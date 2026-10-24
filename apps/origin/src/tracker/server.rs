@@ -26,8 +26,11 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tracing::{debug, error, info, warn};
 
+use crate::garde_reseau::adresse_annoncee_effective;
 use crate::relay::rate_limiter::{RateLimitResult, RateLimiter, RateLimiterConfig};
-use crate::relay::PermisRegistry;
+use crate::relay::{PermisRegistry, RegistreIdentites};
+
+use super::authentification::GardeTracker;
 
 use super::catalog::Catalog;
 use super::metrics::TrackerMetrics;
@@ -58,12 +61,40 @@ pub struct TrackerServer {
     slug_registry: Arc<SlugRegistry>,
     /// Rate limiter pour les connexions Tracker.
     rate_limiter: Arc<RateLimiter>,
+    /// Authentification des messages mutateurs (O-02).
+    garde: GardeTracker,
+}
+
+/// Longueur maximale d'un nom de lobby (O-05, C-13).
+const LONGUEUR_MAX_NOM_LOBBY: usize = 64;
+/// Taille maximale des métadonnées d'un lobby (JSON sérialisé, C-13).
+const TAILLE_MAX_METADONNEES_LOBBY: usize = 4096;
+
+/// Valide un nom de lobby : non vide, borné, sans caractère de contrôle ni chevron.
+fn nom_lobby_valide(nom: &str) -> bool {
+    let n = nom.chars().count();
+    n > 0
+        && n <= LONGUEUR_MAX_NOM_LOBBY
+        && !nom.chars().any(|c| c.is_control() || c == '<' || c == '>')
+}
+
+/// Réponse d'erreur d'authentification.
+fn refus_auth(type_reponse: TrackerMessageType, raison: &str) -> TrackerMessage {
+    TrackerMessage::new(
+        type_reponse,
+        ErrorPayload::new(error_codes::INVALID_PERMIS, format!("authentication failed: {raison}"))
+            .to_bytes(),
+    )
 }
 
 impl TrackerServer {
     /// Crée un nouveau serveur tracker.
     #[must_use]
-    pub fn new(config: Arc<OriginConfig>, permis_registry: Option<Arc<PermisRegistry>>) -> Self {
+    pub fn new(
+        config: Arc<OriginConfig>,
+        permis_registry: Option<Arc<PermisRegistry>>,
+        identites: Option<Arc<RegistreIdentites>>,
+    ) -> Self {
         let pool_manager = Arc::new(PoolManager::new(
             config.tracker.pools.enable_version_isolation,
         ));
@@ -88,6 +119,7 @@ impl TrackerServer {
             permis_registry,
             slug_registry,
             rate_limiter,
+            garde: GardeTracker::new(identites),
         }
     }
 
@@ -172,6 +204,7 @@ impl TrackerServer {
         let metrics = Arc::clone(&self.metrics);
         let permis_registry = self.permis_registry.clone();
         let slug_registry = Arc::clone(&self.slug_registry);
+        let garde = self.garde.clone();
 
         tokio::spawn(async move {
             if let Err(e) = Self::handle_connection(
@@ -181,6 +214,7 @@ impl TrackerServer {
                 config,
                 permis_registry,
                 slug_registry,
+                garde,
                 Arc::clone(&metrics),
             )
             .await
@@ -192,6 +226,7 @@ impl TrackerServer {
     }
 
     /// Gère une connexion individuelle.
+    #[allow(clippy::too_many_arguments)] // états partagés du Tracker, passés explicitement
     async fn handle_connection(
         mut stream: TcpStream,
         peer_addr: SocketAddr,
@@ -199,6 +234,7 @@ impl TrackerServer {
         config: Arc<OriginConfig>,
         permis_registry: Option<Arc<PermisRegistry>>,
         slug_registry: Arc<SlugRegistry>,
+        garde: GardeTracker,
         metrics: Arc<TrackerMetrics>,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let mut buf = BytesMut::with_capacity(4096);
@@ -223,6 +259,7 @@ impl TrackerServer {
                     &config,
                     permis_registry.as_ref(),
                     &slug_registry,
+                    &garde,
                     &metrics,
                 )
                 .await;
@@ -255,6 +292,7 @@ impl TrackerServer {
     }
 
     /// Traite un message.
+    #[allow(clippy::too_many_arguments, clippy::too_many_lines)] // contrôles d'authentification explicites
     async fn handle_message(
         msg: TrackerMessage,
         peer_addr: SocketAddr,
@@ -262,12 +300,71 @@ impl TrackerServer {
         config: &Arc<OriginConfig>,
         permis_registry: Option<&Arc<PermisRegistry>>,
         slug_registry: &Arc<SlugRegistry>,
+        garde: &GardeTracker,
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
-        match msg.header.message_type {
+        let type_message = msg.header.message_type;
+
+        // O-02 : tout message mutateur (ou révélant une adresse) doit être signé par le COG.
+        let type_refus = match type_message {
+            TrackerMessageType::Announce => Some(TrackerMessageType::AnnounceAck),
+            TrackerMessageType::Withdraw
+            | TrackerMessageType::Heartbeat
+            | TrackerMessageType::UpdateLobby
+            | TrackerMessageType::DeleteLobby => Some(TrackerMessageType::Error),
+            TrackerMessageType::CreateLobby => Some(TrackerMessageType::CreateLobbyErr),
+            TrackerMessageType::JoinLobby => Some(TrackerMessageType::JoinLobbyResult),
+            _ => None,
+        };
+        let authentifie = match type_refus {
+            Some(type_reponse) => match garde.authentifier(type_message as u8, &msg.payload).await {
+                Ok(v) => Some(v),
+                Err(e) => {
+                    warn!(
+                        "[Tracker] {:?} refusé depuis {} : {}",
+                        type_message, peer_addr, e
+                    );
+                    metrics.record_protocol_error();
+                    if type_message == TrackerMessageType::Announce {
+                        metrics.record_announce(false);
+                        let ack = AnnounceAckPayload {
+                            success: false,
+                            message: format!("Authentication failed: {e}"),
+                            heartbeat_interval: config.limits.heartbeat_interval_seconds,
+                            ttl: config.limits.tunnel_timeout_seconds,
+                            assigned_subdomain: None,
+                        };
+                        return Some(TrackerMessage::new(
+                            TrackerMessageType::AnnounceAck,
+                            ack.to_bytes(),
+                        ));
+                    }
+                    if type_message == TrackerMessageType::JoinLobby {
+                        return Some(TrackerMessage::new(
+                            TrackerMessageType::JoinLobbyResult,
+                            JoinLobbyResultPayload {
+                                success: false,
+                                message: "Authentication failed".to_string(),
+                                host_address: None,
+                            }
+                            .to_bytes(),
+                        ));
+                    }
+                    return Some(refus_auth(type_reponse, &e.to_string()));
+                }
+            },
+            None => None,
+        };
+        let (cog_id, corps) = match &authentifie {
+            Some(v) => (v.cog_id.as_str(), v.corps.as_bytes()),
+            None => ("", msg.payload.as_ref()),
+        };
+
+        match type_message {
             TrackerMessageType::Announce => {
                 Self::handle_announce(
-                    &msg.payload,
+                    cog_id,
+                    corps,
                     peer_addr,
                     pool_manager,
                     config,
@@ -278,10 +375,10 @@ impl TrackerServer {
                 .await
             }
             TrackerMessageType::Withdraw => {
-                Self::handle_withdraw(&msg.payload, pool_manager, slug_registry, metrics).await
+                Self::handle_withdraw(cog_id, pool_manager, slug_registry, metrics).await
             }
             TrackerMessageType::Heartbeat => {
-                Self::handle_heartbeat(&msg.payload, pool_manager, metrics).await
+                Self::handle_heartbeat(cog_id, pool_manager, metrics).await
             }
             TrackerMessageType::SearchCogs => {
                 Self::handle_search_cogs(&msg.payload, pool_manager, metrics).await
@@ -290,16 +387,16 @@ impl TrackerServer {
                 Self::handle_search_lobbys(&msg.payload, pool_manager, metrics).await
             }
             TrackerMessageType::CreateLobby => {
-                Self::handle_create_lobby(&msg.payload, pool_manager, config, metrics).await
+                Self::handle_create_lobby(cog_id, corps, pool_manager, config, metrics).await
             }
             TrackerMessageType::UpdateLobby => {
-                Self::handle_update_lobby(&msg.payload, pool_manager, metrics).await
+                Self::handle_update_lobby(cog_id, corps, pool_manager, metrics).await
             }
             TrackerMessageType::DeleteLobby => {
-                Self::handle_delete_lobby(&msg.payload, pool_manager, metrics).await
+                Self::handle_delete_lobby(cog_id, corps, pool_manager, metrics).await
             }
             TrackerMessageType::JoinLobby => {
-                Self::handle_join_lobby(&msg.payload, pool_manager, config, metrics).await
+                Self::handle_join_lobby(cog_id, corps, pool_manager, config, metrics).await
             }
             TrackerMessageType::GetStats => Self::handle_get_stats(pool_manager, metrics).await,
             _ => {
@@ -316,7 +413,9 @@ impl TrackerServer {
     /// `peer_addr` est l'adresse IP source de la connexion TCP du COG.
     /// Si l'adresse annoncée est locale (127.0.0.1, etc.), elle est remplacée
     /// par l'IP réelle du COG + le port annoncé.
+    #[allow(clippy::too_many_arguments, clippy::too_many_lines)] // contrôles d'authentification explicites
     async fn handle_announce(
+        cog_id: &str,
         payload: &[u8],
         peer_addr: SocketAddr,
         pool_manager: &Arc<PoolManager>,
@@ -326,7 +425,11 @@ impl TrackerServer {
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
         let announce = match AnnouncePayload::parse(payload) {
-            Ok(a) => a,
+            Ok(mut a) => {
+                // cog_id authentifié par l'enveloppe (jamais lu du corps sans preuve).
+                a.cog_id = cog_id.to_string();
+                a
+            }
             Err(e) => {
                 metrics.record_announce(false);
                 return Some(TrackerMessage::new(
@@ -341,9 +444,10 @@ impl TrackerServer {
             announce.cog_id, announce.core_version, announce.services, announce.slug
         );
 
-        // Vérifier le permis_id avec le registre partagé Relay (R-011)
+        // Vérifier le permis_id avec le registre partagé Relay (R-011) : le permis doit
+        // avoir été délivré à ce même cog_id (O-01).
         if let Some(registry) = permis_registry {
-            if !registry.is_valid(&announce.permis_id).await {
+            if !registry.is_valid_for(&announce.permis_id, &announce.cog_id).await {
                 metrics.record_announce(false);
                 let ack = AnnounceAckPayload {
                     success: false,
@@ -359,43 +463,35 @@ impl TrackerServer {
             }
         }
 
+        // O-03 : analyse stricte de l'adresse ; une adresse locale devient l'IP du pair ;
+        // toute IP littérale non publique est refusée.
+        let effective_address = match adresse_annoncee_effective(&announce.address, peer_addr.ip())
+        {
+            Ok(a) => a.canonique(),
+            Err(e) => {
+                warn!(
+                    "COG {} announced a refused address '{}': {}",
+                    announce.cog_id, announce.address, e
+                );
+                metrics.record_announce(false);
+                let ack = AnnounceAckPayload {
+                    success: false,
+                    message: format!("Refused address: {e}"),
+                    heartbeat_interval: config.limits.heartbeat_interval_seconds,
+                    ttl: config.limits.tunnel_timeout_seconds,
+                    assigned_subdomain: None,
+                };
+                return Some(TrackerMessage::new(
+                    TrackerMessageType::AnnounceAck,
+                    ack.to_bytes(),
+                ));
+            }
+        };
+
         // Récupérer ou créer le pool
         let pool = pool_manager
             .get_or_create_pool(&announce.core_version)
             .await;
-
-        // Si l'adresse annoncée est locale (127.0.0.1, localhost, 0.0.0.0, etc.),
-        // la remplacer par l'IP réelle du COG (vue par le Tracker) + le port annoncé.
-        let effective_address = {
-            let addr_lower = announce.address.to_lowercase();
-            let is_local = addr_lower.starts_with("127.0.0.1")
-                || addr_lower.starts_with("localhost")
-                || addr_lower.starts_with("0.0.0.0")
-                || addr_lower.starts_with("[::1]")
-                || addr_lower.starts_with("https://127.")
-                || addr_lower.starts_with("http://127.")
-                || addr_lower.starts_with("https://localhost")
-                || addr_lower.starts_with("http://localhost")
-                || addr_lower.starts_with("https://0.0.0.0")
-                || addr_lower.starts_with("http://0.0.0.0");
-
-            if is_local {
-                let port = announce
-                    .address
-                    .rsplit(':')
-                    .next()
-                    .and_then(|p| p.trim_end_matches('/').parse::<u16>().ok())
-                    .unwrap_or(8090);
-                let real_addr = format!("{}:{}", peer_addr.ip(), port);
-                info!(
-                    "COG {} announced local address '{}', replaced with real IP: {}",
-                    announce.cog_id, announce.address, real_addr
-                );
-                real_addr
-            } else {
-                announce.address.clone()
-            }
-        };
 
         // Enregistrer le slug de sous-domaine
         let assigned_subdomain = match slug_registry
@@ -447,40 +543,13 @@ impl TrackerServer {
     /// Le COG reste dans le catalogue mais est marqué "absent" (droit reconnu à la déconnexion).
     /// Le slug de sous-domaine est désenregistré.
     async fn handle_withdraw(
-        payload: &[u8],
+        cog_id: &str,
         pool_manager: &Arc<PoolManager>,
         slug_registry: &Arc<SlugRegistry>,
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
-        // Le client envoie {"cog_id": "..."} — extraire le cog_id depuis l'objet JSON.
-        // Accepte aussi une chaîne brute ("cog_id") pour rétro-compatibilité.
-        let cog_id: String = match serde_json::from_slice::<serde_json::Value>(payload) {
-            Ok(serde_json::Value::Object(map)) => {
-                match map.get("cog_id").and_then(|v| v.as_str()) {
-                    Some(id) => id.to_string(),
-                    None => {
-                        warn!(
-                            "[Tracker] WITHDRAW payload objet sans champ cog_id: {:?}",
-                            map
-                        );
-                        return None;
-                    }
-                }
-            }
-            Ok(serde_json::Value::String(id)) => id,
-            Ok(other) => {
-                warn!("[Tracker] WITHDRAW payload inattendu: {:?}", other);
-                return None;
-            }
-            Err(e) => {
-                warn!(
-                    "[Tracker] WITHDRAW payload invalide ({} octets): {}",
-                    payload.len(),
-                    e
-                );
-                return None;
-            }
-        };
+        // cog_id authentifié par l'enveloppe signée (O-02).
+        let cog_id = cog_id.to_string();
 
         info!("[Tracker] WITHDRAW reçu pour cog_id={}", &cog_id);
 
@@ -520,20 +589,14 @@ impl TrackerServer {
 
     /// Traite un heartbeat.
     async fn handle_heartbeat(
-        payload: &[u8],
+        cog_id: &str,
         pool_manager: &Arc<PoolManager>,
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
-        let heartbeat = match HeartbeatPayload::parse(payload) {
-            Ok(h) => h,
-            Err(e) => {
-                warn!(
-                    "[Tracker] Heartbeat payload invalide ({} octets): {}",
-                    payload.len(),
-                    e
-                );
-                return None;
-            }
+        // cog_id authentifié par l'enveloppe signée (O-02).
+        let heartbeat = HeartbeatPayload {
+            cog_id: cog_id.to_string(),
+            timestamp: 0,
         };
 
         info!("[Tracker] Heartbeat reçu: cog_id={}", &heartbeat.cog_id);
@@ -720,13 +783,17 @@ impl TrackerServer {
 
     /// Traite la création d'un lobby.
     async fn handle_create_lobby(
+        cog_id: &str,
         payload: &[u8],
         pool_manager: &Arc<PoolManager>,
         config: &Arc<OriginConfig>,
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
         let create = match CreateLobbyPayload::parse(payload) {
-            Ok(c) => c,
+            Ok(mut c) => {
+                c.cog_id = cog_id.to_string();
+                c
+            }
             Err(_) => {
                 return Some(TrackerMessage::new(
                     TrackerMessageType::CreateLobbyErr,
@@ -744,7 +811,17 @@ impl TrackerServer {
             ));
         }
 
-        let cog = cog_entry.unwrap();
+        let cog = cog_entry?;
+
+        // O-05 : nom et métadonnées bornés, sans balisage.
+        let metadata = serde_json::to_string(&create.metadata).unwrap_or_default();
+        if !nom_lobby_valide(&create.name) || metadata.len() > TAILLE_MAX_METADONNEES_LOBBY {
+            return Some(TrackerMessage::new(
+                TrackerMessageType::CreateLobbyErr,
+                ErrorPayload::new(error_codes::INTERNAL_ERROR, "Invalid lobby name or metadata")
+                    .to_bytes(),
+            ));
+        }
 
         // Vérifier la limite de lobbys par COG
         if cog.lobbys.len() >= config.tracker.lobbys.max_lobbys_per_cog as usize {
@@ -776,7 +853,7 @@ impl TrackerServer {
             password_hash,
             max_players: create.max_players,
             current_players: 1, // L'hôte
-            metadata: serde_json::to_string(&create.metadata).unwrap_or_default(),
+            metadata,
         };
 
         // Trouver le pool et mettre à jour le COG
@@ -800,14 +877,26 @@ impl TrackerServer {
 
     /// Traite la mise à jour d'un lobby.
     async fn handle_update_lobby(
+        cog_id: &str,
         payload: &[u8],
         pool_manager: &Arc<PoolManager>,
         _metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
-        let update = match UpdateLobbyPayload::parse(payload) {
-            Ok(u) => u,
-            Err(_) => return None,
+        let Ok(mut update) = UpdateLobbyPayload::parse(payload) else {
+            return None;
         };
+        update.cog_id = cog_id.to_string();
+        if let Some(name) = &update.name {
+            if !nom_lobby_valide(name) {
+                return None;
+            }
+        }
+        if let Some(meta) = &update.metadata {
+            if serde_json::to_string(meta).map_or(true, |m| m.len() > TAILLE_MAX_METADONNEES_LOBBY)
+            {
+                return None;
+            }
+        }
 
         // Trouver le COG
         let cog = pool_manager.find_cog(&update.cog_id).await?;
@@ -841,6 +930,7 @@ impl TrackerServer {
 
     /// Traite la suppression d'un lobby.
     async fn handle_delete_lobby(
+        cog_id: &str,
         payload: &[u8],
         pool_manager: &Arc<PoolManager>,
         metrics: &Arc<TrackerMetrics>,
@@ -852,7 +942,8 @@ impl TrackerServer {
             lobby_id: String,
         }
 
-        let delete: DeletePayload = serde_json::from_slice(payload).ok()?;
+        let mut delete: DeletePayload = serde_json::from_slice(payload).ok()?;
+        delete.cog_id = cog_id.to_string();
 
         // Trouver le COG
         let cog = pool_manager.find_cog(&delete.cog_id).await?;
@@ -880,13 +971,17 @@ impl TrackerServer {
 
     /// Traite une demande de join.
     async fn handle_join_lobby(
+        cog_id: &str,
         payload: &[u8],
         pool_manager: &Arc<PoolManager>,
         _config: &Arc<OriginConfig>,
         metrics: &Arc<TrackerMetrics>,
     ) -> Option<TrackerMessage> {
         let join = match JoinLobbyPayload::parse(payload) {
-            Ok(j) => j,
+            Ok(mut j) => {
+                j.cog_id = cog_id.to_string();
+                j
+            }
             Err(_) => {
                 metrics.record_join_request(false);
                 return Some(TrackerMessage::new(
@@ -1000,5 +1095,226 @@ impl TrackerServer {
             TrackerMessageType::StatsResult,
             response.to_bytes(),
         ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use miyuwebway_participant::identite::{maintenant_ms, EnveloppeTracker, IdentiteCog};
+
+    struct Banc {
+        pool: Arc<PoolManager>,
+        config: Arc<OriginConfig>,
+        permis: Arc<PermisRegistry>,
+        slugs: Arc<SlugRegistry>,
+        garde: GardeTracker,
+        metrics: Arc<TrackerMetrics>,
+        identites: Arc<RegistreIdentites>,
+    }
+
+    impl Banc {
+        fn new() -> Self {
+            let identites = Arc::new(RegistreIdentites::new());
+            Self {
+                pool: Arc::new(PoolManager::new(true)),
+                config: Arc::new(OriginConfig::default()),
+                permis: Arc::new(PermisRegistry::new()),
+                slugs: Arc::new(SlugRegistry::new()),
+                garde: GardeTracker::new(Some(Arc::clone(&identites))),
+                metrics: Arc::new(TrackerMetrics::new()),
+                identites,
+            }
+        }
+
+        async fn envoyer(&self, t: TrackerMessageType, payload: Vec<u8>) -> Option<TrackerMessage> {
+            TrackerServer::handle_message(
+                TrackerMessage::new(t, Bytes::from(payload)),
+                "8.8.8.8:5000".parse().expect("pair"),
+                &self.pool,
+                &self.config,
+                Some(&self.permis),
+                &self.slugs,
+                &self.garde,
+                &self.metrics,
+            )
+            .await
+        }
+
+        /// COG enregistré (clé épinglée + permis lié) puis annoncé.
+        async fn cog_annonce(&self) -> IdentiteCog {
+            let id = IdentiteCog::generer();
+            self.identites
+                .epingler(&id.cog_id(), &id.cle_publique())
+                .await
+                .expect("épinglage");
+            self.permis
+                .register(
+                    "permis-1".to_string(),
+                    id.cog_id(),
+                    chrono::Utc::now() + chrono::Duration::hours(1),
+                )
+                .await;
+            let corps = serde_json::json!({
+                "cog_id": id.cog_id(), "core_version": "1.0.0", "address": "0.0.0.0:8090",
+                "services": [], "permis_id": "permis-1"
+            })
+            .to_string();
+            let r = self
+                .envoyer(TrackerMessageType::Announce, signe(&id, TrackerMessageType::Announce, &corps))
+                .await
+                .expect("ack");
+            let ack: serde_json::Value = serde_json::from_slice(&r.payload).expect("json");
+            assert_eq!(ack["success"], true, "{ack}");
+            id
+        }
+    }
+
+    fn signe(id: &IdentiteCog, t: TrackerMessageType, corps: &str) -> Vec<u8> {
+        let env = EnveloppeTracker::sceller(id, t as u8, maintenant_ms(), corps.to_string())
+            .expect("sceller");
+        serde_json::to_vec(&env).expect("json")
+    }
+
+    #[tokio::test]
+    async fn announce_signe_enregistre_adresse_du_pair() {
+        let banc = Banc::new();
+        let id = banc.cog_annonce().await;
+        let entree = banc.pool.find_cog(&id.cog_id()).await.expect("présent");
+        assert_eq!(entree.address, "8.8.8.8:8090");
+    }
+
+    #[tokio::test]
+    async fn withdraw_non_authentifie_refuse_et_sans_effet() {
+        let banc = Banc::new();
+        let id = banc.cog_annonce().await;
+        let slug = banc.slugs.get_slug(&id.cog_id()).await;
+        let r = banc
+            .envoyer(
+                TrackerMessageType::Withdraw,
+                serde_json::json!({"cog_id": id.cog_id()}).to_string().into_bytes(),
+            )
+            .await
+            .expect("réponse");
+        assert_eq!(r.header.message_type, TrackerMessageType::Error);
+        // Le slug n'a pas été libéré.
+        assert_eq!(banc.slugs.get_slug(&id.cog_id()).await, slug);
+        assert!(slug.is_some());
+
+        // WITHDRAW signé par le COG lui-même : accepté.
+        let r = banc
+            .envoyer(
+                TrackerMessageType::Withdraw,
+                signe(&id, TrackerMessageType::Withdraw, &serde_json::json!({"cog_id": id.cog_id()}).to_string()),
+            )
+            .await
+            .expect("réponse");
+        assert_eq!(r.header.message_type, TrackerMessageType::WithdrawAck);
+        assert_eq!(banc.slugs.get_slug(&id.cog_id()).await, None);
+    }
+
+    #[tokio::test]
+    async fn heartbeat_non_authentifie_refuse() {
+        let banc = Banc::new();
+        let id = banc.cog_annonce().await;
+        let r = banc
+            .envoyer(
+                TrackerMessageType::Heartbeat,
+                serde_json::json!({"cog_id": id.cog_id(), "timestamp": 1}).to_string().into_bytes(),
+            )
+            .await
+            .expect("réponse");
+        assert_eq!(r.header.message_type, TrackerMessageType::Error);
+        let r = banc
+            .envoyer(
+                TrackerMessageType::Heartbeat,
+                signe(&id, TrackerMessageType::Heartbeat, "{}"),
+            )
+            .await
+            .expect("réponse");
+        assert_eq!(r.header.message_type, TrackerMessageType::HeartbeatAck);
+    }
+
+    #[tokio::test]
+    async fn lobby_d_autrui_non_modifiable() {
+        let banc = Banc::new();
+        let victime = banc.cog_annonce().await;
+        // Création anonyme refusée.
+        let r = banc
+            .envoyer(
+                TrackerMessageType::CreateLobby,
+                serde_json::json!({"cog_id": victime.cog_id(), "name": "x", "is_public": true,
+                    "password": null, "max_players": 4, "metadata": {}})
+                .to_string()
+                .into_bytes(),
+            )
+            .await
+            .expect("réponse");
+        assert_eq!(r.header.message_type, TrackerMessageType::CreateLobbyErr);
+        // Nom de lobby avec balisage refusé même signé.
+        let corps = serde_json::json!({"cog_id": victime.cog_id(), "name": "<img src=x onerror=alert(1)>",
+            "is_public": true, "password": null, "max_players": 4, "metadata": {}})
+        .to_string();
+        let r = banc
+            .envoyer(
+                TrackerMessageType::CreateLobby,
+                signe(&victime, TrackerMessageType::CreateLobby, &corps),
+            )
+            .await
+            .expect("réponse");
+        assert_eq!(r.header.message_type, TrackerMessageType::CreateLobbyErr);
+    }
+
+    #[tokio::test]
+    async fn announce_avec_permis_d_un_autre_cog_refuse() {
+        let banc = Banc::new();
+        let _victime = banc.cog_annonce().await; // détient « permis-1 »
+        let attaquant = IdentiteCog::generer();
+        banc.identites
+            .epingler(&attaquant.cog_id(), &attaquant.cle_publique())
+            .await
+            .expect("épinglage");
+        let corps = serde_json::json!({
+            "cog_id": attaquant.cog_id(), "core_version": "1.0.0", "address": "0.0.0.0:8090",
+            "services": [], "permis_id": "permis-1"
+        })
+        .to_string();
+        let r = banc
+            .envoyer(
+                TrackerMessageType::Announce,
+                signe(&attaquant, TrackerMessageType::Announce, &corps),
+            )
+            .await
+            .expect("ack");
+        let ack: serde_json::Value = serde_json::from_slice(&r.payload).expect("json");
+        assert_eq!(ack["success"], false);
+        assert!(banc.pool.find_cog(&attaquant.cog_id()).await.is_none());
+    }
+
+    #[tokio::test]
+    async fn announce_adresse_privee_refusee() {
+        let banc = Banc::new();
+        let id = IdentiteCog::generer();
+        banc.identites
+            .epingler(&id.cog_id(), &id.cle_publique())
+            .await
+            .expect("épinglage");
+        banc.permis
+            .register("p".into(), id.cog_id(), chrono::Utc::now() + chrono::Duration::hours(1))
+            .await;
+        for adresse in ["169.254.169.254:80", "[::ffff:127.0.0.1]:80", "10.0.0.1:80"] {
+            let corps = serde_json::json!({
+                "cog_id": id.cog_id(), "core_version": "1.0.0", "address": adresse,
+                "services": [], "permis_id": "p"
+            })
+            .to_string();
+            let r = banc
+                .envoyer(TrackerMessageType::Announce, signe(&id, TrackerMessageType::Announce, &corps))
+                .await
+                .expect("ack");
+            let ack: serde_json::Value = serde_json::from_slice(&r.payload).expect("json");
+            assert_eq!(ack["success"], false, "{adresse}");
+        }
+        assert!(banc.pool.find_cog(&id.cog_id()).await.is_none());
     }
 }

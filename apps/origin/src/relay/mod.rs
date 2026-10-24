@@ -18,6 +18,7 @@
 //! - `tunnel` — Tunnels de données entre COGs
 //! - `metrics` — Métriques et statistiques
 
+pub mod identites;
 pub mod metrics;
 pub mod permis_registry;
 pub mod rate_limiter;
@@ -26,5 +27,6 @@ pub mod session;
 pub mod tunnel;
 pub mod verification;
 
+pub use identites::RegistreIdentites;
 pub use permis_registry::PermisRegistry;
 pub use server::RelayServer;

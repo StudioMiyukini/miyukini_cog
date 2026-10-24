@@ -31,6 +31,12 @@ use tokio_rustls::rustls;
 use tokio_rustls::TlsAcceptor;
 use tracing::{debug, error, info, warn};
 
+use miyuwebway_participant::identite::{cog_id_bien_forme, verifier_register};
+use miyuwebway_participant::protocol::{
+    MAGIC_REPONSE_INJECTEE, MAGIC_REQUETE_INJECTEE, TAILLE_ID_REQUETE,
+};
+
+use super::identites::RegistreIdentites;
 use super::metrics::RelayMetrics;
 use super::permis_registry::PermisRegistry;
 use super::rate_limiter::{RateLimitResult, RateLimiter, RateLimiterConfig};
@@ -44,11 +50,33 @@ use crate::protocol::{
     ED25519_SIGNATURE_SIZE, SESSION_ID_SIZE,
 };
 
+/// Nombre maximal de requêtes injectées en attente (toutes sessions, C-13).
+const MAX_INJECTIONS_EN_ATTENTE: usize = 10_000;
+
+/// Issue de la remise d'une trame DATA à l'injecteur.
+#[derive(Debug, PartialEq, Eq)]
+enum RemiseInjection {
+    /// Réponse livrée à la requête en attente correspondante.
+    Livree,
+    /// Réponse encadrée mais id inconnu, expiré ou d'une autre session : jetée.
+    Rejetee,
+    /// Trame sans cadre de réponse injectée (trafic de tunnel COG-COG).
+    NonInjection,
+}
+
 /// Pending HTTP injections (Phase 2 : Origin → COG via tunnel).
-/// Quand Origin envoie une requête HTTP à un COG, on enregistre un oneshot.
-/// Quand le COG renvoie DATA (réponse HTTP), handle_data complète le oneshot.
+///
+/// O-06 : chaque requête reçoit un identifiant aléatoire de 128 bits, transmis au COG
+/// (`MWHQ` + id) et rappelé dans la réponse (`MWHR` + id). Les attentes sont indexées par
+/// cet id et liées à la session émettrice : une réponse d'id inconnu, ou venant d'une autre
+/// session, est jetée. Deux visiteurs concurrents ne peuvent donc jamais recevoir la
+/// réponse destinée à l'autre.
+/// Attentes : id de requête → (session émettrice, canal de réponse).
+type AttentesInjection =
+    HashMap<[u8; TAILLE_ID_REQUETE], ([u8; SESSION_ID_SIZE], oneshot::Sender<Bytes>)>;
+
 struct HttpInjector {
-    pending: Arc<RwLock<HashMap<[u8; SESSION_ID_SIZE], oneshot::Sender<Bytes>>>>,
+    pending: Arc<RwLock<AttentesInjection>>,
 }
 
 impl HttpInjector {
@@ -58,75 +86,134 @@ impl HttpInjector {
         }
     }
 
-    /// Enregistre une attente de réponse et retourne le receiver.
-    async fn register(&self, session_id: [u8; SESSION_ID_SIZE]) -> oneshot::Receiver<Bytes> {
+    /// Enregistre une attente de réponse ; retourne l'id de requête et le receiver.
+    async fn register(
+        &self,
+        session_id: [u8; SESSION_ID_SIZE],
+    ) -> Result<([u8; TAILLE_ID_REQUETE], oneshot::Receiver<Bytes>), &'static str> {
         let (tx, rx) = oneshot::channel();
         let mut pending = self.pending.write().await;
-        pending.insert(session_id, tx);
-        rx
+        if pending.len() >= MAX_INJECTIONS_EN_ATTENTE {
+            return Err("too many pending tunnel requests");
+        }
+        let mut id = [0u8; TAILLE_ID_REQUETE];
+        loop {
+            rand::RngCore::fill_bytes(&mut rand::rngs::OsRng, &mut id);
+            if !pending.contains_key(&id) {
+                break;
+            }
+        }
+        pending.insert(id, (session_id, tx));
+        Ok((id, rx))
     }
 
-    /// Complète une attente si elle existe (retourne true si complétée).
-    async fn complete(&self, session_id: [u8; SESSION_ID_SIZE], data: Bytes) -> bool {
+    /// Retire une attente (délai dépassé, échec d'envoi).
+    async fn abandon(&self, id: &[u8; TAILLE_ID_REQUETE]) {
+        self.pending.write().await.remove(id);
+    }
+
+    /// Livre une réponse encadrée à l'attente correspondante (id **et** session).
+    async fn complete(&self, session_id: [u8; SESSION_ID_SIZE], data: &Bytes) -> RemiseInjection {
+        let Some(reste) = data.strip_prefix(MAGIC_REPONSE_INJECTEE.as_slice()) else {
+            return RemiseInjection::NonInjection;
+        };
+        if reste.len() < TAILLE_ID_REQUETE {
+            return RemiseInjection::Rejetee;
+        }
+        let mut id = [0u8; TAILLE_ID_REQUETE];
+        id.copy_from_slice(&reste[..TAILLE_ID_REQUETE]);
         let tx = {
             let mut pending = self.pending.write().await;
-            pending.remove(&session_id)
+            match pending.get(&id) {
+                Some((session_attendue, _)) if *session_attendue == session_id => {
+                    pending.remove(&id).map(|(_, tx)| tx)
+                }
+                Some(_) => {
+                    warn!("Tunnel response with request id from another session dropped");
+                    None
+                }
+                None => None,
+            }
         };
-        if let Some(tx) = tx {
-            let _ = tx.send(data);
-            true
-        } else {
-            false
+        match tx {
+            Some(tx) => {
+                let corps = data.slice(MAGIC_REPONSE_INJECTEE.len() + TAILLE_ID_REQUETE..);
+                let _ = tx.send(corps);
+                RemiseInjection::Livree
+            }
+            None => RemiseInjection::Rejetee,
         }
     }
 }
 
+/// Encadre une requête HTTP injectée : `MWHQ` + id + requête.
+fn encadrer_requete(id: &[u8; TAILLE_ID_REQUETE], requete: &[u8]) -> Bytes {
+    let mut sortie = BytesMut::with_capacity(4 + TAILLE_ID_REQUETE + requete.len());
+    sortie.extend_from_slice(MAGIC_REQUETE_INJECTEE);
+    sortie.extend_from_slice(id);
+    sortie.extend_from_slice(requete);
+    sortie.freeze()
+}
+
+/// Contexte partagé par toutes les connexions du Relay.
+struct ContexteRelay {
+    sessions: Arc<SessionManager>,
+    permis_registry: Option<Arc<PermisRegistry>>,
+    identites: Arc<RegistreIdentites>,
+    identite_relay: String,
+    verifier: Arc<Verifier>,
+    config: Arc<OriginConfig>,
+    tracker_addresses: Bytes,
+    tracker_signature: [u8; ED25519_SIGNATURE_SIZE],
+    rate_limiter: Arc<RateLimiter>,
+    tunnel_manager: Arc<TunnelManager>,
+    http_injector: Arc<HttpInjector>,
+    metrics: Arc<RelayMetrics>,
+}
+
 /// Serveur Relay.
 pub struct RelayServer {
-    /// Configuration.
-    config: Arc<OriginConfig>,
-    /// Gestionnaire de sessions.
-    sessions: Arc<SessionManager>,
-    /// Registre des permis (partagé avec le Tracker pour vérification ANNOUNCE).
-    permis_registry: Option<Arc<PermisRegistry>>,
-    /// Vérificateur de conformité.
-    verifier: Arc<Verifier>,
+    /// Contexte partagé.
+    ctx: Arc<ContexteRelay>,
     /// Accepteur TLS.
     tls_acceptor: Option<TlsAcceptor>,
-    /// Adresses des trackers officiels (JSON).
-    tracker_addresses: Bytes,
-    /// Signature des adresses des trackers.
-    tracker_signature: [u8; ED25519_SIGNATURE_SIZE],
-    /// Rate limiter.
-    rate_limiter: Arc<RateLimiter>,
-    /// Gestionnaire de tunnels.
-    tunnel_manager: Arc<TunnelManager>,
-    /// Injecteur HTTP Phase 2 (Origin → COG via tunnel).
-    http_injector: Arc<HttpInjector>,
-    /// Métriques.
-    metrics: Arc<RelayMetrics>,
 }
 
 impl RelayServer {
     /// Crée un nouveau serveur relay.
     ///
-    /// Si `permis_registry` est fourni, les permis délivrés y sont enregistrés
-    /// pour que le Tracker puisse vérifier les ANNOUNCE.
+    /// Si `permis_registry` est fourni, les permis délivrés y sont enregistrés (liés au
+    /// `cog_id` prouvé) pour que le Tracker puisse vérifier les ANNOUNCE.
+    /// `identites` est le registre TOFU des clés COG, partagé avec le Tracker.
     pub async fn new(
         config: Arc<OriginConfig>,
         permis_registry: Option<Arc<PermisRegistry>>,
+        identites: Arc<RegistreIdentites>,
     ) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
-        // Créer le gestionnaire de sessions
+        let tls_acceptor = Self::setup_tls(&config).await?;
+        let mut serveur = Self::sans_tls(config, permis_registry, identites)?;
+        serveur.tls_acceptor = Some(tls_acceptor);
+        serveur.ctx.verifier.load_keys().await.ok();
+        Ok(serveur)
+    }
+
+    /// Construit le serveur sans accepteur TLS (tests et assemblage).
+    fn sans_tls(
+        config: Arc<OriginConfig>,
+        permis_registry: Option<Arc<PermisRegistry>>,
+        identites: Arc<RegistreIdentites>,
+    ) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
+        if !config.relay.strict_verification {
+            warn!(
+                "Relay en mode NON STRICT (relay.strict_verification = false) : la Phase A \
+                 (clé Cores) et la Phase C sont ignorées. La preuve d'identité signée reste exigée."
+            );
+        }
+
         let sessions = Arc::new(SessionManager::new(i64::from(
             config.limits.tunnel_timeout_seconds,
         )));
-
-        // Créer le vérificateur
         let verifier = Arc::new(Verifier::new(config.cores.keys_dir.clone()));
-        verifier.load_keys().await.ok();
-
-        // Configurer TLS
-        let tls_acceptor = Self::setup_tls(&config).await?;
 
         // Préparer la liste des trackers
         let tracker_addresses = serde_json::to_vec(&vec![format!(
@@ -134,7 +221,6 @@ impl RelayServer {
             config.identity.ip, config.tracker.port
         )])?;
 
-        // Créer le rate limiter
         let rate_limiter_config = RateLimiterConfig {
             max_connections_per_ip: config.rate_limits.tcp_connections_per_ip,
             max_messages_per_session: config.rate_limits.requests_per_hour_per_cog / 60, // Par minute
@@ -146,86 +232,99 @@ impl RelayServer {
         };
         let rate_limiter = Arc::new(RateLimiter::new(rate_limiter_config));
 
-        // Créer le gestionnaire de tunnels
         let tunnel_manager = Arc::new(TunnelManager::new(i64::from(
             config.limits.tunnel_timeout_seconds,
         )));
 
-        // Créer les métriques
-        let metrics = Arc::new(RelayMetrics::new());
-
-        // Injecteur HTTP Phase 2
-        let http_injector = Arc::new(HttpInjector::new());
+        let identite_relay = config.relay.identite_relay(&config.identity);
+        info!("Relay identity for REGISTER proofs: {}", identite_relay);
 
         Ok(Self {
-            config,
-            sessions,
-            permis_registry,
-            verifier,
-            tls_acceptor: Some(tls_acceptor),
-            tracker_addresses: Bytes::from(tracker_addresses),
-            tracker_signature: [0u8; ED25519_SIGNATURE_SIZE],
-            rate_limiter,
-            tunnel_manager,
-            http_injector,
-            metrics,
+            ctx: Arc::new(ContexteRelay {
+                sessions,
+                permis_registry,
+                identites,
+                identite_relay,
+                verifier,
+                config,
+                tracker_addresses: Bytes::from(tracker_addresses),
+                tracker_signature: [0u8; ED25519_SIGNATURE_SIZE],
+                rate_limiter,
+                tunnel_manager,
+                http_injector: Arc::new(HttpInjector::new()),
+                metrics: Arc::new(RelayMetrics::new()),
+            }),
+            tls_acceptor: None,
         })
     }
 
     /// Récupère les métriques.
     #[must_use]
     pub fn metrics(&self) -> Arc<RelayMetrics> {
-        Arc::clone(&self.metrics)
+        Arc::clone(&self.ctx.metrics)
     }
 
     /// Récupère le gestionnaire de sessions.
     #[must_use]
     pub fn sessions(&self) -> Arc<SessionManager> {
-        Arc::clone(&self.sessions)
+        Arc::clone(&self.ctx.sessions)
     }
 
     /// Récupère le gestionnaire de tunnels.
     #[must_use]
     pub fn tunnels(&self) -> Arc<TunnelManager> {
-        Arc::clone(&self.tunnel_manager)
+        Arc::clone(&self.ctx.tunnel_manager)
     }
 
     /// Injecte une requête HTTP vers un COG via le tunnel Relay (Phase 2).
     ///
-    /// Résout cog_id → session_id, envoie la requête brute, attend la réponse (timeout 30s).
+    /// Résout `cog_id` → `session_id`, envoie la requête encadrée par un id unique (O-06),
+    /// attend la réponse portant ce même id (timeout 30s).
     /// Retourne Err si le COG n'a pas de session active ou si timeout.
     pub async fn inject_http_request(
         &self,
         cog_id: &str,
         request_bytes: Bytes,
     ) -> Result<Bytes, Box<dyn std::error::Error + Send + Sync>> {
+        let ctx = &self.ctx;
         // Résoudre cog_id → session
-        let session = self
+        let session = ctx
             .sessions
             .get_by_cog_id(cog_id)
             .await
-            .ok_or_else(|| format!("No active Relay session for cog_id: {}", cog_id))?;
+            .ok_or_else(|| format!("No active Relay session for cog_id: {cog_id}"))?;
 
         let session_id = {
             let s = session.read().await;
-            if !s.is_active() {
+            if !s.is_active() || !s.identite_verifiee {
                 return Err("Session not active".into());
             }
             s.id
         };
 
-        let rx = self.http_injector.register(session_id).await;
+        let (id_requete, rx) = ctx.http_injector.register(session_id).await?;
 
-        self.tunnel_manager
-            .send_to_session(session_id, request_bytes)
+        if let Err(e) = ctx
+            .tunnel_manager
+            .send_to_session(session_id, encadrer_requete(&id_requete, &request_bytes))
             .await
-            .map_err(|e| format!("Failed to send to session: {}", e))?;
+        {
+            ctx.http_injector.abandon(&id_requete).await;
+            return Err(format!("Failed to send to session: {e}").into());
+        }
 
         // Attendre la réponse (timeout 30s)
-        match tokio::time::timeout(tokio::time::Duration::from_secs(30), rx).await {
+        let resultat = tokio::time::timeout(tokio::time::Duration::from_secs(30), rx).await;
+        match resultat {
             Ok(Ok(response)) => Ok(response),
-            Ok(Err(_)) => Err("COG closed connection before response".into()),
-            Err(_) => Err("HTTP tunnel response timeout (30s)".into()),
+            Ok(Err(_)) => {
+                ctx.http_injector.abandon(&id_requete).await;
+                Err("COG closed connection before response".into())
+            }
+            Err(_) => {
+                ctx.http_injector.abandon(&id_requete).await;
+                Err("HTTP tunnel response timeout (30s)".into())
+            }
         }
     }
 
@@ -256,8 +355,11 @@ impl RelayServer {
 
     /// Démarre le serveur.
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        let addr: SocketAddr =
-            format!("{}:{}", self.config.relay.host, self.config.relay.port).parse()?;
+        let addr: SocketAddr = format!(
+            "{}:{}",
+            self.ctx.config.relay.host, self.ctx.config.relay.port
+        )
+        .parse()?;
 
         let listener = TcpListener::bind(addr).await?;
         info!("🔐 Relay server listening on {}", addr);
@@ -273,7 +375,7 @@ impl RelayServer {
                 }
                 Err(e) => {
                     error!("Accept error: {}", e);
-                    self.metrics.record_internal_error();
+                    self.ctx.metrics.record_internal_error();
                 }
             }
         }
@@ -282,23 +384,29 @@ impl RelayServer {
     /// Démarre les tâches de maintenance.
     fn start_maintenance_tasks(&self) {
         // Nettoyage des sessions expirées
-        let sessions = Arc::clone(&self.sessions);
-        let metrics = Arc::clone(&self.metrics);
+        let ctx = Arc::clone(&self.ctx);
         tokio::spawn(async move {
             loop {
                 tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
-                let cleaned = sessions.cleanup_expired().await;
+                let cleaned = ctx.sessions.cleanup_expired().await;
                 if cleaned > 0 {
                     info!("Cleaned up {} expired sessions", cleaned);
                     for _ in 0..cleaned {
-                        metrics.record_session_expired();
+                        ctx.metrics.record_session_expired();
+                    }
+                }
+                // O-15 : purge des permis expirés.
+                if let Some(registry) = &ctx.permis_registry {
+                    let purges = registry.cleanup_expired().await;
+                    for _ in 0..purges {
+                        ctx.metrics.record_permit_expired();
                     }
                 }
             }
         });
 
         // Nettoyage du rate limiter
-        let rate_limiter = Arc::clone(&self.rate_limiter);
+        let rate_limiter = Arc::clone(&self.ctx.rate_limiter);
         tokio::spawn(async move {
             loop {
                 tokio::time::sleep(tokio::time::Duration::from_secs(120)).await;
@@ -307,8 +415,8 @@ impl RelayServer {
         });
 
         // Nettoyage des tunnels
-        let tunnel_manager = Arc::clone(&self.tunnel_manager);
-        let metrics = Arc::clone(&self.metrics);
+        let tunnel_manager = Arc::clone(&self.ctx.tunnel_manager);
+        let metrics = Arc::clone(&self.ctx.metrics);
         tokio::spawn(async move {
             loop {
                 tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
@@ -326,16 +434,17 @@ impl RelayServer {
     /// Gère une nouvelle connexion entrante.
     async fn handle_new_connection(&self, stream: TcpStream, peer_addr: SocketAddr) {
         let ip = peer_addr.ip();
+        let ctx = Arc::clone(&self.ctx);
 
         // Vérifier le rate limit
-        match self.rate_limiter.check_connection(ip).await {
+        match ctx.rate_limiter.check_connection(ip).await {
             RateLimitResult::Allowed => {}
             RateLimitResult::Exceeded { current, limit } => {
                 warn!(
                     "Connection from {} rejected: rate limit exceeded ({}/{})",
                     peer_addr, current, limit
                 );
-                self.metrics.record_rejected_connection();
+                ctx.metrics.record_rejected_connection();
                 return;
             }
             RateLimitResult::Blocked {
@@ -346,44 +455,18 @@ impl RelayServer {
                     "Connection from {} blocked: {} (retry after {}s)",
                     peer_addr, reason, retry_after
                 );
-                self.metrics.record_rejected_connection();
+                ctx.metrics.record_rejected_connection();
                 return;
             }
         }
 
-        self.metrics.record_connection();
+        ctx.metrics.record_connection();
         debug!("New connection from {}", peer_addr);
 
-        // Cloner les références nécessaires
         let tls_acceptor = self.tls_acceptor.clone();
-        let sessions = Arc::clone(&self.sessions);
-        let permis_registry = self.permis_registry.clone();
-        let verifier = Arc::clone(&self.verifier);
-        let config = Arc::clone(&self.config);
-        let tracker_addresses = self.tracker_addresses.clone();
-        let tracker_signature = self.tracker_signature;
-        let rate_limiter = Arc::clone(&self.rate_limiter);
-        let tunnel_manager = Arc::clone(&self.tunnel_manager);
-        let http_injector = Arc::clone(&self.http_injector);
-        let metrics = Arc::clone(&self.metrics);
-
         tokio::spawn(async move {
-            let result = Self::handle_connection(
-                stream,
-                peer_addr,
-                tls_acceptor,
-                sessions,
-                permis_registry,
-                verifier,
-                config,
-                tracker_addresses,
-                tracker_signature,
-                rate_limiter,
-                tunnel_manager,
-                http_injector,
-                Arc::clone(&metrics),
-            )
-            .await;
+            let metrics = Arc::clone(&ctx.metrics);
+            let result = Self::handle_connection(stream, peer_addr, tls_acceptor, ctx).await;
 
             if let Err(e) = result {
                 debug!("Connection error from {}: {}", peer_addr, e);
@@ -398,16 +481,7 @@ impl RelayServer {
         stream: TcpStream,
         peer_addr: SocketAddr,
         tls_acceptor: Option<TlsAcceptor>,
-        sessions: Arc<SessionManager>,
-        permis_registry: Option<Arc<PermisRegistry>>,
-        verifier: Arc<Verifier>,
-        config: Arc<OriginConfig>,
-        tracker_addresses: Bytes,
-        tracker_signature: [u8; ED25519_SIGNATURE_SIZE],
-        rate_limiter: Arc<RateLimiter>,
-        tunnel_manager: Arc<TunnelManager>,
-        http_injector: Arc<HttpInjector>,
-        metrics: Arc<RelayMetrics>,
+        ctx: Arc<ContexteRelay>,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         // Appliquer TLS
         let mut stream: Box<dyn AsyncReadWriteExt> = if let Some(acceptor) = tls_acceptor {
@@ -415,7 +489,7 @@ impl RelayServer {
                 Ok(tls_stream) => Box::new(tls_stream),
                 Err(e) => {
                     warn!("TLS handshake failed from {}: {}", peer_addr, e);
-                    metrics.record_tls_error();
+                    ctx.metrics.record_tls_error();
                     return Err(e.into());
                 }
             }
@@ -424,12 +498,12 @@ impl RelayServer {
         };
 
         // Créer la session
-        let session = sessions.create(peer_addr).await;
-        let session_id = {
+        let session = ctx.sessions.create(peer_addr).await;
+        let (session_id, defi) = {
             let s = session.read().await;
-            s.id
+            (s.id, s.defi)
         };
-        metrics.record_session_created();
+        ctx.metrics.record_session_created();
 
         info!(
             "Session created for {}: {}",
@@ -437,110 +511,91 @@ impl RelayServer {
             hex::encode(&session_id[..8])
         );
 
+        // O-01 : ouvrir la session par le défi d'identité (32 octets aléatoires).
+        let challenge = Frame::new(MessageType::Challenge, Bytes::copy_from_slice(&defi));
+        let bytes = challenge.to_bytes();
+        ctx.metrics.record_message_sent(bytes.len());
+        stream.write_all(&bytes).await?;
+        stream.flush().await?;
+
         // Créer un channel pour les messages sortants du tunnel
         let (tunnel_tx, mut tunnel_rx) = mpsc::channel::<TunnelMessage>(100);
-        tunnel_manager
+        ctx.tunnel_manager
             .register_outbound(session_id, tunnel_tx)
             .await;
 
         // Buffer de lecture
         let mut read_buf = BytesMut::with_capacity(8192);
 
-        loop {
-            tokio::select! {
-                // Lire des données entrantes
-                result = stream.read_buf(&mut read_buf) => {
-                    match result {
-                        Ok(0) => {
-                            // Connexion fermée
-                            break;
-                        }
-                        Ok(n) => {
-                            metrics.record_message_received(n);
+        let resultat: Result<(), Box<dyn std::error::Error + Send + Sync>> = async {
+            loop {
+                tokio::select! {
+                    // Lire des données entrantes
+                    result = stream.read_buf(&mut read_buf) => {
+                        match result {
+                            Ok(0) => break,
+                            Ok(n) => {
+                                ctx.metrics.record_message_received(n);
 
-                            // Traiter les trames
-                            while let Some(frame) = Self::try_parse_frame(&mut read_buf, &metrics)? {
-                                let session_id_arr: [u8; 16] = match session_id[..16].try_into() {
-                                    Ok(arr) => arr,
-                                    Err(_) => {
-                                        warn!("Invalid session_id length from {}", peer_addr);
-                                        break;
+                                // Traiter les trames
+                                while let Some(frame) = Self::try_parse_frame(&mut read_buf, &ctx.metrics)? {
+                                    if !ctx.rate_limiter.check_message(&session_id).await.is_allowed() {
+                                        warn!("Session {} rate limited", hex::encode(&session_id[..8]));
+                                        return Ok(());
                                     }
-                                };
-                                if !rate_limiter.check_message(&session_id_arr).await.is_allowed() {
-                                    warn!("Session {} rate limited", hex::encode(&session_id[..8]));
-                                    break;
-                                }
 
-                                // Traiter la trame
-                                let response = Self::handle_frame(
-                                    &frame,
-                                    &session,
-                                    permis_registry.as_ref(),
-                                    &verifier,
-                                    &config,
-                                    &tracker_addresses,
-                                    &tracker_signature,
-                                    &sessions,
-                                    &tunnel_manager,
-                                    &http_injector,
-                                    peer_addr.ip(),
-                                    &rate_limiter,
-                                    &metrics,
-                                )
-                                .await;
+                                    let response = Self::handle_frame(&frame, &session, &ctx, peer_addr.ip()).await;
 
-                                // Envoyer la réponse
-                                if let Some(response_frame) = response {
-                                    let bytes = response_frame.to_bytes();
-                                    metrics.record_message_sent(bytes.len());
-                                    stream.write_all(&bytes).await?;
-                                    stream.flush().await?;
-                                }
+                                    if let Some(response_frame) = response {
+                                        let bytes = response_frame.to_bytes();
+                                        ctx.metrics.record_message_sent(bytes.len());
+                                        stream.write_all(&bytes).await?;
+                                        stream.flush().await?;
+                                    }
 
-                                // Vérifier si on doit fermer
-                                let state = {
-                                    let s = session.read().await;
-                                    s.state
-                                };
-
-                                if state == SessionState::Closed {
-                                    info!("Session closed for {}", peer_addr);
-                                    break;
+                                    let state = session.read().await.state;
+                                    if state == SessionState::Closed {
+                                        info!("Session closed for {}", peer_addr);
+                                        return Ok(());
+                                    }
                                 }
                             }
+                            Err(e) => {
+                                debug!("Read error from {}: {}", peer_addr, e);
+                                break;
+                            }
                         }
-                        Err(e) => {
-                            debug!("Read error from {}: {}", peer_addr, e);
+                    }
+
+                    // Envoyer des messages de tunnel
+                    Some(msg) = tunnel_rx.recv() => {
+                        let frame = Frame::new(MessageType::Data, msg.data);
+                        let bytes = frame.to_bytes();
+                        ctx.metrics.record_message_sent(bytes.len());
+                        ctx.metrics.record_data_relayed();
+
+                        if stream.write_all(&bytes).await.is_err() {
                             break;
                         }
+                        stream.flush().await?;
                     }
-                }
-
-                // Envoyer des messages de tunnel
-                Some(msg) = tunnel_rx.recv() => {
-                    // Construire une trame DATA
-                    let frame = Frame::new(MessageType::Data, msg.data);
-                    let bytes = frame.to_bytes();
-                    metrics.record_message_sent(bytes.len());
-                    metrics.record_data_relayed();
-
-                    if stream.write_all(&bytes).await.is_err() {
-                        break;
-                    }
-                    stream.flush().await?;
                 }
             }
+            Ok(())
         }
+        .await;
 
-        // Nettoyer
-        tunnel_manager.unregister_outbound(&session_id).await;
-        tunnel_manager.close_session_tunnels(&session_id).await;
-        sessions.remove(&session_id).await;
-        metrics.record_session_closed();
+        // Nettoyer (toujours, même en cas d'erreur). Le permis n'est pas révoqué ici : un COG
+        // sans tunnel ferme sa session Relay juste après REGISTER_OK et annonce ensuite au
+        // Tracker. Le permis est lié au cog_id prouvé et purgé à expiration (O-15 partiel).
+        ctx.tunnel_manager.unregister_outbound(&session_id).await;
+        ctx.tunnel_manager.close_session_tunnels(&session_id).await;
+        ctx.sessions.remove(&session_id).await;
+        ctx.rate_limiter.remove_session(&session_id).await;
+        ctx.metrics.record_session_closed();
         info!("Connection closed for {}", peer_addr);
 
-        Ok(())
+        resultat
     }
 
     /// Essaie de parser une trame du buffer.
@@ -561,149 +616,144 @@ impl RelayServer {
     async fn handle_frame(
         frame: &Frame,
         session: &Arc<RwLock<Session>>,
-        permis_registry: Option<&Arc<PermisRegistry>>,
-        verifier: &Arc<Verifier>,
-        config: &Arc<OriginConfig>,
-        tracker_addresses: &Bytes,
-        tracker_signature: &[u8; ED25519_SIGNATURE_SIZE],
-        sessions: &Arc<SessionManager>,
-        tunnel_manager: &Arc<TunnelManager>,
-        http_injector: &Arc<HttpInjector>,
+        ctx: &ContexteRelay,
         client_ip: std::net::IpAddr,
-        rate_limiter: &Arc<RateLimiter>,
-        metrics: &Arc<RelayMetrics>,
     ) -> Option<Frame> {
         debug!("Received {:?}", frame.header.message_type);
 
         match frame.header.message_type {
             MessageType::Register => {
-                Self::handle_register(
-                    &frame.payload,
-                    session,
-                    permis_registry,
-                    verifier,
-                    config,
-                    tracker_addresses,
-                    tracker_signature,
-                    sessions,
-                    client_ip,
-                    rate_limiter,
-                    metrics,
-                )
-                .await
+                Self::handle_register(&frame.payload, session, ctx, client_ip).await
             }
             MessageType::CoreKey => {
-                Self::handle_core_key(
-                    &frame.payload,
-                    session,
-                    verifier,
-                    config,
-                    permis_registry,
-                    tracker_addresses,
-                    tracker_signature,
-                    sessions,
-                    client_ip,
-                    rate_limiter,
-                    metrics,
-                )
-                .await
+                Self::handle_core_key(&frame.payload, session, ctx, client_ip).await
             }
             MessageType::ServiceBlock => {
-                Self::handle_service_block(&frame.payload, session, verifier, metrics).await
+                Self::handle_service_block(&frame.payload, session, ctx).await
             }
             MessageType::Heartbeat => {
-                metrics.record_heartbeat();
+                ctx.metrics.record_heartbeat();
                 Self::handle_heartbeat(&frame.payload, session).await
             }
             MessageType::Close => {
                 Self::handle_close(session).await;
                 None
             }
-            MessageType::Data => {
-                Self::handle_data(
-                    &frame.payload,
-                    session,
-                    tunnel_manager,
-                    http_injector,
-                    metrics,
-                )
-                .await
-            }
+            MessageType::Data => Self::handle_data(&frame.payload, session, ctx).await,
             _ => {
                 warn!("Unhandled message type: {:?}", frame.header.message_type);
-                metrics.record_protocol_error();
+                ctx.metrics.record_protocol_error();
                 None
             }
         }
     }
 
+    /// Construit une trame `REGISTER_ERR`.
+    #[allow(clippy::unnecessary_wraps)] // utilisé comme valeur de retour `Option<Frame>`
+    fn refus(code: RegisterErrorCode, message: &'static [u8]) -> Option<Frame> {
+        let err = RegisterErrPayload::new(code, Bytes::from_static(message));
+        Some(Frame::new(MessageType::RegisterErr, err.to_bytes()))
+    }
+
     /// Traite un message REGISTER.
+    ///
+    /// O-01 : le REGISTER doit porter la clé publique d'identité et la signature du défi
+    /// de la session ; le `cog_id` doit être l'empreinte de cette clé ; la clé est épinglée
+    /// au premier usage (TOFU) et une autre clé pour le même `cog_id` est refusée.
+    /// Le défi n'est utilisable qu'une fois par session.
+    #[allow(clippy::too_many_lines)] // séquence de contrôles fail-closed, lue d'un bloc
     async fn handle_register(
         payload: &Bytes,
         session: &Arc<RwLock<Session>>,
-        permis_registry: Option<&Arc<PermisRegistry>>,
-        _verifier: &Arc<Verifier>,
-        config: &Arc<OriginConfig>,
-        tracker_addresses: &Bytes,
-        tracker_signature: &[u8; ED25519_SIGNATURE_SIZE],
-        sessions: &Arc<SessionManager>,
+        ctx: &ContexteRelay,
         client_ip: std::net::IpAddr,
-        rate_limiter: &Arc<RateLimiter>,
-        metrics: &Arc<RelayMetrics>,
     ) -> Option<Frame> {
+        let metrics = &ctx.metrics;
+        let rate_limiter = &ctx.rate_limiter;
+
+        // Un seul essai par session et par défi (anti-rejeu, anti-force brute).
+        let defi = {
+            let mut s = session.write().await;
+            if s.defi_consomme || s.state != SessionState::Pending {
+                metrics.record_registration(false);
+                rate_limiter.record_failed_registration(client_ip).await;
+                s.close();
+                return Self::refus(RegisterErrorCode::AuthFailed, b"Challenge already used");
+            }
+            s.defi_consomme = true;
+            s.defi
+        };
+
         // Parser le payload
-        let register = match RegisterPayload::parse(payload.clone()) {
+        let register = match RegisterPayload::parse(payload) {
             Ok(r) => r,
             Err(e) => {
                 warn!("Failed to parse REGISTER: {}", e);
                 metrics.record_registration(false);
-                let err = RegisterErrPayload::new(
+                rate_limiter.record_failed_registration(client_ip).await;
+                session.write().await.close();
+                return Self::refus(
                     RegisterErrorCode::InternalError,
-                    Bytes::from_static(b"Invalid registration payload"),
+                    b"Invalid registration payload",
                 );
-                return Some(Frame::new(MessageType::RegisterErr, err.to_bytes()));
             }
         };
 
-        // Extraire le cog_id
+        // Extraire le cog_id (forme stricte : empreinte base32 de 26 caractères)
         let cog_id = match register.cog_id_str() {
-            Some(id) => id,
-            None => {
+            Some(id) if cog_id_bien_forme(&id) => id,
+            _ => {
                 metrics.record_registration(false);
                 rate_limiter.record_failed_registration(client_ip).await;
-                let err = RegisterErrPayload::new(
-                    RegisterErrorCode::InternalError,
-                    Bytes::from_static(b"Invalid cog_id encoding"),
-                );
-                return Some(Frame::new(MessageType::RegisterErr, err.to_bytes()));
+                session.write().await.close();
+                return Self::refus(RegisterErrorCode::InvalidToken, b"Invalid cog_id");
             }
         };
 
-        info!("REGISTER request from cog_id: {}", cog_id);
-
-        // Vérifier si le cog_id est déjà enregistré
-        if sessions.is_cog_registered(&cog_id).await {
+        // O-01 : preuve d'identité obligatoire dans les deux modes (strict ou non).
+        let (Some(cle), Some(signature)) = (register.cle_publique, register.signature) else {
+            warn!("Unsigned REGISTER refused for cog_id {}", cog_id);
             metrics.record_registration(false);
-            let err = RegisterErrPayload::new(
-                RegisterErrorCode::CogIdConflict,
-                Bytes::from_static(b"cog_id already registered"),
-            );
-            return Some(Frame::new(MessageType::RegisterErr, err.to_bytes()));
+            rate_limiter.record_failed_registration(client_ip).await;
+            session.write().await.close();
+            return Self::refus(RegisterErrorCode::AuthFailed, b"Signed identity proof required");
+        };
+        if let Err(e) = verifier_register(
+            &cle,
+            &signature,
+            &defi,
+            &cog_id,
+            &ctx.identite_relay,
+            &register.corps_signe,
+        ) {
+            warn!("REGISTER identity proof refused for {}: {}", cog_id, e);
+            metrics.record_registration(false);
+            rate_limiter.record_failed_registration(client_ip).await;
+            session.write().await.close();
+            return Self::refus(RegisterErrorCode::AuthFailed, b"Invalid identity proof");
         }
 
-        // Vérifier le timestamp (anti-rejeu)
-        let now = chrono::Utc::now().timestamp() as u64;
-        let window = config.policies.timestamp_window_seconds;
+        // TOFU : épingler la clé au premier usage, refuser une autre clé ensuite.
+        if let Err(e) = ctx.identites.epingler(&cog_id, &cle).await {
+            warn!("REGISTER refused for {}: {}", cog_id, e);
+            metrics.record_registration(false);
+            rate_limiter.record_failed_registration(client_ip).await;
+            session.write().await.close();
+            return Self::refus(RegisterErrorCode::AuthFailed, b"Identity key mismatch");
+        }
+
+        info!("REGISTER with valid identity proof from cog_id: {}", cog_id);
+
+        // Vérifier le timestamp (défense en profondeur ; le défi assure la fraîcheur)
+        let now = chrono::Utc::now().timestamp().max(0).cast_unsigned();
+        let window = ctx.config.policies.timestamp_window_seconds;
         if register.timestamp < now.saturating_sub(window)
             || register.timestamp > now.saturating_add(window)
         {
             metrics.record_registration(false);
             rate_limiter.record_failed_registration(client_ip).await;
-            let err = RegisterErrPayload::new(
-                RegisterErrorCode::AuthFailed,
-                Bytes::from_static(b"Timestamp out of window"),
-            );
-            return Some(Frame::new(MessageType::RegisterErr, err.to_bytes()));
+            session.write().await.close();
+            return Self::refus(RegisterErrorCode::AuthFailed, b"Timestamp out of window");
         }
 
         // Mettre à jour la session
@@ -720,17 +770,25 @@ impl RelayServer {
                 } else {
                     std::str::from_utf8(&register.parent_cog_id)
                         .ok()
+                        .filter(|p| cog_id_bien_forme(p))
                         .map(String::from)
                 },
             );
             s.set_environment_health(register.environment_health.clone());
+            s.identite_verifiee = true;
+            s.cle_identite = Some(cle);
             s.start_phase_a();
             s.id
         };
-        sessions.register_cog(cog_id.clone(), session_id).await;
+        // L'identité est prouvée : la nouvelle session remplace une éventuelle session
+        // précédente du même COG (plus de blocage « CogIdConflict » par un usurpateur).
+        if ctx.sessions.is_cog_registered(&cog_id).await {
+            info!("COG {} re-registered: new authenticated session replaces the old one", cog_id);
+        }
+        ctx.sessions.register_cog(cog_id.clone(), session_id).await;
 
         // Mode strict : demander CORE_KEY (Phase A) puis Phase C, pas de REGISTER_OK ici
-        if config.relay.strict_verification {
+        if ctx.config.relay.strict_verification {
             let response = VerifyResultPayload::new(
                 session_id,
                 VerifyPhase::PhaseA,
@@ -740,8 +798,8 @@ impl RelayServer {
             return Some(Frame::new(MessageType::VerifyResult, response.to_bytes()));
         }
 
-        // Mode non strict : simulation Phase A/C et REGISTER_OK immédiat
-        let _core_version = register.core_version_str().unwrap_or_default();
+        // Mode non strict (explicite, journalisé au démarrage) : pas de Phase A/C,
+        // mais identité prouvée ci-dessus.
         {
             let mut s = session.write().await;
             s.phase_a_passed = true;
@@ -750,14 +808,24 @@ impl RelayServer {
         metrics.record_phase_a(true);
         metrics.record_phase_c(true);
 
-        let permis_id = {
+        Some(Self::delivrer_permis(session, ctx, &cog_id, client_ip).await)
+    }
+
+    /// Délivre un permis lié au `cog_id` prouvé et construit `REGISTER_OK`.
+    async fn delivrer_permis(
+        session: &Arc<RwLock<Session>>,
+        ctx: &ContexteRelay,
+        cog_id: &str,
+        client_ip: std::net::IpAddr,
+    ) -> Frame {
+        let (session_id, permis_id) = {
             let s = session.read().await;
-            s.generate_permis_id()
+            (s.id, s.generate_permis_id())
         };
         let permis_expires = chrono::Utc::now() + chrono::Duration::hours(24);
 
         let mut session_key = [0u8; 32];
-        rand::RngCore::fill_bytes(&mut rand::thread_rng(), &mut session_key);
+        rand::RngCore::fill_bytes(&mut rand::rngs::OsRng, &mut session_key);
 
         {
             let mut s = session.write().await;
@@ -767,48 +835,43 @@ impl RelayServer {
                 expires_at: permis_expires,
                 scope: Bytes::from_static(b"{}"),
             };
+            s.phase_c_passed = true;
             s.activate(permis, session_key);
         }
 
-        metrics.record_registration(true);
-        metrics.record_permit_issued();
-        rate_limiter.reset_failed_registrations(client_ip).await;
+        ctx.metrics.record_registration(true);
+        ctx.metrics.record_permit_issued();
+        ctx.rate_limiter.reset_failed_registrations(client_ip).await;
 
-        info!(
-            "COG {} registered successfully, Permis: {}",
-            cog_id, permis_id
-        );
+        info!("COG {} registered, Permis: {}", cog_id, permis_id);
 
-        if let Some(registry) = permis_registry {
-            registry.register(permis_id.clone(), permis_expires).await;
+        if let Some(registry) = &ctx.permis_registry {
+            registry
+                .register(permis_id.clone(), cog_id.to_string(), permis_expires)
+                .await;
         }
 
         let response = RegisterOkPayload::build(
             session_id,
             Bytes::from(permis_id),
-            permis_expires.timestamp() as u64,
+            permis_expires.timestamp().max(0).cast_unsigned(),
             Bytes::from_static(b"{}"),
-            tracker_addresses.clone(),
-            *tracker_signature,
+            ctx.tracker_addresses.clone(),
+            ctx.tracker_signature,
         );
-
-        Some(Frame::new(MessageType::RegisterOk, response.to_bytes()))
+        Frame::new(MessageType::RegisterOk, response.to_bytes())
     }
 
-    /// Traite un message CORE_KEY.
+    /// Traite un message `CORE_KEY`.
+    ///
+    /// Accepté uniquement après un REGISTER dont l'identité a été prouvée, en Phase A.
     async fn handle_core_key(
         payload: &Bytes,
         session: &Arc<RwLock<Session>>,
-        verifier: &Arc<Verifier>,
-        config: &Arc<OriginConfig>,
-        permis_registry: Option<&Arc<PermisRegistry>>,
-        tracker_addresses: &Bytes,
-        tracker_signature: &[u8; ED25519_SIGNATURE_SIZE],
-        _sessions: &Arc<SessionManager>,
+        ctx: &ContexteRelay,
         client_ip: std::net::IpAddr,
-        rate_limiter: &Arc<RateLimiter>,
-        metrics: &Arc<RelayMetrics>,
     ) -> Option<Frame> {
+        let metrics = &ctx.metrics;
         let core_key = match CoreKeyPayload::parse(payload.clone()) {
             Ok(k) => k,
             Err(e) => {
@@ -818,111 +881,72 @@ impl RelayServer {
             }
         };
 
-        let core_version = {
+        let (core_version, cog_id, session_id) = {
             let s = session.read().await;
-            s.core_version.clone().unwrap_or_default()
+            if !s.identite_verifiee || s.state != SessionState::VerifyingPhaseA {
+                warn!("CORE_KEY refused: no proven identity or wrong phase");
+                metrics.record_protocol_error();
+                return Self::refus(RegisterErrorCode::AuthFailed, b"REGISTER proof required first");
+            }
+            (
+                s.core_version.clone().unwrap_or_default(),
+                s.cog_id.clone().unwrap_or_default(),
+                s.id,
+            )
         };
+        if core_key.session_id != session_id {
+            metrics.record_protocol_error();
+            return Self::refus(RegisterErrorCode::AuthFailed, b"Session mismatch");
+        }
 
-        let result = verifier.verify_phase_a(&core_version, &core_key.key).await;
+        let result = ctx.verifier.verify_phase_a(&core_version, &core_key.key).await;
         let passed_a = result == VerifyResult::Ok;
         metrics.record_phase_a(passed_a);
 
-        if passed_a {
+        if !passed_a {
+            ctx.rate_limiter.record_failed_registration(client_ip).await;
+            let response =
+                VerifyResultPayload::new(session_id, VerifyPhase::PhaseA, result, Bytes::new());
+            return Some(Frame::new(MessageType::VerifyResult, response.to_bytes()));
+        }
+
+        session.write().await.complete_phase_a();
+
+        // Après Phase A OK : Phase C puis REGISTER_OK
+        let environment_health = {
+            let s = session.read().await;
+            s.environment_health.clone().unwrap_or_else(Bytes::new)
+        };
+        let phase_c_result = ctx.verifier.verify_phase_c(&environment_health).await;
+        let phase_c_ok = phase_c_result == VerifyResult::Ok;
+        metrics.record_phase_c(phase_c_ok);
+
+        if !phase_c_ok {
             let mut s = session.write().await;
-            s.complete_phase_a();
-        }
-
-        // Mode strict : après Phase A OK, faire Phase C puis REGISTER_OK
-        if passed_a && config.relay.strict_verification {
-            let (environment_health, cog_id) = {
-                let s = session.read().await;
-                let health = s.environment_health.clone().unwrap_or_else(Bytes::new);
-                let cog_id = s.cog_id.clone();
-                (health, cog_id)
-            };
-            let phase_c_result = verifier.verify_phase_c(&environment_health).await;
-            let phase_c_ok = phase_c_result == VerifyResult::Ok;
-            metrics.record_phase_c(phase_c_ok);
-
-            if !phase_c_ok {
-                let mut s = session.write().await;
-                s.state = SessionState::VerifyingPhaseC;
-                let response = VerifyResultPayload::new(
-                    core_key.session_id,
-                    VerifyPhase::PhaseC,
-                    VerifyResult::Fail,
-                    Bytes::from_static(b"Environment health check failed"),
-                );
-                return Some(Frame::new(MessageType::VerifyResult, response.to_bytes()));
-            }
-
-            let session_id = {
-                let s = session.read().await;
-                s.id
-            };
-            let cog_id = cog_id.unwrap_or_default();
-            let permis_id = {
-                let s = session.read().await;
-                s.generate_permis_id()
-            };
-            let permis_expires = chrono::Utc::now() + chrono::Duration::hours(24);
-
-            let mut session_key = [0u8; 32];
-            rand::RngCore::fill_bytes(&mut rand::thread_rng(), &mut session_key);
-
-            {
-                let mut s = session.write().await;
-                let permis = PermisInfo {
-                    permis_id: permis_id.clone(),
-                    issued_at: chrono::Utc::now(),
-                    expires_at: permis_expires,
-                    scope: Bytes::from_static(b"{}"),
-                };
-                s.phase_c_passed = true;
-                s.activate(permis, session_key);
-            }
-
-            metrics.record_registration(true);
-            metrics.record_permit_issued();
-            metrics.record_phase_c(true);
-            rate_limiter.reset_failed_registrations(client_ip).await;
-
-            info!(
-                "COG {} registered (strict 3-phase), Permis: {}",
-                cog_id, permis_id
-            );
-
-            if let Some(registry) = permis_registry {
-                registry.register(permis_id.clone(), permis_expires).await;
-            }
-
-            let response = RegisterOkPayload::build(
+            s.state = SessionState::VerifyingPhaseC;
+            let response = VerifyResultPayload::new(
                 session_id,
-                Bytes::from(permis_id),
-                permis_expires.timestamp() as u64,
-                Bytes::from_static(b"{}"),
-                tracker_addresses.clone(),
-                *tracker_signature,
+                VerifyPhase::PhaseC,
+                VerifyResult::Fail,
+                Bytes::from_static(b"Environment health check failed"),
             );
-            return Some(Frame::new(MessageType::RegisterOk, response.to_bytes()));
+            return Some(Frame::new(MessageType::VerifyResult, response.to_bytes()));
         }
 
-        let response = VerifyResultPayload::new(
-            core_key.session_id,
-            VerifyPhase::PhaseA,
-            result,
-            Bytes::new(),
-        );
-        Some(Frame::new(MessageType::VerifyResult, response.to_bytes()))
+        Some(Self::delivrer_permis(session, ctx, &cog_id, client_ip).await)
     }
 
-    /// Traite un message SERVICE_BLOCK.
+    /// Traite un message `SERVICE_BLOCK` (identité prouvée requise).
     async fn handle_service_block(
         payload: &Bytes,
         session: &Arc<RwLock<Session>>,
-        verifier: &Arc<Verifier>,
-        metrics: &Arc<RelayMetrics>,
+        ctx: &ContexteRelay,
     ) -> Option<Frame> {
+        let metrics = &ctx.metrics;
+        if !session.read().await.identite_verifiee {
+            metrics.record_protocol_error();
+            return None;
+        }
         let block = match ServiceBlockPayload::parse(payload.clone()) {
             Ok(b) => b,
             Err(e) => {
@@ -936,7 +960,8 @@ impl RelayServer {
             .unwrap_or("unknown")
             .to_string();
 
-        let result = verifier
+        let result = ctx
+            .verifier
             .verify_phase_b(&service_id, block.block_index, &block.encrypted_block)
             .await;
 
@@ -975,45 +1000,50 @@ impl RelayServer {
     async fn handle_data(
         payload: &Bytes,
         session: &Arc<RwLock<Session>>,
-        tunnel_manager: &Arc<TunnelManager>,
-        http_injector: &Arc<HttpInjector>,
-        metrics: &Arc<RelayMetrics>,
+        ctx: &ContexteRelay,
     ) -> Option<Frame> {
         // Vérifier que la session est active
-        let (is_active, session_id, sequence) = {
+        let (session_id, sequence) = {
             let mut s = session.write().await;
-            if !s.is_active() {
+            if !s.is_active() || !s.identite_verifiee {
+                warn!("DATA received on inactive session");
                 return None;
             }
             s.touch();
             s.messages_received += 1;
             let seq = s.sequence_number;
             s.sequence_number = s.sequence_number.wrapping_add(1);
-            (true, s.id, seq)
+            (s.id, seq)
         };
 
-        if !is_active {
-            warn!("DATA received on inactive session");
-            return None;
-        }
-
-        // Phase 2 : si c'est une réponse à une requête HTTP injectée par Origin, compléter le oneshot
-        if http_injector.complete(session_id, payload.clone()).await {
-            debug!(
-                "HTTP response received via tunnel for session {}",
-                hex::encode(&session_id[..8])
-            );
-            return None;
+        // Phase 2 : réponse à une requête HTTP injectée par Origin (id + session vérifiés)
+        match ctx.http_injector.complete(session_id, payload).await {
+            RemiseInjection::Livree => {
+                debug!(
+                    "HTTP response received via tunnel for session {}",
+                    hex::encode(&session_id[..8])
+                );
+                return None;
+            }
+            RemiseInjection::Rejetee => {
+                warn!(
+                    "Tunnel response with unknown request id dropped (session {})",
+                    hex::encode(&session_id[..8])
+                );
+                return None;
+            }
+            RemiseInjection::NonInjection => {}
         }
 
         // Relayer via le tunnel COG-COG
-        if let Err(e) = tunnel_manager
+        if let Err(e) = ctx
+            .tunnel_manager
             .relay_data(session_id, payload.clone(), sequence)
             .await
         {
             debug!("Failed to relay data: {}", e);
         } else {
-            metrics.record_data_relayed();
+            ctx.metrics.record_data_relayed();
         }
 
         None
@@ -1028,6 +1058,333 @@ impl<T: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin + Send> AsyncReadWr
 #[cfg(test)]
 mod tests {
     use super::*;
+    use miyuwebway_participant::identite::{message_register, IdentiteCog};
+    use miyuwebway_participant::protocol::RegisterPayload as RegisterClient;
+    use sha2::{Digest, Sha256};
+
+    fn serveur(strict: bool) -> (RelayServer, Arc<PermisRegistry>, Arc<RegistreIdentites>) {
+        let mut config = OriginConfig::default();
+        config.relay.strict_verification = strict;
+        let permis = Arc::new(PermisRegistry::new());
+        let identites = Arc::new(RegistreIdentites::new());
+        let serveur = RelayServer::sans_tls(
+            Arc::new(config),
+            Some(Arc::clone(&permis)),
+            Arc::clone(&identites),
+        )
+        .expect("serveur");
+        (serveur, permis, identites)
+    }
+
+    fn adresse() -> SocketAddr {
+        "203.0.113.7:4444".parse().expect("adresse")
+    }
+
+    fn register_client(cog_id: &str) -> RegisterClient {
+        RegisterClient {
+            cog_id: cog_id.to_string(),
+            core_version: "1.0.0".to_string(),
+            cog_type: 3,
+            os_type: 2,
+            passport_type: 0,
+            services: vec![],
+            nonce: [1u8; 16],
+            timestamp: chrono::Utc::now().timestamp().cast_unsigned(),
+        }
+    }
+
+    fn code_refus(frame: &Frame) -> Option<RegisterErrorCode> {
+        if frame.header.message_type != MessageType::RegisterErr {
+            return None;
+        }
+        RegisterErrorCode::from_byte(frame.payload[0])
+    }
+
+    async fn enregistrer(
+        serveur: &RelayServer,
+        identite: &IdentiteCog,
+    ) -> (Arc<RwLock<Session>>, Option<Frame>) {
+        let session = serveur.ctx.sessions.create(adresse()).await;
+        let defi = session.read().await.defi;
+        let payload = register_client(&identite.cog_id()).to_origin_bytes_signe(
+            identite,
+            &defi,
+            &serveur.ctx.identite_relay,
+        );
+        let reponse =
+            RelayServer::handle_register(&payload, &session, &serveur.ctx, adresse().ip()).await;
+        (session, reponse)
+    }
+
+    #[tokio::test]
+    async fn strict_par_defaut() {
+        assert!(OriginConfig::default().relay.strict_verification);
+    }
+
+    #[tokio::test]
+    async fn register_non_signe_refuse() {
+        for strict in [true, false] {
+            let (serveur, _, _) = serveur(strict);
+            let identite = IdentiteCog::generer();
+            let session = serveur.ctx.sessions.create(adresse()).await;
+            let payload = register_client(&identite.cog_id()).to_origin_bytes();
+            let r = RelayServer::handle_register(&payload, &session, &serveur.ctx, adresse().ip())
+                .await
+                .expect("réponse");
+            assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
+            assert_eq!(session.read().await.state, SessionState::Closed);
+            assert!(!serveur.ctx.sessions.is_cog_registered(&identite.cog_id()).await);
+        }
+    }
+
+    #[tokio::test]
+    async fn register_signature_falsifiee_refuse() {
+        let (serveur, _, _) = serveur(true);
+        let identite = IdentiteCog::generer();
+        let session = serveur.ctx.sessions.create(adresse()).await;
+        // Signé sur un autre défi (rejeu d'une preuve ancienne).
+        let payload = register_client(&identite.cog_id()).to_origin_bytes_signe(
+            &identite,
+            &[0xAA; 32],
+            &serveur.ctx.identite_relay,
+        );
+        let r = RelayServer::handle_register(&payload, &session, &serveur.ctx, adresse().ip())
+            .await
+            .expect("réponse");
+        assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
+
+        // Signé pour un autre Relay.
+        let session = serveur.ctx.sessions.create(adresse()).await;
+        let defi = session.read().await.defi;
+        let payload = register_client(&identite.cog_id()).to_origin_bytes_signe(
+            &identite,
+            &defi,
+            "relay.pirate.example",
+        );
+        let r = RelayServer::handle_register(&payload, &session, &serveur.ctx, adresse().ip())
+            .await
+            .expect("réponse");
+        assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
+    }
+
+    #[tokio::test]
+    async fn register_cog_id_usurpe_refuse() {
+        let (serveur, _, _) = serveur(true);
+        let attaquant = IdentiteCog::generer();
+        let victime = IdentiteCog::generer();
+        let session = serveur.ctx.sessions.create(adresse()).await;
+        let defi = session.read().await.defi;
+        // REGISTER portant le cog_id de la victime, signé par la clé de l'attaquant.
+        let mut corps = BytesMut::from(&register_client(&victime.cog_id()).to_origin_bytes()[..]);
+        corps.extend_from_slice(&attaquant.cle_publique());
+        let message = message_register(&defi, &victime.cog_id(), &serveur.ctx.identite_relay, &corps);
+        let _ = Sha256::digest(&message);
+        let signature = attaquant.signer_register(&defi, &serveur.ctx.identite_relay, &corps);
+        corps.extend_from_slice(&signature);
+        let r = RelayServer::handle_register(&corps.freeze(), &session, &serveur.ctx, adresse().ip())
+            .await
+            .expect("réponse");
+        assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
+        assert!(!serveur.ctx.sessions.is_cog_registered(&victime.cog_id()).await);
+    }
+
+    #[tokio::test]
+    async fn cle_differente_pour_cog_id_epingle_refusee() {
+        let (serveur, _, identites) = serveur(true);
+        let identite = IdentiteCog::generer();
+        // Une autre clé est déjà épinglée pour ce cog_id.
+        identites
+            .epingler(&identite.cog_id(), &[0x11; 32])
+            .await
+            .expect("épinglage");
+        let (_, r) = enregistrer(&serveur, &identite).await;
+        assert_eq!(
+            code_refus(&r.expect("réponse")),
+            Some(RegisterErrorCode::AuthFailed)
+        );
+    }
+
+    #[tokio::test]
+    async fn defi_a_usage_unique() {
+        let (serveur, _, _) = serveur(true);
+        let identite = IdentiteCog::generer();
+        let (session, r) = enregistrer(&serveur, &identite).await;
+        assert_eq!(
+            r.expect("réponse").header.message_type,
+            MessageType::VerifyResult
+        );
+        let defi = session.read().await.defi;
+        let payload = register_client(&identite.cog_id()).to_origin_bytes_signe(
+            &identite,
+            &defi,
+            &serveur.ctx.identite_relay,
+        );
+        let r = RelayServer::handle_register(&payload, &session, &serveur.ctx, adresse().ip())
+            .await
+            .expect("réponse");
+        assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
+    }
+
+    #[tokio::test]
+    async fn flux_strict_complet_et_permis_lie() {
+        let (serveur, permis, identites) = serveur(true);
+        serveur
+            .ctx
+            .verifier
+            .add_core_key("1.0.0".to_string(), Sha256::digest(b"cle-cores").to_vec())
+            .await;
+        let identite = IdentiteCog::generer();
+
+        // CORE_KEY avant REGISTER : refusé.
+        let session_anonyme = serveur.ctx.sessions.create(adresse()).await;
+        let id_anonyme = session_anonyme.read().await.id;
+        let mut ck = BytesMut::new();
+        ck.extend_from_slice(&id_anonyme);
+        ck.extend_from_slice(&(9u16).to_be_bytes());
+        ck.extend_from_slice(b"cle-cores");
+        let r = RelayServer::handle_core_key(&ck.freeze(), &session_anonyme, &serveur.ctx, adresse().ip())
+            .await
+            .expect("réponse");
+        assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
+
+        // REGISTER signé → VERIFY_RESULT (Phase A demandée).
+        let (session, r) = enregistrer(&serveur, &identite).await;
+        assert_eq!(r.expect("réponse").header.message_type, MessageType::VerifyResult);
+        assert!(identites.cle_epinglee(&identite.cog_id()).await.is_some());
+
+        // CORE_KEY → REGISTER_OK, permis lié au cog_id prouvé.
+        let id = session.read().await.id;
+        let mut ck = BytesMut::new();
+        ck.extend_from_slice(&id);
+        ck.extend_from_slice(&(9u16).to_be_bytes());
+        ck.extend_from_slice(b"cle-cores");
+        let r = RelayServer::handle_core_key(&ck.freeze(), &session, &serveur.ctx, adresse().ip())
+            .await
+            .expect("réponse");
+        assert_eq!(r.header.message_type, MessageType::RegisterOk);
+        let permis_id = session.read().await.permis.clone().expect("permis").permis_id;
+        assert!(permis.is_valid_for(&permis_id, &identite.cog_id()).await);
+        assert!(!permis.is_valid_for(&permis_id, &IdentiteCog::generer().cog_id()).await);
+    }
+
+    #[tokio::test]
+    async fn non_strict_exige_quand_meme_la_preuve() {
+        let (serveur, permis, _) = serveur(false);
+        let identite = IdentiteCog::generer();
+        let (session, r) = enregistrer(&serveur, &identite).await;
+        assert_eq!(r.expect("réponse").header.message_type, MessageType::RegisterOk);
+        let permis_id = session.read().await.permis.clone().expect("permis").permis_id;
+        assert!(permis.is_valid_for(&permis_id, &identite.cog_id()).await);
+    }
+
+    #[tokio::test]
+    async fn injecteur_ne_croise_jamais_les_reponses() {
+        let inj = HttpInjector::new();
+        let session = [1u8; SESSION_ID_SIZE];
+        let autre_session = [2u8; SESSION_ID_SIZE];
+        let (id_a, rx_a) = inj.register(session).await.expect("a");
+        let (id_b, rx_b) = inj.register(session).await.expect("b");
+        assert_ne!(id_a, id_b);
+
+        let reponse = |id: &[u8; TAILLE_ID_REQUETE], corps: &[u8]| {
+            let mut b = BytesMut::new();
+            b.extend_from_slice(MAGIC_REPONSE_INJECTEE);
+            b.extend_from_slice(id);
+            b.extend_from_slice(corps);
+            b.freeze()
+        };
+
+        // Id inconnu : jeté.
+        assert_eq!(
+            inj.complete(session, &reponse(&[9u8; 16], b"x")).await,
+            RemiseInjection::Rejetee
+        );
+        // Bon id mais autre session : jeté, l'attente reste.
+        assert_eq!(
+            inj.complete(autre_session, &reponse(&id_a, b"vol")).await,
+            RemiseInjection::Rejetee
+        );
+        // Réponses dans l'ordre inverse : chacune va à son demandeur.
+        assert_eq!(
+            inj.complete(session, &reponse(&id_b, b"pour-b")).await,
+            RemiseInjection::Livree
+        );
+        assert_eq!(
+            inj.complete(session, &reponse(&id_a, b"pour-a")).await,
+            RemiseInjection::Livree
+        );
+        assert_eq!(rx_a.await.expect("a"), Bytes::from_static(b"pour-a"));
+        assert_eq!(rx_b.await.expect("b"), Bytes::from_static(b"pour-b"));
+        // Rejeu de la même réponse : jeté.
+        assert_eq!(
+            inj.complete(session, &reponse(&id_a, b"rejeu")).await,
+            RemiseInjection::Rejetee
+        );
+        // Trame non encadrée : trafic de tunnel ordinaire.
+        assert_eq!(
+            inj.complete(session, &Bytes::from_static(b"HTTP/1.1 200 OK")).await,
+            RemiseInjection::NonInjection
+        );
+        // Réponse tronquée : jetée.
+        assert_eq!(
+            inj.complete(session, &Bytes::from_static(b"MWHR123")).await,
+            RemiseInjection::Rejetee
+        );
+    }
+
+    #[tokio::test]
+    async fn injections_concurrentes_bout_en_bout() {
+        const N: usize = 8;
+        let (serveur, _, _) = serveur(false);
+        let serveur = Arc::new(serveur);
+        let identite = IdentiteCog::generer();
+        let (session, r) = enregistrer(&serveur, &identite).await;
+        assert_eq!(r.expect("réponse").header.message_type, MessageType::RegisterOk);
+        let session_id = session.read().await.id;
+        let (tx, mut rx) = mpsc::channel::<TunnelMessage>(16);
+        serveur.ctx.tunnel_manager.register_outbound(session_id, tx).await;
+
+        // COG simulé : reçoit N requêtes puis répond dans l'ordre inverse, en renvoyant le chemin.
+        let ctx = Arc::clone(&serveur.ctx);
+        let session_cog = Arc::clone(&session);
+        let cog = tokio::spawn(async move {
+            let mut recues = Vec::new();
+            while recues.len() < N {
+                let msg = rx.recv().await.expect("requête");
+                let reste = msg.data.strip_prefix(MAGIC_REQUETE_INJECTEE.as_slice()).expect("cadre");
+                let (id, requete) = reste.split_at(TAILLE_ID_REQUETE);
+                recues.push((id.to_vec(), requete.to_vec()));
+            }
+            for (id, requete) in recues.into_iter().rev() {
+                let mut b = BytesMut::new();
+                b.extend_from_slice(MAGIC_REPONSE_INJECTEE);
+                b.extend_from_slice(&id);
+                b.extend_from_slice(b"HTTP/1.1 200 OK\r\n\r\n");
+                b.extend_from_slice(&requete);
+                RelayServer::handle_data(&b.freeze(), &session_cog, &ctx).await;
+            }
+        });
+
+        let mut taches = Vec::new();
+        for i in 0..N {
+            let serveur = Arc::clone(&serveur);
+            let cog_id = identite.cog_id();
+            taches.push(tokio::spawn(async move {
+                let requete = format!("GET /visiteur-{i} HTTP/1.1\r\n\r\n");
+                let reponse = serveur
+                    .inject_http_request(&cog_id, Bytes::from(requete.clone()))
+                    .await
+                    .expect("réponse");
+                (requete, reponse)
+            }));
+        }
+        for t in taches {
+            let (requete, reponse) = t.await.expect("tâche");
+            assert!(reponse.ends_with(requete.as_bytes()), "réponse croisée");
+        }
+        cog.await.expect("cog");
+        assert!(serveur.ctx.http_injector.pending.read().await.is_empty());
+    }
 
     #[test]
     fn test_relay_metrics_created() {

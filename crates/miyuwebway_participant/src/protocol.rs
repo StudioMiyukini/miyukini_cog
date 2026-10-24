@@ -25,6 +25,16 @@ pub const PERMIS_ID_SIZE: usize = 16;
 pub const RELAY_MAGIC: u32 = 0x4D575352; // "MWSR"
 /// Magic number pour les trames Tracker.
 pub const TRACKER_MAGIC: u32 = 0x4D575354; // "MWST"
+/// Préfixe d'une requête HTTP injectée par Origin dans le tunnel (O-06).
+/// Format DATA : `MWHQ` + id de requête (16 octets aléatoires) + requête HTTP brute.
+pub const MAGIC_REQUETE_INJECTEE: &[u8; 4] = b"MWHQ";
+/// Préfixe de la réponse correspondante du COG.
+/// Format DATA : `MWHR` + même id de requête (16 octets) + réponse HTTP brute.
+pub const MAGIC_REPONSE_INJECTEE: &[u8; 4] = b"MWHR";
+/// Taille de l'identifiant de requête injectée (128 bits).
+pub const TAILLE_ID_REQUETE: usize = 16;
+/// Taille maximale d'une réponse HTTP locale relayée (borne C-13, O-10).
+pub const TAILLE_MAX_REPONSE_HTTP: usize = 65_535 - 4 - TAILLE_ID_REQUETE;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES DE MESSAGES RELAY
@@ -56,6 +66,8 @@ pub enum RelayMessageType {
     VerifyResult = 0x12,
     /// Redirection (Origin).
     Redirect = 0x13,
+    /// Défi d'identité envoyé par le Relay à l'ouverture de session (O-01).
+    Challenge = 0x14,
 }
 
 impl RelayMessageType {
@@ -73,6 +85,7 @@ impl RelayMessageType {
             0x11 => Some(Self::ServiceBlock),
             0x12 => Some(Self::VerifyResult),
             0x13 => Some(Self::Redirect),
+            0x14 => Some(Self::Challenge),
             _ => None,
         }
     }
@@ -418,6 +431,26 @@ impl RegisterPayload {
         buf.freeze()
     }
 
+    /// Sérialise au format Origin **signé** (O-01) : corps + clé publique (32) + signature (64).
+    ///
+    /// La signature porte sur le défi du Relay, l'identité du Relay, le `cog_id` et
+    /// l'empreinte SHA-256 du corps (clé publique comprise). Le `cog_id` utilisé est
+    /// toujours celui dérivé de la clé (jamais un champ libre).
+    pub fn to_origin_bytes_signe(
+        &self,
+        identite: &crate::identite::IdentiteCog,
+        defi: &[u8; crate::identite::TAILLE_DEFI],
+        identite_relay: &str,
+    ) -> Bytes {
+        let mut lie = self.clone();
+        lie.cog_id = identite.cog_id();
+        let mut corps = BytesMut::from(&lie.to_origin_bytes()[..]);
+        corps.extend_from_slice(&identite.cle_publique());
+        let signature = identite.signer_register(defi, identite_relay, &corps);
+        corps.extend_from_slice(&signature);
+        corps.freeze()
+    }
+
     /// Sérialise en JSON (legacy / tests).
     pub fn to_bytes(&self) -> Bytes {
         Bytes::from(serde_json::to_vec(self).unwrap_or_default())
@@ -602,6 +635,9 @@ impl RegisterAckPayload {
         }
         let permis_expires_at = u64::from_be_bytes(data[i..i + 8].try_into().ok()?);
         i += 8;
+        if data.len() < i + 2 {
+            return None;
+        }
         let scope_len = u16::from_be_bytes([data[i], data[i + 1]]) as usize;
         i += 2;
         if data.len() < i + scope_len {

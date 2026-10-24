@@ -166,7 +166,6 @@ impl Catalog {
             cogs.push(serde_json::json!({
                 "cog_id": e.cog_id,
                 "core_version": e.core_version,
-                "address": e.address,
                 "last_seen": e.last_seen.to_rfc3339(),
                 "services": e.services,
                 "lobby_count": e.lobbys.len(),
@@ -367,65 +366,94 @@ impl Catalog {
     </div>
 
     <script>
+        // O-05 : tous les champs fournis par les COG sont insérés via textContent
+        // (jamais d'insertion HTML brute), y compris noms de lobby, cog_id et champs de services.
+        function el(tag, text, cls) {
+            const e = document.createElement(tag);
+            if (text !== undefined && text !== null) e.textContent = String(text);
+            if (cls) e.className = cls;
+            return e;
+        }
+        function empty(container, message) {
+            container.replaceChildren(el('p', message, 'empty'));
+        }
+        function table(headers, rows) {
+            const t = el('table');
+            const thead = el('thead');
+            const hr = el('tr');
+            headers.forEach(h => hr.appendChild(el('th', h)));
+            thead.appendChild(hr);
+            const tbody = el('tbody');
+            rows.forEach(cells => {
+                const tr = el('tr');
+                cells.forEach(c => tr.appendChild(el('td', c)));
+                tbody.appendChild(tr);
+            });
+            t.appendChild(thead);
+            t.appendChild(tbody);
+            return t;
+        }
         async function loadCatalog() {
             try {
                 const resp = await fetch('/api/catalog');
                 const data = await resp.json();
-                
-                document.getElementById('services-count').textContent = data.services?.length || 0;
-                document.getElementById('lobbys-count').textContent = data.lobbys?.length || 0;
-                document.getElementById('cogs-count').textContent = data.pool_stats?.total_cogs || 0;
+
+                document.getElementById('services-count').textContent = String(data.services?.length || 0);
+                document.getElementById('lobbys-count').textContent = String(data.lobbys?.length || 0);
+                document.getElementById('cogs-count').textContent = String(data.pool_stats?.total_cogs || 0);
 
                 const servicesEl = document.getElementById('services-table');
-                if (data.services && data.services.length > 0) {
-                    servicesEl.innerHTML = `<table>
-                        <thead><tr><th>ID</th><th>Version</th><th>Catégorie</th><th>Description</th></tr></thead>
-                        <tbody>${data.services.map(s => 
-                            `<tr><td>${s.service_id}</td><td>${s.version}</td><td>${s.category}</td><td>${s.description}</td></tr>`
-                        ).join('')}</tbody>
-                    </table>`;
+                if (Array.isArray(data.services) && data.services.length > 0) {
+                    servicesEl.replaceChildren(table(
+                        ['ID', 'Version', 'Catégorie', 'Description'],
+                        data.services.map(s => [s.service_id, s.version, s.category, s.description])
+                    ));
                 } else {
-                    servicesEl.innerHTML = '<p class="empty">Aucun service enregistré</p>';
+                    empty(servicesEl, 'Aucun service enregistré');
                 }
 
                 const lobbysEl = document.getElementById('lobbys-table');
-                if (data.lobbys && data.lobbys.length > 0) {
-                    lobbysEl.innerHTML = `<table>
-                        <thead><tr><th>Nom</th><th>Hôte</th><th>Joueurs</th><th>Accès</th></tr></thead>
-                        <tbody>${data.lobbys.map(l => 
-                            `<tr><td>${l.name}</td><td>${l.host_cog_id}</td><td>${l.current_players}/${l.max_players}</td><td>${l.password_required ? '🔒' : '🌐'}</td></tr>`
-                        ).join('')}</tbody>
-                    </table>`;
+                if (Array.isArray(data.lobbys) && data.lobbys.length > 0) {
+                    lobbysEl.replaceChildren(table(
+                        ['Nom', 'Hôte', 'Joueurs', 'Accès'],
+                        data.lobbys.map(l => [
+                            l.name,
+                            l.host_cog_id,
+                            Number(l.current_players) + '/' + Number(l.max_players),
+                            l.password_required ? '🔒' : '🌐'
+                        ])
+                    ));
                 } else {
-                    lobbysEl.innerHTML = '<p class="empty">Aucun lobby actif</p>';
+                    empty(lobbysEl, 'Aucun lobby actif');
                 }
 
                 const cogsEl = document.getElementById('cogs-cards');
-                if (data.cogs && data.cogs.length > 0) {
-                    cogsEl.innerHTML = data.cogs.map(c => {
-                        const visitUrl = '/visit?cog_id=' + encodeURIComponent(c.cog_id);
+                if (Array.isArray(data.cogs) && data.cogs.length > 0) {
+                    const cards = data.cogs.map(c => {
                         const present = c.present === true;
-                        const cardClass = 'cog-card' + (present ? '' : ' absent');
-                        const banner = present ? '' : '<div class="cog-absent-banner">Absent</div>';
-                        const btnClass = 'btn-visit' + (present ? '' : ' disabled');
-                        const btnContent = present ? '<a href="' + visitUrl + '" class="' + btnClass + '" target="_blank" rel="noopener">Visiter</a>' : '<span class="' + btnClass + '">Visiter</span>';
-                        return '<div class="' + cardClass + '">' + banner +
-                            '<h3>' + escapeHtml(c.cog_id) + '</h3>' +
-                            '<p class="cog-meta">Cores ' + escapeHtml(c.core_version) + ' · ' + (c.services?.length || 0) + ' service(s)</p>' +
-                            btnContent + '</div>';
-                    }).join('');
+                        const card = el('div', null, 'cog-card' + (present ? '' : ' absent'));
+                        if (!present) card.appendChild(el('div', 'Absent', 'cog-absent-banner'));
+                        card.appendChild(el('h3', c.cog_id));
+                        const nb = Array.isArray(c.services) ? c.services.length : 0;
+                        card.appendChild(el('p', 'Cores ' + String(c.core_version ?? '') + ' · ' + nb + ' service(s)', 'cog-meta'));
+                        if (present) {
+                            const a = el('a', 'Visiter', 'btn-visit');
+                            a.href = '/visit?cog_id=' + encodeURIComponent(String(c.cog_id));
+                            a.target = '_blank';
+                            a.rel = 'noopener noreferrer';
+                            card.appendChild(a);
+                        } else {
+                            card.appendChild(el('span', 'Visiter', 'btn-visit disabled'));
+                        }
+                        return card;
+                    });
+                    cogsEl.replaceChildren(...cards);
                 } else {
-                    cogsEl.innerHTML = '<p class="empty">Aucun COG enregistré sur le réseau</p>';
+                    empty(cogsEl, 'Aucun COG enregistré sur le réseau');
                 }
             } catch (e) {
                 console.error('Failed to load catalog:', e);
             }
-        }
-        function escapeHtml(s) {
-            if (!s) return '';
-            const div = document.createElement('div');
-            div.textContent = s;
-            return div.innerHTML;
         }
         loadCatalog();
         setInterval(loadCatalog, 30000);
@@ -494,6 +522,33 @@ mod tests {
         // Récupérer
         assert!(catalog.get_service("jaykoa").await.is_some());
         assert!(catalog.get_service("unknown").await.is_none());
+    }
+
+    #[test]
+    fn page_mws_sans_innerhtml_pour_les_champs_cog() {
+        // O-05 : aucun champ fourni par un COG n'est inséré via innerHTML.
+        let html = Catalog::new(Arc::new(PoolManager::new(true))).to_html();
+        assert!(!html.contains("innerHTML"));
+        assert!(html.contains("textContent"));
+        assert!(!html.contains("${l.name}"));
+    }
+
+    #[tokio::test]
+    async fn catalogue_public_sans_adresse_ip() {
+        // O-12 : l'adresse réelle des COG n'est pas publiée par /api/catalog.
+        let pool_manager = Arc::new(PoolManager::new(true));
+        let pool = pool_manager.get_or_create_pool("1.0.0").await;
+        pool.add_cog(super::super::pool::CogEntry {
+            cog_id: "c".to_string(),
+            core_version: "1.0.0".to_string(),
+            address: "203.0.113.9:8090".to_string(),
+            last_seen: chrono::Utc::now(),
+            services: vec![],
+            lobbys: vec![],
+        })
+        .await;
+        let json = Catalog::new(pool_manager).to_json(None).await.to_string();
+        assert!(!json.contains("203.0.113.9"));
     }
 
     #[tokio::test]

@@ -16,6 +16,7 @@
 //! - `catalog` — Catalogue des services et lobbys
 //! - `metrics` — Statistiques et métriques
 
+pub mod authentification;
 pub mod catalog;
 pub mod metrics;
 pub mod pool;

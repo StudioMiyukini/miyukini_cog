@@ -42,6 +42,7 @@ pub mod context;
 pub mod declaration;
 pub mod discovery;
 pub mod errors;
+pub mod identite;
 pub mod port;
 mod store;
 pub mod transport;
@@ -71,6 +72,7 @@ pub use discovery::{
     request_build as discovery_request_build, request_send as discovery_request_send,
 };
 pub use errors::MiyuwebwayParticipantError;
+pub use identite::{cog_id_depuis_cle, EnveloppeTracker, IdentiteCog};
 pub use port::check as port_check;
 pub use transport::send as transport_send;
 

@@ -78,6 +78,10 @@ pub struct OriginConfig {
     /// Configuration des limites.
     #[serde(default)]
     pub limits: LimitsConfig,
+
+    /// Configuration du serveur web (isolement de /visit, proxy direct).
+    #[serde(default)]
+    pub web: WebConfig,
 }
 
 impl OriginConfig {
@@ -96,6 +100,8 @@ impl OriginConfig {
 
     /// Valide la configuration.
     fn validate(&self) -> Result<(), ConfigError> {
+        self.validate_web()?;
+
         // Vérifier les ports
         if self.relay.port == self.tracker.port {
             return Err(ConfigError::InvalidValue {
@@ -116,6 +122,33 @@ impl OriginConfig {
                 field: "tls.key_path".to_string(),
                 message: format!("key file not found: {}", self.tls.key_path),
             });
+        }
+
+        Ok(())
+    }
+
+    /// Valide la section web (règles indépendantes des fichiers).
+    fn validate_web(&self) -> Result<(), ConfigError> {
+        // O-04 : l'hôte bac à sable de /visit ne doit pas partager le site du domaine principal.
+        if let Some(visit_host) = self.web.visit_host.as_deref() {
+            let visit_host = visit_host.trim().to_ascii_lowercase();
+            let domaine = self
+                .identity
+                .domain
+                .as_deref()
+                .unwrap_or("miyukini.com")
+                .to_ascii_lowercase();
+            if visit_host.is_empty()
+                || visit_host == domaine
+                || visit_host.ends_with(&format!(".{domaine}"))
+                || visit_host.contains(['/', ':', ' '])
+            {
+                return Err(ConfigError::InvalidValue {
+                    field: "web.visit_host".to_string(),
+                    message: "must be a distinct site (not the main domain nor one of its subdomains)"
+                        .to_string(),
+                });
+            }
         }
 
         Ok(())
@@ -149,8 +182,49 @@ pub struct RelayConfig {
     /// Vérification stricte en 3 phases (Phase A CORE_KEY, Phase C environment_health).
     /// Si true : après REGISTER on envoie VERIFY_RESULT(phase A, EXTENDED_REQUIRED),
     /// on attend CORE_KEY puis on fait Phase C et REGISTER_OK.
-    #[serde(default)]
+    ///
+    /// O-01 : **vrai par défaut** (clé absente du TOML = strict). `false` doit être écrit
+    /// explicitement et journalise un avertissement ; la preuve d'identité signée reste
+    /// exigée dans les deux modes.
+    #[serde(default = "default_true")]
     pub strict_verification: bool,
+    /// Identité du Relay incluse dans la preuve REGISTER signée par le COG ; doit être égale
+    /// au nom TLS utilisé par les COG (défaut : `identity.domain`, sinon `miyukini.com`,
+    /// comme le reste d'Origin).
+    #[serde(default)]
+    pub identity_name: Option<String>,
+    /// Fichier JSON des clés COG épinglées (TOFU). Absent : épinglage en mémoire seule.
+    #[serde(default)]
+    pub identity_pins_path: Option<String>,
+}
+
+fn default_true() -> bool {
+    true
+}
+
+impl RelayConfig {
+    /// Identité du Relay attendue dans la preuve REGISTER.
+    #[must_use]
+    pub fn identite_relay(&self, identity: &IdentityConfig) -> String {
+        self.identity_name
+            .clone()
+            .or_else(|| identity.domain.clone())
+            .unwrap_or_else(|| "miyukini.com".to_string())
+    }
+}
+
+/// Configuration du serveur web.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WebConfig {
+    /// Hôte bac à sable dédié à `/visit` (O-04), sur un site distinct du domaine principal
+    /// (ex. `miyukini-visit.net`). Absent : `/visit` est servi sur l'origine principale avec
+    /// `Content-Security-Policy: sandbox` sans scripts.
+    #[serde(default)]
+    pub visit_host: Option<String>,
+    /// Désactive le proxy direct « Phase 1 » (repli sans tunnel). Par défaut le proxy reste
+    /// actif mais n'atteint que des adresses publiques vérifiées (O-03).
+    #[serde(default)]
+    pub disable_direct_proxy: bool,
 }
 
 fn default_host() -> String {
@@ -497,6 +571,8 @@ impl Default for OriginConfig {
                 host: default_host(),
                 port: default_relay_port(),
                 strict_verification: true,
+                identity_name: None,
+                identity_pins_path: None,
             },
             tracker: TrackerConfig {
                 host: default_host(),
@@ -531,6 +607,7 @@ impl Default for OriginConfig {
             admin: AdminConfig::default(),
             logging: LoggingConfig::default(),
             limits: LimitsConfig::default(),
+            web: WebConfig::default(),
         }
     }
 }
@@ -579,5 +656,47 @@ data_dir = "/var/lib/miyukini/policies"
         let config: OriginConfig = toml::from_str(toml).expect("test config should parse");
         assert_eq!(config.identity.ip, "84.235.227.152");
         assert_eq!(config.relay.port, 7000);
+        // O-01 : clé absente du TOML = mode strict.
+        assert!(config.relay.strict_verification);
+        assert_eq!(config.relay.identite_relay(&config.identity), "miyukini.com");
+    }
+
+    #[test]
+    fn non_strict_uniquement_si_ecrit_explicitement() {
+        let toml = r#"
+[identity]
+role = "origin"
+ip = "1.2.3.4"
+domain = "miyukini.com"
+[relay]
+strict_verification = false
+[tracker]
+[tls]
+cert_path = "a"
+key_path = "b"
+[auth]
+token_file = "t"
+[registry]
+data_dir = "d"
+[cores]
+keys_dir = "k"
+[policies]
+data_dir = "p"
+"#;
+        let config: OriginConfig = toml::from_str(toml).expect("parse");
+        assert!(!config.relay.strict_verification);
+        assert_eq!(config.relay.identite_relay(&config.identity), "miyukini.com");
+    }
+
+    #[test]
+    fn visit_host_sous_domaine_refuse() {
+        let mut config = OriginConfig::default();
+        config.identity.domain = Some("miyukini.com".to_string());
+        config.web.visit_host = Some("visit.miyukini.com".to_string());
+        assert!(config.validate_web().is_err());
+        config.web.visit_host = Some("miyukini.com".to_string());
+        assert!(config.validate_web().is_err());
+        config.web.visit_host = Some("miyukini-visit.net".to_string());
+        assert!(config.validate_web().is_ok());
     }
 }

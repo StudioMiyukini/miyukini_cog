@@ -54,6 +54,7 @@ pub struct PermisInfo {
 
 /// Session de connexion relay.
 #[derive(Debug)]
+#[allow(clippy::struct_excessive_bools)] // états de vérification indépendants (phases, défi)
 pub struct Session {
     /// Identifiant unique de la session.
     pub id: [u8; SESSION_ID_SIZE],
@@ -105,6 +106,15 @@ pub struct Session {
     // Clé de session pour HMAC
     /// Clé de session dérivée.
     pub session_key: Option<[u8; 32]>,
+
+    /// Défi d'identité aléatoire (32 octets) envoyé à l'ouverture de session (O-01).
+    pub defi: [u8; 32],
+    /// Le défi a déjà servi (un seul essai REGISTER par session).
+    pub defi_consomme: bool,
+    /// Identité prouvée par signature du défi (O-01).
+    pub identite_verifiee: bool,
+    /// Clé publique d'identité prouvée.
+    pub cle_identite: Option<[u8; 32]>,
 }
 
 impl Session {
@@ -113,6 +123,8 @@ impl Session {
     pub fn new(peer_addr: SocketAddr) -> Self {
         let id = Uuid::new_v4().into_bytes();
         let now = Utc::now();
+        let mut defi = [0u8; 32];
+        rand::RngCore::fill_bytes(&mut rand::rngs::OsRng, &mut defi);
 
         Self {
             id,
@@ -135,6 +147,10 @@ impl Session {
             messages_received: 0,
             messages_sent: 0,
             session_key: None,
+            defi,
+            defi_consomme: false,
+            identite_verifiee: false,
+            cle_identite: None,
         }
     }
 
@@ -307,8 +323,12 @@ impl SessionManager {
         if let Some(session) = sessions.remove(session_id) {
             let session = session.read().await;
             if let Some(ref cog_id) = session.cog_id {
+                // Ne retirer l'index que s'il pointe encore sur cette session : une session
+                // plus récente et authentifiée du même COG a pu la remplacer.
                 let mut index = self.cog_index.write().await;
-                index.remove(cog_id);
+                if index.get(cog_id) == Some(session_id) {
+                    index.remove(cog_id);
+                }
             }
         }
     }

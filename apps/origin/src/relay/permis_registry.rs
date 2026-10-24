@@ -13,10 +13,20 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::debug;
 
-/// Registre des permis valides (permis_id → date d'expiration).
+/// Nombre maximal de permis simultanés (C-13).
+pub const MAX_PERMIS: usize = 1_000_000;
+
+/// Entrée du registre : permis lié à un `cog_id` authentifié (O-01).
+#[derive(Debug, Clone)]
+struct EntreePermis {
+    cog_id: String,
+    expires_at: DateTime<Utc>,
+}
+
+/// Registre des permis valides (`permis_id` → `cog_id` authentifié + expiration).
 #[derive(Debug, Clone)]
 pub struct PermisRegistry {
-    entries: Arc<RwLock<HashMap<String, DateTime<Utc>>>>,
+    entries: Arc<RwLock<HashMap<String, EntreePermis>>>,
 }
 
 impl PermisRegistry {
@@ -28,21 +38,25 @@ impl PermisRegistry {
         }
     }
 
-    /// Enregistre un permis délivré par le Relay (appelé après REGISTER_OK).
-    pub async fn register(&self, permis_id: String, expires_at: DateTime<Utc>) {
+    /// Enregistre un permis délivré par le Relay au `cog_id` dont l'identité a été prouvée.
+    pub async fn register(&self, permis_id: String, cog_id: String, expires_at: DateTime<Utc>) {
         let mut entries = self.entries.write().await;
-        entries.insert(permis_id.clone(), expires_at);
+        if entries.len() >= MAX_PERMIS {
+            let now = Utc::now();
+            entries.retain(|_, e| e.expires_at > now);
+        }
         debug!(
-            "Permis registered: {} (expires {:?})",
-            permis_id, expires_at
+            "Permis registered: {} for {} (expires {:?})",
+            permis_id, cog_id, expires_at
         );
+        entries.insert(permis_id, EntreePermis { cog_id, expires_at });
     }
 
-    /// Vérifie si un permis est valide (enregistré et non expiré).
-    pub async fn is_valid(&self, permis_id: &str) -> bool {
+    /// Vérifie qu'un permis est valide (enregistré, non expiré) **et** lié à `cog_id`.
+    pub async fn is_valid_for(&self, permis_id: &str, cog_id: &str) -> bool {
         let entries = self.entries.read().await;
         match entries.get(permis_id) {
-            Some(expires_at) => Utc::now() < *expires_at,
+            Some(e) => Utc::now() < e.expires_at && e.cog_id == cog_id,
             None => false,
         }
     }
@@ -59,7 +73,7 @@ impl PermisRegistry {
         let now = Utc::now();
         let mut entries = self.entries.write().await;
         let before = entries.len();
-        entries.retain(|_, exp| *exp > now);
+        entries.retain(|_, e| e.expires_at > now);
         before - entries.len()
     }
 }
@@ -67,5 +81,32 @@ impl PermisRegistry {
 impl Default for PermisRegistry {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn permis_lie_au_cog_id() {
+        let r = PermisRegistry::new();
+        let exp = Utc::now() + chrono::Duration::hours(1);
+        r.register("p1".into(), "cogA".into(), exp).await;
+        assert!(r.is_valid_for("p1", "cogA").await);
+        // Permis valide mais présenté pour un autre cog_id : refusé.
+        assert!(!r.is_valid_for("p1", "cogB").await);
+        assert!(!r.is_valid_for("inconnu", "cogA").await);
+        r.revoke("p1").await;
+        assert!(!r.is_valid_for("p1", "cogA").await);
+    }
+
+    #[tokio::test]
+    async fn permis_expire_refuse() {
+        let r = PermisRegistry::new();
+        r.register("p".into(), "c".into(), Utc::now() - chrono::Duration::seconds(1))
+            .await;
+        assert!(!r.is_valid_for("p", "c").await);
+        assert_eq!(r.cleanup_expired().await, 1);
     }
 }

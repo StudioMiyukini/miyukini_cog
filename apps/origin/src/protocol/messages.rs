@@ -47,11 +47,19 @@ pub struct RegisterPayload {
     pub nonce: [u8; NONCE_SIZE],
     /// Horodatage (secondes depuis epoch).
     pub timestamp: u64,
+    /// Clé publique d'identité Ed25519 du COG (O-01). `None` = REGISTER non signé (refusé).
+    pub cle_publique: Option<[u8; 32]>,
+    /// Signature de la preuve REGISTER (O-01).
+    pub signature: Option<[u8; ED25519_SIGNATURE_SIZE]>,
+    /// Octets signés (tout le REGISTER sauf la signature), pour la vérification.
+    pub corps_signe: Bytes,
 }
 
 impl RegisterPayload {
     /// Parse un payload REGISTER.
-    pub fn parse(mut buf: impl Buf) -> Result<Self, FrameError> {
+    pub fn parse(octets: &Bytes) -> Result<Self, FrameError> {
+        let total = octets.len();
+        let mut buf = octets.clone();
         // Helper pour lire une chaîne avec préfixe de longueur (2 octets)
         fn read_bytes_u16(buf: &mut impl Buf, field: &str) -> Result<Bytes, FrameError> {
             if buf.remaining() < 2 {
@@ -114,6 +122,27 @@ impl RegisterPayload {
         buf.copy_to_slice(&mut nonce);
         let timestamp = buf.get_u64();
 
+        // O-01 : extension signée (clé publique 32 + signature 64), exactement 96 octets.
+        let (cle_publique, signature, corps_signe) = match buf.remaining() {
+            0 => (None, None, Bytes::new()),
+            n if n == 32 + ED25519_SIGNATURE_SIZE => {
+                let mut cle = [0u8; 32];
+                buf.copy_to_slice(&mut cle);
+                let mut sig = [0u8; ED25519_SIGNATURE_SIZE];
+                buf.copy_to_slice(&mut sig);
+                (
+                    Some(cle),
+                    Some(sig),
+                    octets.slice(..total - ED25519_SIGNATURE_SIZE),
+                )
+            }
+            _ => {
+                return Err(FrameError::Malformed(
+                    "unexpected trailing bytes after timestamp".into(),
+                ))
+            }
+        };
+
         Ok(Self {
             token,
             cog_id,
@@ -128,6 +157,9 @@ impl RegisterPayload {
             parent_cog_id,
             nonce,
             timestamp,
+            cle_publique,
+            signature,
+            corps_signe,
         })
     }
 

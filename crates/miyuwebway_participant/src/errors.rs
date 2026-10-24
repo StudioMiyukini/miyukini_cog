@@ -94,4 +94,21 @@ pub enum MiyuwebwayParticipantError {
     /// COG non trouvé.
     #[error("COG not found")]
     CogNotFound,
+
+    /// Identité cryptographique du COG absente (O-01 : refus par défaut).
+    #[error("Identité COG absente : une clé d'identité est requise")]
+    IdentiteAbsente,
+
+    /// `cog_id` déclaré différent de l'empreinte de la clé d'identité.
+    #[error("cog_id {declare} différent de l'empreinte de la clé ({attendu})")]
+    CogIdNonLie {
+        /// cog_id déclaré.
+        declare: String,
+        /// cog_id dérivé de la clé.
+        attendu: String,
+    },
+
+    /// Erreur d'identité (signature, clé, fichier).
+    #[error("Identité : {0}")]
+    Identite(#[from] crate::identite::ErreurIdentite),
 }

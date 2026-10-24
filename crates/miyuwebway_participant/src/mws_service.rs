@@ -107,6 +107,8 @@ pub struct MwsService {
 impl MwsService {
     /// Crée un nouveau service MWS.
     pub fn new(config: MwsServiceConfig) -> Self {
+        let mut config = config;
+        Self::partager_identite(&mut config);
         let mut relay_config = config.relay.clone();
         if relay_config.home_http_bind.is_none() && config.home_http_bind.is_some() {
             relay_config.home_http_bind = config.home_http_bind.clone();
@@ -120,6 +122,16 @@ impl MwsService {
             relay_session: Arc::new(RwLock::new(None)),
             lobbys: Arc::new(RwLock::new(Vec::new())),
             shutdown: Arc::new(RwLock::new(false)),
+        }
+    }
+
+    /// La même clé d'identité signe REGISTER (Relay) et les messages Tracker (O-01, O-02).
+    fn partager_identite(config: &mut MwsServiceConfig) {
+        if config.tracker.identite.is_none() {
+            config.tracker.identite = config.relay.identite.clone();
+        }
+        if config.relay.identite.is_none() {
+            config.relay.identite = config.tracker.identite.clone();
         }
     }
 
@@ -137,6 +149,7 @@ impl MwsService {
             .unwrap_or("localhost")
             .to_string();
         self.config.tracker.tracker_address = tracker_address;
+        Self::partager_identite(&mut self.config);
         self.relay_client = Arc::new(RelayClient::new(self.config.relay.clone()));
         self.tracker_client = Arc::new(TrackerClient::new(self.config.tracker.clone()));
         self
@@ -145,6 +158,20 @@ impl MwsService {
     /// Démarre le service et connecte le COG au réseau MWS.
     pub async fn start(&self, identity: CogIdentity) -> Result<(), MiyuwebwayParticipantError> {
         info!("Starting MWS service for COG {}", identity.cog_id);
+
+        // O-01 : le cog_id n'est jamais un champ libre ; il doit être l'empreinte de la clé.
+        let cle = self
+            .config
+            .relay
+            .identite
+            .as_ref()
+            .ok_or(MiyuwebwayParticipantError::IdentiteAbsente)?;
+        if cle.cog_id() != identity.cog_id {
+            return Err(MiyuwebwayParticipantError::CogIdNonLie {
+                declare: identity.cog_id.clone(),
+                attendu: cle.cog_id(),
+            });
+        }
 
         // Stocker l'identité
         {
@@ -512,6 +539,36 @@ mod tests {
         let config = MwsServiceConfig::default();
         assert!(config.auto_heartbeat);
         assert!(config.auto_reconnect);
+    }
+
+    #[tokio::test]
+    async fn demarrage_sans_identite_refuse() {
+        let service = MwsService::with_defaults();
+        let r = service
+            .start(CogIdentity {
+                cog_id: "victime".to_string(),
+                core_version: "1.0.0".to_string(),
+                public_address: "127.0.0.1:8080".to_string(),
+                services: vec![],
+            })
+            .await;
+        assert!(matches!(r, Err(MiyuwebwayParticipantError::IdentiteAbsente)));
+    }
+
+    #[tokio::test]
+    async fn demarrage_cog_id_usurpe_refuse() {
+        let mut config = MwsServiceConfig::default();
+        config.relay.identite = Some(Arc::new(crate::identite::IdentiteCog::generer()));
+        let service = MwsService::new(config);
+        let r = service
+            .start(CogIdentity {
+                cog_id: "victime".to_string(),
+                core_version: "1.0.0".to_string(),
+                public_address: "127.0.0.1:8080".to_string(),
+                services: vec![],
+            })
+            .await;
+        assert!(matches!(r, Err(MiyuwebwayParticipantError::CogIdNonLie { .. })));
     }
 
     #[tokio::test]

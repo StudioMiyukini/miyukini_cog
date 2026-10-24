@@ -889,6 +889,25 @@ mod tests {
     }
 
     #[test]
+    fn cookie_admin_hote_seul_strict_et_limite_a_admin() {
+        // O-04 : cookie non envoyé aux sous-domaines (pas d'attribut Domain), ni hors /admin.
+        for r in [
+            AdminServer::redirect_with_session("jeton", 60),
+            AdminServer::redirect_logout(),
+        ] {
+            let ligne = r
+                .lines()
+                .find(|l| l.starts_with("Set-Cookie:"))
+                .expect("Set-Cookie");
+            assert!(ligne.contains("HttpOnly"));
+            assert!(ligne.contains("Secure"));
+            assert!(ligne.contains("SameSite=Strict"));
+            assert!(ligne.contains("Path=/admin"));
+            assert!(!ligne.to_ascii_lowercase().contains("domain="));
+        }
+    }
+
+    #[test]
     fn cookie_parse_utilise_le_bon_prefixe() {
         let req = "GET / HTTP/1.1\r\nCookie: a=1; admin_session=abc123; b=2\r\n\r\n";
         let (_, _, c, _) = AdminServer::parse_request(req);

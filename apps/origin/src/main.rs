@@ -21,6 +21,7 @@
 
 mod admin;
 mod config;
+mod garde_reseau;
 mod protocol;
 mod relay;
 mod tracker;
@@ -33,7 +34,7 @@ use tracing_subscriber::FmtSubscriber;
 
 use admin::AdminServer;
 use config::OriginConfig;
-use relay::{PermisRegistry, RelayServer};
+use relay::{PermisRegistry, RegistreIdentites, RelayServer};
 use tracker::TrackerServer;
 use web::WebServer;
 
@@ -138,8 +139,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Registre des permis (Relay enregistre à la délivrance, Tracker vérifie sur ANNOUNCE, R-011)
     let permis_registry = Arc::new(PermisRegistry::new());
 
+    // Registre TOFU des clés d'identité COG (O-01), partagé Relay/Tracker.
+    let identites = if let Some(chemin) = config.relay.identity_pins_path.as_ref() {
+        match RegistreIdentites::charger(PathBuf::from(chemin)) {
+            Ok(r) => Arc::new(r),
+            Err(e) => {
+                // Fail-closed : un registre illisible n'est pas remplacé silencieusement.
+                error!("Registre des identités COG illisible ({}): {}", chemin, e);
+                return Err(e.into());
+            }
+        }
+    } else {
+        info!("Identités COG épinglées en mémoire seule (relay.identity_pins_path absent)");
+        Arc::new(RegistreIdentites::new())
+    };
+
     // Créer le tracker (pour partager le pool_manager et le slug_registry)
-    let tracker = TrackerServer::new(Arc::clone(&config), Some(Arc::clone(&permis_registry)));
+    let tracker = TrackerServer::new(
+        Arc::clone(&config),
+        Some(Arc::clone(&permis_registry)),
+        Some(Arc::clone(&identites)),
+    );
     let pool_manager = tracker.pool_manager();
     let slug_registry = tracker.slug_registry();
 
@@ -161,7 +181,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Créer le serveur relay (avant web pour Phase 2 : inject HTTP via tunnel)
     let relay_arc: Option<Arc<RelayServer>> =
-        match RelayServer::new(Arc::clone(&config), Some(Arc::clone(&permis_registry))).await {
+        match RelayServer::new(
+            Arc::clone(&config),
+            Some(Arc::clone(&permis_registry)),
+            Arc::clone(&identites),
+        )
+        .await
+        {
             Ok(relay) => Some(Arc::new(relay)),
             Err(e) => {
                 error!("Failed to create relay server: {}", e);

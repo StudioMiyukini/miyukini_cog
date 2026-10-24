@@ -96,6 +96,8 @@ pub enum MessageType {
     VerifyResult = 0x12,
     /// Redirection vers un autre relay (Relay/Origin → COG)
     Redirect = 0x13,
+    /// Défi d'identité de 32 octets envoyé à l'ouverture de session (Relay → COG), O-01
+    Challenge = 0x14,
 
     // Messages de contrôle
     /// Révocation d'un Permis de circulation (Relay/Origin → Tracker) - R-009
@@ -125,6 +127,7 @@ impl MessageType {
             0x11 => Some(Self::ServiceBlock),
             0x12 => Some(Self::VerifyResult),
             0x13 => Some(Self::Redirect),
+            0x14 => Some(Self::Challenge),
             0x30 => Some(Self::PermitRevoke),
             _ => None,
         }

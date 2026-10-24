@@ -454,7 +454,7 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
                         </div>
                     </div>"#,
                     html_escape(&lobby.name),
-                    html_escape(&cog_id[..cog_id.len().min(16)]),
+                    html_escape(&cog_id.chars().take(16).collect::<String>()),
                     lobby.current_players,
                     lobby.max_players,
                     html_escape(version),

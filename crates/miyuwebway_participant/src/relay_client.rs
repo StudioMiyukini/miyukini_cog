@@ -9,9 +9,11 @@
 //! Gère la connexion au Relay, l'enregistrement en 3 phases, et le heartbeat.
 
 use crate::errors::MiyuwebwayParticipantError;
+use crate::identite::{IdentiteCog, TAILLE_DEFI};
 use crate::protocol::{
     core_key_payload_bytes, RegisterAckPayload, RegisterPayload, RelayFrame, RelayMessageType,
-    VerifyResultPayload, NONCE_SIZE, SESSION_ID_SIZE,
+    VerifyResultPayload, MAGIC_REPONSE_INJECTEE, MAGIC_REQUETE_INJECTEE, NONCE_SIZE,
+    SESSION_ID_SIZE, TAILLE_ID_REQUETE, TAILLE_MAX_REPONSE_HTTP,
 };
 use bytes::{Bytes, BytesMut};
 use std::sync::Arc;
@@ -50,6 +52,10 @@ pub struct RelayClientConfig {
     /// Phase 2 : adresse du serveur HTTP local pour le forwarding (ex. "127.0.0.1:8080").
     /// Si fourni, la connexion reste ouverte et les trames DATA sont transmises comme requêtes HTTP.
     pub home_http_bind: Option<String>,
+    /// Clé d'identité du COG (O-01). Obligatoire : sans elle, l'enregistrement est refusé.
+    pub identite: Option<Arc<IdentiteCog>>,
+    /// Identité du Relay incluse dans la preuve REGISTER (défaut : `tls_domain`).
+    pub identite_relay: Option<String>,
 }
 
 impl Default for RelayClientConfig {
@@ -61,6 +67,8 @@ impl Default for RelayClientConfig {
             heartbeat_interval: 30,
             core_conformity_key: None,
             home_http_bind: None,
+            identite: None,
+            identite_relay: None,
         }
     }
 }
@@ -153,6 +161,25 @@ impl RelayClient {
     ) -> Result<RelaySession, MiyuwebwayParticipantError> {
         info!("Connecting to Relay at {}", self.config.relay_address);
 
+        // O-01 : identité cryptographique obligatoire ; le cog_id doit être l'empreinte de la clé.
+        let identite = self
+            .config
+            .identite
+            .clone()
+            .ok_or(MiyuwebwayParticipantError::IdentiteAbsente)?;
+        let attendu = identite.cog_id();
+        if cog_id != attendu {
+            return Err(MiyuwebwayParticipantError::CogIdNonLie {
+                declare: cog_id.to_string(),
+                attendu,
+            });
+        }
+        let identite_relay = self
+            .config
+            .identite_relay
+            .clone()
+            .unwrap_or_else(|| self.config.tls_domain.clone());
+
         // Mettre à jour l'état
         {
             let mut session = self.session.write().await;
@@ -211,7 +238,20 @@ impl RelayClient {
             session.state = RelaySessionState::Connected;
         }
 
-        // Envoyer REGISTER
+        // O-01 : le Relay ouvre la session par un défi aléatoire de 32 octets.
+        let defi_frame = tokio::time::timeout(connect_timeout, self.read_frame(&mut tls_stream))
+            .await
+            .map_err(|_| MiyuwebwayParticipantError::Timeout)??;
+        if defi_frame.header.message_type != RelayMessageType::Challenge {
+            return Err(MiyuwebwayParticipantError::UnexpectedMessage);
+        }
+        let defi: [u8; TAILLE_DEFI] = defi_frame
+            .payload
+            .as_ref()
+            .try_into()
+            .map_err(|_| MiyuwebwayParticipantError::InvalidPayload)?;
+
+        // Envoyer REGISTER signé
         let nonce = generate_nonce();
         let register = RegisterPayload {
             cog_id: cog_id.to_string(),
@@ -224,7 +264,10 @@ impl RelayClient {
             timestamp: chrono::Utc::now().timestamp() as u64,
         };
 
-        let frame = RelayFrame::new(RelayMessageType::Register, register.to_origin_bytes());
+        let frame = RelayFrame::new(
+            RelayMessageType::Register,
+            register.to_origin_bytes_signe(&identite, &defi, &identite_relay),
+        );
 
         tls_stream
             .write_all(&frame.to_bytes())
@@ -376,6 +419,9 @@ impl RelayClient {
 }
 
 /// Tâche Phase 2 : écoute les trames DATA, les transmet au serveur HTTP local, renvoie la réponse.
+///
+/// O-06 : seules les requêtes encadrées `MWHQ` + id (16 octets) sont traitées ; la réponse
+/// rappelle le même id (`MWHR` + id) pour qu'Origin ne la livre qu'au bon visiteur.
 async fn run_relay_listener(
     mut stream: tokio_rustls::client::TlsStream<TcpStream>,
     home_http_bind: String,
@@ -395,32 +441,34 @@ async fn run_relay_listener(
                 while let Some(frame) = RelayFrame::parse(&mut buffer) {
                     match frame.header.message_type {
                         RelayMessageType::Data => {
+                            let Some((id_requete, requete)) = decoder_requete_injectee(&frame.payload)
+                            else {
+                                warn!("Relay listener: DATA sans identifiant de requête, ignorée");
+                                continue;
+                            };
                             debug!(
                                 "Relay DATA received ({} bytes), forwarding to {}",
-                                frame.payload.len(),
+                                requete.len(),
                                 home_http_bind
                             );
-                            match forward_http_to_local(&home_http_bind, &frame.payload).await {
-                                Ok(response) => {
-                                    let response_frame =
-                                        RelayFrame::new(RelayMessageType::Data, response);
-                                    if stream.write_all(&response_frame.to_bytes()).await.is_err() {
-                                        warn!("Relay listener: failed to send HTTP response");
-                                        return;
-                                    }
-                                }
+                            let reponse = match forward_http_to_local(&home_http_bind, requete).await
+                            {
+                                Ok(response) => response,
                                 Err(e) => {
                                     warn!("Relay listener: HTTP forward failed: {}", e);
-                                    // Envoyer une réponse d'erreur 502 pour que Origin puisse répondre au visiteur
-                                    let err_body = format!(
-                                        "HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\n\r\n"
-                                    );
-                                    let err_frame = RelayFrame::new(
-                                        RelayMessageType::Data,
-                                        Bytes::from(err_body),
-                                    );
-                                    let _ = stream.write_all(&err_frame.to_bytes()).await;
+                                    // Réponse 502 pour que Origin puisse répondre au visiteur
+                                    Bytes::from_static(
+                                        b"HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\n\r\n",
+                                    )
                                 }
+                            };
+                            let response_frame = RelayFrame::new(
+                                RelayMessageType::Data,
+                                encoder_reponse_injectee(&id_requete, &reponse),
+                            );
+                            if stream.write_all(&response_frame.to_bytes()).await.is_err() {
+                                warn!("Relay listener: failed to send HTTP response");
+                                return;
                             }
                         }
                         RelayMessageType::Close => {
@@ -442,7 +490,27 @@ async fn run_relay_listener(
     }
 }
 
-/// Transmet une requête HTTP brute au serveur local et retourne la réponse.
+/// Décode une requête injectée : `MWHQ` + id (16) + requête. `None` si le cadre est absent.
+fn decoder_requete_injectee(payload: &[u8]) -> Option<([u8; TAILLE_ID_REQUETE], &[u8])> {
+    let reste = payload.strip_prefix(MAGIC_REQUETE_INJECTEE.as_slice())?;
+    if reste.len() < TAILLE_ID_REQUETE {
+        return None;
+    }
+    let (id, requete) = reste.split_at(TAILLE_ID_REQUETE);
+    Some((id.try_into().ok()?, requete))
+}
+
+/// Encode la réponse : `MWHR` + id (16) + réponse (tronquée à la borne du protocole).
+fn encoder_reponse_injectee(id: &[u8; TAILLE_ID_REQUETE], reponse: &[u8]) -> Bytes {
+    let corps = &reponse[..reponse.len().min(TAILLE_MAX_REPONSE_HTTP)];
+    let mut sortie = BytesMut::with_capacity(4 + TAILLE_ID_REQUETE + corps.len());
+    sortie.extend_from_slice(MAGIC_REPONSE_INJECTEE);
+    sortie.extend_from_slice(id);
+    sortie.extend_from_slice(corps);
+    sortie.freeze()
+}
+
+/// Transmet une requête HTTP brute au serveur local et retourne la réponse (lecture bornée, O-10).
 async fn forward_http_to_local(
     addr: &str,
     request: &[u8],
@@ -458,9 +526,10 @@ async fn forward_http_to_local(
     tcp.write_all(request).await?;
 
     let mut response = Vec::new();
+    let limite = u64::try_from(TAILLE_MAX_REPONSE_HTTP).unwrap_or(u64::MAX);
     match tokio::time::timeout(
         tokio::time::Duration::from_secs(30),
-        tcp.read_to_end(&mut response),
+        (&mut tcp).take(limite).read_to_end(&mut response),
     )
     .await
     {
@@ -500,6 +569,56 @@ mod tests {
     fn test_default_config() {
         let config = RelayClientConfig::default();
         assert_eq!(config.relay_address, "miyukini.com:7000");
+    }
+
+    #[test]
+    fn requete_injectee_aller_retour() {
+        let id = [5u8; TAILLE_ID_REQUETE];
+        let mut trame = Vec::new();
+        trame.extend_from_slice(MAGIC_REQUETE_INJECTEE);
+        trame.extend_from_slice(&id);
+        trame.extend_from_slice(b"GET / HTTP/1.1\r\n\r\n");
+        let (id_lu, requete) = decoder_requete_injectee(&trame).expect("cadre valide");
+        assert_eq!(id_lu, id);
+        assert_eq!(requete, b"GET / HTTP/1.1\r\n\r\n");
+        let reponse = encoder_reponse_injectee(&id, b"HTTP/1.1 200 OK\r\n\r\n");
+        assert_eq!(&reponse[..4], MAGIC_REPONSE_INJECTEE);
+        assert_eq!(&reponse[4..20], &id);
+    }
+
+    #[test]
+    fn requete_sans_cadre_ignoree() {
+        assert!(decoder_requete_injectee(b"GET / HTTP/1.1\r\n\r\n").is_none());
+        assert!(decoder_requete_injectee(b"MWHQ123").is_none());
+    }
+
+    #[test]
+    fn reponse_bornee() {
+        let grande = vec![b'a'; TAILLE_MAX_REPONSE_HTTP + 1000];
+        let r = encoder_reponse_injectee(&[0u8; TAILLE_ID_REQUETE], &grande);
+        assert_eq!(r.len(), 4 + TAILLE_ID_REQUETE + TAILLE_MAX_REPONSE_HTTP);
+    }
+
+    #[tokio::test]
+    async fn enregistrement_sans_identite_refuse() {
+        let client = RelayClient::new(RelayClientConfig {
+            relay_address: "127.0.0.1:1".to_string(),
+            ..RelayClientConfig::default()
+        });
+        let r = client.connect_and_register("victime", "1.0.0", vec![]).await;
+        assert!(matches!(r, Err(MiyuwebwayParticipantError::IdentiteAbsente)));
+    }
+
+    #[tokio::test]
+    async fn enregistrement_cog_id_non_lie_refuse() {
+        let identite = Arc::new(IdentiteCog::generer());
+        let client = RelayClient::new(RelayClientConfig {
+            relay_address: "127.0.0.1:1".to_string(),
+            identite: Some(identite),
+            ..RelayClientConfig::default()
+        });
+        let r = client.connect_and_register("victime", "1.0.0", vec![]).await;
+        assert!(matches!(r, Err(MiyuwebwayParticipantError::CogIdNonLie { .. })));
     }
 
     #[test]

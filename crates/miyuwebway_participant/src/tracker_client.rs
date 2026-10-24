@@ -9,6 +9,7 @@
 //! Gère l'annonce, le heartbeat, et la découverte de COGs/lobbys.
 
 use crate::errors::MiyuwebwayParticipantError;
+use crate::identite::{CompteurMonotone, EnveloppeTracker, IdentiteCog};
 use crate::protocol::{
     AnnounceAckPayload, AnnouncePayload, CogInfo, LobbyInfo, LobbySearchResult, SearchCogsPayload,
     SearchCogsResultPayload, SearchLobbysPayload, SearchLobbysResultPayload, TrackerFrame,
@@ -30,6 +31,8 @@ pub struct TrackerClientConfig {
     pub connect_timeout: u64,
     /// Intervalle de heartbeat en secondes.
     pub heartbeat_interval: u64,
+    /// Clé d'identité du COG : signe ANNOUNCE, WITHDRAW, HEARTBEAT et les messages de lobby (O-02).
+    pub identite: Option<Arc<IdentiteCog>>,
 }
 
 impl Default for TrackerClientConfig {
@@ -38,6 +41,7 @@ impl Default for TrackerClientConfig {
             tracker_address: "miyukini.com:21000".to_string(),
             connect_timeout: 30,
             heartbeat_interval: 60,
+            identite: None,
         }
     }
 }
@@ -99,6 +103,8 @@ pub struct TrackerClient {
     heartbeat_interval: Arc<RwLock<u32>>,
     /// Liste des trackers officiels fournie par Origin.
     official_trackers: Arc<RwLock<Vec<String>>>,
+    /// Compteur monotone des messages signés (anti-rejeu).
+    compteur: Arc<CompteurMonotone>,
 }
 
 impl TrackerClient {
@@ -110,7 +116,34 @@ impl TrackerClient {
             read_buffer: Arc::new(RwLock::new(BytesMut::with_capacity(8192))),
             heartbeat_interval: Arc::new(RwLock::new(60)),
             official_trackers: Arc::new(RwLock::new(Vec::new())),
+            compteur: Arc::new(CompteurMonotone::new()),
         }
+    }
+
+    /// Scelle un corps JSON dans une enveloppe signée (O-02). Refus si aucune identité.
+    async fn sceller(
+        &self,
+        type_message: TrackerMessageType,
+        corps: Vec<u8>,
+    ) -> Result<bytes::Bytes, MiyuwebwayParticipantError> {
+        let identite = self
+            .config
+            .read()
+            .await
+            .identite
+            .clone()
+            .ok_or(MiyuwebwayParticipantError::IdentiteAbsente)?;
+        let corps =
+            String::from_utf8(corps).map_err(|_| MiyuwebwayParticipantError::InvalidPayload)?;
+        let enveloppe = EnveloppeTracker::sceller(
+            &identite,
+            type_message as u8,
+            self.compteur.suivant(),
+            corps,
+        )?;
+        serde_json::to_vec(&enveloppe)
+            .map(bytes::Bytes::from)
+            .map_err(|_| MiyuwebwayParticipantError::InvalidPayload)
     }
 
     /// Crée un client avec la configuration par défaut.
@@ -226,7 +259,10 @@ impl TrackerClient {
         };
 
         // Envoyer l'annonce (format Origin : pas de request_id)
-        let frame = TrackerFrame::new(TrackerMessageType::Announce, payload.to_bytes());
+        let signe = self
+            .sceller(TrackerMessageType::Announce, payload.to_bytes().to_vec())
+            .await?;
+        let frame = TrackerFrame::new(TrackerMessageType::Announce, signe);
 
         stream
             .write_all(&frame.to_bytes())
@@ -298,7 +334,10 @@ impl TrackerClient {
             load,
         };
 
-        let frame = TrackerFrame::new(TrackerMessageType::Heartbeat, payload.to_bytes());
+        let signe = self
+            .sceller(TrackerMessageType::Heartbeat, payload.to_bytes().to_vec())
+            .await?;
+        let frame = TrackerFrame::new(TrackerMessageType::Heartbeat, signe);
 
         stream
             .write_all(&frame.to_bytes())
@@ -329,7 +368,12 @@ impl TrackerClient {
         );
 
         let payload = serde_json::json!({ "cog_id": cog_id });
-        let payload_bytes = bytes::Bytes::from(serde_json::to_vec(&payload).unwrap_or_default());
+        let payload_bytes = self
+            .sceller(
+                TrackerMessageType::Withdraw,
+                serde_json::to_vec(&payload).unwrap_or_default(),
+            )
+            .await?;
 
         let frame = TrackerFrame::new(TrackerMessageType::Withdraw, payload_bytes);
 
@@ -482,7 +526,10 @@ impl TrackerClient {
             password,
         };
 
-        let frame = TrackerFrame::new(TrackerMessageType::CreateLobby, payload.to_bytes());
+        let signe = self
+            .sceller(TrackerMessageType::CreateLobby, payload.to_bytes().to_vec())
+            .await?;
+        let frame = TrackerFrame::new(TrackerMessageType::CreateLobby, signe);
 
         stream
             .write_all(&frame.to_bytes())
@@ -526,7 +573,12 @@ impl TrackerClient {
             "cog_id": cog_id,
             "lobby_id": lobby_id,
         });
-        let payload_bytes = bytes::Bytes::from(serde_json::to_vec(&payload).unwrap_or_default());
+        let payload_bytes = self
+            .sceller(
+                TrackerMessageType::DeleteLobby,
+                serde_json::to_vec(&payload).unwrap_or_default(),
+            )
+            .await?;
 
         let frame = TrackerFrame::new(TrackerMessageType::DeleteLobby, payload_bytes);
 
@@ -601,6 +653,33 @@ mod tests {
     fn test_default_config() {
         let config = TrackerClientConfig::default();
         assert_eq!(config.tracker_address, "miyukini.com:21000");
+    }
+
+    #[tokio::test]
+    async fn message_mutateur_sans_identite_refuse() {
+        let client = TrackerClient::with_defaults();
+        let r = client
+            .sceller(TrackerMessageType::Withdraw, br#"{"cog_id":"x"}"#.to_vec())
+            .await;
+        assert!(matches!(r, Err(MiyuwebwayParticipantError::IdentiteAbsente)));
+    }
+
+    #[tokio::test]
+    async fn message_mutateur_signe_verifiable() {
+        let identite = Arc::new(IdentiteCog::generer());
+        let client = TrackerClient::new(TrackerClientConfig {
+            identite: Some(Arc::clone(&identite)),
+            ..TrackerClientConfig::default()
+        });
+        let octets = client
+            .sceller(TrackerMessageType::Heartbeat, br#"{"cog_id":"x"}"#.to_vec())
+            .await
+            .expect("scellement");
+        let env: EnveloppeTracker = serde_json::from_slice(&octets).expect("json");
+        let v = env
+            .verifier(TrackerMessageType::Heartbeat as u8)
+            .expect("signature valide");
+        assert_eq!(v.cog_id, identite.cog_id());
     }
 
     #[tokio::test]

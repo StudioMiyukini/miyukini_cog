@@ -8,6 +8,7 @@
 
 use super::{api, content::ContentManager, forum_auth, market, pages};
 use crate::config::OriginConfig;
+use crate::garde_reseau::{analyser_adresse, connecter_cible_publique, AdresseAnalysee};
 use crate::relay::rate_limiter::{RateLimitResult, RateLimiter, RateLimiterConfig};
 use crate::relay::RelayServer;
 use crate::tracker::{
@@ -40,6 +41,55 @@ pub enum RouteResponse {
     Raw {
         bytes: Vec<u8>,
     },
+    /// Contenu fourni par un COG (non fiable, O-04) : servi avec
+    /// `Content-Security-Policy: sandbox`, `nosniff`, sans aucun cookie.
+    NonFiable {
+        status: String,
+        content_type: String,
+        body: Vec<u8>,
+        /// Scripts autorisés dans le bac à sable (hôte `/visit` dédié uniquement).
+        scripts: bool,
+    },
+}
+
+/// Taille maximale d'une réponse lue depuis un COG par le proxy direct (C-13, O-10).
+const TAILLE_MAX_REPONSE_COG: usize = 8 * 1024 * 1024;
+
+/// Nettoie une valeur d'en-tête venant d'un COG (pas de CR/LF, longueur bornée).
+fn entete_sur(valeur: &str, defaut: &str) -> String {
+    let v: String = valeur
+        .chars()
+        .filter(|c| !c.is_control())
+        .take(128)
+        .collect();
+    if v.trim().is_empty() {
+        defaut.to_string()
+    } else {
+        v
+    }
+}
+
+/// Retire de la réponse d'un sous-domaine COG les `Set-Cookie` portant un attribut `Domain`
+/// (un COG ne doit pas poser de cookie sur le domaine principal ni sur les autres COG).
+fn assainir_reponse_sous_domaine(reponse: &[u8]) -> Vec<u8> {
+    let Some(fin) = reponse.windows(4).position(|w| w == b"\r\n\r\n") else {
+        return reponse.to_vec();
+    };
+    let (entetes, corps) = reponse.split_at(fin);
+    let entetes = String::from_utf8_lossy(entetes);
+    let mut sortie = Vec::with_capacity(reponse.len());
+    for (i, ligne) in entetes.split("\r\n").enumerate() {
+        let minuscule = ligne.to_ascii_lowercase();
+        if minuscule.starts_with("set-cookie:") && minuscule.contains("domain=") {
+            continue;
+        }
+        if i > 0 {
+            sortie.extend_from_slice(b"\r\n");
+        }
+        sortie.extend_from_slice(ligne.as_bytes());
+    }
+    sortie.extend_from_slice(corps);
+    sortie
 }
 
 /// Serveur web public.
@@ -473,6 +523,32 @@ async fn handle_connection(
         }
     }
 
+    // O-04 : hôte bac à sable dédié à /visit (site distinct). Rien d'autre n'y est servi.
+    if let Some(visit_host) = config.web.visit_host.as_deref() {
+        let hote = host_header
+            .as_deref()
+            .map(|h| h.split(':').next().unwrap_or(h));
+        if hote == Some(visit_host.trim().to_ascii_lowercase().as_str()) {
+            let (chemin, query) = path.split_once('?').unwrap_or((path, ""));
+            let route_response = if method == "GET" && chemin == "/visit" {
+                visit_route(
+                    query,
+                    &visit_tracker,
+                    &config,
+                    &pool_mgr,
+                    &slug_registry,
+                    relay_ref.as_deref(),
+                    true,
+                )
+                .await
+            } else {
+                not_found_page()
+            };
+            write_response(&mut writer, route_response).await?;
+            return Ok(());
+        }
+    }
+
     // Vérifier si la requête est pour un sous-domaine COG
     let domain = config.identity.domain.as_deref().unwrap_or("miyukini.com");
 
@@ -589,9 +665,46 @@ Permissions-Policy: camera=(), microphone=(), geolocation=()\r\n";
         RouteResponse::Raw { bytes } => {
             writer.write_all(&bytes).await?;
         }
+        RouteResponse::NonFiable {
+            status,
+            content_type,
+            body,
+            scripts,
+        } => {
+            let response = entetes_non_fiables(&status, &content_type, body.len(), scripts);
+            writer.write_all(response.as_bytes()).await?;
+            writer.write_all(&body).await?;
+        }
     }
     writer.flush().await?;
     Ok(())
+}
+
+/// En-têtes d'une réponse au contenu non fiable (O-04) : bac à sable CSP (origine opaque,
+/// sans `allow-same-origin`), `nosniff`, pas de cache, aucun cookie.
+fn entetes_non_fiables(status: &str, content_type: &str, longueur: usize, scripts: bool) -> String {
+    let sandbox = if scripts {
+        "sandbox allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+    } else {
+        "sandbox allow-forms allow-popups allow-popups-to-escape-sandbox"
+    };
+    format!(
+        "HTTP/1.1 {}\r\n\
+         Content-Type: {}\r\n\
+         Content-Length: {}\r\n\
+         Content-Security-Policy: {}; frame-ancestors 'none'\r\n\
+         X-Content-Type-Options: nosniff\r\n\
+         X-Frame-Options: DENY\r\n\
+         Referrer-Policy: no-referrer\r\n\
+         Cache-Control: no-store\r\n\
+         Cross-Origin-Resource-Policy: same-origin\r\n\
+         Connection: close\r\n\
+         \r\n",
+        entete_sur(status, "502 Bad Gateway"),
+        entete_sur(content_type, "application/octet-stream"),
+        longueur,
+        sandbox,
+    )
 }
 
 /// Extrait le slug du sous-domaine COG depuis le header Host.
@@ -663,7 +776,9 @@ async fn handle_cog_subdomain_request(
                     config.identity.domain.as_deref().unwrap_or("miyukini.com"),
                     cog_id
                 );
-                return raw_http_response_to_route(&response_bytes);
+                return raw_http_response_to_route(&assainir_reponse_sous_domaine(
+                    &response_bytes,
+                ));
             }
             Err(e) => {
                 debug!(
@@ -674,27 +789,32 @@ async fn handle_cog_subdomain_request(
         }
     }
 
-    // Phase 1 (ou fallback) : proxy HTTP direct vers le COG
+    // Phase 1 (ou fallback) : proxy HTTP direct vers le COG (cibles publiques seules, O-03)
+    if config.web.disable_direct_proxy {
+        return cog_offline_page(slug, &cog_id, config);
+    }
     let entry = pool_mgr.find_cog(&cog_id).await;
 
     match entry {
         Some(entry) => {
-            let target_url = if entry.address.starts_with("http") {
-                format!("{}{}", entry.address.trim_end_matches('/'), path)
-            } else {
-                format!("http://{}{}", entry.address, path)
+            let Ok(adresse) = analyser_adresse(&entry.address) else {
+                warn!("COG {} has an invalid stored address, proxy refused", cog_id);
+                return cog_offline_page(slug, &cog_id, config);
             };
-
             info!(
                 "COG subdomain proxy: {}.{} -> {} (cog_id: {})",
                 slug,
                 config.identity.domain.as_deref().unwrap_or("miyukini.com"),
-                target_url,
+                adresse.canonique(),
                 cog_id
             );
 
-            match proxy_http_request(&target_url).await {
-                Ok(response) => response,
+            match proxy_http_request(&adresse, path).await {
+                Ok(reponse) => RouteResponse::Normal {
+                    status: reponse.status,
+                    content_type: reponse.content_type,
+                    body: String::from_utf8_lossy(&reponse.body).into_owned(),
+                },
                 Err(e) => {
                     warn!(
                         "COG proxy failed for slug '{}' (cog_id: {}): {}",
@@ -715,92 +835,75 @@ fn raw_http_response_to_route(response: &[u8]) -> RouteResponse {
     }
 }
 
+/// Réponse HTTP minimale lue depuis un COG.
+struct ReponseCog {
+    status: String,
+    content_type: String,
+    location: Option<String>,
+    body: Vec<u8>,
+}
+
+/// Découpe une réponse HTTP brute (statut, Content-Type, Location, corps).
+fn decouper_reponse_http(brute: &[u8]) -> Option<ReponseCog> {
+    let fin = brute.windows(4).position(|w| w == b"\r\n\r\n")?;
+    let entetes = String::from_utf8_lossy(&brute[..fin]);
+    let mut lignes = entetes.split("\r\n");
+    let status = lignes
+        .next()
+        .and_then(|l| l.strip_prefix("HTTP/1.1 ").or_else(|| l.strip_prefix("HTTP/1.0 ")))
+        .map(|s| entete_sur(s, "502 Bad Gateway"))?;
+    let mut content_type = "text/html".to_string();
+    let mut location = None;
+    for ligne in lignes {
+        if let Some((nom, valeur)) = ligne.split_once(':') {
+            let nom = nom.trim().to_ascii_lowercase();
+            if nom == "content-type" {
+                content_type = entete_sur(valeur.trim(), "text/html");
+            } else if nom == "location" {
+                location = Some(valeur.trim().chars().filter(|c| !c.is_control()).collect());
+            }
+        }
+    }
+    Some(ReponseCog {
+        status,
+        content_type,
+        location,
+        body: brute[fin + 4..].to_vec(),
+    })
+}
+
 /// Proxy HTTP direct vers le COG (Phase 1).
+///
+/// O-03 : la cible est résolue et **chaque** IP obtenue doit être publique ; la connexion
+/// est ouverte vers l'IP vérifiée (pas de seconde résolution), à chaque requête ; aucune
+/// redirection n'est suivie ; la réponse est bornée (O-10).
 async fn proxy_http_request(
-    target_url: &str,
-) -> Result<RouteResponse, Box<dyn std::error::Error + Send + Sync>> {
-    // Extraire host:port et path depuis l'URL
-    let url = target_url
-        .strip_prefix("http://")
-        .unwrap_or(target_url.strip_prefix("https://").unwrap_or(target_url));
+    adresse: &AdresseAnalysee,
+    path: &str,
+) -> Result<ReponseCog, Box<dyn std::error::Error + Send + Sync>> {
+    if !path.starts_with('/') || path.chars().any(|c| c.is_control() || c.is_whitespace()) {
+        return Err("invalid path".into());
+    }
+    let mut stream =
+        connecter_cible_publique(adresse, std::time::Duration::from_secs(5)).await?;
 
-    let (host_port, path) = match url.find('/') {
-        Some(idx) => (&url[..idx], &url[idx..]),
-        None => (url, "/"),
-    };
-
-    // Connexion TCP vers le COG
-    let mut stream = match tokio::time::timeout(
-        tokio::time::Duration::from_secs(5),
-        tokio::net::TcpStream::connect(host_port),
-    )
-    .await
-    {
-        Ok(Ok(s)) => s,
-        Ok(Err(e)) => return Err(format!("connection failed: {}", e).into()),
-        Err(_) => return Err("connection timeout (5s)".into()),
-    };
-
-    // Envoyer la requête HTTP
     let request = format!(
         "GET {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\nUser-Agent: MiyukiniOriginProxy/1.0\r\n\r\n",
-        path, host_port
+        path,
+        adresse.entete_host()
     );
     stream.write_all(request.as_bytes()).await?;
 
-    // Lire la réponse complète
     let mut response_buf = Vec::new();
+    let limite = u64::try_from(TAILLE_MAX_REPONSE_COG).unwrap_or(u64::MAX);
     tokio::time::timeout(
         tokio::time::Duration::from_secs(10),
-        stream.read_to_end(&mut response_buf),
+        (&mut stream).take(limite).read_to_end(&mut response_buf),
     )
     .await
     .map_err(|_| "response timeout (10s)")??;
 
-    // Parser la réponse HTTP minimale
-    let response_str = String::from_utf8_lossy(&response_buf);
-
-    // Séparer headers et body
-    if let Some(header_end) = response_str.find("\r\n\r\n") {
-        let body = &response_str[header_end + 4..];
-        let headers_part = &response_str[..header_end];
-
-        // Extraire le status
-        let status = headers_part
-            .lines()
-            .next()
-            .and_then(|line| {
-                line.strip_prefix("HTTP/1.1 ")
-                    .or_else(|| line.strip_prefix("HTTP/1.0 "))
-            })
-            .unwrap_or("200 OK")
-            .to_string();
-
-        // Extraire Content-Type
-        let content_type = headers_part
-            .lines()
-            .find_map(|line| {
-                let lower = line.to_lowercase();
-                if lower.starts_with("content-type:") {
-                    Some(line.split_once(':')?.1.trim().to_string())
-                } else {
-                    None
-                }
-            })
-            .unwrap_or_else(|| "text/html".to_string());
-
-        Ok(RouteResponse::Normal {
-            status,
-            content_type,
-            body: body.to_string(),
-        })
-    } else {
-        Ok(RouteResponse::Normal {
-            status: "502 Bad Gateway".to_string(),
-            content_type: "text/plain".to_string(),
-            body: "Invalid response from COG".to_string(),
-        })
-    }
+    decouper_reponse_http(&response_buf).ok_or_else(|| "Invalid response from COG".into())
 }
 
 /// Page affichée quand le slug ne correspond à aucun COG enregistré.
@@ -1047,24 +1150,15 @@ async fn route_request(
         },
 
         "/visit" => {
-            let cog_id = parse_cog_id_from_query(query);
-            match cog_id {
-                Some(id) if !id.is_empty() && id.len() <= 128 => {
-                    let target_path =
-                        parse_visit_path_from_query(query).unwrap_or_else(|| "/".to_string());
-                    visit_tracker.record_visit(&id).await;
-                    handle_cog_visit_request(
-                        &id,
-                        &target_path,
-                        config,
-                        pool_mgr,
-                        slug_registry,
-                        relay_ref,
-                    )
-                    .await
-                }
-                _ => not_found_page(),
+            // O-04 : si un hôte bac à sable dédié est configuré, /visit n'est jamais servi
+            // sur l'origine principale.
+            if let Some(visit_host) = config.web.visit_host.as_deref() {
+                return RouteResponse::Redirect {
+                    location: format!("https://{visit_host}/visit?{query}"),
+                };
             }
+            visit_route(query, visit_tracker, config, pool_mgr, slug_registry, relay_ref, false)
+                .await
         }
 
         "/services" => {
@@ -1329,6 +1423,42 @@ async fn route_request(
     }
 }
 
+/// Traite `/visit?cog_id=…&path=…` (identifiant validé, visite enregistrée pour un COG connu).
+async fn visit_route(
+    query: &str,
+    visit_tracker: &CatalogVisitTracker,
+    config: &OriginConfig,
+    pool_mgr: &PoolManager,
+    slug_registry: &SlugRegistry,
+    relay_ref: Option<&RelayServer>,
+    bac_a_sable_dedie: bool,
+) -> RouteResponse {
+    match parse_cog_id_from_query(query) {
+        Some(id) if miyuwebway_participant::identite::cog_id_bien_forme(&id) => {
+            let Some(target_path) = parse_visit_path_from_query(query).or_else(|| {
+                (!query.contains("path=")).then(|| "/".to_string())
+            }) else {
+                return not_found_page();
+            };
+            // O-15 : n'enregistrer de visite que pour un COG connu.
+            if pool_mgr.find_cog(&id).await.is_some() {
+                visit_tracker.record_visit(&id).await;
+            }
+            handle_cog_visit_request(
+                &id,
+                &target_path,
+                config,
+                pool_mgr,
+                slug_registry,
+                relay_ref,
+                bac_a_sable_dedie,
+            )
+            .await
+        }
+        _ => not_found_page(),
+    }
+}
+
 fn parse_cog_id_from_query(query: &str) -> Option<String> {
     query.split('&').find_map(|part| {
         let value = part.strip_prefix("cog_id=")?;
@@ -1355,7 +1485,11 @@ fn normalize_visit_path(path: &str) -> Option<String> {
     if path.is_empty() {
         return Some("/".to_string());
     }
-    if path.contains('\0') || path.contains('\r') || path.contains('\n') || path.contains("://") {
+    if path.chars().any(|c| c.is_control() || c.is_whitespace())
+        || path.contains("://")
+        || path.starts_with("//")
+        || path.contains('\\')
+    {
         return None;
     }
 
@@ -1368,6 +1502,11 @@ fn normalize_visit_path(path: &str) -> Option<String> {
     Some(normalized)
 }
 
+/// Sert `/visit` : contenu d'un COG, toujours en bac à sable (O-04).
+///
+/// `bac_a_sable_dedie` : vrai quand la requête arrive sur l'hôte `web.visit_host` (site
+/// distinct du domaine principal) ; les scripts y sont alors permis dans une origine opaque.
+/// Sinon (repli sur l'origine principale), le bac à sable interdit tout script.
 async fn handle_cog_visit_request(
     cog_id: &str,
     target_path: &str,
@@ -1375,12 +1514,14 @@ async fn handle_cog_visit_request(
     pool_mgr: &PoolManager,
     slug_registry: &SlugRegistry,
     relay_ref: Option<&RelayServer>,
+    bac_a_sable_dedie: bool,
 ) -> RouteResponse {
     let slug = slug_registry
         .get_slug(cog_id)
         .await
         .unwrap_or_else(|| SlugRegistry::sanitize_cog_id(cog_id));
 
+    // Requête construite par Origin : aucun cookie ni en-tête du visiteur n'est transmis.
     let raw_request = format!(
         "GET {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\nUser-Agent: MiyukiniOriginVisit/1.0\r\n\r\n",
         target_path, cog_id
@@ -1392,7 +1533,10 @@ async fn handle_cog_visit_request(
             .await
         {
             Ok(response_bytes) => {
-                return rewrite_visit_raw_response(&response_bytes, cog_id);
+                return match decouper_reponse_http(&response_bytes) {
+                    Some(reponse) => reponse_visite(reponse, cog_id, bac_a_sable_dedie),
+                    None => bad_gateway(),
+                };
             }
             Err(e) => {
                 debug!(
@@ -1403,16 +1547,17 @@ async fn handle_cog_visit_request(
         }
     }
 
+    if config.web.disable_direct_proxy {
+        return cog_offline_page(&slug, cog_id, config);
+    }
+
     match pool_mgr.find_cog(cog_id).await {
         Some(entry) => {
-            let target_url = if entry.address.starts_with("http") {
-                format!("{}{}", entry.address.trim_end_matches('/'), target_path)
-            } else {
-                format!("http://{}{}", entry.address, target_path)
+            let Ok(adresse) = analyser_adresse(&entry.address) else {
+                return cog_offline_page(&slug, cog_id, config);
             };
-
-            match proxy_http_request(&target_url).await {
-                Ok(response) => rewrite_visit_route_response(response, cog_id),
+            match proxy_http_request(&adresse, target_path).await {
+                Ok(reponse) => reponse_visite(reponse, cog_id, bac_a_sable_dedie),
                 Err(e) => {
                     warn!(
                         "Visit proxy failed for cog '{}' (slug '{}', path '{}'): {}",
@@ -1426,92 +1571,57 @@ async fn handle_cog_visit_request(
     }
 }
 
-fn rewrite_visit_route_response(route_response: RouteResponse, cog_id: &str) -> RouteResponse {
-    match route_response {
-        RouteResponse::Normal {
-            status,
-            content_type,
-            body,
-        } => {
-            if content_type.to_ascii_lowercase().starts_with("text/html") {
-                RouteResponse::Normal {
-                    status,
-                    content_type,
-                    body: rewrite_visit_html(&body, cog_id),
-                }
-            } else {
-                RouteResponse::Normal {
-                    status,
-                    content_type,
-                    body,
-                }
-            }
-        }
-        RouteResponse::Redirect { location } => RouteResponse::Redirect {
-            location: rewrite_visit_location(&location, cog_id),
-        },
-        RouteResponse::Binary { .. } => route_response,
-        RouteResponse::Raw { bytes } => rewrite_visit_raw_response(&bytes, cog_id),
+/// Réponse 502 générique.
+fn bad_gateway() -> RouteResponse {
+    RouteResponse::Normal {
+        status: "502 Bad Gateway".to_string(),
+        content_type: "text/plain".to_string(),
+        body: "Invalid response from COG".to_string(),
     }
 }
 
-fn rewrite_visit_raw_response(response: &[u8], cog_id: &str) -> RouteResponse {
-    let response_str = String::from_utf8_lossy(response);
-
-    if let Some(header_end) = response_str.find("\r\n\r\n") {
-        let body = &response_str[header_end + 4..];
-        let headers_part = &response_str[..header_end];
-
-        let status = headers_part
-            .lines()
-            .next()
-            .and_then(|line| {
-                line.strip_prefix("HTTP/1.1 ")
-                    .or_else(|| line.strip_prefix("HTTP/1.0 "))
-            })
-            .unwrap_or("200 OK")
-            .to_string();
-
-        let content_type = headers_part
-            .lines()
-            .find_map(|line| {
-                let lower = line.to_ascii_lowercase();
-                if lower.starts_with("content-type:") {
-                    Some(line.split_once(':')?.1.trim().to_string())
-                } else {
-                    None
-                }
-            })
-            .unwrap_or_else(|| "text/html".to_string());
-
-        if status.starts_with("30") {
-            if let Some(location) = headers_part.lines().find_map(|line| {
-                let lower = line.to_ascii_lowercase();
-                if lower.starts_with("location:") {
-                    Some(line.split_once(':')?.1.trim().to_string())
-                } else {
-                    None
-                }
-            }) {
-                return RouteResponse::Redirect {
-                    location: rewrite_visit_location(&location, cog_id),
-                };
-            }
+/// Convertit la réponse d'un COG pour `/visit` : jamais d'en-tête du COG recopié
+/// (donc aucun `Set-Cookie`), HTML réécrit, contenu servi en bac à sable.
+fn reponse_visite(reponse: ReponseCog, cog_id: &str, scripts: bool) -> RouteResponse {
+    if reponse.status.starts_with("30") {
+        if let Some(location) = reponse.location {
+            return redirection_visite(&location, cog_id);
         }
+    }
+    let body = if reponse
+        .content_type
+        .to_ascii_lowercase()
+        .starts_with("text/html")
+    {
+        rewrite_visit_html(&String::from_utf8_lossy(&reponse.body), cog_id).into_bytes()
+    } else {
+        reponse.body
+    };
+    RouteResponse::NonFiable {
+        status: reponse.status,
+        content_type: reponse.content_type,
+        body,
+        scripts,
+    }
+}
 
-        return RouteResponse::Normal {
-            status,
-            content_type: content_type.clone(),
-            body: if content_type.to_ascii_lowercase().starts_with("text/html") {
-                rewrite_visit_html(body, cog_id)
-            } else {
-                body.to_string()
-            },
+/// Redirection émise par un COG pendant une visite (O-16) : seuls les chemins relatifs
+/// sont suivis dans `/visit` ; une URL absolue donne une page intermédiaire.
+fn redirection_visite(location: &str, cog_id: &str) -> RouteResponse {
+    if location.starts_with('/') && !location.starts_with("//") && !location.contains('\\') {
+        return RouteResponse::Redirect {
+            location: rewrite_visit_location(location, cog_id),
         };
     }
-
-    RouteResponse::Raw {
-        bytes: response.to_vec(),
+    let lien = pages::html_escape(location);
+    RouteResponse::Normal {
+        status: "200 OK".to_string(),
+        content_type: "text/html".to_string(),
+        body: format!(
+            "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"><title>Vous quittez Miyukini</title></head>\
+             <body><h1>Vous quittez Miyukini</h1><p>Ce COG vous redirige vers un site externe :</p>\
+             <p><code>{lien}</code></p><p><a href=\"{lien}\" rel=\"noopener noreferrer nofollow\">Continuer</a></p></body></html>"
+        ),
     }
 }
 
@@ -2016,5 +2126,74 @@ mod tests {
         assert_eq!(super::effective_client_ip(remote, &h), Some(remote));
         // Loopback sans en-tête valide : pas d'IP exploitable.
         assert_eq!(super::effective_client_ip(lo, &[]), None);
+    }
+
+    #[test]
+    fn visite_servie_en_bac_a_sable_sans_cookie() {
+        let brute = b"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nSet-Cookie: s=1; Domain=miyukini.com\r\n\r\n<script>fetch('/admin/api/config')</script>";
+        let reponse = super::decouper_reponse_http(brute).expect("réponse");
+        let route = super::reponse_visite(reponse, "aaaaaaaaaaaaaaaaaaaaaaaaaa", false);
+        let super::RouteResponse::NonFiable {
+            status,
+            content_type,
+            body,
+            scripts,
+        } = route
+        else {
+            panic!("contenu COG non marqué non fiable");
+        };
+        assert!(!scripts);
+        let entetes = super::entetes_non_fiables(&status, &content_type, body.len(), scripts);
+        assert!(entetes.contains("Content-Security-Policy: sandbox allow-forms"));
+        assert!(!entetes.contains("allow-scripts"));
+        assert!(!entetes.contains("allow-same-origin"));
+        assert!(entetes.contains("X-Content-Type-Options: nosniff"));
+        assert!(!entetes.to_ascii_lowercase().contains("set-cookie"));
+        // Hôte dédié : scripts permis mais toujours en origine opaque.
+        let dedie = super::entetes_non_fiables("200 OK", "text/html", 0, true);
+        assert!(dedie.contains("allow-scripts"));
+        assert!(!dedie.contains("allow-same-origin"));
+    }
+
+    #[test]
+    fn entetes_cog_sans_injection_crlf() {
+        let e = super::entetes_non_fiables("200 OK\r\nSet-Cookie: x=1", "text/html\r\nX: y", 0, false);
+        assert!(!e.contains("\r\nSet-Cookie"));
+        assert!(!e.contains("\r\nX: y"));
+    }
+
+    #[test]
+    fn redirection_absolue_du_cog_page_intermediaire() {
+        match super::redirection_visite("https://evil.example/<script>", "aaaaaaaaaaaaaaaaaaaaaaaaaa") {
+            super::RouteResponse::Normal { body, .. } => {
+                assert!(!body.contains("<script>"));
+                assert!(body.contains("&lt;script&gt;"));
+            }
+            _ => panic!("une URL absolue ne doit pas produire de 302"),
+        }
+        assert!(matches!(
+            super::redirection_visite("//evil.example", "aaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            super::RouteResponse::Normal { .. }
+        ));
+        assert!(matches!(
+            super::redirection_visite("/page", "aaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            super::RouteResponse::Redirect { .. }
+        ));
+    }
+
+    #[test]
+    fn sous_domaine_cookie_avec_domain_retire() {
+        let brute = b"HTTP/1.1 200 OK\r\nSet-Cookie: a=1; Path=/\r\nset-cookie: b=2; Domain=.miyukini.com\r\n\r\ncorps";
+        let r = String::from_utf8(super::assainir_reponse_sous_domaine(brute)).expect("utf8");
+        assert!(r.contains("Set-Cookie: a=1"));
+        assert!(!r.contains("b=2"));
+        assert!(r.ends_with("\r\n\r\ncorps"));
+    }
+
+    #[test]
+    fn chemins_de_visite_dangereux_refuses() {
+        assert_eq!(normalize_visit_path("//evil.example"), None);
+        assert_eq!(normalize_visit_path("/a b"), None);
+        assert_eq!(normalize_visit_path("/a\\b"), None);
     }
 }
