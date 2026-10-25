@@ -373,6 +373,26 @@ fn sas_binaire_absent_refuse() {
     assert_eq!(erreurs(m.portail.relever(&s, 1).unwrap()), vec![ErreurPortail::Sas(ErreurSas::Lancement)]);
 }
 
+/// Noyau sans Landlock : le sas sort avec `SORTIE_LANDLOCK` ; le parent
+/// refuse le lot entier avec une erreur explicite (simulé par un script).
+#[cfg(target_os = "linux")]
+#[test]
+fn sas_sans_landlock_refuse_le_lot() {
+    use std::os::unix::fs::PermissionsExt;
+    let dossier = std::env::temp_dir().join(format!("miyuportail-sans-landlock-{}", std::process::id()));
+    std::fs::create_dir_all(&dossier).unwrap();
+    let script = dossier.join("portail-sas");
+    std::fs::write(&script, format!("#!/bin/sh\nexit {}\n", miyuportail::sas::SORTIE_LANDLOCK)).unwrap();
+    std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o700)).unwrap();
+    let m = monde(Box::new(SasProcessus::new(&script)), Box::new(RefusParDefaut));
+    let s = m.voie_ouverte("docs");
+    m.portail.deposer(&s, m.trame(&s, 1)).unwrap();
+    m.portail.deposer(&s, m.trame(&s, 2)).unwrap();
+    let r = erreurs(m.portail.relever(&s, 2).unwrap());
+    std::fs::remove_dir_all(&dossier).unwrap();
+    assert_eq!(r, vec![ErreurPortail::Sas(ErreurSas::LandlockIndisponible); 2]);
+}
+
 #[cfg(target_os = "linux")]
 mod seccomp {
     use std::os::unix::process::ExitStatusExt;
@@ -402,6 +422,16 @@ mod seccomp {
     fn seccomp_tue_le_sas_qui_ecrit_un_fichier() {
         assert_eq!(lancer("--essai=ecriture").signal(), Some(SIGSYS));
         assert!(!std::path::Path::new("/tmp/portail-sas-essai-ecriture").exists());
+    }
+
+    /// Landlock seul (sans seccomp) : lecture, écriture et création refusées
+    /// par le noyau. Noyau sans Landlock : le sas refuse de démarrer.
+    #[cfg(debug_assertions)]
+    #[test]
+    fn landlock_refuse_tout_acces_au_systeme_de_fichiers() {
+        let code = lancer("--essai=landlock").code();
+        assert_eq!(code, Some(miyuportail::sas::SORTIE_OK), "code de sortie {code:?}");
+        assert!(!std::path::Path::new("/tmp/portail-sas-essai-landlock").exists());
     }
 
     #[test]
@@ -525,4 +555,101 @@ fn inscription_impossible_refuse_le_passage() {
     // La coupure reste effective même si l'incident ne peut pas être inscrit.
     assert_eq!(portail.couper(&s, MotifCoupure::Decision), Err(ErreurPortail::Inscription));
     assert_eq!(portail.etat(&s).unwrap(), EtatVoie::Coupee(MotifCoupure::Decision));
+}
+
+// ------------------------------------------- voie supprimée puis redéclarée en vol
+
+/// Action exécutée une fois, au milieu d'une relève (sas) ou d'une
+/// publication (CDR), hors du verrou des voies.
+type EnVol = Arc<Mutex<Option<Box<dyn FnOnce() + Send>>>>;
+
+struct SasEnVol(EnVol);
+
+impl DecodeurIsole for SasEnVol {
+    fn decoder_lot(&self, requete: &RequeteSas) -> Result<Vec<ResultatTrame>, ErreurSas> {
+        if let Some(action) = self.0.lock().unwrap().take() {
+            action();
+        }
+        SasEnProcessus.decoder_lot(requete)
+    }
+}
+
+struct CdrEnVol(EnVol);
+
+impl Desarmement for CdrEnVol {
+    fn desarmer(&self, o: &ObjetADesarmer<'_>) -> Result<ObjetDesarme, RefusDesarmement> {
+        if let Some(action) = self.0.lock().unwrap().take() {
+            action();
+        }
+        Ok(ObjetDesarme { octets: o.octets.to_vec() })
+    }
+}
+
+/// Non-régression : une voie supprimée puis redéclarée pendant une relève
+/// repart avec les mêmes numéros de génération ; les trames de l'ancienne
+/// voie (ancien traité, anciennes files) ne doivent pas être admises dans la
+/// nouvelle — « aucun résidu » (SERVICES-HYBRIDES §4).
+#[test]
+fn voie_redeclaree_pendant_la_releve_refuse_le_lot() {
+    let en_vol: EnVol = Arc::new(Mutex::new(None));
+    let portail = Arc::new(PortailInterne::new(
+        Box::new(SasEnVol(en_vol.clone())),
+        Box::new(RefusParDefaut),
+        Arc::new(RegistreMemoire::new()),
+    ));
+    // Monde de service : clés et trames seulement.
+    let m = rapide();
+    let s = id("docs");
+    let (facade, auteur) = (m.facade.verifying_key().to_bytes(), m.auteur.verifying_key().to_bytes());
+    portail.declarer(contrat("docs", ClasseExposition::H2)).unwrap();
+    portail.activer(&s).unwrap();
+    portail.ouvrir_session(&s, facade, vec![auteur]).unwrap();
+    portail.deposer(&s, m.trame(&s, 1)).unwrap();
+
+    let p = Arc::clone(&portail);
+    let s2 = s.clone();
+    *en_vol.lock().unwrap() = Some(Box::new(move || {
+        p.supprimer(&s2).unwrap();
+        p.declarer(contrat("docs", ClasseExposition::H2)).unwrap();
+        p.activer(&s2).unwrap();
+        p.ouvrir_session(&s2, facade, vec![auteur]).unwrap();
+    }));
+    assert_eq!(erreurs(portail.relever(&s, 1).unwrap()), vec![ErreurPortail::VoieCoupee]);
+    assert_eq!(portail.compteurs(&s).unwrap().admises, 0);
+}
+
+/// Non-régression : publication conforme à l'ancien traité, voie supprimée
+/// puis redéclarée (sans ce type) pendant le CDR : rien n'est publié.
+#[test]
+fn voie_redeclaree_pendant_la_publication_refuse() {
+    let en_vol: EnVol = Arc::new(Mutex::new(None));
+    let portail = Arc::new(PortailInterne::new(
+        Box::new(SasEnProcessus),
+        Box::new(CdrEnVol(en_vol.clone())),
+        Arc::new(RegistreMemoire::new()),
+    ));
+    let s = id("docs");
+    portail.declarer(contrat("docs", ClasseExposition::H2)).unwrap();
+    portail.activer(&s).unwrap();
+
+    let p = Arc::clone(&portail);
+    let s2 = s.clone();
+    *en_vol.lock().unwrap() = Some(Box::new(move || {
+        p.supprimer(&s2).unwrap();
+        let mut sans_sortant = contrat("docs", ClasseExposition::H2);
+        sans_sortant.traite.types.retain(|t| t.sens == Sens::Entrante);
+        p.declarer(sans_sortant).unwrap();
+        p.activer(&s2).unwrap();
+    }));
+    let publication = Publication {
+        type_code: SORTANT,
+        champs: vec![
+            Champ { tag: 1, valeur: Valeur::Texte("compte rendu".into()) },
+            Champ { tag: 2, valeur: Valeur::Document(b"png".to_vec()) },
+        ],
+        etiquette: Sensibilite::Publiable,
+        declencheur: Declencheur::Utilisateur,
+    };
+    assert_eq!(portail.publier(&s, publication), Err(ErreurPortail::VoieCoupee));
+    assert_eq!(portail.lire_publication(&s), Ok(None));
 }

@@ -7,7 +7,9 @@
 //! # Sas de décodage
 //!
 //! Un processus `portail-sas` est lancé **par lot** de trames. Il se confine
-//! ([`crate::bac_a_sable`]) **avant** de lire quoi que ce soit, décode chaque
+//! ([`crate::bac_a_sable`] : Landlock, rlimits, seccomp) **avant** de lire
+//! quoi que ce soit (noyau sans Landlock : sortie [`SORTIE_LANDLOCK`], lot
+//! refusé par [`ErreurSas::LandlockIndisponible`]), décode chaque
 //! trame avec le décodeur n° 1 ([`crate::msce::decoder_trame`]) et répond par
 //! le **format interne** réencodé. Le parent impose un délai et tue le
 //! processus en cas de dépassement ; toute fin anormale refuse le lot entier.
@@ -212,6 +214,10 @@ pub enum Essai {
     Boucle,
     /// Altère la première réponse admise (doit être refusée par la deuxième validation).
     Divergence,
+    /// Installe **Landlock seul** (sans seccomp) puis tente d'ouvrir des
+    /// chemins : sortie [`SORTIE_OK`] si chaque ouverture est refusée par le
+    /// noyau (`EACCES`), [`SORTIE_ESSAI_ECHEC`] sinon.
+    Landlock,
 }
 
 #[cfg(debug_assertions)]
@@ -224,11 +230,12 @@ impl Essai {
             Self::Plantage => "--essai=plantage",
             Self::Boucle => "--essai=boucle",
             Self::Divergence => "--essai=divergence",
+            Self::Landlock => "--essai=landlock",
         }
     }
 
     fn depuis_argument(a: &str) -> Option<Self> {
-        [Self::Socket, Self::Ecriture, Self::Plantage, Self::Boucle, Self::Divergence]
+        [Self::Socket, Self::Ecriture, Self::Plantage, Self::Boucle, Self::Divergence, Self::Landlock]
             .into_iter()
             .find(|e| e.argument() == a)
     }
@@ -242,6 +249,11 @@ pub const SORTIE_REQUETE: i32 = 2;
 pub const SORTIE_BAC_A_SABLE: i32 = 3;
 /// Code de sortie : arguments refusés.
 pub const SORTIE_ARGUMENTS: i32 = 4;
+/// Code de sortie : noyau sans Landlock (ou domaine non appliqué) — refus.
+pub const SORTIE_LANDLOCK: i32 = 5;
+/// Code de sortie d'un mode d'essai dont la propriété n'est pas tenue.
+#[cfg(debug_assertions)]
+pub const SORTIE_ESSAI_ECHEC: i32 = 6;
 
 /// Point d'entrée du binaire `portail-sas` : confinement, lecture bornée de
 /// l'entrée standard, traitement, écriture de la réponse. Renvoie le code de sortie.
@@ -260,8 +272,15 @@ pub fn executer(arguments: &[String]) -> i32 {
         return SORTIE_ARGUMENTS;
     }
 
-    if crate::bac_a_sable::installer().is_err() {
-        return SORTIE_BAC_A_SABLE;
+    #[cfg(all(debug_assertions, target_os = "linux"))]
+    if essai == Some(Essai::Landlock) {
+        return essai_landlock();
+    }
+
+    match crate::bac_a_sable::installer() {
+        Ok(()) => {}
+        Err(ErreurSas::LandlockIndisponible) => return SORTIE_LANDLOCK,
+        Err(_) => return SORTIE_BAC_A_SABLE,
     }
 
     #[cfg(debug_assertions)]
@@ -278,7 +297,7 @@ pub fn executer(arguments: &[String]) -> i32 {
         Some(Essai::Boucle) => loop {
             std::hint::spin_loop();
         },
-        Some(Essai::Divergence) | None => {}
+        Some(Essai::Divergence | Essai::Landlock) | None => {}
     }
 
     let Some(entree) = lire_entree_bornee() else {
@@ -295,6 +314,28 @@ pub fn executer(arguments: &[String]) -> i32 {
         return SORTIE_REQUETE;
     }
     SORTIE_OK
+}
+
+/// Essai Landlock : domaine seul (sans seccomp, pour que l'appel `openat`
+/// atteigne le noyau), puis lecture, écriture et création refusées.
+#[cfg(all(debug_assertions, target_os = "linux"))]
+fn essai_landlock() -> i32 {
+    match crate::bac_a_sable::interdire_systeme_de_fichiers() {
+        Ok(()) => {}
+        Err(_) => return SORTIE_LANDLOCK,
+    }
+    let refuse = |r: std::io::Result<std::fs::File>| {
+        matches!(r, Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied)
+    };
+    let lecture = refuse(std::fs::File::open("/"));
+    let lecture_fichier = refuse(std::fs::File::open("/proc/self/status"));
+    let ecriture = refuse(std::fs::OpenOptions::new().write(true).open("/dev/null"));
+    let creation = refuse(std::fs::File::create("/tmp/portail-sas-essai-landlock"));
+    if lecture && lecture_fichier && ecriture && creation {
+        SORTIE_OK
+    } else {
+        SORTIE_ESSAI_ECHEC
+    }
 }
 
 /// Altère la séquence de la première déclaration admise (essai de divergence).
@@ -414,6 +455,9 @@ impl SasProcessus {
         };
         let ecrit = ecrivain.join().unwrap_or(false);
         let reponse = lecteur.join().ok().flatten();
+        if statut.code() == Some(SORTIE_LANDLOCK) {
+            return Err(ErreurSas::LandlockIndisponible);
+        }
         if !statut.success() || !ecrit {
             return Err(ErreurSas::FinAnormale);
         }

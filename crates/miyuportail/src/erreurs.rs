@@ -110,6 +110,10 @@ pub enum ErreurSas {
     /// Installation du bac à sable (rlimits, seccomp) impossible.
     #[error("installation du bac à sable impossible")]
     BacASable,
+    /// Noyau sans Landlock (ou domaine non appliqué) : le sas refuse de
+    /// démarrer, sans réglage pour lever ce refus (fail-closed).
+    #[error("Landlock indisponible : sas refusé")]
+    LandlockIndisponible,
 }
 
 /// Erreur du Portail interne. Toute erreur est un refus (C-12).

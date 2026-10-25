@@ -147,3 +147,117 @@ pub fn cas(entree: &[u8]) -> Option<Cas> {
 pub fn contexte<'a>(service: &'a IdService, sens: Sens, traite: &'a Traite, ancres: &'a Ancres) -> Contexte<'a> {
     Contexte { service, sens, traite, ancres }
 }
+
+/// Lecteur d'octets de l'entrée fuzzée : au-delà de la fin, renvoie 0.
+pub struct Flux<'a> {
+    octets: &'a [u8],
+}
+
+impl<'a> Flux<'a> {
+    pub fn new(octets: &'a [u8]) -> Self {
+        Self { octets }
+    }
+
+    pub fn vide(&self) -> bool {
+        self.octets.is_empty()
+    }
+
+    pub fn u8(&mut self) -> u8 {
+        match self.octets.split_first() {
+            Some((&o, reste)) => {
+                self.octets = reste;
+                o
+            }
+            None => 0,
+        }
+    }
+
+    pub fn u64(&mut self) -> u64 {
+        (0..8).fold(0u64, |a, _| (a << 8) | u64::from(self.u8()))
+    }
+
+    /// Prend au plus `n` octets.
+    pub fn prendre(&mut self, n: usize) -> &'a [u8] {
+        let n = n.min(self.octets.len());
+        let (tete, reste) = self.octets.split_at(n);
+        self.octets = reste;
+        tete
+    }
+}
+
+/// Champs **conformes** au traité de fuzzing pour `code` (types `ENTRANT`,
+/// `ENTRANT + 1`, `SORTANT`), tirés de l'entrée : optionnels présents ou non,
+/// tailles dans les bornes, texte `[a-z ]`.
+pub fn champs_conformes(f: &mut Flux<'_>, code: u64) -> Vec<miyuportail::Champ> {
+    use miyuportail::{Champ, Valeur};
+    let presence = f.u8();
+    let mut champs = Vec::new();
+    if code == ENTRANT + 1 {
+        if presence & 1 != 0 {
+            let n = usize::from(f.u8());
+            champs.push(Champ { tag: 1, valeur: Valeur::Document(f.prendre(n).to_vec()) });
+        }
+        return champs;
+    }
+    let n = usize::from(f.u8() % 129);
+    let lettre = |o: &u8| if o % 27 == 26 { ' ' } else { char::from(b'a' + o % 27) };
+    let texte: String = f.prendre(n).iter().map(lettre).collect();
+    champs.push(Champ { tag: 1, valeur: Valeur::Texte(texte) });
+    if presence & 1 != 0 {
+        champs.push(Champ { tag: 2, valeur: Valeur::Entier(f.u64()) });
+    }
+    if presence & 2 != 0 {
+        champs.push(Champ { tag: 3, valeur: Valeur::Booleen(f.u8() & 1 != 0) });
+    }
+    let n = usize::from(f.u8() % 65);
+    champs.push(Champ { tag: 5, valeur: Valeur::Octets(f.prendre(n).to_vec()) });
+    if presence & 4 != 0 {
+        let n = usize::from(f.u8()) * 4;
+        champs.push(Champ { tag: 9, valeur: Valeur::Document(f.prendre(n.min(1024)).to_vec()) });
+    }
+    if presence & 8 != 0 {
+        champs.push(Champ { tag: 200, valeur: Valeur::Entier(f.u64()) });
+    }
+    champs
+}
+
+/// Déclaration de la voie fuzzée, conforme au traité ou non selon les octets
+/// (version, type ou champs perturbés quand `perturbation` le demande).
+pub fn declaration_tiree(f: &mut Flux<'_>, sens: Sens) -> miyuportail::Declaration {
+    use miyuportail::{Champ, Declaration, Valeur};
+    let perturbation = f.u8();
+    let code = match (sens, f.u8() % 2) {
+        (Sens::Entrante, 0) => ENTRANT,
+        (Sens::Entrante, _) => ENTRANT + 1,
+        (Sens::Sortante, _) => SORTANT,
+    };
+    let mut d = Declaration {
+        service: service(),
+        sens,
+        version_traite: VERSION_TRAITE,
+        type_code: code,
+        sequence: u64::from(f.u8()),
+        emise_le: 1_800_000_000,
+        champs: champs_conformes(f, code),
+        signataires: Vec::new(),
+    };
+    match perturbation {
+        0xF0 => d.version_traite = f.u64(),
+        0xF1 => d.type_code = f.u64(),
+        0xF2 => d.sens = if sens == Sens::Entrante { Sens::Sortante } else { Sens::Entrante },
+        0xF3 => d.champs.push(Champ { tag: 250, valeur: Valeur::Entier(0) }),
+        0xF4 => d.champs.retain(|c| c.tag != 1),
+        0xF5 => {
+            let n = usize::from(f.u8());
+            d.champs.retain(|c| c.tag != 2);
+            d.champs.insert(1.min(d.champs.len()), Champ { tag: 2, valeur: Valeur::Octets(f.prendre(n).to_vec()) });
+        }
+        0xF6 => {
+            if let Some(Champ { valeur: Valeur::Texte(t), .. }) = d.champs.first_mut() {
+                t.push('\u{7}');
+            }
+        }
+        _ => {}
+    }
+    d
+}

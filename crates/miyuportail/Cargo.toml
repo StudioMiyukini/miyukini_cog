@@ -9,7 +9,7 @@ homepage.workspace = true
 documentation.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "Portail interne — voies à sens unique par service, rupture protocolaire MSCE, CDR, sas de décodage seccomp (EX-44, EX-45, EX-46, EX-49)"
+description = "Portail interne — voies à sens unique par service, rupture protocolaire MSCE, CDR, sas de décodage Landlock + seccomp (EX-44, EX-45, EX-46, EX-49)"
 
 [[bin]]
 name = "portail-sas"
@@ -22,9 +22,11 @@ rand_core = { version = "0.6", features = ["getrandom"] }
 sha2 = "0.10"
 thiserror = "2"
 
-# Sas de décodage : Linux uniquement (seccomp + rlimits), API sûres.
+# Sas de décodage : Linux uniquement (Landlock + seccomp + rlimits), API sûres.
+# Licences : seccompiler Apache-2.0 OR BSD-3-Clause, landlock MIT OR Apache-2.0 (C-71 : aucun copyleft).
 [target.'cfg(target_os = "linux")'.dependencies]
 seccompiler = { version = "0.5", default-features = false }
+landlock = "0.4.7"
 rustix = { version = "1", default-features = false, features = ["std", "process"] }
 libc = { version = "0.2", default-features = false }
 

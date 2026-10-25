@@ -5654,6 +5654,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "landlock"
+version = "0.4.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4cca98e95f35b29d469dade6724c6f96cec9236640f745a0e99b0334ec320ab1"
+dependencies = [
+ "enumflags2",
+ "libc",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "lazy-js-bundle"
 version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5733,9 +5744,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.183"
+version = "0.2.191"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5b646652bf6661599e1da8901b3b9522896f01e736bad5f723fe7a3a27f899d"
+checksum = "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a"
 
 [[package]]
 name = "libfuzzer-sys"
@@ -6832,6 +6843,7 @@ dependencies = [
  "mime_guess",
  "miyauth",
  "miyucdr",
+ "miyuregistre",
  "miyusceau",
  "miyuwebway_participant",
  "mockall",
@@ -7129,10 +7141,12 @@ dependencies = [
  "central-remote",
  "chrono",
  "dioxus",
+ "hex",
  "jaycontact-client",
  "jaykoa-client",
  "jaykonta-client",
  "jaymeteo-client",
+ "libc",
  "miyauth",
  "miyualicia-capture",
  "miyualicia-wakeword",
@@ -7146,10 +7160,12 @@ dependencies = [
  "miyuregistre",
  "miyusceau",
  "miyuwebway_participant",
+ "rand 0.8.5",
  "rand_core 0.6.4",
  "reqwest",
  "rfd 0.15.4",
  "rodio",
+ "rustix",
  "semver 1.0.27",
  "serde",
  "serde_json",
@@ -7224,6 +7240,7 @@ dependencies = [
  "miyauth",
  "miyukini-kernel",
  "miyumarket",
+ "miyuregistre",
  "miyusceau",
  "miyuwebway_participant",
  "miyuwebway_tracker",
@@ -7388,6 +7405,7 @@ name = "miyuportail"
 version = "0.1.0"
 dependencies = [
  "ed25519-dalek",
+ "landlock",
  "libc",
  "miyusceau",
  "rand_core 0.6.4",

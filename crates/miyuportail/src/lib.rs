@@ -2,7 +2,7 @@
 //! @do     declarer_modules_portail
 //! @role   securite
 //! @layer  toolkit
-//! @human  miyuportail — Portail interne : voies à sens unique par service, rupture protocolaire MSCE, CDR, sas de décodage seccomp.
+//! @human  miyuportail — Portail interne : voies à sens unique par service, rupture protocolaire MSCE, CDR, sas de décodage Landlock + seccomp.
 
 //! # MiyuPortail — Portail interne (lot 3 « Frontières »)
 //!
@@ -12,8 +12,10 @@
 //! - **EX-44** deux voies à sens unique, une voie par service ([`portail`]) ;
 //! - **EX-45** CDR obligatoire sur tout document ([`cdr::Desarmement`],
 //!   refus par défaut) ;
-//! - **EX-46** sas de décodage seccomp en processus séparé ([`sas`],
-//!   [`bac_a_sable`]) + deuxième validation indépendante ([`validation2`]) ;
+//! - **EX-46** sas de décodage en processus séparé, confiné par Landlock
+//!   (aucun accès au système de fichiers ; noyau sans Landlock = refus),
+//!   rlimits et seccomp ([`sas`], [`bac_a_sable`]) + deuxième validation
+//!   indépendante ([`validation2`]) ;
 //! - **EX-49** coupure d'une voie sans impact sur les autres
 //!   ([`portail::CoupureVoie`], [`portail::PoigneeCoupure`]) ;
 //! - **rupture protocolaire** : seule la trame MSCE « déclaration » est admise

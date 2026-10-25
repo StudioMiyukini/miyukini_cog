@@ -1,19 +1,38 @@
 //! @id     miyuportail_bac_a_sable
-//! @do     confiner_sas_seccomp_rlimits
+//! @do     confiner_sas_landlock_seccomp_rlimits
 //! @role   securite
 //! @layer  kernel
-//! @human  miyuportail — confinement du sas : rlimits puis filtre seccomp en liste blanche, action « tuer le processus » (EX-46).
+//! @human  miyuportail — confinement du sas : Landlock (aucun accès fichier ni réseau), rlimits, puis filtre seccomp en liste blanche, action « tuer le processus » (EX-46).
 
 //! Ordre d'installation (avant toute lecture d'entrée non fiable) :
 //!
-//! 1. **rlimits** : mémoire virtuelle 256 Mio, CPU 5 s, taille de fichier 0,
+//! 1. **Landlock** (crate `landlock`, API sûre) : domaine **sans aucune
+//!    règle** qui gère tous les droits du système de fichiers (ABI v1 exigée,
+//!    droits des ABI suivantes au mieux), les droits réseau TCP (ABI ≥ 4) et
+//!    les portées (sockets abstraites, signaux ; ABI ≥ 6) : **aucun** chemin
+//!    n'est accessible, ni en lecture, ni en écriture, ni en exécution. Les
+//!    descripteurs 0, 1, 2 déjà ouverts (tubes du parent) ne sont pas touchés.
+//!    Installé en premier : la création du jeu de règles consomme un
+//!    descripteur, que la limite `RLIMIT_NOFILE = 3` interdirait ensuite.
+//!    Pose aussi `no_new_privs`.
+//! 2. **rlimits** : mémoire virtuelle 256 Mio, CPU 5 s, taille de fichier 0,
 //!    descripteurs 3 (0, 1, 2 déjà ouverts), processus 0, cœur 0, mémoire
 //!    verrouillée 0 ; processus non « dumpable » (aucun vidage mémoire).
-//! 2. **`no_new_privs`** puis **filtre seccomp-bpf** (crate `seccompiler`,
-//!    API sûre) appliqué à tous les fils (`TSYNC`). Toute instruction hors
-//!    liste blanche **tue le processus** (`SECCOMP_RET_KILL_PROCESS`, SIGSYS).
+//! 3. **Filtre seccomp-bpf** (crate `seccompiler`, API sûre) appliqué à tous
+//!    les fils (`TSYNC`). Toute instruction hors liste blanche **tue le
+//!    processus** (`SECCOMP_RET_KILL_PROCESS`, SIGSYS).
 //!
-//! Liste blanche (aucun `open`, `socket`, `connect`, `clone`, `execve`…) :
+//! Landlock double seccomp (défense en profondeur) : un contournement du
+//! filtre (appel oublié, nouvel appel d'ouverture) bute encore sur un domaine
+//! où aucun chemin n'existe.
+//!
+//! **Noyau sans Landlock** (absent, désactivé au démarrage, ABI < 1) : le sas
+//! **refuse de démarrer** ([`ErreurSas::LandlockIndisponible`], code de
+//! sortie [`crate::sas::SORTIE_LANDLOCK`]) et tout lot est refusé. Aucun
+//! réglage ne lève ce refus (fail-closed, C-12) : il faut un noyau ≥ 5.13
+//! avec `landlock` dans `lsm=`.
+//!
+//! Liste blanche seccomp (aucun `open`, `socket`, `connect`, `clone`, `execve`…) :
 //!
 //! | appel | condition |
 //! |---|---|
@@ -35,11 +54,50 @@ pub const LIMITE_MEMOIRE: u64 = 256 * 1024 * 1024;
 /// Temps CPU maximal du sas (secondes).
 pub const LIMITE_CPU_SECS: u64 = 5;
 
-/// Installe les rlimits puis le filtre seccomp. Irréversible.
+/// Installe Landlock, les rlimits puis le filtre seccomp. Irréversible.
 #[cfg(target_os = "linux")]
 pub fn installer() -> Result<(), ErreurSas> {
+    interdire_systeme_de_fichiers()?;
     limiter_ressources()?;
     appliquer_seccomp()
+}
+
+/// Domaine Landlock sans aucune règle : tout accès au système de fichiers
+/// (et, selon le noyau, au réseau TCP, aux sockets abstraites et aux
+/// signaux hors du domaine) est refusé. Irréversible.
+///
+/// Les droits de l'ABI v1 sont **exigés** (`HardRequirement`) : noyau sans
+/// Landlock ⇒ [`ErreurSas::LandlockIndisponible`]. Les droits des ABI
+/// suivantes sont ajoutés au mieux. Le statut renvoyé par le noyau est
+/// contrôlé : domaine non appliqué ou `no_new_privs` absent ⇒ refus.
+#[cfg(target_os = "linux")]
+pub fn interdire_systeme_de_fichiers() -> Result<(), ErreurSas> {
+    use landlock::{
+        Access, AccessFs, AccessNet, CompatLevel, Compatible, Ruleset, RulesetAttr, RulesetStatus, Scope, ABI,
+    };
+
+    // ABI la plus récente connue de la crate : droits ajoutés au mieux.
+    const ABI_RECENTE: ABI = ABI::V9;
+    let indisponible = |_| ErreurSas::LandlockIndisponible;
+    let statut = Ruleset::default()
+        .set_compatibility(CompatLevel::HardRequirement)
+        .handle_access(AccessFs::from_all(ABI::V1))
+        .map_err(indisponible)?
+        .set_compatibility(CompatLevel::BestEffort)
+        .handle_access(AccessFs::from_all(ABI_RECENTE))
+        .map_err(indisponible)?
+        .handle_access(AccessNet::from_all(ABI_RECENTE))
+        .map_err(indisponible)?
+        .scope(Scope::from_all(ABI_RECENTE))
+        .map_err(indisponible)?
+        .create()
+        .map_err(indisponible)?
+        .restrict_self()
+        .map_err(indisponible)?;
+    if statut.ruleset == RulesetStatus::NotEnforced || !statut.no_new_privs {
+        return Err(ErreurSas::LandlockIndisponible);
+    }
+    Ok(())
 }
 
 /// Hors Linux : aucun confinement possible, refus.

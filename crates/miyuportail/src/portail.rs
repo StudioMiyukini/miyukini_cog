@@ -35,6 +35,7 @@
 //! reprend au-delà de sa dernière séquence admise (aucun rejeu possible).
 
 use std::collections::{BTreeMap, VecDeque};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
@@ -234,9 +235,25 @@ impl Fenetre {
     }
 }
 
+/// Source des identifiants d'instance de voie : jamais réutilisés dans le
+/// processus, même après suppression et redéclaration du même service.
+static PROCHAINE_INSTANCE: AtomicU64 = AtomicU64::new(0);
+
+/// Identité d'une voie à un instant : instance (déclaration) et génération
+/// (session, coupure, désactivation). Toute opération faite hors verrou
+/// (sas, CDR) n'est validée que si l'identité n'a pas changé.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Identite {
+    instance: u64,
+    generation: u64,
+}
+
 struct Voie {
     contrat: ContratVoies,
     etat: EtatVoie,
+    /// Instance unique de la déclaration (une voie supprimée puis
+    /// redéclarée est une **autre** voie : lots et publications en vol refusés).
+    instance: u64,
     generation: u64,
     session: Option<Session>,
     quarantaine: VecDeque<Vec<u8>>,
@@ -253,6 +270,7 @@ impl Voie {
         Self {
             contrat,
             etat: EtatVoie::Desactivee,
+            instance: PROCHAINE_INSTANCE.fetch_add(1, Ordering::Relaxed),
             generation: 0,
             session: None,
             quarantaine: VecDeque::new(),
@@ -263,6 +281,10 @@ impl Voie {
             debit_sortie: Fenetre::new(),
             compteurs: CompteursVoie::default(),
         }
+    }
+
+    fn identite(&self) -> Identite {
+        Identite { instance: self.instance, generation: self.generation }
     }
 
     fn exiger(&self, sens: Sens) -> Result<(), ErreurPortail> {
@@ -584,7 +606,7 @@ impl PortailInterne {
         max: usize,
     ) -> Result<Vec<Result<DeclarationAdmise, ErreurPortail>>, ErreurPortail> {
         // 1. Prise du lot (verrou court).
-        let (requete, generation) = {
+        let (requete, identite) = {
             let mut v = verrouiller(&self.voies)?;
             let voie = voie_mut(&mut v, service)?;
             voie.exiger(Sens::Entrante)?;
@@ -601,7 +623,7 @@ impl PortailInterne {
                 traite: voie.contrat.traite.restreindre(Sens::Entrante),
                 trames,
             };
-            (requete, voie.generation)
+            (requete, voie.identite())
         };
 
         // 2. Sas isolé, deuxième validation, CDR (hors verrou : les autres voies continuent).
@@ -619,7 +641,7 @@ impl PortailInterne {
         // 3. Anti-rejeu et inscription (verrou) ; voie coupée entre-temps = tout refusé.
         let mut v = verrouiller(&self.voies)?;
         let voie = voie_mut(&mut v, service)?;
-        let toujours_valide = voie.etat == EtatVoie::Active && voie.generation == generation;
+        let toujours_valide = voie.etat == EtatVoie::Active && voie.identite() == identite;
         let mut sortie = Vec::with_capacity(candidats.len());
         for candidat in candidats {
             let resultat = if toujours_valide {
@@ -710,11 +732,11 @@ impl PortailInterne {
             return Err(ErreurPortail::ActionUtilisateurRequise);
         }
         // 1. Contrôles de voie et instantané du traité.
-        let (traite, generation) = {
+        let (traite, identite) = {
             let mut v = verrouiller(&self.voies)?;
             let voie = voie_mut(&mut v, service)?;
             voie.exiger(Sens::Sortante)?;
-            (voie.contrat.traite.clone(), voie.generation)
+            (voie.contrat.traite.clone(), voie.identite())
         };
         // 2. Conformité au traité et CDR (hors verrou).
         let brouillon = Declaration {
@@ -734,7 +756,7 @@ impl PortailInterne {
         let mut v = verrouiller(&self.voies)?;
         let voie = voie_mut(&mut v, service)?;
         voie.exiger(Sens::Sortante)?;
-        if voie.generation != generation {
+        if voie.identite() != identite {
             return Err(ErreurPortail::VoieCoupee);
         }
         if voie.publication.len() >= voie.contrat.quota_file {
