@@ -26,7 +26,12 @@
 //!   adossée à un miroir vérifié (lot 2 §8.2) ;
 //! - `suivi_revocations` (fonctionnalité `miyauth`) : suivi **unique** du
 //!   registre de révocation d'un COG (miroir + liste, fraîcheur ≤ 15 min
-//!   imposée), utilisé par Origin, MiyuCloud et les façades.
+//!   imposée), utilisé par Origin, MiyuCloud et les façades ;
+//! - `enveloppe` (fonctionnalité `miyauth`) : format partagé de l'enveloppe
+//!   signée des envois de révocation vers Origin (A-014) ;
+//! - `editeur` (fonctionnalité `editeur`) : côté COG, publication du registre
+//!   de révocation (dépôt MiyuCloud, envois signés vers Origin) ; binaire
+//!   `miyuregistre-publier` (fonctionnalité `publier`).
 //!
 //! Fail-closed : toute donnée non vérifiée, incohérente ou hors politique est
 //! un refus ; aucun état n'est modifié par une opération refusée.
@@ -44,7 +49,11 @@
     )
 )]
 
+#[cfg(feature = "editeur")]
+pub mod editeur;
 pub mod entree;
+#[cfg(feature = "miyauth")]
+pub mod enveloppe;
 pub mod erreurs;
 pub mod federal;
 pub mod journal;

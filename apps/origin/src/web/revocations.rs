@@ -96,20 +96,15 @@ use tracing::warn;
 use super::server::RouteResponse;
 use crate::config::ForumConfig;
 
-/// Route de synchronisation des registres de révocation.
-pub const ROUTE_REVOCATIONS: &str = "/api/auth/revocations/sync";
-/// Taille maximale du corps d'un envoi (tête + entrées, base64).
-pub const TAILLE_MAX_CORPS_REVOCATIONS: usize = 2 * 1024 * 1024;
-/// Nombre maximal d'entrées par envoi (un morceau).
-pub const MAX_ENTREES_SYNCHRO: usize = 4096;
+// Format de l'enveloppe et bornes du protocole : partagés avec l'émetteur
+// côté COG (`miyuregistre::editeur`), définis une seule fois dans `miyuregistre`.
+pub use miyuregistre::enveloppe::{
+    octets_enveloppe, DUREE_MAX_ENVELOPPE_SECS, MAX_ENTREES_SYNCHRO, ROUTE_REVOCATIONS, TAILLE_MAX_CORPS_REVOCATIONS,
+};
 /// Durée de vie d'une attente sans tête (15 min).
 pub const DUREE_ATTENTE_SECS: u64 = FRAICHEUR_MAX_DEFAUT_SECS;
 /// Fenêtre d'agrégation des refus journalisés.
 pub const FENETRE_JOURNAL_REFUS_SECS: u64 = 60;
-/// Domaine de séparation de l'enveloppe signée d'un envoi.
-pub const DOMAINE_ENVELOPPE: &[u8] = b"miyukini/origin/revocations/morceau/v1";
-/// Échéance maximale d'une enveloppe, comptée depuis l'heure d'Origin (15 min).
-pub const DUREE_MAX_ENVELOPPE_SECS: u64 = 15 * 60;
 /// Dérive d'horloge tolérée sur l'échéance (COG en avance).
 pub const TOLERANCE_HORLOGE_SECS: u64 = 120;
 /// Enveloppes retenues (anti-rejeu) par COG jusqu'à leur échéance.
@@ -230,40 +225,9 @@ pub struct Synchronise {
 // Enveloppe
 // ---------------------------------------------------------------------------
 
-/// Empreinte des entrées d'un envoi : SHA-256 des entrées concaténées, chacune
-/// préfixée de sa longueur (u32 BE) pour fixer les frontières.
-pub fn empreinte_entrees(entrees: &[Vec<u8>]) -> [u8; 32] {
-    let mut h = Sha256::new();
-    for e in entrees {
-        // Entrées bornées par le corps (≤ 2 Mio) : la longueur tient sur u32.
-        h.update(u32::try_from(e.len()).unwrap_or(u32::MAX).to_be_bytes());
-        h.update(e);
-    }
-    h.finalize().into()
-}
-
-/// Octets signés par la clé de journal du COG pour un envoi (voir l'en-tête du module).
-pub fn octets_enveloppe(cog: &CogId, depuis: u64, tete: Option<&[u8]>, entrees: &[Vec<u8>], echeance: u64) -> Vec<u8> {
-    let id = cog.as_str().as_bytes();
-    let mut m = Vec::with_capacity(DOMAINE_ENVELOPPE.len() + id.len() + 100);
-    m.extend_from_slice(DOMAINE_ENVELOPPE);
-    m.push(0);
-    // Un CogId est court (validé par `CogId::new`) : la longueur tient sur u16.
-    m.extend_from_slice(&u16::try_from(id.len()).unwrap_or(u16::MAX).to_be_bytes());
-    m.extend_from_slice(id);
-    m.extend_from_slice(&depuis.to_be_bytes());
-    m.extend_from_slice(&(entrees.len() as u64).to_be_bytes());
-    m.extend_from_slice(&empreinte_entrees(entrees));
-    if let Some(t) = tete {
-        m.push(1);
-        m.extend_from_slice(&Sha256::digest(t));
-    } else {
-        m.push(0);
-        m.extend_from_slice(&[0u8; 32]);
-    }
-    m.extend_from_slice(&echeance.to_be_bytes());
-    m
-}
+// `empreinte_entrees`, [`octets_enveloppe`] et `DOMAINE_ENVELOPPE` :
+// `miyuregistre::enveloppe` (format partagé avec l'émetteur côté COG),
+// disposition décrite en tête du module.
 
 /// Envoi dont l'enveloppe a été vérifiée (construit seulement par
 /// [`RevocationsReconnues::authentifier`]).

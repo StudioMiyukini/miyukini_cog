@@ -17,10 +17,40 @@ sha2 = "0.10"
 thiserror = "2"
 # Adaptateur `SourceRevocation` (lot 2 §8.2) : facultatif, sans cycle (miyauth ne dépend pas du registre).
 miyauth = { path = "../miyauth", optional = true }
+# Éditeur du registre de révocation (fonctionnalité `editeur`) : signature des
+# enveloppes A-014, corps JSON, tampons effacés. Tous déjà dans le graphe du
+# workspace ; licences MIT OR Apache-2.0 (C-71 : aucun copyleft).
+ed25519-dalek = { version = "2", optional = true }
+serde_json = { version = "1", optional = true }
+zeroize = { version = "1", optional = true }
+# Transport HTTP du binaire `miyuregistre-publier` (fonctionnalité `publier`) :
+# ureq 2 + rustls + webpki-roots, MIT OR Apache-2.0, bloquant.
+ureq = { version = "2", default-features = false, features = ["tls"], optional = true }
+
+# Appels système sans `unsafe` (open O_NOFOLLOW, openat, renameat, flock,
+# fchmod) : rustix, Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT.
+[target.'cfg(unix)'.dependencies]
+rustix = { version = "1", default-features = false, features = ["std", "fs", "process"], optional = true }
 
 [features]
-# `revocation::RevocationsRegistre` : révocations miyauth lues dans un miroir vérifié.
+# `revocation::RevocationsRegistre` : révocations miyauth lues dans un miroir vérifié ;
+# `enveloppe` : format partagé de la synchro vers Origin (A-014).
 miyauth = ["dep:miyauth"]
+# `editeur` : côté COG — tête fraîche, dépôt MiyuCloud, envois signés vers Origin.
+editeur = ["miyauth", "miyauth/http", "dep:ed25519-dalek", "dep:serde_json", "dep:zeroize", "dep:rustix"]
+# `publier` : transport HTTP et binaire `miyuregistre-publier`.
+publier = ["editeur", "dep:ureq"]
+
+[[bin]]
+name = "miyuregistre-publier"
+path = "src/bin/miyuregistre_publier.rs"
+required-features = ["publier"]
+
+[dev-dependencies]
+# Origin de test en processus (tests de bout en bout de l'éditeur).
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "net", "sync"] }
+tempfile = "3"
 
 [lints]
 workspace = true

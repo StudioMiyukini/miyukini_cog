@@ -118,6 +118,22 @@ fn controle(longueur: [u8; 4], octets: &[u8]) -> [u8; TAILLE_CONTROLE] {
     c
 }
 
+/// Entête du format fichier (`"MRGJ"` ‖ version).
+pub(crate) fn entete_fichier() -> [u8; TAILLE_ENTETE as usize] {
+    [MAGIC[0], MAGIC[1], MAGIC[2], MAGIC[3], VERSION]
+}
+
+/// Enregistrement au format fichier : longueur (4) ‖ octets ‖ contrôle (8).
+pub(crate) fn encoder_enregistrement(octets: &[u8]) -> Result<Vec<u8>, ErreurStockage> {
+    valider_taille(octets)?;
+    let longueur = u32::try_from(octets.len()).map_err(|_| ErreurStockage::TailleInvalide)?.to_be_bytes();
+    let mut enregistrement = Vec::with_capacity(4 + octets.len() + TAILLE_CONTROLE);
+    enregistrement.extend_from_slice(&longueur);
+    enregistrement.extend_from_slice(octets);
+    enregistrement.extend_from_slice(&controle(longueur, octets));
+    Ok(enregistrement)
+}
+
 /// Stockage fichier append-only, durable (`fsync` à chaque ajout).
 #[derive(Debug)]
 pub struct StockageFichier {
@@ -240,12 +256,7 @@ impl StockageFichier {
 impl Stockage for StockageFichier {
     fn ajouter(&mut self, octets: &[u8]) -> Result<u64, ErreurStockage> {
         self.exiger_sain()?;
-        valider_taille(octets)?;
-        let longueur = (octets.len() as u32).to_be_bytes();
-        let mut enregistrement = Vec::with_capacity(4 + octets.len() + TAILLE_CONTROLE);
-        enregistrement.extend_from_slice(&longueur);
-        enregistrement.extend_from_slice(octets);
-        enregistrement.extend_from_slice(&controle(longueur, octets));
+        let enregistrement = encoder_enregistrement(octets)?;
 
         let ecrire = |f: &mut File, fin: u64| -> std::io::Result<()> {
             f.seek(SeekFrom::Start(fin))?;
