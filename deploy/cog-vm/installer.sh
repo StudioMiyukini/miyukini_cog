@@ -13,6 +13,10 @@
 # deploy/recette/installer.sh. Ce script ne fait que les garde-fous propres à la VM jetable.
 # Il ne touche ni à /etc/miyukini/douane (banc d'intrusion), ni au réseau hors table COG.
 #
+# Paquet : copié d'abord dans /run/miyukini-paquet.XXXXXX (root 0700, sans suivre les liens), puis
+# vérifié (aucun lien, liste exacte des fichiers = MANIFESTE, SHA-256) ; seuls les fichiers listés
+# au MANIFESTE sont installés, depuis cette copie.
+#
 # Ré-exécuter ce script met à jour binaires, unités et configuration non secrète, et conserve
 # les secrets existants.
 
@@ -60,11 +64,38 @@ if ! command -v systemd-detect-virt >/dev/null 2>&1 || ! systemd-detect-virt --v
 	die "refus : hôte non virtualisé (systemd-detect-virt --vm) ; cet installateur ne s'exécute que dans la VM jetable"
 fi
 [[ -n $BUNDLE ]] || BUNDLE=$(cd "$(dirname "$0")" && pwd)
-BUNDLE=$(cd "$BUNDLE" && pwd)
+SOURCE=$(cd "$BUNDLE" && pwd)
 
-# Logique commune (répertoire de ce script = paquet).
+# Copie privée (comme deploy/recette/installer.sh) : refus de tout lien symbolique, tube ou
+# périphérique AVANT toute action, puis copie sans suivre les liens dans /run (root, 0700). Seule la
+# copie est vérifiée, sourcée et installée ; le dossier déposé (/home/cog/cog-paquet) n'est plus relu.
+PRIVE=""
+trap 'if [[ -n $PRIVE ]]; then rm -rf "$PRIVE"; fi' EXIT
+speciaux=$(cd "$SOURCE" && find . ! -type f ! -type d -printf '%y %p\n' | head -n 5)
+[[ -z $speciaux ]] || die "paquet refusé : entrée(s) ni fichier régulier ni dossier (lien symbolique, tube, périphérique) : $(tr '\n' ' ' <<<"$speciaux")"
+PRIVE=$(mktemp -d /run/miyukini-paquet.XXXXXX)
+chmod 0700 "$PRIVE"
+mkdir -m 0700 "$PRIVE/paquet"
+cp -R -P --preserve=mode,timestamps -- "$SOURCE/." "$PRIVE/paquet/"
+chown -R -h root:root "$PRIVE/paquet"
+chmod -R go-w "$PRIVE/paquet"
+BUNDLE=$PRIVE/paquet
+log "paquet copié dans $BUNDLE (root, 0700) ; $SOURCE n'est plus relu"
+
+# Avant de sourcer commun.sh (outils système seulement) : empreinte du MANIFESTE si elle est donnée,
+# puis SHA-256 de commun.sh contre ce MANIFESTE.
+[[ -f $BUNDLE/MANIFESTE && ! -L $BUNDLE/MANIFESTE ]] || die "MANIFESTE absent du paquet"
+if [[ -n $MANIFESTE_ATTENDU ]]; then
+	[[ $(sha256sum "$BUNDLE/MANIFESTE" | cut -d' ' -f1) == "$MANIFESTE_ATTENDU" ]] ||
+		die "empreinte du MANIFESTE différente de celle attendue ($MANIFESTE_ATTENDU)"
+fi
+[[ -f $BUNDLE/commun.sh && ! -L $BUNDLE/commun.sh ]] || die "commun.sh absent du paquet"
+(cd "$BUNDLE" && grep -v '^#' MANIFESTE | grep -E '^[0-9a-f]{64}  \./commun\.sh$' | sha256sum --check --strict --quiet -) ||
+	die "commun.sh absent du MANIFESTE ou différent"
+
+# Logique commune (copie privée vérifiée).
 # shellcheck source=commun.sh
-. "$(dirname "$0")/commun.sh"
+. "$BUNDLE/commun.sh"
 export BUNDLE AVEC_BANC MANIFESTE_ATTENDU
 
 verifier_paquet

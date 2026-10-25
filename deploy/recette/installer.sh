@@ -6,13 +6,18 @@
 #
 # Exécuté depuis le paquet cog-<version>-<commit>.tar.zst extrait. Ordre strict :
 #   1. refus si la machine ressemble à une production (heuristique ci-dessous) ;
-#   2. AUTHENTIFICATION, avant toute exécution de contenu du paquet : MANIFESTE et MANIFESTE.sig
-#      sont copiés dans un répertoire root 0700, puis vérifiés par openssl (signature détachée
-#      Ed25519) avec la clé publique PEM fournie par l'opérateur (ou, à défaut, celle du paquet
-#      SI SA SHA-256 correspond à l'empreinte donnée par l'opérateur) ;
-#   3. SHA-256 de chaque fichier du paquet, contre la copie authentifiée ; aucun fichier hors manifeste ;
-#   4. seulement alors : bin/outil-sceau (sceau), commun.sh et l'installation ;
+#   2. COPIE PRIVÉE : le paquet entier est copié (sans suivre aucun lien ; un lien symbolique, tube
+#      ou périphérique dans le paquet est refusé avant toute action) dans /run/miyukini-paquet.XXXXXX,
+#      root, 0700. Le dossier d'origine n'est plus jamais relu : le modifier ensuite n'a aucun effet ;
+#   3. AUTHENTIFICATION de la copie, par des outils SYSTÈME seulement (openssl, sha256sum) : la clé
+#      publique PEM fournie par l'opérateur (ou celle de la copie SI son SHA-256 égale l'empreinte
+#      donnée par l'opérateur) vérifie la signature détachée Ed25519 du MANIFESTE ; puis liste exacte
+#      des fichiers (aucun lien, aucun fichier hors manifeste) et SHA-256 de chacun ;
+#   4. seulement alors, depuis la copie : bin/outil-sceau (sceau), commun.sh et l'installation
+#      (fichiers listés au MANIFESTE uniquement) ; la copie est effacée à la sortie ;
 #   5. amorçage : instructions. Aucun secret affiché, aucun mot de passe écrit par ce script.
+# Le corps du script est un bloc { … } : bash le lit en entier avant de l'exécuter (une
+# réécriture de installer.sh pendant l'exécution est sans effet).
 #
 # Heuristique « machine de production » (refus si l'une est vraie) :
 #   - unité active parmi : cloudflared*, docker, containerd, nginx, apache2, php*-fpm,
@@ -20,6 +25,7 @@
 #   - répertoire présent : /etc/cloudflared, /opt/miyucloud, /var/www/nextcloud ;
 #   - --confirme-machine-de-recette absent.
 # Une installation COG précédente (/opt/miyukini) n'est pas un signe de production.
+{
 set -euo pipefail
 umask 0022
 LOG_TAG=recette
@@ -29,7 +35,8 @@ PEM_OPTION=""
 EMPREINTE_PEM=""
 CONFIRME=0
 AUTH_DIR=""
-trap 'if [[ -n $AUTH_DIR ]]; then rm -rf "$AUTH_DIR"; fi' EXIT
+PRIVE=""
+trap 'if [[ -n $AUTH_DIR ]]; then rm -rf "$AUTH_DIR"; fi; if [[ -n $PRIVE ]]; then rm -rf "$PRIVE"; fi' EXIT
 
 log() { printf '[recette] %s\n' "$*"; }
 die() { printf '[recette] ERREUR: %s\n' "$*" >&2; exit 1; }
@@ -77,15 +84,50 @@ verifier_machine_de_recette() {
 
 verifier_machine_de_recette
 
-# ------------------------------------------------------------------ 2. authentification (avant tout)
+# ------------------------------------------------------------------ 2. copie privée (avant tout)
 
-# authentifier_paquet <répertoire du paquet> <clé publique PEM de confiance>
-# Copie MANIFESTE et MANIFESTE.sig dans un répertoire root 0700 (AUTH_DIR), vérifie la signature
-# détachée avec openssl, puis les SHA-256 des fichiers à partir de la COPIE authentifiée. Ne
-# n'exécute rien du paquet. Code 1 au moindre écart. (Fonction exportée vers
-# /opt/miyukini/exploitation/authentification.sh par la même installation : mettre-a-jour.sh la réutilise.)
+# copier_paquet_prive <dossier source> : refuse toute entrée qui n'est ni fichier régulier ni
+# dossier, puis copie le paquet SANS SUIVRE LES LIENS (cp -P) dans PRIVE=/run/miyukini-paquet.XXXXXX
+# (root, 0700) ; les fichiers copiés appartiennent à root et ne sont modifiables par aucun autre
+# compte. La copie est recontrôlée (types, liste exacte, SHA-256) par authentifier_paquet : un
+# changement de la source pendant la copie est donc soit absent de la copie, soit refusé.
+copier_paquet_prive() {
+	local src=$1 speciaux
+	speciaux=$(cd "$src" && find . ! -type f ! -type d -printf '%y %p\n' | head -n 5) || return 1
+	if [[ -n $speciaux ]]; then
+		echo "[recette] ERREUR: paquet refusé : entrée(s) ni fichier régulier ni dossier (lien symbolique, tube, périphérique) : $(tr '\n' ' ' <<<"$speciaux")" >&2
+		return 1
+	fi
+	PRIVE=$(mktemp -d /run/miyukini-paquet.XXXXXX) || return 1
+	chmod 0700 "$PRIVE"
+	mkdir -m 0700 "$PRIVE/paquet"
+	cp -R -P --preserve=mode,timestamps -- "$src/." "$PRIVE/paquet/" || return 1
+	chown -R -h root:root "$PRIVE/paquet"
+	chmod -R go-w "$PRIVE/paquet"
+}
+
+# authentifier_paquet <copie privée du paquet> <clé publique PEM de confiance>
+# Outils système seulement (openssl, sha256sum, find) ; rien du paquet n'est exécuté ni sourcé.
+#   a. la copie appartient à root et n'est modifiable par aucun autre compte ;
+#   b. aucune entrée qui ne soit ni fichier régulier ni dossier (lien symbolique compris) ;
+#   c. MANIFESTE, MANIFESTE.sig et la clé copiés dans AUTH_DIR (root 0700), signature détachée
+#      Ed25519 vérifiée par openssl ;
+#   d. LISTE EXACTE triée des fichiers présents (hors ./MANIFESTE, ./MANIFESTE.sig, ./MANIFESTE.sceau
+#      à la racine) = celle du MANIFESTE signé, lignes « <sha256>  ./<chemin> » sans doublon ;
+#   e. SHA-256 de chaque fichier contre le MANIFESTE signé.
+# Code 1 au moindre écart. (Fonction exportée vers /opt/miyukini/exploitation/authentification.sh
+# par la même installation : mettre-a-jour.sh la réutilise.)
 authentifier_paquet() {
-	local bundle=$1 pem=$2 n lignes presents
+	local bundle=$1 pem=$2 lignes presents speciaux mal
+	if [[ ! -d $bundle || -L $bundle ]] || [[ -n $(find "$bundle" \( ! -user root -o -perm /022 \) -print -quit) ]]; then
+		echo "[recette] ERREUR: paquet refusé : $bundle n'est pas une copie privée (root, non modifiable par un autre compte)" >&2
+		return 1
+	fi
+	speciaux=$(cd "$bundle" && find . ! -type f ! -type d -printf '%y %p\n' | head -n 5)
+	if [[ -n $speciaux ]]; then
+		echo "[recette] ERREUR: paquet refusé : entrée(s) ni fichier régulier ni dossier (lien symbolique, tube, périphérique) : $(tr '\n' ' ' <<<"$speciaux")" >&2
+		return 1
+	fi
 	AUTH_DIR=$(mktemp -d /run/miyukini-auth.XXXXXX) || return 1
 	chmod 0700 "$AUTH_DIR"
 	cp "$bundle/MANIFESTE" "$bundle/MANIFESTE.sig" "$AUTH_DIR/" || return 1
@@ -96,34 +138,52 @@ authentifier_paquet() {
 		return 1
 	fi
 	printf '[recette] signature Ed25519 du MANIFESTE vérifiée (openssl)\n'
+	mal=$(grep -v '^#' "$AUTH_DIR/MANIFESTE" | grep -cvE '^[0-9a-f]{64}  \./[^[:cntrl:]]+$' || true)
+	if ((mal > 0)); then
+		echo "[recette] ERREUR: paquet refusé : $mal ligne(s) mal formée(s) dans le MANIFESTE signé" >&2
+		return 1
+	fi
+	lignes=$(grep -v '^#' "$AUTH_DIR/MANIFESTE" | sed -n 's/^[0-9a-f]\{64\}  //p' | LC_ALL=C sort)
+	if [[ -z $lignes || $lignes != "$(LC_ALL=C sort -u <<<"$lignes")" ]]; then
+		echo "[recette] ERREUR: paquet refusé : MANIFESTE signé vide ou chemin en double" >&2
+		return 1
+	fi
+	presents=$(cd "$bundle" && find . -type f ! -path ./MANIFESTE ! -path ./MANIFESTE.sig ! -path ./MANIFESTE.sceau | LC_ALL=C sort)
+	if [[ $lignes != "$presents" ]]; then
+		echo "[recette] ERREUR: paquet refusé : liste des fichiers différente du MANIFESTE signé ($(grep -c . <<<"$presents") présents, $(grep -c . <<<"$lignes") listés) : $(diff <(printf '%s\n' "$lignes") <(printf '%s\n' "$presents") | sed -n 's/^< /absent /p; s/^> /hors manifeste /p' | head -n 5 | tr '\n' ' ')" >&2
+		return 1
+	fi
 	(cd "$bundle" && grep -v '^#' "$AUTH_DIR/MANIFESTE" | sha256sum --check --strict --quiet -) || {
 		printf '[recette] ERREUR: SHA-256 des fichiers différents du MANIFESTE signé\n' >&2
 		return 1
 	}
-	lignes=$(grep -vc '^#' "$AUTH_DIR/MANIFESTE")
-	presents=$(cd "$bundle" && find . -type f ! -name MANIFESTE ! -name MANIFESTE.sig ! -name MANIFESTE.sceau | wc -l)
-	n=$presents
-	[[ $lignes == "$n" ]] || {
-		printf '[recette] ERREUR: %s fichier(s) présents, %s au manifeste signé\n' "$presents" "$lignes" >&2
-		return 1
-	}
-	printf '[recette] %s fichiers conformes au manifeste signé\n' "$lignes"
+	printf '[recette] %s fichiers conformes au manifeste signé (liste exacte, aucun lien)\n' "$(grep -c . <<<"$lignes")"
 }
 
 [[ -n $BUNDLE ]] || BUNDLE=$(cd "$(dirname "$0")" && pwd)
-BUNDLE=$(cd "$BUNDLE" && pwd)
+SOURCE=$(cd "$BUNDLE" && pwd)
+[[ -f $SOURCE/MANIFESTE ]] || die "élément du paquet absent : MANIFESTE"
+copier_paquet_prive "$SOURCE" || die "copie privée du paquet refusée : rien n'a été exécuté ni installé"
+BUNDLE=$PRIVE/paquet
+log "paquet copié dans $BUNDLE (root, 0700) ; $SOURCE n'est plus relu"
+if [[ -n $(find "$SOURCE" -perm /022 -print -quit) ]]; then
+	log "avertissement : $SOURCE est modifiable par un autre compte (groupe ou autres) ; seule la copie privée est utilisée"
+fi
 for f in MANIFESTE MANIFESTE.sig MANIFESTE.sceau cle-publique-editeur.pem cle-publique-editeur.hex commun.sh bin/outil-sceau; do
-	[[ -f $BUNDLE/$f ]] || die "élément du paquet absent : $f"
+	[[ -f $BUNDLE/$f && ! -L $BUNDLE/$f ]] || die "élément du paquet absent : $f"
 done
 
-# Clé de confiance : fournie par l'opérateur (recommandé), ou empreinte donnée et comparée.
+# ------------------------------------------------------------------ 3. authentification
+
+# Clé de confiance : fournie par l'opérateur (recommandé), ou celle de la copie privée si son
+# empreinte (sha256sum, outil système) égale celle donnée par l'opérateur.
 if [[ -n $PEM_OPTION ]]; then
 	[[ -f $PEM_OPTION ]] || die "clé PEM introuvable : $PEM_OPTION"
 	PEM_CONFIANCE=$PEM_OPTION
 elif [[ -n $EMPREINTE_PEM ]]; then
 	[[ $EMPREINTE_PEM =~ ^[0-9a-f]{64}$ ]] || die "--empreinte-cle-pem : 64 caractères hexadécimaux attendus"
 	fp=$(sha256sum "$BUNDLE/cle-publique-editeur.pem" | cut -d' ' -f1)
-	[[ $fp == "$EMPREINTE_PEM" ]] || die "empreinte de la clé du paquet ($fp) différente de celle fournie : refus"
+	[[ $fp == "$EMPREINTE_PEM" ]] || die "empreinte de la clé du paquet ($fp) différente de celle fournie : refus ; rien n'a été exécuté ni installé"
 	PEM_CONFIANCE=$BUNDLE/cle-publique-editeur.pem
 else
 	die "clé de confiance requise : --cle-publique-pem FICHIER ou --empreinte-cle-pem SHA256 (publiés dans les notes de version)"
@@ -131,9 +191,10 @@ fi
 
 authentifier_paquet "$BUNDLE" "$PEM_CONFIANCE" || die "authentification du paquet refusée : rien n'a été exécuté ni installé"
 
-# ------------------------------------------------------------------ 3. contenu authentifié
+# ------------------------------------------------------------------ 4. contenu authentifié
 
-# Le paquet est désormais authentifié : son outil de sceau et sa logique commune peuvent s'exécuter.
+# La copie privée est authentifiée (signature openssl, liste exacte, SHA-256) : son outil de sceau,
+# désormais couvert par le MANIFESTE signé, et sa logique commune peuvent s'exécuter.
 "$BUNDLE/bin/outil-sceau" verifier --cle-publique "$(tr -d '\n' <"$BUNDLE/cle-publique-editeur.hex")" \
 	--manifeste "$AUTH_DIR/MANIFESTE" --sceau "$BUNDLE/MANIFESTE.sceau" >/dev/null ||
 	die "sceau MANIFESTE.sceau refusé"
@@ -153,9 +214,9 @@ done
 [[ ! -e $BUNDLE/bin/miyuracine ]] || die "paquet interdit : bin/miyuracine présent (racine hors ligne)"
 log "$(sed -n 's/^version //p' "$BUNDLE/VERSION") ; $(sed -n 's/^arbre //p' "$BUNDLE/VERSION")"
 
-# ------------------------------------------------------------------ 4. installation
+# ------------------------------------------------------------------ 5. installation
 
-log "installation dans $PREFIXE (bundle : $BUNDLE)"
+log "installation dans $PREFIXE (copie privée : $BUNDLE)"
 paquets
 utilisateurs
 repertoires
@@ -207,3 +268,5 @@ Amorçage (une fois, depuis votre poste, par tunnel SSH ; rien n'est écrit sur 
 
   3. Contrôle : $EXPLOITATION/etat.sh   ·   Sauvegarde : $EXPLOITATION/sauvegarder.sh --help
 FIN
+exit 0
+}

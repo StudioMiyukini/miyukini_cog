@@ -14,7 +14,7 @@
 #   apparmor/   profils miyukini-* (mode enforce à l'installation)
 #   systemd/    unités générées par commun.sh (couvertes par le MANIFESTE)
 #   exploitation/ sauvegarder, restaurer, mettre-a-jour, etat, desinstaller
-#   tests/      tester.sh et scenarios.sh (cog-vm), zone.sh et mise-a-jour.sh (recette)
+#   tests/      tester.sh et scenarios.sh (cog-vm), zone.sh, installateur.sh et mise-a-jour.sh (recette)
 #   commun.sh installer.sh cle-publique-editeur.{hex,pem} VERSION
 #   MANIFESTE   SHA-256 de chaque fichier (sauf MANIFESTE, MANIFESTE.sceau, MANIFESTE.sig), lié au commit
 #   MANIFESTE.sig   signature détachée Ed25519 brute du MANIFESTE (openssl pkeyutl -rawin) : AUTHENTIFICATION

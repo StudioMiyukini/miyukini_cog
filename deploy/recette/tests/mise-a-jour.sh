@@ -12,6 +12,10 @@
 #      sauvegarde préalable, version installée et services inchangés ;
 #   U2 mauvaise clé publique (clé Ed25519 jetable) : idem ;
 #   U3 mauvaise empreinte de clé (--empreinte-cle-pem) : idem ;
+#   U6 lien symbolique dans le paquet (même nombre de fichiers, SHA-256 égaux par le lien) : idem ;
+#   U7 fichier parasite exploitation/MANIFESTE.sig : idem ;
+#   U8 fichier listé remplacé par un autre, même nombre total : idem ;
+#   U9 lien physique dans l'archive : idem ;
 #   U4 échec de santé forcé (--essai-echec-sante) : retour arrière automatique, code 3, ancienne
 #      version restaurée, données conservées, zone COG présente, services actifs ;
 #   U5 mise à jour réussie : code 0, MANIFESTE installé = celui de B, services sains.
@@ -26,7 +30,7 @@ while (($#)); do
 		--paquet-maj) PAQUET=${2:?}; shift ;;
 		--cle-publique-pem) PEM=${2:?}; shift ;;
 		--confirme-machine-de-recette) CONFIRME=1 ;;
-		-h | --help) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+		-h | --help) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
 		*) echo "option inconnue : $1" >&2; exit 2 ;;
 	esac
 	shift
@@ -127,6 +131,41 @@ refus_avant_sauvegarde "U2 mauvaise clé publique" "$TMP/u2.log" "signature du M
 # U3 : mauvaise empreinte de clé.
 refus_avant_sauvegarde "U3 mauvaise empreinte de clé" "$TMP/u3.log" "empreinte de la clé" \
 	--paquet "$PAQUET" --empreinte-cle-pem "$(sha256sum "$TMP/autre.pem" | cut -d' ' -f1)"
+
+# archive_alteree <nom> <script bash exécuté dans la racine du paquet extrait> : archive dérivée de
+# B (MANIFESTE, signature et sceau d'origine conservés), écrite dans $TMP/<nom>.tar.zst.
+archive_alteree() {
+	local nom=$1 script=$2 racine
+	rm -rf "$TMP/$nom"
+	mkdir -p "$TMP/$nom"
+	zstd -dc "$PAQUET" | tar -C "$TMP/$nom" -xpf -
+	racine=$(find "$TMP/$nom" -mindepth 1 -maxdepth 1)
+	(cd "$racine" && bash -euc "$script")
+	tar -C "$TMP/$nom" -cf - "$(basename "$racine")" | zstd -q -o "$TMP/$nom.tar.zst"
+	rm -rf "${TMP:?}/$nom"
+}
+
+# U6 : lien symbolique. config/bridge.toml devient un lien vers une copie non listée de même
+# contenu : même nombre de fichiers réguliers, SHA-256 identiques en suivant le lien (l'ancien
+# contrôle par nombre l'acceptait). Refus avant toute sauvegarde.
+archive_alteree u6 'mv config/bridge.toml config/.bridge.toml && ln -s .bridge.toml config/bridge.toml'
+refus_avant_sauvegarde "U6 lien symbolique dans le paquet" "$TMP/u6.log" "ni fichier régulier ni dossier" \
+	--paquet "$TMP/u6.tar.zst" --cle-publique-pem "$PEM"
+
+# U7 : fichier parasite sous/MANIFESTE.sig (l'ancien contrôle « -name MANIFESTE.sig » l'excluait).
+archive_alteree u7 'printf "#!/bin/sh\nexit 0\n" >exploitation/MANIFESTE.sig'
+refus_avant_sauvegarde "U7 fichier parasite exploitation/MANIFESTE.sig" "$TMP/u7.log" "hors manifeste ./exploitation/MANIFESTE.sig" \
+	--paquet "$TMP/u7.tar.zst" --cle-publique-pem "$PEM"
+
+# U8 : fichier listé remplacé par un autre, même nombre total (etat.sh retiré, porte.sh ajouté).
+archive_alteree u8 'mv exploitation/etat.sh exploitation/porte.sh'
+refus_avant_sauvegarde "U8 fichier listé remplacé, même nombre total" "$TMP/u8.log" "liste des fichiers différente" \
+	--paquet "$TMP/u8.tar.zst" --cle-publique-pem "$PEM"
+
+# U9 : lien physique dans l'archive (refusé dès le listage, avant extraction).
+archive_alteree u9 'rm config/bridge.toml && ln config/strongfather/"$(ls config/strongfather | head -n1)" config/bridge.toml'
+refus_avant_sauvegarde "U9 lien physique dans l'archive" "$TMP/u9.log" "ni fichier régulier ni dossier" \
+	--paquet "$TMP/u9.tar.zst" --cle-publique-pem "$PEM"
 
 # U4 : échec de santé forcé -> retour arrière automatique.
 avant_p=$(nb_prealables)

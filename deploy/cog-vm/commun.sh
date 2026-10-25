@@ -4,9 +4,11 @@
 # l'inclusion, seulement des définitions.
 #
 # Le script appelant : règle `set -euo pipefail`, définit LOG_TAG (libellé des journaux), vérifie
-# ses propres garde-fous (root, cible autorisée), puis source ce fichier depuis le paquet. Il
-# renseigne BUNDLE (répertoire du paquet) AVANT d'appeler les fonctions de paquet, et ne les
-# appelle qu'après verifier_paquet (et, en recette, verifier_signature).
+# ses propres garde-fous (root, cible autorisée), copie le paquet dans un dossier privé (root
+# 0700, sans suivre les liens), puis source ce fichier depuis CETTE copie. Il renseigne BUNDLE
+# (la copie privée) AVANT d'appeler les fonctions de paquet, et ne les appelle qu'après
+# verifier_paquet (et, en recette, l'authentification). Les fonctions de paquet n'installent que
+# des fichiers listés au MANIFESTE (installer_fichier), jamais un glob.
 #
 # Layout de paquet attendu (produit par pousser.sh ou deploy/recette/construire-paquet.sh) :
 #   MANIFESTE  bin/  config/{bridge.toml,strongfather/}  static/{static,static-dist}
@@ -47,11 +49,49 @@ PORTS_COG_TCP=(50051 11435 8086 8090 5432)
 
 # ------------------------------------------------------------------ manifeste et signature
 
-# verifier_paquet : SHA-256 de chaque fichier du paquet, aucun fichier hors manifeste.
+# Contrôle de forme du paquet (avant tout `sha256sum --check`) :
+#   - aucune entrée qui ne soit ni fichier régulier ni dossier (lien symbolique, tube, périphérique,
+#     socket) : `sha256sum` et `install` suivraient un lien que `find -type f` ne compte pas ;
+#   - la LISTE EXACTE triée des fichiers présents (hors ./MANIFESTE, ./MANIFESTE.sceau et
+#     ./MANIFESTE.sig, à la racine seulement) est égale à celle du MANIFESTE : aucun fichier ajouté,
+#     retiré ou substitué, même à nombre égal ;
+#   - chaque ligne du MANIFESTE est « <sha256>  ./<chemin> » (aucun nom échappé, aucun doublon).
+# L'installation ne lit ensuite QUE des fichiers listés (fichiers_du_manifeste, installer_fichier),
+# jamais un glob du paquet. Fonctions sans effet de bord : réutilisées par authentifier_paquet.
+
+# chemins_du_manifeste <MANIFESTE> : chemins listés (forme « ./x »), triés.
+chemins_du_manifeste() {
+	grep -v '^#' "$1" | sed -n 's/^[0-9a-f]\{64\}  //p' | LC_ALL=C sort
+}
+
+# controle_forme_paquet <répertoire> <MANIFESTE> : code 1, motif sur stderr, au moindre écart.
+controle_forme_paquet() {
+	local dir=$1 manifeste=$2 speciaux mal listes presents
+	[[ -d $dir && ! -L $dir ]] || { echo "paquet refusé : $dir n'est pas un dossier" >&2; return 1; }
+	speciaux=$(cd "$dir" && find . ! -type f ! -type d -printf '%y %p\n' | head -n 5)
+	if [[ -n $speciaux ]]; then
+		echo "paquet refusé : entrée(s) ni fichier régulier ni dossier (lien symbolique, tube, périphérique) : $(tr '\n' ' ' <<<"$speciaux")" >&2
+		return 1
+	fi
+	[[ -f $manifeste && ! -L $manifeste ]] || { echo "paquet refusé : MANIFESTE absent" >&2; return 1; }
+	mal=$(grep -v '^#' "$manifeste" | grep -cvE '^[0-9a-f]{64}  \./[^[:cntrl:]]+$' || true)
+	((mal == 0)) || { echo "paquet refusé : $mal ligne(s) mal formée(s) dans le MANIFESTE" >&2; return 1; }
+	listes=$(chemins_du_manifeste "$manifeste")
+	[[ -n $listes ]] || { echo "paquet refusé : MANIFESTE vide" >&2; return 1; }
+	[[ $listes == "$(LC_ALL=C sort -u <<<"$listes")" ]] || { echo "paquet refusé : chemin en double dans le MANIFESTE" >&2; return 1; }
+	presents=$(cd "$dir" && find . -type f ! -path ./MANIFESTE ! -path ./MANIFESTE.sceau ! -path ./MANIFESTE.sig | LC_ALL=C sort)
+	if [[ $listes != "$presents" ]]; then
+		echo "paquet refusé : liste des fichiers différente du MANIFESTE ($(grep -c . <<<"$presents") présents, $(grep -c . <<<"$listes") listés) : $(diff <(printf '%s\n' "$listes") <(printf '%s\n' "$presents") | sed -n 's/^< /absent /p; s/^> /hors manifeste /p' | head -n 5 | tr '\n' ' ')" >&2
+		return 1
+	fi
+}
+
+# verifier_paquet : forme du paquet (ci-dessus), puis SHA-256 de chaque fichier listé.
 # MANIFESTE_ATTENDU (optionnel) : empreinte du MANIFESTE affichée à part, comparée ici.
+# BUNDLE doit être la copie privée (root, 0700) faite par l'installateur (copier_paquet_prive).
 verifier_paquet() {
-	local manifeste=$BUNDLE/MANIFESTE empreinte listes presents
-	[[ -f $manifeste ]] || die "MANIFESTE absent du paquet"
+	local manifeste=$BUNDLE/MANIFESTE empreinte
+	[[ -f $manifeste && ! -L $manifeste ]] || die "MANIFESTE absent du paquet"
 	empreinte=$(sha256sum "$manifeste" | cut -d' ' -f1)
 	log "manifeste : sha256 $empreinte"
 	sed -n 's/^# /['"$LOG_TAG"']   /p' "$manifeste"
@@ -59,19 +99,37 @@ verifier_paquet() {
 		[[ $empreinte == "$MANIFESTE_ATTENDU" ]] ||
 			die "empreinte du MANIFESTE différente de celle attendue ($MANIFESTE_ATTENDU)"
 	fi
+	controle_forme_paquet "$BUNDLE" "$manifeste" || die "paquet non conforme au MANIFESTE (voir ci-dessus)"
 	(cd "$BUNDLE" && grep -v '^#' MANIFESTE | sha256sum --check --strict --quiet -) ||
 		die "paquet altéré : SHA-256 différent du MANIFESTE"
-	listes=$(grep -vc '^#' "$manifeste")
-	presents=$(cd "$BUNDLE" && find . -type f ! -path ./MANIFESTE ! -name MANIFESTE.sceau ! -name MANIFESTE.sig | wc -l)
-	[[ $listes == "$presents" ]] || die "paquet : $presents fichier(s) présents, $listes au manifeste"
-	log "paquet conforme au manifeste ($listes fichiers)"
+	log "paquet conforme au manifeste ($(grep -vc '^#' "$manifeste") fichiers, liste exacte, aucun lien)"
+}
+
+# fichiers_du_manifeste <regex ERE> : chemins relatifs (sans « ./ ») listés au MANIFESTE du
+# paquet, filtrés par la regex. Seule source des fichiers installés.
+fichiers_du_manifeste() {
+	chemins_du_manifeste "$BUNDLE/MANIFESTE" | sed 's|^\./||' | grep -E "$1" || true
+}
+
+# au_manifeste <chemin relatif> : le fichier est listé au MANIFESTE du paquet.
+au_manifeste() {
+	chemins_du_manifeste "$BUNDLE/MANIFESTE" | grep -qxF "./$1"
+}
+
+# installer_fichier <mode> <chemin relatif au paquet> <destination> : installe un fichier LISTÉ,
+# contrôlé régulier et non lien juste avant la copie.
+installer_fichier() {
+	local mode=$1 rel=$2 dest=$3
+	au_manifeste "$rel" || die "$rel absent du MANIFESTE : non installé"
+	[[ -f $BUNDLE/$rel && ! -L $BUNDLE/$rel ]] || die "$rel : pas un fichier régulier (lien ?) : non installé"
+	install -o root -g root -m "$mode" "$BUNDLE/$rel" "$dest"
 }
 
 # verifier_signature <clé publique hex ou fichier> : le MANIFESTE est scellé par l'éditeur
 # (Sceau v1.1, type ManifestePaquet). Seule cette clé épinglée est acceptée.
 verifier_signature() {
 	local cle=$1 outil=$BUNDLE/bin/outil-sceau
-	[[ -x $outil ]] || die "outil-sceau absent du paquet (bin/outil-sceau)"
+	[[ -x $outil && ! -L $outil ]] && au_manifeste bin/outil-sceau || die "outil-sceau absent du paquet (bin/outil-sceau)"
 	[[ -f $BUNDLE/MANIFESTE.sceau ]] || die "MANIFESTE.sceau absent : paquet non signé"
 	"$outil" verifier --cle-publique "$cle" --manifeste "$BUNDLE/MANIFESTE" --sceau "$BUNDLE/MANIFESTE.sceau" ||
 		die "signature du paquet refusée (clé d'éditeur attendue non reconnue, ou paquet altéré)"
@@ -131,22 +189,30 @@ repertoires() {
 binaires() {
 	local b
 	for b in "${BINAIRES[@]}"; do
-		install -o root -g root -m 0755 "$BUNDLE/bin/$b" "$BIN/$b"
+		installer_fichier 0755 "bin/$b" "$BIN/$b"
 	done
 	for b in "${BINAIRES_OUTILS[@]}"; do
-		if [[ -f $BUNDLE/bin/$b ]]; then
-			install -o root -g root -m 0755 "$BUNDLE/bin/$b" "$BIN/$b"
+		if au_manifeste "bin/$b"; then
+			installer_fichier 0755 "bin/$b" "$BIN/$b"
 		fi
 	done
 }
 
 politiques_et_statiques() {
 	# Politiques StrongFather (lues par MAIA via COG_POLITIQUES_DIR) : lecture seule.
-	install -o root -g root -m 0644 "$BUNDLE"/config/strongfather/*.toml "$ETC/strongfather/"
-	# Statiques MiyuCloud (version de production et version source).
+	local f n=0
+	while IFS= read -r f; do
+		installer_fichier 0644 "$f" "$ETC/strongfather/${f##*/}"
+		n=$((n + 1))
+	done < <(fichiers_du_manifeste '^config/strongfather/[^/]+\.toml$')
+	((n > 0)) || die "aucune politique config/strongfather/*.toml au MANIFESTE"
+	# Statiques MiyuCloud (version de production et version source) : fichiers listés seulement.
 	rm -rf "$PARTAGE/miyucloud/static" "$PARTAGE/miyucloud/static-dist"
-	cp -r "$BUNDLE/static/static" "$PARTAGE/miyucloud/static"
-	cp -r "$BUNDLE/static/static-dist" "$PARTAGE/miyucloud/static-dist"
+	install -d -o root -g root -m 0755 "$PARTAGE/miyucloud/static" "$PARTAGE/miyucloud/static-dist"
+	while IFS= read -r f; do
+		[[ -f $BUNDLE/$f && ! -L $BUNDLE/$f ]] || die "$f : pas un fichier régulier (lien ?) : non installé"
+		install -D -o root -g root -m 0644 "$BUNDLE/$f" "$PARTAGE/miyucloud/${f#static/}"
+	done < <(fichiers_du_manifeste '^static/static(-dist)?/')
 	chown -R root:root "$PARTAGE/miyucloud"
 	find "$PARTAGE/miyucloud" -type d -exec chmod 0755 {} +
 	find "$PARTAGE/miyucloud" -type f -exec chmod 0644 {} +
@@ -154,7 +220,7 @@ politiques_et_statiques() {
 	# $MIYUKINI_DATA_DIR/bridge.toml : ce chemin n'est qu'un point de montage (fichier vide root)
 	# recouvert, dans l'espace de noms du service, par un montage lié en lecture seule
 	# (BindReadOnlyPaths, voir generer_unites).
-	install -o root -g root -m 0444 "$BUNDLE/config/bridge.toml" "$ETC/bridge.toml"
+	installer_fichier 0444 config/bridge.toml "$ETC/bridge.toml"
 	rm -f "$VAR/maia/bridge.toml"
 	install -o root -g root -m 0444 /dev/null "$VAR/maia/bridge.toml"
 }
@@ -256,14 +322,15 @@ FIN
 # Profils du paquet : copiés dans /etc/apparmor.d et chargés en enforce. Un profil refusé arrête.
 apparmor_profils() {
 	log "AppArmor : profils"
-	local f nom
-	[[ -d $BUNDLE/apparmor ]] || die "apparmor/ absent du paquet"
-	for f in "$BUNDLE"/apparmor/miyukini-*; do
-		nom=$(basename "$f")
-		install -o root -g root -m 0644 "$f" "/etc/apparmor.d/$nom"
+	local f nom n=0
+	while IFS= read -r f; do
+		nom=${f##*/}
+		installer_fichier 0644 "$f" "/etc/apparmor.d/$nom"
 		apparmor_parser -r -W "/etc/apparmor.d/$nom" || die "profil AppArmor $nom refusé par apparmor_parser"
 		log "  profil $nom chargé"
-	done
+		n=$((n + 1))
+	done < <(fichiers_du_manifeste '^apparmor/miyukini-[^/]+$')
+	((n > 0)) || die "aucun profil apparmor/miyukini-* au MANIFESTE"
 }
 
 # ------------------------------------------------------------------ Douane : zone COG
@@ -271,10 +338,14 @@ apparmor_profils() {
 # arretes_essai : exemple du banc (clé jetable). Emplacement dans le paquet : banc/cible/examples
 # (VM) ou bin/ (recette).
 chemin_arretes_essai() {
-	local ex=$BUNDLE/banc/cible/examples/arretes_essai
-	[[ -x $ex ]] || ex=$BUNDLE/bin/arretes_essai
-	[[ -x $ex ]] || die "arretes_essai absent du paquet"
-	printf '%s' "$ex"
+	local rel
+	for rel in banc/cible/examples/arretes_essai bin/arretes_essai; do
+		if au_manifeste "$rel" && [[ -f $BUNDLE/$rel && ! -L $BUNDLE/$rel && -x $BUNDLE/$rel ]]; then
+			printf '%s' "$BUNDLE/$rel"
+			return 0
+		fi
+	done
+	die "arretes_essai absent du paquet (ou non listé au MANIFESTE)"
 }
 
 # Arrêtés d'essai : générés par arretes_essai (clé jetable, jamais conservée), vérifiés par
@@ -528,9 +599,13 @@ Environment=RUST_LOG=info" "miyukini-miyucloud"
 
 # unites : unités du paquet (systemd/, si présentes) sinon générées sur place.
 unites() {
-	if [[ -d $BUNDLE/systemd ]]; then
-		log "unités systemd (depuis le paquet, couvertes par le MANIFESTE)"
-		install -o root -g root -m 0644 "$BUNDLE"/systemd/*.service "$BUNDLE"/systemd/*.timer "$UNITES_DIR/"
+	local f liste
+	liste=$(fichiers_du_manifeste '^systemd/[^/]+\.(service|timer)$')
+	if [[ -n $liste ]]; then
+		log "unités systemd (depuis le paquet, fichiers listés au MANIFESTE)"
+		while IFS= read -r f; do
+			installer_fichier 0644 "$f" "$UNITES_DIR/${f##*/}"
+		done <<<"$liste"
 	else
 		log "unités systemd (générées)"
 		generer_unites "$UNITES_DIR"
@@ -611,11 +686,12 @@ controle_sante() {
 # installer_exploitation : scripts d'exploitation et commun.sh (depuis le paquet, vérifié).
 installer_exploitation() {
 	install -d -o root -g root -m 0755 "$EXPLOITATION"
-	if [[ -d $BUNDLE/exploitation ]]; then
-		install -o root -g root -m 0755 "$BUNDLE"/exploitation/*.sh "$EXPLOITATION/"
-	fi
-	install -o root -g root -m 0644 "$BUNDLE/commun.sh" "$EXPLOITATION/commun.sh"
-	if [[ -f $BUNDLE/VERSION ]]; then
-		install -o root -g root -m 0644 "$BUNDLE/VERSION" "$PREFIXE/VERSION"
+	local f
+	while IFS= read -r f; do
+		installer_fichier 0755 "$f" "$EXPLOITATION/${f##*/}"
+	done < <(fichiers_du_manifeste '^exploitation/[^/]+\.sh$')
+	installer_fichier 0644 commun.sh "$EXPLOITATION/commun.sh"
+	if au_manifeste VERSION; then
+		installer_fichier 0644 VERSION "$PREFIXE/VERSION"
 	fi
 }

@@ -43,10 +43,16 @@ reconstruisent pas depuis le commit annoncé.
 
 Dans la VM, avant toute installation :
 
-1. l'empreinte du `MANIFESTE` reçu est comparée à celle calculée sur l'hôte (`pousser.sh`, puis de
-   nouveau par `installer.sh --manifeste-sha256 <hex>`) ;
-2. `sha256sum --check --strict` sur tous les fichiers, et aucun fichier hors manifeste ;
-3. après copie, les binaires de `/opt/miyukini/bin` sont revérifiés contre
+1. tout lien symbolique, tube ou périphérique dans le paquet est refusé, puis le paquet est copié
+   sans suivre les liens dans `/run/miyukini-paquet.XXXXXX` (root, 0700) ; le dossier déposé n'est
+   plus relu, seule la copie est vérifiée, sourcée et installée (effacée à la sortie) ;
+2. l'empreinte du `MANIFESTE` reçu est comparée à celle calculée sur l'hôte (`pousser.sh`, puis de
+   nouveau par `installer.sh --manifeste-sha256 <hex>`, avant de sourcer `commun.sh`) ;
+3. la **liste exacte** triée des fichiers présents doit égaler celle du `MANIFESTE` (aucun fichier
+   ajouté, retiré ou substitué, même à nombre égal), puis `sha256sum --check --strict` sur chacun ;
+4. seuls les fichiers listés au `MANIFESTE` sont installés (aucun glob), chacun recontrôlé fichier
+   régulier non lien juste avant `install` ;
+5. après copie, les binaires de `/opt/miyukini/bin` sont revérifiés contre
    `/opt/miyukini/MANIFESTE` (conservé ; `tester.sh` le recontrôle).
 
 ## Services installés
