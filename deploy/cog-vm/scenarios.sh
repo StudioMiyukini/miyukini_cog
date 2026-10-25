@@ -20,7 +20,7 @@ if [[ ${1:-} == --distant ]]; then
 	ICI=$(cd "$(dirname "$0")" && pwd)
 	RACINE=$(cd "$ICI/../.." && pwd)
 	VM=${COG_VM:-$HOME/vm/cog-essai}
-	SSH_OPTS=(-q -o BatchMode=yes -o StrictHostKeyChecking=no -o "UserKnownHostsFile=$VM/known_hosts" -i "$VM/cle_vm" -P 2222)
+	SSH_OPTS=(-q -o BatchMode=yes -o StrictHostKeyChecking=no -o "UserKnownHostsFile=$VM/known_hosts" -i "$VM/cle_vm" -P ${COG_SSH_PORT:-2222})
 	DEST=/home/cog/cog-scenarios
 	"$VM/ssh-vm.sh" "rm -rf '$DEST' && mkdir -p '$DEST/migrations'"
 	scp "${SSH_OPTS[@]}" "$ICI/scenarios.sh" "cog@127.0.0.1:$DEST/scenarios.sh"

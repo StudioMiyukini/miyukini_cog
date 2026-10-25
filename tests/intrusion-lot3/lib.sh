@@ -238,13 +238,23 @@ montrer_client() {
 
 # ---------------------------------------------- compteurs et journaux NFLOG
 
-# Somme des compteurs des règles nftables portant ce préfixe de journal.
-compteur() {
+# Paquets rejetés par la Douane dans un espace de noms : somme des compteurs
+# nommés « rejets » de ses tables (journalisation bornée, A-016 : la règle
+# « log prefix "MDOU|…" » ne porte pas de compteur ; le rejet qui la suit
+# incrémente toujours « rejets », journalisé ou non). Le préfixe exact est
+# prouvé par la capture NFLOG (nflog_occurrences).
+compteur_rejets() {
+	local ns=$1
+	{ ip netns exec "$ns" nft list counters 2>/dev/null || true; } |
+		awk '/counter rejets \{/ { r = 1; next }
+			r && /packets/ { for (i = 1; i < NF; i++) if ($i == "packets") s += $(i + 1); r = 0 }
+			END { print s + 0 }'
+}
+
+# Vrai si l'espace de noms porte au moins une règle de journal de ce préfixe.
+regle_journal_presente() {
 	local ns=$1 prefixe=$2
-	{ ip netns exec "$ns" nft list ruleset 2>/dev/null || true; } |
-		{ grep -F "log prefix \"$prefixe\"" || true; } |
-		sed -n 's/.*counter packets \([0-9][0-9]*\) bytes.*/\1/p' |
-		awk '{ s += $1 } END { print s + 0 }'
+	{ ip netns exec "$ns" nft list ruleset 2>/dev/null || true; } | grep -qF "log prefix \"$prefixe\""
 }
 
 # Occurrences du préfixe dans la capture NFLOG de l'espace de noms.
@@ -271,13 +281,17 @@ instantane_journaux() {
 	JOURNAL_N0=()
 	local spec
 	for spec in "${JOURNAUX_ATTENDUS[@]}"; do
-		JOURNAL_C0+=("$(compteur "${spec%%=*}" "${spec#*=}")")
+		JOURNAL_C0+=("$(compteur_rejets "${spec%%=*}")")
 		JOURNAL_N0+=("$(nflog_occurrences "${spec%%=*}" "${spec#*=}")")
 	done
 }
 
-# Vérifie qu'au moins un des journaux attendus a progressé (compteur nftables
-# de la règle MDOU, et capture NFLOG si disponible). Émet une ligne TAP.
+# Vérifie qu'au moins un des journaux attendus a progressé : le compteur
+# « rejets » de l'espace a progressé (le paquet a été rejeté par la Douane) ET
+# la capture NFLOG contient au moins une ligne de plus portant le préfixe exact
+# (journalisation bornée : au moins une ligne par flux, pas une par paquet).
+# Sans capture NFLOG : compteur « rejets » et présence de la règle de ce
+# préfixe seulement. Émet une ligne TAP.
 verifier_journaux() {
 	local desc=$1 i spec c1 n1 trouve="" dc dn attente
 	((${#JOURNAUX_ATTENDUS[@]})) || return 0
@@ -285,12 +299,13 @@ verifier_journaux() {
 		trouve=""
 		for i in "${!JOURNAUX_ATTENDUS[@]}"; do
 			spec=${JOURNAUX_ATTENDUS[$i]}
-			c1=$(compteur "${spec%%=*}" "${spec#*=}")
+			c1=$(compteur_rejets "${spec%%=*}")
 			n1=$(nflog_occurrences "${spec%%=*}" "${spec#*=}")
 			dc=$((c1 - JOURNAL_C0[i]))
 			dn=$((n1 - JOURNAL_N0[i]))
-			if ((dc > 0)) && { ((!NFLOG_DISPO)) || ((dn > 0)); }; then
-				trouve="${spec#*=} dans ${spec%%=*} (compteur +$dc, nflog +$dn)"
+			if ((dc > 0)) && { ((NFLOG_DISPO)) && ((dn > 0)) ||
+				{ ((!NFLOG_DISPO)) && regle_journal_presente "${spec%%=*}" "${spec#*=}"; }; }; then
+				trouve="${spec#*=} dans ${spec%%=*} (rejets +$dc, nflog +$dn)"
 				break
 			fi
 		done
@@ -301,7 +316,7 @@ verifier_journaux() {
 		if ((NFLOG_DISPO)); then
 			tap_ok "[EX-12] journal Douane : $trouve"
 		else
-			tap_ok "[EX-12] journal Douane : $trouve # nflog non capturé (tcpdump sans nflog) : compteur seul"
+			tap_ok "[EX-12] journal Douane : $trouve # nflog non capturé (tcpdump sans nflog) : compteur rejets et règle du préfixe seuls"
 		fi
 	else
 		tap_pas_ok "[EX-12] journal Douane absent pour : $desc" "attendu (l'un de) : ${JOURNAUX_ATTENDUS[*]}"

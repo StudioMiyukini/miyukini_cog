@@ -83,10 +83,23 @@ controle "aucune écoute hors boucle locale (hors SSH et résolveur systemd)" \
 # ------------------------------------------------------------------ Douane : zone COG
 
 controle "Douane : unité de zone COG activée au démarrage" systemctl is-enabled --quiet miyukini-douane-cog
-controle "Douane : table nftables miyudouane_hote chargée, sortie des comptes COG refusée" \
-	bash -c "sudo -n nft list table inet miyudouane_hote | grep -q 'meta skuid .*oifname != \"lo\" counter packets [0-9]* bytes [0-9]* drop'"
+controle "Douane : table nftables miyudouane_hote chargée, sortie des comptes COG refusée (par compte)" \
+	bash -c "sudo -n nft list table inet miyudouane_hote | grep -qE 'meta skuid .*drop'"
 controle "Douane : table nftables de l'hôte chargée sans réécriture des autres tables (table inet miyudouane_hote seule)" \
 	bash -c "sudo -n nft list tables | grep -q 'table inet miyudouane_hote'"
+# M2 : la zone suit nftables (PartOf), les services COG suivent la zone (BindsTo), contrôle périodique.
+controle "Douane : unité de zone rattachée à nftables.service (PartOf=)" \
+	bash -c "systemctl show -p PartOf --value miyukini-douane-cog | grep -qw nftables.service"
+controle "Douane : unité de zone rechargeable (ExecReload = nft -f du rendu miyudouane hote)" \
+	bash -c "systemctl show -p ExecReload --value miyukini-douane-cog | grep -q '/etc/miyukini/douane-cog.nft'"
+controle "Douane : minuteur de contrôle périodique de la zone actif (fail-closed)" \
+	systemctl is-active --quiet miyukini-douane-cog-controle.timer
+for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
+	controle "COG $u : lié à la zone (BindsTo=miyukini-douane-cog.service)" \
+		bash -c "systemctl show -p BindsTo --value $u | grep -qw miyukini-douane-cog.service"
+done
+controle "Douane : description de zone générée (miyudouane-hote 2, flux boucle par compte)" \
+	bash -c "sudo -n head -c 4096 /etc/miyukini/douane-hote.desc | grep -q '^miyudouane-hote 2' && sudo -n grep -c '^boucle ' /etc/miyukini/douane-hote.desc | grep -qx 2"
 
 # Contrôle positif : le compte cog (non COG) atteint Internet ; sans cela l'isolement ne prouve rien.
 controle "contrôle : un compte non COG atteint Internet (NAT de la VM)" \
@@ -96,8 +109,50 @@ for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-portail; 
 	controle "COG $u : sortie vers Internet impossible (1.1.1.1:80 injoignable)" \
 		test "$(sudo -n -u "$u" curl -s -m 5 -o /dev/null -w '%{http_code}' http://1.1.1.1/)" = 000
 done
-controle "COG miyukini-maia : boucle locale joignable (MAIA /health 200 depuis son compte)" \
-	test "$(sudo -n -u miyukini-maia curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:11435/health)" = 200
+controle "MAIA /health 200 en boucle locale (lu par root : un compte COG n'a pas de flux vers son propre port)" \
+	test "$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:11435/health)" = 200
+# M3 : un compte COG n'atteint en boucle locale que ses flux déclarés (directive « boucle » de
+# miyudouane hote). Refus prouvé par le compteur nommé « rejets » de la table Douane.
+controle "Douane : flux de boucle déclarés par compte (maia -> 50051, miyucloud -> 5432), aucun lo sans compte" bash -c '
+	t=$(sudo -n nft list chain inet miyudouane_hote sortie)
+	m="(\"?miyukini-maia\"?|$(id -u miyukini-maia))"; c="(\"?miyukini-miyucloud\"?|$(id -u miyukini-miyucloud))"
+	grep -qE "meta skuid $m oifname \"lo\" ip daddr 127.0.0.1 tcp dport 50051 accept" <<<"$t" &&
+	grep -qE "meta skuid $c oifname \"lo\" ip daddr 127.0.0.1 tcp dport 5432 accept" <<<"$t" &&
+	! grep -qE "^[[:space:]]*oifname \"lo\" accept" <<<"$t"'
+controle "Douane : rejet des comptes COG journalisé (MDOU|zone-cog|sortie|SORTIE-COG|, NFLOG 110) puis compté" bash -c '
+	t=$(sudo -n nft list chain inet miyudouane_hote sortie)
+	grep -q "log prefix \"MDOU|zone-cog|sortie|SORTIE-COG|\" group 110" <<<"$t" &&
+	grep -q "meta skuid @comptes_cog counter name \"rejets\" drop" <<<"$t"'
+# Journal effectif : capture NFLOG (groupe 110) pendant une tentative 127.0.0.53:53 du compte MAIA.
+if command -v tcpdump >/dev/null 2>&1; then
+	controle "COG miyukini-maia : tentative 127.0.0.53:53 journalisée sur NFLOG 110 (préfixe SORTIE-COG)" bash -c '
+		d=$(sudo -n mktemp -d /run/cog-nflog.XXXXXX); f=$d/capture.pcap
+		sudo -n timeout 8 tcpdump -Z root -i nflog:110 -c 1 -U -w "$f" >/dev/null 2>&1 & p=$!
+		sleep 2
+		sudo -n -u miyukini-maia timeout 3 bash -c "exec 3<>/dev/tcp/127.0.0.53/53" 2>/dev/null
+		wait $p
+		r=1; sudo -n grep -aq "MDOU|zone-cog|sortie|SORTIE-COG|" "$f" && r=0
+		sudo -n rm -rf "$d"; exit $r'
+fi
+rejets_zone() { sudo -n nft list counter inet miyudouane_hote rejets | sed -n 's/.*packets \([0-9]*\).*/\1/p'; }
+export -f rejets_zone
+controle "COG miyukini-maia : résolveur loopback 127.0.0.53:53 refusé (compteur rejets incrémenté)" bash -c '
+	avant=$(rejets_zone)
+	sudo -n -u miyukini-maia timeout 4 bash -c "exec 3<>/dev/tcp/127.0.0.53/53" 2>/dev/null
+	apres=$(rejets_zone)
+	[ -n "$avant" ] && [ "$apres" -gt "$avant" ]'
+controle "COG miyukini-miyucloud : 127.0.0.1:8086 (son propre port, non déclaré) refusé (compteur rejets)" bash -c '
+	avant=$(rejets_zone)
+	sudo -n -u miyukini-miyucloud timeout 4 bash -c "exec 3<>/dev/tcp/127.0.0.1/8086" 2>/dev/null
+	apres=$(rejets_zone)
+	[ -n "$avant" ] && [ "$apres" -gt "$avant" ]'
+controle "COG miyukini-portail : KindMother 127.0.0.1:50051 (flux d'un autre compte) refusé (compteur rejets)" bash -c '
+	avant=$(rejets_zone)
+	sudo -n -u miyukini-portail timeout 4 bash -c "exec 3<>/dev/tcp/127.0.0.1/50051" 2>/dev/null
+	apres=$(rejets_zone)
+	[ -n "$avant" ] && [ "$apres" -gt "$avant" ]'
+controle "COG miyukini-miyucloud : PostgreSQL 127.0.0.1:5432 joignable (flux déclaré)" \
+	sudo -n -u miyukini-miyucloud bash -c 'exec 3<>/dev/tcp/127.0.0.1/5432'
 controle "COG miyukini-maia : KindMother joignable en boucle locale depuis son compte" \
 	sudo -n -u miyukini-maia bash -c 'exec 3<>/dev/tcp/127.0.0.1/50051'
 
@@ -259,7 +314,7 @@ controle "MAIA : bridge.toml monté en lecture seule dans l'espace du service" b
 
 # B7 : binaires installés conformes au manifeste du paquet (lié au commit).
 controle "binaires installés conformes à /opt/miyukini/MANIFESTE" bash -c \
-	"cd /opt/miyukini && grep -v '^#' MANIFESTE | grep '  \\./bin/' | sha256sum --check --strict --quiet -"
+	"cd /opt/miyukini && grep -v '^#' MANIFESTE | grep '  \\./bin/' | grep -v 'bin/arretes_essai$' | sha256sum --check --strict --quiet -"
 
 propriete_egale() { [[ "$(systemctl show -p "$2" --value "$1")" == "$3" ]]; }
 for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do

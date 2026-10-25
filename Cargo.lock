@@ -85,7 +85,7 @@ checksum = "250f629c0161ad8107cf89319e990051fae62832fd343083bea452d93e2205fd"
 
 [[package]]
 name = "alicia-mvp"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -1061,14 +1061,14 @@ dependencies = [
 
 [[package]]
 name = "bondingbrother"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "strongfather",
 ]
 
 [[package]]
 name = "borderguard"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "miyusceau",
@@ -1380,7 +1380,7 @@ dependencies = [
 
 [[package]]
 name = "caringnanny"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "miyuvigie",
@@ -1418,7 +1418,7 @@ dependencies = [
 
 [[package]]
 name = "central-remote"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "axum 0.8.8",
  "central-remote-protocol",
@@ -1448,7 +1448,7 @@ dependencies = [
 
 [[package]]
 name = "central-remote-protocol"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -1687,7 +1687,7 @@ dependencies = [
 
 [[package]]
 name = "cog-portal-contract"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "serde",
  "thiserror 2.0.18",
@@ -1695,7 +1695,7 @@ dependencies = [
 
 [[package]]
 name = "cog-web-portal"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "axum 0.8.8",
  "chrono",
@@ -3368,7 +3368,7 @@ dependencies = [
 
 [[package]]
 name = "everbuddy"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "kindmother",
  "miyukini-kernel",
@@ -4830,7 +4830,7 @@ dependencies = [
 
 [[package]]
 name = "jay-collab"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "ed25519-dalek",
  "futures-util",
@@ -4944,7 +4944,7 @@ dependencies = [
 
 [[package]]
 name = "jay1tribu"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "kindmother",
@@ -4963,7 +4963,7 @@ dependencies = [
 
 [[package]]
 name = "jay1tribu-app"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "dioxus",
@@ -4997,7 +4997,7 @@ dependencies = [
 
 [[package]]
 name = "jaybureau-core"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "rand 0.8.5",
@@ -5009,7 +5009,7 @@ dependencies = [
 
 [[package]]
 name = "jaycloud"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "argon2",
  "async-trait",
@@ -5038,7 +5038,7 @@ dependencies = [
 
 [[package]]
 name = "jaycloud-client"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "miyualicia-dispatcher",
@@ -5052,7 +5052,7 @@ dependencies = [
 
 [[package]]
 name = "jaycloud-migrate"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "jaycloud",
  "serde",
@@ -5064,7 +5064,7 @@ dependencies = [
 
 [[package]]
 name = "jayclub"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "jay1tribu",
@@ -5078,7 +5078,7 @@ dependencies = [
 
 [[package]]
 name = "jaycontact-client"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "miyualicia-dispatcher",
@@ -5092,7 +5092,7 @@ dependencies = [
 
 [[package]]
 name = "jaydocs-client"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -5109,7 +5109,7 @@ dependencies = [
 
 [[package]]
 name = "jayfaim"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "serde",
@@ -5119,7 +5119,7 @@ dependencies = [
 
 [[package]]
 name = "jaykoa"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "jayrdv",
@@ -5138,7 +5138,7 @@ dependencies = [
 
 [[package]]
 name = "jaykoa-app"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "dioxus",
@@ -5154,7 +5154,7 @@ dependencies = [
 
 [[package]]
 name = "jaykoa-client"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "borderguard",
@@ -5173,7 +5173,7 @@ dependencies = [
 
 [[package]]
 name = "jaykonta"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "kindmother",
@@ -5192,7 +5192,7 @@ dependencies = [
 
 [[package]]
 name = "jaykonta-app"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "dioxus",
@@ -5208,7 +5208,7 @@ dependencies = [
 
 [[package]]
 name = "jaykonta-client"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -5225,7 +5225,7 @@ dependencies = [
 
 [[package]]
 name = "jaymail"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "imap",
@@ -5242,7 +5242,7 @@ dependencies = [
 
 [[package]]
 name = "jaymail-client"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -5259,7 +5259,7 @@ dependencies = [
 
 [[package]]
 name = "jaymanga"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "image",
@@ -5279,7 +5279,7 @@ dependencies = [
 
 [[package]]
 name = "jaymanga-app"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "dioxus",
@@ -5296,7 +5296,7 @@ dependencies = [
 
 [[package]]
 name = "jaymessage"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chacha20poly1305",
  "chrono",
@@ -5316,7 +5316,7 @@ dependencies = [
 
 [[package]]
 name = "jaymessage-client"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -5333,7 +5333,7 @@ dependencies = [
 
 [[package]]
 name = "jaymeteo-client"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "miyualicia-dispatcher",
@@ -5347,7 +5347,7 @@ dependencies = [
 
 [[package]]
 name = "jayrdv"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "jayrdv-facade",
@@ -5368,7 +5368,7 @@ dependencies = [
 
 [[package]]
 name = "jayrdv-client"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -5385,7 +5385,7 @@ dependencies = [
 
 [[package]]
 name = "jayrdv-facade"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "jayrdv-traite",
  "miyauth",
@@ -5400,14 +5400,14 @@ dependencies = [
 
 [[package]]
 name = "jayrdv-traite"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyuhybride",
 ]
 
 [[package]]
 name = "jaysheets-client"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -5424,7 +5424,7 @@ dependencies = [
 
 [[package]]
 name = "jayslides-client"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -5549,7 +5549,7 @@ dependencies = [
 
 [[package]]
 name = "kindmother"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "miyusql",
@@ -5559,7 +5559,7 @@ dependencies = [
 
 [[package]]
 name = "kindmother-client"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "ed25519-dalek",
@@ -5577,7 +5577,7 @@ dependencies = [
 
 [[package]]
 name = "kindmother-db-key"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "argon2",
  "getrandom 0.2.17",
@@ -5587,7 +5587,7 @@ dependencies = [
 
 [[package]]
 name = "kindmother-heritage"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "kindmother",
@@ -5605,7 +5605,7 @@ dependencies = [
 
 [[package]]
 name = "kindmother-import"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "jay1tribu",
  "jaykoa",
@@ -5620,7 +5620,7 @@ dependencies = [
 
 [[package]]
 name = "kindmother-service"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "ed25519-dalek",
@@ -5938,7 +5938,7 @@ checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
 
 [[package]]
 name = "logisticssteward"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "caringnanny",
  "miyukini-kernel",
@@ -6056,7 +6056,7 @@ dependencies = [
 
 [[package]]
 name = "maia"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "aes-gcm",
  "async-recursion",
@@ -6088,7 +6088,7 @@ dependencies = [
 
 [[package]]
 name = "maia-federee"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyauth",
  "miyufederation",
@@ -6104,7 +6104,7 @@ dependencies = [
 
 [[package]]
 name = "maia-llm"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-stream",
  "axum 0.8.8",
@@ -6128,7 +6128,7 @@ dependencies = [
 
 [[package]]
 name = "maia-memoire"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "kindmother-client",
@@ -6144,7 +6144,7 @@ dependencies = [
 
 [[package]]
 name = "maia-modeles"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "hex",
  "libc",
@@ -6161,7 +6161,7 @@ dependencies = [
 
 [[package]]
 name = "maia-stt"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "hound",
  "miyualicia-capture",
@@ -6267,7 +6267,7 @@ dependencies = [
 
 [[package]]
 name = "masterbutler"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
 ]
@@ -6443,7 +6443,7 @@ dependencies = [
 
 [[package]]
 name = "mip-configurator"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "serde",
@@ -6472,7 +6472,7 @@ dependencies = [
 
 [[package]]
 name = "miyauth"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "ed25519-dalek",
  "hkdf",
@@ -6486,7 +6486,7 @@ dependencies = [
 
 [[package]]
 name = "miyualicia"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "axum 0.8.8",
  "borderguard",
@@ -6517,7 +6517,7 @@ dependencies = [
 
 [[package]]
 name = "miyualicia-api"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "argon2",
  "axum 0.8.8",
@@ -6542,7 +6542,7 @@ dependencies = [
 
 [[package]]
 name = "miyualicia-automations"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "miyualicia-devices",
@@ -6557,7 +6557,7 @@ dependencies = [
 
 [[package]]
 name = "miyualicia-capture"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "blake3",
  "cpal 0.17.1",
@@ -6572,7 +6572,7 @@ dependencies = [
 
 [[package]]
 name = "miyualicia-cores-gate"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "borderguard",
@@ -6585,7 +6585,7 @@ dependencies = [
 
 [[package]]
 name = "miyualicia-devices"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "serde",
@@ -6597,7 +6597,7 @@ dependencies = [
 
 [[package]]
 name = "miyualicia-dispatcher"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-trait",
  "bondingbrother",
@@ -6616,7 +6616,7 @@ dependencies = [
 
 [[package]]
 name = "miyualicia-http"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "miyualicia-devices",
@@ -6631,7 +6631,7 @@ dependencies = [
 
 [[package]]
 name = "miyualicia-memory"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "rusqlite",
@@ -6645,7 +6645,7 @@ dependencies = [
 
 [[package]]
 name = "miyualicia-mqtt"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "bytes",
  "chrono",
@@ -6661,7 +6661,7 @@ dependencies = [
 
 [[package]]
 name = "miyualicia-skills"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "serde",
@@ -6673,7 +6673,7 @@ dependencies = [
 
 [[package]]
 name = "miyualicia-wakeword"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "half",
  "hound",
@@ -6687,7 +6687,7 @@ dependencies = [
 
 [[package]]
 name = "miyuantispam"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6696,7 +6696,7 @@ dependencies = [
 
 [[package]]
 name = "miyubilling"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6704,7 +6704,7 @@ dependencies = [
 
 [[package]]
 name = "miyubooking"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6712,7 +6712,7 @@ dependencies = [
 
 [[package]]
 name = "miyubookmarks"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6720,7 +6720,7 @@ dependencies = [
 
 [[package]]
 name = "miyucalc"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6728,7 +6728,7 @@ dependencies = [
 
 [[package]]
 name = "miyucanal"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "hmac",
  "miyuregistre",
@@ -6740,7 +6740,7 @@ dependencies = [
 
 [[package]]
 name = "miyucdr"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "image",
  "serde_json",
@@ -6750,7 +6750,7 @@ dependencies = [
 
 [[package]]
 name = "miyuclock"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6758,7 +6758,7 @@ dependencies = [
 
 [[package]]
 name = "miyucloud"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "argon2",
  "base64",
@@ -6790,7 +6790,7 @@ dependencies = [
 
 [[package]]
 name = "miyucloud-dav"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "async-stream",
  "axum 0.8.8",
@@ -6891,7 +6891,7 @@ dependencies = [
 
 [[package]]
 name = "miyucms"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6899,7 +6899,7 @@ dependencies = [
 
 [[package]]
 name = "miyucomptareports"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6907,7 +6907,7 @@ dependencies = [
 
 [[package]]
 name = "miyucontacts"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6915,7 +6915,7 @@ dependencies = [
 
 [[package]]
 name = "miyucptaledger"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6923,7 +6923,7 @@ dependencies = [
 
 [[package]]
 name = "miyudeclarations"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6931,7 +6931,7 @@ dependencies = [
 
 [[package]]
 name = "miyudiscovery"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6939,7 +6939,7 @@ dependencies = [
 
 [[package]]
 name = "miyudouane"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "borderguard",
  "miyusceau",
@@ -6947,7 +6947,7 @@ dependencies = [
 
 [[package]]
 name = "miyuexpense"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6955,7 +6955,7 @@ dependencies = [
 
 [[package]]
 name = "miyuexport"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "genpdf",
  "miyukini-kernel",
@@ -6965,7 +6965,7 @@ dependencies = [
 
 [[package]]
 name = "miyufederation"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "hmac",
  "miyauth",
@@ -6980,7 +6980,7 @@ dependencies = [
 
 [[package]]
 name = "miyufeeds"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6988,7 +6988,7 @@ dependencies = [
 
 [[package]]
 name = "miyuforum"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -6996,7 +6996,7 @@ dependencies = [
 
 [[package]]
 name = "miyufrontiere"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "borderguard",
  "caringnanny",
@@ -7012,7 +7012,7 @@ dependencies = [
 
 [[package]]
 name = "miyuhr"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7020,7 +7020,7 @@ dependencies = [
 
 [[package]]
 name = "miyuhybride"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "borderguard",
  "ed25519-dalek",
@@ -7037,7 +7037,7 @@ dependencies = [
 
 [[package]]
 name = "miyuinvoice"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7045,7 +7045,7 @@ dependencies = [
 
 [[package]]
 name = "miyujobs"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7068,7 +7068,7 @@ dependencies = [
 
 [[package]]
 name = "miyukini-admin"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "argon2",
  "axum 0.7.9",
@@ -7093,7 +7093,7 @@ dependencies = [
 
 [[package]]
 name = "miyukini-central"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "argon2",
  "base64",
@@ -7191,7 +7191,7 @@ dependencies = [
 
 [[package]]
 name = "miyukini-cog-bridge"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "central-remote-protocol",
  "chacha20poly1305",
@@ -7217,7 +7217,7 @@ dependencies = [
 
 [[package]]
 name = "miyukini-connect"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "argon2",
  "rand 0.8.5",
@@ -7230,14 +7230,14 @@ dependencies = [
 
 [[package]]
 name = "miyukini-kernel"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "uuid",
 ]
 
 [[package]]
 name = "miyukini-origin"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "anyhow",
  "argon2",
@@ -7275,7 +7275,7 @@ dependencies = [
 
 [[package]]
 name = "miyukini-service-ui"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "dioxus",
  "miyuki-ui-dioxus",
@@ -7284,7 +7284,7 @@ dependencies = [
 
 [[package]]
 name = "miyukini-whisper-app"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyustt",
  "miyutts",
@@ -7295,7 +7295,7 @@ dependencies = [
 
 [[package]]
 name = "miyukinibb"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyauth",
  "miyusceau",
@@ -7307,7 +7307,7 @@ dependencies = [
 
 [[package]]
 name = "miyukinisales"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "serde",
@@ -7317,7 +7317,7 @@ dependencies = [
 
 [[package]]
 name = "miyukiniwatch"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "kindmother",
@@ -7336,7 +7336,7 @@ dependencies = [
 
 [[package]]
 name = "miyukiniwatch-app"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "dioxus",
@@ -7351,7 +7351,7 @@ dependencies = [
 
 [[package]]
 name = "miyulocale"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "miyukini-kernel",
@@ -7360,7 +7360,7 @@ dependencies = [
 
 [[package]]
 name = "miyumarket"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "miyusceau",
@@ -7372,7 +7372,7 @@ dependencies = [
 
 [[package]]
 name = "miyumedia"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7380,7 +7380,7 @@ dependencies = [
 
 [[package]]
 name = "miyumoderationforum"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7388,7 +7388,7 @@ dependencies = [
 
 [[package]]
 name = "miyunotify"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7396,7 +7396,7 @@ dependencies = [
 
 [[package]]
 name = "miyupm"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7404,7 +7404,7 @@ dependencies = [
 
 [[package]]
 name = "miyupolls"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7412,7 +7412,7 @@ dependencies = [
 
 [[package]]
 name = "miyuportail"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "ed25519-dalek",
  "landlock",
@@ -7427,7 +7427,7 @@ dependencies = [
 
 [[package]]
 name = "miyuposanalytics"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7435,7 +7435,7 @@ dependencies = [
 
 [[package]]
 name = "miyuposinventory"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7443,7 +7443,7 @@ dependencies = [
 
 [[package]]
 name = "miyuposkitchen"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7451,7 +7451,7 @@ dependencies = [
 
 [[package]]
 name = "miyuposloyalty"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7459,7 +7459,7 @@ dependencies = [
 
 [[package]]
 name = "miyupospayment"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7467,7 +7467,7 @@ dependencies = [
 
 [[package]]
 name = "miyupossales"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7475,7 +7475,7 @@ dependencies = [
 
 [[package]]
 name = "miyuprofile"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7484,7 +7484,7 @@ dependencies = [
 
 [[package]]
 name = "miyuracine"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "argon2",
  "chacha20poly1305",
@@ -7500,7 +7500,7 @@ dependencies = [
 
 [[package]]
 name = "miyuregistre"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "axum 0.8.8",
  "ed25519-dalek",
@@ -7518,7 +7518,7 @@ dependencies = [
 
 [[package]]
 name = "miyurelais"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "borderguard",
  "caringnanny",
@@ -7530,7 +7530,7 @@ dependencies = [
 
 [[package]]
 name = "miyusceau"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "ed25519-dalek",
  "rand_core 0.6.4",
@@ -7539,7 +7539,7 @@ dependencies = [
 
 [[package]]
 name = "miyusearch"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7547,7 +7547,7 @@ dependencies = [
 
 [[package]]
 name = "miyushipping"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7555,7 +7555,7 @@ dependencies = [
 
 [[package]]
 name = "miyusocialfeed"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7563,7 +7563,7 @@ dependencies = [
 
 [[package]]
 name = "miyusocialmessaging"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7571,7 +7571,7 @@ dependencies = [
 
 [[package]]
 name = "miyusocialmoderation"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7579,7 +7579,7 @@ dependencies = [
 
 [[package]]
 name = "miyusocialprofile"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7587,7 +7587,7 @@ dependencies = [
 
 [[package]]
 name = "miyusql"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "miyusql",
@@ -7596,7 +7596,7 @@ dependencies = [
 
 [[package]]
 name = "miyustore"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7604,7 +7604,7 @@ dependencies = [
 
 [[package]]
 name = "miyustory"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7612,7 +7612,7 @@ dependencies = [
 
 [[package]]
 name = "miyustt"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "axum 0.8.8",
  "miyauth",
@@ -7626,7 +7626,7 @@ dependencies = [
 
 [[package]]
 name = "miyutext"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "pulldown-cmark 0.9.6",
@@ -7635,7 +7635,7 @@ dependencies = [
 
 [[package]]
 name = "miyutreasury"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7643,7 +7643,7 @@ dependencies = [
 
 [[package]]
 name = "miyutts"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "axum 0.8.8",
  "base64",
@@ -7658,7 +7658,7 @@ dependencies = [
 
 [[package]]
 name = "miyuvalidate"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7668,11 +7668,11 @@ dependencies = [
 
 [[package]]
 name = "miyuvigie"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 
 [[package]]
 name = "miyuweb"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7680,7 +7680,7 @@ dependencies = [
 
 [[package]]
 name = "miyuwebway_participant"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "bytes",
  "chrono",
@@ -7701,7 +7701,7 @@ dependencies = [
 
 [[package]]
 name = "miyuwebway_tracker"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7710,7 +7710,7 @@ dependencies = [
 
 [[package]]
 name = "miyuwidgets"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -7774,7 +7774,7 @@ dependencies = [
 
 [[package]]
 name = "mscm-generator"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
  "regex",
@@ -11547,7 +11547,7 @@ dependencies = [
 
 [[package]]
 name = "strongfather"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyukini-kernel",
  "serde",
@@ -11746,7 +11746,7 @@ checksum = "7b2093cf4c8eb1e67749a6762251bc9cd836b6fc171623bd0a9d324d37af2417"
 
 [[package]]
 name = "tamr"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "kindmother",
  "miyukini-kernel",
@@ -11818,7 +11818,7 @@ checksum = "61c41af27dd6d1e27b1b16b489db798443478cef1f06a660c96db617ba5de3b1"
 
 [[package]]
 name = "team"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "axum 0.8.8",
  "chrono",
@@ -12236,7 +12236,7 @@ dependencies = [
 
 [[package]]
 name = "toolkit-registry-export"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "miyauth",
  "miyuantispam",
@@ -13936,7 +13936,7 @@ dependencies = [
 
 [[package]]
 name = "worrysentinel"
-version = "0.1.0"
+version = "0.9.0-beta.1"
 dependencies = [
  "caringnanny",
  "miyukini-kernel",

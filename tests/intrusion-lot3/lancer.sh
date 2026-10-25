@@ -118,7 +118,7 @@ prevol() {
 		NFLOG_DISPO=1
 		info "journaux NFLOG : tcpdump -i nflog:<groupe> (préfixes MDOU| lus dans les captures)"
 	else
-		avertir "tcpdump avec prise en charge nflog absent : seuls les compteurs des règles MDOU| seront vérifiés"
+		avertir "tcpdump avec prise en charge nflog absent : seuls le compteur rejets et la présence des règles MDOU| seront vérifiés"
 	fi
 	command -v ping >/dev/null 2>&1 && PING_DISPO=1
 	command -v nmap >/dev/null 2>&1 || info "nmap absent : balayages ignorés (facultatif)"
@@ -285,7 +285,7 @@ demarrer_ecouteurs() {
 	if ((NFLOG_DISPO)); then
 		for ns in "${NS_ZONES[@]}" "${NS_FRONTIERES[@]}"; do
 			if [[ ! -f $TRAVAIL/journaux/nflog_$ns.pcap ]]; then
-				avertir "capture NFLOG de $ns absente (voir $TRAVAIL/journaux/tcpdump_$ns.log ; AppArmor ?) : compteurs seuls"
+				avertir "capture NFLOG de $ns absente (voir $TRAVAIL/journaux/tcpdump_$ns.log ; AppArmor ?) : compteur rejets seul"
 				NFLOG_DISPO=0
 			fi
 		done

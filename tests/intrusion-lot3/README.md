@@ -28,7 +28,7 @@ déclarées et interdites avec des outils standard. Il produit un rapport TAP et
 | `br_netfilter` | **ne doit pas être chargé** : il ferait passer les trames pontées par les crochets `inet` des espaces de zone, qui rejettent tout (le filtrage des zones est fait par `table bridge` + `nf_conntrack_bridge`). Docker le charge : `modprobe -r br_netfilter` sur la VM |
 | Outils | `iproute2` (`ip`, `ss`), `nftables` ≥ 1.0, `kmod`, `procps` (`sysctl`), `coreutils` (`timeout`), `bash` ≥ 4 |
 | Écouteur TCP | `socat`, sinon `python3`, sinon `nc` (OpenBSD, busybox ou traditionnel) — détection automatique ; le client n'utilise que `bash` (`/dev/tcp`) |
-| Journaux | `tcpdump` avec prise en charge `nflog` (recommandé). Sans lui, seuls les compteurs des règles `MDOU|…` sont vérifiés |
+| Journaux | `tcpdump` avec prise en charge `nflog` (recommandé). Sans lui, seuls le compteur `rejets` et la présence des règles `MDOU|…` sont vérifiés |
 | Facultatif | `ping` (sondes ICMP), `nmap` (balayages de ports) |
 | Construction | `cargo` (dans le compte utilisateur ; root n'en a généralement pas besoin) |
 
@@ -87,14 +87,18 @@ Le répertoire de travail conserve les arrêtés, les règles générées, ce qu
 - **Flux déclaré** : la connexion aboutit **et** le jeton unique envoyé arrive à l'écouteur attendu.
 - **Flux interdit** : la connexion expire ou n'a pas de route (ou EPERM, rejet par la chaîne de sortie
   locale). Un **refus TCP** (RST) est un échec : il prouverait que le paquet a atteint un hôte. Le jeton ne
-  doit être reçu par **aucun** écouteur. Puis une ligne TAP vérifie le **journal Douane** : le compteur de la
-  règle `log prefix "MDOU|<lieu>|<chaîne>|<MOTIF>|"` attendue a progressé **et**, si `tcpdump` nflog est
-  disponible, le préfixe apparaît dans la capture NFLOG de l'espace (`group` 101–103 frontières, 110–112 zones).
+  doit être reçu par **aucun** écouteur. Puis une ligne TAP vérifie le **journal Douane** : le compteur nommé
+  `rejets` de l'espace a progressé (rejet effectif) **et** la capture NFLOG de l'espace contient au moins une
+  ligne de plus portant le préfixe attendu `MDOU|<lieu>|<chaîne>|<MOTIF>|` (`group` 101–103 frontières,
+  110–112 zones). La journalisation est bornée (A-016 : une ligne par flux et par seconde, 50 lignes/s par
+  table) : le banc attend **au moins une** ligne par sonde, pas une par paquet. La règle `log` ne porte pas
+  de compteur ; sans `tcpdump` nflog, seuls le compteur `rejets` et la présence de la règle du préfixe sont
+  vérifiés.
 
 > Pourquoi pas `journalctl -k` / `dmesg` : les règles de la Douane journalisent en **NFLOG** (`log … group N`),
 > destiné aux Vigies, et non dans le journal noyau ; de plus le journal noyau est désactivé par défaut hors de
-> l'espace initial (`nf_log_all_netns=0`). Le banc lit donc les groupes NFLOG (`tcpdump -i nflog:N`) et les
-> compteurs des règles, sans modifier les règles générées.
+> l'espace initial (`nf_log_all_netns=0`). Le banc lit donc les groupes NFLOG (`tcpdump -i nflog:N`) et le
+> compteur nommé `rejets`, sans modifier les règles générées.
 
 ## Sondes et exigences couvertes
 

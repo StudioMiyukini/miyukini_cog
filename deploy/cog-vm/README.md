@@ -26,8 +26,8 @@ Installation de test des services COG dans la VM jetable `cog-essai` (Ubuntu 26.
 ```sh
 deploy/cog-vm/pousser.sh          # construit le paquet, pousse, installe
 # dans la VM :
-/home/cog/cog-paquet/tester.sh          # tests de fumée (85 contrôles)
-/home/cog/cog-paquet/tester.sh --banc   # + banc d'intrusion lot 3 (root, ~2 min ; 100 contrôles)
+/home/cog/cog-paquet/tester.sh          # tests de fumée (100 contrôles)
+/home/cog/cog-paquet/tester.sh --banc   # + banc d'intrusion lot 3 (root, ~2 min ; 101 contrôles, dont le banc à 100)
 ```
 
 Les binaires doivent être construits au préalable (`cargo build --release -p <paquet>`).
@@ -84,17 +84,21 @@ n'apparaît ni dans `argv` ni dans les journaux PostgreSQL.
   vérifie avec `miyudouane regles` (signature, constitution, vigueur) pour `externe`, `portail-interne` et
   `portail-local`, puis compile la zone COG avec `miyudouane zone --zone cog`. Le plan des essais reprend les
   sandboxes du banc (`--sandbox cog:voie-a …`) : le Douane refuse un arrêté dont une voie n'a pas de sandbox.
-- Règles appliquées sur l'hôte de la VM : table **`inet miyudouane_hote`** (fichier `/etc/miyukini/douane-cog.nft`,
-  chargé par `miyukini-douane-cog.service`, dont dépendent les quatre services COG) :
-  - `sortie_cog` : les comptes COG (`miyukini-kindmother`, `-maia`, `-miyucloud`, `-portail`) n'envoient rien hors
-    boucle locale (`oifname != "lo"` refusé) : aucune route sortante ;
-  - `entree_cog` : entrée non locale refusée sur les ports COG (50051, 11435, 8086, 8090, 5432) ;
+- Règles appliquées sur l'hôte de la VM : table **`inet miyudouane_hote`**, **générée** par la Douane
+  (`commun.sh`, fonction `douane_cog`) : l'installateur écrit la description `/etc/miyukini/douane-hote.desc`
+  (format `miyudouane-hote 2`, en-tête de `crates/miyudouane/src/hote.rs`), la fait auditer
+  (`miyudouane hote --description …`), puis l'applique (`--appliquer --fichier /etc/miyukini/douane-cog.nft`) ;
+  le fichier rendu est rechargé par `miyukini-douane-cog.service`, dont dépendent les quatre services COG :
+  - chaîne `sortie` : les comptes COG (`miyukini-kindmother`, `-maia`, `-miyucloud`, `-portail`) n'envoient rien
+    hors boucle locale, et en boucle locale seulement leurs flux déclarés (`boucle`) :
+    `miyukini-maia → 127.0.0.1:50051`, `miyukini-miyucloud → 127.0.0.1:5432` ; le reste (résolveur 127.0.0.53,
+    autre port, autre compte) est journalisé `MDOU|zone-cog|sortie|SORTIE-COG|` (NFLOG 110) et rejeté (compteur `rejets`) ;
+  - chaîne `entree` : entrée non locale refusée sur les ports COG (50051, 11435, 8086, 8090, 5432) ;
   - SSH d'administration et les autres comptes non touchés ; aucun `flush ruleset` (autres tables intactes).
+- Rattachement : la zone suit `nftables.service` (`PartOf=`), les services la suivent (`BindsTo=`) ; minuteur
+  `miyukini-douane-cog-controle.timer` (chaque minute) : table absente ⇒ rechargée, sinon services COG arrêtés.
 - Contrôle positif dans `tester.sh` : un compte non COG atteint Internet, donc l'échec des comptes COG a un sens.
-- **Limite** : `miyudouane` ne produit pas de règles par UID (`meta skuid`) sur l'hôte ; `miyudouane zone` rend des
-  règles pour espaces de noms (services en sandboxes). La table hôte est donc écrite par `installer.sh`, à partir
-  de la politique « aucune sortie COG » que les arrêtés d'essai ne contredisent pas (flux COG déclarés vers Franche
-  seulement, non routés dans la VM). Les arrêtés sont valides un jour (`pas_apres`) : leur vérification a lieu à
+- **Limite** : les arrêtés sont des arrêtés d'essai valides un jour (`pas_apres`) : leur vérification a lieu à
   l'installation seulement.
 
 ### Profils AppArmor (`deploy/apparmor/`, mode enforce)
@@ -102,7 +106,7 @@ n'apparaît ni dans `argv` ni dans les journaux PostgreSQL.
 | Profil | Binaire | Accès retenus (observés en journal `DENIED` pendant `scenarios.sh`) |
 |---|---|---|
 | `miyukini-kindmother` | `/opt/miyukini/bin/kindmother-server` | `/var/lib/miyukini/kindmother/` rw (chmod des droits 0700 par le service), TCP, `/etc/machine-id` r, `cpu.max` et `/proc/PID/cgroup` r |
-| `miyukini-maia` | `/opt/miyukini/bin/maia` | `/var/lib/miyukini/maia/**` rwk (`bridge.toml` en lecture seule), `/etc/miyukini/strongfather/**` r, TCP, sondes `/proc/uptime`, `/proc/`, `/sys/class/drm/**` r ; aucun exec |
+| `miyukini-maia` | `/opt/miyukini/bin/maia` | `/var/lib/miyukini/maia/**` rwk (`bridge.toml` en lecture seule), `/etc/miyukini/strongfather/**` r, TCP, sondes `/proc/uptime`, `/proc/`, `/sys/class/drm/**` r (et `vendor` / `mem_info_vram_total` du périphérique PCI) ; `/proc/N/stat` et `/proc/N/task/` refusés en silence (`deny` : parcours des processus par `sysinfo`, inutile) ; aucun exec |
 | `miyukini-miyucloud` | `/opt/miyukini/bin/miyucloud-server` | `/var/lib/miyukini/miyucloud/**` rwk, `/opt/miyukini/share/miyucloud/**` r, `/tmp` (fichiers temporaires), TCP (PostgreSQL et écoute), NSS `passwd`/`group`/`nsswitch.conf` r |
 | `miyukini-cog-web-portal` | `/opt/miyukini/bin/cog-web-portal` | `/var/lib/miyukini/cog-web-portal/**` rwk, TCP, `cpu.max` et `/proc/PID/cgroup` r |
 | `miyukini-portail-sas` | `/opt/miyukini/bin/portail-sas` | aucun réseau (`deny network`), aucun fichier hors bibliothèques ; `/proc/PID/fd/` r (fermeture des descripteurs). Second niveau derrière Landlock et seccomp du sas |

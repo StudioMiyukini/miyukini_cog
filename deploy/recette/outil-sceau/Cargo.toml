@@ -1,0 +1,21 @@
+# Outil de scellement des manifestes de paquet de recette (Sceau v1.1, crate miyusceau).
+# Crate AUTONOME : [workspace] vide, hors workspace racine (qui n'est pas modifié).
+# Construction : cargo build --release --locked (dans ce répertoire).
+[package]
+name = "outil-sceau-recette"
+version = "0.9.0-beta.1"
+edition = "2021"
+publish = false
+description = "Signe et vérifie le MANIFESTE d'un paquet COG (type Sceau ManifestePaquet)"
+
+[[bin]]
+name = "outil-sceau"
+path = "src/main.rs"
+
+[dependencies]
+miyusceau = { path = "../../../crates/miyusceau" }
+sha2 = "0.10"
+ed25519-dalek = "2"
+base64 = "0.22"
+
+[workspace]
