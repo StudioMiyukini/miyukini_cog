@@ -550,9 +550,8 @@ fn nettoyage_ne_reconstitue_aucune_signature() {
         ("text/csv", &b"\x16MZ"[..]),
         ("text/plain", &b"\x0c%P\x03DF-M"[..]),
     ] {
-        match miyucdr::desarmer(mime, entree, &lim) {
-            Ok(r) => assert_eq!(miyucdr::detecter(&r.octets), miyucdr::TypeDetecte::Texte, "{entree:?}"),
-            Err(_) => {}
+        if let Ok(r) = miyucdr::desarmer(mime, entree, &lim) {
+            assert_eq!(miyucdr::detecter(&r.octets), miyucdr::TypeDetecte::Texte, "{entree:?}");
         }
     }
 }
