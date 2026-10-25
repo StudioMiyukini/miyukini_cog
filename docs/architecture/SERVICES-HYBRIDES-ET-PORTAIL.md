@@ -1,6 +1,6 @@
 # Services hybrides et durcissement du Portail interne
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-004** (v1.4 : Portail, CDR et quarantaine du lot 3, §1, §3.1). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-004** (v1.4 : Portail, CDR et quarantaine du lot 3, §1, §3.1) · amendé **A-007** (v1.7 : services hybrides du lot 5, H3 refusé, anti-rejeu par auteur, §1, §3.1, §4.1). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id arch.cog.services-hybrides -->
 <!-- @role architecture-specification -->
@@ -28,6 +28,7 @@
   - H3 : comme H2 + destinations sortantes en liste blanche + intention StrongFather pour chaque action
 - La classe est déclarée dans le **contrat** (manifeste signé) ; changer de classe = nouvelle installation
 - Sens de voie ouverts (A-004) : H0 aucun · H1 sortante · H2 / H3 entrante + sortante (liste blanche sortante et intention StrongFather de H3 : hors Portail)
+- **Amendé A-007** : un manifeste **H3 est refusé** tant que l'encodage de sa liste blanche sortante et de son intention StrongFather n'est pas spécifié (§4.1)
 
 ## 2. Gabarit d'un service hybride
 
@@ -114,7 +115,7 @@ Implémenté par `crates/miyuportail` et `crates/miyucdr` (lot 3).
 | 2 | `sens` | `0x01` entrante, `0x02` sortante |
 | 3 | `version du traité` | u64, **égale** à celle du traité |
 | 4 | `type` | u64, déclaré par le traité pour ce sens |
-| 5 | `séquence` | u64, **strictement croissante** par session (anti-rejeu) |
+| 5 | `séquence` | u64, **strictement croissante** ~~par session~~ **par auteur dans la session** (anti-rejeu ; amendé A-007, implémentation : par session, à aligner) |
 | 6 | `émise le` | u64, secondes Unix |
 | 7 | `champs` | TLV imbriqué, schéma du traité (≤ 32 champs ; traité ≤ 64 types) |
 
@@ -154,6 +155,74 @@ Implémenté par `crates/miyuportail` et `crates/miyucdr` (lot 3).
 - **Fin de session** : façade détruite, DB secondaire purgée
 - **Mise à jour** : moteur et façade mis à jour ensemble ; versions de traité compatibles ou refus
 - **Désactivation** : voies supprimées, aucun résidu en Franche
+
+### 4.1 Services hybrides implémentés — amendement A-007
+
+<!-- @id arch.hybride.lot5-a007 -->
+<!-- @role hybrid-implementation -->
+<!-- @do record_hybrid_service_implementation -->
+
+Implémenté par `crates/miyuhybride`, `crates/jayrdv-traite`, `crates/jayrdv-facade` et le moteur `crates/jayrdv` (`hybride.rs`) ; Market : `miyumarket` tag 5 ; Portail : `miyuportail::msce::sceller_cosigne` (lot 5).
+
+**Manifeste et contrat de service**
+- Manifeste = `Sceau` `0x03` (manifeste de paquet), signé par l'éditeur épinglé ; tags 1–4 du Market (service, version, SHA-256 de l'archive, binaire) + **tag 5 « contrat »**, **obligatoire** pour un service hybride ; le Market le transporte **opaque** (vide refusé), `miyuhybride` le décode strictement
+- Contrat = TLV imbriqué, tags strictement croissants :
+
+| tag | champ | forme |
+|---|---|---|
+| 1 | `genre` | texte `miyukini/contrat-service/v1` (séparation de domaine) |
+| 2 | `classe` | 1 o : 0 H0, 1 H1, 2 H2, 3 H3 |
+| 3 | `exposition par défaut` | 1 o, **doit valoir 0** (EX-48) |
+| 4 | `ressources` | TLV : 1 CPU % (≤ 1 600), 2 mémoire Mio (≤ 65 536), 3 disque Mio, 4 tâches (≤ 4 096), 5 sessions (≤ 1 024) ; toutes ≥ 1 |
+| 5 | `voie` | TLV : 1 taille max de trame, 2 débit max / minute / sens, 3 quota de file — absent en H0 |
+| 6 | `traité` | encodage canonique du traité du Portail — absent en H0 |
+| 7 | `façade` | TLV : 1 SHA-256 de l'image signée, 2 DB secondaire max (Mio, ≤ disque), 3 durée max de session (≤ 24 h) — absent en H0 |
+| 8 | `entrées externes` | `n` (1 o) puis `n` × (origine 1 o, protocole 1 o, port u16, débit Kio/s u32, taille max paquet u16), 1..16, strictement croissantes — absent en H0 |
+
+**Règles de classe (fail-closed)**
+- H0 : ni voie, ni traité, ni façade, ni entrée ; jamais de voie au Portail
+- H1 : au moins un type de **publication** ; aucune session entrante ouverte au Portail
+- H2 : au moins un type **entrant**
+- **H3 : refusé** tant que son encodage n'est pas spécifié
+- Entrées : origine **Fédération** seule (TCP / UDP, port ≠ 0, paquet ≥ 80 o) ; **Origin et International refusés** tant qu'aucune liste blanche de pairs n'existe (INV-Z6)
+- Entrées Douane / BorderGuard **dérivées** du manifeste (fonctionnalité `douane`, génération seulement : voie et flux `Fédération → Franche`, plafonds de la sandbox) ; l'arrêté reste scellé par BorderGuard
+
+**Guichets du Portail** (séparés par les types)
+- **Façade** (Franche) : déposer une déclaration entrante, lire une publication, état, compteurs — rien d'autre
+- **Moteur** (zone COG) : relever les déclarations admises (structures typées), répondre — rien d'autre
+- Codecs générés d'une seule déclaration (`message_traite!`), compilés des deux côtés (INV-H4) ; champ inconnu, absent ou de nature différente refusé (INV-H3)
+
+**Signature d'auteur et réponse**
+- L'**appareil** signe la charge MSCE (octets signés `0x08`) ; la façade ajoute sa clé de session (`sceller_cosigne` : cosignature vérifiée `verify_strict`, clé faible refusée, **avant** assemblage) ; la façade ne peut rien forger au nom d'un auteur
+- Le moteur ne publie qu'en **réponse** à une déclaration admise : **jeton à usage unique**, périmé à la désactivation ou à une nouvelle session ; 1 à 32 messages, étiquette **`Session`**, déclencheur utilisateur
+- Chaque réponse porte `demande` = SHA-256 de la trame entrante (corrélation par la façade, sans autre canal retour)
+
+**Identité à la façade**
+- Visa du COG hôte + preuve de possession (`miyauth::http`), audience = identifiant du service
+- Portée **`jayrdv:reserver`** exigée (JayRDV) ; clé d'appareil du visa = **auteur épinglé** de la session, sinon refus
+
+**Traité JayRDV v1** (H2, premier service migré)
+
+| sens | code | message |
+|---|---|---|
+| entrant | 1 | `DemandeCreneaux` |
+| entrant | 2 | `Reservation` |
+| sortant | 101 | `CreneauDisponible` |
+| sortant | 102 | `FinCreneaux` |
+| sortant | 103 | `ReservationConfirmee` |
+| sortant | 104 | `ReservationRefusee` (motif par code, aucun texte libre) |
+
+**Façade jetable** (INV-H5, INV-H6, EX-43)
+- Session : image conforme au manifeste, clé de session **éphémère générée en zone COG**, auteurs épinglés, DB secondaire **vierge** bornée par le contrat
+- **Condamnée** à la coupure, à la désactivation ou à l'expiration de la session : tout refusé (503), DB purgée
+- Le `Superviseur` la **détruit** ; reconstruction **seulement** après `retablir` **et** `activer` explicites (une voie rétablie reste désactivée)
+
+**Multi-appareils** (décision du propriétaire, A-007)
+- Anti-rejeu **par auteur** dans une session : chaque appareil épinglé a sa propre séquence strictement croissante
+- Plusieurs appareils partagent **une** instance de façade
+- Implémentation actuelle : séquence par session (à aligner)
+
+**À décider** (A-007) : encodage de H3 ; liste blanche de pairs (Origin, International) ; point d'application des quotas de disque et de sessions ; emplacement du guichet des visas ; rafraîchissement des révocations d'une façade ; image de façade signée réelle
 
 ## 5. Catalogue
 

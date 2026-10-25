@@ -1,6 +1,6 @@
 # Modèle de zones et de couches — Miyukini COG
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-003** (v1.3 : clés par usage implémentées, §15) et **A-004** (v1.4 : frontières, Douane, Vigies, coupure de voie du lot 3, §5, §10–§12, §15) · amendé **A-005** (v1.5 : règles intégrées des Vigies sur le motif de la Douane, attribution de voie par le côté d'entrée, §12) · amendé **A-006** (v1.6 : registre et canal officiel du lot 4, §7, §15, §17). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-003** (v1.3 : clés par usage implémentées, §15) et **A-004** (v1.4 : frontières, Douane, Vigies, coupure de voie du lot 3, §5, §10–§12, §15) · amendé **A-005** (v1.5 : règles intégrées des Vigies sur le motif de la Douane, attribution de voie par le côté d'entrée, §12) · amendé **A-006** (v1.6 : registre et canal officiel du lot 4, §7, §15, §17) · amendé **A-007** (v1.7 : intégrations du canal officiel, contrat de service, fédération du lot 6, contestation 72 h, registre fédéral sans Origin, §7, §10, §16, §17). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id arch.cog.zones-couches -->
 <!-- @role architecture-reference -->
@@ -156,6 +156,13 @@
   - **Persistance de la quarantaine** (décision du propriétaire) : liste en attente + première vue, format `MCQT`, **HMAC-SHA256** par enregistrement (clé dérivée du secret local du COG) ; le décompte reprend après redémarrage ; altéré ou illisible ⇒ quarantaine **relancée** pour les annonces concernées, jamais raccourcie
   - **Artefact** relevé par empreinte, taille annoncée = borne de lecture, taille et SHA-256 exacts ; version strictement supérieure ; remise au chemin d'installation existant
   - **Non implémenté, à décider** (A-006) : exception « correctif critique co-signé » (aucun raccourcissement) ; amorçage du registre officiel épinglé dans l'image signée (TOFU aujourd'hui) ; « sens unique » face aux positions et empreintes publiques des demandes ; voie des binaires à travers le CDR du Portail
+- **Intégrations (amendé A-007)** — Central (`apps/central/src/canal_officiel/`), maia-llm (`canal.rs`), `miyuregistre::revocation` ; détail : [A-007](GEL-DOC-CONCEPTUELLE-v1.md)
+  - **Cores** : opération StrongFather dédiée `mettre_a_jour_canal`, politique `market-canal-officiel` (éditeur officiel, niveau souverain, aucune dérogation) ; `.msp` signé revérifié, version du paquet = version annoncée
+  - **Version de canal** = `majeure × 10¹² + mineure × 10⁶ + correctif` ; pré-version ⇒ aucune version de canal
+  - **OS** : refusé (aucun installateur) ; **modèles IA** : artefact `MMIA` (entête + manifeste signé + octets du modèle), provenance du modèle revérifiée
+  - **État** sous `<données>/canal-officiel/` : `secret-local`, `miroir.mrgj`, `etat.mcce` (un seul état atomique : `EtatRegistre` + fenêtre MTP + horloge de confiance), `quarantaine.mcqt` ; premier état au premier usage, état illisible ⇒ canal **désactivé**
+  - **Configuration** `<config>/canal-officiel.json`, désactivé par défaut ; refus remontés à WorrySentinel avec une gravité (`High`, `Medium`, `Low`)
+  - **Reste** : transport par la voie réservée du Portail (aucun cycle lancé aujourd'hui)
 
 ## 8. Rupture protocolaire et dédouanement
 
@@ -264,6 +271,7 @@
   - signé par la clé d'usage **arrêtés** (indice 4, §15), vérifié contre les ancres `Souverain` du COG ; aucun arrêté d'un autre COG
   - constitution contrôlée au scellement et à la vérification : couples de zones admis par frontière (INV-Z1, Z2, Z3, Z7), liste blanche pour International et Origin (INV-Z6), plafonds de débit et de flux
   - sans arrêté valide, la Douane **ferme** sa frontière
+- **Contrat implémenté (A-007)** (`miyuhybride`) : tag 5 du manifeste `0x03`, TLV 1–8 (genre, classe, exposition par défaut = 0, ressources, voie, traité, façade, entrées externes) ; entrées de la Fédération seule ; H3 refusé ; détail : [services hybrides §4.1](SERVICES-HYBRIDES-ET-PORTAIL.md)
 
 ## 11. Réseau intégré
 
@@ -420,6 +428,7 @@
 - Signalement avec **preuves cryptographiques** (déclarations signées par le COG mis en cause)
 - **Quorum de 6 membres indépendants** qui vérifient les preuves (seuil > admission)
 - Délai de contestation ; faux signalement prouvé = sanction de l'auteur
+  - **Amendé A-007** (décision du propriétaire) : quorum de 6 atteint ⇒ **suspension immédiate** (titres de l'accusé refusés) ; **révocation définitive après 72 h**, sauf contre-preuve signée examinée par le quorum : 6 membres distincts signent un « recours accepté » sur la même empreinte de preuve ⇒ suspension levée
 - Sanction = **révocation définitive du `cog_id`**, tous les pairs refusent
 - Retour possible seulement par **réinitialisation d'identité** (nouvelle racine) → repart candidat
 - **Aucune destruction à distance** (INV-Z11) : les données restent au propriétaire, souvent victime d'un piratage
@@ -427,7 +436,7 @@
 
 **Registre fédéral**
 - Statuts, confirmations et blacklists dans un **registre Merkle fédéral**
-- Têtes échangées entre pairs, contresignées par Origin en témoin → éclipse et double discours détectables
+- Têtes échangées entre pairs, ~~contresignées par Origin en témoin~~ **contresignées par ≥ 3 membres distincts** (clés de journal des membres actuels ; Origin, s'il est présent, = **un** témoin ; amendé A-007, EX-30) → éclipse et double discours détectables
 - Révocations fédérées avec **fraîcheur maximale** ; au-delà, accès fédéré refusé
 - Propagation par **commérage** (annonce puis récupération à la demande)
 
@@ -435,6 +444,16 @@
 - **Note locale** de chaque pair (ban score), indépendante de la blacklist fédérale
 - **Anti-éclipse** : pairs choisis dans des réseaux différents, pairs anciens conservés
 - **Évolutions du protocole** activées seulement quand un seuil de membres les signale
+
+**Implémenté (amendé A-007)** — `crates/miyufederation` ; détail : [A-007](GEL-DOC-CONCEPTUELLE-v1.md), [lot 2 §4.1, §10](../securite/ARCHITECTURE-lot2-identite-signee.md)
+- **Titres** : candidature = certificat `0x06` nature `0x43`, auto-signée, 48 h ; confirmation = reconnaissance `0x07`, ≤ 24 h, périmètre `federation` ; accusation = certificat `0x06` nature `0x42`, un sceau cosigné (≤ 8) ; preuve de faute `MFPV` (équivoque de têtes)
+- **Preuve de calcul** : SHA-256 lié à la racine et au jour, 22 bits par défaut (plancher 8, maximum 40)
+- **Confirmations** : membre seulement, jamais soi-même ; comptées à partir de leur **réception** ; quota de **8** nouveaux COG par membre et par 30 jours
+- **Statut membre** : conservé tant qu'il reste ≥ 2 confirmations, **perdu immédiatement** sous 2 ; fondateurs (graines de l'image) membres d'office
+- **Défense locale** : note des pairs (bannissement à 100 points, −10 / 24 h), jamais exportée ; carnet de pairs par réseau, premier contact conservé
+- **Vue fédérale** : fraîcheur 15 min ; tête de 24 h au plus
+- **Écarts à aligner** : la révocation est aujourd'hui **immédiate** (suspension et recours à implémenter)
+- **À décider** (A-007) : attestation TPM, autres types de preuve, persistance des statuts, transport du commérage
 
 ## 17. Confiance et résilience
 
@@ -444,7 +463,7 @@
 <!-- @do ensure_trust_and_resilience -->
 
 - **Temps de confiance** : horloge monotone qui ne recule jamais ; rejet de toute heure antérieure à la **médiane des 11 dernières têtes** de registre vues (Median-Time-Past) ; horodatages signés par Origin
-  - **Amendé A-006** : fenêtre de 11 têtes, médiane **haute** si paire (amorçage), heure **égale** au MTP acceptée ; un MTP **par registre** pour ses têtes + horloge **globale** alimentée par toutes les têtes acceptées (local, canal officiel, COG fédérés) ; état persistant `MSMT` ; registre fédéral : têtes cosignées par Origin, amorçage au premier usage, journal fédéral agrégé d'Origin **à décider**
+  - **Amendé A-006** : fenêtre de 11 têtes, médiane **haute** si paire (amorçage), heure **égale** au MTP acceptée ; un MTP **par registre** pour ses têtes + horloge **globale** alimentée par toutes les têtes acceptées (local, canal officiel, COG fédérés) ; état persistant `MSMT` ; registre fédéral : ~~têtes cosignées par Origin~~ têtes contresignées par ≥ 3 membres, Origin = un témoin (remplacé par A-007), amorçage au premier usage, journal fédéral agrégé d'Origin **à décider**
 - **Sauvegarde hors site** : DB principale chiffrée par une clé hors ligne, publiée via la Franche vers un pair fédéré (flux déclaré)
 - **Amorçage** : image signée, empreinte publiée hors bande (site, papier, QR), clé Origin intégrée à l'image
 - **Gouvernance d'Origin** : à seuil (plusieurs détenteurs), plan de succession ; la Fédération fonctionne sans Origin

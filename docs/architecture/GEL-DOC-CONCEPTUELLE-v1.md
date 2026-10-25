@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.6 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.7 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -65,6 +65,7 @@
 | A-004 | 2026-10-25 | Zones §5, §10–§12, §15 · Services hybrides §3 · Lot 2 §3.1, §4.1 : choix d'implémentation du lot 3 (Portail, CDR, arrêtés, Douane, Vigies, coupure de voie) ; détail ci-dessous | 1.4 |
 | A-005 | 2026-10-25 | Zones §12 : règles intégrées des Vigies sur le motif de la Douane (`LATERAL`, `NON-DECLARE` critiques, coupure de la voie fautive) ; attribution de voie par le seul côté d'entrée ; détail ci-dessous | 1.5 |
 | A-006 | 2026-10-25 | Lot 2 §3, §4.1, §8, §8.1, §8.2, §9 · Zones §7, §15, §17 : choix d'implémentation du lot 4 (entrées de registre `0x04`, stockage `MRGJ`, Median-Time-Past, relevé `MCAN`, quarantaine, registre fédéral) ; têtes du registre officiel par une clé de journal d'Origin ; révocations à seuil 1 ; quarantaine persistée et scellée ; détail ci-dessous | 1.6 |
+| A-007 | 2026-10-25 | Zones §7, §10, §16, §17 · Services hybrides §1, §3.1, §4.1 · Lot 2 §4.1, §8.2, §8.3, §9, §10 · IA fédérée §2, §7 · Menaces EX-32, EX-34 : intégrations du lot 4, choix des lots 5 (services hybrides) et 6 (fédération) ; délai de contestation 72 h ; registre fédéral sans Origin (≥ 3 témoins membres, **remplace** une phrase d'A-006) ; anti-rejeu du Portail par auteur ; code des Fiches ≠ `0x08` ; détail ci-dessous | 1.7 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -230,7 +231,7 @@
   - **Relevé** (zone COG → dépôt officiel, **pull seulement**, le dépôt ne pousse rien et reste non fiable) : demandes **`MCAN`** `"MCAN" | 0x01 | code` — `0x01` tête, `0x02` entrées `depuis (8) | nombre (4, 1..=1024)`, `0x03` artefact `empreinte (32) | taille (8)` ; décodage strict, taille exacte
   - **Quarantaine** : **48 h** comptées depuis la **première vue locale** sur l'heure de confiance, jamais depuis l'horodatage signé (une annonce antidatée ne raccourcit rien) ; plus longue configurable, plus courte refusée ; installation seulement si une tête **émise après la fin de la quarantaine** est acceptée et fraîche (toute révocation publiée pendant la quarantaine est vue), inclusion revérifiée, version strictement supérieure à l'installée
   - **Bornes** : **4 096** entrées nouvelles au plus par relevé ; **1 Mio** au plus par enregistrement stocké ; entrée reçue ≤ taille maximale d'un sceau ; artefact relevé par empreinte, **taille annoncée = borne de lecture**, taille et SHA-256 exacts exigés
-  - **Registre fédéral** (EX-34) : tête d'un COG acceptée seulement **cosignée** — 2 sur {clé de journal du COG, Origin}, Origin cosignant le même sceau ; clé de journal du COG ≠ clé d'Origin ; amorçage d'un COG au **premier usage** (TOFU)
+  - **Registre fédéral** (EX-34) : ~~tête d'un COG acceptée seulement **cosignée** — 2 sur {clé de journal du COG, Origin}, Origin cosignant le même sceau~~ **(remplacé par A-007 : ≥ 3 témoins membres distincts, Origin = un témoin au plus)** ; clé de journal du COG ≠ clé d'Origin ; amorçage d'un COG au **premier usage** (TOFU)
 - **Décision du propriétaire 1 — têtes du registre officiel**
   - Têtes signées par une **clé de journal d'Origin dédiée** (en ligne), **seuil 1** ; distincte de la clé de signature d'Origin et de la clé éditeur (configuration refusée sinon)
   - Mises à jour inchangées : **2 sur 2** {Origin, éditeur}, portées par la feuille `Publication` (annonce)
@@ -255,3 +256,90 @@
   - **C** : C-12 appliquée (état de quarantaine douteux ⇒ relance) ; C-24 — `hmac` 0.12 (déjà inventorié) utilisé par `miyucanal` ; C-26 : cibles de fuzzing `MRGJ`, `MCAN`, `MCQT` et entrée `0x04` à écrire
   - **Plan** : lot 4 — statut « Fait / Reste » à reporter au §6 (hors gel)
   - **Code** : `miyuregistre`, `miyucanal` (non encore commités)
+
+### A-007 — Lots 4 (intégrations), 5 et 6 : choix consignés et décisions
+
+<!-- @id arch.gel.a007 -->
+<!-- @role amendment -->
+<!-- @do record_lot4_integrations_lot5_lot6_choices -->
+
+- **Date / validation** : 2026-10-25, propriétaire du projet · **version** 1.7
+- **Motif**
+  - Lot 4 : intégrations du canal officiel (Central, maia-llm, révocations miyauth) signalées « non spécifié par la doc gelée, à amender » dans leurs modules
+  - Lot 5 « Services hybrides » (`miyuhybride`, `jayrdv-traite`, `jayrdv-facade`, moteur `jayrdv::hybride`) et lot 6 « Fédération » (`miyufederation`) : encodages et seuils que la doc gelée nomme sans les fixer
+  - Consigner l'existant ; **trois décisions** du propriétaire (délai de contestation, registre fédéral sans Origin, services hybrides multi-appareils) ; **un conflit** de code de type résolu (Fiches ≠ `0x08`)
+- **Documents touchés**
+  - [Zones et couches](MODELE-ZONES-ET-COUCHES-COG.md) : bandeau, §7 (intégrations), §10 (encodage du contrat), §16 (fédération implémentée, décisions), §17 (phrase A-006 remplacée)
+  - [Services hybrides et Portail](SERVICES-HYBRIDES-ET-PORTAIL.md) : bandeau, §1 (H3 refusé), §3.1 (séquence par auteur), §4.1 (nouveau)
+  - [Lot 2 — identité signée](../securite/ARCHITECTURE-lot2-identite-signee.md) : bandeau, §4.1 (types `0x03`, `0x07`, natures `0x42`, `0x43`), §8.2 (série miyauth), §8.3 (registre fédéral), §9 (tag 5), §10 (confirmation fédérale)
+  - [IA fédérée](IA-FEDEREE.md) : bandeau, §2 et §7 EX-57 (code des Fiches)
+  - [Modèle de menaces](../securite/MODELE-MENACES-COG.md) : bandeau, EX-32, EX-34
+  - Hors gel, alignés : [plan](../implementation/PLAN-IMPLEMENTATION.md) §6, §7, §8, §9 ; `config/strongfather/market.toml`
+- **Décision — lot 4, intégrations** (consignation de l'implémenté)
+  - **Opération StrongFather** `OperationMarket::MettreAJourCanal` (`mettre_a_jour_canal`, action `modification`, sujet `central.market`), distincte de la mise à jour Market ; politique **`market-canal-officiel`** : provenance `signee_officielle` **et** niveau `souverain` seulement, aucune dérogation de développement
+  - **Installation des Cores** (`installer_depuis_canal`) par-dessus le canal : paquet `.msp` signé par un éditeur épinglé ; version du manifeste signé = version annoncée ; décision StrongFather **avant** l'arrêt du service, puis le chemin unique d'installation (nouvelle décision) ; un refus à une étape ⇒ aucun octet écrit
+  - **Version de canal** : `version_canal(semver) = majeure × 10¹² + mineure × 10⁶ + correctif` (mineure, correctif < 10⁶) ; **pré-version ou métadonnée de build ⇒ aucune version de canal** ; version installée illisible ⇒ `u64::MAX` (aucune installation)
+  - **Catégories** : Cores → Central ; **OS → refus** (aucun installateur d'OS, l'annonce reste en attente, refus signalé) ; modèle IA → installateur délégué (maia-llm), absent ⇒ refus
+  - **Persistance** sous `<données>/canal-officiel/` (dossier `0700`, fichiers `0600`, écriture atomique fichier temporaire + renommage) :
+    - `secret-local` : 32 o aléatoires, créé **une fois** (création exclusive) ; lien symbolique, autre taille ou droits ouverts ⇒ refus ; dérive la clé HMAC de `MCQT` (A-006)
+    - `miroir.mrgj` : miroir intégral (`MRGJ`, A-006)
+    - `etat.mcce` : **un seul état atomique** `"MCCE" | 0x01 | 3 × (longueur (4, BE, 1..=1 Mio) | octets)` = `EtatRegistre` (`MSRG`), fenêtre MTP du registre (`MSMT`), horloge de confiance ; taille exacte exigée ; contenu revérifié au chargement
+    - `quarantaine.mcqt` : `MCQT` (A-006)
+  - **Reprise** : aucun état ⇒ confiance au **premier usage** (miroir non confirmé retiré, signalé) ; état illisible, secret local douteux ou reprise refusée (signature, autre registre, stockage incohérent) ⇒ canal **désactivé**, rien n'est installé ; quarantaine absente ou altérée ⇒ relancée (A-006)
+  - **Configuration** `<config>/canal-officiel.json` : `actif` (défaut faux), `registre`, `origin`, `journal_origin`, `editeur` (64 hex, clés distinctes), `periode_secs` (défaut 3 600, minimum 300) ; champ inconnu refusé ; absent, faux ou invalide ⇒ **désactivé** ; aucun cycle lancé tant que la voie de relevé du Portail n'est pas branchée
+  - **Artefact « modèle »** `MMIA` : `"MMIA" | 0x01 | longueur du manifeste (4, BE, 1..=128 Kio) | manifeste signé (ManifesteModele) | octets du modèle (non vides)` ; tout vérifié **en mémoire** avant écriture (ancre `model_trust_anchors`, nom, taille, licence, SHA-256 ; nom commençant par `.` ou en `.sceau` refusé) ; écriture atomique `0644`, modèle puis `X.gguf.sceau`, contrôle de chargement rejoué ; index `.canal-modeles.json`, version strictement supérieure ; index illisible ⇒ aucune installation
+  - **Révocations miyauth ← registre** (`RevocationsRegistre`, fonctionnalité `miyauth` de `miyuregistre`) : série miyauth **16 o** ↔ cible d'entrée **32 o complétée de 16 octets nuls** ; cible `Serie` à fin non nulle ignorée ; `Cle(kid)` reprise ; `Annonce` / `Artefact` ignorées ; seules les entrées au **seuil** sur les ancres fournies comptent ; horodatage = tête vérifiée ; fraîcheur 15 min ; fail-closed
+  - **Refus → WorrySentinel** (`SignalCanal` + `ThreatLevel`) :
+    - `High` : signature, rétrogradation, inclusion, artefact altéré, quarantaine altérée, relevé refusé (registre, sceau, temps, révoqué), échec de persistance, miroir non confirmé retiré
+    - `Medium` : annonce invalide, révoquée, refus de l'installateur (StrongFather, OS, modèles, version), configuration, réponse invalide, trop d'entrées
+    - `Low` : artefact indisponible, transport, révocation enregistrée, annonce annulée
+    - événements ordinaires (synchronisation, quarantaine, attente, installation) : journalisés seulement
+  - **Banc d'essai** `miyucanal::banc` (fonctionnalité `banc-essai`, tests seulement) : Origin, éditeur, dépôt simulés ; clés jamais persistées
+- **Décision — lot 5, services hybrides** (consignation de l'implémenté ; détail : [services hybrides §4.1](SERVICES-HYBRIDES-ET-PORTAIL.md))
+  - **Contrat de service** = **tag 5** du manifeste `Sceau` `0x03` (tags 1–4 du Market inchangés ; le Market le transporte **opaque**, vide refusé) ; TLV imbriqué 1–8 : genre `miyukini/contrat-service/v1`, classe, exposition par défaut (**doit valoir 0**), ressources, voie, traité, façade, entrées externes
+  - **Règles** : H0 ni voie, ni traité, ni façade, ni entrée ; H1 publication seule ; H2 ≥ 1 type entrant ; **H3 refusé** tant que son encodage n'est pas spécifié ; entrées d'origine **Fédération** seule (Origin et International refusés tant qu'aucune liste blanche de pairs n'existe)
+  - **Réponse du moteur** : publication seulement en **réponse** à une déclaration admise signée par son auteur, avec un **jeton à usage unique** (périmé à la désactivation ou à une nouvelle session) ; étiquette **`Session`** ; 1 à 32 messages ; chaque réponse porte `demande` = SHA-256 de la trame entrante
+  - **Signature d'auteur** : l'appareil signe la charge MSCE (octets signés `0x08`) ; la façade ajoute sa clé de session par `miyuportail::msce::sceller_cosigne` (cosignature vérifiée `verify_strict`, clé faible refusée, **avant** assemblage) : la façade ne peut rien forger au nom d'un auteur
+  - **Visa** : audience = identifiant du service, portée **`jayrdv:reserver`** exigée ; clé d'appareil du visa = auteur épinglé de la session
+  - **Traité JayRDV v1** : entrants 1 `DemandeCreneaux`, 2 `Reservation` ; sortants 101 `CreneauDisponible`, 102 `FinCreneaux`, 103 `ReservationConfirmee`, 104 `ReservationRefusee` (motif par code, aucun texte libre)
+  - **Façade jetable** : condamnée à la coupure, à la désactivation ou à l'expiration de la session (503, DB secondaire purgée) ; détruite par le `Superviseur`, reconstruite **seulement** après `retablir` **et** `activer` explicites
+- **Décision — lot 6, fédération** (consignation de l'implémenté ; détail : [zones §16](MODELE-ZONES-ET-COUCHES-COG.md), [lot 2 §4.1, §10](../securite/ARCHITECTURE-lot2-identite-signee.md))
+  - **Candidature** = certificat `0x06`, nature **`0x43`**, auto-signée par l'identité, validité **48 h**
+  - **Confirmation** = reconnaissance `0x07`, signée par un **membre** (ni invité, ni soi-même), ≤ **24 h**, niveau 1, périmètre `federation` ; comptée à partir de sa **réception**
+  - **Accusation** = certificat `0x06`, nature **`0x42`**, **un seul sceau cosigné** (≤ 8 signatures, quorum 6) ; preuve **`MFPV`** (équivoque de têtes)
+  - **Preuve de calcul** : `SHA-256("miyukini/federation/candidature/v1" || 0x00 || racine || jour (8, BE) || nonce (8, BE))`, `jour = emise_a / 86 400` ; difficulté **22 bits** par défaut, plancher 8, maximum 40
+  - **Quota** : **8** nouveaux COG confirmés par membre et par **30 jours**
+  - **Statut membre** : compteur des 7 jours remis à zéro sous 4 ; membre acquis conservé tant qu'il reste ≥ 2 confirmations, **perdu immédiatement** sous 2 (lecture fail-closed de « durablement »), statut alors fixé par le compte ; fondateurs (graines de l'image) membres d'office
+  - **Note locale** des pairs : seuil de bannissement 100, décroissance 10 points / 24 h ; jamais exportée
+  - **Vue fédérale** : fraîcheur **15 min** (plus courte seulement) ; âge maximal d'une tête **24 h**
+- **Décision du propriétaire 1 — délai de contestation (EX-32)**
+  - Accusation au quorum de 6 ⇒ **suspension immédiate** : les titres de l'accusé sont refusés
+  - **Révocation définitive après 72 h**, sauf contre-preuve signée présentée et examinée par le quorum : **6 membres distincts** signent un « recours accepté » sur la **même empreinte de preuve** ⇒ suspension levée
+  - **Jamais de destruction à distance** (INV-Z11)
+  - Encodage du « recours accepté » : fixé à l'implémentation, consigné par amendement ; aujourd'hui le code révoque **immédiatement** (à aligner)
+- **Décision du propriétaire 2 — registre fédéral sans Origin (EX-30 prime sur A-006)**
+  - Tête fédérale valide avec **≥ 3 témoins membres distincts** (clés de journal des membres actuels), en plus de la signature du COG propriétaire
+  - Origin, s'il est présent, compte pour **un** témoin seulement
+  - **Remplace** la phrase d'A-006 « 2 sur {clé de journal du COG, Origin} » (barrée ci-dessus)
+- **Décision du propriétaire 3 — services hybrides multi-appareils**
+  - Anti-rejeu du Portail **par auteur** dans une session : chaque appareil (auteur) épinglé a sa propre séquence strictement croissante
+  - Plusieurs appareils partagent **une** instance de façade
+  - Aujourd'hui : séquence par session (Portail et façade JayRDV, à aligner)
+- **Conflit résolu — code des Fiches (lot 7)** : `0x08` reste la **déclaration de voie** (A-004) ; les Fiches de l'IA fédérée recevront un **nouveau code de type**, attribué par l'amendement du lot 7 (non choisi ici)
+- **À décider ultérieurement** (points ouverts, pas des décisions)
+  - Encodage de H3 : liste blanche sortante, intention StrongFather
+  - Liste blanche de pairs pour les entrées Origin et International
+  - Point d'application des quotas de disque et de sessions déclarés
+  - Emplacement du guichet des visas
+  - Rafraîchissement des révocations d'une façade (instantané remis au lancement aujourd'hui)
+  - Image de façade signée réelle (aujourd'hui : SHA-256 de l'identité du crate, en processus)
+  - Attestation TPM de l'indépendance des confirmateurs
+  - Autres types de preuve que l'équivoque
+  - Persistance fédérale des statuts (vue en mémoire aujourd'hui)
+  - Transport du commérage (`inv` / `getdata`, WireGuard)
+  - Transport du canal officiel par le Portail et règle des binaires vérifiés par empreinte face au CDR (A-006)
+- **Impact**
+  - **EX** : EX-02, EX-14, EX-20, EX-26 (canal branché sur Central et maia-llm) ; EX-16, EX-40 à EX-43, EX-47, EX-48 (lot 5) ; EX-30 à EX-35, EX-37, EX-38 (lot 6) consignés ; **EX-32** précisée (contestation 72 h), **EX-34** révisée (témoins membres, Origin facultatif)
+  - **C** : C-12 appliquée (configuration ou état douteux ⇒ canal désactivé ; H3 et entrées non spécifiées ⇒ refus) ; C-24 — inventaire à compléter (`rand_core` `OsRng` : secret local, clés de session) ; C-26 : cibles de fuzzing écrites pour `MCAN`, `MCQT`, `MRGJ`, entrée `0x04`, miroir, MSCE, sas ; restent manifeste de service, titres fédéraux, `MFPV`, `MCCE`, `MMIA`
+  - **Plan** : lots 4, 5, 6 — statut « Fait / Reste » ; lot 7 — « Fiches (type à attribuer, ≠ `0x08`) »
+  - **Code** : non encore commité ; alignements à faire : suspension 72 h et recours (`miyufederation`), `miyuregistre::federal` (2 sur {COG, Origin}) vers ≥ 3 témoins membres, séquence par auteur (`miyuportail`, `jayrdv-facade`)

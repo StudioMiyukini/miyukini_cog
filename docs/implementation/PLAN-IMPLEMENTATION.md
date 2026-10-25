@@ -173,7 +173,8 @@
 - Mises à jour Cores, OS et modèles IA : 2 sur 2, quarantaine temporelle (EX-01, EX-02, EX-26)
 - **Sortie** : une mise à jour signée installée de bout en bout ; une mise à jour altérée refusée
 - **Statut (2026-10-25)** — [A-006](../architecture/GEL-DOC-CONCEPTUELLE-v1.md) (doc v1.6) : **sortie atteinte au niveau bibliothèque** (`miyuregistre`, `miyucanal`, 6b546458 ; test `sortie_lot4.rs`)
-  - **Reste** : `Installateur` dans Central (via `update_from_package`, porte StrongFather) et maia-llm ; transport du canal sur une voie réservée du Portail (règle des binaires vérifiés par empreinte face au CDR) ; adaptateur `SourceRevocation` (miyauth) alimenté par la tête vérifiée ; remontée des refus à WorrySentinel ; persistance de l'horloge et de l'état côté appelant ; installateur d'OS inexistant ; points « à décider ultérieurement » d'A-006
+  - **Fait (2026-10-25, [A-007](../architecture/GEL-DOC-CONCEPTUELLE-v1.md), doc v1.7, non commité)** : installateur Central (`apps/central/src/canal_officiel/`, opération StrongFather `mettre_a_jour_canal`, politique `market-canal-officiel`) ; installateur de modèles maia-llm (`canal.rs`, artefact `MMIA`) ; adaptateur `SourceRevocation` ← registre vérifié (`miyuregistre::revocation`) ; refus → WorrySentinel ; persistance `etat.mcce` / `quarantaine.mcqt` / secret local ; configuration `canal-officiel.json` (désactivé par défaut) ; banc d'essai `miyucanal::banc`
+  - **Reste** : transport du canal sur une voie réservée du Portail (aucun cycle lancé ; règle des binaires vérifiés par empreinte face au CDR) ; brancher l'installateur de modèles dans Central (`avec_modeles`) ; brancher `RevocationsRegistre` chez les vérificateurs miyauth ; installateur d'OS inexistant (correctifs d'OS refusés) ; fuzzing `MCCE`, `MMIA` ; points « à décider ultérieurement » d'A-006
 
 ## 7. Lot 5 — Services hybrides
 
@@ -186,6 +187,9 @@
 - Exposition désactivée par défaut, activée service par service (EX-48)
 - **Premier service migré** : un service H2 (JayRDV proposé), puis MiyuCloud
 - **Sortie** : service H2 utilisable depuis un appareil fédéré sans route vers la zone COG
+- **Statut (2026-10-25)** — [A-007](../architecture/GEL-DOC-CONCEPTUELLE-v1.md) (doc v1.7) : **sortie atteinte au niveau bibliothèque**, en processus, sans réseau (`jayrdv/tests/sortie_lot5.rs` ; non commité)
+  - **Fait** : `miyuhybride` (manifeste tag 5, règles H0–H3, guichets, jeton de réponse, codecs `message_traite!`, façade jetable, `Superviseur`, DB secondaire, dérivation Douane) ; `jayrdv-traite` (traité v1) ; `jayrdv-facade` (visa + PoP, portée `jayrdv:reserver`) ; moteur `jayrdv::hybride` ; `miyumarket` tag 5 ; `miyuportail::msce::sceller_cosigne`
+  - **Reste** : anti-rejeu **par auteur** (décision A-007 : `miyuportail`, `jayrdv-facade`) ; façade en sandbox Franche réelle (image signée, réseau, Douane appliquée) ; application des quotas de disque et de sessions ; guichet des visas ; rafraîchissement des révocations de la façade ; H3 ; MiyuCloud ; fuzzing du manifeste de service ; points « à décider ultérieurement » d'A-007
 
 ## 8. Lot 6 — Fédération
 
@@ -198,6 +202,9 @@
 - Note locale des pairs, anti-éclipse, fraîcheur des révocations (EX-35, EX-37)
 - Fédération fonctionnelle sans Origin (EX-30)
 - **Sortie** : trois COG de test atteignent le statut membre ; un COG fautif est révoqué
+- **Statut (2026-10-25)** — [A-007](../architecture/GEL-DOC-CONCEPTUELLE-v1.md) (doc v1.7) : **sortie atteinte au niveau bibliothèque**, sans Origin (`miyufederation/tests/sortie_lot6.rs` ; non commité)
+  - **Fait** : candidature `0x06`/`0x43` + hashcash, confirmation `0x07`, statuts, quota, témoins anti-éclipse (≥ 3 membres), accusation `0x06`/`0x42` au quorum de 6 + preuve `MFPV`, révocation d'identité, note locale, carnet de pairs, fraîcheur de la vue
+  - **Reste** : **suspension immédiate + révocation après 72 h + « recours accepté »** (décision A-007 ; aujourd'hui révocation immédiate) ; aligner `miyuregistre::federal` (2 sur {COG, Origin}) sur ≥ 3 témoins membres ; transport du commérage ; persistance des statuts ; attestation TPM ; autres types de preuve ; fuzzing des titres fédéraux et de `MFPV`
 
 ## 9. Lot 7 — MAIA
 
@@ -207,7 +214,7 @@
 
 - Mémoire N0–N4 sous budget de tokens, notes versionnées, oubli à la demande (EX-50 à EX-56)
 - Modèle local par profil matériel (Gemma 4 E4B sur le serveur actuel, après banc d'essai)
-- IA fédérée : Fiches `0x08`, double MAIA, marquage `etranger`, corroboration (EX-57 à EX-63)
+- IA fédérée : Fiches (type à attribuer, ≠ 0x08), double MAIA, marquage `etranger`, corroboration (EX-57 à EX-63)
 - **Sortie** : réponse sourcée sur une Fiche fédérée, injection de test sans effet
 
 ## 10. Lot 8 — Durcissement continu

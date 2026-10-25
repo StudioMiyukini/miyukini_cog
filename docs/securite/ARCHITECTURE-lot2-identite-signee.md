@@ -1,6 +1,6 @@
 # Lot 2 — Identité signée : Passeports, Visas et paquets identifiables
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1) **A-003** (v1.3 : choix d'implémentation du lot 2) **A-004** (v1.4 : type `0x08`, natures de certificat, indice d'usage 4 des arrêtés) et **A-006** (v1.6 : registre et canal officiel du lot 4, §3, §4.1, §8, §8.3, §9). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1) **A-003** (v1.3 : choix d'implémentation du lot 2) **A-004** (v1.4 : type `0x08`, natures de certificat, indice d'usage 4 des arrêtés) et **A-006** (v1.6 : registre et canal officiel du lot 4, §3, §4.1, §8, §8.3, §9) · amendé **A-007** (v1.7 : natures `0x42` / `0x43`, usage fédéral de `0x07`, tag 5 du manifeste, série miyauth au registre, registre fédéral sans Origin, §4.1, §8.2, §8.3, §9, §10). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id securite.lot2.identite-signee -->
 <!-- @role architecture-specification -->
@@ -100,7 +100,7 @@ version     1 o   0x02 (Sceau v1.1 ; 0x01 = Sceau v1.0, abandonné, refusé)
 alg         1 o   algorithme de signature du sceau (table ci-dessous)
 type        1 o   0x01 passeport | 0x02 visa | 0x03 manifeste paquet | 0x04 entrée registre
                   0x05 tête registre | 0x06 certificat (émission, éditeur) | 0x07 reconnaissance
-                  0x08 déclaration de voie (A-004, Portail)
+                  0x08 déclaration de voie (A-004, Portail ; les Fiches du lot 7 auront un autre code, A-007)
                   0x04 : nature 1 publication · 2 révocation · 3 émission · 4 décret · 5 événement (A-006, §8.3)
 len         4 o   longueur de la charge utile (≤ 65 536)
 payload   len o   champs TLV canoniques (4.2)
@@ -128,7 +128,14 @@ Compléments A-004 :
 |---|---|---|
 | `0x01` | passation de racine (§3.1) | ancienne **et** nouvelle identité |
 | `0x41` (« A ») | arrêté de frontière | clé d'usage `arretes` (indice 4) |
+| `0x42` (« B ») | accusation fédérale (A-007, §10) | membres qui ont vérifié la preuve, un sceau cosigné (quorum 6, ≤ 8) |
+| `0x43` (« C ») | candidature fédérale (A-007, §10) | identité du candidat (auto-signée) |
 | autre | réservé | refusé par les décodeurs |
+
+Compléments A-007 :
+
+- **Type `0x03`** : tag 5 facultatif « contrat de service » (TLV imbriqué, opaque pour le Market, obligatoire pour un service hybride ; [services hybrides §4.1](../architecture/SERVICES-HYBRIDES-ET-PORTAIL.md))
+- **Type `0x07`** : seul usage implémenté = **confirmation fédérale** (§10)
 
 Octets signés (identiques pour tous les signataires) :
 `"miyukini/sceau/v1.1" || 0x00 || version || alg || type || len || payload`.
@@ -319,7 +326,7 @@ Implémenté par `crates/miyusceau` (`registre.rs`, `merkle.rs` ; 7ed62645, 6774
 
 - Cibles : série d'un titre, ou clé (appareil, émission) ; vérification passeport et visa contre série, appareil et clé d'émission
 - Fail-closed : liste absente, **plus ancienne que 15 min** (défaut, durée d'un visa) ou datée dans le futur au-delà de la tolérance d'horloge ⇒ refus
-- Interface indépendante du stockage (`SourceRevocation`) ; adaptateur ← tête de registre vérifiée : reste à faire (plan, lot 2)
+- Interface indépendante du stockage (`SourceRevocation`) ; adaptateur ← tête de registre vérifiée : **fait** (amendé A-007, `miyuregistre::RevocationsRegistre`) — entrées au seuil sur les ancres du COG seulement, horodatage = tête vérifiée ; série miyauth (16 o) inscrite **complétée de 16 octets nuls** (cible 32 o), cible `Serie` à fin non nulle ignorée
 - **Canal officiel (amendé A-006)** : révocation = entrée `0x04` de nature 2, signée par **Origin ou l'éditeur** (**seuil 1** sur l'ensemble exact {Origin, éditeur} ; la clé de journal d'Origin n'est pas comptée) ; cibles série, **annonce** (identité du sceau), **artefact** (SHA-256), **clé** (tout ce qu'elle a signé) ; une révocation ne peut qu'**empêcher** une installation ; vue par le miroir intégral du registre officiel
 
 ### 8.3 Entrées, stockage et canal officiel — amendement A-006
@@ -353,7 +360,7 @@ Implémenté par `crates/miyuregistre` et `crates/miyucanal` (lot 4).
 - **Stockage** `MRGJ` : `"MRGJ" | 0x01` puis `longueur (4) | octets | contrôle (8)`, contrôle = `SHA-256(longueur || octets)[0..8]`, ≤ 1 Mio par enregistrement ; `fsync` à chaque ajout ; fin tronquée retirée à l'ouverture, corruption au milieu refusée
 - **Median-Time-Past** : 11 dernières têtes, médiane haute si la fenêtre est paire, égal accepté ; un MTP par registre + horloge de confiance globale ([zones §17](../architecture/MODELE-ZONES-ET-COUCHES-COG.md)) ; état `MSMT`
 - **Miroir** du registre officiel : copie intégrale, racine reconstruite, cohérence recalculée ; ≤ 4 096 entrées nouvelles par relevé
-- **Registre fédéral** (EX-34) : tête d'un COG = 2 sur {clé de journal du COG, Origin}, Origin cosignant le même sceau ; amorçage au premier usage
+- **Registre fédéral** (EX-34) : ~~tête d'un COG = 2 sur {clé de journal du COG, Origin}, Origin cosignant le même sceau~~ **amendé A-007** : tête signée par la clé de journal du COG **et** contresignée par **≥ 3 membres distincts** (clés de journal des membres actuels) ; Origin, s'il est présent, compte pour **un** témoin ; amorçage au premier usage
 - Relevé, quarantaine et persistance : [zones §7](../architecture/MODELE-ZONES-ET-COUCHES-COG.md) ; détail et points ouverts : [A-006](../architecture/GEL-DOC-CONCEPTUELLE-v1.md)
 
 ## 9. Paquets identifiables (Market)
@@ -397,6 +404,10 @@ de manifeste ; inclusion vérifiée contre une tête fraîche du miroir du regis
 artefact relevé par empreinte, taille et SHA-256 exacts ; version strictement supérieure à l'installée ; remise
 au chemin d'installation existant (Central, StrongFather).
 
+Amendé A-007 — Central revérifie le `.msp` (éditeur officiel, sans dérogation), exige version du paquet = version annoncée
+(`majeure × 10¹² + mineure × 10⁶ + correctif`, pré-version exclue) et une décision StrongFather `mettre_a_jour_canal` ;
+manifeste `0x03` étendu du tag 5 « contrat de service » (lot 5).
+
 ## 10. Fédération (« diplomatie »)
 
 - `cog_id` = empreinte de la clé racine (fin du « premier arrivé » sur Origin Relay, constat H7).
@@ -406,6 +417,24 @@ au chemin d'installation existant (Central, StrongFather).
 - `REGISTER` sur Origin Relay = signature d'un défi serveur par la racine (ou clé d'émission) du
   COG ; permis délivré = `Sceau` lié au `cog_id`.
 - Liste des trackers signée par la racine Origin (remplace `tracker_signature` à zéro).
+
+### 10.1 Titres fédéraux — amendement A-007
+
+<!-- @id securite.lot2.titres-federaux -->
+<!-- @role federation-titles -->
+<!-- @do encode_federation_titles -->
+
+Implémenté par `crates/miyufederation` (lot 6). TLV canoniques, tous les champs obligatoires.
+
+| Titre | Sceau | Signé par | Champs (tags) |
+|---|---|---|---|
+| Candidature | `0x06`, nature `0x43` | identité du candidat | 1 `nature`, 2 `racine`, 3 `journal`, 4 `registre`, 5 `emise_a` (validité 48 h), 6 `difficulte` (1..=40), 7 `nonce` |
+| Confirmation | `0x07` | identité d'un membre | 1 `reconnue`, 2 `confirmatrice`, 3 `niveau` (= 1), 4 `perimetre` (= `federation`), 5 `emise_a`, 6 `expire_a` (≤ 24 h) |
+| Accusation | `0x06`, nature `0x42` | membres, un sceau cosigné (≤ 8) | 1 `nature`, 2 `accuse`, 3 `type_preuve` (1 = équivoque), 4 `empreinte_preuve`, 5 `emise_a` |
+
+- **Preuve de calcul** : `SHA-256("miyukini/federation/candidature/v1" || 0x00 || racine || jour (8, BE) || nonce (8, BE))`, `jour = emise_a / 86 400`, bits nuls en tête ≥ `difficulte`
+- **Preuve de faute** `MFPV` : `"MFPV" | 0x01 | type (1) | long. A (4, BE) | A | long. B (4, BE) | B`, sceaux rangés par octets croissants ; empreinte = SHA-256 de l'encodage ; seule la signature du mis en cause compte
+- **Issue** d'une accusation : entrée `0x04` de nature révocation, cible `Cle(kid)` ; contestation 72 h (décision du propriétaire, [zones §16](../architecture/MODELE-ZONES-ET-COUCHES-COG.md))
 
 ## 11. Intégration dans le code existant
 

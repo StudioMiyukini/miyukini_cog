@@ -1,6 +1,6 @@
 # Modèle de menaces — Miyukini COG
 
-> **Gelé v1.0 — 2026-10-24.** Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-007** (v1.7 : contestation 72 h EX-32, registre fédéral sans Origin EX-34). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id securite.menaces.cog -->
 <!-- @role threat-model -->
@@ -239,9 +239,9 @@
 - **EX-29** Un espace isolé et une DB secondaire par service en Franche
 - **EX-30** Gouvernance d'Origin à seuil, Fédération fonctionnelle sans Origin
 - **EX-31** Seuls les membres confirment ; confirmateurs indépendants (TPM, quotas) et responsables
-- **EX-32** Blacklist : preuves signées + quorum de 6 membres indépendants + contestation
+- **EX-32** Blacklist : preuves signées + quorum de 6 membres indépendants + contestation (A-007 : suspension immédiate, révocation après 72 h sauf « recours accepté » par 6 membres)
 - **EX-33** Sanction = révocation d'identité ; aucune destruction à distance
-- **EX-34** Registre Merkle fédéral contresigné par Origin (anti-éclipse)
+- **EX-34** Registre Merkle fédéral ~~contresigné par Origin~~ contresigné par ≥ 3 membres distincts, Origin = un témoin facultatif (anti-éclipse ; A-007)
 - **EX-35** Fraîcheur maximale des révocations fédérées
 - **EX-36** Identifiant de passeport différent par COG visité
 - **EX-37** Note locale des pairs (ban score) et anti-éclipse (diversité des pairs)

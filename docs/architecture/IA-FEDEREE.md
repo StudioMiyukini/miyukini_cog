@@ -1,6 +1,6 @@
 # IA fédérée — le web pour IA entre COG
 
-> **Gelé v1.0 — 2026-10-24.** Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-007** (v1.7 : code de type des Fiches ≠ `0x08`). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id arch.ia.federee -->
 <!-- @role architecture-specification -->
@@ -31,7 +31,7 @@
 <!-- @layer 6 -->
 <!-- @do define_fiche_format -->
 
-- Sceau v1, nouveau type **`0x08 Fiche`**, signée par le COG émetteur
+- Sceau v1, nouveau type ~~**`0x08 Fiche`**~~ **Fiche** (code à attribuer par l'amendement du lot 7, ≠ `0x08` déjà pris par la déclaration de voie ; amendé A-007), signée par le COG émetteur
 - Champs typés :
   - `sujet`, `type` (fait, définition, procédure, document, tableau)
   - `texte` (≤ ~2 000 tokens, texte brut)
@@ -106,7 +106,7 @@
 <!-- @role security-requirements -->
 <!-- @do derive_federated_ai_requirements -->
 
-- **EX-57** Fiches signées (`0x08`), champs typés, aucun champ de consignes, normalisation à l'entrée
+- **EX-57** Fiches signées (type à attribuer, ≠ `0x08`, A-007), champs typés, aucun champ de consignes, normalisation à l'entrée
 - **EX-58** Aucune IA étrangère n'interroge MAIA : service de requête déterministe uniquement
 - **EX-59** Double MAIA : le planificateur ne voit jamais de contenu étranger
 - **EX-60** Marquage `etranger` propagé ; aucune action, publication ni mémoire longue sans validation
