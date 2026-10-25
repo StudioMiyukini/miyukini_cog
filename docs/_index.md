@@ -30,6 +30,8 @@ Numérotation unifiée K / C / T / S / A / H (décision D6, [vue globale](archit
 | [legal/](legal/) | Documentation juridique |
 | [securite/](securite/) | Audits de securite transverses (auth, WAN, federation, secrets) |
 | [architecture/](architecture/) | Modele de reference (zones, couches, services hybrides, IA) — point d'entree : [vue globale](architecture/COG-VUE-GLOBALE.md) |
+| [architecture/alliance/](architecture/alliance/_index.md) | Conception v2 **hors gel** : Alliances (federations privees), COG-CC, HECTOR, Alliance-Admin |
+| [market/](market/POSITIONNEMENT-COG.md) | Positionnement professionnel et industriel de COG : concurrence, maturite, risques, marche d'entree |
 
 ## Migration documentaire recente
 
@@ -39,4 +41,4 @@ Numérotation unifiée K / C / T / S / A / H (décision D6, [vue globale](archit
 
 ---
 
-Date de mise a jour : 2026-10-24
+Date de mise a jour : 2026-10-25
