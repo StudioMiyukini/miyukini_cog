@@ -538,3 +538,29 @@ fn famille_image_par_detection() {
         None
     );
 }
+
+/// Constats du fuzzing (lot 8) : le nettoyage ne doit pas reconstituer une
+/// signature de fichier, et le JSON doit être idempotent.
+#[test]
+fn nettoyage_ne_reconstitue_aucune_signature() {
+    let lim = miyucdr::Limites::default();
+    for (mime, entree) in [
+        ("text/plain", &b"\x01GIF89a"[..]),
+        ("text/plain", &b"\x01{\\rtf"[..]),
+        ("text/csv", &b"\x16MZ"[..]),
+        ("text/plain", &b"\x0c%P\x03DF-M"[..]),
+    ] {
+        match miyucdr::desarmer(mime, entree, &lim) {
+            Ok(r) => assert_eq!(miyucdr::detecter(&r.octets), miyucdr::TypeDetecte::Texte, "{entree:?}"),
+            Err(_) => {}
+        }
+    }
+}
+
+#[test]
+fn json_idempotent() {
+    let lim = miyucdr::Limites::default();
+    let une = miyucdr::desarmer("application/json", b"1976619766666696.86", &lim).unwrap().octets;
+    let deux = miyucdr::desarmer("application/json", &une, &lim).unwrap().octets;
+    assert_eq!(une, deux);
+}

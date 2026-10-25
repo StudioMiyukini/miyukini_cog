@@ -20,7 +20,8 @@ description = "Désarmement et reconstruction de contenu (CDR) : toute entrée d
 [dependencies]
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp"] }
 unicode-normalization = "0.1"
-serde_json = "1"
+# float_roundtrip : un nombre resérialisé se relit à l'identique (idempotence du CDR).
+serde_json = { version = "1", features = ["float_roundtrip"] }
 thiserror = "2"
 
 [lints.rust]

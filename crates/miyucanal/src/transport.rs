@@ -133,7 +133,9 @@ pub fn decoder_entrees(octets: &[u8], attendues: u32) -> Result<Vec<Vec<u8>>, Er
         return Err(refus());
     }
     let mut pos = 4usize;
-    let mut entrees = Vec::with_capacity(nombre as usize);
+    // Capacité bornée par ce que l'entrée peut réellement contenir (≥ 5 octets
+    // par entrée) : un nombre annoncé énorme ne réserve pas de mémoire.
+    let mut entrees = Vec::with_capacity((nombre as usize).min(octets.len().saturating_sub(4) / 5));
     for _ in 0..nombre {
         let entete = octets.get(pos..pos + 4).ok_or_else(refus)?;
         let n = u32::from_be_bytes(entete.try_into().map_err(|_| refus())?) as usize;

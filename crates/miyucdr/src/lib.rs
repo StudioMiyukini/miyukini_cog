@@ -507,6 +507,15 @@ fn desarmer_type(
     };
 
     annulation.verifier()?;
+    // Le nettoyage (retrait des caractères de contrôle) peut reconstituer une
+    // signature de fichier (« \x01GIF89a » → « GIF89a ») : la sortie textuelle
+    // est redétectée et doit rester du texte, sinon refus.
+    if !type_reel.est_image() {
+        let sortie_detectee = detecter(&sortie);
+        if sortie_detectee != TypeDetecte::Texte {
+            return Err(Refus::TypeDiscordant { declare, detecte: sortie_detectee });
+        }
+    }
     if !type_reel.est_image() && sortie.len() > limites.texte_octets_max {
         return Err(Refus::TropVolumineux {
             octets: sortie.len(),
