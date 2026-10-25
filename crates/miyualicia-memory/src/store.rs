@@ -1,260 +1,201 @@
-//! Store SQLite + FTS5 pour la mémoire Alicia.
+//! Store de la mémoire d'Alicia, écrit et lu par **KindMother** (K-13).
 //!
-//! Schéma P1 :
-//! - `facts(id, persona, subject, content, source, confidence, created_at, updated_at)`
-//! - `facts_fts(content)` — index FTS5 sur `facts.content`, lié par `rowid`
-//! - `preferences(scope, key, value_json, updated_at)` — `PRIMARY KEY(scope,key)`
-//! - `episodes(id, persona, service_id, intent, user_phrase, params_json, outcome, error, created_at)`
-//! - `episodes_fts(user_phrase)` — index FTS5
-//! - `personas(id, display_name, description, is_default, created_at)`
+//! Tables (base KindMother `maia-_alicia`, voir [`crate::schema`]) :
+//! - `facts` — vue courante des faits ; `fact_versions` — historique
+//!   append-only (EX-52) ; `fact_tombstones` — oublis demandés (EX-56)
+//! - `preferences(scope, key)` ; `episodes` ; `personas` ; `learned_skills` ;
+//!   `pending_confirmations` ; `meta` (étiquette `nationale`)
 //!
-//! Le store est volontairement **synchrone** (rusqlite). En P2 on l'enveloppera
-//! côté `miyualicia` dans une tâche dédiée si besoin.
+//! Toutes les écritures sont des **intentions typées** en lots atomiques ;
+//! les lectures sont typées (égalités, tri, limite). La recherche plein texte
+//! (ancien FTS5) est faite par le store sur les lignes lues
+//! ([`crate::recherche`]).
+//!
+//! L'API reste **synchrone** (pont vers le client asynchrone de KindMother).
+//! [`MemoryStore::open_in_memory`] sert les essais : mêmes intentions, tables
+//! en mémoire vive, rien sur disque.
+//!
+//! Concurrence : les transitions de confirmation sont des mises à jour
+//! conditionnelles (`clé = {id, statut}`) appliquées atomiquement par
+//! KindMother — une seule réclamation gagne. Les écritures composées (lecture
+//! puis écriture : version d'un fait, oubli, upsert qui préserve `created_at`)
+//! sont sérialisées dans le processus ; l'opérateur `maia-_alicia` n'appartient
+//! qu'au runtime d'Alicia.
 
 // @id service.alicia.memory.store
 // @role memory_store
 // @layer 7
 // @do persist_alicia_memory
-// @human Store SQLite local pour les faits, préférences, épisodes et personas d'Alicia.
+// @human Store de la mémoire d'Alicia (faits, préférences, épisodes, personas) par KindMother.
 
+use std::collections::HashSet;
 use std::path::Path;
+use std::sync::{Mutex, MutexGuard};
 
 use chrono::{DateTime, Utc};
-use rusqlite::{params, Connection, OptionalExtension, Row};
+use kindmother_client::{TypedSelect, TypedWriteIntent};
 use serde_json::Value;
 use uuid::Uuid;
 
+use crate::entrepot::{Entrepot, Ligne, MAX_LOT};
 use crate::errors::MemoryError;
-use crate::types::{
-    Episode, EpisodeOutcome, Fact, FactTombstone, FactVersion, LearnedSkill, LearnedSkillStatus, PendingConfirmation,
-    PendingExpiryReport, PendingStatus, Persona, Preference, PENDING_REASON_EXPIRED,
+use crate::kindmother::{base_heritee_a_importer, ConfigKindMother, EntrepotKindMother};
+use crate::recherche::Requete;
+use crate::schema::{
+    EPISODES, FACTS, FACT_TOMBSTONES, FACT_VERSIONS, LEARNED_SKILLS, PENDING, PERSONAS, PREFERENCES,
 };
+use crate::types::{
+    Episode, EpisodeOutcome, Fact, FactTombstone, FactVersion, LearnedSkill, LearnedSkillStatus,
+    PendingConfirmation, PendingExpiryReport, PendingStatus, Persona, Preference,
+    PENDING_REASON_EXPIRED,
+};
+use crate::vif::EntrepotVif;
 
-/// Store mémoire — wrapper rusqlite + helpers typés.
+/// Store mémoire — intentions typées vers KindMother (ou mémoire vive).
 ///
-/// La connexion SQLite est encapsulée dans un `Mutex` interne pour garantir
-/// que `Arc<MemoryStore>` soit `Send + Sync` — indispensable pour partager le
-/// store entre handlers axum, tâches tokio, et le runtime Alicia.
+/// `Send + Sync` : partageable en `Arc<MemoryStore>` entre handlers axum,
+/// tâches tokio et le runtime Alicia.
 pub struct MemoryStore {
-    conn: std::sync::Mutex<Connection>,
+    entrepot: Entrepot,
+    /// Sérialise les écritures composées (lecture puis lot) du processus.
+    ecriture: Mutex<()>,
 }
 
 impl MemoryStore {
-    fn lock_conn(&self) -> Result<std::sync::MutexGuard<'_, Connection>, MemoryError> {
-        // Le lock ne peut être empoisonné que si une autre tâche a paniqué en
-        // tenant le mutex. Fail-closed (C-12) : on remonte une erreur typée
-        // plutôt que de continuer avec un état potentiellement incohérent.
-        self.conn.lock().map_err(|_| MemoryError::LockPoisoned)
+    fn avec(entrepot: Entrepot) -> Self {
+        Self {
+            entrepot,
+            ecriture: Mutex::new(()),
+        }
     }
 
-    /// Ouvre (ou crée) un store dans le fichier `path`. Crée le dossier parent
-    /// si nécessaire.
+    fn verrou(&self) -> Result<MutexGuard<'_, ()>, MemoryError> {
+        // Fail-closed (C-12) : un verrou empoisonné refuse l'opération.
+        self.ecriture.lock().map_err(|_| MemoryError::LockPoisoned)
+    }
+
+    /// Ouvre la mémoire servie par KindMother (adresse `KINDMOTHER_ADDR`,
+    /// défaut `127.0.0.1:50051`, justificatif `maia-_alicia` à l'emplacement
+    /// standard).
+    ///
+    /// `path` désigne l'**ancienne base SQLite** de la mémoire : si elle
+    /// existe (non vide) et n'a pas encore été importée, elle est importée une
+    /// fois (feature `import-heritage`) ; sans cette feature, l'ouverture est
+    /// refusée tant qu'elle n'est pas importée. Le fichier n'est jamais créé,
+    /// modifié ni supprimé. Voir [`MemoryStore::connecter`].
     pub fn open(path: &Path) -> Result<Self, MemoryError> {
-        if let Some(parent) = path.parent() {
-            if !parent.as_os_str().is_empty() && !parent.exists() {
-                std::fs::create_dir_all(parent).map_err(|e| MemoryError::Io {
-                    path: parent.to_path_buf(),
-                    source: e,
-                })?;
+        Self::connecter(&ConfigKindMother::depuis_env().avec_base_heritee(path))
+    }
+
+    /// Ouvre la mémoire servie par KindMother selon `cfg`.
+    ///
+    /// Fail-closed : KindMother injoignable ⇒ [`MemoryError::KindMotherUnavailable`] ;
+    /// justificatif absent, authentification refusée, base non `nationale` ou
+    /// non chiffrée ⇒ refus. Aucun repli sur un fichier local.
+    pub fn connecter(cfg: &ConfigKindMother) -> Result<Self, MemoryError> {
+        let km = EntrepotKindMother::connecter(cfg)?;
+        let store = Self::avec(Entrepot::KindMother(Box::new(km)));
+        if let Some(chemin) = &cfg.base_heritee {
+            store.reprendre_base_heritee(chemin)?;
+        }
+        store.completer_historique()?;
+        Ok(store)
+    }
+
+    /// Ouvre un store en mémoire vive (tests, développement) : rien sur disque.
+    pub fn open_in_memory() -> Result<Self, MemoryError> {
+        Ok(Self::avec(Entrepot::Vif(EntrepotVif::new())))
+    }
+
+    /// Ancienne base non importée : import (feature `import-heritage`) ou refus.
+    fn reprendre_base_heritee(&self, chemin: &Path) -> Result<(), MemoryError> {
+        if !base_heritee_a_importer(chemin) {
+            return Ok(());
+        }
+        #[cfg(feature = "import-heritage")]
+        {
+            let rapport = self.importer_base_heritee(chemin)?;
+            tracing::info!(
+                base_heritee = %chemin.display(),
+                lignes = rapport.total_attendues(),
+                orphelines = rapport.total_orphelines(),
+                "mémoire d'Alicia : ancienne base SQLite importée dans KindMother (fichier conservé)"
+            );
+            Ok(())
+        }
+        #[cfg(not(feature = "import-heritage"))]
+        {
+            Err(MemoryError::LegacyDatabase(format!(
+                "{} présente et non importée dans KindMother (K-13) : ouverture refusée pour ne \
+                 pas présenter une mémoire vide. Importer avec `alicia-memoire-import {}` \
+                 (feature import-heritage), ou créer {} pour confirmer l'abandon volontaire \
+                 (le fichier hérité n'est jamais touché).",
+                chemin.display(),
+                chemin.display(),
+                kindmother_client::heritage::chemin_marqueur_import(chemin).display()
+            )))
+        }
+    }
+
+    /// Importe **une fois** l'ancienne base SQLite `chemin` dans KindMother
+    /// (identifiants conservés, vérification ligne à ligne, marqueur
+    /// `<chemin>.importe-kindmother`). Idempotent : relancé après succès, ne
+    /// fait rien ; après un échec, reprend sans doublon. Le fichier hérité
+    /// n'est jamais modifié ni supprimé.
+    #[cfg(feature = "import-heritage")]
+    pub fn importer_base_heritee(
+        &self,
+        chemin: &Path,
+    ) -> Result<kindmother_heritage::RapportImport, MemoryError> {
+        let rapport =
+            {
+                let _g = self.verrou()?;
+                match &self.entrepot {
+                    Entrepot::KindMother(k) => k.importer(chemin)?,
+                    Entrepot::Vif(_) => return Err(MemoryError::LegacyDatabase(
+                        "mémoire vive : import d'une ancienne base impossible (KindMother requis)"
+                            .to_string(),
+                    )),
+                }
+            };
+        self.completer_historique()?;
+        Ok(rapport)
+    }
+
+    /// EX-52 : chaque fait sans historique (base antérieure au versionnage)
+    /// reçoit une version 1 égale à son contenu courant. Idempotent.
+    fn completer_historique(&self) -> Result<(), MemoryError> {
+        let _g = self.verrou()?;
+        let faits = self.entrepot.toutes(FACTS, &[("id", false)], |q| q)?;
+        if faits.is_empty() {
+            return Ok(());
+        }
+        let avec_historique: HashSet<String> = self
+            .entrepot
+            .toutes(
+                FACT_VERSIONS,
+                &[("fact_id", false), ("version", false)],
+                |q| q.columns(["fact_id", "version"]),
+            )?
+            .iter()
+            .filter_map(|l| l.get("fact_id").and_then(Value::as_str).map(str::to_string))
+            .collect();
+        let mut intents = Vec::new();
+        for l in &faits {
+            let f = fact_de(l)?;
+            if !avec_historique.contains(&f.id.to_string()) {
+                intents.push(intention_version(&f, 1, f.updated_at));
             }
         }
-        let conn = Connection::open(path)?;
-        let store = Self {
-            conn: std::sync::Mutex::new(conn),
-        };
-        store.init_schema()?;
-        Ok(store)
-    }
-
-    /// Ouvre un store en mémoire (tests).
-    pub fn open_in_memory() -> Result<Self, MemoryError> {
-        let conn = Connection::open_in_memory()?;
-        let store = Self {
-            conn: std::sync::Mutex::new(conn),
-        };
-        store.init_schema()?;
-        Ok(store)
-    }
-
-    fn init_schema(&self) -> Result<(), MemoryError> {
-        self.lock_conn()?.execute_batch(
-            r"
-            -- EX-52 : un oubli demandé efface réellement (pages réécrites à zéro).
-            PRAGMA secure_delete = ON;
-
-            CREATE TABLE IF NOT EXISTS facts (
-                id          TEXT PRIMARY KEY,
-                persona     TEXT NOT NULL,
-                subject     TEXT NOT NULL,
-                content     TEXT NOT NULL,
-                source      TEXT NOT NULL,
-                confidence  REAL NOT NULL,
-                created_at  TEXT NOT NULL,
-                updated_at  TEXT NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_facts_persona ON facts(persona);
-            CREATE INDEX IF NOT EXISTS idx_facts_subject ON facts(subject);
-
-            CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts
-                USING fts5(content, content='facts', content_rowid='rowid');
-
-            CREATE TABLE IF NOT EXISTS preferences (
-                scope       TEXT NOT NULL,
-                key         TEXT NOT NULL,
-                value_json  TEXT NOT NULL,
-                updated_at  TEXT NOT NULL,
-                PRIMARY KEY (scope, key)
-            );
-
-            CREATE TABLE IF NOT EXISTS episodes (
-                id           TEXT PRIMARY KEY,
-                persona      TEXT NOT NULL,
-                service_id   TEXT NOT NULL,
-                intent       TEXT NOT NULL,
-                user_phrase  TEXT NOT NULL,
-                params_json  TEXT NOT NULL,
-                outcome      TEXT NOT NULL,
-                error        TEXT,
-                created_at   TEXT NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_episodes_persona ON episodes(persona);
-            CREATE INDEX IF NOT EXISTS idx_episodes_service ON episodes(service_id);
-            CREATE INDEX IF NOT EXISTS idx_episodes_created ON episodes(created_at);
-
-            CREATE VIRTUAL TABLE IF NOT EXISTS episodes_fts
-                USING fts5(user_phrase, content='episodes', content_rowid='rowid');
-
-            CREATE TABLE IF NOT EXISTS personas (
-                id            TEXT PRIMARY KEY,
-                display_name  TEXT NOT NULL,
-                description   TEXT NOT NULL,
-                is_default    INTEGER NOT NULL,
-                created_at    TEXT NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS learned_skills (
-                id              TEXT PRIMARY KEY,
-                persona         TEXT NOT NULL,
-                trigger_phrase  TEXT NOT NULL,
-                qualified_id    TEXT NOT NULL,
-                params_template TEXT NOT NULL,
-                status          TEXT NOT NULL,
-                created_at      TEXT NOT NULL,
-                accepted_at     TEXT
-            );
-            CREATE INDEX IF NOT EXISTS idx_learned_persona ON learned_skills(persona);
-            CREATE INDEX IF NOT EXISTS idx_learned_status  ON learned_skills(status);
-            CREATE INDEX IF NOT EXISTS idx_learned_qid     ON learned_skills(qualified_id);
-
-            CREATE TABLE IF NOT EXISTS pending_confirmations (
-                id            TEXT PRIMARY KEY,
-                qualified_id  TEXT NOT NULL,
-                params_json   TEXT NOT NULL,
-                persona       TEXT NOT NULL,
-                user_phrase   TEXT NOT NULL,
-                prompt        TEXT NOT NULL,
-                status        TEXT NOT NULL,
-                created_at    TEXT NOT NULL,
-                resolved_at   TEXT,
-                claimed_at    INTEGER NOT NULL DEFAULT 0,
-                reason        TEXT
-            );
-            CREATE INDEX IF NOT EXISTS idx_pending_status   ON pending_confirmations(status);
-            CREATE INDEX IF NOT EXISTS idx_pending_persona  ON pending_confirmations(persona);
-            CREATE INDEX IF NOT EXISTS idx_pending_created  ON pending_confirmations(created_at);
-
-            -- EX-52 : historique append-only des faits (jamais réécrit).
-            CREATE TABLE IF NOT EXISTS fact_versions (
-                fact_id     TEXT NOT NULL,
-                version     INTEGER NOT NULL CHECK (version >= 1),
-                persona     TEXT NOT NULL,
-                subject     TEXT NOT NULL,
-                content     TEXT NOT NULL,
-                source      TEXT NOT NULL,
-                confidence  REAL NOT NULL,
-                recorded_at TEXT NOT NULL,
-                PRIMARY KEY (fact_id, version)
-            );
-
-            -- EX-52 / EX-56 : pierres tombales des oublis demandés (sans contenu).
-            CREATE TABLE IF NOT EXISTS fact_tombstones (
-                fact_id          TEXT PRIMARY KEY,
-                forgotten_at     TEXT NOT NULL,
-                forgotten_by     TEXT NOT NULL,
-                reason           TEXT NOT NULL,
-                versions_erased  INTEGER NOT NULL
-            );
-            ",
-        )?;
-        self.migrate_schema()?;
-        self.migrate_fact_versions()?;
-        Ok(())
-    }
-
-    /// Migration additive EX-52 : chaque fait existant sans historique reçoit
-    /// une version 1 (son contenu courant). Les contenus écrasés par l'ancien
-    /// `remember` (avant versionnage) sont perdus et ne peuvent être
-    /// reconstitués. L'index FTS est reconstruit à cette occasion (l'ancien
-    /// `remember` y insérait des doublons à chaque mise à jour).
-    ///
-    /// Idempotente ; réversibilité (C-41) : tables additives, ignorées par
-    /// l'ancien code.
-    fn migrate_fact_versions(&self) -> Result<(), MemoryError> {
-        let mut conn = self.lock_conn()?;
-        let tx = conn.transaction()?;
-        let sans_historique: i64 = tx.query_row(
-            "SELECT COUNT(*) FROM facts
-             WHERE id NOT IN (SELECT fact_id FROM fact_versions)",
-            [],
-            |r| r.get(0),
-        )?;
-        if sans_historique > 0 {
-            tx.execute(
-                "INSERT INTO fact_versions
-                     (fact_id, version, persona, subject, content, source, confidence, recorded_at)
-                 SELECT id, 1, persona, subject, content, source, confidence, updated_at
-                 FROM facts WHERE id NOT IN (SELECT fact_id FROM fact_versions)",
-                [],
-            )?;
-            tx.execute("INSERT INTO facts_fts(facts_fts) VALUES('rebuild')", [])?;
+        let n = intents.len();
+        for lot in intents.chunks(MAX_LOT) {
+            self.entrepot.soumettre(lot.to_vec())?;
+        }
+        if n > 0 {
             tracing::info!(
-                faits = sans_historique,
-                "migration mémoire : version initiale créée pour les faits existants"
+                faits = n,
+                "mémoire : version initiale créée pour les faits existants"
             );
-        }
-        tx.commit()?;
-        Ok(())
-    }
-
-    /// Migrations additives des bases créées avec un schéma antérieur.
-    ///
-    /// `pending_confirmations` : ajout de `claimed_at` (horodatage de
-    /// réclamation, epoch ms, défaut `0`) et `reason` (motif de résolution
-    /// automatique, `NULL` par défaut). `ALTER TABLE ... ADD COLUMN` ne touche
-    /// pas les lignes existantes ; une ligne `executing` héritée garde
-    /// `claimed_at = 0` (date de réclamation inconnue) et sera donc expirée
-    /// en `Failed` au premier balayage — jamais ré-exécutée.
-    ///
-    /// Réversibilité (C-41) : colonnes purement additives, ignorées par
-    /// l'ancien code ; retour arrière = `ALTER TABLE ... DROP COLUMN`.
-    fn migrate_schema(&self) -> Result<(), MemoryError> {
-        let conn = self.lock_conn()?;
-        let colonnes: Vec<String> = {
-            let mut stmt = conn.prepare("PRAGMA table_info(pending_confirmations)")?;
-            let rows = stmt.query_map([], |r| r.get::<_, String>(1))?;
-            rows.collect::<Result<Vec<_>, _>>()?
-        };
-        let a = |nom: &str| colonnes.iter().any(|c| c == nom);
-        if !a("claimed_at") {
-            conn.execute_batch(
-                "ALTER TABLE pending_confirmations
-                 ADD COLUMN claimed_at INTEGER NOT NULL DEFAULT 0;",
-            )?;
-            tracing::info!("migration mémoire : colonne pending_confirmations.claimed_at ajoutée");
-        }
-        if !a("reason") {
-            conn.execute_batch("ALTER TABLE pending_confirmations ADD COLUMN reason TEXT;")?;
-            tracing::info!("migration mémoire : colonne pending_confirmations.reason ajoutée");
         }
         Ok(())
     }
@@ -273,127 +214,82 @@ impl MemoryStore {
     /// - Un fait oublié (pierre tombale) ne peut pas être réécrit sous le même
     ///   identifiant : [`MemoryError::FactForgotten`].
     ///
-    /// L'ensemble (version, vue courante, index FTS) est écrit dans une seule
-    /// transaction.
+    /// Version et vue courante sont écrites dans un seul lot atomique.
     pub fn remember(&self, fact: &Fact) -> Result<(), MemoryError> {
         let id = fact.id.to_string();
-        let mut conn = self.lock_conn()?;
-        let tx = conn.transaction()?;
-
-        let oublie = tx
-            .query_row(
-                "SELECT 1 FROM fact_tombstones WHERE fact_id = ?1",
-                params![id],
-                |_| Ok(()),
-            )
-            .optional()?
-            .is_some();
-        if oublie {
+        let _g = self.verrou()?;
+        if !self
+            .entrepot
+            .select(
+                TypedSelect::from(FACT_TOMBSTONES)
+                    .filter("fact_id", id.as_str())
+                    .limit(1),
+            )?
+            .is_empty()
+        {
             return Err(MemoryError::FactForgotten(fact.id));
         }
-
-        let actuel = tx
-            .query_row(
-                "SELECT rowid, persona, subject, content, source, confidence
-                 FROM facts WHERE id = ?1",
-                params![id],
-                |r| {
-                    Ok(EtatFait {
-                        rowid: r.get(0)?,
-                        persona: r.get(1)?,
-                        subject: r.get(2)?,
-                        content: r.get(3)?,
-                        source: r.get(4)?,
-                        confidence: r.get(5)?,
-                    })
-                },
-            )
-            .optional()?;
-
+        let actuel = self
+            .entrepot
+            .select(TypedSelect::from(FACTS).filter("id", id.as_str()))?
+            .first()
+            .map(EtatFait::de)
+            .transpose()?;
         if actuel.as_ref().is_some_and(|a| a.identique(fact)) {
             // Rien de nouveau : pas de version supplémentaire.
             return Ok(());
         }
+        let derniere = self
+            .entrepot
+            .select(
+                TypedSelect::from(FACT_VERSIONS)
+                    .columns(["version"])
+                    .filter("fact_id", id.as_str())
+                    .order_by("version", true)
+                    .limit(1),
+            )?
+            .first()
+            .map(|l| entier(l, "version"))
+            .transpose()?
+            .unwrap_or(0);
+        let version = u32::try_from(derniere.saturating_add(1)).map_err(|_| {
+            MemoryError::Corrupt(format!("fait {id} : version {derniere} hors bornes"))
+        })?;
 
-        let version: i64 = tx.query_row(
-            "SELECT COALESCE(MAX(version), 0) + 1 FROM fact_versions WHERE fact_id = ?1",
-            params![id],
-            |r| r.get(0),
-        )?;
-        tx.execute(
-            "INSERT INTO fact_versions
-                 (fact_id, version, persona, subject, content, source, confidence, recorded_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-            params![
-                id,
-                version,
-                fact.persona,
-                fact.subject,
-                fact.content,
-                fact.source,
-                fact.confidence,
-                fact.updated_at.to_rfc3339(),
-            ],
-        )?;
-
-        if let Some(a) = actuel {
-            // Index FTS à contenu externe : retirer l'ancien contenu avant
-            // de mettre à jour la vue courante.
-            tx.execute(
-                "INSERT INTO facts_fts(facts_fts, rowid, content) VALUES('delete', ?1, ?2)",
-                params![a.rowid, a.content],
-            )?;
-            tx.execute(
-                "UPDATE facts SET persona = ?2, subject = ?3, content = ?4, source = ?5,
-                                  confidence = ?6, updated_at = ?7
-                 WHERE id = ?1",
-                params![
-                    id,
-                    fact.persona,
-                    fact.subject,
-                    fact.content,
-                    fact.source,
-                    fact.confidence,
-                    fact.updated_at.to_rfc3339(),
-                ],
-            )?;
-            tx.execute(
-                "INSERT INTO facts_fts(rowid, content) VALUES (?1, ?2)",
-                params![a.rowid, fact.content],
-            )?;
+        let mut intents = vec![intention_version(fact, version, fact.updated_at)];
+        intents.push(if actuel.is_some() {
+            TypedWriteIntent::update(FACTS)
+                .key("id", id.as_str())
+                .value("persona", fact.persona.as_str())
+                .value("subject", fact.subject.as_str())
+                .value("content", fact.content.as_str())
+                .value("source", fact.source.as_str())
+                .value("confidence", f64::from(fact.confidence))
+                .value("updated_at", fact.updated_at.to_rfc3339())
+                .purpose("alicia_memoire_fait_maj")
         } else {
-            tx.execute(
-                "INSERT INTO facts(id, persona, subject, content, source, confidence,
-                                   created_at, updated_at)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-                params![
-                    id,
-                    fact.persona,
-                    fact.subject,
-                    fact.content,
-                    fact.source,
-                    fact.confidence,
-                    fact.created_at.to_rfc3339(),
-                    fact.updated_at.to_rfc3339(),
-                ],
-            )?;
-            tx.execute(
-                "INSERT INTO facts_fts(rowid, content)
-                 SELECT rowid, content FROM facts WHERE id = ?1",
-                params![id],
-            )?;
-        }
-        tx.commit()?;
+            TypedWriteIntent::insert(FACTS)
+                .value("id", id.as_str())
+                .value("persona", fact.persona.as_str())
+                .value("subject", fact.subject.as_str())
+                .value("content", fact.content.as_str())
+                .value("source", fact.source.as_str())
+                .value("confidence", f64::from(fact.confidence))
+                .value("created_at", fact.created_at.to_rfc3339())
+                .value("updated_at", fact.updated_at.to_rfc3339())
+                .purpose("alicia_memoire_fait")
+        });
+        self.entrepot.soumettre(intents)?;
         Ok(())
     }
 
     /// **Oubli demandé** d'un fait (EX-52, EX-56) : seule écriture destructive
     /// autorisée sur la mémoire.
     ///
-    /// Efface réellement la vue courante, l'index FTS et **toutes** les
-    /// versions, puis enregistre une pierre tombale sans contenu (qui, quand,
-    /// pourquoi, nombre de versions effacées). `forgotten_by` et `reason` sont
-    /// obligatoires (non vides, bornés).
+    /// Efface réellement la vue courante et **toutes** les versions, puis
+    /// enregistre une pierre tombale sans contenu (qui, quand, pourquoi,
+    /// nombre de versions effacées), dans un seul lot atomique.
+    /// `forgotten_by` et `reason` sont obligatoires (non vides, bornés).
     ///
     /// Renvoie le nombre de faits retirés de la vue courante (0 ou 1). Un fait
     /// inconnu ou déjà oublié renvoie 0 sans nouvelle pierre tombale.
@@ -401,126 +297,130 @@ impl MemoryStore {
         valider_champ_oubli("auteur", forgotten_by, OUBLI_AUTEUR_MAX)?;
         valider_champ_oubli("motif", reason, OUBLI_MOTIF_MAX)?;
         let id_s = id.to_string();
-        let mut conn = self.lock_conn()?;
-        let tx = conn.transaction()?;
-
-        let actuel: Option<(i64, String)> = tx
-            .query_row(
-                "SELECT rowid, content FROM facts WHERE id = ?1",
-                params![id_s],
-                |r| Ok((r.get(0)?, r.get(1)?)),
-            )
-            .optional()?;
-        let versions: i64 = tx.query_row(
-            "SELECT COUNT(*) FROM fact_versions WHERE fact_id = ?1",
-            params![id_s],
-            |r| r.get(0),
-        )?;
-        if actuel.is_none() && versions == 0 {
+        let _g = self.verrou()?;
+        let actuel = !self
+            .entrepot
+            .select(
+                TypedSelect::from(FACTS)
+                    .columns(["id"])
+                    .filter("id", id_s.as_str()),
+            )?
+            .is_empty();
+        let versions = self
+            .entrepot
+            .toutes(FACT_VERSIONS, &[("version", false)], |q| {
+                q.columns(["version"]).filter("fact_id", id_s.as_str())
+            })?
+            .len();
+        if !actuel && versions == 0 {
             return Ok(0);
         }
+        let deja_tombe = !self
+            .entrepot
+            .select(
+                TypedSelect::from(FACT_TOMBSTONES)
+                    .filter("fact_id", id_s.as_str())
+                    .limit(1),
+            )?
+            .is_empty();
 
-        let mut retires = 0usize;
-        if let Some((rowid, content)) = actuel {
-            tx.execute(
-                "INSERT INTO facts_fts(facts_fts, rowid, content) VALUES('delete', ?1, ?2)",
-                params![rowid, content],
-            )?;
-            retires = tx.execute("DELETE FROM facts WHERE id = ?1", params![id_s])?;
+        let mut intents = Vec::new();
+        if actuel {
+            intents.push(
+                TypedWriteIntent::delete(FACTS)
+                    .key("id", id_s.as_str())
+                    .purpose("alicia_memoire_oubli_demande"),
+            );
         }
-        tx.execute("DELETE FROM fact_versions WHERE fact_id = ?1", params![id_s])?;
-        tx.execute(
-            "INSERT INTO fact_tombstones(fact_id, forgotten_at, forgotten_by, reason, versions_erased)
-             VALUES (?1, ?2, ?3, ?4, ?5)
-             ON CONFLICT(fact_id) DO NOTHING",
-            params![
-                id_s,
-                Utc::now().to_rfc3339(),
-                forgotten_by.trim(),
-                reason.trim(),
-                versions
-            ],
-        )?;
-        // L'entrée 'delete' laisse d'anciens segments FTS contenant le texte :
-        // 'optimize' les fusionne et libère leurs pages (mises à zéro par
-        // secure_delete).
-        tx.execute("INSERT INTO facts_fts(facts_fts) VALUES('optimize')", [])?;
-        tx.commit()?;
-        // Trames WAL éventuelles contenant l'ancien contenu : point de contrôle
-        // tronquant (sans effet hors mode WAL). Un échec n'annule pas l'oubli.
-        if let Err(e) = conn.query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |_| Ok(())) {
-            tracing::warn!(fait = %id, "mémoire : point de contrôle WAL après oubli impossible : {e}");
+        intents.push(
+            TypedWriteIntent::delete(FACT_VERSIONS)
+                .key("fact_id", id_s.as_str())
+                .purpose("alicia_memoire_oubli_demande"),
+        );
+        if !deja_tombe {
+            intents.push(
+                TypedWriteIntent::insert(FACT_TOMBSTONES)
+                    .value("fact_id", id_s.as_str())
+                    .value("forgotten_at", Utc::now().to_rfc3339())
+                    .value("forgotten_by", forgotten_by.trim())
+                    .value("reason", reason.trim())
+                    .value(
+                        "versions_erased",
+                        i64::try_from(versions).unwrap_or(i64::MAX),
+                    )
+                    .purpose("alicia_memoire_pierre_tombale"),
+            );
         }
+        let lignes = self.entrepot.soumettre(intents)?;
+        let retires = if actuel {
+            usize::try_from(lignes.first().copied().unwrap_or(0)).unwrap_or(usize::MAX)
+        } else {
+            0
+        };
         tracing::info!(fait = %id, versions, "mémoire : fait oublié à la demande (pierre tombale)");
         Ok(retires)
     }
 
     /// Version courante d'un fait (None si inconnu ou oublié).
     pub fn fact(&self, id: Uuid) -> Result<Option<Fact>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT id, persona, subject, content, source, confidence, created_at, updated_at
-             FROM facts WHERE id = ?1",
-        )?;
-        stmt.query_row(params![id.to_string()], row_to_fact)
-            .optional()
-            .map_err(MemoryError::from)
+        self.entrepot
+            .select(TypedSelect::from(FACTS).filter("id", id.to_string()))?
+            .first()
+            .map(fact_de)
+            .transpose()
     }
 
     /// Historique complet d'un fait, de la version 1 à la version courante
     /// (ordre croissant). Vide si inconnu ou oublié.
     pub fn fact_history(&self, id: Uuid) -> Result<Vec<FactVersion>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT fact_id, version, persona, subject, content, source, confidence, recorded_at
-             FROM fact_versions WHERE fact_id = ?1 ORDER BY version ASC",
-        )?;
-        let rows = stmt.query_map(params![id.to_string()], row_to_fact_version)?;
-        rows.collect::<Result<Vec<_>, _>>().map_err(MemoryError::from)
+        self.entrepot
+            .toutes(FACT_VERSIONS, &[("version", false)], |q| {
+                q.filter("fact_id", id.to_string())
+            })?
+            .iter()
+            .map(version_de)
+            .collect()
     }
 
     /// Pierre tombale d'un fait oublié (None si jamais oublié).
     pub fn fact_tombstone(&self, id: Uuid) -> Result<Option<FactTombstone>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT fact_id, forgotten_at, forgotten_by, reason, versions_erased
-             FROM fact_tombstones WHERE fact_id = ?1",
-        )?;
-        stmt.query_row(params![id.to_string()], row_to_tombstone)
-            .optional()
-            .map_err(MemoryError::from)
+        self.entrepot
+            .select(TypedSelect::from(FACT_TOMBSTONES).filter("fact_id", id.to_string()))?
+            .first()
+            .map(tombe_de)
+            .transpose()
     }
 
     /// Liste les faits d'un persona (triés par `updated_at` décroissant).
     pub fn facts_for_persona(&self, persona: &str) -> Result<Vec<Fact>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT id, persona, subject, content, source, confidence, created_at, updated_at
-             FROM facts WHERE persona = ?1 ORDER BY updated_at DESC",
-        )?;
-        let rows = stmt.query_map(params![persona], row_to_fact)?;
-        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+        self.entrepot
+            .toutes(FACTS, &[("updated_at", true), ("id", false)], |q| {
+                q.filter("persona", persona)
+            })?
+            .iter()
+            .map(fact_de)
+            .collect()
     }
 
-    /// Recherche plein texte sur les faits — retourne au plus `limit` résultats.
+    /// Recherche plein texte sur les faits — retourne au plus `limit` résultats,
+    /// les plus pertinents d'abord (voir [`crate::recherche`]).
     pub fn recall(&self, query: &str, limit: usize) -> Result<Vec<Fact>, MemoryError> {
-        if query.trim().is_empty() {
+        let requete = Requete::analyser(query);
+        if requete.est_vide() || limit == 0 {
             return Ok(Vec::new());
         }
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            r"
-            SELECT f.id, f.persona, f.subject, f.content, f.source, f.confidence,
-                   f.created_at, f.updated_at
-            FROM facts_fts ft
-            JOIN facts f ON f.rowid = ft.rowid
-            WHERE facts_fts MATCH ?1
-            ORDER BY rank
-            LIMIT ?2
-            ",
-        )?;
-        let rows = stmt.query_map(params![query, i64::try_from(limit).unwrap_or(i64::MAX)], row_to_fact)?;
-        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+        let mut trouves: Vec<(f64, Fact)> = Vec::new();
+        for l in self.entrepot.toutes(FACTS, &[("id", false)], |q| q)? {
+            let f = fact_de(&l)?;
+            if let Some(s) = requete.score(&f.content) {
+                trouves.push((s, f));
+            }
+        }
+        trouves.sort_by(|a, b| {
+            b.0.total_cmp(&a.0)
+                .then_with(|| b.1.updated_at.cmp(&a.1.updated_at))
+        });
+        Ok(trouves.into_iter().take(limit).map(|(_, f)| f).collect())
     }
 
     // ------------------------------------------------------------------
@@ -530,86 +430,47 @@ impl MemoryStore {
     /// Définit (ou met à jour) une préférence.
     pub fn prefer(&self, pref: &Preference) -> Result<(), MemoryError> {
         let value_json = serde_json::to_string(&pref.value)?;
-        self.lock_conn()?.execute(
-            r"
-            INSERT INTO preferences(scope, key, value_json, updated_at)
-            VALUES (?1, ?2, ?3, ?4)
-            ON CONFLICT(scope, key) DO UPDATE SET
-                value_json = excluded.value_json,
-                updated_at = excluded.updated_at
-            ",
-            params![pref.scope, pref.key, value_json, pref.updated_at.to_rfc3339()],
-        )?;
+        self.entrepot
+            .soumettre(vec![TypedWriteIntent::upsert(PREFERENCES)
+                .key("scope", pref.scope.as_str())
+                .key("key", pref.key.as_str())
+                .value("value_json", value_json)
+                .value("updated_at", pref.updated_at.to_rfc3339())
+                .purpose("alicia_memoire_preference")])?;
         Ok(())
     }
 
     /// Récupère une préférence (None si absente).
     pub fn preference(&self, scope: &str, key: &str) -> Result<Option<Preference>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT scope, key, value_json, updated_at FROM preferences
-             WHERE scope = ?1 AND key = ?2",
-        )?;
-        let opt = stmt
-            .query_row(params![scope, key], |row| {
-                let scope: String = row.get(0)?;
-                let key: String = row.get(1)?;
-                let value_json: String = row.get(2)?;
-                let updated_at: String = row.get(3)?;
-                Ok((scope, key, value_json, updated_at))
-            })
-            .optional()?;
-        match opt {
-            None => Ok(None),
-            Some((scope, key, value_json, updated_at)) => {
-                let value: Value = serde_json::from_str(&value_json)?;
-                let updated_at = parse_rfc3339(&updated_at)?;
-                Ok(Some(Preference {
-                    scope,
-                    key,
-                    value,
-                    updated_at,
-                }))
-            }
-        }
+        self.entrepot
+            .select(
+                TypedSelect::from(PREFERENCES)
+                    .filter("scope", scope)
+                    .filter("key", key),
+            )?
+            .first()
+            .map(preference_de)
+            .transpose()
     }
 
     /// Liste toutes les préférences d'un scope (persona ou `"global"`).
     pub fn preferences_for_scope(&self, scope: &str) -> Result<Vec<Preference>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT scope, key, value_json, updated_at FROM preferences
-             WHERE scope = ?1 ORDER BY key",
-        )?;
-        let rows = stmt.query_map(params![scope], |row| {
-            let scope: String = row.get(0)?;
-            let key: String = row.get(1)?;
-            let value_json: String = row.get(2)?;
-            let updated_at: String = row.get(3)?;
-            Ok((scope, key, value_json, updated_at))
-        })?;
-        let mut out = Vec::new();
-        for row in rows {
-            let (scope, key, value_json, updated_at) = row?;
-            let value: Value = serde_json::from_str(&value_json)?;
-            let updated_at = parse_rfc3339(&updated_at)?;
-            out.push(Preference {
-                scope,
-                key,
-                value,
-                updated_at,
-            });
-        }
-        Ok(out)
+        self.entrepot
+            .toutes(PREFERENCES, &[("key", false)], |q| q.filter("scope", scope))?
+            .iter()
+            .map(preference_de)
+            .collect()
     }
 
     /// Supprime une préférence. Renvoie le nombre de lignes supprimées.
     pub fn unprefer(&self, scope: &str, key: &str) -> Result<usize, MemoryError> {
-        let n = self.lock_conn()?.execute(
-            "DELETE FROM preferences WHERE scope = ?1 AND key = ?2",
-            params![scope, key],
-        )?;
-        Ok(n)
+        let n = self
+            .entrepot
+            .soumettre(vec![TypedWriteIntent::delete(PREFERENCES)
+                .key("scope", scope)
+                .key("key", key)
+                .purpose("alicia_memoire_preference_retrait")])?;
+        Ok(usize::try_from(n.first().copied().unwrap_or(0)).unwrap_or(usize::MAX))
     }
 
     // ------------------------------------------------------------------
@@ -619,77 +480,65 @@ impl MemoryStore {
     /// Enregistre un épisode (insertion uniquement — pas d'upsert).
     pub fn record_episode(&self, ep: &Episode) -> Result<(), MemoryError> {
         let params_json = serde_json::to_string(&ep.params)?;
-        let outcome = match ep.outcome {
-            EpisodeOutcome::Ok => "ok",
-            EpisodeOutcome::Cancelled => "cancelled",
-            EpisodeOutcome::Failed => "failed",
-        };
-        self.lock_conn()?.execute(
-            r"
-            INSERT INTO episodes(id, persona, service_id, intent, user_phrase, params_json,
-                                 outcome, error, created_at)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
-            ",
-            params![
-                ep.id.to_string(),
-                ep.persona,
-                ep.service_id,
-                ep.intent,
-                ep.user_phrase,
-                params_json,
-                outcome,
-                ep.error,
-                ep.created_at.to_rfc3339(),
-            ],
-        )?;
-        self.lock_conn()?.execute(
-            "INSERT INTO episodes_fts(rowid, user_phrase) SELECT rowid, user_phrase FROM episodes WHERE id = ?1",
-            params![ep.id.to_string()],
-        )?;
+        self.entrepot
+            .soumettre(vec![TypedWriteIntent::insert(EPISODES)
+                .value("id", ep.id.to_string())
+                .value("persona", ep.persona.as_str())
+                .value("service_id", ep.service_id.as_str())
+                .value("intent", ep.intent.as_str())
+                .value("user_phrase", ep.user_phrase.as_str())
+                .value("params_json", params_json)
+                .value("outcome", outcome_as_str(ep.outcome))
+                .value("error", ep.error.clone())
+                .value("created_at", ep.created_at.to_rfc3339())
+                .purpose("alicia_memoire_episode")])?;
         Ok(())
     }
 
     /// Récupère les `limit` derniers épisodes (tous personas confondus).
     pub fn recent_episodes(&self, limit: usize) -> Result<Vec<Episode>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT id, persona, service_id, intent, user_phrase, params_json,
-                    outcome, error, created_at
-             FROM episodes ORDER BY created_at DESC LIMIT ?1",
-        )?;
-        let rows = stmt.query_map(params![i64::try_from(limit).unwrap_or(i64::MAX)], row_to_episode)?;
-        rows.collect::<Result<Vec<_>, _>>()
-            .map_err(MemoryError::from)
+        self.entrepot
+            .select(
+                TypedSelect::from(EPISODES)
+                    .order_by("created_at", true)
+                    .limit(limite(limit)),
+            )?
+            .iter()
+            .map(episode_de)
+            .collect()
     }
 
-    /// Épisodes récents restreints à une liste de personas (filtre en SQL,
-    /// avant le `LIMIT`). Liste vide → aucun épisode. Au plus 64 personas.
+    /// Épisodes récents restreints à une liste de personas (filtre côté
+    /// KindMother, avant la limite). Liste vide → aucun épisode. Au plus 64
+    /// personas.
     pub fn recent_episodes_for_personas(
         &self,
         personas: &[String],
         limit: usize,
     ) -> Result<Vec<Episode>, MemoryError> {
+        let mut vus = HashSet::new();
+        let personas: Vec<&String> = personas
+            .iter()
+            .take(64)
+            .filter(|p| vus.insert(p.as_str()))
+            .collect();
         if personas.is_empty() {
             return Ok(Vec::new());
         }
-        let personas = &personas[..personas.len().min(64)];
-        let marques = vec!["?"; personas.len()].join(", ");
-        let sql = format!(
-            "SELECT id, persona, service_id, intent, user_phrase, params_json,
-                    outcome, error, created_at
-             FROM episodes WHERE persona IN ({marques})
-             ORDER BY created_at DESC LIMIT ?{}",
-            personas.len() + 1
-        );
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(&sql)?;
-        let mut valeurs: Vec<&dyn rusqlite::ToSql> =
-            personas.iter().map(|p| p as &dyn rusqlite::ToSql).collect();
-        let limite = i64::try_from(limit).unwrap_or(i64::MAX);
-        valeurs.push(&limite);
-        let rows = stmt.query_map(valeurs.as_slice(), row_to_episode)?;
-        rows.collect::<Result<Vec<_>, _>>()
-            .map_err(MemoryError::from)
+        let mut out = Vec::new();
+        for p in personas {
+            for l in self.entrepot.select(
+                TypedSelect::from(EPISODES)
+                    .filter("persona", p.as_str())
+                    .order_by("created_at", true)
+                    .limit(limite(limit)),
+            )? {
+                out.push(episode_de(&l)?);
+            }
+        }
+        out.sort_by_key(|e: &Episode| std::cmp::Reverse(e.created_at));
+        out.truncate(limit);
+        Ok(out)
     }
 
     /// Liste les épisodes d'un service donné, plus récents d'abord.
@@ -698,107 +547,102 @@ impl MemoryStore {
         service_id: &str,
         limit: usize,
     ) -> Result<Vec<Episode>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT id, persona, service_id, intent, user_phrase, params_json,
-                    outcome, error, created_at
-             FROM episodes WHERE service_id = ?1
-             ORDER BY created_at DESC LIMIT ?2",
-        )?;
-        let rows = stmt.query_map(params![service_id, i64::try_from(limit).unwrap_or(i64::MAX)], row_to_episode)?;
-        rows.collect::<Result<Vec<_>, _>>()
-            .map_err(MemoryError::from)
+        self.entrepot
+            .select(
+                TypedSelect::from(EPISODES)
+                    .filter("service_id", service_id)
+                    .order_by("created_at", true)
+                    .limit(limite(limit)),
+            )?
+            .iter()
+            .map(episode_de)
+            .collect()
     }
 
     /// Recherche plein texte sur les phrases utilisateur des épisodes.
-    pub fn search_episodes(
-        &self,
-        query: &str,
-        limit: usize,
-    ) -> Result<Vec<Episode>, MemoryError> {
-        if query.trim().is_empty() {
+    pub fn search_episodes(&self, query: &str, limit: usize) -> Result<Vec<Episode>, MemoryError> {
+        let requete = Requete::analyser(query);
+        if requete.est_vide() || limit == 0 {
             return Ok(Vec::new());
         }
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            r"
-            SELECT e.id, e.persona, e.service_id, e.intent, e.user_phrase, e.params_json,
-                   e.outcome, e.error, e.created_at
-            FROM episodes_fts ft
-            JOIN episodes e ON e.rowid = ft.rowid
-            WHERE episodes_fts MATCH ?1
-            ORDER BY rank
-            LIMIT ?2
-            ",
-        )?;
-        let rows = stmt.query_map(params![query, i64::try_from(limit).unwrap_or(i64::MAX)], row_to_episode)?;
-        rows.collect::<Result<Vec<_>, _>>()
-            .map_err(MemoryError::from)
+        let mut trouves: Vec<(f64, Episode)> = Vec::new();
+        for l in self.entrepot.toutes(EPISODES, &[("id", false)], |q| q)? {
+            let e = episode_de(&l)?;
+            if let Some(s) = requete.score(&e.user_phrase) {
+                trouves.push((s, e));
+            }
+        }
+        trouves.sort_by(|a, b| {
+            b.0.total_cmp(&a.0)
+                .then_with(|| b.1.created_at.cmp(&a.1.created_at))
+        });
+        Ok(trouves.into_iter().take(limit).map(|(_, e)| e).collect())
     }
 
     // ------------------------------------------------------------------
     // PERSONAS
     // ------------------------------------------------------------------
 
-    /// Crée ou met à jour un persona.
+    /// Crée ou met à jour un persona (la date de création d'origine est conservée).
     pub fn upsert_persona(&self, persona: &Persona) -> Result<(), MemoryError> {
         if persona.id.trim().is_empty() {
             return Err(MemoryError::InvalidId(persona.id.clone()));
         }
-        self.lock_conn()?.execute(
-            r"
-            INSERT INTO personas(id, display_name, description, is_default, created_at)
-            VALUES (?1, ?2, ?3, ?4, ?5)
-            ON CONFLICT(id) DO UPDATE SET
-                display_name = excluded.display_name,
-                description  = excluded.description,
-                is_default   = excluded.is_default
-            ",
-            params![
-                persona.id,
-                persona.display_name,
-                persona.description,
-                i32::from(persona.is_default),
-                persona.created_at.to_rfc3339(),
-            ],
-        )?;
+        let _g = self.verrou()?;
+        let existe = !self
+            .entrepot
+            .select(
+                TypedSelect::from(PERSONAS)
+                    .columns(["id"])
+                    .filter("id", persona.id.as_str()),
+            )?
+            .is_empty();
+        let intent = if existe {
+            TypedWriteIntent::update(PERSONAS).key("id", persona.id.as_str())
+        } else {
+            TypedWriteIntent::insert(PERSONAS)
+                .value("id", persona.id.as_str())
+                .value("created_at", persona.created_at.to_rfc3339())
+        };
+        self.entrepot.soumettre(vec![intent
+            .value("display_name", persona.display_name.as_str())
+            .value("description", persona.description.as_str())
+            .value("is_default", i64::from(persona.is_default))
+            .purpose("alicia_memoire_persona")])?;
         Ok(())
     }
 
     /// Récupère un persona par son `id`.
     pub fn persona(&self, id: &str) -> Result<Option<Persona>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT id, display_name, description, is_default, created_at
-             FROM personas WHERE id = ?1",
-        )?;
-        stmt.query_row(params![id], row_to_persona)
-            .optional()
-            .map_err(MemoryError::from)
+        self.entrepot
+            .select(TypedSelect::from(PERSONAS).filter("id", id))?
+            .first()
+            .map(persona_de)
+            .transpose()
     }
 
     /// Liste tous les personas (triés par `id`).
     pub fn personas(&self) -> Result<Vec<Persona>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT id, display_name, description, is_default, created_at
-             FROM personas ORDER BY id",
-        )?;
-        let rows = stmt.query_map([], row_to_persona)?;
-        rows.collect::<Result<Vec<_>, _>>()
-            .map_err(MemoryError::from)
+        self.entrepot
+            .toutes(PERSONAS, &[("id", false)], |q| q)?
+            .iter()
+            .map(persona_de)
+            .collect()
     }
 
-    /// Persona marqué `is_default = 1` (s'il y en a un).
+    /// Persona marqué `is_default = 1` (s'il y en a un ; le plus ancien sinon).
     pub fn default_persona(&self) -> Result<Option<Persona>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT id, display_name, description, is_default, created_at
-             FROM personas WHERE is_default = 1 LIMIT 1",
-        )?;
-        stmt.query_row([], row_to_persona)
-            .optional()
-            .map_err(MemoryError::from)
+        self.entrepot
+            .select(
+                TypedSelect::from(PERSONAS)
+                    .filter("is_default", 1_i64)
+                    .order_by("created_at", false)
+                    .order_by("id", false)
+                    .limit(1),
+            )?
+            .first()
+            .map(persona_de)
+            .transpose()
     }
 
     // ------------------------------------------------------------------
@@ -897,33 +741,35 @@ impl MemoryStore {
     // SKILLS APPRISES (P5)
     // ------------------------------------------------------------------
 
-    /// Insère ou met à jour une `LearnedSkill` (clé = `id`).
+    /// Insère ou met à jour une `LearnedSkill` (clé = `id` ; la date de
+    /// création d'origine est conservée).
     pub fn upsert_learned_skill(&self, skill: &LearnedSkill) -> Result<(), MemoryError> {
         let params_json = serde_json::to_string(&skill.params_template)?;
-        self.lock_conn()?.execute(
-            r"
-            INSERT INTO learned_skills(id, persona, trigger_phrase, qualified_id,
-                                       params_template, status, created_at, accepted_at)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
-            ON CONFLICT(id) DO UPDATE SET
-                persona         = excluded.persona,
-                trigger_phrase  = excluded.trigger_phrase,
-                qualified_id    = excluded.qualified_id,
-                params_template = excluded.params_template,
-                status          = excluded.status,
-                accepted_at     = excluded.accepted_at
-            ",
-            params![
-                skill.id.to_string(),
-                skill.persona,
-                skill.trigger_phrase,
-                skill.qualified_id,
-                params_json,
-                learned_status_as_str(skill.status),
-                skill.created_at.to_rfc3339(),
-                skill.accepted_at.map(|d| d.to_rfc3339()),
-            ],
-        )?;
+        let id = skill.id.to_string();
+        let _g = self.verrou()?;
+        let existe = !self
+            .entrepot
+            .select(
+                TypedSelect::from(LEARNED_SKILLS)
+                    .columns(["id"])
+                    .filter("id", id.as_str()),
+            )?
+            .is_empty();
+        let intent = if existe {
+            TypedWriteIntent::update(LEARNED_SKILLS).key("id", id.as_str())
+        } else {
+            TypedWriteIntent::insert(LEARNED_SKILLS)
+                .value("id", id.as_str())
+                .value("created_at", skill.created_at.to_rfc3339())
+        };
+        self.entrepot.soumettre(vec![intent
+            .value("persona", skill.persona.as_str())
+            .value("trigger_phrase", skill.trigger_phrase.as_str())
+            .value("qualified_id", skill.qualified_id.as_str())
+            .value("params_template", params_json)
+            .value("status", learned_status_as_str(skill.status))
+            .value("accepted_at", skill.accepted_at.map(|d| d.to_rfc3339()))
+            .purpose("alicia_memoire_skill")])?;
         Ok(())
     }
 
@@ -955,15 +801,17 @@ impl MemoryStore {
 
     /// Marque une skill comme acceptée (statut `Accepted`, `accepted_at` posé).
     pub fn accept_learned_skill(&self, id: Uuid) -> Result<(), MemoryError> {
-        let n = self.lock_conn()?.execute(
-            "UPDATE learned_skills SET status = ?1, accepted_at = ?2 WHERE id = ?3",
-            params![
-                learned_status_as_str(LearnedSkillStatus::Accepted),
-                Utc::now().to_rfc3339(),
-                id.to_string(),
-            ],
-        )?;
-        if n == 0 {
+        let n = self
+            .entrepot
+            .soumettre(vec![TypedWriteIntent::update(LEARNED_SKILLS)
+                .key("id", id.to_string())
+                .value(
+                    "status",
+                    learned_status_as_str(LearnedSkillStatus::Accepted),
+                )
+                .value("accepted_at", Utc::now().to_rfc3339())
+                .purpose("alicia_memoire_skill_acceptee")])?;
+        if n.first().copied().unwrap_or(0) == 0 {
             return Err(MemoryError::LearnedSkillNotFound(id));
         }
         Ok(())
@@ -971,14 +819,16 @@ impl MemoryStore {
 
     /// Marque une skill comme refusée (statut `Rejected`).
     pub fn reject_learned_skill(&self, id: Uuid) -> Result<(), MemoryError> {
-        let n = self.lock_conn()?.execute(
-            "UPDATE learned_skills SET status = ?1 WHERE id = ?2",
-            params![
-                learned_status_as_str(LearnedSkillStatus::Rejected),
-                id.to_string(),
-            ],
-        )?;
-        if n == 0 {
+        let n = self
+            .entrepot
+            .soumettre(vec![TypedWriteIntent::update(LEARNED_SKILLS)
+                .key("id", id.to_string())
+                .value(
+                    "status",
+                    learned_status_as_str(LearnedSkillStatus::Rejected),
+                )
+                .purpose("alicia_memoire_skill_refusee")])?;
+        if n.first().copied().unwrap_or(0) == 0 {
             return Err(MemoryError::LearnedSkillNotFound(id));
         }
         Ok(())
@@ -986,50 +836,42 @@ impl MemoryStore {
 
     /// Récupère une skill apprise par son id.
     pub fn learned_skill(&self, id: Uuid) -> Result<Option<LearnedSkill>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT id, persona, trigger_phrase, qualified_id, params_template,
-                    status, created_at, accepted_at
-             FROM learned_skills WHERE id = ?1",
-        )?;
-        stmt.query_row(params![id.to_string()], row_to_learned_skill)
-            .optional()
-            .map_err(MemoryError::from)
+        self.entrepot
+            .select(TypedSelect::from(LEARNED_SKILLS).filter("id", id.to_string()))?
+            .first()
+            .map(skill_de)
+            .transpose()
+    }
+
+    fn skills_par_statut(
+        &self,
+        persona: &str,
+        statut: LearnedSkillStatus,
+    ) -> Result<Vec<LearnedSkill>, MemoryError> {
+        self.entrepot
+            .toutes(
+                LEARNED_SKILLS,
+                &[("created_at", true), ("id", false)],
+                |q| {
+                    q.filter("persona", persona)
+                        .filter("status", learned_status_as_str(statut))
+                },
+            )?
+            .iter()
+            .map(skill_de)
+            .collect()
     }
 
     /// Liste les skills apprises **acceptées** pour une persona donnée
     /// (utilisable au runtime pour matcher des phrases).
     pub fn active_learned_skills(&self, persona: &str) -> Result<Vec<LearnedSkill>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT id, persona, trigger_phrase, qualified_id, params_template,
-                    status, created_at, accepted_at
-             FROM learned_skills
-             WHERE persona = ?1 AND status = 'accepted'
-             ORDER BY created_at DESC",
-        )?;
-        let rows = stmt.query_map(params![persona], row_to_learned_skill)?;
-        rows.collect::<Result<Vec<_>, _>>()
-            .map_err(MemoryError::from)
+        self.skills_par_statut(persona, LearnedSkillStatus::Accepted)
     }
 
     /// Liste les skills apprises **proposées** pour une persona — c'est ce
     /// qu'on pousse dans le dialogue de promotion.
-    pub fn pending_learned_skills(
-        &self,
-        persona: &str,
-    ) -> Result<Vec<LearnedSkill>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT id, persona, trigger_phrase, qualified_id, params_template,
-                    status, created_at, accepted_at
-             FROM learned_skills
-             WHERE persona = ?1 AND status = 'proposed'
-             ORDER BY created_at DESC",
-        )?;
-        let rows = stmt.query_map(params![persona], row_to_learned_skill)?;
-        rows.collect::<Result<Vec<_>, _>>()
-            .map_err(MemoryError::from)
+    pub fn pending_learned_skills(&self, persona: &str) -> Result<Vec<LearnedSkill>, MemoryError> {
+        self.skills_par_statut(persona, LearnedSkillStatus::Proposed)
     }
 
     /// `true` si une skill apprise existe déjà (proposée OU rejetée OU
@@ -1040,16 +882,16 @@ impl MemoryStore {
         persona: &str,
         qualified_id: &str,
     ) -> Result<bool, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT 1 FROM learned_skills
-             WHERE persona = ?1 AND qualified_id = ?2 LIMIT 1",
-        )?;
-        let exists = stmt
-            .query_row(params![persona, qualified_id], |_| Ok(()))
-            .optional()?
-            .is_some();
-        Ok(exists)
+        Ok(!self
+            .entrepot
+            .select(
+                TypedSelect::from(LEARNED_SKILLS)
+                    .columns(["id"])
+                    .filter("persona", persona)
+                    .filter("qualified_id", qualified_id)
+                    .limit(1),
+            )?
+            .is_empty())
     }
 
     /// Cherche, parmi les `LearnedSkill` **acceptées** pour la persona, une
@@ -1105,6 +947,11 @@ fn normalize_phrase(s: &str) -> String {
         .join(" ")
 }
 
+/// Limite d'une lecture (bornée à `u32::MAX`).
+fn limite(limit: usize) -> u32 {
+    u32::try_from(limit).unwrap_or(u32::MAX)
+}
+
 // ----------------------------------------------------------------------
 // PENDING CONFIRMATIONS (queue async)
 // ----------------------------------------------------------------------
@@ -1133,41 +980,36 @@ impl MemoryStore {
             prompt.to_string(),
         );
         let params_json = serde_json::to_string(&pc.params)?;
-        self.lock_conn()?.execute(
-            r"
-            INSERT INTO pending_confirmations(id, qualified_id, params_json, persona,
-                                              user_phrase, prompt, status, created_at, resolved_at)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
-            ",
-            params![
-                pc.id.to_string(),
-                pc.qualified_id,
-                params_json,
-                pc.persona,
-                pc.user_phrase,
-                pc.prompt,
-                pending_status_as_str(pc.status),
-                pc.created_at.to_rfc3339(),
-                pc.resolved_at.map(|d| d.to_rfc3339()),
-            ],
-        )?;
+        self.entrepot
+            .soumettre(vec![TypedWriteIntent::insert(PENDING)
+                .value("id", pc.id.to_string())
+                .value("qualified_id", pc.qualified_id.as_str())
+                .value("params_json", params_json)
+                .value("persona", pc.persona.as_str())
+                .value("user_phrase", pc.user_phrase.as_str())
+                .value("prompt", pc.prompt.as_str())
+                .value("status", pending_status_as_str(pc.status))
+                .value("created_at", pc.created_at.to_rfc3339())
+                .value("resolved_at", pc.resolved_at.map(|d| d.to_rfc3339()))
+                .purpose("alicia_memoire_confirmation")])?;
         Ok(pc)
+    }
+
+    fn pending_filtrees(
+        &self,
+        filtre: impl Fn(TypedSelect) -> TypedSelect,
+    ) -> Result<Vec<PendingConfirmation>, MemoryError> {
+        self.entrepot
+            .toutes(PENDING, &[("created_at", true), ("id", false)], filtre)?
+            .iter()
+            .map(pending_de)
+            .collect()
     }
 
     /// Liste toutes les confirmations actuellement `Pending` (toutes personas
     /// confondues, plus récentes d'abord).
     pub fn list_pending_confirmations(&self) -> Result<Vec<PendingConfirmation>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
-                    status, created_at, resolved_at, reason
-             FROM pending_confirmations
-             WHERE status = 'pending'
-             ORDER BY created_at DESC",
-        )?;
-        let rows = stmt.query_map([], row_to_pending)?;
-        rows.collect::<Result<Vec<_>, _>>()
-            .map_err(MemoryError::from)
+        self.pending_filtrees(|q| q.filter("status", pending_status_as_str(PendingStatus::Pending)))
     }
 
     /// Liste les confirmations `Pending` filtrées par persona.
@@ -1175,17 +1017,10 @@ impl MemoryStore {
         &self,
         persona: &str,
     ) -> Result<Vec<PendingConfirmation>, MemoryError> {
-        let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
-                    status, created_at, resolved_at, reason
-             FROM pending_confirmations
-             WHERE persona = ?1 AND status = 'pending'
-             ORDER BY created_at DESC",
-        )?;
-        let rows = stmt.query_map(params![persona], row_to_pending)?;
-        rows.collect::<Result<Vec<_>, _>>()
-            .map_err(MemoryError::from)
+        self.pending_filtrees(|q| {
+            q.filter("persona", persona)
+                .filter("status", pending_status_as_str(PendingStatus::Pending))
+        })
     }
 
     /// Récupère une confirmation par id, quel que soit son statut.
@@ -1193,8 +1028,11 @@ impl MemoryStore {
         &self,
         id: Uuid,
     ) -> Result<Option<PendingConfirmation>, MemoryError> {
-        let conn = self.lock_conn()?;
-        pending_by_id(&conn, id)
+        self.entrepot
+            .select(TypedSelect::from(PENDING).filter("id", id.to_string()))?
+            .first()
+            .map(pending_de)
+            .transpose()
     }
 
     /// Marque une confirmation `Confirmed` (statut + resolved_at) directement
@@ -1216,31 +1054,24 @@ impl MemoryStore {
     }
 
     /// Réclame **atomiquement** une confirmation en vue de son exécution
-    /// (R-017) : `UPDATE ... SET status = 'executing' WHERE id = ? AND
-    /// status = 'pending'`. Seul l'appelant qui fait passer exactement une
-    /// ligne obtient l'enregistrement ; tout appel concurrent reçoit
+    /// (R-017) : mise à jour conditionnelle `clé = {id, statut = pending}`
+    /// appliquée par KindMother. Seul l'appelant qui fait passer exactement
+    /// une ligne obtient l'enregistrement ; tout appel concurrent reçoit
     /// `PendingConfirmationAlreadyResolved` (ou `NotFound`).
     ///
     /// Retourne l'enregistrement stocké (statut `Executing`) : c'est lui, et
     /// lui seul, qui doit être exécuté.
-    pub fn claim_pending_confirmation(
-        &self,
-        id: Uuid,
-    ) -> Result<PendingConfirmation, MemoryError> {
-        let conn = self.lock_conn()?;
-        let n = conn.execute(
-            "UPDATE pending_confirmations
-             SET status = ?1, claimed_at = ?4
-             WHERE id = ?2 AND status = ?3",
-            params![
-                pending_status_as_str(PendingStatus::Executing),
-                id.to_string(),
-                pending_status_as_str(PendingStatus::Pending),
-                Utc::now().timestamp_millis(),
-            ],
-        )?;
-        let current = pending_by_id(&conn, id)?;
-        match (n, current) {
+    pub fn claim_pending_confirmation(&self, id: Uuid) -> Result<PendingConfirmation, MemoryError> {
+        let n = self
+            .entrepot
+            .soumettre(vec![TypedWriteIntent::update(PENDING)
+                .key("id", id.to_string())
+                .key("status", pending_status_as_str(PendingStatus::Pending))
+                .value("status", pending_status_as_str(PendingStatus::Executing))
+                .value("claimed_at", Utc::now().timestamp_millis())
+                .purpose("alicia_memoire_confirmation_reclamee")])?;
+        let current = self.pending_confirmation(id)?;
+        match (n.first().copied().unwrap_or(0), current) {
             (1, Some(pc)) => Ok(pc),
             (_, None) => Err(MemoryError::PendingConfirmationNotFound(id)),
             (_, Some(pc)) => Err(MemoryError::PendingConfirmationAlreadyResolved {
@@ -1286,11 +1117,11 @@ impl MemoryStore {
     /// - `Pending` créée depuis au moins `pending_ttl` → `Cancelled`, motif
     ///   `"expired"` : une confirmation ancienne ne peut plus être confirmée.
     ///
-    /// Chaque transition est une requête conditionnelle unique
-    /// (`UPDATE ... WHERE status = ... AND <date> <= ?`) exécutée sous le
-    /// verrou de connexion dans une transaction : aucune course possible avec
-    /// une réclamation ou une finalisation concurrente (la condition sur le
-    /// statut est réévaluée par SQLite).
+    /// Chaque transition est une mise à jour conditionnelle
+    /// (`clé = {id, statut}`) dans un lot atomique : le statut est réévalué
+    /// par KindMother, aucune course possible avec une réclamation ou une
+    /// finalisation concurrente (une ligne changée entre-temps n'est pas
+    /// touchée et n'apparaît pas dans le bilan).
     pub fn expire_stale_pending_confirmations_at(
         &self,
         now: DateTime<Utc>,
@@ -1303,54 +1134,79 @@ impl MemoryStore {
         let seuil_pending = now_ms.saturating_sub(ttl_ms(pending_ttl));
         let resolu = now.to_rfc3339();
 
-        let mut conn = self.lock_conn()?;
-        let tx = conn.transaction()?;
-        let failed = expire_where(
-            &tx,
-            PendingStatus::Executing,
-            PendingStatus::Failed,
-            "claimed_at <= ?1",
-            seuil_exec,
-            &resolu,
-        )?;
-        // `created_at` est en RFC 3339 : conversion en epoch ms côté SQLite
-        // (julianday gère fuseau et fraction de seconde).
-        let cancelled = expire_where(
-            &tx,
-            PendingStatus::Pending,
-            PendingStatus::Cancelled,
-            "CAST((julianday(created_at) - 2440587.5) * 86400000.0 AS INTEGER) <= ?1",
-            seuil_pending,
-            &resolu,
-        )?;
-        tx.commit()?;
-        Ok(PendingExpiryReport { failed, cancelled })
+        let mut candidates: Vec<(Uuid, PendingStatus, PendingStatus)> = Vec::new();
+        for l in self.entrepot.toutes(PENDING, &[("id", false)], |q| {
+            q.columns(["id", "claimed_at"])
+                .filter("status", pending_status_as_str(PendingStatus::Executing))
+        })? {
+            if entier(&l, "claimed_at")? <= seuil_exec {
+                candidates.push((
+                    uuid_col(&l, "id")?,
+                    PendingStatus::Executing,
+                    PendingStatus::Failed,
+                ));
+            }
+        }
+        for l in self.entrepot.toutes(PENDING, &[("id", false)], |q| {
+            q.columns(["id", "created_at"])
+                .filter("status", pending_status_as_str(PendingStatus::Pending))
+        })? {
+            if date(&l, "created_at")?.timestamp_millis() <= seuil_pending {
+                candidates.push((
+                    uuid_col(&l, "id")?,
+                    PendingStatus::Pending,
+                    PendingStatus::Cancelled,
+                ));
+            }
+        }
+
+        let mut rapport = PendingExpiryReport::default();
+        for lot in candidates.chunks(MAX_LOT) {
+            let intents = lot
+                .iter()
+                .map(|(id, from, to)| {
+                    TypedWriteIntent::update(PENDING)
+                        .key("id", id.to_string())
+                        .key("status", pending_status_as_str(*from))
+                        .value("status", pending_status_as_str(*to))
+                        .value("resolved_at", resolu.as_str())
+                        .value("reason", PENDING_REASON_EXPIRED)
+                        .purpose("alicia_memoire_confirmation_expiree")
+                })
+                .collect();
+            let lignes = self.entrepot.soumettre(intents)?;
+            for ((id, _, to), n) in lot.iter().zip(lignes) {
+                if n == 1 {
+                    match to {
+                        PendingStatus::Failed => rapport.failed.push(*id),
+                        _ => rapport.cancelled.push(*id),
+                    }
+                }
+            }
+        }
+        Ok(rapport)
     }
 
-    /// Transition atomique `from → to` (une seule requête conditionnelle,
-    /// sous le verrou de connexion). Erreur typée si aucune ligne ne change.
+    /// Transition atomique `from → to` (une seule mise à jour conditionnelle).
+    /// Erreur typée si aucune ligne ne change.
     fn transition_pending(
         &self,
         id: Uuid,
         from: PendingStatus,
         to: PendingStatus,
     ) -> Result<(), MemoryError> {
-        let conn = self.lock_conn()?;
-        let n = conn.execute(
-            "UPDATE pending_confirmations
-             SET status = ?1, resolved_at = ?2
-             WHERE id = ?3 AND status = ?4",
-            params![
-                pending_status_as_str(to),
-                Utc::now().to_rfc3339(),
-                id.to_string(),
-                pending_status_as_str(from),
-            ],
-        )?;
-        if n == 1 {
+        let n = self
+            .entrepot
+            .soumettre(vec![TypedWriteIntent::update(PENDING)
+                .key("id", id.to_string())
+                .key("status", pending_status_as_str(from))
+                .value("status", pending_status_as_str(to))
+                .value("resolved_at", Utc::now().to_rfc3339())
+                .purpose("alicia_memoire_confirmation_resolue")])?;
+        if n.first().copied().unwrap_or(0) == 1 {
             return Ok(());
         }
-        match pending_by_id(&conn, id)? {
+        match self.pending_confirmation(id)? {
             None => Err(MemoryError::PendingConfirmationNotFound(id)),
             Some(pc) => Err(MemoryError::PendingConfirmationAlreadyResolved {
                 id,
@@ -1358,159 +1214,6 @@ impl MemoryStore {
             }),
         }
     }
-}
-
-/// Fait expirer (`from → to`, motif `"expired"`) les lignes vérifiant
-/// `condition` (paramètre `?1` = seuil epoch ms). Retourne les ids touchés.
-///
-/// `UPDATE ... RETURNING` : sélection et transition dans la même requête
-/// conditionnelle (atomique).
-fn expire_where(
-    conn: &Connection,
-    from: PendingStatus,
-    to: PendingStatus,
-    condition: &str,
-    seuil_ms: i64,
-    resolu: &str,
-) -> Result<Vec<Uuid>, MemoryError> {
-    let sql = format!(
-        "UPDATE pending_confirmations
-         SET status = ?2, resolved_at = ?3, reason = ?4
-         WHERE status = ?5 AND {condition}
-         RETURNING id"
-    );
-    let mut stmt = conn.prepare(&sql)?;
-    let rows = stmt.query_map(
-        params![
-            seuil_ms,
-            pending_status_as_str(to),
-            resolu,
-            PENDING_REASON_EXPIRED,
-            pending_status_as_str(from),
-        ],
-        |r| r.get::<_, String>(0),
-    )?;
-    let mut ids = Vec::new();
-    for r in rows {
-        let brut = r?;
-        let id = Uuid::parse_str(&brut)
-            .map_err(|e| MemoryError::InvalidId(format!("uuid invalide '{brut}' : {e}")))?;
-        ids.push(id);
-    }
-    Ok(ids)
-}
-
-/// Lecture d'une confirmation par id sur une connexion déjà verrouillée.
-fn pending_by_id(
-    conn: &Connection,
-    id: Uuid,
-) -> Result<Option<PendingConfirmation>, MemoryError> {
-    let mut stmt = conn.prepare(
-        "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
-                status, created_at, resolved_at, reason
-         FROM pending_confirmations
-         WHERE id = ?1",
-    )?;
-    stmt.query_row(params![id.to_string()], row_to_pending)
-        .optional()
-        .map_err(MemoryError::from)
-}
-
-fn pending_status_as_str(s: PendingStatus) -> &'static str {
-    match s {
-        PendingStatus::Pending => "pending",
-        PendingStatus::Executing => "executing",
-        PendingStatus::Confirmed => "confirmed",
-        PendingStatus::Failed => "failed",
-        PendingStatus::Cancelled => "cancelled",
-    }
-}
-
-fn row_to_pending(row: &Row<'_>) -> rusqlite::Result<PendingConfirmation> {
-    let id_str: String = row.get(0)?;
-    let id = Uuid::parse_str(&id_str).map_err(|e| {
-        rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
-    })?;
-    let params_json: String = row.get(2)?;
-    let params: Value = serde_json::from_str(&params_json).map_err(|e| {
-        rusqlite::Error::FromSqlConversionFailure(2, rusqlite::types::Type::Text, Box::new(e))
-    })?;
-    let status_str: String = row.get(6)?;
-    let status = match status_str.as_str() {
-        "pending" => PendingStatus::Pending,
-        "executing" => PendingStatus::Executing,
-        "confirmed" => PendingStatus::Confirmed,
-        "failed" => PendingStatus::Failed,
-        "cancelled" => PendingStatus::Cancelled,
-        other => {
-            return Err(rusqlite::Error::FromSqlConversionFailure(
-                6,
-                rusqlite::types::Type::Text,
-                format!("statut PendingConfirmation inconnu : {other}").into(),
-            ));
-        }
-    };
-    let created_at: String = row.get(7)?;
-    let resolved_at: Option<String> = row.get(8)?;
-    let resolved_at = resolved_at.map(|s| rfc3339_or_err(&s, 8)).transpose()?;
-    let reason: Option<String> = row.get(9)?;
-    Ok(PendingConfirmation {
-        id,
-        qualified_id: row.get(1)?,
-        params,
-        persona: row.get(3)?,
-        user_phrase: row.get(4)?,
-        prompt: row.get(5)?,
-        status,
-        created_at: rfc3339_or_err(&created_at, 7)?,
-        resolved_at,
-        reason,
-    })
-}
-
-fn learned_status_as_str(s: LearnedSkillStatus) -> &'static str {
-    match s {
-        LearnedSkillStatus::Proposed => "proposed",
-        LearnedSkillStatus::Accepted => "accepted",
-        LearnedSkillStatus::Rejected => "rejected",
-    }
-}
-
-fn row_to_learned_skill(row: &Row<'_>) -> rusqlite::Result<LearnedSkill> {
-    let id_str: String = row.get(0)?;
-    let id = Uuid::parse_str(&id_str).map_err(|e| {
-        rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
-    })?;
-    let params_json: String = row.get(4)?;
-    let params_template: Value = serde_json::from_str(&params_json).map_err(|e| {
-        rusqlite::Error::FromSqlConversionFailure(4, rusqlite::types::Type::Text, Box::new(e))
-    })?;
-    let status_str: String = row.get(5)?;
-    let status = match status_str.as_str() {
-        "proposed" => LearnedSkillStatus::Proposed,
-        "accepted" => LearnedSkillStatus::Accepted,
-        "rejected" => LearnedSkillStatus::Rejected,
-        other => {
-            return Err(rusqlite::Error::FromSqlConversionFailure(
-                5,
-                rusqlite::types::Type::Text,
-                format!("statut LearnedSkill inconnu : {other}").into(),
-            ));
-        }
-    };
-    let created_at: String = row.get(6)?;
-    let accepted_at: Option<String> = row.get(7)?;
-    let accepted_at = accepted_at.map(|s| rfc3339_or_err(&s, 7)).transpose()?;
-    Ok(LearnedSkill {
-        id,
-        persona: row.get(1)?,
-        trigger_phrase: row.get(2)?,
-        qualified_id: row.get(3)?,
-        params_template,
-        status,
-        created_at: rfc3339_or_err(&created_at, 6)?,
-        accepted_at,
-    })
 }
 
 // ----------------------------------------------------------------------
@@ -1524,7 +1227,6 @@ const OUBLI_MOTIF_MAX: usize = 512;
 
 /// État courant d'un fait, lu avant une nouvelle écriture.
 struct EtatFait {
-    rowid: i64,
     persona: String,
     subject: String,
     content: String,
@@ -1533,6 +1235,16 @@ struct EtatFait {
 }
 
 impl EtatFait {
+    fn de(l: &Ligne) -> Result<Self, MemoryError> {
+        Ok(Self {
+            persona: texte(l, "persona")?,
+            subject: texte(l, "subject")?,
+            content: texte(l, "content")?,
+            source: texte(l, "source")?,
+            confidence: reel(l, "confidence")?,
+        })
+    }
+
     /// Vrai si `fait` n'apporte aucun changement à l'état courant.
     fn identique(&self, fait: &Fact) -> bool {
         self.persona == fait.persona
@@ -1557,126 +1269,238 @@ fn valider_champ_oubli(nom: &str, valeur: &str, max: usize) -> Result<(), Memory
     Ok(())
 }
 
-fn uuid_col(row: &Row<'_>, idx: usize) -> rusqlite::Result<Uuid> {
-    let s: String = row.get(idx)?;
-    Uuid::parse_str(&s).map_err(|e| {
-        rusqlite::Error::FromSqlConversionFailure(idx, rusqlite::types::Type::Text, Box::new(e))
-    })
-}
-
-fn u32_col(row: &Row<'_>, idx: usize) -> rusqlite::Result<u32> {
-    let v: i64 = row.get(idx)?;
-    u32::try_from(v).map_err(|e| {
-        rusqlite::Error::FromSqlConversionFailure(idx, rusqlite::types::Type::Integer, Box::new(e))
-    })
-}
-
-fn row_to_fact_version(row: &Row<'_>) -> rusqlite::Result<FactVersion> {
-    let recorded_at: String = row.get(7)?;
-    Ok(FactVersion {
-        fact_id: uuid_col(row, 0)?,
-        version: u32_col(row, 1)?,
-        persona: row.get(2)?,
-        subject: row.get(3)?,
-        content: row.get(4)?,
-        source: row.get(5)?,
-        confidence: row.get(6)?,
-        recorded_at: rfc3339_or_err(&recorded_at, 7)?,
-    })
-}
-
-fn row_to_tombstone(row: &Row<'_>) -> rusqlite::Result<FactTombstone> {
-    let forgotten_at: String = row.get(1)?;
-    Ok(FactTombstone {
-        fact_id: uuid_col(row, 0)?,
-        forgotten_at: rfc3339_or_err(&forgotten_at, 1)?,
-        forgotten_by: row.get(2)?,
-        reason: row.get(3)?,
-        versions_erased: u32_col(row, 4)?,
-    })
+/// Intention d'ajout d'une version de fait (append-only).
+fn intention_version(f: &Fact, version: u32, enregistre: DateTime<Utc>) -> TypedWriteIntent {
+    TypedWriteIntent::insert(FACT_VERSIONS)
+        .value("fact_id", f.id.to_string())
+        .value("version", i64::from(version))
+        .value("persona", f.persona.as_str())
+        .value("subject", f.subject.as_str())
+        .value("content", f.content.as_str())
+        .value("source", f.source.as_str())
+        .value("confidence", f64::from(f.confidence))
+        .value("recorded_at", enregistre.to_rfc3339())
+        .purpose("alicia_memoire_version_fait")
 }
 
 // ----------------------------------------------------------------------
-// Row → struct helpers
+// Statuts
 // ----------------------------------------------------------------------
 
-fn row_to_fact(row: &Row<'_>) -> rusqlite::Result<Fact> {
-    let id_str: String = row.get(0)?;
-    let id = Uuid::parse_str(&id_str).map_err(|e| {
-        rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
-    })?;
-    let created_at: String = row.get(6)?;
-    let updated_at: String = row.get(7)?;
+fn outcome_as_str(o: EpisodeOutcome) -> &'static str {
+    match o {
+        EpisodeOutcome::Ok => "ok",
+        EpisodeOutcome::Cancelled => "cancelled",
+        EpisodeOutcome::Failed => "failed",
+    }
+}
+
+fn pending_status_as_str(s: PendingStatus) -> &'static str {
+    match s {
+        PendingStatus::Pending => "pending",
+        PendingStatus::Executing => "executing",
+        PendingStatus::Confirmed => "confirmed",
+        PendingStatus::Failed => "failed",
+        PendingStatus::Cancelled => "cancelled",
+    }
+}
+
+fn learned_status_as_str(s: LearnedSkillStatus) -> &'static str {
+    match s {
+        LearnedSkillStatus::Proposed => "proposed",
+        LearnedSkillStatus::Accepted => "accepted",
+        LearnedSkillStatus::Rejected => "rejected",
+    }
+}
+
+// ----------------------------------------------------------------------
+// Ligne → struct
+// ----------------------------------------------------------------------
+
+fn illisible(c: &str) -> MemoryError {
+    MemoryError::Corrupt(format!("colonne {c} absente ou de type inattendu"))
+}
+
+fn texte(l: &Ligne, c: &str) -> Result<String, MemoryError> {
+    l.get(c)
+        .and_then(Value::as_str)
+        .map(str::to_string)
+        .ok_or_else(|| illisible(c))
+}
+
+fn texte_opt(l: &Ligne, c: &str) -> Result<Option<String>, MemoryError> {
+    match l.get(c) {
+        None | Some(Value::Null) => Ok(None),
+        Some(Value::String(s)) => Ok(Some(s.clone())),
+        Some(_) => Err(illisible(c)),
+    }
+}
+
+fn entier(l: &Ligne, c: &str) -> Result<i64, MemoryError> {
+    l.get(c).and_then(Value::as_i64).ok_or_else(|| illisible(c))
+}
+
+fn reel(l: &Ligne, c: &str) -> Result<f64, MemoryError> {
+    l.get(c).and_then(Value::as_f64).ok_or_else(|| illisible(c))
+}
+
+#[allow(clippy::cast_possible_truncation)]
+fn confiance(l: &Ligne, c: &str) -> Result<f32, MemoryError> {
+    Ok(reel(l, c)? as f32)
+}
+
+fn u32_col(l: &Ligne, c: &str) -> Result<u32, MemoryError> {
+    u32::try_from(entier(l, c)?)
+        .map_err(|_| MemoryError::Corrupt(format!("colonne {c} hors bornes")))
+}
+
+fn parse_date(s: &str, c: &str) -> Result<DateTime<Utc>, MemoryError> {
+    DateTime::parse_from_rfc3339(s)
+        .map(|d| d.with_timezone(&Utc))
+        .map_err(|e| {
+            MemoryError::Corrupt(format!("colonne {c} : date RFC3339 invalide '{s}' : {e}"))
+        })
+}
+
+fn date(l: &Ligne, c: &str) -> Result<DateTime<Utc>, MemoryError> {
+    parse_date(&texte(l, c)?, c)
+}
+
+fn date_opt(l: &Ligne, c: &str) -> Result<Option<DateTime<Utc>>, MemoryError> {
+    texte_opt(l, c)?.map(|s| parse_date(&s, c)).transpose()
+}
+
+fn uuid_col(l: &Ligne, c: &str) -> Result<Uuid, MemoryError> {
+    let s = texte(l, c)?;
+    Uuid::parse_str(&s)
+        .map_err(|e| MemoryError::Corrupt(format!("colonne {c} : uuid invalide '{s}' : {e}")))
+}
+
+fn json_col(l: &Ligne, c: &str) -> Result<Value, MemoryError> {
+    Ok(serde_json::from_str(&texte(l, c)?)?)
+}
+
+fn fact_de(l: &Ligne) -> Result<Fact, MemoryError> {
     Ok(Fact {
-        id,
-        persona: row.get(1)?,
-        subject: row.get(2)?,
-        content: row.get(3)?,
-        source: row.get(4)?,
-        confidence: row.get(5)?,
-        created_at: rfc3339_or_err(&created_at, 6)?,
-        updated_at: rfc3339_or_err(&updated_at, 7)?,
+        id: uuid_col(l, "id")?,
+        persona: texte(l, "persona")?,
+        subject: texte(l, "subject")?,
+        content: texte(l, "content")?,
+        source: texte(l, "source")?,
+        confidence: confiance(l, "confidence")?,
+        created_at: date(l, "created_at")?,
+        updated_at: date(l, "updated_at")?,
     })
 }
 
-fn row_to_episode(row: &Row<'_>) -> rusqlite::Result<Episode> {
-    let id_str: String = row.get(0)?;
-    let id = Uuid::parse_str(&id_str).map_err(|e| {
-        rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
-    })?;
-    let params_json: String = row.get(5)?;
-    let params: Value = serde_json::from_str(&params_json).map_err(|e| {
-        rusqlite::Error::FromSqlConversionFailure(5, rusqlite::types::Type::Text, Box::new(e))
-    })?;
-    let outcome_str: String = row.get(6)?;
-    let outcome = match outcome_str.as_str() {
+fn version_de(l: &Ligne) -> Result<FactVersion, MemoryError> {
+    Ok(FactVersion {
+        fact_id: uuid_col(l, "fact_id")?,
+        version: u32_col(l, "version")?,
+        persona: texte(l, "persona")?,
+        subject: texte(l, "subject")?,
+        content: texte(l, "content")?,
+        source: texte(l, "source")?,
+        confidence: confiance(l, "confidence")?,
+        recorded_at: date(l, "recorded_at")?,
+    })
+}
+
+fn tombe_de(l: &Ligne) -> Result<FactTombstone, MemoryError> {
+    Ok(FactTombstone {
+        fact_id: uuid_col(l, "fact_id")?,
+        forgotten_at: date(l, "forgotten_at")?,
+        forgotten_by: texte(l, "forgotten_by")?,
+        reason: texte(l, "reason")?,
+        versions_erased: u32_col(l, "versions_erased")?,
+    })
+}
+
+fn preference_de(l: &Ligne) -> Result<Preference, MemoryError> {
+    Ok(Preference {
+        scope: texte(l, "scope")?,
+        key: texte(l, "key")?,
+        value: json_col(l, "value_json")?,
+        updated_at: date(l, "updated_at")?,
+    })
+}
+
+fn episode_de(l: &Ligne) -> Result<Episode, MemoryError> {
+    let outcome = match texte(l, "outcome")?.as_str() {
         "ok" => EpisodeOutcome::Ok,
         "cancelled" => EpisodeOutcome::Cancelled,
         "failed" => EpisodeOutcome::Failed,
+        other => return Err(MemoryError::Corrupt(format!("outcome inconnu : {other}"))),
+    };
+    Ok(Episode {
+        id: uuid_col(l, "id")?,
+        persona: texte(l, "persona")?,
+        service_id: texte(l, "service_id")?,
+        intent: texte(l, "intent")?,
+        user_phrase: texte(l, "user_phrase")?,
+        params: json_col(l, "params_json")?,
+        outcome,
+        error: texte_opt(l, "error")?,
+        created_at: date(l, "created_at")?,
+    })
+}
+
+fn persona_de(l: &Ligne) -> Result<Persona, MemoryError> {
+    Ok(Persona {
+        id: texte(l, "id")?,
+        display_name: texte(l, "display_name")?,
+        description: texte(l, "description")?,
+        is_default: entier(l, "is_default")? != 0,
+        created_at: date(l, "created_at")?,
+    })
+}
+
+fn skill_de(l: &Ligne) -> Result<LearnedSkill, MemoryError> {
+    let status = match texte(l, "status")?.as_str() {
+        "proposed" => LearnedSkillStatus::Proposed,
+        "accepted" => LearnedSkillStatus::Accepted,
+        "rejected" => LearnedSkillStatus::Rejected,
         other => {
-            return Err(rusqlite::Error::FromSqlConversionFailure(
-                6,
-                rusqlite::types::Type::Text,
-                format!("outcome inconnu : {other}").into(),
-            ));
+            return Err(MemoryError::Corrupt(format!(
+                "statut LearnedSkill inconnu : {other}"
+            )))
         }
     };
-    let created_at: String = row.get(8)?;
-    Ok(Episode {
-        id,
-        persona: row.get(1)?,
-        service_id: row.get(2)?,
-        intent: row.get(3)?,
-        user_phrase: row.get(4)?,
-        params,
-        outcome,
-        error: row.get(7)?,
-        created_at: rfc3339_or_err(&created_at, 8)?,
+    Ok(LearnedSkill {
+        id: uuid_col(l, "id")?,
+        persona: texte(l, "persona")?,
+        trigger_phrase: texte(l, "trigger_phrase")?,
+        qualified_id: texte(l, "qualified_id")?,
+        params_template: json_col(l, "params_template")?,
+        status,
+        created_at: date(l, "created_at")?,
+        accepted_at: date_opt(l, "accepted_at")?,
     })
 }
 
-fn row_to_persona(row: &Row<'_>) -> rusqlite::Result<Persona> {
-    let created_at: String = row.get(4)?;
-    let is_default: i32 = row.get(3)?;
-    Ok(Persona {
-        id: row.get(0)?,
-        display_name: row.get(1)?,
-        description: row.get(2)?,
-        is_default: is_default != 0,
-        created_at: rfc3339_or_err(&created_at, 4)?,
+fn pending_de(l: &Ligne) -> Result<PendingConfirmation, MemoryError> {
+    let status = match texte(l, "status")?.as_str() {
+        "pending" => PendingStatus::Pending,
+        "executing" => PendingStatus::Executing,
+        "confirmed" => PendingStatus::Confirmed,
+        "failed" => PendingStatus::Failed,
+        "cancelled" => PendingStatus::Cancelled,
+        other => {
+            return Err(MemoryError::Corrupt(format!(
+                "statut PendingConfirmation inconnu : {other}"
+            )))
+        }
+    };
+    Ok(PendingConfirmation {
+        id: uuid_col(l, "id")?,
+        qualified_id: texte(l, "qualified_id")?,
+        params: json_col(l, "params_json")?,
+        persona: texte(l, "persona")?,
+        user_phrase: texte(l, "user_phrase")?,
+        prompt: texte(l, "prompt")?,
+        status,
+        created_at: date(l, "created_at")?,
+        resolved_at: date_opt(l, "resolved_at")?,
+        reason: texte_opt(l, "reason")?,
     })
-}
-
-fn parse_rfc3339(s: &str) -> Result<DateTime<Utc>, MemoryError> {
-    DateTime::parse_from_rfc3339(s)
-        .map(|dt| dt.with_timezone(&Utc))
-        .map_err(|e| MemoryError::InvalidId(format!("date RFC3339 invalide '{s}' : {e}")))
-}
-
-fn rfc3339_or_err(s: &str, idx: usize) -> rusqlite::Result<DateTime<Utc>> {
-    DateTime::parse_from_rfc3339(s)
-        .map(|dt| dt.with_timezone(&Utc))
-        .map_err(|e| {
-            rusqlite::Error::FromSqlConversionFailure(idx, rusqlite::types::Type::Text, Box::new(e))
-        })
 }

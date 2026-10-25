@@ -1,5 +1,6 @@
 //! Tests EX-52 : faits versionnés, oubli demandé avec pierre tombale,
-//! migration additive depuis l'ancien schéma.
+//! en mémoire vive (même contrat que KindMother ; migration et oubli sur
+//! disque : `tests/kindmother.rs`).
 
 // @id service.alicia.memory.tests.fact_versions
 // @role tests
@@ -127,86 +128,3 @@ fn oubli_d_un_fait_inconnu_ne_cree_rien() {
     assert!(s.fact_tombstone(id).unwrap().is_none());
 }
 
-#[test]
-fn migration_depuis_l_ancien_schema() {
-    let dir = tempfile::tempdir().unwrap();
-    let chemin = dir.path().join("memoire.db");
-    let id = uuid::Uuid::new_v4();
-    let maintenant = Utc::now().to_rfc3339();
-    {
-        // Schéma antérieur : facts + FTS, sans versions ni pierres tombales,
-        // avec le doublon FTS que produisait l'ancien `remember`.
-        let c = rusqlite::Connection::open(&chemin).unwrap();
-        c.execute_batch(
-            "CREATE TABLE facts (
-                id TEXT PRIMARY KEY, persona TEXT NOT NULL, subject TEXT NOT NULL,
-                content TEXT NOT NULL, source TEXT NOT NULL, confidence REAL NOT NULL,
-                created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
-             CREATE VIRTUAL TABLE facts_fts
-                USING fts5(content, content='facts', content_rowid='rowid');",
-        )
-        .unwrap();
-        c.execute(
-            "INSERT INTO facts VALUES (?1, 'voice', 'user', 'Jean aime le métro', 'user', 1.0, ?2, ?2)",
-            rusqlite::params![id.to_string(), maintenant],
-        )
-        .unwrap();
-        c.execute_batch(
-            "INSERT INTO facts_fts(rowid, content) SELECT rowid, content FROM facts;
-             INSERT INTO facts_fts(rowid, content) SELECT rowid, content FROM facts;",
-        )
-        .unwrap();
-    }
-
-    let s = MemoryStore::open(&chemin).unwrap();
-    let h = s.fact_history(id).unwrap();
-    assert_eq!(h.len(), 1);
-    assert_eq!(h[0].version, 1);
-    assert_eq!(h[0].content, "Jean aime le métro");
-    assert_eq!(s.recall("métro", 5).unwrap().len(), 1);
-
-    // Mise à jour après migration : v2, v1 conservée.
-    let mut f = s.fact(id).unwrap().expect("fait migré");
-    f.content = "Jean aime le train".into();
-    s.remember(&f).unwrap();
-    let h = s.fact_history(id).unwrap();
-    assert_eq!(h.len(), 2);
-    assert_eq!(h[0].content, "Jean aime le métro");
-    assert_eq!(h[1].content, "Jean aime le train");
-    drop(s);
-
-    // Réouverture : migration idempotente (pas de version dupliquée).
-    let s = MemoryStore::open(&chemin).unwrap();
-    assert_eq!(s.fact_history(id).unwrap().len(), 2);
-    assert_eq!(s.recall("train", 5).unwrap().len(), 1);
-    assert!(s.recall("métro", 5).unwrap().is_empty());
-}
-
-#[test]
-fn oubli_efface_le_contenu_du_fichier() {
-    let dir = std::env::temp_dir().join(format!("alicia-oubli-{}", uuid_court()));
-    std::fs::create_dir_all(&dir).unwrap();
-    let chemin = dir.join("memoire.db");
-    let marqueur = "MARQUEUR-SECRET-A-OUBLIER-7f3a";
-    {
-        let s = MemoryStore::open(&chemin).unwrap();
-        let mut f = fait(&format!("{marqueur} version 1"));
-        s.remember(&f).unwrap();
-        f.content = format!("{marqueur} version 2");
-        f.updated_at = Utc::now() + Duration::seconds(1);
-        s.remember(&f).unwrap();
-        s.forget(f.id, "test", "droit à l'oubli").unwrap();
-    }
-    for entree in std::fs::read_dir(&dir).unwrap() {
-        let octets = std::fs::read(entree.unwrap().path()).unwrap();
-        assert!(
-            !octets.windows(marqueur.len()).any(|w| w == marqueur.as_bytes()),
-            "contenu oublié encore présent sur disque"
-        );
-    }
-    let _ = std::fs::remove_dir_all(&dir);
-}
-
-fn uuid_court() -> String {
-    format!("{}-{}", std::process::id(), Utc::now().timestamp_nanos_opt().unwrap_or(0))
-}

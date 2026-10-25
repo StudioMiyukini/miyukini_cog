@@ -185,6 +185,12 @@ impl ArbitrationEngine {
         // Pont MAIA - état des Fiches publiées (A-017) ; base réservée, jamais étiquetable
         self.register_operator(OperatorConfig::owner("cog-federee", "cog-federee"))
             .await;
+        // Mémoire d'Alicia - base nationale (préfixe maia-), hors espace des utilisateurs MAIA
+        self.register_operator(OperatorConfig::owner("maia-_alicia", "maia-_alicia"))
+            .await;
+        // Fédération - état fédéral scellé MFED (A-019) ; base non nationale
+        self.register_operator(OperatorConfig::owner("miyufederation", "miyufederation"))
+            .await;
 
         // === Hub Central ===
 

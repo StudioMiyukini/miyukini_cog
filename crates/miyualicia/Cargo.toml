@@ -49,6 +49,8 @@ miyutts = { path = "../miyutts" }
 miyualicia-cores-gate = { path = "../miyualicia-cores-gate" }
 borderguard = { path = "../borderguard" }
 tempfile = "3"
+# Mémoire d'Alicia par KindMother (serveur éphémère, SQLCipher) pour les tests de redémarrage.
+kindmother-service = { path = "../kindmother-service" }
 
 [lints.rust]
 unsafe_code = "forbid"

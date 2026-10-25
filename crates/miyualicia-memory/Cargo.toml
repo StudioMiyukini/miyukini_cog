@@ -1,7 +1,8 @@
 # @id: miyualicia_memory_crate_config
 # @do: declare_miyualicia_memory_crate
 # @layer: 7
-# @human: Crate Alicia Memory — mémoire persistante (faits, préférences, épisodes, personas).
+# @human: Crate Alicia Memory — mémoire persistante (faits, préférences, épisodes, personas)
+#         écrite et lue par KindMother, seul écrivain (K-13) ; base `maia-_alicia`, nationale.
 
 [package]
 name = "miyualicia-memory"
@@ -14,18 +15,40 @@ homepage.workspace = true
 documentation.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "Alicia Memory — mémoire persistante locale pour Alicia (faits, préférences, épisodes, personas) sur SQLite + FTS5."
+description = "Alicia Memory — mémoire persistante d'Alicia (faits, préférences, épisodes, personas) écrite par KindMother (intentions typées, SQLCipher, base nationale)."
+
+[[bin]]
+# Import explicite, unique et idempotent de l'ancienne base SQLite dans KindMother.
+name = "alicia-memoire-import"
+path = "src/bin/alicia_memoire_import.rs"
+required-features = ["import-heritage"]
+
+[features]
+default = []
+# Reprise de l'ancienne base SQLite (lecture seule, fichier jamais modifié ni supprimé) :
+# import automatique à l'ouverture et commande `alicia-memoire-import`. Sans cette
+# feature, une ancienne base non importée fait refuser l'ouverture (garde de bascule).
+import-heritage = ["dep:kindmother-heritage"]
 
 [dependencies]
+# Stockage : KindMother seul écrivain (K-13) — intentions typées, aucune instruction SQL.
+kindmother-client = { path = "../kindmother-client" }
+kindmother-heritage = { path = "../kindmother-heritage", optional = true }
+tokio       = { version = "1", features = ["rt-multi-thread", "sync"] }
 serde       = { version = "1", features = ["derive"] }
 serde_json  = "1"
 chrono      = { version = "0.4", features = ["serde"] }
 uuid        = { version = "1", features = ["v4", "serde"] }
-rusqlite    = { version = "0.32", features = ["bundled", "chrono", "serde_json"] }
 thiserror   = "2"
 tracing     = "0.1"
 
 [dev-dependencies]
+# Tests d'import : la feature est activée pour les tests d'intégration.
+miyualicia-memory = { path = ".", features = ["import-heritage"] }
+# Serveur KindMother réel (SQLCipher par défaut) et fabrique de bases héritées.
+kindmother-service = { path = "../kindmother-service" }
+kindmother-heritage = { path = "../kindmother-heritage", features = ["fabrique-test"] }
+tokio       = { version = "1", features = ["rt-multi-thread", "macros"] }
 tempfile    = "3"
 
 [lints.rust]

@@ -2,7 +2,7 @@
 //! `Persona`.
 //!
 //! Tous les types sont sérialisables (`serde`) pour exposition future via API
-//! REST (`miyualicia-api`) et persistance (`rusqlite` colonnes `TEXT`).
+//! REST (`miyualicia-api`) et persistance (KindMother, colonnes `TEXT`).
 
 // @id service.alicia.memory.types
 // @role memory_types

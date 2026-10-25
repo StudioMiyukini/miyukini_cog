@@ -603,11 +603,11 @@ async fn runtime_with_shout(tmp: &std::path::Path) -> Arc<CapabilitiesRuntime> {
     runtime_with_shout_cfg(tmp, None, PendingExpiryConfig::default()).await
 }
 
-/// Variante paramétrable : base SQLite fichier (redémarrage simulé) et TTL
-/// d'expiration des confirmations.
+/// Variante paramétrable : mémoire servie par KindMother (redémarrage simulé)
+/// et TTL d'expiration des confirmations.
 async fn runtime_with_shout_cfg(
     tmp: &std::path::Path,
-    memory_db_path: Option<std::path::PathBuf>,
+    memory_kindmother: Option<miyualicia_memory::ConfigKindMother>,
     pending_expiry: PendingExpiryConfig,
 ) -> Arc<CapabilitiesRuntime> {
     let demo = tmp.join("demo");
@@ -629,7 +629,7 @@ async fn runtime_with_shout_cfg(
     Arc::new(
         CapabilitiesRuntime::new_with_bypass_gate(CapabilitiesRuntimeConfig {
             services_dir: Some(tmp.to_path_buf()),
-            memory_db_path,
+            memory_kindmother,
             pending_expiry,
             ..Default::default()
         })
@@ -762,10 +762,22 @@ fn counting_client() -> Arc<SlowCountingClient> {
     })
 }
 
+/// Mémoire d'Alicia sur un KindMother éphémère (données dans `tmp/kindmother`) :
+/// deux runtimes successifs partagent la même base (redémarrage simulé).
+fn kindmother(tmp: &std::path::Path) -> miyualicia_memory::ConfigKindMother {
+    let dir = tmp.join("kindmother");
+    std::fs::create_dir_all(&dir).unwrap();
+    let (addr, creds) = kindmother_service::spawn_ephemeral_blocking(&dir).unwrap();
+    miyualicia_memory::ConfigKindMother::new(addr.to_string()).avec_justificatifs(creds)
+}
+
 /// Simule un arrêt brutal pendant l'exécution : la confirmation est
 /// réclamée (`Executing`) puis le runtime disparaît sans finaliser.
-async fn crash_mid_execution(tmp: &std::path::Path, db: &std::path::Path) -> uuid::Uuid {
-    let rt = runtime_with_shout_cfg(tmp, Some(db.to_path_buf()), PendingExpiryConfig::default()).await;
+async fn crash_mid_execution(
+    tmp: &std::path::Path,
+    km: &miyualicia_memory::ConfigKindMother,
+) -> uuid::Uuid {
+    let rt = runtime_with_shout_cfg(tmp, Some(km.clone()), PendingExpiryConfig::default()).await;
     let id = queued_id(
         rt.dispatch_and_queue("demo.shout", &Value::Null, "voice", "x")
             .await
@@ -778,13 +790,13 @@ async fn crash_mid_execution(tmp: &std::path::Path, db: &std::path::Path) -> uui
 #[tokio::test]
 async fn stuck_executing_older_than_ttl_is_failed_at_startup_and_never_executed() {
     let tmp = tempfile::tempdir().unwrap();
-    let db = tmp.path().join("memoire.db");
-    let id = crash_mid_execution(tmp.path(), &db).await;
+    let km = kindmother(tmp.path());
+    let id = crash_mid_execution(tmp.path(), &km).await;
 
     // Redémarrage avec TTL Executing nul : la réclamation est « trop vieille ».
     let rt = runtime_with_shout_cfg(
         tmp.path(),
-        Some(db.clone()),
+        Some(km.clone()),
         PendingExpiryConfig {
             executing_ttl_secs: 0,
             ..Default::default()
@@ -808,11 +820,11 @@ async fn stuck_executing_older_than_ttl_is_failed_at_startup_and_never_executed(
 #[tokio::test]
 async fn fresh_executing_is_untouched_at_startup_and_not_reexecuted() {
     let tmp = tempfile::tempdir().unwrap();
-    let db = tmp.path().join("memoire.db");
-    let id = crash_mid_execution(tmp.path(), &db).await;
+    let km = kindmother(tmp.path());
+    let id = crash_mid_execution(tmp.path(), &km).await;
 
     // Redémarrage avec le TTL par défaut (15 min) : rien n'expire encore.
-    let rt = runtime_with_shout_cfg(tmp.path(), Some(db.clone()), PendingExpiryConfig::default()).await;
+    let rt = runtime_with_shout_cfg(tmp.path(), Some(km.clone()), PendingExpiryConfig::default()).await;
     let client = counting_client();
     rt.register_service_client("demo", client.clone()).await;
     let report = rt.sweep_expired_confirmations().unwrap();

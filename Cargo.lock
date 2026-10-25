@@ -6495,6 +6495,7 @@ dependencies = [
  "axum 0.8.8",
  "borderguard",
  "chrono",
+ "kindmother-service",
  "miyauth",
  "miyualicia",
  "miyualicia-cores-gate",
@@ -6638,11 +6639,15 @@ name = "miyualicia-memory"
 version = "0.9.0-beta.1"
 dependencies = [
  "chrono",
- "rusqlite",
+ "kindmother-client",
+ "kindmother-heritage",
+ "kindmother-service",
+ "miyualicia-memory",
  "serde",
  "serde_json",
  "tempfile",
  "thiserror 2.0.18",
+ "tokio",
  "tracing",
  "uuid",
 ]
@@ -6972,13 +6977,17 @@ name = "miyufederation"
 version = "0.9.0-beta.1"
 dependencies = [
  "hmac",
+ "kindmother-client",
+ "kindmother-service",
  "miyauth",
  "miyuracine",
  "miyuregistre",
  "miyusceau",
  "rustix",
+ "serde_json",
  "sha2",
  "thiserror 2.0.18",
+ "tokio",
  "zeroize",
 ]
 
@@ -10258,7 +10267,6 @@ dependencies = [
  "fallible-streaming-iterator",
  "hashlink 0.9.1",
  "libsqlite3-sys",
- "serde_json",
  "smallvec",
 ]
 

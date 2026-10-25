@@ -62,8 +62,16 @@ pub struct CapabilitiesRuntimeConfig {
     /// Dossier surveillé pour les `service.manifest.json` (un sous-dossier
     /// par service, ou un manifeste à plat).
     pub services_dir: Option<PathBuf>,
-    /// Chemin du fichier SQLite de la mémoire d'Alicia.
-    /// `None` → store en mémoire (volatile, dev / test).
+    /// Mémoire d'Alicia servie par KindMother (seul écrivain, K-13) :
+    /// adresse, justificatifs de l'opérateur `maia-_alicia`, ancienne base
+    /// SQLite éventuelle à importer une fois. KindMother injoignable ⇒ le
+    /// runtime refuse de démarrer (aucun repli sur un fichier local).
+    pub memory_kindmother: Option<miyualicia_memory::ConfigKindMother>,
+    /// Ancienne base SQLite de la mémoire d'Alicia (avant KindMother) :
+    /// importée une fois si présente, jamais modifiée ni supprimée. Seule
+    /// (sans `memory_kindmother`), elle implique KindMother à l'adresse
+    /// `KINDMOTHER_ADDR` (défaut `127.0.0.1:50051`).
+    /// Les deux à `None` → store en mémoire vive (volatile, dev / test).
     pub memory_db_path: Option<PathBuf>,
     /// Politique d'exécution. Default = `AliciaPolicy::strict()`.
     pub policy: AliciaPolicy,
@@ -182,17 +190,24 @@ impl CapabilitiesRuntime {
     /// Construit et initialise le sous-système.
     ///
     /// Si `services_dir` est défini, un premier scan est lancé pour peupler
-    /// le registre. Si `memory_db_path` est `None`, la mémoire est
-    /// volatile (in-memory).
+    /// le registre. Sans `memory_kindmother` ni `memory_db_path`, la mémoire
+    /// est volatile (in-memory) ; sinon elle est servie par KindMother.
     // API async publique conservée (appelants externes en `.await`).
     #[allow(clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn new(
         config: CapabilitiesRuntimeConfig,
         core_gate: Arc<dyn CoreGate + Send + Sync>,
     ) -> Result<Self, AliciaError> {
-        let memory = match config.memory_db_path.as_ref() {
-            None => MemoryStore::open_in_memory().map_err(memory_err)?,
-            Some(path) => MemoryStore::open(path).map_err(memory_err)?,
+        let memory = match (config.memory_kindmother.as_ref(), config.memory_db_path.as_ref()) {
+            (Some(km), heritee) => {
+                let mut km = km.clone();
+                if km.base_heritee.is_none() {
+                    km.base_heritee = heritee.cloned();
+                }
+                MemoryStore::connecter(&km).map_err(memory_err)?
+            }
+            (None, Some(path)) => MemoryStore::open(path).map_err(memory_err)?,
+            (None, None) => MemoryStore::open_in_memory().map_err(memory_err)?,
         };
         let mut registry = SkillRegistry::new();
         if let Some(dir) = config.services_dir.as_ref() {
