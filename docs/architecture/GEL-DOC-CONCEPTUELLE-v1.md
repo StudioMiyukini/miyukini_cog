@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.19 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.20 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -78,6 +78,7 @@
 | A-017 | 2026-10-25 | Route de publication des Fiches depuis MAIA : requête signée par l'utilisateur, champs structurels calculés par le serveur, porte des Cores, débits ; clé d'identité dans le pont (à trancher) ; **à valider par le propriétaire** | 1.17 |
 | A-018 | 2026-10-25 | État de publication persistant dans KindMother (base réservée `cog-federee`, une insertion par version, rechargement fail-closed), plafond décompté après ALLOW, contrôle du propriétaire de l'étiquette ; **à valider par le propriétaire** | 1.18 |
 | A-019 | 2026-10-25 | État fédéral persistant (`MFED` v3 avec carnet de pairs, support KindMother `miyufederation`, rechargement revérifié, 72 h à travers les arrêts), fuzzing ; mémoire d'Alicia dans KindMother (`maia-_alicia`, `nationale`), import unique ; **à valider par le propriétaire** | 1.19 |
+| A-020 | 2026-10-25 | Effacement physique dans KindMother (`secure_delete` relu, WAL vidé après suppression), effacement de l'ancienne base d'Alicia, anti-retour de l'état fédéral (`MFED` v4, compteur `MFFR`), encodage canonique du Sceau ; **à valider par le propriétaire** | 1.20 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -657,5 +658,31 @@
   - Ouverture refusée sans migrations appliquées, sans classement `nationale` relu chez KindMother, ou base non chiffrée ; KindMother injoignable ⇒ erreur explicite, aucun repli sur un fichier local
   - Recherche plein texte faite par le store (tous les mots exigés, `mot*` = préfixe, casse et accents ignorés) ; plus de syntaxe FTS5
   - Import unique de l'ancienne base SQLite (moteur `kindmother-heritage`, fonctionnalité `import-heritage`, au démarrage ou par `alicia-memoire-import`) : vérification ligne à ligne, empreinte du fichier avant et après, marqueur `<base>.importe-kindmother`, idempotent ; l'ancien fichier n'est jamais modifié ni supprimé ; sans la fonctionnalité, une ancienne base non importée fait refuser l'ouverture
-  - **Limite** : KindMother n'efface pas physiquement les pages libérées (`secure_delete` absent) ; un oubli laisse des pages chiffrées résiduelles, à traiter dans KindMother pour toutes les bases
+  - **Limite** (levée par A-020) : KindMother n'effaçait pas physiquement les pages libérées ; un oubli laissait des pages chiffrées résiduelles
 - **Impact** : EX-30, EX-35, EX-37, EX-50..56 ; plan lots 6, 7
+
+### A-020 — Effacement physique, anti-retour de l'état fédéral, encodage canonique du Sceau
+
+<!-- @id arch.gel.a020 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a020 -->
+
+- **Date** : 2026-10-25 · **version** 1.20 · corrections après revue de sécurité de l'implémenté d'A-019 et constat du fuzzing ; **validation du propriétaire attendue**
+- **Effacement physique dans KindMother** (toutes bases)
+  - `PRAGMA secure_delete = ON` posé et **relu** sur chaque connexion (lecture-écriture, lecture seule, journal d'audit) ; valeur relue ≠ 1 ⇒ connexion refusée
+  - Tout lot comportant une suppression effective (`Delete` typé, ou `DELETE` en SQL de transition) est suivi de `wal_checkpoint(TRUNCATE)` sous le verrou d'écriture ; point de contrôle incomplet ⇒ suppression maintenue, entrée d'audit annotée, résidu vidé au prochain effacement réussi ; coût ≈ 10 ms par lot qui supprime
+  - **Un oubli doit être exprimé par une suppression** : une mise à jour qui écrase une valeur n'est pas garantie effacée du WAL
+  - Limites : bases antérieures (pages libérées avant ce changement : `VACUUM` unique à prévoir) ; sauvegardes `_backups/` d'avant migration (règle de conservation à fixer) ; rémanence matérielle (SSD, copie sur écriture) couverte seulement par le chiffrement
+- **Ancienne base d'Alicia** (précise A-019) : après un import **vérifié** d'empreinte inchangée, l'ancienne base et ses `-wal`/`-shm`/`-journal` sont réécrits de zéros, synchronisés puis supprimés ; le marqueur garde l'empreinte, la date et les fichiers effacés ; lien symbolique ou empreinte différente ⇒ jamais effacé ; conservation seulement explicite (`--conserver-ancienne`), et `forget()` est alors **refusé** (`LegacyCopyPresent`) ; pierres tombales réappliquées après chaque import et à chaque ouverture (aucune résurrection)
+- **État fédéral : anti-retour** (précise A-019)
+  - **`MFED` v4** : génération monotone en fin de corps, sous le HMAC ; v2/v3 lues avec génération 0
+  - **Compteur de fraîcheur `MFFR` v1**, hors de KindMother : fichier local 0600 en dossier privé verrouillé, `"MFFR" | 0x01 | génération (8) | SHA-256 de l'état (32) | mac (32)` (77 octets), clé `HMAC(secret local, "miyukini/miyufederation/fraicheur/v1")` ; ordre d'écriture : l'état puis le compteur
+  - Au chargement : état plus ancien ⇒ `EtatPerime` ; même génération, autre empreinte ⇒ `EtatDivergent` ; une génération d'avance (écriture interrompue) ⇒ accepté, compteur avancé ; plus ⇒ `CompteurIncoherent` ; compteur absent ⇒ `CompteurAbsent` jusqu'à **réamorçage explicite** (après revérification complète et constat que l'état n'a pas été restauré) ; état absent alors que le compteur existe ⇒ `EtatAbsent`
+  - Morceaux de la génération précédente purgés dans le lot qui suit une bascule réussie
+  - Limite : un acteur capable d'écrire sur le disque local peut restaurer ensemble compteur et état (comme la paire état + registre local)
+- **Sceau : encodage canonique** (`crates/miyusceau`) : tout ce que l'encodeur accepte, le décodeur l'accepte, et `decoder(encoder(x)) == x`
+  - `TeteRegistre::valider` (validité `1..=plafond`, taille 0 ⇒ racine `SHA-256("")`) appelé à la construction (`TeteRegistre::nouvelle`), à l'encodage et au décodage
+  - `Sceau::encoder` vérifié et faillible (charge ≤ 64 Kio, 1 à 8 signatures, algorithme et longueur de signature cohérents, `kid` strictement croissants, aucune troncature de longueur) ; `encoder_brut` réservé aux tests
+  - Preuves Merkle : chemin > 64 refusé à l'encodage
+  - `sceller`, `sceller_multi`, `cosigner` : la charge doit se relire et se ré-encoder à l'octet près (`EncodageNonCanonique`)
+- **Impact** : EX-30, EX-35, EX-50..56 ; plan lots 2, 6, 7
