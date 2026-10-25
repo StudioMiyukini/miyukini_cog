@@ -18,7 +18,7 @@ use std::cell::RefCell;
 use maia_federee::{
     autoriser, consulter, sceller_fiche, Audience, BaseEtrangere, Consultation, Effet, Etablissement, ErreurFederee,
     Fiche, ModeleLecteur, Plan, Planificateur, PolitiqueCorroboration, Provenance, Relation, RequeteTypee,
-    ServiceRequete, TypeFiche, VueFederale,
+    Publiable, Publication, ServiceRequete, TypeFiche, VueFederale, AutoriteEtiquettes, verifier_fiche,
 };
 use miyauth::CogId;
 use miyufederation::{Candidature, Federation, Parametres};
@@ -131,6 +131,8 @@ impl ModeleLecteur for LecteurFactice {
 fn reponse_sourcee_corroboree_et_injection_sans_effet() {
     let cogs: Vec<Cog> = (1..=5u8).map(Cog::nouveau).collect();
     let (l, a, b, c, x) = (&cogs[0], &cogs[1], &cogs[2], &cogs[3], &cogs[4]);
+    // Couche des étiquettes « publiable » (EX-47) : seul ce test l'institue dans ce binaire.
+    let etiquettes = AutoriteEtiquettes::instituer().unwrap();
 
     // ── Vue fédérale de L, rendue fraîche : tête de A témoignée par B, C, X ──
     let mut vue_l = vue_avec(&cogs);
@@ -162,8 +164,10 @@ fn reponse_sourcee_corroboree_et_injection_sans_effet() {
     let mut base = BaseEtrangere::new(l.cog.clone());
     let requete = RequeteTypee::nouvelle("capitale France", &[], None, 10).unwrap().encoder().unwrap();
     for (emetteur, octets) in &publications {
-        let mut service = ServiceRequete::new();
-        service.publier(octets.clone(), true, Provenance::Utilisateur, t).unwrap();
+        // Chaque émetteur publie sa propre Fiche, étiquetée « publiable » (F1).
+        let mut service = ServiceRequete::new(emetteur.cog.clone());
+        let capacite = Publiable::etiquetee(&etiquettes, &verifier_fiche(octets, t).unwrap()).unwrap();
+        service.publier(octets.clone(), Publication::Originale(capacite), t).unwrap();
         // Le service répond à L (membre) par des Fiches signées, sans aucun modèle.
         for recue in service.repondre(&l.cog, maia_federee::Qualite::Membre, &requete, t).unwrap() {
             base.recevoir(&recue, &vue_l, t).unwrap();
@@ -223,10 +227,12 @@ fn reponse_sourcee_corroboree_et_injection_sans_effet() {
     }
     // Republication : jamais sans validation confirmée par TAMR (A-009).
     assert_eq!(autoriser(reponse.provenance(), Effet::Publication, None, "x"), Err(ErreurFederee::ValidationRequise));
-    let mut service_l = ServiceRequete::new();
+    // L ne publie jamais la Fiche piégée de X comme sienne, même « étiquetée » (F1).
+    let mut service_l = ServiceRequete::new(l.cog.clone());
+    let capacite = Publiable::etiquetee(&etiquettes, &verifier_fiche(&publications[3].1, t).unwrap()).unwrap();
     assert_eq!(
-        service_l.publier(publications[3].1.clone(), true, Provenance::Etranger, t),
-        Err(ErreurFederee::ValidationRequise)
+        service_l.publier(publications[3].1.clone(), Publication::Originale(capacite), t),
+        Err(ErreurFederee::FicheNonLocale)
     );
 
     // Hors fédération : aucune consultation.

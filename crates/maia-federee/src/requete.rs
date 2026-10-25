@@ -24,7 +24,7 @@ use miyusceau::{EcrivainTlv, LecteurTlv};
 
 use crate::base::Qualite;
 use crate::erreurs::ErreurFederee;
-use crate::fiche::{verifier_fiche, Audience, FicheVerifiee, Reprise, TypeFiche};
+use crate::fiche::{reprises_distinctes, verifier_fiche, Audience, FicheVerifiee, Reprise, TypeFiche};
 use crate::marquage::{autoriser, Effet, Provenance, ValidationUtilisateur};
 use crate::normalisation::{cle_comparaison, normaliser_ligne};
 
@@ -163,38 +163,125 @@ struct Publiee {
     octets: Vec<u8>,
 }
 
+/// Autorité des étiquettes (EX-47) : **jeton unique par processus**, détenu
+/// par la seule couche qui connaît l'étiquette KindMother `publiable` posée
+/// par une action de l'utilisateur. Seul le premier appel de
+/// [`Self::instituer`] l'obtient. Sans elle, aucun [`Publiable`] ne peut être
+/// construit : tant que la couche d'étiquettes n'existe pas, aucune Fiche
+/// originale n'est publiable (fail-closed).
+#[derive(Debug)]
+pub struct AutoriteEtiquettes {
+    _prive: (),
+}
+
+static ETIQUETTES_PRISES: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+impl AutoriteEtiquettes {
+    /// Institue l'autorité : `Some` au **premier** appel du processus, `None` ensuite.
+    pub fn instituer() -> Option<Self> {
+        if ETIQUETTES_PRISES.swap(true, std::sync::atomic::Ordering::SeqCst) {
+            tracing::warn!(target: "maia_federee::audit", "tentative d'instituer une seconde autorité d'étiquettes : refus");
+            return None;
+        }
+        Some(Self { _prive: () })
+    }
+}
+
+/// Capacité « publiable » (revue de sécurité du lot 7, F1) : atteste que la
+/// donnée de la Fiche **exacte** (empreinte de ses octets signés) a reçu
+/// l'étiquette `publiable` par une action de l'utilisateur. Construite
+/// uniquement par le détenteur de l'[`AutoriteEtiquettes`], qui ne l'accorde
+/// jamais à une donnée `etranger` ni à la mémoire de MAIA (`nationale`).
+/// Ni `Clone`, ni champ public : une capacité sert une seule publication.
+#[derive(Debug, PartialEq, Eq)]
+pub struct Publiable {
+    cog: CogId,
+    empreinte: [u8; 32],
+}
+
+impl Publiable {
+    /// Atteste que la Fiche `fiche` (originale : sans reprise) est publiable.
+    pub fn etiquetee(_autorite: &AutoriteEtiquettes, fiche: &FicheVerifiee) -> Result<Self, ErreurFederee> {
+        if fiche.est_reprise() {
+            // Une donnée étrangère ne devient jamais « publiable » : republication sous TAMR.
+            return Err(ErreurFederee::ValidationRequise);
+        }
+        Ok(Self { cog: fiche.cog().clone(), empreinte: fiche.empreinte() })
+    }
+}
+
+/// Point d'entrée typé d'une publication (F1) : la provenance n'est plus un
+/// paramètre fourni par l'appelant, elle découle du chemin.
+#[derive(Debug)]
+pub enum Publication<'a> {
+    /// Fiche originale du COG local, étiquetée `publiable` par l'utilisateur.
+    Originale(Publiable),
+    /// Republication d'une donnée étrangère (A-009) : validation de
+    /// l'utilisateur confirmée par TAMR pour les octets exacts, et Fiches
+    /// sources vérifiées, en bijection avec le champ `reprises`.
+    Reprise {
+        /// Fiches étrangères republiées (vérifiées).
+        sources: &'a [FicheVerifiee],
+        /// Validation confirmée par TAMR.
+        validation: &'a ValidationUtilisateur,
+    },
+}
+
 /// Service de requête déterministe (aucun modèle, EX-58).
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct ServiceRequete {
+    cog_local: CogId,
     publiees: Vec<Publiee>,
     demandes: BTreeMap<CogId, Vec<u64>>,
 }
 
 impl ServiceRequete {
-    /// Service vide.
-    pub fn new() -> Self {
-        Self::default()
+    /// Service vide du COG `cog_local` : il ne publie que des Fiches signées
+    /// par la clé d'identité de ce COG.
+    pub fn new(cog_local: CogId) -> Self {
+        Self { cog_local, publiees: Vec::new(), demandes: BTreeMap::new() }
     }
 
-    /// Publie une Fiche de son propre COG (IA-FEDEREE §5) : seules les données
-    /// étiquetées `publiable` par l'utilisateur ; une donnée `etranger` passe
-    /// par [`Self::republier`] ; jamais la mémoire de MAIA (`nationale`, qui
-    /// n'a pas d'étiquette `publiable`). Une version plus récente remplace la
-    /// précédente ; une version égale ou antérieure est refusée.
-    pub fn publier(
-        &mut self,
-        octets: Vec<u8>,
-        publiable: bool,
-        provenance: Provenance,
-        maintenant: u64,
-    ) -> Result<(), ErreurFederee> {
-        autoriser(provenance, Effet::Publication, None, "publication")?;
-        if !publiable {
-            return Err(ErreurFederee::NonPubliable);
+    /// COG local.
+    pub fn cog_local(&self) -> &CogId {
+        &self.cog_local
+    }
+
+    /// Publie une Fiche **signée par le COG local** (IA-FEDEREE §5, F1) :
+    ///
+    /// - [`Publication::Originale`] : seules les données étiquetées
+    ///   `publiable` par l'utilisateur ([`Publiable`] couvrant les octets
+    ///   exacts) ; une Fiche à reprises est refusée ;
+    /// - [`Publication::Reprise`] : donnée étrangère (A-009), validation
+    ///   confirmée par TAMR liée aux octets exacts ; champ `reprises` égal,
+    ///   en tant qu'ensemble sans doublon, à `{Reprise::de(s)}` des sources
+    ///   (sans doublon) ; licence identique à chaque source ; audience au plus
+    ///   aussi large que chaque source. Elle ne compte jamais pour *k*.
+    ///
+    /// Jamais la mémoire de MAIA (`nationale`, qui n'a pas d'étiquette
+    /// `publiable`). Une version plus récente remplace la précédente ; une
+    /// version égale ou antérieure est refusée.
+    pub fn publier(&mut self, octets: Vec<u8>, publication: Publication<'_>, maintenant: u64) -> Result<(), ErreurFederee> {
+        if let Publication::Reprise { validation, .. } = &publication {
+            autoriser(Provenance::Etranger, Effet::Publication, Some(validation), &Self::description_republication(&octets))?;
         }
         let fiche = verifier_fiche(&octets, maintenant)?;
-        if fiche.est_reprise() {
-            return Err(ErreurFederee::ValidationRequise);
+        if fiche.cog() != &self.cog_local {
+            return Err(ErreurFederee::FicheNonLocale);
+        }
+        match publication {
+            Publication::Originale(capacite) => {
+                if fiche.est_reprise() {
+                    return Err(ErreurFederee::ValidationRequise);
+                }
+                if capacite.cog != self.cog_local || capacite.empreinte != fiche.empreinte() {
+                    return Err(ErreurFederee::NonPubliable);
+                }
+            }
+            Publication::Reprise { sources, validation } => {
+                Self::controler_reprises(&fiche, sources)?;
+                tracing::info!(target: "maia_federee::audit", fiche = %fiche.fiche().id, confirmation = validation.confirmation(), "republication validée");
+            }
         }
         self.inserer(fiche, octets)
     }
@@ -211,28 +298,21 @@ impl ServiceRequete {
         })
     }
 
-    /// Republie une donnée étrangère (A-009) : validation de l'utilisateur
-    /// **confirmée par TAMR** liée aux octets exacts ; champ `reprises`
-    /// non vide, qui référence exactement `sources` (Fiches étrangères
-    /// vérifiées) ; licence identique à chaque source ; audience au plus aussi
-    /// large que chaque source. La Fiche republiée ne compte jamais pour *k*.
-    pub fn republier(
-        &mut self,
-        octets: Vec<u8>,
-        sources: &[FicheVerifiee],
-        validation: &ValidationUtilisateur,
-        maintenant: u64,
-    ) -> Result<(), ErreurFederee> {
-        autoriser(Provenance::Etranger, Effet::Publication, Some(validation), &Self::description_republication(&octets))?;
-        let fiche = verifier_fiche(&octets, maintenant)?;
+    /// `reprises` == `{Reprise::de(s) | s ∈ sources}`, sans doublon d'un côté
+    /// ni de l'autre (F2), puis licence et audience de chaque source.
+    fn controler_reprises(fiche: &FicheVerifiee, sources: &[FicheVerifiee]) -> Result<(), ErreurFederee> {
         let f = fiche.fiche();
-        if sources.is_empty() || f.reprises.len() != sources.len() {
+        let attendues: Vec<Reprise> = sources.iter().map(Reprise::de).collect();
+        if sources.is_empty()
+            || !reprises_distinctes(&attendues)
+            || !reprises_distinctes(&f.reprises)
+            || f.reprises.len() != attendues.len()
+            || !attendues.iter().all(|r| f.reprises.contains(r))
+            || !f.reprises.iter().all(|r| attendues.contains(r))
+        {
             return Err(ErreurFederee::ChampInvalide("reprises"));
         }
         for source in sources {
-            if !f.reprises.contains(&Reprise::de(source)) {
-                return Err(ErreurFederee::ChampInvalide("reprises"));
-            }
             if source.cog() == fiche.cog() {
                 return Err(ErreurFederee::ChampInvalide("reprises : source de son propre COG"));
             }
@@ -243,8 +323,7 @@ impl ServiceRequete {
                 return Err(ErreurFederee::ChampInvalide("audience plus large que la source"));
             }
         }
-        tracing::info!(target: "maia_federee::audit", fiche = %f.id, confirmation = validation.confirmation(), "republication validée");
-        self.inserer(fiche, octets)
+        Ok(())
     }
 
     fn inserer(&mut self, fiche: FicheVerifiee, octets: Vec<u8>) -> Result<(), ErreurFederee> {
@@ -338,16 +417,38 @@ mod tests {
         assert_eq!(RequeteTypee::decoder(&r.encoder().unwrap()).unwrap(), r);
     }
 
+    fn autorite() -> AutoriteEtiquettes {
+        AutoriteEtiquettes { _prive: () }
+    }
+
+    fn originale(octets: &[u8]) -> Publication<'static> {
+        let f = verifier_fiche(octets, T).unwrap();
+        Publication::Originale(Publiable::etiquetee(&autorite(), &f).unwrap())
+    }
+
+    fn cog_cle(cle: &CleSignature) -> CogId {
+        crate::fiche::cog_de_cle(&cle.cle_publique()).unwrap()
+    }
+
+    #[test]
+    fn autorite_etiquettes_unique_par_processus() {
+        // Seul ce test institue l'autorité dans ce binaire de test.
+        let premiere = AutoriteEtiquettes::instituer();
+        assert!(premiere.is_some());
+        assert!(AutoriteEtiquettes::instituer().is_none());
+    }
+
     #[test]
     fn service_deterministe_audience_quota_publiable() {
         let cle = CleSignature::generer();
-        let mut s = ServiceRequete::new();
+        let mut s = ServiceRequete::new(cog_cle(&cle));
         let f = fiche(&cle, "geo.paris", "Paris est la capitale de la France.", &[]);
         let octets = sceller_fiche(&f, &cle).unwrap();
-        assert_eq!(s.publier(octets.clone(), false, Provenance::Utilisateur, T), Err(ErreurFederee::NonPubliable));
-        assert_eq!(s.publier(octets.clone(), true, Provenance::Etranger, T), Err(ErreurFederee::ValidationRequise));
-        s.publier(octets.clone(), true, Provenance::Utilisateur, T).unwrap();
-        assert_eq!(s.publier(octets.clone(), true, Provenance::Utilisateur, T), Err(ErreurFederee::VersionObsolete));
+        // Capacité d'une autre Fiche : refus.
+        let autre = sceller_fiche(&fiche(&cle, "geo.lyon", "Lyon.", &[]), &cle).unwrap();
+        assert_eq!(s.publier(octets.clone(), originale(&autre), T), Err(ErreurFederee::NonPubliable));
+        s.publier(octets.clone(), originale(&octets), T).unwrap();
+        assert_eq!(s.publier(octets.clone(), originale(&octets), T), Err(ErreurFederee::VersionObsolete));
 
         let q = RequeteTypee::nouvelle("capitale France", &[], None, 5).unwrap().encoder().unwrap();
         assert_eq!(s.repondre(&cog(1), Qualite::Membre, &q, T).unwrap(), vec![octets]);
@@ -363,6 +464,25 @@ mod tests {
     }
 
     #[test]
+    fn publication_d_une_fiche_d_un_autre_cog_refusee() {
+        // F1 : une Fiche signée par un autre COG (ou du contenu étranger
+        // auto-signé ailleurs) ne se publie pas, même avec une capacité.
+        let locale = CleSignature::generer();
+        let etrangere = CleSignature::generer();
+        let mut s = ServiceRequete::new(cog_cle(&locale));
+        let octets = sceller_fiche(&fiche(&etrangere, "geo.paris", "Paris.", &[]), &etrangere).unwrap();
+        assert_eq!(s.publier(octets.clone(), originale(&octets), T), Err(ErreurFederee::FicheNonLocale));
+        let source = verifier_fiche(&octets, T).unwrap();
+        let v = ValidationUtilisateur::construire(true, "c1", &ServiceRequete::description_republication(&octets));
+        assert_eq!(
+            s.publier(octets.clone(), Publication::Reprise { sources: std::slice::from_ref(&source), validation: &v }, T),
+            Err(ErreurFederee::FicheNonLocale)
+        );
+        let q = RequeteTypee::nouvelle("Paris", &[], None, 5).unwrap().encoder().unwrap();
+        assert_eq!(s.repondre(&cog(1), Qualite::Membre, &q, T).unwrap().len(), 0);
+    }
+
+    #[test]
     fn republication_sous_tamr_reprises_licence_audience() {
         let etrangere = CleSignature::generer();
         let locale = CleSignature::generer();
@@ -371,14 +491,17 @@ mod tests {
         let base = crate::fiche::Fiche { reprises: vec![Reprise::de(&source)], ..fiche(&locale, "geo.paris.reprise", "Paris est la capitale.", &[]) };
         let octets = reprise(base.clone());
         let desc = ServiceRequete::description_republication(&octets);
-        let tamr = ValidationUtilisateur::confirmee_par_tamr("c1", &desc);
-        let mut s = ServiceRequete::new();
-        // Sans validation, validation simple ou validation d'autres octets : refus.
-        assert_eq!(s.republier(octets.clone(), std::slice::from_ref(&source), &ValidationUtilisateur::nouvelle("c1", &desc), T), Err(ErreurFederee::ValidationRequise));
-        let autre = ValidationUtilisateur::confirmee_par_tamr("c1", "republier 00");
-        assert_eq!(s.republier(octets.clone(), std::slice::from_ref(&source), &autre, T), Err(ErreurFederee::ValidationRequise));
-        // Le chemin ordinaire refuse une Fiche à reprises.
-        assert_eq!(s.publier(octets.clone(), true, Provenance::Utilisateur, T), Err(ErreurFederee::ValidationRequise));
+        let tamr = ValidationUtilisateur::construire(true, "c1", &desc);
+        let mut s = ServiceRequete::new(cog_cle(&locale));
+        let sources = std::slice::from_ref(&source);
+        // Sans validation TAMR, ou validation d'autres octets : refus.
+        let simple = ValidationUtilisateur::construire(false, "c1", &desc);
+        assert_eq!(s.publier(octets.clone(), Publication::Reprise { sources, validation: &simple }, T), Err(ErreurFederee::ValidationRequise));
+        let autre = ValidationUtilisateur::construire(true, "c1", "republier 00");
+        assert_eq!(s.publier(octets.clone(), Publication::Reprise { sources, validation: &autre }, T), Err(ErreurFederee::ValidationRequise));
+        // Le chemin ordinaire refuse une Fiche à reprises (pas de capacité possible).
+        let v = verifier_fiche(&octets, T).unwrap();
+        assert_eq!(Publiable::etiquetee(&autorite(), &v), Err(ErreurFederee::ValidationRequise));
         // Reprises absentes, licence changée, audience élargie : refus même validé.
         for f in [
             crate::fiche::Fiche { reprises: Vec::new(), ..base.clone() },
@@ -386,13 +509,37 @@ mod tests {
             crate::fiche::Fiche { audience: Audience::Invites, ..base.clone() },
         ] {
             let o = reprise(f);
-            let v = ValidationUtilisateur::confirmee_par_tamr("c1", &ServiceRequete::description_republication(&o));
-            assert!(matches!(s.republier(o, std::slice::from_ref(&source), &v, T), Err(ErreurFederee::ChampInvalide(_))));
+            let v = ValidationUtilisateur::construire(true, "c1", &ServiceRequete::description_republication(&o));
+            assert!(matches!(s.publier(o, Publication::Reprise { sources, validation: &v }, T), Err(ErreurFederee::ChampInvalide(_))));
         }
-        s.republier(octets.clone(), std::slice::from_ref(&source), &tamr, T).unwrap();
+        s.publier(octets.clone(), Publication::Reprise { sources, validation: &tamr }, T).unwrap();
         let q = RequeteTypee::nouvelle("capitale", &[], None, 5).unwrap().encoder().unwrap();
         let rendu = s.repondre(&cog(1), Qualite::Membre, &q, T).unwrap();
         assert_eq!(rendu, vec![octets.clone()]);
         assert!(verifier_fiche(&rendu[0], T).unwrap().est_reprise());
+    }
+
+    #[test]
+    fn republication_sources_en_double_refusee() {
+        // F2 : sources [s, s] et reprises [R(s), R(x)] ⇒ R(x) n'aurait jamais été vérifiée.
+        let etrangere = CleSignature::generer();
+        let locale = CleSignature::generer();
+        let s1 = verifier_fiche(&sceller_fiche(&fiche(&etrangere, "geo.paris", "Paris.", &[]), &etrangere).unwrap(), T).unwrap();
+        let fantome = verifier_fiche(&sceller_fiche(&fiche(&etrangere, "geo.piege", "Piège.", &[]), &etrangere).unwrap(), T).unwrap();
+        let f = crate::fiche::Fiche {
+            reprises: vec![Reprise::de(&s1), Reprise::de(&fantome)],
+            ..fiche(&locale, "geo.reprise", "Paris.", &[])
+        };
+        let octets = sceller_fiche(&f, &locale).unwrap();
+        let v = ValidationUtilisateur::construire(true, "c1", &ServiceRequete::description_republication(&octets));
+        let mut s = ServiceRequete::new(cog_cle(&locale));
+        let doubles = [s1.clone(), s1.clone()];
+        assert_eq!(
+            s.publier(octets.clone(), Publication::Reprise { sources: &doubles, validation: &v }, T),
+            Err(ErreurFederee::ChampInvalide("reprises"))
+        );
+        // Sources exactes : accepté.
+        let exactes = [s1, fantome];
+        s.publier(octets, Publication::Reprise { sources: &exactes, validation: &v }, T).unwrap();
     }
 }

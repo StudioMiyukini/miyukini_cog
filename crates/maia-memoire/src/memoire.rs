@@ -8,8 +8,8 @@
 //!
 //! - [`VueMaia`] — ce que MAIA (le modèle, ses outils) peut faire : assembler le
 //!   contexte, ouvrir une branche (lecture seule), **noter** et **proposer**.
-//!   [`MemoireMaia::noter`] écrit directement une note ordinaire (déduction, hors
-//!   domaine sensible, nouvelle ou déjà d'auteur `maia`, quota de
+//!   [`MemoireMaia::noter`] écrit directement une note ordinaire (déduction, domaine
+//!   déjà présent en mémoire et non sensible, nouvelle ou déjà d'auteur `maia`, quota de
 //!   [`MAX_ECRITS_MAIA_24H`]) et en fait un candidat sinon (A-009). Un contenu
 //!   `etranger` n'entre jamais en mémoire longue sans validation (EX-53) ; MAIA
 //!   ne pose jamais de Règle (EX-54) et n'oublie rien ;
@@ -51,6 +51,10 @@ pub const MAX_MOTIF_OUBLI: usize = 200;
 pub const MAX_LIENS: usize = 16;
 /// Écritures directes de MAIA au plus par 24 h glissantes ; au-delà : candidats (A-009).
 pub const MAX_ECRITS_MAIA_24H: usize = 50;
+/// Candidats de MAIA en attente au plus ; au-delà : refus explicite (F5).
+pub const MAX_CANDIDATS_MAIA_EN_ATTENTE: usize = 100;
+/// Candidats de MAIA proposés au plus par 24 h glissantes ; au-delà : refus explicite (F5).
+pub const MAX_CANDIDATS_MAIA_24H: usize = 100;
 
 /// Horloge injectable (tests).
 pub type Horloge = Arc<dyn Fn() -> DateTime<Utc> + Send + Sync>;
@@ -58,6 +62,20 @@ pub type Horloge = Arc<dyn Fn() -> DateTime<Utc> + Send + Sync>;
 /// Vrai si le domaine est sensible.
 pub fn est_sensible(domaine: &str) -> bool {
     DOMAINES_SENSIBLES.contains(&domaine)
+}
+
+/// Vrai si le domaine existe déjà en mémoire **par l'utilisateur** : au moins
+/// une note courante de ce domaine écrite par l'utilisateur ou validée par lui
+/// (jamais une note de MAIA seule). Revue de sécurité du lot 7 (F4) : MAIA ne
+/// choisit pas la sensibilité d'une note en inventant un nom de domaine
+/// (`medical.x`, `banque.x`, `profil.x`) ; un domaine nouveau ⇒ candidat.
+fn domaine_etabli(courantes: &BTreeMap<IdMemoire, &Note>, domaine: &str) -> bool {
+    courantes.values().any(|n| n.id.domaine() == domaine && n.auteur != Auteur::Maia)
+}
+
+/// Forme de comparaison d'un texte de candidat (F5) : minuscules, espaces réduits.
+fn texte_normalise(texte: &str) -> String {
+    texte.to_lowercase().split_whitespace().collect::<Vec<_>>().join(" ")
 }
 
 /// Contrôle d'un texte d'unité : une ligne, sans balise de bloc, sous le plafond de sa strate.
@@ -183,8 +201,9 @@ pub enum Notee {
     Candidat(Uuid),
 }
 
-/// Mode de validation d'un candidat.
-#[derive(Debug, Clone, PartialEq)]
+/// Mode de validation d'un candidat. Ni `Clone` : une confirmation TAMR ne
+/// se duplique pas (L1).
+#[derive(Debug, PartialEq)]
 pub enum Validation {
     /// Validation explicite de l'utilisateur.
     Utilisateur,
@@ -193,30 +212,66 @@ pub enum Validation {
     UtilisateurEtTamr(ConfirmationTamr),
 }
 
+/// Autorité TAMR (revue de sécurité du lot 7, L1) : **jeton unique par
+/// processus**. Seul le premier appel de [`Self::instituer`] l'obtient ; le
+/// pont l'institue au démarrage dans son module TAMR. Sans ce jeton, aucune
+/// [`ConfirmationTamr`] ne peut être construite, donc aucune
+/// [`Validation::UtilisateurEtTamr`].
+///
+/// Limite : scellement **à l'exécution** (premier arrivé) ; la bibliothèque
+/// ne dépend pas de StrongFather et ne revérifie pas la décision.
+#[derive(Debug)]
+pub struct AutoriteTamr {
+    _prive: (),
+}
+
+static AUTORITE_TAMR_PRISE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+impl AutoriteTamr {
+    /// Institue l'autorité : `Some` au **premier** appel du processus, `None` ensuite.
+    pub fn instituer() -> Option<Self> {
+        if AUTORITE_TAMR_PRISE.swap(true, std::sync::atomic::Ordering::SeqCst) {
+            tracing::warn!(target: "maia_memoire::audit", "tentative d'instituer une seconde autorité TAMR : refus");
+            return None;
+        }
+        Some(Self { _prive: () })
+    }
+}
+
 /// Confirmation TAMR (intervention `APPROVAL` tranchée par StrongFather) liée
 /// à **un** candidat exact : identifiant et contenu figés au moment de
-/// l'approbation. Toute différence avec le candidat stocké ⇒ refus
-/// ([`ErreurMemoire::TamrRequis`]).
+/// l'approbation, et **version courante de la note cible** (F8) pour une
+/// correction. Toute différence avec le candidat stocké, ou une cible qui a
+/// changé depuis la demande ⇒ refus ([`ErreurMemoire::TamrRequis`]).
 ///
 /// À construire **uniquement** par le chemin TAMR de MAIA (module `tamr` du
-/// pont, après une décision StrongFather autorisée couvrant l'empreinte de ce
-/// candidat) ; la bibliothèque n'a pas de dépendance vers StrongFather et ne
-/// peut donc pas vérifier la décision elle-même.
-#[derive(Debug, Clone, PartialEq)]
+/// pont, détenteur de l'[`AutoriteTamr`], après une décision StrongFather
+/// autorisée couvrant l'empreinte de ce candidat) ; la bibliothèque n'a pas
+/// de dépendance vers StrongFather et ne peut donc pas vérifier la décision
+/// elle-même. Ni `Clone`.
+#[derive(Debug, PartialEq)]
 pub struct ConfirmationTamr {
     candidat: Box<Candidat>,
+    version_cible: Option<u32>,
     intervention: String,
 }
 
 impl ConfirmationTamr {
-    /// Confirmation pour `candidat` tel qu'approuvé, tracée par `intervention`.
-    pub fn nouvelle(candidat: Candidat, intervention: &str) -> Self {
-        Self { candidat: Box::new(candidat), intervention: intervention.to_string() }
+    /// Confirmation pour `candidat` tel qu'approuvé (`version_cible` : version
+    /// courante de la note cible vue à la demande, `None` pour une nouvelle
+    /// note), tracée par `intervention`.
+    pub fn nouvelle(_autorite: &AutoriteTamr, candidat: Candidat, version_cible: Option<u32>, intervention: &str) -> Self {
+        Self { candidat: Box::new(candidat), version_cible, intervention: intervention.to_string() }
     }
 
     /// Identifiant du candidat approuvé.
     pub fn candidat(&self) -> Uuid {
         self.candidat.id
+    }
+
+    /// Version de la cible approuvée (`None` : nouvelle note).
+    pub fn version_cible(&self) -> Option<u32> {
+        self.version_cible
     }
 
     /// Identifiant de l'intervention TAMR (journal).
@@ -235,7 +290,9 @@ pub struct MemoireMaia<E: Entrepot> {
     entrepot: E,
     tokeniseur: Arc<dyn Tokeniseur>,
     horloge: Horloge,
-    ecriture: tokio::sync::Mutex<()>,
+    /// Verrou d'écriture ; il garde aussi l'horodatage des candidats proposés
+    /// par MAIA (quota sur 24 h, F5 ; journal en mémoire du processus).
+    ecriture: tokio::sync::Mutex<Vec<DateTime<Utc>>>,
 }
 
 impl<E: Entrepot> MemoireMaia<E> {
@@ -246,7 +303,7 @@ impl<E: Entrepot> MemoireMaia<E> {
             entrepot,
             tokeniseur,
             horloge: Arc::new(Utc::now),
-            ecriture: tokio::sync::Mutex::new(()),
+            ecriture: tokio::sync::Mutex::new(Vec::new()),
         })
     }
 
@@ -302,7 +359,8 @@ impl<E: Entrepot> MemoireMaia<E> {
     }
 
     /// Note de MAIA (A-009) : écrite directement si c'est une note ordinaire —
-    /// provenance `deduit`, type ≠ Règle, domaine non sensible, nouvelle note ou
+    /// provenance `deduit`, type ≠ Règle, domaine non sensible **et déjà
+    /// présent en mémoire** (créé ou validé par l'utilisateur, F4), nouvelle note ou
     /// correction d'une note dont la version courante est d'auteur `maia`, moins
     /// de [`MAX_ECRITS_MAIA_24H`] écritures directes sur 24 h, et version écrite
     /// en strate N2 ou N3 (jamais N0 ni N1 : domaine `moi`, préférence forte,
@@ -333,6 +391,7 @@ impl<E: Entrepot> MemoireMaia<E> {
             };
             let branche = actuelle.map_or_else(|| p.branche.clone(), |n| n.id.branche());
             let directe = !est_sensible(branche.domaine())
+                && domaine_etabli(&courantes, branche.domaine())
                 && actuelle.is_none_or(|n| n.auteur == Auteur::Maia)
                 && recents < MAX_ECRITS_MAIA_24H;
             if directe {
@@ -382,6 +441,12 @@ impl<E: Entrepot> MemoireMaia<E> {
     }
 
     /// Proposition de MAIA : toujours un candidat, jamais une écriture en mémoire longue (EX-53, EX-54).
+    ///
+    /// Bornes (F5) : un candidat en attente de même texte normalisé dans la
+    /// même branche est réutilisé (aucune écriture) ; au-delà de
+    /// [`MAX_CANDIDATS_MAIA_EN_ATTENTE`] candidats de MAIA en attente ou de
+    /// [`MAX_CANDIDATS_MAIA_24H`] propositions sur 24 h glissantes ⇒
+    /// [`ErreurMemoire::CandidatsPlafond`].
     pub async fn proposer(&self, p: Proposition) -> Result<Uuid, ErreurMemoire> {
         if p.type_unite == TypeUnite::Regle {
             return Err(ErreurMemoire::RegleReserveeUtilisateur);
@@ -398,7 +463,7 @@ impl<E: Entrepot> MemoireMaia<E> {
         verifier_echelle(p.importance)?;
         let confiance = verifier_echelle(p.confiance)?.min(plafond);
         controler_listes(&p.liens, &[], &p.sources)?;
-        let _g = self.ecriture.lock().await;
+        let mut journal = self.ecriture.lock().await;
         let c = self.entrepot.lire().await?;
         let branche = match &p.cible {
             Some(id) => {
@@ -411,6 +476,23 @@ impl<E: Entrepot> MemoireMaia<E> {
             None => p.branche.clone(),
         };
         let texte = controler_texte(self.tokeniseur.as_ref(), &p.texte, p.type_unite, branche.profondeur())?;
+        let maintenant = self.maintenant();
+        let de_maia = |k: &&Candidat| k.provenance != Provenance::Utilisateur;
+        let cle = texte_normalise(&texte);
+        if let Some(k) = c.candidats.iter().filter(de_maia).find(|k| k.branche == branche && texte_normalise(&k.texte) == cle) {
+            return Ok(k.id);
+        }
+        if c.candidats.iter().filter(de_maia).count() >= MAX_CANDIDATS_MAIA_EN_ATTENTE {
+            tracing::warn!(target: "maia_memoire::audit", "plafond des candidats de MAIA en attente atteint");
+            return Err(ErreurMemoire::CandidatsPlafond("candidats en attente"));
+        }
+        let depuis = maintenant - chrono::Duration::hours(24);
+        journal.retain(|t| *t > depuis);
+        let recents = c.candidats.iter().filter(de_maia).filter(|k| k.propose_le > depuis).count();
+        if journal.len().max(recents) >= MAX_CANDIDATS_MAIA_24H {
+            tracing::warn!(target: "maia_memoire::audit", "quota de propositions de MAIA sur 24 h atteint");
+            return Err(ErreurMemoire::CandidatsPlafond("propositions sur 24 h"));
+        }
         let candidat = Candidat {
             id: Uuid::new_v4(),
             cible: p.cible,
@@ -423,10 +505,11 @@ impl<E: Entrepot> MemoireMaia<E> {
             provenance: p.provenance,
             liens: p.liens,
             sources: p.sources,
-            propose_le: self.maintenant(),
+            propose_le: maintenant,
         };
         let id = candidat.id;
         self.entrepot.appliquer(vec![Ecriture::AjouterCandidat(candidat)]).await?;
+        journal.push(maintenant);
         Ok(id)
     }
 }
@@ -621,7 +704,12 @@ impl<E: Entrepot> AccesUtilisateur<'_, E> {
             let tamr = match mode {
                 Validation::Utilisateur => false,
                 Validation::UtilisateurEtTamr(conf) => {
-                    if candidats.len() != 1 || !conf.couvre(k) {
+                    // F8 : la cible n'a pas changé depuis la demande d'approbation.
+                    let version_actuelle = match &k.cible {
+                        Some(id) => Some(cible_courante(&c, id)?),
+                        None => None,
+                    };
+                    if candidats.len() != 1 || !conf.couvre(k) || conf.version_cible() != version_actuelle {
                         return Err(ErreurMemoire::TamrRequis(k.branche.to_string()));
                     }
                     true

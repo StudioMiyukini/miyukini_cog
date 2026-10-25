@@ -9,7 +9,9 @@
 //! Défense architecturale minimale tirée d'IA-FEDEREE §3, appliquée à une
 //! seule MAIA (le patron « deux MAIA » complet est prévu au lot 7) :
 //!
-//! - chaque résultat d'outil porte une **provenance** (`locale` ou `etranger`) ;
+//! - chaque résultat d'outil porte une **provenance** (`locale`, `etranger`
+//!   ou `inconnue`, cette dernière traitée comme `etranger`) ; seuls les
+//!   résultats d'une liste blanche explicite sont `locale` (F3) ;
 //! - tout contenu venu de l'extérieur (`web_fetch`, services inter-COG ou
 //!   surface web) est marqué `etranger`, **délimité** par des balises à nonce
 //!   et annoncé comme données non fiables dans le prompt système ;
@@ -38,22 +40,35 @@
 //!   (Fiches) : non implémenté (pas encore de Fiches dans MAIA).
 //! - **Mémoire longue / apprentissage** (C-52) : aucune écriture en mémoire
 //!   longue n'existe dans ce crate ; à garder fermé au lot 7.
-//! - Les fichiers du sandbox lus par `file_ops` sont considérés `locale`,
-//!   même s'ils proviennent à l'origine du web.
+//! - Les fichiers du sandbox lus par `file_ops` (et les sorties de
+//!   `shell_exec`) sont `inconnue`, donc traités comme `etranger` (F3).
 
 use serde::Serialize;
 use std::collections::HashMap;
 
 use crate::skills::cog_services;
 
-/// Provenance d'un résultat d'outil.
+/// Provenance d'un résultat d'outil, portée par **chaque** résultat (revue de
+/// sécurité du lot 7, F3).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Provenance {
-    /// Donnée produite localement (sandbox, service COG interne).
+    /// Donnée **prouvée** locale : outil de la liste blanche
+    /// ([`provenance_resultat`]) dont le résultat ne contient que des données
+    /// produites par le COG (statut d'écriture, service COG interne déclaré).
     Locale,
     /// Donnée venue de l'extérieur : non fiable, ne déclenche aucune action.
     Etranger,
+    /// Origine non prouvée (fichier lu, sortie de commande, outil inconnu) :
+    /// **traitée comme `etranger`** (délimitée, contamine le tour).
+    Inconnue,
+}
+
+impl Provenance {
+    /// Vrai si le résultat doit être traité comme étranger (`etranger` ou `inconnue`).
+    pub fn non_fiable(self) -> bool {
+        self != Self::Locale
+    }
 }
 
 /// Effet d'un appel d'outil, du point de vue de la garde.
@@ -108,7 +123,16 @@ pub fn classer_appel(skill_id: &str, params: &HashMap<String, serde_json::Value>
     }
 }
 
-/// Provenance du résultat d'un appel d'outil.
+/// Provenance du résultat d'un appel d'outil (F3). **Liste blanche explicite**
+/// des résultats prouvés locaux ; tout le reste est `etranger` ou `inconnue` :
+///
+/// | outil | résultat | provenance |
+/// |---|---|---|
+/// | `web_fetch` | page distante | `etranger` |
+/// | `cog_services` | selon le service déclaré (inter-COG ⇒ `etranger`, inconnu ⇒ `etranger`) | déclarée |
+/// | `file_ops` `exists` / `write` / `mkdir` / `delete` | statut produit par le pont | `locale` |
+/// | `file_ops` `read` / `list` / `search` (et action absente = `read`) | contenu ou noms de fichiers d'origine non prouvée | `inconnue` |
+/// | `shell_exec`, tout autre outil | sortie non vérifiable | `inconnue` |
 pub fn provenance_resultat(
     skill_id: &str,
     params: &HashMap<String, serde_json::Value>,
@@ -116,7 +140,11 @@ pub fn provenance_resultat(
     match skill_id {
         "web_fetch" => Provenance::Etranger,
         "cog_services" => cog_services::provenance_appel(params),
-        _ => Provenance::Locale,
+        "file_ops" => match params.get("action").and_then(|v| v.as_str()).unwrap_or("read") {
+            "exists" | "write" | "mkdir" | "delete" => Provenance::Locale,
+            _ => Provenance::Inconnue,
+        },
+        _ => Provenance::Inconnue,
     }
 }
 
@@ -199,9 +227,16 @@ impl EtatTour {
         Decision::Autorisee
     }
 
-    /// Enregistre l'ingestion d'un résultat d'outil de la provenance donnée.
+    /// Vrai si **tous** les résultats d'outils du tour (et l'historique) sont
+    /// `locale` : condition de l'écriture directe de `memoire_noter` (F3).
+    pub fn tous_locaux(&self) -> bool {
+        !self.etranger
+    }
+
+    /// Enregistre l'ingestion d'un résultat d'outil de la provenance donnée
+    /// (`inconnue` contamine comme `etranger`).
     pub fn enregistrer(&mut self, skill_id: &str, provenance: Provenance) {
-        if provenance == Provenance::Etranger {
+        if provenance.non_fiable() {
             self.etranger = true;
             if !self.sources.iter().any(|s| s == skill_id) {
                 self.sources.push(skill_id.to_string());
@@ -328,7 +363,29 @@ mod tests {
     #[test]
     fn web_fetch_est_etranger() {
         assert_eq!(provenance_resultat("web_fetch", &p(&[])), Provenance::Etranger);
-        assert_eq!(provenance_resultat("file_ops", &p(&[])), Provenance::Locale);
+    }
+
+    #[test]
+    fn seuls_les_resultats_prouves_locaux_sont_locaux() {
+        // F3 : fichier lu, liste, recherche, sortie de commande, outil inconnu : `inconnue`.
+        for (skill, params) in [
+            ("file_ops", p(&[])),
+            ("file_ops", p(&[("action", "read".into())])),
+            ("file_ops", p(&[("action", "list".into())])),
+            ("file_ops", p(&[("action", "search".into())])),
+            ("shell_exec", p(&[("command", "cat page.html".into())])),
+            ("outil_inconnu", p(&[])),
+        ] {
+            assert_eq!(provenance_resultat(skill, &params), Provenance::Inconnue, "{skill} {params:?}");
+        }
+        for action in ["exists", "write", "mkdir", "delete"] {
+            assert_eq!(provenance_resultat("file_ops", &p(&[("action", action.into())])), Provenance::Locale);
+        }
+        // `inconnue` contamine le tour comme `etranger`.
+        let mut etat = EtatTour::new();
+        etat.enregistrer("file_ops", Provenance::Inconnue);
+        assert!(etat.contient_etranger() && !etat.tous_locaux());
+        assert!(matches!(etat.decider("file_ops", &p(&[("action", "write".into())])), Decision::ConfirmationRequise(_)));
     }
 
     #[test]

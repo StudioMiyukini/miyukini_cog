@@ -170,6 +170,14 @@ impl Reprise {
     }
 }
 
+/// Vrai si aucune Fiche source n'est référencée deux fois : ni même
+/// (`cog`, `id`), ni même empreinte (F2).
+pub(crate) fn reprises_distinctes(reprises: &[Reprise]) -> bool {
+    reprises.iter().enumerate().all(|(i, a)| {
+        reprises[i + 1..].iter().all(|b| (a.cog != b.cog || a.id != b.id) && a.empreinte != b.empreinte)
+    })
+}
+
 impl Audience {
     /// Vrai si l'audience `self` n'est pas plus large que `source` (A-009) :
     /// tout est inclus dans « invités » ; « membres » seulement dans
@@ -314,6 +322,9 @@ impl Fiche {
             champ(!cogs.is_empty() && cogs.len() <= MAX_NOMMES, "audience")?;
         }
         champ(self.reprises.len() <= MAX_REPRISES && self.reprises.iter().all(|r| id_valide(&r.id) && r.version >= 1), "reprises")?;
+        // Revue de sécurité du lot 7 (F2) : une reprise en double masquerait une
+        // reprise jamais vérifiée (cardinalités égales, inclusion seulement).
+        champ(reprises_distinctes(&self.reprises), "reprises")?;
         Ok(())
     }
 
@@ -652,6 +663,35 @@ mod tests {
             }
         }
         let octets = sceller(&ReprisesVides(fiche(&cle, "r", "t", &[])), &cle).unwrap();
+        assert!(matches!(verifier_fiche(&octets, T), Err(ErreurFederee::Sceau(ErreurSceau::ValeurInvalide(TAG_REPRISES)))));
+    }
+
+    #[test]
+    fn reprises_en_double_refusees() {
+        // F2 : une reprise en double ne se scelle pas et ne se décode pas.
+        let cle = CleSignature::generer();
+        let src_cle = CleSignature::generer();
+        let source = verifier_fiche(&sceller_fiche(&fiche(&src_cle, "s", "t", &[]), &src_cle).unwrap(), T).unwrap();
+        let r = Reprise::de(&source);
+        let doubles = Fiche { reprises: vec![r.clone(), r.clone()], ..fiche(&cle, "r", "t", &[]) };
+        assert!(sceller_fiche(&doubles, &cle).is_err());
+        // Même Fiche source, autre version annoncée : même (cog, id) ⇒ refus.
+        let meme_id = Fiche { reprises: vec![r.clone(), Reprise { version: 2, empreinte: [9; 32], ..r.clone() }], ..fiche(&cle, "r", "t", &[]) };
+        assert!(sceller_fiche(&meme_id, &cle).is_err());
+        struct ReprisesDoubles(Fiche, Vec<u8>);
+        impl Titre for ReprisesDoubles {
+            const TYPE: TypeSceau = TypeSceau::Fiche;
+            fn encoder(&self, e: &mut EcrivainTlv) -> Result<(), ErreurSceau> {
+                self.0.encoder(e)?;
+                e.octets(TAG_REPRISES, &self.1)?;
+                Ok(())
+            }
+            fn decoder(_: &mut LecteurTlv<'_>) -> Result<Self, ErreurSceau> {
+                unreachable!()
+            }
+        }
+        let charge = doubles.encoder_reprises().unwrap();
+        let octets = sceller(&ReprisesDoubles(fiche(&cle, "r", "t", &[]), charge), &cle).unwrap();
         assert!(matches!(verifier_fiche(&octets, T), Err(ErreurFederee::Sceau(ErreurSceau::ValeurInvalide(TAG_REPRISES)))));
     }
 

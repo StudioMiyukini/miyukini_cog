@@ -10,10 +10,14 @@
 //! - Le planificateur (modèle avec outils) propose une note ; elle passe par
 //!   [`maia_memoire::VueMaia::noter`] : écriture directe d'une note ordinaire
 //!   (N2 / N3, déduction, hors domaine sensible, quota) ou candidat sinon ;
-//! - **garde supplémentaire** (revue de sécurité du lot 7) : si le tour courant
-//!   contient du contenu étranger ([`crate::garde_etranger::EtatTour`]), la
-//!   note est marquée `etranger` et devient **toujours** un candidat
+//! - **garde supplémentaire** (revue de sécurité du lot 7) : si un résultat
+//!   d'outil du tour n'est pas `locale` (`etranger` ou `inconnue`, F3 ;
+//!   [`crate::garde_etranger::EtatTour::tous_locaux`]), la note est marquée
+//!   `etranger` et devient **toujours** un candidat
 //!   ([`maia_memoire::VueMaia::proposer`]) : jamais d'écriture directe ;
+//! - **compétence explicite** [`COMPETENCE_MEMOIRE`] (F6) : l'outil n'est
+//!   proposé qu'aux agents qui la déclarent, et contrôlé avant toute
+//!   exécution ;
 //! - décision StrongFather obligatoire avant tout effet (K-11) :
 //!   `data.operation = 'memoire.noter'` (voir [`intention_noter`]) ; sans
 //!   politique applicable : refus par défaut ;
@@ -36,6 +40,16 @@ use crate::gouvernance::{GouvernanceMaia, APPELANT_LOCAL, ORIGINE_MAIA};
 pub const NOM_OUTIL_NOTER: &str = "memoire_noter";
 /// Valeur de `data.operation` de l'intention StrongFather.
 pub const OPERATION_NOTER: &str = "memoire.noter";
+/// Compétence d'agent requise pour l'outil (à déclarer dans `skill_ids`, F6).
+pub const COMPETENCE_MEMOIRE: &str = "memoire";
+
+/// Vrai si l'agent déclare la compétence [`COMPETENCE_MEMOIRE`] (et en a le niveau).
+pub fn competence_memoire(agent: &AgentDef) -> bool {
+    matches!(
+        crate::security::check_agent_skill_permission(agent, COMPETENCE_MEMOIRE),
+        crate::security::PermissionCheck::Allowed
+    )
+}
 
 type Futur<'a, T> = Pin<Box<dyn Future<Output = Result<T, ErreurMemoire>> + Send + 'a>>;
 
@@ -134,13 +148,16 @@ pub async fn noter(carnet: &dyn CarnetMaia, mut p: Proposition, contenu_etranger
 
 /// Intention StrongFather de l'outil : `action = modification`,
 /// `subject = maia.agent.<agent>`, `data.operation = 'memoire.noter'`,
-/// `data.agent`, `data.contenu_etranger`, `data.ecriture_directe_possible`
-/// (`false` dans un tour étranger : candidat seulement).
+/// `data.agent`, `data.competence_memoire` (`true` si l'agent déclare la
+/// compétence `memoire`), `data.contenu_etranger` (un résultat d'outil du tour
+/// n'est pas `locale`), `data.ecriture_directe_possible` (`false` dans un tour
+/// étranger : candidat seulement).
 pub fn intention_noter(agent: &AgentDef, contenu_etranger: bool) -> Intent {
     let mut data = HashMap::new();
     data.insert("operation".into(), OPERATION_NOTER.into());
     data.insert("outil".into(), NOM_OUTIL_NOTER.into());
     data.insert("agent".into(), agent.id.clone());
+    data.insert("competence_memoire".into(), competence_memoire(agent).to_string());
     data.insert("contenu_etranger".into(), contenu_etranger.to_string());
     data.insert("ecriture_directe_possible".into(), (!contenu_etranger).to_string());
     Intent::new(
@@ -164,6 +181,12 @@ pub async fn executer(
     params: &HashMap<String, serde_json::Value>,
     contenu_etranger: bool,
 ) -> serde_json::Value {
+    if !competence_memoire(agent) {
+        return serde_json::json!({
+            "success": false,
+            "error": format!("Agent '{}' sans la compétence « {COMPETENCE_MEMOIRE} »", agent.display_name),
+        });
+    }
     let Some(carnet) = carnet else {
         return serde_json::json!({ "success": false, "error": "mémoire de l'utilisateur non disponible" });
     };
@@ -206,6 +229,19 @@ mod tests {
         params(serde_json::json!({ "branche": "travail.cog", "type": "fait", "texte": "Prépare le lot 8", "importance": 4 }))
     }
 
+    /// Agent intégré qui déclare la compétence `memoire` (F6).
+    fn alicia() -> AgentDef {
+        crate::agents::AgentRegistry::new().get_agent("alicia").expect("alicia")
+    }
+
+    /// Domaine « travail » établi par l'utilisateur (F4).
+    async fn domaine_travail(m: &MemoireMaia<EntrepotMemoire>) {
+        m.utilisateur()
+            .ecrire(maia_memoire::Ecrit::new(Branche::parse("travail.lot").expect("b"), TypeUnite::Fait, "Lot 7", 5))
+            .await
+            .expect("écrire");
+    }
+
     const POLITIQUE_NOTER: &str = r#"
 version = 1
 
@@ -214,7 +250,7 @@ id = "maia-memoire-noter"
 type = "permission"
 effect = "authorize"
 condition = "data.operation == 'memoire.noter'"
-rule = "data.agent != ''"
+rule = "data.agent != '' && data.competence_memoire == 'true'"
 [policy.target]
 actions = ["modification"]
 origins = ["maia"]
@@ -223,24 +259,44 @@ origins = ["maia"]
     #[tokio::test]
     async fn tour_sain_note_ordinaire_ecrite() {
         let (m, v) = vue().await;
+        domaine_travail(&m).await;
         let g = crate::tamr::tests::gouvernance(POLITIQUE_NOTER);
-        let agent = crate::agents::AgentRegistry::new().get_agent("maria").expect("maria");
-        let r = executer(&g, Some(&v), &agent, &note(), false).await;
+        let r = executer(&g, Some(&v), &alicia(), &note(), false).await;
         assert_eq!(r["success"], true, "{r}");
         assert_eq!(r["ecrite"], "travail.cog.f1");
+        assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 2);
+    }
+
+    #[tokio::test]
+    async fn agent_sans_competence_memoire_refuse() {
+        // F6 : sans la compétence `memoire`, rien n'est écrit ni proposé, même
+        // si une politique StrongFather permissive l'autoriserait.
+        let (m, v) = vue().await;
+        domaine_travail(&m).await;
+        let permissive = POLITIQUE_NOTER.replace(" && data.competence_memoire == 'true'", "");
+        let g = crate::tamr::tests::gouvernance(&permissive);
+        for id in ["maria", "victor", "denis"] {
+            let agent = crate::agents::AgentRegistry::new().get_agent(id).expect("agent");
+            assert!(!competence_memoire(&agent), "{id}");
+            let r = executer(&g, Some(&v), &agent, &note(), false).await;
+            assert_eq!(r["success"], false, "{id} : {r}");
+        }
         assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 1);
+        assert!(m.utilisateur().candidats().await.expect("k").is_empty());
+        let i = intention_noter(&alicia(), false);
+        assert_eq!(i.data.content["competence_memoire"], "true");
     }
 
     #[tokio::test]
     async fn tour_etranger_toujours_candidat() {
         let (m, v) = vue().await;
+        domaine_travail(&m).await;
         let g = crate::tamr::tests::gouvernance(POLITIQUE_NOTER);
-        let agent = crate::agents::AgentRegistry::new().get_agent("maria").expect("maria");
-        let r = executer(&g, Some(&v), &agent, &note(), true).await;
+        let r = executer(&g, Some(&v), &alicia(), &note(), true).await;
         assert_eq!(r["success"], true, "{r}");
         assert!(r.get("candidat").is_some() && r.get("ecrite").is_none(), "{r}");
         let u = m.utilisateur();
-        assert!(u.consulter().await.expect("c").is_empty(), "aucune écriture directe");
+        assert_eq!(u.consulter().await.expect("c").len(), 1, "aucune écriture directe");
         let k = u.candidats().await.expect("k");
         assert_eq!(k.len(), 1);
         assert_eq!(k[0].provenance, Provenance::Etranger);
@@ -248,13 +304,13 @@ origins = ["maia"]
         // Même via la fonction : une proposition déduite devient candidate dans un tour étranger.
         let p = proposition(&note(), false).expect("p");
         assert!(matches!(noter(&v, p, true).await, Ok(Notee::Candidat(_))));
-        assert!(u.consulter().await.expect("c").is_empty());
+        assert_eq!(u.consulter().await.expect("c").len(), 1);
     }
 
     #[tokio::test]
     async fn strongfather_absent_ou_sans_regle_rien_ecrit() {
         let (m, v) = vue().await;
-        let agent = crate::agents::AgentRegistry::new().get_agent("maria").expect("maria");
+        let agent = alicia();
         for g in [
             GouvernanceMaia::depuis_fichier(std::env::temp_dir().join("maia-noter-absent.toml")),
             crate::tamr::tests::gouvernance(crate::tamr::tests::POLITIQUE_SANS_TAMR),
@@ -267,6 +323,21 @@ origins = ["maia"]
         let g = crate::tamr::tests::gouvernance(POLITIQUE_NOTER);
         let r = executer(&g, None, &agent, &note(), false).await;
         assert_eq!(r["success"], false);
+    }
+
+    #[test]
+    fn politiques_de_base_competence_et_refus_critique() {
+        // F6 (config/strongfather/maia.toml) : compétence exigée ; écriture directe
+        // annoncée dans un tour étranger ⇒ refus critique.
+        let g = crate::gouvernance::tests::gouvernance_de_base();
+        assert!(g.executer(&intention_noter(&alicia(), false), |_| ()).is_ok());
+        assert!(g.executer(&intention_noter(&alicia(), true), |_| ()).is_ok(), "candidat seulement : autorisé");
+        let maria = crate::agents::AgentRegistry::new().get_agent("maria").expect("maria");
+        assert!(g.executer(&intention_noter(&maria, false), |_| ()).is_err());
+        let mut incoherente = intention_noter(&alicia(), true);
+        incoherente.data.content.insert("ecriture_directe_possible".into(), "true".into());
+        let e = g.executer(&incoherente, |_| ()).unwrap_err();
+        assert!(e.contains("maia-memoire-noter-etranger-direct"), "{e}");
     }
 
     #[test]

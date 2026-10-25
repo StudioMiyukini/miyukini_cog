@@ -43,7 +43,7 @@ pub use erreurs::ErreurMemoire;
 pub use ident::{Branche, Chemin, IdMemoire, TypeUnite};
 pub use jetons::{BorneOctets, Profil, Tokeniseur};
 pub use kindmother::EntrepotKindMother;
-pub use memoire::{AccesUtilisateur, ConfirmationTamr, Ecrit, Issue, MemoireMaia, Notee, Proposition, Validation, VueMaia};
+pub use memoire::{AccesUtilisateur, AutoriteTamr, ConfirmationTamr, Ecrit, Issue, MemoireMaia, Notee, Proposition, Validation, VueMaia};
 /// Identifiant des candidats (réexporté pour les appelants sans dépendance directe).
 pub use uuid::Uuid;
 pub use types::{Candidat, EmpreinteSource, Etiquette, ExportMemoire, Note, PierreTombale, Provenance, ETIQUETTE};

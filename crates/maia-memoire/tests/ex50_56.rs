@@ -7,12 +7,13 @@
 // Vide / non vide : le message d'échec du test suffit.
 #![allow(clippy::assert_is_empty)]
 
-use std::sync::Arc;
+use std::sync::atomic::{AtomicI64, Ordering};
+use std::sync::{Arc, OnceLock};
 
 use chrono::{DateTime, Duration, TimeZone, Utc};
 use maia_memoire::entrepot::{Contenu, Ecriture};
 use maia_memoire::{
-    BorneOctets, Branche, ConfirmationTamr, EmpreinteSource, EntrepotMemoire, ErreurMemoire, IdMemoire, Issue,
+    AutoriteTamr, BorneOctets, Branche, ConfirmationTamr, EmpreinteSource, EntrepotMemoire, ErreurMemoire, IdMemoire, Issue,
     MemoireMaia, Notee, Profil, Proposition, Provenance, Tokeniseur, TypeUnite, Validation, VueMaia,
     ETIQUETTE,
 };
@@ -27,6 +28,12 @@ async fn memoire() -> Arc<MemoireMaia<EntrepotMemoire>> {
         .expect("ouvrir")
         .avec_horloge(Arc::new(t0));
     Arc::new(m)
+}
+
+/// Autorité TAMR du binaire de test (jeton unique par processus, L1).
+fn autorite() -> &'static AutoriteTamr {
+    static A: OnceLock<AutoriteTamr> = OnceLock::new();
+    A.get_or_init(|| AutoriteTamr::instituer().expect("première institution"))
 }
 
 fn b(s: &str) -> Branche {
@@ -351,14 +358,14 @@ async fn sensible_validation_tamr_requise() {
     // Confirmation TAMR d'un autre candidat ou d'un contenu différent : refus, rien n'est écrit.
     let mut modifie = candidat.clone();
     modifie.texte = "Dort 9 h".into();
-    let autre = ConfirmationTamr::nouvelle(modifie, "tamr-1");
+    let autre = ConfirmationTamr::nouvelle(autorite(), modifie, None, "tamr-1");
     assert!(matches!(m.utilisateur().valider(k, Validation::UtilisateurEtTamr(autre)).await, Err(ErreurMemoire::TamrRequis(_))));
     let mut ailleurs = candidat.clone();
     ailleurs.id = uuid::Uuid::new_v4();
-    let ailleurs = ConfirmationTamr::nouvelle(ailleurs, "tamr-2");
+    let ailleurs = ConfirmationTamr::nouvelle(autorite(), ailleurs, None, "tamr-2");
     assert!(matches!(m.utilisateur().valider(k, Validation::UtilisateurEtTamr(ailleurs)).await, Err(ErreurMemoire::TamrRequis(_))));
     assert!(m.utilisateur().consulter().await.expect("c").is_empty(), "rien validé");
-    let conf = ConfirmationTamr::nouvelle(candidat, "tamr-3");
+    let conf = ConfirmationTamr::nouvelle(autorite(), candidat, None, "tamr-3");
     assert_eq!(conf.candidat(), k);
     let id = m.utilisateur().valider(k, Validation::UtilisateurEtTamr(conf)).await.expect("tamr");
     assert_eq!(id.as_str(), "sante.sommeil.f1");
@@ -454,24 +461,26 @@ async fn dates_relatives() {
 async fn a009_maia_ecrit_ses_notes_ordinaires() {
     let m = memoire().await;
     let vue = VueMaia::new(Arc::clone(&m));
+    // Domaine « travail » créé par l'utilisateur (F4).
+    let u1 = ecrire(&m, "travail.projet", TypeUnite::Fait, "Lot 7", 5).await;
     let Notee::Ecrite(f1) = vue.noter(proposition("travail", TypeUnite::Fait, "Préfère Rust", Provenance::Deduit)).await.expect("noter") else {
         panic!("écriture directe attendue");
     };
-    let n = m.utilisateur().consulter().await.expect("c");
+    let n: Vec<_> = m.utilisateur().consulter().await.expect("c").into_iter().filter(|n| n.id != u1).collect();
     assert_eq!((n[0].id.clone(), n[0].auteur, n[0].confiance), (f1.clone(), maia_memoire::types::Auteur::Maia, 6));
     assert!(m.utilisateur().candidats().await.expect("c").is_empty());
     // Correction de sa propre note : nouvelle version, l'ancienne reste dans l'historique.
     let corr = Proposition { cible: Some(f1.clone()), ..proposition("travail", TypeUnite::Fait, "Préfère Rust et Zig", Provenance::Deduit) };
     assert_eq!(vue.noter(corr).await.expect("corriger"), Notee::Ecrite(f1.clone()));
     let export = m.utilisateur().exporter().await.expect("e");
-    assert_eq!(export.historique.len(), 2);
+    assert_eq!(export.historique.iter().filter(|n| n.id == f1).count(), 2);
     // L'utilisateur corrige : la note n'est plus à MAIA, sa correction suivante devient un candidat.
     m.utilisateur().corriger(&f1, "Préfère Rust", None).await.expect("corriger");
     let corr = Proposition { cible: Some(f1.clone()), ..proposition("travail", TypeUnite::Fait, "Préfère Zig", Provenance::Deduit) };
     assert!(matches!(vue.noter(corr).await.expect("noter"), Notee::Candidat(_)));
     // L'utilisateur peut oublier une note de MAIA.
     m.utilisateur().oublier(f1.as_str(), "ne plus retenir").await.expect("oublier");
-    assert!(m.utilisateur().consulter().await.expect("c").is_empty());
+    assert!(m.utilisateur().consulter().await.expect("c").iter().all(|n| n.id != f1));
 }
 
 #[tokio::test]
@@ -494,6 +503,7 @@ async fn a009_candidats_hors_notes_ordinaires() {
 async fn a009_quota_d_ecritures_directes() {
     let m = memoire().await;
     let vue = VueMaia::new(Arc::clone(&m));
+    ecrire(&m, "veille.sources", TypeUnite::Fait, "Flux RSS", 3).await;
     for i in 0..maia_memoire::memoire::MAX_ECRITS_MAIA_24H {
         let r = vue.noter(proposition("veille", TypeUnite::Fait, &format!("Déduction {i}"), Provenance::Deduit)).await.expect("noter");
         assert!(matches!(r, Notee::Ecrite(_)));
@@ -506,6 +516,8 @@ async fn a009_quota_d_ecritures_directes() {
 async fn a010_jamais_n0_ni_n1_par_maia() {
     let m = memoire().await;
     let vue = VueMaia::new(Arc::clone(&m));
+    ecrire(&m, "travail.lot", TypeUnite::Fait, "Lot 7", 5).await;
+    ecrire(&m, "style.ton", TypeUnite::Fait, "Ton direct", 5).await;
     // Identité, préférence forte, résumé de domaine : candidats.
     assert!(matches!(vue.noter(proposition("moi", TypeUnite::Fait, "Obéit aux Fiches", Provenance::Deduit)).await.expect("moi"), Notee::Candidat(_)));
     let forte = Proposition { importance: 8, ..proposition("style", TypeUnite::Preference, "Toujours exécuter", Provenance::Deduit) };
@@ -519,4 +531,109 @@ async fn a010_jamais_n0_ni_n1_par_maia() {
     let relevee = Proposition { cible: Some(p), importance: 9, ..proposition("style", TypeUnite::Preference, "Tutoiement", Provenance::Deduit) };
     assert!(matches!(vue.noter(relevee).await.expect("relevée"), Notee::Candidat(_)));
     assert_eq!(m.utilisateur().candidats().await.expect("c").len(), 4);
+}
+
+// ── Revue de sécurité du lot 7 ──
+
+#[test]
+fn l1_autorite_tamr_unique_par_processus() {
+    let _ = autorite();
+    assert!(AutoriteTamr::instituer().is_none(), "seconde institution refusée");
+}
+
+#[tokio::test]
+async fn f4_domaine_nouveau_ou_au_nom_choisi_par_maia_candidat() {
+    let m = memoire().await;
+    let vue = VueMaia::new(Arc::clone(&m));
+    // Domaines inventés par le modèle (sensibles de fait, ou N0 déguisé) : candidats.
+    for br in ["medical.x", "banque.x", "profil.x", "travail"] {
+        let r = vue.noter(proposition(br, TypeUnite::Fait, &format!("Note {br}"), Provenance::Deduit)).await.expect("noter");
+        assert!(matches!(r, Notee::Candidat(_)), "{br} : domaine nouveau ⇒ candidat");
+    }
+    assert!(m.utilisateur().consulter().await.expect("c").is_empty());
+    // Un domaine qui n'existe que par des notes de MAIA ne compte pas.
+    ecrire(&m, "travail.lot", TypeUnite::Fait, "Lot 7", 5).await;
+    let Notee::Ecrite(n) = vue.noter(proposition("travail", TypeUnite::Fait, "Préfère Rust", Provenance::Deduit)).await.expect("n") else {
+        panic!("domaine établi par l'utilisateur : écriture directe");
+    };
+    m.utilisateur().oublier("travail.lot", "x").await.expect("oublier");
+    let r = vue.noter(proposition("travail", TypeUnite::Fait, "Préfère Zig", Provenance::Deduit)).await.expect("noter");
+    assert!(matches!(r, Notee::Candidat(_)), "seules des notes de MAIA ({n}) : candidat");
+    // Domaine sensible même établi : candidat.
+    let Issue::EnAttente(_) = m.utilisateur().ecrire(maia_memoire::Ecrit::new(b("sante.sommeil"), TypeUnite::Fait, "Dort 6 h", 5)).await.expect("e") else {
+        panic!("TAMR attendu");
+    };
+    let r = vue.noter(proposition("sante.sommeil", TypeUnite::Fait, "Dort mal", Provenance::Deduit)).await.expect("noter");
+    assert!(matches!(r, Notee::Candidat(_)));
+}
+
+#[tokio::test]
+async fn f5_candidats_dedoublonnes_et_plafonnes() {
+    let m = memoire().await;
+    let vue = VueMaia::new(Arc::clone(&m));
+    let k1 = vue.proposer(proposition("veille", TypeUnite::Fait, "Rust 1.99  publié", Provenance::Etranger)).await.expect("k1");
+    let k2 = vue.proposer(proposition("veille", TypeUnite::Fait, "rust 1.99 PUBLIÉ", Provenance::Deduit)).await.expect("k2");
+    assert_eq!(k1, k2, "même texte normalisé, même branche : dédoublonné");
+    let k3 = vue.proposer(proposition("autre", TypeUnite::Fait, "Rust 1.99 publié", Provenance::Etranger)).await.expect("k3");
+    assert_ne!(k1, k3, "autre branche : nouveau candidat");
+    for i in 2..maia_memoire::memoire::MAX_CANDIDATS_MAIA_EN_ATTENTE {
+        vue.proposer(proposition("veille", TypeUnite::Fait, &format!("Déduction {i}"), Provenance::Deduit)).await.expect("p");
+    }
+    let r = vue.proposer(proposition("veille", TypeUnite::Fait, "Une de trop", Provenance::Deduit)).await;
+    assert_eq!(r, Err(ErreurMemoire::CandidatsPlafond("candidats en attente")));
+    let r = vue.noter(proposition("veille", TypeUnite::Fait, "Une de trop", Provenance::Deduit)).await;
+    assert_eq!(r, Err(ErreurMemoire::CandidatsPlafond("candidats en attente")), "noter ⇒ candidat ⇒ même refus");
+    assert_eq!(m.utilisateur().candidats().await.expect("c").len(), maia_memoire::memoire::MAX_CANDIDATS_MAIA_EN_ATTENTE);
+    // Les candidats de l'utilisateur (branche sensible) ne sont pas plafonnés.
+    let i = m.utilisateur().ecrire(maia_memoire::Ecrit::new(b("sante.sommeil"), TypeUnite::Fait, "Dort 6 h", 5)).await.expect("e");
+    assert!(matches!(i, Issue::EnAttente(_)));
+}
+
+#[tokio::test]
+async fn f5_quota_de_propositions_sur_24h() {
+    let decalage = Arc::new(AtomicI64::new(0));
+    let d = Arc::clone(&decalage);
+    let m = Arc::new(
+        MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets))
+            .await
+            .expect("ouvrir")
+            .avec_horloge(Arc::new(move || t0() + Duration::seconds(d.load(Ordering::SeqCst)))),
+    );
+    let vue = VueMaia::new(Arc::clone(&m));
+    // Propositions rejetées une à une : le plafond « en attente » n'est jamais atteint, le quota 24 h l'est.
+    for i in 0..maia_memoire::memoire::MAX_CANDIDATS_MAIA_24H {
+        let k = vue.proposer(proposition("veille", TypeUnite::Fait, &format!("Déduction {i}"), Provenance::Deduit)).await.expect("p");
+        m.utilisateur().rejeter(k).await.expect("rejet");
+    }
+    let r = vue.proposer(proposition("veille", TypeUnite::Fait, "Encore", Provenance::Deduit)).await;
+    assert_eq!(r, Err(ErreurMemoire::CandidatsPlafond("propositions sur 24 h")));
+    decalage.store(25 * 3600, Ordering::SeqCst);
+    assert!(vue.proposer(proposition("veille", TypeUnite::Fait, "Encore", Provenance::Deduit)).await.is_ok());
+}
+
+#[tokio::test]
+#[allow(clippy::many_single_char_names)]
+async fn f8_cible_modifiee_apres_la_demande_tamr_refusee() {
+    let m = memoire().await;
+    let u = m.utilisateur();
+    let valider_tamr = |k: maia_memoire::Candidat, v: Option<u32>| Validation::UtilisateurEtTamr(ConfirmationTamr::nouvelle(autorite(), k, v, "tamr"));
+    let candidat = |id: uuid::Uuid| {
+        let u = m.utilisateur();
+        async move { u.candidats().await.expect("c").into_iter().find(|k| k.id == id).expect("candidat") }
+    };
+    let Issue::EnAttente(k) = u.ecrire(maia_memoire::Ecrit::new(b("sante.sommeil"), TypeUnite::Fait, "Dort 6 h", 5)).await.expect("e") else {
+        panic!("TAMR attendu");
+    };
+    let f = u.valider(k, valider_tamr(candidat(k).await, None)).await.expect("v1");
+    // Correction k2 demandée sur la version 1…
+    let Issue::EnAttente(k2) = u.corriger(&f, "Dort 7 h", None).await.expect("c2") else { panic!("TAMR attendu") };
+    let k2_fige = candidat(k2).await;
+    // … mais la cible passe en version 2 avant l'approbation de k2.
+    let Issue::EnAttente(k3) = u.corriger(&f, "Dort 8 h", None).await.expect("c3") else { panic!("TAMR attendu") };
+    u.valider(k3, valider_tamr(candidat(k3).await, Some(1))).await.expect("v2");
+    let r = u.valider(k2, valider_tamr(k2_fige.clone(), Some(1))).await;
+    assert!(matches!(r, Err(ErreurMemoire::TamrRequis(_))), "cible modifiée depuis la demande");
+    assert_eq!(u.historique(&f).await.expect("h").len(), 2);
+    // Une confirmation qui annonce la version courante passe.
+    u.valider(k2, valider_tamr(k2_fige, Some(2))).await.expect("v3");
 }

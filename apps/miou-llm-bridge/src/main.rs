@@ -112,6 +112,12 @@ async fn main() {
         miyauth::http::service::encoder_cle_publique(&cle.cle_publique())
     );
 
+    // Autorités scellées TAMR (L1) : instituées au démarrage, avant tout autre code ;
+    // prises ailleurs ⇒ toute approbation TAMR sera refusée.
+    if !tamr::instituer_autorites() {
+        tracing::error!("Autorités TAMR indisponibles : approbations refusées");
+    }
+
     // Timestamp de démarrage (pour uptime)
     let started_at = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)

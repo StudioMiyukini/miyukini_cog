@@ -80,7 +80,7 @@ pub struct ToolCallLogEntry {
     pub arguments: serde_json::Value,
     pub result_success: bool,
     pub duration_ms: u64,
-    /// Provenance du résultat (`locale` / `etranger`), absente si non exécuté.
+    /// Provenance du résultat (`locale` / `etranger` / `inconnue`), absente si non exécuté.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provenance: Option<Provenance>,
     /// Vrai si l'appel a été suspendu par la garde.
@@ -337,7 +337,14 @@ pub async fn execute_tool_call(
 
     // Outil mémoire (lot 7, A-009) : hors registre des skills, porte StrongFather
     // propre ; tour étranger ⇒ candidat seulement (jamais d'écriture directe).
+    // Compétence `memoire` contrôlée AVANT toute exécution (F6).
     if skill_id == crate::outil_memoire::NOM_OUTIL_NOTER {
+        if let security::PermissionCheck::Denied(reason) =
+            security::check_agent_skill_permission(agent, crate::outil_memoire::COMPETENCE_MEMOIRE)
+        {
+            let msg = message_refus(tool_call, serde_json::json!({ "success": false, "error": reason }));
+            return (msg, log_entry);
+        }
         return executer_noter(tool_call, agent, audit_log, garde, log_entry).await;
     }
 
@@ -465,8 +472,9 @@ pub async fn execute_tool_call(
         );
     }
     let brut = valeur.to_string();
+    // `inconnue` est délimitée comme `etranger` (F3).
     let content = match provenance {
-        Provenance::Etranger => garde_etranger::envelopper_etranger(
+        Provenance::Etranger | Provenance::Inconnue => garde_etranger::envelopper_etranger(
             &brut,
             skill_id,
             &garde_etranger::identifiant_aleatoire(),
@@ -501,7 +509,8 @@ async fn executer_noter(
         return (msg, log_entry);
     };
     log_entry.arguments = serde_json::to_value(&params).unwrap_or(serde_json::Value::Null);
-    let etranger = garde.etat.contient_etranger();
+    // Écriture directe seulement si TOUS les résultats d'outils du tour sont `locale` (F3).
+    let etranger = !garde.etat.tous_locaux();
     let resultat =
         crate::outil_memoire::executer(garde.gouvernance, garde.memoire, agent, &params, etranger).await;
     let succes = resultat.get("success").and_then(serde_json::Value::as_bool) == Some(true);
@@ -812,8 +821,10 @@ mod tests {
 
     #[tokio::test]
     async fn memoire_noter_dans_la_boucle_tour_etranger_candidat_seulement() {
-        use maia_memoire::{BorneOctets, EntrepotMemoire, MemoireMaia, VueMaia};
+        use maia_memoire::{BorneOctets, Branche, Ecrit, EntrepotMemoire, MemoireMaia, TypeUnite, VueMaia};
         let agents = AgentRegistry::new();
+        // `alicia` déclare la compétence `memoire` (F6) ; `victor` non.
+        let alicia = agents.get_agent("alicia").expect("alicia built-in");
         let victor = agents.get_agent("victor").expect("victor built-in");
         let audit = AuditLog::new(100);
         let registre = RegistreConfirmations::new();
@@ -823,29 +834,56 @@ mod tests {
         let gouv = crate::tamr::tests::gouvernance(&base);
         assert!(gouv.est_operationnelle());
         let m = std::sync::Arc::new(MemoireMaia::ouvrir(EntrepotMemoire::new(), std::sync::Arc::new(BorneOctets)).await.expect("m"));
+        // Domaine « travail » établi par l'utilisateur (F4).
+        m.utilisateur().ecrire(Ecrit::new(Branche::parse("travail.lot").expect("b"), TypeUnite::Fait, "Lot 7", 5)).await.expect("e");
         let vue = VueMaia::new(std::sync::Arc::clone(&m));
-        let note = serde_json::json!({ "branche": "travail", "type": "fait", "texte": "Aime Rust", "importance": 3 });
+        let note = |texte: &str| serde_json::json!({ "branche": "travail", "type": "fait", "texte": texte, "importance": 3 });
+
+        // Agent sans la compétence `memoire` : refusé avant toute exécution (F6).
+        let mut garde = GardeTour::new(&registre, &exec, &gouv).avec_memoire(Some(&vue));
+        let (msg, log) = execute_tool_call(&appel("0", "memoire_noter", note("Aime Rust")), &victor, &audit, &mut garde).await;
+        assert!(contenu(&msg).contains("\"success\":false"), "{}", contenu(&msg));
+        assert!(!log.result_success);
+        assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 1);
+        assert_eq!(m.utilisateur().candidats().await.expect("k").len(), 0);
 
         // Tour sain : note ordinaire écrite directement.
         let mut garde = GardeTour::new(&registre, &exec, &gouv).avec_memoire(Some(&vue));
-        let (msg, log) = execute_tool_call(&appel("1", "memoire_noter", note.clone()), &victor, &audit, &mut garde).await;
+        let (msg, log) = execute_tool_call(&appel("1", "memoire_noter", note("Aime Rust")), &alicia, &audit, &mut garde).await;
         assert!(contenu(&msg).contains("\"ecrite\":\"travail.f1\""), "{}", contenu(&msg));
         assert!(log.result_success);
 
         // Tour contaminé par web_fetch : la même note n'est qu'un candidat.
         let mut garde = GardeTour::new(&registre, &exec, &gouv).avec_memoire(Some(&vue));
-        execute_tool_call(&appel("2", "web_fetch", serde_json::json!({ "url": "https://exemple.org/" })), &victor, &audit, &mut garde).await;
+        execute_tool_call(&appel("2", "web_fetch", serde_json::json!({ "url": "https://exemple.org/" })), &alicia, &audit, &mut garde).await;
         assert!(garde.contient_etranger());
-        let (msg, log) = execute_tool_call(&appel("3", "memoire_noter", note), &victor, &audit, &mut garde).await;
+        let (msg, log) = execute_tool_call(&appel("3", "memoire_noter", note("Aime Rust")), &alicia, &audit, &mut garde).await;
         assert!(contenu(&msg).contains("\"candidat\""), "{}", contenu(&msg));
         assert!(!log.blocked);
-        assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 1, "aucune écriture directe de plus");
+        assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 2, "aucune écriture directe de plus");
         assert_eq!(m.utilisateur().candidats().await.expect("k").len(), 1);
         assert!(registre.lister().is_empty(), "aucune action suspendue exécutable");
 
+        // Tour avec un fichier lu (provenance `inconnue`, F3) : candidat `etranger` seulement.
+        let mut garde = GardeTour::new(&registre, &exec, &gouv).avec_memoire(Some(&vue));
+        let (msg, log) = execute_tool_call(
+            &appel("5", "file_ops", serde_json::json!({ "action": "read", "path": "page.html" })),
+            &alicia,
+            &audit,
+            &mut garde,
+        )
+        .await;
+        assert_eq!(log.provenance, Some(Provenance::Inconnue));
+        assert!(contenu(&msg).starts_with("<<<CONTENU_ETRANGER source=file_ops"), "{}", contenu(&msg));
+        let (msg, _) = execute_tool_call(&appel("6", "memoire_noter", note("Aime Zig")), &alicia, &audit, &mut garde).await;
+        assert!(contenu(&msg).contains("\"candidat\""), "{}", contenu(&msg));
+        assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 2);
+        let k = m.utilisateur().candidats().await.expect("k");
+        assert!(k.iter().all(|k| k.provenance == maia_memoire::Provenance::Etranger));
+
         // Sans mémoire attachée : refus.
         let mut garde = GardeTour::new(&registre, &exec, &gouv);
-        let (msg, _) = execute_tool_call(&appel("4", "memoire_noter", serde_json::json!({})), &victor, &audit, &mut garde).await;
+        let (msg, _) = execute_tool_call(&appel("4", "memoire_noter", serde_json::json!({})), &alicia, &audit, &mut garde).await;
         assert!(contenu(&msg).contains("\"success\":false"));
     }
 

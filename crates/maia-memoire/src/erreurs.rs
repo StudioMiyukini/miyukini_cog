@@ -57,6 +57,11 @@ pub enum ErreurMemoire {
     #[error("validation TAMR requise pour la branche sensible {0}")]
     TamrRequis(String),
 
+    /// Plafond des candidats de MAIA atteint (en attente ou sur 24 h) : refus
+    /// explicite, rien n'est proposé (revue de sécurité du lot 7, F5).
+    #[error("plafond des propositions de MAIA atteint : {0}")]
+    CandidatsPlafond(&'static str),
+
     /// Candidat inconnu (déjà validé, rejeté ou jamais proposé).
     #[error("candidat inconnu : {0}")]
     CandidatInconnu(Uuid),

@@ -39,6 +39,25 @@
 //!   ⇒ 400 (aucune authentification ambiante) ; aucun en-tête CORS ;
 //! - origine réseau contrôlée comme le reste de l'API.
 //!
+//! Revue de sécurité du lot 7 :
+//!
+//! - **L2 (rejeu après redémarrage)** : l'usage signé lie l'**identifiant
+//!   d'instance** (128 bits aléatoires tirés au démarrage) et l'utilisateur :
+//!   `maia/memoire/<instance>/<utilisateur>` ; une requête capturée avant un
+//!   redémarrage (registre de nonces vidé) ne se rejoue pas. L'identifiant est
+//!   rendu dans l'en-tête [`ENTETE_INSTANCE`] de toute réponse de ces routes ;
+//! - **F7 (approbation TAMR)** : `POST …/approbations/{iv}` exige une requête
+//!   signée d'usage `maia/tamr-approbation/<instance>/<utilisateur>` par une clé
+//!   épinglée dans `MAIA_TAMR_CLES_APPROBATION` (voir [`crate::tamr`]),
+//!   **distincte** des clés mémoire (clé commune ⇒ approbations refusées ;
+//!   liste vide ⇒ approbations refusées). Le refus d'une approbation (`DELETE`)
+//!   reste ouvert à la clé mémoire ;
+//! - **L3** : limiteur de débit (`security::RateLimiter`, par IP) appliqué
+//!   avant tout contrôle ; la signature porte sur l'empreinte du corps, elle ne
+//!   peut donc être vérifiée qu'après lecture : les en-têtes (clé épinglée,
+//!   fenêtre, nonce) sont contrôlés **avant** la lecture et le corps reste borné
+//!   à [`MAX_CORPS`].
+//!
 //! Le chemin d'inférence et les outils de MAIA ne détiennent qu'une
 //! `VueMaia` : ces routes sont le seul accès à `AccesUtilisateur`.
 
@@ -59,14 +78,20 @@ use serde::Deserialize;
 
 use crate::config::SecurityConfig;
 use crate::gouvernance::GouvernanceMaia;
-use crate::tamr::{ActionTamr, RefusTamr, RegistreApprobations};
+use crate::security::{RateLimitConfig, RateLimiter};
+use crate::tamr::{ActionTamr, RefusTamr, RegistreApprobations, SignatureApprobation, ENV_CLES_APPROBATION, USAGE_APPROBATION};
 
-/// Usage signé des requêtes de l'utilisateur sur sa mémoire.
+/// Usage signé (préfixe) des requêtes de l'utilisateur sur sa mémoire ; usage
+/// complet : `maia/memoire/<instance>/<utilisateur>` (L2).
 pub const USAGE_MEMOIRE: &str = "maia/memoire";
 /// Clés publiques de l'utilisateur de l'instance (base64 URL ou hex, séparées par des virgules).
 pub const ENV_CLES_UTILISATEUR: &str = "MAIA_MEMOIRE_CLES_UTILISATEUR";
 /// Corps maximal d'une requête mémoire (octets).
 pub const MAX_CORPS: usize = 256 * 1024;
+/// En-tête de réponse portant l'identifiant d'instance à lier dans l'usage signé (L2).
+pub const ENTETE_INSTANCE: &str = "x-maia-instance";
+/// Requêtes au plus par minute et par IP sur ces routes (L3).
+pub const DEBIT_MAX_PAR_MINUTE: u32 = 60;
 
 /// Utilisateur authentifié (posé par la garde).
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -76,48 +101,70 @@ pub struct UtilisateurAuthentifie(pub String);
 pub struct EtatMemoireHttp<E: Entrepot> {
     acces: Option<(String, Arc<MemoireMaia<E>>)>,
     garde: GardeSignee,
+    garde_approbation: GardeSignee,
+    instance: String,
+    limiteur: RateLimiter,
     approbations: RegistreApprobations,
     gouvernance: Arc<GouvernanceMaia>,
     securite: SecurityConfig,
 }
 
+fn analyser_env(nom: &str) -> Vec<[u8; 32]> {
+    let brut = std::env::var(nom).unwrap_or_default();
+    let textes: Vec<&str> = brut.split(',').map(str::trim).filter(|t| !t.is_empty()).collect();
+    match analyser_cles_publiques(&textes) {
+        Ok(c) => c,
+        Err(e) => {
+            tracing::error!("{nom} : {e} — clés ignorées (fail-closed)");
+            Vec::new()
+        }
+    }
+}
+
 impl<E: Entrepot> EtatMemoireHttp<E> {
-    /// Routes actives pour `utilisateur`, sa mémoire et ses clés ; sans clé : désactivées.
+    /// Routes actives pour `utilisateur`, sa mémoire et ses clés ; sans clé :
+    /// désactivées. `cles_approbation` (F7) : clés d'approbation TAMR,
+    /// distinctes des clés mémoire ; une clé commune ⇒ aucune approbation.
     pub fn new(
         acces: Option<(String, Arc<MemoireMaia<E>>)>,
         cles_utilisateur: Vec<[u8; 32]>,
+        cles_approbation: Vec<[u8; 32]>,
         gouvernance: Arc<GouvernanceMaia>,
         securite: SecurityConfig,
     ) -> Self {
+        let cles_approbation = if cles_approbation.iter().any(|c| cles_utilisateur.contains(c)) {
+            tracing::error!("{ENV_CLES_APPROBATION} : clé aussi épinglée pour « {USAGE_MEMOIRE} » — approbations TAMR refusées");
+            Vec::new()
+        } else {
+            cles_approbation
+        };
         Self {
             acces,
             garde: GardeSignee::new(cles_utilisateur),
+            garde_approbation: GardeSignee::new(cles_approbation),
+            instance: crate::garde_etranger::identifiant_aleatoire(),
+            limiteur: RateLimiter::new(RateLimitConfig { max_requests: DEBIT_MAX_PAR_MINUTE, window: std::time::Duration::from_secs(60) }),
             approbations: RegistreApprobations::new(),
             gouvernance,
             securite,
         }
     }
 
-    /// Clés lues dans [`ENV_CLES_UTILISATEUR`] ; absentes ou mal formées ⇒ routes désactivées.
+    /// Clés lues dans [`ENV_CLES_UTILISATEUR`] et [`ENV_CLES_APPROBATION`] ;
+    /// absentes ou mal formées ⇒ routes (ou approbations) désactivées.
     pub fn depuis_env(
         acces: Option<(String, Arc<MemoireMaia<E>>)>,
         gouvernance: Arc<GouvernanceMaia>,
         securite: SecurityConfig,
     ) -> Self {
-        let brut = std::env::var(ENV_CLES_UTILISATEUR).unwrap_or_default();
-        let textes: Vec<&str> = brut.split(',').map(str::trim).filter(|t| !t.is_empty()).collect();
-        let cles = match analyser_cles_publiques(&textes) {
-            Ok(c) => c,
-            Err(e) => {
-                tracing::error!("{ENV_CLES_UTILISATEUR} : {e} — routes mémoire désactivées");
-                Vec::new()
-            }
-        };
-        let etat = Self::new(acces, cles, gouvernance, securite);
+        let etat = Self::new(acces, analyser_env(ENV_CLES_UTILISATEUR), analyser_env(ENV_CLES_APPROBATION), gouvernance, securite);
         if etat.est_active() {
-            tracing::info!("routes mémoire actives (requêtes signées « {USAGE_MEMOIRE} » de l'utilisateur)");
+            tracing::info!("routes mémoire actives (requêtes signées « {USAGE_MEMOIRE}/<instance>/<utilisateur> » de l'utilisateur)");
         } else {
             tracing::info!("routes mémoire désactivées (mémoire non ouverte ou {ENV_CLES_UTILISATEUR} vide)");
+        }
+        if !etat.garde_approbation.est_configuree() {
+            tracing::info!("approbations TAMR désactivées ({ENV_CLES_APPROBATION} vide ou invalide)");
         }
         etat
     }
@@ -125,6 +172,28 @@ impl<E: Entrepot> EtatMemoireHttp<E> {
     /// Vrai si les routes sont servies.
     pub fn est_active(&self) -> bool {
         self.acces.is_some() && self.garde.est_configuree()
+    }
+
+    /// Identifiant d'instance fixé (tests).
+    #[cfg(test)]
+    fn avec_instance(mut self, instance: &str) -> Self {
+        self.instance = instance.to_string();
+        self
+    }
+
+    /// Identifiant d'instance (aléatoire, tiré au démarrage) lié dans l'usage signé (L2).
+    pub fn instance(&self) -> &str {
+        &self.instance
+    }
+
+    /// Usage signé attendu des requêtes mémoire de `utilisateur` (L2).
+    pub fn usage_memoire(&self, utilisateur: &str) -> String {
+        format!("{USAGE_MEMOIRE}/{}/{utilisateur}", self.instance)
+    }
+
+    /// Usage signé attendu des approbations TAMR de `utilisateur` (F7, L2).
+    pub fn usage_approbation(&self, utilisateur: &str) -> String {
+        format!("{USAGE_APPROBATION}/{}/{utilisateur}", self.instance)
     }
 }
 
@@ -151,29 +220,60 @@ fn refus(statut: StatusCode, motif: &str) -> Response {
     (statut, Json(serde_json::json!({ "error": "accès mémoire refusé", "reason": motif }))).into_response()
 }
 
-/// Garde : routes actives, pas de cookie, origine, requête signée par une clé de l'utilisateur.
+/// `POST /v1/memoire/{u}/approbations/{iv}` : approbation TAMR (F7).
+fn est_approbation(methode: &axum::http::Method, chemin: &str) -> bool {
+    let segments: Vec<&str> = chemin.split('/').collect();
+    methode == axum::http::Method::POST
+        && matches!(segments.as_slice(), ["", "v1", "memoire", u, "approbations", iv] if !u.is_empty() && !iv.is_empty())
+}
+
+/// Garde : débit, routes actives, pas de cookie, origine, requête signée par
+/// une clé de l'utilisateur (ou d'approbation), usage lié à l'instance.
+/// Toute réponse porte [`ENTETE_INSTANCE`].
 async fn garde<E: Entrepot + 'static>(State(etat): State<Arc<EtatMemoireHttp<E>>>, req: Request, next: Next) -> Response {
+    let mut reponse = garder(&etat, req, next).await;
+    if let Ok(v) = axum::http::HeaderValue::from_str(&etat.instance) {
+        reponse.headers_mut().insert(ENTETE_INSTANCE, v);
+    }
+    reponse
+}
+
+async fn garder<E: Entrepot + 'static>(etat: &EtatMemoireHttp<E>, req: Request, next: Next) -> Response {
+    let Some(peer) = req.extensions().get::<ConnectInfo<SocketAddr>>().map(|ci| ci.0.ip()) else {
+        return refus(StatusCode::FORBIDDEN, "no_connect_info");
+    };
+    let ip = crate::security::resolve_client_ip(peer, req.headers(), &etat.securite.trusted_proxies).to_string();
+    // L3 : limiteur de débit avant tout autre travail.
+    if etat.limiteur.check(&format!("memoire:{ip}")).is_err() {
+        tracing::warn!(target: "maia::memoire_http", ip = %ip, "débit dépassé sur les routes mémoire");
+        return refus(StatusCode::TOO_MANY_REQUESTS, "debit_depasse");
+    }
     let Some((utilisateur, _)) = etat.acces.as_ref().filter(|_| etat.garde.est_configuree()) else {
         return refus(StatusCode::SERVICE_UNAVAILABLE, "memoire_http_desactivee");
     };
     if req.headers().contains_key(axum::http::header::COOKIE) {
         return refus(StatusCode::BAD_REQUEST, "cookie_refuse");
     }
-    let Some(peer) = req.extensions().get::<ConnectInfo<SocketAddr>>().map(|ci| ci.0.ip()) else {
-        return refus(StatusCode::FORBIDDEN, "no_connect_info");
-    };
-    let ip = crate::security::resolve_client_ip(peer, req.headers(), &etat.securite.trusted_proxies).to_string();
     if let crate::security::OriginCheck::Blocked(_) = crate::security::check_origin(Some(&ip), req.headers(), &etat.securite) {
         return refus(StatusCode::FORBIDDEN, "origin_blocked");
     }
+    let approbation = est_approbation(req.method(), req.uri().path());
+    let (garde, usage) = if approbation {
+        if !etat.garde_approbation.est_configuree() {
+            return refus(StatusCode::SERVICE_UNAVAILABLE, "approbations_desactivees");
+        }
+        (&etat.garde_approbation, etat.usage_approbation(utilisateur))
+    } else {
+        (&etat.garde, etat.usage_memoire(utilisateur))
+    };
     let maintenant = maintenant_unix();
     let h = req.headers();
     let v = |n: &str| h.get(n).and_then(|x| x.to_str().ok());
-    let entetes = match etat.garde.controler_entetes(v(ENTETE_SIGNATAIRE), v(ENTETE_HORODATAGE), v(ENTETE_NONCE), v(ENTETE_SIGNATURE), maintenant) {
+    let entetes = match garde.controler_entetes(v(ENTETE_SIGNATAIRE), v(ENTETE_HORODATAGE), v(ENTETE_NONCE), v(ENTETE_SIGNATURE), maintenant) {
         Ok(e) => e,
         Err(r) => {
-            tracing::warn!(target: "maia::memoire_http", refus = ?r, "requête mémoire refusée");
-            return refus(StatusCode::UNAUTHORIZED, "signature_utilisateur_requise");
+            tracing::warn!(target: "maia::memoire_http", refus = ?r, approbation, "requête mémoire refusée");
+            return refus(StatusCode::UNAUTHORIZED, if approbation { "signature_approbation_requise" } else { "signature_utilisateur_requise" });
         }
     };
     let (parts, corps) = req.into_parts();
@@ -181,12 +281,15 @@ async fn garde<E: Entrepot + 'static>(State(etat): State<Arc<EtatMemoireHttp<E>>
         return refus(StatusCode::PAYLOAD_TOO_LARGE, "corps_trop_volumineux");
     };
     let chemin = parts.uri.path_and_query().map_or_else(|| parts.uri.path(), |pq| pq.as_str());
-    if let Err(r) = etat.garde.verifier(&entetes, USAGE_MEMOIRE, parts.method.as_str(), chemin, &corps, maintenant) {
-        tracing::warn!(target: "maia::memoire_http", refus = ?r, "requête mémoire refusée");
-        return refus(StatusCode::UNAUTHORIZED, "signature_utilisateur_requise");
+    if let Err(r) = garde.verifier(&entetes, &usage, parts.method.as_str(), chemin, &corps, maintenant) {
+        tracing::warn!(target: "maia::memoire_http", refus = ?r, approbation, "requête mémoire refusée");
+        return refus(StatusCode::UNAUTHORIZED, if approbation { "signature_approbation_requise" } else { "signature_utilisateur_requise" });
     }
     let mut parts = parts;
     parts.extensions.insert(UtilisateurAuthentifie(utilisateur.clone()));
+    if approbation {
+        parts.extensions.insert(SignatureApprobation::verifiee(&entetes.signataire));
+    }
     next.run(Request::from_parts(parts, Body::from(corps))).await
 }
 
@@ -222,6 +325,7 @@ fn erreur(e: &ErreurMemoire) -> Response {
         ErreurMemoire::CandidatInconnu(_) | ErreurMemoire::NoteInconnue(_) => StatusCode::NOT_FOUND,
         ErreurMemoire::NoteOubliee(_) => StatusCode::GONE,
         ErreurMemoire::Conflit(_) => StatusCode::CONFLICT,
+        ErreurMemoire::CandidatsPlafond(_) => StatusCode::TOO_MANY_REQUESTS,
         ErreurMemoire::Entrepot(_) | ErreurMemoire::NonChiffree | ErreurMemoire::EtiquetteInvalide(_) => {
             StatusCode::SERVICE_UNAVAILABLE
         }
@@ -233,7 +337,10 @@ fn erreur(e: &ErreurMemoire) -> Response {
 fn refus_tamr(r: &RefusTamr) -> Response {
     let statut = match r {
         RefusTamr::Inconnue => StatusCode::NOT_FOUND,
-        RefusTamr::RegistrePlein | RefusTamr::Indisponible => StatusCode::SERVICE_UNAVAILABLE,
+        RefusTamr::RegistrePlein | RefusTamr::Indisponible | RefusTamr::AutoriteIndisponible | RefusTamr::Serialisation => {
+            StatusCode::SERVICE_UNAVAILABLE
+        }
+        RefusTamr::SignatureRequise => StatusCode::UNAUTHORIZED,
         _ => StatusCode::FORBIDDEN,
     };
     (statut, Json(serde_json::json!({ "error": r.to_string(), "tamr": "refus" }))).into_response()
@@ -386,7 +493,18 @@ async fn valider<E: Entrepot + 'static>(
             Err(e) => erreur(&e),
         };
     }
-    match etat.approbations.demander(ActionTamr::ValiderCandidat { proprietaire: u, candidat: k }) {
+    // F8 : version courante de la cible figée, affichée et liée à l'empreinte.
+    let cible_actuelle = match &k.cible {
+        Some(id) => {
+            let notes = essayer!(acces.consulter().await.map_err(|e| erreur(&e)));
+            match notes.into_iter().find(|n| &n.id == id) {
+                Some(n) => Some(Box::new(n)),
+                None => return erreur(&ErreurMemoire::NoteInconnue(id.to_string())),
+            }
+        }
+        None => None,
+    };
+    match etat.approbations.demander(ActionTamr::ValiderCandidat { proprietaire: u, candidat: k, cible_actuelle }) {
         Ok(d) => (StatusCode::ACCEPTED, Json(serde_json::json!({ "approbation": d }))).into_response(),
         Err(r) => refus_tamr(&r),
     }
@@ -416,13 +534,17 @@ struct CorpsApprobation {
 async fn approuver<E: Entrepot + 'static>(
     State(etat): Etat<E>,
     Extension(auth): Auth,
+    signature: Option<Extension<SignatureApprobation>>,
     Path((u, intervention)): Path<(String, String)>,
     Json(c): Json<CorpsApprobation>,
 ) -> Response {
     let m = essayer!(memoire(&etat, &auth, &u));
+    let Some(Extension(signature)) = signature else {
+        return refus_tamr(&RefusTamr::SignatureRequise);
+    };
     let ok = essayer!(etat
         .approbations
-        .approuver(&intervention, &auth.0, &c.empreinte, &etat.gouvernance)
+        .approuver(&intervention, &auth.0, &c.empreinte, &signature, &etat.gouvernance)
         .map_err(|r| refus_tamr(&r)));
     let ActionTamr::ValiderCandidat { candidat, .. } = ok.action() else {
         return refus_tamr(&RefusTamr::HorsPortee);
@@ -461,6 +583,21 @@ mod tests {
         CleSignature::depuis_graine(&[7_u8; 32])
     }
 
+    /// Clé d'approbation TAMR d'Alice (distincte de sa clé mémoire, F7).
+    fn alice_approbation() -> CleSignature {
+        CleSignature::depuis_graine(&[8_u8; 32])
+    }
+
+    const INSTANCE: &str = "instance-essai";
+
+    fn usage_memoire() -> String {
+        format!("{USAGE_MEMOIRE}/{INSTANCE}/alice")
+    }
+
+    fn usage_approbation() -> String {
+        format!("{USAGE_APPROBATION}/{INSTANCE}/alice")
+    }
+
     async fn monter(gouvernance: GouvernanceMaia) -> (Router, Arc<MemoireMaia<EntrepotMemoire>>) {
         let m = Arc::new(MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets)).await.expect("m"));
         let r = monter_sur(Arc::clone(&m), gouvernance);
@@ -468,12 +605,16 @@ mod tests {
     }
 
     fn monter_sur(m: Arc<MemoireMaia<EntrepotMemoire>>, gouvernance: GouvernanceMaia) -> Router {
-        routeur(Arc::new(EtatMemoireHttp::new(
-            Some(("alice".into(), m)),
-            vec![alice().cle_publique()],
-            Arc::new(gouvernance),
-            SecurityConfig::default(),
-        )))
+        routeur(Arc::new(
+            EtatMemoireHttp::new(
+                Some(("alice".into(), m)),
+                vec![alice().cle_publique()],
+                vec![alice_approbation().cle_publique()],
+                Arc::new(gouvernance),
+                SecurityConfig::default(),
+            )
+            .avec_instance(INSTANCE),
+        ))
     }
 
     fn requete(methode: &str, chemin: &str, corps: &str, cle: Option<(&CleSignature, &str)>) -> Request {
@@ -489,7 +630,12 @@ mod tests {
     }
 
     fn signee(methode: &str, chemin: &str, corps: &str) -> Request {
-        requete(methode, chemin, corps, Some((&alice(), USAGE_MEMOIRE)))
+        requete(methode, chemin, corps, Some((&alice(), usage_memoire().as_str())))
+    }
+
+    /// Requête d'approbation signée par la clé d'approbation (F7).
+    fn approuvee(chemin: &str, corps: &str) -> Request {
+        requete("POST", chemin, corps, Some((&alice_approbation(), usage_approbation().as_str())))
     }
 
     async fn appel(app: &Router, r: Request) -> (StatusCode, serde_json::Value) {
@@ -517,8 +663,8 @@ mod tests {
     async fn desactivees_par_defaut() {
         let m = Arc::new(MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets)).await.expect("m"));
         for etat in [
-            EtatMemoireHttp::new(Some(("alice".into(), Arc::clone(&m))), Vec::new(), Arc::new(sans_tamr()), SecurityConfig::default()),
-            EtatMemoireHttp::new(None, vec![alice().cle_publique()], Arc::new(sans_tamr()), SecurityConfig::default()),
+            EtatMemoireHttp::new(Some(("alice".into(), Arc::clone(&m))), Vec::new(), Vec::new(), Arc::new(sans_tamr()), SecurityConfig::default()),
+            EtatMemoireHttp::new(None, vec![alice().cle_publique()], Vec::new(), Arc::new(sans_tamr()), SecurityConfig::default()),
         ] {
             assert!(!etat.est_active());
             let app = routeur(Arc::new(etat));
@@ -570,7 +716,7 @@ mod tests {
         }
         // La clé de Bob n'est pas épinglée : 401, même sur sa propre base.
         let bob = CleSignature::depuis_graine(&[9_u8; 32]);
-        let (s, _) = appel(&app, requete("POST", "/v1/memoire/bob/consulter", "", Some((&bob, USAGE_MEMOIRE)))).await;
+        let (s, _) = appel(&app, requete("POST", "/v1/memoire/bob/consulter", "", Some((&bob, usage_memoire().as_str())))).await;
         assert_eq!(s, StatusCode::UNAUTHORIZED);
         assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 1, "rien d'oublié");
     }
@@ -642,12 +788,12 @@ mod tests {
         let iv = d["intervention_id"].as_str().expect("iv");
         let corps = serde_json::json!({ "empreinte": d["empreinte"] }).to_string();
         // StrongFather sans règle TAMR : refus, rien n'est écrit.
-        let (s, v) = appel(&app, signee("POST", &format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
+        let (s, v) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
         assert_eq!(s, StatusCode::FORBIDDEN, "{v}");
         assert!(m.utilisateur().consulter().await.expect("c").is_empty());
         assert_eq!(m.utilisateur().candidats().await.expect("k").len(), 1, "candidat conservé");
         // Demande consommée : pas de seconde réponse.
-        let (s, _) = appel(&app, signee("POST", &format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
+        let (s, _) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
         assert_eq!(s, StatusCode::NOT_FOUND);
         // StrongFather indisponible : refus.
         let app2 = monter_sur(Arc::clone(&m), GouvernanceMaia::indisponible("test"));
@@ -655,7 +801,7 @@ mod tests {
         let d = &v["approbation"];
         let iv = d["intervention_id"].as_str().expect("iv");
         let corps = serde_json::json!({ "empreinte": d["empreinte"] }).to_string();
-        let (s, _) = appel(&app2, signee("POST", &format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
+        let (s, _) = appel(&app2, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
         assert_eq!(s, StatusCode::FORBIDDEN);
         assert!(m.utilisateur().consulter().await.expect("c").is_empty());
     }
@@ -669,7 +815,7 @@ mod tests {
         let iv = d["intervention_id"].as_str().expect("iv").to_string();
         // Empreinte d'une autre action : refus, demande consommée, rien n'est écrit.
         let faux = serde_json::json!({ "empreinte": "00".repeat(32) }).to_string();
-        let (s, _) = appel(&app, signee("POST", &format!("/v1/memoire/alice/approbations/{iv}"), &faux)).await;
+        let (s, _) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &faux)).await;
         assert_eq!(s, StatusCode::FORBIDDEN);
         assert!(m.utilisateur().consulter().await.expect("c").is_empty());
         // Candidat rejeté entre la demande et l'approbation : approbation accordée mais rien n'est écrit.
@@ -679,7 +825,7 @@ mod tests {
         m.utilisateur().rejeter(k).await.expect("rejet");
         let k2 = candidat_sensible(&m).await;
         let corps = serde_json::json!({ "empreinte": d["empreinte"] }).to_string();
-        let (s, _) = appel(&app, signee("POST", &format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
+        let (s, _) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
         assert_eq!(s, StatusCode::NOT_FOUND);
         assert!(m.utilisateur().consulter().await.expect("c").is_empty());
         // Approbation du candidat exact : écrit.
@@ -688,9 +834,129 @@ mod tests {
         let d = v["approbation"].clone();
         let iv = d["intervention_id"].as_str().expect("iv").to_string();
         let corps = serde_json::json!({ "empreinte": d["empreinte"] }).to_string();
-        let (s, v) = appel(&app, signee("POST", &format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
+        let (s, v) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
         assert_eq!(s, StatusCode::OK, "{v}");
         assert_eq!(v["ecrite"], "sante.sommeil.f1");
         assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 1);
+    }
+
+    // ── Revue de sécurité du lot 7 ──
+
+    #[tokio::test]
+    async fn l2_usage_lie_a_l_instance_et_a_l_utilisateur() {
+        let (app, _) = monter(sans_tamr()).await;
+        // Ancienne forme (usage seul) : rejouable après redémarrage ⇒ refusée.
+        let (s, _) = appel(&app, requete("POST", "/v1/memoire/alice/consulter", "", Some((&alice(), USAGE_MEMOIRE)))).await;
+        assert_eq!(s, StatusCode::UNAUTHORIZED);
+        // Requête signée pour une autre instance (avant redémarrage) : refusée.
+        let ancienne = format!("{USAGE_MEMOIRE}/instance-precedente/alice");
+        let (s, _) = appel(&app, requete("POST", "/v1/memoire/alice/consulter", "", Some((&alice(), ancienne.as_str())))).await;
+        assert_eq!(s, StatusCode::UNAUTHORIZED);
+        // L'identifiant d'instance est annoncé dans toute réponse, même un refus.
+        let rep = app.clone().oneshot(requete("POST", "/v1/memoire/alice/consulter", "", None)).await.expect("r");
+        assert_eq!(rep.headers().get(ENTETE_INSTANCE).and_then(|v| v.to_str().ok()), Some(INSTANCE));
+        assert_eq!(appel(&app, signee("POST", "/v1/memoire/alice/consulter", "")).await.0, StatusCode::OK);
+        // Instances distinctes à chaque démarrage.
+        let m = Arc::new(MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets)).await.expect("m"));
+        let e1 = EtatMemoireHttp::new(Some(("alice".into(), Arc::clone(&m))), vec![alice().cle_publique()], Vec::new(), Arc::new(sans_tamr()), SecurityConfig::default());
+        let e2 = EtatMemoireHttp::new(Some(("alice".into(), m)), vec![alice().cle_publique()], Vec::new(), Arc::new(sans_tamr()), SecurityConfig::default());
+        assert_ne!(e1.instance(), e2.instance());
+        assert_eq!(e1.usage_memoire("alice"), format!("maia/memoire/{}/alice", e1.instance()));
+    }
+
+    #[tokio::test]
+    async fn l3_debit_limite_sur_les_routes_memoire() {
+        let (app, _) = monter(sans_tamr()).await;
+        for _ in 0..DEBIT_MAX_PAR_MINUTE {
+            assert_eq!(appel(&app, requete("POST", "/v1/memoire/alice/consulter", "", None)).await.0, StatusCode::UNAUTHORIZED);
+        }
+        let (s, v) = appel(&app, signee("POST", "/v1/memoire/alice/consulter", "")).await;
+        assert_eq!(s, StatusCode::TOO_MANY_REQUESTS, "{v}");
+    }
+
+    async fn demande_sensible(app: &Router, m: &MemoireMaia<EntrepotMemoire>) -> (String, String) {
+        let k = candidat_sensible(m).await;
+        let (_, v) = appel(app, signee("POST", &format!("/v1/memoire/alice/candidats/{k}/valider"), "")).await;
+        let d = &v["approbation"];
+        (d["intervention_id"].as_str().expect("iv").to_string(), serde_json::json!({ "empreinte": d["empreinte"] }).to_string())
+    }
+
+    #[tokio::test]
+    async fn f7_approbation_exige_la_cle_d_approbation_distincte() {
+        let (app, m) = monter(crate::tamr::tests::gouvernance(crate::tamr::tests::POLITIQUE_TAMR)).await;
+        let (iv, corps) = demande_sensible(&app, &m).await;
+        let chemin = format!("/v1/memoire/alice/approbations/{iv}");
+        // Clé mémoire, avec l'usage mémoire ou l'usage d'approbation : 401, demande intacte.
+        for usage in [usage_memoire(), usage_approbation()] {
+            let (s, v) = appel(&app, requete("POST", &chemin, &corps, Some((&alice(), usage.as_str())))).await;
+            assert_eq!(s, StatusCode::UNAUTHORIZED, "{v}");
+        }
+        // Clé d'approbation avec l'usage mémoire : 401.
+        let (s, _) = appel(&app, requete("POST", &chemin, &corps, Some((&alice_approbation(), usage_memoire().as_str())))).await;
+        assert_eq!(s, StatusCode::UNAUTHORIZED);
+        assert!(m.utilisateur().consulter().await.expect("c").is_empty());
+        // Clé d'approbation et usage d'approbation : accordée.
+        let (s, v) = appel(&app, approuvee(&chemin, &corps)).await;
+        assert_eq!(s, StatusCode::OK, "{v}");
+        // La clé d'approbation n'ouvre pas les autres routes.
+        let (s, _) = appel(&app, requete("POST", "/v1/memoire/alice/consulter", "", Some((&alice_approbation(), usage_memoire().as_str())))).await;
+        assert_eq!(s, StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn f7_sans_cle_d_approbation_ou_cle_commune_approbations_refusees() {
+        let m = Arc::new(MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets)).await.expect("m"));
+        for approbation in [Vec::new(), vec![alice().cle_publique()]] {
+            let app = routeur(Arc::new(
+                EtatMemoireHttp::new(
+                    Some(("alice".into(), Arc::clone(&m))),
+                    vec![alice().cle_publique()],
+                    approbation,
+                    Arc::new(crate::tamr::tests::gouvernance(crate::tamr::tests::POLITIQUE_TAMR)),
+                    SecurityConfig::default(),
+                )
+                .avec_instance(INSTANCE),
+            ));
+            let (iv, corps) = demande_sensible(&app, &m).await;
+            let chemin = format!("/v1/memoire/alice/approbations/{iv}");
+            for cle in [alice(), alice_approbation()] {
+                let (s, v) = appel(&app, requete("POST", &chemin, &corps, Some((&cle, usage_approbation().as_str())))).await;
+                assert_eq!(s, StatusCode::SERVICE_UNAVAILABLE, "{v}");
+            }
+            assert!(m.utilisateur().consulter().await.expect("c").is_empty());
+            // Le refus d'une approbation reste possible avec la clé mémoire.
+            assert_eq!(appel(&app, signee("DELETE", &chemin, "")).await.0, StatusCode::OK);
+        }
+    }
+
+    #[tokio::test]
+    async fn f8_cible_modifiee_avant_approbation_refusee() {
+        let (app, m) = monter(crate::tamr::tests::gouvernance(crate::tamr::tests::POLITIQUE_TAMR)).await;
+        // Note sensible v1 (validée sous TAMR), puis correction k2 demandée.
+        let (iv, corps) = demande_sensible(&app, &m).await;
+        let (s, _) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
+        assert_eq!(s, StatusCode::OK);
+        let (s, v) = appel(&app, signee("POST", "/v1/memoire/alice/corriger", r#"{"id":"sante.sommeil.f1","texte":"Dort 7 h"}"#)).await;
+        assert_eq!(s, StatusCode::ACCEPTED, "{v}");
+        let k2 = v["candidat"].as_str().expect("k2").to_string();
+        let (_, v) = appel(&app, signee("POST", &format!("/v1/memoire/alice/candidats/{k2}/valider"), "")).await;
+        let d = v["approbation"].clone();
+        let description = d["description"].as_str().expect("description");
+        assert!(description.contains("texte actuel : « Dort 6 h »"), "{description}");
+        assert!(description.contains("version 1"), "{description}");
+        let iv2 = d["intervention_id"].as_str().expect("iv").to_string();
+        let corps2 = serde_json::json!({ "empreinte": d["empreinte"] }).to_string();
+        // La cible change (k3 validé) avant l'approbation de k2.
+        let (_, v) = appel(&app, signee("POST", "/v1/memoire/alice/corriger", r#"{"id":"sante.sommeil.f1","texte":"Dort 8 h"}"#)).await;
+        let k3 = v["candidat"].as_str().expect("k3").to_string();
+        let (_, v) = appel(&app, signee("POST", &format!("/v1/memoire/alice/candidats/{k3}/valider"), "")).await;
+        let d3 = v["approbation"].clone();
+        let iv3 = d3["intervention_id"].as_str().expect("iv").to_string();
+        let corps3 = serde_json::json!({ "empreinte": d3["empreinte"] }).to_string();
+        assert_eq!(appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv3}"), &corps3)).await.0, StatusCode::OK);
+        let (s, v) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv2}"), &corps2)).await;
+        assert_eq!(s, StatusCode::FORBIDDEN, "{v}");
+        let n = m.utilisateur().consulter().await.expect("c");
+        assert_eq!(n[0].texte, "Dort 8 h", "la correction approuvée sur une cible périmée n'est pas écrite");
     }
 }

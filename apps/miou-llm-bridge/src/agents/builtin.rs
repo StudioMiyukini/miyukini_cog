@@ -119,9 +119,11 @@ fn alicia() -> AgentDef {
   • Bas (économe, petit modèle)
   • Moyen (meilleur rapport qualité/ressources)
   • Performance Max (meilleur GGUF supporté par le hardware)"#.into(),
+        // `memoire` : compétence explicite de l'outil `memoire_noter` (revue de
+        // sécurité du lot 7, F6) — seule l'assistante personnelle la détient.
         skill_ids: vec![
             "file_ops".into(), "shell_exec".into(), "web_fetch".into(),
-            "cog_services".into(),
+            "cog_services".into(), "memoire".into(),
         ],
         model_preference: ModelPreference::Best,
         security_level: SecurityLevel::Extended,
@@ -435,9 +437,11 @@ Tu es le cerveau et la mémoire de l'équipe. Tu fonctionnes de manière quasi-a
 - COMPRESSION : Les contextes sont comprimés régulièrement pour économiser les tokens
 - FORMATION : Les nouvelles informations sont distribuées aux agents concernés
 - SÉCURITÉ : Aucune action destructrice sans double validation"#.into(),
+        // `memoire` : compétence explicite de l'outil `memoire_noter` (revue de
+        // sécurité du lot 7, F6) — seule l'assistante personnelle la détient.
         skill_ids: vec![
             "file_ops".into(), "shell_exec".into(), "web_fetch".into(),
-            "cog_services".into(),
+            "cog_services".into(), "memoire".into(),
         ],
         model_preference: ModelPreference::Best,
         security_level: SecurityLevel::Full,

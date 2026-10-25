@@ -41,6 +41,9 @@ pub enum ErreurFederee {
     /// Requête mal formée.
     #[error("requête invalide : {0}")]
     RequeteInvalide(&'static str),
+    /// Publication d'une Fiche qui n'est pas signée par le COG local (F1).
+    #[error("seule une fiche signée par le COG local se publie")]
+    FicheNonLocale,
     /// Donnée non étiquetée `publiable`.
     #[error("donnée non publiable")]
     NonPubliable,

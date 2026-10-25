@@ -461,7 +461,8 @@ async fn chat_with_agent(
     } else {
         Vec::new()
     };
-    if req.enable_tools && carnet.is_some() {
+    // Compétence `memoire` déclarée par l'agent (F6) : sinon l'outil n'est pas proposé.
+    if req.enable_tools && carnet.is_some() && crate::outil_memoire::competence_memoire(&agent) {
         tools.push(crate::outil_memoire::definition_noter());
     }
 

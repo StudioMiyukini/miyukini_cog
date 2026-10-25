@@ -45,8 +45,10 @@ pub use base::{BaseEtrangere, Qualite, VueFederale, MAX_FICHES_PAR_EMETTEUR};
 pub use consultation::{consulter, Consultation, Plan, Planificateur, ReponseSourcee};
 pub use corroboration::{corroborer, Affirmation, Etablissement, PolitiqueCorroboration, Source, K_DEFAUT, PLAFOND_DEFAUT};
 pub use erreurs::ErreurFederee;
-pub use fiche::{cog_de_cle, sceller_fiche, verifier_fiche, Audience, Fiche, FicheVerifiee, Relation, TypeFiche, TYPE_FICHE};
+pub use fiche::{cog_de_cle, sceller_fiche, verifier_fiche, Audience, Fiche, FicheVerifiee, Relation, Reprise, TypeFiche, TYPE_FICHE};
 pub use lecteur::{extraire, Ancrage, ExtraitType, ModeleLecteur};
-pub use marquage::{autoriser, Effet, Etranger, Provenance, ValidationUtilisateur};
+pub use marquage::{autoriser, AutoriteConfirmation, Effet, Etranger, Provenance, ValidationUtilisateur};
 pub use plongement::PlongementLocal;
-pub use requete::{RequeteTypee, ServiceRequete, QUOTA_REQUETES, PERIODE_QUOTA_SECS};
+pub use requete::{
+    AutoriteEtiquettes, Publiable, Publication, RequeteTypee, ServiceRequete, PERIODE_QUOTA_SECS, QUOTA_REQUETES,
+};

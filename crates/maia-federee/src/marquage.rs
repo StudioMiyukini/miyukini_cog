@@ -94,10 +94,40 @@ pub enum Effet {
     Apprentissage,
 }
 
+/// Autorité de confirmation (revue de sécurité du lot 7, L1) : **jeton unique
+/// par processus**. Seul le premier appel de [`Self::instituer`] l'obtient ;
+/// le pont l'institue au démarrage, dans son module TAMR, avant tout autre
+/// code. Sans ce jeton, aucune [`ValidationUtilisateur`] ne peut être
+/// construite hors de cette crate : un module qui ne la détient pas ne peut
+/// pas fabriquer une validation (ni simple, ni confirmée par TAMR).
+///
+/// Limite : le scellement est **à l'exécution** (premier arrivé) et tient à
+/// la discipline du processus — tout code du pont qui reçoit une référence au
+/// jeton peut valider ; le jeton n'est jamais cloné ni sérialisé.
+#[derive(Debug)]
+pub struct AutoriteConfirmation {
+    _prive: (),
+}
+
+static AUTORITE_PRISE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+impl AutoriteConfirmation {
+    /// Institue l'autorité : `Some` au **premier** appel du processus, `None` ensuite.
+    pub fn instituer() -> Option<Self> {
+        if AUTORITE_PRISE.swap(true, std::sync::atomic::Ordering::SeqCst) {
+            tracing::warn!(target: "maia_federee::audit", "tentative d'instituer une seconde autorité de confirmation : refus");
+            return None;
+        }
+        Some(Self { _prive: () })
+    }
+}
+
 /// Validation explicite de l'utilisateur, liée à **une** action exacte
 /// (empreinte de sa description canonique) et à l'identifiant de la
 /// confirmation (registre des confirmations de MAIA, puis décision TAMR).
-#[derive(Debug, Clone, PartialEq, Eq)]
+///
+/// Ni `Clone` ni constructeur public sans [`AutoriteConfirmation`] (L1).
+#[derive(Debug, PartialEq, Eq)]
 pub struct ValidationUtilisateur {
     confirmation: String,
     empreinte: [u8; 32],
@@ -105,16 +135,22 @@ pub struct ValidationUtilisateur {
 }
 
 impl ValidationUtilisateur {
+    pub(crate) fn construire(tamr: bool, confirmation: &str, description: &str) -> Self {
+        Self { confirmation: confirmation.to_string(), empreinte: Sha256::digest(description.as_bytes()).into(), tamr }
+    }
+
     /// À construire **uniquement** par le chemin de confirmation humaine
-    /// (étape séparée qui a affiché `description` à l'utilisateur).
-    pub fn nouvelle(confirmation: &str, description: &str) -> Self {
-        Self { confirmation: confirmation.to_string(), empreinte: Sha256::digest(description.as_bytes()).into(), tamr: false }
+    /// (étape séparée qui a affiché `description` à l'utilisateur), détenteur
+    /// de l'[`AutoriteConfirmation`].
+    pub fn nouvelle(_autorite: &AutoriteConfirmation, confirmation: &str, description: &str) -> Self {
+        Self::construire(false, confirmation, description)
     }
 
     /// Validation de l'utilisateur **confirmée par TAMR** (décision StrongFather
-    /// `APPROVAL`) : à construire uniquement par le chemin TAMR (A-009).
-    pub fn confirmee_par_tamr(confirmation: &str, description: &str) -> Self {
-        Self { tamr: true, ..Self::nouvelle(confirmation, description) }
+    /// `APPROVAL`) : à construire uniquement par le chemin TAMR (A-009),
+    /// détenteur de l'[`AutoriteConfirmation`].
+    pub fn confirmee_par_tamr(_autorite: &AutoriteConfirmation, confirmation: &str, description: &str) -> Self {
+        Self::construire(true, confirmation, description)
     }
 
     /// Vrai si la validation a été confirmée par TAMR.
@@ -163,6 +199,15 @@ mod tests {
     use super::*;
 
     #[test]
+    fn autorite_de_confirmation_unique_par_processus() {
+        // L1 : seul ce test institue l'autorité dans ce binaire de test.
+        let a = AutoriteConfirmation::instituer().unwrap();
+        assert!(AutoriteConfirmation::instituer().is_none());
+        assert!(ValidationUtilisateur::confirmee_par_tamr(&a, "c", "d").par_tamr());
+        assert!(!ValidationUtilisateur::nouvelle(&a, "c", "d").par_tamr());
+    }
+
+    #[test]
     fn local_autorise_etranger_garde() {
         assert!(autoriser(Provenance::Utilisateur, Effet::Publication, None, "x").is_ok());
         for effet in [Effet::Action, Effet::MemoireLongue] {
@@ -172,7 +217,7 @@ mod tests {
 
     #[test]
     fn validation_liee_a_l_action_exacte() {
-        let v = ValidationUtilisateur::nouvelle("c1", "file_ops {\"action\":\"write\"}");
+        let v = ValidationUtilisateur::construire(false, "c1", "file_ops {\"action\":\"write\"}");
         assert!(autoriser(Provenance::Etranger, Effet::Action, Some(&v), "file_ops {\"action\":\"write\"}").is_ok());
         assert_eq!(
             autoriser(Provenance::Etranger, Effet::Action, Some(&v), "shell_exec {}"),
@@ -182,8 +227,8 @@ mod tests {
 
     #[test]
     fn publication_sous_tamr_seulement() {
-        let simple = ValidationUtilisateur::nouvelle("c1", "republier x");
-        let tamr = ValidationUtilisateur::confirmee_par_tamr("c1", "republier x");
+        let simple = ValidationUtilisateur::construire(false, "c1", "republier x");
+        let tamr = ValidationUtilisateur::construire(true, "c1", "republier x");
         assert_eq!(autoriser(Provenance::Etranger, Effet::Publication, None, "republier x"), Err(ErreurFederee::ValidationRequise));
         assert_eq!(autoriser(Provenance::Etranger, Effet::Publication, Some(&simple), "republier x"), Err(ErreurFederee::ValidationRequise));
         assert_eq!(autoriser(Provenance::Etranger, Effet::Publication, Some(&tamr), "republier y"), Err(ErreurFederee::ValidationRequise));
@@ -192,7 +237,7 @@ mod tests {
 
     #[test]
     fn regle_apprentissage_toujours_interdits() {
-        let v = ValidationUtilisateur::confirmee_par_tamr("c1", "d");
+        let v = ValidationUtilisateur::construire(true, "c1", "d");
         for effet in [Effet::Regle, Effet::Apprentissage] {
             assert!(matches!(autoriser(Provenance::Etranger, effet, Some(&v), "d"), Err(ErreurFederee::Interdit(_))));
         }
@@ -202,7 +247,7 @@ mod tests {
     fn marque_propagee() {
         let e = Etranger::marquer("Paris".to_string()).map(|s| s.len());
         assert_eq!(e.provenance(), Provenance::Etranger);
-        assert_eq!(e.clone().valider(Effet::MemoireLongue, "m", &ValidationUtilisateur::nouvelle("c", "autre")).unwrap_err(), ErreurFederee::ValidationRequise);
-        assert_eq!(e.valider(Effet::MemoireLongue, "m", &ValidationUtilisateur::nouvelle("c", "m")).unwrap(), 5);
+        assert_eq!(e.clone().valider(Effet::MemoireLongue, "m", &ValidationUtilisateur::construire(false, "c", "autre")).unwrap_err(), ErreurFederee::ValidationRequise);
+        assert_eq!(e.valider(Effet::MemoireLongue, "m", &ValidationUtilisateur::construire(false, "c", "m")).unwrap(), 5);
     }
 }

@@ -170,24 +170,43 @@ origins = ["maia"]
 # ── Mémoire MAIA (A-009, A-010, A-011) ──
 # Intention « TAMR » (apps/miou-llm-bridge/src/tamr.rs) : approbation par l'utilisateur
 # propriétaire d'une action exacte (candidat sensible, republication) ; empreinte obligatoire.
+# Revue de sécurité du lot 7 (F7) : l'approbation n'est accordée que pour une requête
+# signée d'usage « maia/tamr-approbation » par une clé épinglée dans
+# MAIA_TAMR_CLES_APPROBATION, DISTINCTE des clés « maia/memoire » ; l'intention porte
+# l'identifiant de la clé signataire (data.cle_approbation, SHA-256 hexadécimal de la
+# clé publique). Limite : StrongFather ne revérifie pas la signature lui-même — ces
+# attributs sont posés par le pont après vérification (défense en profondeur).
 [[policy]]
 id = "maia-tamr-approbation"
 type = "permission"
 effect = "authorize"
 condition = "data.operation == 'tamr.approbation'"
-rule = "data.intervention == 'APPROVAL' && data.canal == 'utilisateur' && data.approbateur_est_proprietaire == 'true' && data.empreinte != ''"
+rule = "data.intervention == 'APPROVAL' && data.canal == 'utilisateur_signe' && data.usage_signe == 'maia/tamr-approbation' && data.cle_approbation != '' && data.approbateur_est_proprietaire == 'true' && data.empreinte != ''"
 [policy.target]
 actions = ["modification", "creation"]
 origins = ["maia"]
 
 # Intention « memoire.noter » (apps/miou-llm-bridge/src/outil_memoire.rs) : note de MAIA ;
-# les restrictions (N2/N3, provenance, sensibles, quota) sont appliquées par maia-memoire.
+# les restrictions (domaine déjà présent et non sensible, N2/N3, provenance, quotas) sont
+# appliquées par maia-memoire. F6 : l'agent doit déclarer la compétence « memoire ».
 [[policy]]
 id = "maia-memoire-noter"
 type = "permission"
 effect = "authorize"
 condition = "data.operation == 'memoire.noter'"
-rule = "data.agent != ''"
+rule = "data.agent != '' && data.competence_memoire == 'true'"
 [policy.target]
 actions = ["modification"]
+origins = ["maia"]
+
+# F6 : un tour dont un résultat d'outil n'est pas « locale » (etranger / inconnue) ne
+# peut jamais mener à une écriture directe en mémoire (candidat seulement).
+[[policy]]
+id = "maia-memoire-noter-etranger-direct"
+type = "permission"
+effect = "deny"
+priority = "critical"
+condition = "data.operation == 'memoire.noter' && data.contenu_etranger == 'true'"
+rule = "data.ecriture_directe_possible == 'true'"
+[policy.target]
 origins = ["maia"]
