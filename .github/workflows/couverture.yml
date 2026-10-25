@@ -1,0 +1,48 @@
+# Couverture des crates de sécurité — lot 8, contraintes C-62 et C-26.
+# Seuil : 80 % des lignes hors tests par crate (scripts/couverture-securite.sh).
+name: couverture
+
+on:
+  workflow_dispatch:
+    inputs:
+      seuil:
+        description: "Seuil de couverture des lignes (%)"
+        required: false
+        default: "80"
+  schedule:
+    - cron: "17 3 * * 1" # lundi 03:17 UTC
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  couverture-securite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: dépendances système
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libssl-dev clang pkg-config
+      - uses: dtolnay/rust-toolchain@ff7f6a3374ce205788da40198ec918bd5d67aea7 # 1.99.0
+        with:
+          toolchain: 1.99.0
+          components: llvm-tools-preview
+      - name: cargo-llvm-cov (version épinglée)
+        run: cargo install cargo-llvm-cov --version 0.9.1 --locked
+      - name: couverture des crates de sécurité
+        env:
+          SEUIL_COUVERTURE: ${{ github.event.inputs.seuil || '80' }}
+          COUV_TARGET_DIR: ${{ runner.temp }}/mcog-cov-target
+        run: |
+          set -o pipefail
+          scripts/couverture-securite.sh --detail | tee couverture.txt
+      - name: résumé
+        if: always()
+        run: |
+          if [ -f couverture.txt ]; then
+            { echo '```'; cat couverture.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
