@@ -1,0 +1,39 @@
+# Cibles de fuzzing de miyufederation (C-26) — cargo-fuzz, nightly.
+# Hors du workspace (table [workspace] propre) : les builds normaux l'ignorent.
+# Lancement : cd crates/miyufederation/fuzz && cargo +nightly fuzz run titres
+# Corpus initial : cargo run --example generer_graines (stable) → seeds/<cible>/.
+[package]
+name = "miyufederation-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+miyufederation = { path = ".." }
+miyusceau = { path = "../../miyusceau" }
+miyuracine = { path = "../../miyuracine" }
+
+[workspace]
+members = ["."]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "titres"
+path = "fuzz_targets/titres.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "preuve"
+path = "fuzz_targets/preuve.rs"
+test = false
+doc = false
+bench = false

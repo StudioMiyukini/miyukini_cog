@@ -57,9 +57,12 @@ jobs:
   fuzz-miyusceau:
     # EX-10 / C-26 : fuzzing court des décodeurs d'entrées non fiables (cargo-fuzz, nightly daté, ASan).
     # Un espace cargo-fuzz autonome par crate : crates/<crate>/fuzz (hors workspace) ;
+    # décodeurs vivant dans un binaire (apps/<app>) : apps/<app>/fuzz, modules inclus par chemin ;
     # corpus initial : seeds/ (régénérable : cargo run --example generer_graines).
     name: fuzz (${{ matrix.crate }})
     runs-on: ubuntu-latest
+    env:
+      DOSSIER_FUZZ: ${{ startsWith(matrix.crate, 'apps/') && matrix.crate || format('crates/{0}', matrix.crate) }}/fuzz
     strategy:
       fail-fast: false
       matrix:
@@ -72,6 +75,12 @@ jobs:
           - miyucdr
           - borderguard
           - miyauth
+          - miyufederation
+          - miyuhybride
+          - maia-federee
+          - maia-memoire
+          - apps/central
+          - apps/maia-llm
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@ff7f6a3374ce205788da40198ec918bd5d67aea7 # 1.99.0 (toolchain forcé ci-dessous)
@@ -79,11 +88,11 @@ jobs:
           toolchain: nightly-2026-10-20
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with:
-          workspaces: crates/${{ matrix.crate }}/fuzz
+          workspaces: ${{ env.DOSSIER_FUZZ }}
       - name: cargo-fuzz
         run: cargo +nightly-2026-10-20 install cargo-fuzz --locked --version 0.13.2
       - name: fuzzing (60 s par cible)
-        working-directory: crates/${{ matrix.crate }}/fuzz
+        working-directory: ${{ env.DOSSIER_FUZZ }}
         run: |
           for cible in $(cargo +nightly-2026-10-20 fuzz list); do
             mkdir -p "corpus/$cible" "seeds/$cible"

@@ -1,0 +1,41 @@
+# Cibles de fuzzing de maia-memoire (C-26) — cargo-fuzz, nightly.
+# Hors du workspace (table [workspace] propre) : les builds normaux l'ignorent.
+# Lancement : cd crates/maia-memoire/fuzz && cargo +nightly fuzz run ident
+# Corpus initial : cargo run --example generer_graines (stable) → seeds/<cible>/.
+[package]
+name = "maia-memoire-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+maia-memoire = { path = ".." }
+serde = "1"
+serde_json = "1"
+chrono = "0.4"
+uuid = "1"
+
+[workspace]
+members = ["."]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "ident"
+path = "fuzz_targets/ident.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "export"
+path = "fuzz_targets/export.rs"
+test = false
+doc = false
+bench = false

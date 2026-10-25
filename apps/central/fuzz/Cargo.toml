@@ -1,0 +1,35 @@
+# Cibles de fuzzing de l'état persistant du canal officiel de Central (C-26) — cargo-fuzz, nightly.
+# Hors du workspace (table [workspace] propre) : les builds normaux l'ignorent.
+# `apps/central` est un binaire (Dioxus) : le module `canal_officiel/persistance.rs`
+# et `miyukini-central::fichiers_secrets` sont inclus par chemin (`#[path]`),
+# sans la pile graphique ni les dépendances de `miyukini-central`.
+# Lancement : cd apps/central/fuzz && cargo +nightly fuzz run etat_mcce
+# Corpus initial : cargo run --example generer_graines (stable) → seeds/<cible>/.
+[package]
+name = "central-canal-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+# Dépendances du module inclus (mêmes versions que apps/central).
+rand_core = { version = "0.6", features = ["getrandom"] }
+tracing = "0.1"
+
+[workspace]
+members = ["."]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "etat_mcce"
+path = "fuzz_targets/etat_mcce.rs"
+test = false
+doc = false
+bench = false

@@ -1,0 +1,73 @@
+{
+  "format": "maia-memoire/v1",
+  "etiquette": "nationale",
+  "exporte_le": "2026-10-25T12:00:00Z",
+  "notes": [
+    {
+      "id": "travail.cog.f12",
+      "version": 2,
+      "texte": "Le COG tourne sur le serveur.",
+      "importance": 5,
+      "confiance": 7,
+      "provenance": "utilisateur",
+      "auteur": "utilisateur",
+      "liens": [
+        "travail.cog.n1"
+      ],
+      "entites": [],
+      "sources": [
+        "abababababababababababababababababababababababababababababababab"
+      ],
+      "cree_le": "2026-10-25T12:00:00Z",
+      "enregistre_le": "2026-10-25T12:00:00Z",
+      "dernier_usage": "2026-10-25T12:00:00Z"
+    }
+  ],
+  "historique": [
+    {
+      "id": "travail.cog.f12",
+      "version": 2,
+      "texte": "Le COG tourne sur le serveur.",
+      "importance": 5,
+      "confiance": 7,
+      "provenance": "utilisateur",
+      "auteur": "utilisateur",
+      "liens": [
+        "travail.cog.n1"
+      ],
+      "entites": [],
+      "sources": [
+        "abababababababababababababababababababababababababababababababab"
+      ],
+      "cree_le": "2026-10-25T12:00:00Z",
+      "enregistre_le": "2026-10-25T12:00:00Z",
+      "dernier_usage": "2026-10-25T12:00:00Z"
+    }
+  ],
+  "candidats": [
+    {
+      "id": "12345678-9abc-def0-1234-56789abcdef0",
+      "cible": "travail.cog.f12",
+      "branche": "travail.cog",
+      "type_unite": "fait",
+      "texte": "Correction proposée.",
+      "importance": 3,
+      "confiance": 4,
+      "provenance": "deduit",
+      "liens": [],
+      "sources": [
+        "abababababababababababababababababababababababababababababababab"
+      ],
+      "sensible": false,
+      "propose_le": "2026-10-25T12:00:00Z"
+    }
+  ],
+  "pierres_tombales": [
+    {
+      "id": "famille.lea.p3",
+      "oublie_le": "2026-10-25T12:00:00Z",
+      "motif": "demande",
+      "versions_effacees": 2
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+# Cibles de fuzzing de maia-federee (C-26) — cargo-fuzz, nightly.
+# Hors du workspace (table [workspace] propre) : les builds normaux l'ignorent.
+# Lancement : cd crates/maia-federee/fuzz && cargo +nightly fuzz run fiche
+# Corpus initial : cargo run --example generer_graines (stable) → seeds/<cible>/.
+[package]
+name = "maia-federee-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+maia-federee = { path = ".." }
+miyusceau = { path = "../../miyusceau" }
+sha2 = "0.10"
+
+[workspace]
+members = ["."]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "fiche"
+path = "fuzz_targets/fiche.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "requete"
+path = "fuzz_targets/requete.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "lecteur"
+path = "fuzz_targets/lecteur.rs"
+test = false
+doc = false
+bench = false

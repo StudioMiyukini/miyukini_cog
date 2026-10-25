@@ -330,6 +330,15 @@ mod tests {
     }
 
     #[test]
+    fn requete_construite_toujours_relue() {
+        // Non-régression (fuzzing, cible `requete`) : normalisation non
+        // idempotente ⇒ requête construite refusée « non canonique » au décodage.
+        let r = RequeteTypee::nouvelle("\u{041D}-P\u{1b}\u{041D}\u{1b}P\u{1b}\u{041D}", &[], Some("fr"), 1).unwrap();
+        assert_eq!(r.sujet(), "H-PHPH");
+        assert_eq!(RequeteTypee::decoder(&r.encoder().unwrap()).unwrap(), r);
+    }
+
+    #[test]
     fn service_deterministe_audience_quota_publiable() {
         let cle = CleSignature::generer();
         let mut s = ServiceRequete::new();

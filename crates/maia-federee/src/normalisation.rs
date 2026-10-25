@@ -109,8 +109,29 @@ fn normaliser_homoglyphes(texte: &str) -> String {
     sortie
 }
 
-/// Étapes 1 à 4, sans mise en forme des espaces.
+/// Passes au plus du point fixe de [`nettoyer`] (2 suffisent en pratique).
+const MAX_PASSES: usize = 8;
+
+/// Étapes 1 à 4, sans mise en forme des espaces, **jusqu'au point fixe** :
+/// une passe peut en appeler une autre (suppression qui forme un mot mixte,
+/// homoglyphes ramenés qui rendent le latin dominant, marque combinante
+/// rapprochée de sa base) ; sans cela la normalisation n'est pas idempotente
+/// et une requête construite par `RequeteTypee::nouvelle` est refusée comme
+/// « non canonique » par `RequeteTypee::decoder` (trouvé par fuzzing).
 fn nettoyer(texte: &str) -> String {
+    let mut courant = nettoyer_une_passe(texte);
+    for _ in 1..MAX_PASSES {
+        let suivant = nettoyer_une_passe(&courant);
+        if suivant == courant {
+            break;
+        }
+        courant = suivant;
+    }
+    courant
+}
+
+/// Une passe des étapes 1 à 4.
+fn nettoyer_une_passe(texte: &str) -> String {
     let nfkc: String = texte.nfkc().collect();
     let filtre: String = nfkc
         .chars()
@@ -200,6 +221,22 @@ mod tests {
             let une = normaliser(t);
             assert_eq!(normaliser(&une), une);
         }
+    }
+
+    #[test]
+    fn idempotente_quand_une_passe_en_appelle_une_autre() {
+        // Non-régression (fuzzing, cible `requete`) : la suppression des
+        // contrôles forme le mot mixte « PНPН », ramené au latin, ce qui rend
+        // le latin dominant ; le « Н » isolé ne l'était qu'à la 2e passe.
+        let t = "\u{041D}-P\u{1b}\u{041D}\u{1b}P\u{1b}\u{041D}";
+        let une = normaliser_ligne(t);
+        assert_eq!(une, "H-PHPH");
+        assert_eq!(normaliser_ligne(&une), une);
+        assert_eq!(normaliser(&normaliser(t)), normaliser(t));
+        // Marque combinante séparée de sa base par un invisible : composée.
+        let e = normaliser("e\u{200B}\u{0301}");
+        assert_eq!(e, "\u{e9}");
+        assert_eq!(normaliser(&e), e);
     }
 
     #[test]
