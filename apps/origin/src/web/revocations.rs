@@ -2,7 +2,7 @@
 //! @do     suivre_revocations_cogs_reconnus
 //! @role   securite
 //! @layer  app
-//! @human  origin — révocations des COG reconnus : suivi vérifié de leur registre (`SuiviRevocationsRegistre`), synchro par morceaux bornée, fraîcheur ≤ 15 min, refus sinon.
+//! @human  origin — révocations des COG reconnus : suivi vérifié de leur registre (`SuiviRevocationsRegistre`), synchro par morceaux authentifiés (enveloppe signée), bornée par COG et globalement, fraîcheur ≤ 15 min, refus sinon.
 
 //! Révocations des COG reconnus vues d'Origin (lot 2 §8.2, A-003, A-007).
 //!
@@ -19,31 +19,60 @@
 //!
 //! Indépendant du store du forum (l'admin en dépend aussi) : la route existe
 //! dès qu'Origin tourne. Le COG **pousse** JSON
-//! `{cog_id, depuis, tete?, entrees}` (titres en base64 URL). Aucune
-//! authentification de transport : tout est vérifié par la signature de la
-//! tête et la racine Merkle.
+//! `{cog_id, depuis, tete?, entrees, echeance, signature}` (titres et
+//! signature en base64 URL).
 //!
-//! - **Morceaux** : un envoi **sans** `tete` est un morceau : ses entrées
-//!   (au plus [`MAX_ENTREES_SYNCHRO`] par envoi, corps ≤ 2 Mio) s'accumulent
-//!   **en attente** pour ce COG. `depuis` doit valoir `taille du miroir +
-//!   entrées en attente` ; sinon (morceau incohérent) l'attente est **purgée**
-//!   et `409` rend `taille` (reprendre à cet index). L'attente est bornée par
-//!   COG : miroir + attente ≤ [`MAX_ENTREES_SUIVI`] entrées (1 048 576) et
-//!   ≤ [`MAX_OCTETS_SUIVI`] octets (256 Mio), comme `MiyuCloud` ; au-delà, purge
-//!   et `413`. Une attente sans tête depuis plus de 15 min est purgée.
+//! ## Enveloppe (chaque envoi, morceau ou tête)
+//!
+//! Chaque envoi est authentifié par une signature Ed25519 de la **clé de
+//! journal épinglée** du COG (la même que pour ses têtes) sur
+//! ([`octets_enveloppe`]) :
+//!
+//! ```text
+//! "miyukini/origin/revocations/morceau/v1" ‖ 0x00     (DOMAINE_ENVELOPPE)
+//! ‖ u16 BE longueur(cog_id) ‖ cog_id (UTF-8)
+//! ‖ u64 BE depuis
+//! ‖ u64 BE nombre d'entrées
+//! ‖ SHA-256( ‖ pour chaque entrée : u32 BE longueur ‖ octets )   (32 o)
+//! ‖ u8 tête présente (0 | 1) ‖ SHA-256(tête) ou 32 × 0x00         (33 o)
+//! ‖ u64 BE echeance (secondes Unix)
+//! ```
+//!
+//! - `echeance` : courte, au plus [`DUREE_MAX_ENVELOPPE_SECS`] (15 min) après
+//!   l'heure d'Origin (+ [`TOLERANCE_HORLOGE_SECS`] de dérive) ; dépassée ⇒ `401`.
+//! - La signature (64 o, `verify_strict`) est vérifiée **avant toute
+//!   modification d'état** et **avant** la limite de débit par COG : un envoi
+//!   non signé, mal signé ou signé par une autre clé est refusé (`401`) sans
+//!   toucher à l'attente ni au quota du COG.
+//! - Anti-rejeu : l'empreinte du message signé est retenue jusqu'à son
+//!   échéance ; un rejeu est **sans effet** (`200`, `rejeu: true`, état
+//!   courant rendu, rien de modifié).
+//!
+//! ## Morceaux et tête
+//!
+//! - **Morceau** : un envoi **sans** `tete` ; ses entrées (au plus
+//!   [`MAX_ENTREES_SYNCHRO`] par envoi, corps ≤ 2 Mio) s'accumulent **en
+//!   attente** pour ce COG. `depuis` doit valoir `taille du miroir + entrées
+//!   en attente` ; sinon `409` rend `taille` (miroir) et `attendu` (position à
+//!   reprendre) **sans purger** l'attente. Bornes par COG : miroir + attente ≤
+//!   [`MAX_ENTREES_SUIVI`] entrées (1 048 576) et ≤ [`MAX_OCTETS_SUIVI`] octets
+//!   (256 Mio), comme `MiyuCloud` ; au-delà, purge et `413`. Bornes globales
+//!   (somme des attentes de tous les COG) : [`MAX_ENTREES_ATTENTE_GLOBALE`]
+//!   et [`MAX_OCTETS_ATTENTE_GLOBALE`] ; au-delà, `503` sans purge (réessayer).
+//!   Une attente sans tête depuis plus de 15 min est purgée.
 //! - **Tête** : l'envoi qui porte `tete` valide le tout (attente + ses propres
-//!   entrées) : racine reconstruite = racine signée. Refus ⇒ attente purgée,
-//!   rien d'autre n'est modifié. Sans attente, `depuis` ≤ taille du miroir
-//!   est toléré (chevauchement).
-//! - Rejeu à l'identique (même tête, rien de neuf) ⇒ `200`, `rejeu: true`,
-//!   sans recalcul.
-//! - Débit limité par IP et par COG (limiteur d'Origin), nombre d'entrées
-//!   contrôlé **avant** tout décodage base64, refus journalisés **agrégés**
+//!   entrées) : racine reconstruite = racine signée. Refus du registre ⇒
+//!   attente purgée, rien d'autre n'est modifié. Sans attente, `depuis` ≤
+//!   taille du miroir est toléré (chevauchement).
+//! - Rejeu de tête à l'identique (même tête, rien de neuf, nouvelle enveloppe)
+//!   ⇒ `200`, `rejeu: true`, sans recalcul.
+//! - Débit : par IP avant lecture du corps ; par COG **après** authentification
+//!   (un tiers ne peut pas épuiser le quota d'un COG). Nombre d'entrées
+//!   contrôlé **avant** tout décodage base64 ; refus journalisés **agrégés**
 //!   (un résumé par minute au plus, pas un `warn!` par requête).
 //!
-//! Limite connue : la route n'étant pas authentifiée, un tiers peut purger
-//! l'attente d'un COG (morceau incohérent) ; il ne peut rien faire accepter.
-//! Le COG reprend alors à `taille` ; la liste détenue reste valable 15 min.
+//! Seul le détenteur de la clé de journal peut donc modifier l'attente d'un
+//! COG (l'enrichir ou la faire purger).
 //!
 //! # Fail-closed
 //!
@@ -53,8 +82,9 @@
 //! COG renvoie son registre depuis l'index 0 (par morceaux au besoin).
 
 use std::collections::BTreeMap;
-use std::sync::Mutex;
+use std::sync::{Mutex, PoisonError};
 
+use ed25519_dalek::{Signature, VerifyingKey};
 use miyauth::http::b64_decoder;
 use miyauth::revocation::FRAICHEUR_MAX_DEFAUT_SECS;
 use miyauth::{CibleRevocation, CogId, ErreurRevocation, SourceRevocation};
@@ -76,6 +106,18 @@ pub const MAX_ENTREES_SYNCHRO: usize = 4096;
 pub const DUREE_ATTENTE_SECS: u64 = FRAICHEUR_MAX_DEFAUT_SECS;
 /// Fenêtre d'agrégation des refus journalisés.
 pub const FENETRE_JOURNAL_REFUS_SECS: u64 = 60;
+/// Domaine de séparation de l'enveloppe signée d'un envoi.
+pub const DOMAINE_ENVELOPPE: &[u8] = b"miyukini/origin/revocations/morceau/v1";
+/// Échéance maximale d'une enveloppe, comptée depuis l'heure d'Origin (15 min).
+pub const DUREE_MAX_ENVELOPPE_SECS: u64 = 15 * 60;
+/// Dérive d'horloge tolérée sur l'échéance (COG en avance).
+pub const TOLERANCE_HORLOGE_SECS: u64 = 120;
+/// Enveloppes retenues (anti-rejeu) par COG jusqu'à leur échéance.
+pub const MAX_ENVELOPPES_VUES: usize = 8192;
+/// Budget global de l'attente : entrées (somme sur tous les COG).
+pub const MAX_ENTREES_ATTENTE_GLOBALE: u64 = 2_097_152;
+/// Budget global de l'attente : octets (somme sur tous les COG, 512 Mio).
+pub const MAX_OCTETS_ATTENTE_GLOBALE: u64 = 512 * 1024 * 1024;
 
 /// Registre déclaré d'un COG reconnu.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -84,7 +126,8 @@ pub struct RegistreReconnu {
     pub cog: CogId,
     /// Identifiant de son registre (32 o).
     pub registre: [u8; 32],
-    /// Clé publique de journal : signe ses têtes et ses entrées de révocation.
+    /// Clé publique de journal : signe ses têtes, ses entrées de révocation et
+    /// les enveloppes de ses envois.
     pub cle_journal: [u8; 32],
 }
 
@@ -93,15 +136,25 @@ pub struct RegistreReconnu {
 pub enum RefusSynchro {
     /// COG sans registre déclaré.
     CogInconnu,
-    /// Position incohérente : reprendre à `taille` (attente purgée).
+    /// Enveloppe absente, mal formée, ou signature invalide pour la clé de journal.
+    NonAuthentifie,
+    /// Échéance de l'enveloppe dépassée ou trop lointaine.
+    EnveloppeExpiree,
+    /// Position incohérente : reprendre à `attendu` (attente conservée).
     Position {
         /// Taille actuelle du miroir.
         taille: u64,
+        /// Position attendue du prochain envoi (miroir + attente).
+        attendu: u64,
     },
     /// Trop d'entrées dans un envoi.
     TropDEntrees,
     /// Registre ou attente au-delà des bornes par COG (attente purgée).
     Bornes,
+    /// Budget global de l'attente épuisé (attente conservée, réessayer).
+    BudgetGlobal,
+    /// Trop d'enveloppes retenues pour ce COG (anti-rejeu saturé, réessayer).
+    TropDEnvois,
     /// Tête ou entrées refusées par le registre (signature, fraîcheur, racine…).
     Registre(String),
     /// État indisponible.
@@ -113,11 +166,28 @@ impl RefusSynchro {
     pub fn motif(&self) -> &'static str {
         match self {
             Self::CogInconnu => "cog_inconnu",
+            Self::NonAuthentifie => "non_authentifie",
+            Self::EnveloppeExpiree => "enveloppe_expiree",
             Self::Position { .. } => "position",
             Self::TropDEntrees => "trop_d_entrees",
             Self::Bornes => "bornes",
+            Self::BudgetGlobal => "budget_global",
+            Self::TropDEnvois => "trop_d_envois",
             Self::Registre(_) => "rejected",
             Self::EtatIndisponible => "unavailable",
+        }
+    }
+
+    /// Statut HTTP de la réponse.
+    pub fn statut(&self) -> u16 {
+        match self {
+            Self::CogInconnu => 403,
+            Self::NonAuthentifie | Self::EnveloppeExpiree => 401,
+            Self::Position { .. } => 409,
+            Self::TropDEntrees | Self::Bornes => 413,
+            Self::TropDEnvois => 429,
+            Self::Registre(_) => 400,
+            Self::BudgetGlobal | Self::EtatIndisponible => 503,
         }
     }
 }
@@ -126,9 +196,15 @@ impl std::fmt::Display for RefusSynchro {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CogInconnu => f.write_str("COG sans registre déclaré"),
-            Self::Position { taille } => write!(f, "position incorrecte (taille du miroir : {taille})"),
+            Self::NonAuthentifie => f.write_str("enveloppe non authentifiée"),
+            Self::EnveloppeExpiree => f.write_str("échéance de l'enveloppe hors fenêtre"),
+            Self::Position { taille, attendu } => {
+                write!(f, "position incorrecte (taille du miroir : {taille}, attendue : {attendu})")
+            }
             Self::TropDEntrees => write!(f, "plus de {MAX_ENTREES_SYNCHRO} entrées"),
             Self::Bornes => f.write_str("registre au-delà des bornes"),
+            Self::BudgetGlobal => f.write_str("budget global de l'attente épuisé"),
+            Self::TropDEnvois => f.write_str("trop d'enveloppes en cours pour ce COG"),
             Self::Registre(e) => write!(f, "registre : {e}"),
             Self::EtatIndisponible => f.write_str("état indisponible"),
         }
@@ -146,14 +222,112 @@ pub struct Synchronise {
     pub a_jour_au: Option<u64>,
     /// Révocations nouvelles prises en compte.
     pub ajoutees: usize,
-    /// Tête déjà appliquée, rien de neuf (aucun recalcul).
+    /// Tête déjà appliquée ou enveloppe rejouée : rien de modifié.
     pub rejeu: bool,
+}
+
+// ---------------------------------------------------------------------------
+// Enveloppe
+// ---------------------------------------------------------------------------
+
+/// Empreinte des entrées d'un envoi : SHA-256 des entrées concaténées, chacune
+/// préfixée de sa longueur (u32 BE) pour fixer les frontières.
+pub fn empreinte_entrees(entrees: &[Vec<u8>]) -> [u8; 32] {
+    let mut h = Sha256::new();
+    for e in entrees {
+        // Entrées bornées par le corps (≤ 2 Mio) : la longueur tient sur u32.
+        h.update(u32::try_from(e.len()).unwrap_or(u32::MAX).to_be_bytes());
+        h.update(e);
+    }
+    h.finalize().into()
+}
+
+/// Octets signés par la clé de journal du COG pour un envoi (voir l'en-tête du module).
+pub fn octets_enveloppe(cog: &CogId, depuis: u64, tete: Option<&[u8]>, entrees: &[Vec<u8>], echeance: u64) -> Vec<u8> {
+    let id = cog.as_str().as_bytes();
+    let mut m = Vec::with_capacity(DOMAINE_ENVELOPPE.len() + id.len() + 100);
+    m.extend_from_slice(DOMAINE_ENVELOPPE);
+    m.push(0);
+    // Un CogId est court (validé par `CogId::new`) : la longueur tient sur u16.
+    m.extend_from_slice(&u16::try_from(id.len()).unwrap_or(u16::MAX).to_be_bytes());
+    m.extend_from_slice(id);
+    m.extend_from_slice(&depuis.to_be_bytes());
+    m.extend_from_slice(&(entrees.len() as u64).to_be_bytes());
+    m.extend_from_slice(&empreinte_entrees(entrees));
+    if let Some(t) = tete {
+        m.push(1);
+        m.extend_from_slice(&Sha256::digest(t));
+    } else {
+        m.push(0);
+        m.extend_from_slice(&[0u8; 32]);
+    }
+    m.extend_from_slice(&echeance.to_be_bytes());
+    m
+}
+
+/// Envoi dont l'enveloppe a été vérifiée (construit seulement par
+/// [`RevocationsReconnues::authentifier`]).
+#[derive(Debug)]
+pub struct EnvoiAuthentifie {
+    cog: CogId,
+    depuis: u64,
+    tete: Option<Vec<u8>>,
+    entrees: Vec<Vec<u8>>,
+    echeance: u64,
+    /// SHA-256 du message signé (anti-rejeu).
+    empreinte: [u8; 32],
+}
+
+impl EnvoiAuthentifie {
+    /// COG authentifié.
+    pub fn cog(&self) -> &CogId {
+        &self.cog
+    }
+}
+
+// ---------------------------------------------------------------------------
+// État
+// ---------------------------------------------------------------------------
+
+/// Budget global de l'attente (somme sur tous les COG).
+#[derive(Debug)]
+struct BudgetGlobal {
+    max_entrees: u64,
+    max_octets: u64,
+    /// (entrées, octets) réservés.
+    utilise: Mutex<(u64, u64)>,
+}
+
+impl BudgetGlobal {
+    fn new(max_entrees: u64, max_octets: u64) -> Self {
+        Self { max_entrees, max_octets, utilise: Mutex::new((0, 0)) }
+    }
+
+    fn reserver(&self, entrees: u64, octets: u64) -> bool {
+        let mut u = self.utilise.lock().unwrap_or_else(PoisonError::into_inner);
+        let (e, o) = (u.0.saturating_add(entrees), u.1.saturating_add(octets));
+        if e > self.max_entrees || o > self.max_octets {
+            return false;
+        }
+        *u = (e, o);
+        true
+    }
+
+    fn liberer(&self, entrees: u64, octets: u64) {
+        let mut u = self.utilise.lock().unwrap_or_else(PoisonError::into_inner);
+        *u = (u.0.saturating_sub(entrees), u.1.saturating_sub(octets));
+    }
+
+    fn utilise(&self) -> (u64, u64) {
+        *self.utilise.lock().unwrap_or_else(PoisonError::into_inner)
+    }
 }
 
 /// Entrées reçues sans tête, en attente de validation.
 #[derive(Debug, Default)]
 struct Attente {
     entrees: Vec<Vec<u8>>,
+    /// Octets réservés au budget global (= somme des longueurs des entrées).
     octets: u64,
     /// Taille du miroir quand l'attente a commencé.
     base: u64,
@@ -162,16 +336,36 @@ struct Attente {
 }
 
 impl Attente {
-    fn purger(&mut self) {
-        *self = Self::default();
+    /// Vide l'attente, rend ses entrées et libère sa part du budget global.
+    fn vider(&mut self, budget: &BudgetGlobal) -> Vec<Vec<u8>> {
+        budget.liberer(self.entrees.len() as u64, self.octets);
+        std::mem::take(self).entrees
     }
+
+    fn purger(&mut self, budget: &BudgetGlobal) {
+        drop(self.vider(budget));
+    }
+
+    fn perimee(&self, maintenant: u64) -> bool {
+        !self.entrees.is_empty() && maintenant > self.debut.saturating_add(DUREE_ATTENTE_SECS)
+    }
+}
+
+/// État mutable d'un COG (sérialise ses synchronisations).
+#[derive(Debug, Default)]
+struct EtatCog {
+    attente: Attente,
+    /// Empreintes des enveloppes traitées → échéance (anti-rejeu).
+    vues: BTreeMap<[u8; 32], u64>,
 }
 
 #[derive(Debug)]
 struct SuiviCog {
     suivi: SuiviRevocationsRegistre,
-    /// Sérialise les synchronisations de ce COG (jamais pris par les vérifications).
-    attente: Mutex<Attente>,
+    /// Clé de journal épinglée (vérifie les enveloppes).
+    cle_journal: VerifyingKey,
+    /// Jamais pris par les vérifications de révocation.
+    etat: Mutex<EtatCog>,
 }
 
 /// Journal agrégé des refus : un résumé par fenêtre au plus.
@@ -184,7 +378,7 @@ impl JournalRefus {
     /// Note un refus de motif `motif` ; rend le résumé à journaliser quand la
     /// fenêtre ([`FENETRE_JOURNAL_REFUS_SECS`]) ouverte par le premier refus est close.
     pub fn noter(&self, motif: &'static str, maintenant: u64) -> Option<String> {
-        let mut etat = self.etat.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let mut etat = self.etat.lock().unwrap_or_else(PoisonError::into_inner);
         let (comptes, debut) = &mut *etat;
         if comptes.is_empty() {
             *debut = maintenant;
@@ -202,26 +396,44 @@ impl JournalRefus {
 }
 
 /// Révocations des COG reconnus (un suivi par COG, tiré de son registre vérifié).
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct RevocationsReconnues {
     /// Fixée à la construction : aucun verrou global.
     cogs: BTreeMap<CogId, SuiviCog>,
     refus: JournalRefus,
+    budget: BudgetGlobal,
+}
+
+impl Default for RevocationsReconnues {
+    fn default() -> Self {
+        Self {
+            cogs: BTreeMap::new(),
+            refus: JournalRefus::default(),
+            budget: BudgetGlobal::new(MAX_ENTREES_ATTENTE_GLOBALE, MAX_OCTETS_ATTENTE_GLOBALE),
+        }
+    }
 }
 
 impl RevocationsReconnues {
     /// Suivi des registres déclarés. Doublon de COG ou clé invalide ⇒ erreur.
     pub fn new(registres: &[RegistreReconnu]) -> Result<Self, String> {
+        Self::avec_budget(registres, MAX_ENTREES_ATTENTE_GLOBALE, MAX_OCTETS_ATTENTE_GLOBALE)
+    }
+
+    /// Comme [`Self::new`], avec un budget global d'attente explicite.
+    pub fn avec_budget(registres: &[RegistreReconnu], max_entrees: u64, max_octets: u64) -> Result<Self, String> {
         let mut cogs = BTreeMap::new();
         for r in registres {
             let suivi = SuiviRevocationsRegistre::new(r.cog.clone(), r.registre, &r.cle_journal)
                 .map_err(|e| format!("cle_journal ({}) : {e}", r.cog))?;
-            let ancien = cogs.insert(r.cog.clone(), SuiviCog { suivi, attente: Mutex::new(Attente::default()) });
+            let cle_journal =
+                VerifyingKey::from_bytes(&r.cle_journal).map_err(|e| format!("cle_journal ({}) : {e}", r.cog))?;
+            let ancien = cogs.insert(r.cog.clone(), SuiviCog { suivi, cle_journal, etat: Mutex::new(EtatCog::default()) });
             if ancien.is_some() {
                 return Err(format!("registre déclaré deux fois pour {}", r.cog));
             }
         }
-        Ok(Self { cogs, refus: JournalRefus::default() })
+        Ok(Self { cogs, refus: JournalRefus::default(), budget: BudgetGlobal::new(max_entrees, max_octets) })
     }
 
     /// Registres déclarés dans `[[forum.cogs_reconnus]]` (`registre` + `cle_journal`).
@@ -259,6 +471,17 @@ impl RevocationsReconnues {
         self.cogs.get(cog)?.suivi.taille()
     }
 
+    /// Entrées en attente pour `cog` (sans tête).
+    pub fn en_attente(&self, cog: &CogId) -> Option<u64> {
+        let etat = self.cogs.get(cog)?.etat.lock().ok()?;
+        Some(etat.attente.entrees.len() as u64)
+    }
+
+    /// Budget global réservé : (entrées, octets) en attente, tous COG confondus.
+    pub fn attente_globale(&self) -> (u64, u64) {
+        self.budget.utilise()
+    }
+
     /// Note un refus de la route ; journalise un résumé agrégé au plus une fois par fenêtre.
     pub fn noter_refus(&self, motif: &'static str, maintenant: u64) {
         if let Some(resume) = self.refus.noter(motif, maintenant) {
@@ -266,44 +489,107 @@ impl RevocationsReconnues {
         }
     }
 
-    /// Synchronise `cog` : morceau (`tete` absente, entrées mises en attente)
-    /// ou tête (attente + `entrees` validées ensemble).
-    ///
-    /// Atomicité : le miroir et la liste de `cog` sont modifiés ensemble ou pas
-    /// du tout ([`SuiviRevocationsRegistre::appliquer`]). Seule l'**attente**
-    /// change sur refus : un morceau incohérent ou une tête refusée la purge.
-    pub fn synchroniser(
+    /// Vérifie l'enveloppe d'un envoi (échéance, signature de la clé de journal
+    /// de `cog`). **Aucun état n'est lu ni modifié** hormis la clé épinglée.
+    #[allow(clippy::too_many_arguments)]
+    pub fn authentifier(
         &self,
         cog: &CogId,
         depuis: u64,
-        tete: Option<&[u8]>,
-        entrees: &[Vec<u8>],
+        tete: Option<Vec<u8>>,
+        entrees: Vec<Vec<u8>>,
+        echeance: u64,
+        signature: &[u8; 64],
         maintenant: u64,
-    ) -> Result<Synchronise, RefusSynchro> {
+    ) -> Result<EnvoiAuthentifie, RefusSynchro> {
         if entrees.len() > MAX_ENTREES_SYNCHRO {
             return Err(RefusSynchro::TropDEntrees);
         }
         let suivi_cog = self.cogs.get(cog).ok_or(RefusSynchro::CogInconnu)?;
-        let mut attente = suivi_cog.attente.lock().map_err(|_| RefusSynchro::EtatIndisponible)?;
+        let limite = maintenant.saturating_add(DUREE_MAX_ENVELOPPE_SECS).saturating_add(TOLERANCE_HORLOGE_SECS);
+        if echeance < maintenant || echeance > limite {
+            return Err(RefusSynchro::EnveloppeExpiree);
+        }
+        let message = octets_enveloppe(cog, depuis, tete.as_deref(), &entrees, echeance);
+        suivi_cog
+            .cle_journal
+            .verify_strict(&message, &Signature::from_bytes(signature))
+            .map_err(|_| RefusSynchro::NonAuthentifie)?;
+        Ok(EnvoiAuthentifie {
+            cog: cog.clone(),
+            depuis,
+            tete,
+            entrees,
+            echeance,
+            empreinte: Sha256::digest(&message).into(),
+        })
+    }
+
+    /// Purge les attentes périmées des **autres** COG (sans attendre leur verrou).
+    fn balayer_perimees(&self, sauf: &CogId, maintenant: u64) {
+        for (c, s) in &self.cogs {
+            if c == sauf {
+                continue;
+            }
+            if let Ok(mut etat) = s.etat.try_lock() {
+                if etat.attente.perimee(maintenant) {
+                    etat.attente.purger(&self.budget);
+                }
+            }
+        }
+    }
+
+    /// Synchronise un envoi authentifié : morceau (`tete` absente, entrées
+    /// mises en attente) ou tête (attente + entrées validées ensemble).
+    ///
+    /// Atomicité : le miroir et la liste du COG sont modifiés ensemble ou pas
+    /// du tout ([`SuiviRevocationsRegistre::appliquer`]). Sur refus, seule une
+    /// tête refusée par le registre ou un dépassement des bornes du COG purge
+    /// l'attente ; une position incohérente ou le budget global la conservent.
+    /// Une enveloppe déjà traitée est sans effet (`rejeu`).
+    pub fn synchroniser(&self, envoi: &EnvoiAuthentifie, maintenant: u64) -> Result<Synchronise, RefusSynchro> {
+        if envoi.echeance < maintenant {
+            return Err(RefusSynchro::EnveloppeExpiree);
+        }
+        let suivi_cog = self.cogs.get(&envoi.cog).ok_or(RefusSynchro::CogInconnu)?;
+        let mut etat = suivi_cog.etat.lock().map_err(|_| RefusSynchro::EtatIndisponible)?;
         let suivi = &suivi_cog.suivi;
         let taille = suivi.taille().ok_or(RefusSynchro::EtatIndisponible)?;
-        let perimee = maintenant > attente.debut.saturating_add(DUREE_ATTENTE_SECS);
-        if !attente.entrees.is_empty() && (attente.base != taille || perimee) {
-            attente.purger();
+        let EtatCog { attente, vues } = &mut *etat;
+        if attente.perimee(maintenant) || (!attente.entrees.is_empty() && attente.base != taille) {
+            attente.purger(&self.budget);
         }
         let en_attente = attente.entrees.len() as u64;
         let attendu = taille.saturating_add(en_attente);
 
-        let Some(tete) = tete else {
-            // Morceau : position exacte, bornes cumulées par COG.
-            if depuis != attendu {
-                attente.purger();
-                return Err(RefusSynchro::Position { taille });
+        // Anti-rejeu : une enveloppe ne sert qu'une fois, quelle qu'en soit l'issue.
+        vues.retain(|_, echeance| *echeance >= maintenant);
+        if vues.contains_key(&envoi.empreinte) {
+            return Ok(Synchronise { taille, en_attente, a_jour_au: suivi.a_jour_au(), ajoutees: 0, rejeu: true });
+        }
+        if vues.len() >= MAX_ENVELOPPES_VUES {
+            return Err(RefusSynchro::TropDEnvois);
+        }
+        vues.insert(envoi.empreinte, envoi.echeance);
+
+        let entrees = &envoi.entrees;
+        let Some(tete) = envoi.tete.as_deref() else {
+            // Morceau : position exacte, bornes par COG puis globales.
+            if envoi.depuis != attendu {
+                return Err(RefusSynchro::Position { taille, attendu });
             }
-            let octets = entrees.iter().fold(attente.octets, |t, e| t.saturating_add(e.len() as u64));
+            let ajout: u64 = entrees.iter().fold(0u64, |t, e| t.saturating_add(e.len() as u64));
+            let octets = attente.octets.saturating_add(ajout);
             if attendu.saturating_add(entrees.len() as u64) > MAX_ENTREES_SUIVI || octets > MAX_OCTETS_SUIVI {
-                attente.purger();
+                attente.purger(&self.budget);
                 return Err(RefusSynchro::Bornes);
+            }
+            let n = entrees.len() as u64;
+            if !self.budget.reserver(n, ajout) {
+                self.balayer_perimees(&envoi.cog, maintenant);
+                if !self.budget.reserver(n, ajout) {
+                    return Err(RefusSynchro::BudgetGlobal);
+                }
             }
             if attente.entrees.is_empty() {
                 attente.base = taille;
@@ -322,16 +608,15 @@ impl RevocationsReconnues {
 
         // Tête : valide l'attente et les entrées de cet envoi, ensemble.
         let resultat = if attente.entrees.is_empty() {
-            suivi.appliquer(tete, depuis, entrees, maintenant)
-        } else if depuis != attendu {
-            attente.purger();
-            return Err(RefusSynchro::Position { taille });
+            suivi.appliquer(tete, envoi.depuis, entrees, maintenant)
+        } else if envoi.depuis != attendu {
+            return Err(RefusSynchro::Position { taille, attendu });
         } else {
-            let mut toutes = std::mem::take(&mut attente.entrees);
+            let mut toutes = attente.vider(&self.budget);
             toutes.extend_from_slice(entrees);
             suivi.appliquer(tete, taille, &toutes, maintenant)
         };
-        attente.purger();
+        attente.purger(&self.budget);
         match resultat {
             Ok(a) => Ok(Synchronise {
                 taille: a.taille,
@@ -340,7 +625,7 @@ impl RevocationsReconnues {
                 ajoutees: a.ajoutees,
                 rejeu: a.rejeu,
             }),
-            Err(RefusSuivi::Couverture { taille, .. }) => Err(RefusSynchro::Position { taille }),
+            Err(RefusSuivi::Couverture { taille, .. }) => Err(RefusSynchro::Position { taille, attendu: taille }),
             Err(RefusSuivi::Bornes) => Err(RefusSynchro::Bornes),
             Err(RefusSuivi::EtatIndisponible) => Err(RefusSynchro::EtatIndisponible),
             Err(e @ RefusSuivi::Registre(_)) => Err(RefusSynchro::Registre(e.to_string())),
@@ -373,12 +658,18 @@ pub struct RevocationsSyncRequest {
     pub tete: Option<String>,
     /// Entrées `depuis..` (base64 URL), au plus [`MAX_ENTREES_SYNCHRO`].
     pub entrees: Vec<String>,
+    /// Échéance de l'enveloppe (secondes Unix, ≤ 15 min).
+    #[serde(default)]
+    pub echeance: Option<u64>,
+    /// Signature Ed25519 (base64 URL, 64 o) de [`octets_enveloppe`] par la clé de journal.
+    #[serde(default)]
+    pub signature: Option<String>,
 }
 
 /// Requête analysée (COG valide, nombre d'entrées borné), pas encore décodée.
 #[derive(Debug)]
 pub struct RequeteSynchro {
-    /// COG visé.
+    /// COG visé (non authentifié à ce stade).
     pub cog: CogId,
     requete: RevocationsSyncRequest,
 }
@@ -387,6 +678,7 @@ fn reponse(statut: u16, corps: &serde_json::Value) -> RouteResponse {
     let ligne = match statut {
         200 => "200 OK",
         400 => "400 Bad Request",
+        401 => "401 Unauthorized",
         403 => "403 Forbidden",
         409 => "409 Conflict",
         413 => "413 Payload Too Large",
@@ -407,7 +699,18 @@ pub fn refus(revocations: &RevocationsReconnues, statut: u16, motif: &'static st
     reponse(statut, &serde_json::json!({ "ok": false, "error": motif }))
 }
 
+fn reponse_refus(revocations: &RevocationsReconnues, e: &RefusSynchro, maintenant: u64) -> RouteResponse {
+    revocations.noter_refus(e.motif(), maintenant);
+    let mut corps = serde_json::json!({ "ok": false, "error": e.motif() });
+    if let RefusSynchro::Position { taille, attendu } = e {
+        corps["taille"] = (*taille).into();
+        corps["attendu"] = (*attendu).into();
+    }
+    reponse(e.statut(), &corps)
+}
+
 /// Clé du limiteur de débit pour `cog` (16 premiers octets de SHA-256).
+/// À n'utiliser que pour un COG **authentifié** ([`EnvoiAuthentifie::cog`]).
 pub fn cle_debit(cog: &CogId) -> [u8; 16] {
     let h = Sha256::digest(format!("origin/revocations/sync/{cog}").as_bytes());
     let mut cle = [0u8; 16];
@@ -435,17 +738,36 @@ pub fn analyser(revocations: &RevocationsReconnues, body: &[u8], maintenant: u64
     Ok(RequeteSynchro { cog, requete })
 }
 
-/// Décode et applique une requête analysée (calcul lourd : hors de la boucle async).
-pub fn traiter(revocations: &RevocationsReconnues, r: &RequeteSynchro, maintenant: u64) -> RouteResponse {
+/// Décode une requête analysée et vérifie son enveloppe (calcul lourd : hors
+/// de la boucle async). Aucun état n'est modifié.
+pub fn authentifier_requete(
+    revocations: &RevocationsReconnues,
+    r: &RequeteSynchro,
+    maintenant: u64,
+) -> Result<EnvoiAuthentifie, RouteResponse> {
+    let non_authentifie = |m| reponse_refus(revocations, &RefusSynchro::NonAuthentifie, m);
+    let (Some(echeance), Some(signature)) = (r.requete.echeance, r.requete.signature.as_deref()) else {
+        return Err(non_authentifie(maintenant));
+    };
+    let Some(signature) = b64_decoder(signature).and_then(|s| <[u8; 64]>::try_from(s).ok()) else {
+        return Err(non_authentifie(maintenant));
+    };
     let tete = match r.requete.tete.as_deref().map(b64_decoder) {
         None => None,
         Some(Some(t)) => Some(t),
-        Some(None) => return refus(revocations, 400, "base64", maintenant),
+        Some(None) => return Err(refus(revocations, 400, "base64", maintenant)),
     };
     let Some(entrees) = r.requete.entrees.iter().map(|e| b64_decoder(e)).collect::<Option<Vec<Vec<u8>>>>() else {
-        return refus(revocations, 400, "base64", maintenant);
+        return Err(refus(revocations, 400, "base64", maintenant));
     };
-    match revocations.synchroniser(&r.cog, r.requete.depuis, tete.as_deref(), &entrees, maintenant) {
+    revocations
+        .authentifier(&r.cog, r.requete.depuis, tete, entrees, echeance, &signature, maintenant)
+        .map_err(|e| reponse_refus(revocations, &e, maintenant))
+}
+
+/// Applique un envoi authentifié (calcul lourd : hors de la boucle async).
+pub fn appliquer_envoi(revocations: &RevocationsReconnues, envoi: &EnvoiAuthentifie, maintenant: u64) -> RouteResponse {
+    match revocations.synchroniser(envoi, maintenant) {
         Ok(s) => reponse(
             200,
             &serde_json::json!({
@@ -457,38 +779,42 @@ pub fn traiter(revocations: &RevocationsReconnues, r: &RequeteSynchro, maintenan
                 "rejeu": s.rejeu,
             }),
         ),
-        Err(e) => {
-            revocations.noter_refus(e.motif(), maintenant);
-            let statut = match &e {
-                RefusSynchro::CogInconnu => 403,
-                RefusSynchro::Position { .. } => 409,
-                RefusSynchro::TropDEntrees | RefusSynchro::Bornes => 413,
-                RefusSynchro::Registre(_) => 400,
-                RefusSynchro::EtatIndisponible => 503,
-            };
-            let mut corps = serde_json::json!({ "ok": false, "error": e.motif() });
-            if let RefusSynchro::Position { taille } = e {
-                corps["taille"] = taille.into();
-            }
-            reponse(statut, &corps)
-        }
+        Err(e) => reponse_refus(revocations, &e, maintenant),
     }
 }
 
-/// [`analyser`] puis [`traiter`] (sans limitation de débit : voir `web::server`).
+/// [`analyser`], [`authentifier_requete`] puis [`appliquer_envoi`] (sans
+/// limitation de débit : voir `web::server`).
 pub fn route_synchro(revocations: &RevocationsReconnues, body: &[u8], maintenant: u64) -> RouteResponse {
-    match analyser(revocations, body, maintenant) {
-        Ok(r) => traiter(revocations, &r, maintenant),
-        Err(refus) => refus,
-    }
+    let envoi = match analyser(revocations, body, maintenant).and_then(|r| authentifier_requete(revocations, &r, maintenant)) {
+        Ok(e) => e,
+        Err(refus) => return refus,
+    };
+    appliquer_envoi(revocations, &envoi, maintenant)
 }
 
 /// Banc d'essai : COG reconnu tenant un journal (tests seulement).
 #[cfg(test)]
 pub(crate) mod banc {
     use super::*;
+    use ed25519_dalek::{Signer, SigningKey};
     use miyuregistre::{cible_serie, Cible, Corps, EntreeRegistre, Journal, StockageMemoire};
     use miyusceau::{sceller, CleSignature};
+
+    /// Échéance des enveloppes du banc (10 min).
+    pub(crate) const VALIDITE: u64 = 600;
+
+    /// Signe l'enveloppe d'un envoi avec `cle`.
+    pub(crate) fn signer(
+        cle: &CleSignature,
+        cog: &CogId,
+        depuis: u64,
+        tete: Option<&[u8]>,
+        entrees: &[Vec<u8>],
+        echeance: u64,
+    ) -> [u8; 64] {
+        SigningKey::from_bytes(&cle.graine()).sign(&octets_enveloppe(cog, depuis, tete, entrees, echeance)).to_bytes()
+    }
 
     /// Registre d'un COG reconnu (côté COG).
     pub(crate) struct RegistreCog {
@@ -530,18 +856,75 @@ pub(crate) mod banc {
             (tete, self.journal.entrees(depuis, u64::MAX).unwrap())
         }
 
+        /// Envoi authentifié (enveloppe signée par la clé de journal, échéance `t + VALIDITE`).
+        pub(crate) fn envoi(
+            &self,
+            origin: &RevocationsReconnues,
+            depuis: u64,
+            tete: Option<&[u8]>,
+            entrees: &[Vec<u8>],
+            t: u64,
+        ) -> Result<EnvoiAuthentifie, RefusSynchro> {
+            let echeance = t + VALIDITE;
+            let sig = signer(&self.cle_journal, &self.cog, depuis, tete, entrees, echeance);
+            origin.authentifier(&self.cog, depuis, tete.map(<[u8]>::to_vec), entrees.to_vec(), echeance, &sig, t)
+        }
+
+        /// Comme [`Self::envoi`], sans copier les entrées.
+        pub(crate) fn envoi_vec(
+            &self,
+            origin: &RevocationsReconnues,
+            depuis: u64,
+            entrees: Vec<Vec<u8>>,
+            t: u64,
+        ) -> Result<EnvoiAuthentifie, RefusSynchro> {
+            let echeance = t + VALIDITE;
+            let sig = signer(&self.cle_journal, &self.cog, depuis, None, &entrees, echeance);
+            origin.authentifier(&self.cog, depuis, None, entrees, echeance, &sig, t)
+        }
+
+        /// Envoie (authentifie puis synchronise) à `t`.
+        pub(crate) fn envoyer(
+            &self,
+            origin: &RevocationsReconnues,
+            depuis: u64,
+            tete: Option<&[u8]>,
+            entrees: &[Vec<u8>],
+            t: u64,
+        ) -> Result<Synchronise, RefusSynchro> {
+            origin.synchroniser(&self.envoi(origin, depuis, tete, entrees, t)?, t)
+        }
+
+        /// Corps JSON signé de la route.
+        pub(crate) fn corps_json(&self, depuis: u64, tete: Option<&[u8]>, entrees: &[Vec<u8>], t: u64) -> String {
+            let b64 = |o: &[u8]| miyauth::http::b64_encoder(o);
+            let echeance = t + VALIDITE;
+            let sig = signer(&self.cle_journal, &self.cog, depuis, tete, entrees, echeance);
+            let mut corps = serde_json::json!({
+                "cog_id": self.cog.as_str(),
+                "depuis": depuis,
+                "entrees": entrees.iter().map(|e| b64(e)).collect::<Vec<_>>(),
+                "echeance": echeance,
+                "signature": b64(&sig),
+            });
+            if let Some(t) = tete {
+                corps["tete"] = b64(t).into();
+            }
+            corps.to_string()
+        }
+
         /// Synchronise `origin` (tête à `t`).
         pub(crate) fn pousser(&mut self, origin: &RevocationsReconnues, t: u64) -> Result<Synchronise, RefusSynchro> {
             let depuis = origin.taille(&self.cog).unwrap_or(0);
             let (tete, entrees) = self.publier(depuis, t);
-            origin.synchroniser(&self.cog, depuis, Some(&tete), &entrees, t)
+            self.envoyer(origin, depuis, Some(&tete), &entrees, t)
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::banc::RegistreCog;
+    use super::banc::{signer, RegistreCog, VALIDITE};
     use super::*;
     use miyauth::revocation::FRAICHEUR_MAX_DEFAUT_SECS;
     use miyusceau::CleSignature;
@@ -550,6 +933,20 @@ mod tests {
 
     fn cog(c: char) -> CogId {
         CogId::new(&c.to_string().repeat(26)).unwrap()
+    }
+
+    fn statut(rep: &RouteResponse) -> String {
+        match rep {
+            RouteResponse::Normal { status, .. } => status.clone(),
+            _ => String::new(),
+        }
+    }
+
+    fn json(rep: &RouteResponse) -> serde_json::Value {
+        match rep {
+            RouteResponse::Normal { body, .. } => serde_json::from_str(body).unwrap(),
+            _ => serde_json::Value::Null,
+        }
     }
 
     #[test]
@@ -616,23 +1013,26 @@ mod tests {
 
         // Mauvaise position : 409 avec la taille.
         let (tete, entrees) = r.publier(0, T0 + 10);
-        assert_eq!(origin.synchroniser(&r.cog, 5, Some(&tete), &entrees, T0 + 10), Err(RefusSynchro::Position { taille: 0 }));
-        // Tête signée par une autre clé que la clé de journal : refus, état inchangé.
+        assert_eq!(r.envoyer(&origin, 5, Some(&tete), &entrees, T0 + 10), Err(RefusSynchro::Position { taille: 0, attendu: 0 }));
+        // Tête signée par une autre clé que la clé de journal : refusée dès l'enveloppe.
         let mut faux = RegistreCog::new(r.cog.clone());
-        let (tete, entrees) = faux.publier(0, T0 + 20);
-        assert!(matches!(origin.synchroniser(&r.cog, 0, Some(&tete), &entrees, T0 + 20), Err(RefusSynchro::Registre(_))));
+        let (tete_f, entrees_f) = faux.publier(0, T0 + 20);
+        assert_eq!(faux.envoyer(&origin, 0, Some(&tete_f), &entrees_f, T0 + 20), Err(RefusSynchro::NonAuthentifie));
+        // Enveloppe authentique, tête d'une autre clé : refus du registre, état inchangé.
+        assert!(matches!(r.envoyer(&origin, 0, Some(&tete_f), &entrees_f, T0 + 20), Err(RefusSynchro::Registre(_))));
         // Entrée omise : position à reprendre ; entrée altérée (racine différente) : refus.
         r.revoquer(&cible, None, T0 + 30);
         let (tete, entrees) = r.publier(0, T0 + 30);
-        assert_eq!(origin.synchroniser(&r.cog, 0, Some(&tete), &[], T0 + 30), Err(RefusSynchro::Position { taille: 0 }));
+        assert_eq!(r.envoyer(&origin, 0, Some(&tete), &[], T0 + 30), Err(RefusSynchro::Position { taille: 0, attendu: 0 }));
         let mut alterees = entrees.clone();
         alterees[0] = b"faux".to_vec();
-        assert!(matches!(origin.synchroniser(&r.cog, 0, Some(&tete), &alterees, T0 + 30), Err(RefusSynchro::Registre(_))));
+        assert!(matches!(r.envoyer(&origin, 0, Some(&tete), &alterees, T0 + 30), Err(RefusSynchro::Registre(_))));
         assert_eq!(origin.est_revoque(&r.cog, &cible, T0 + 30), Ok(false));
         // COG inconnu, trop d'entrées.
-        assert_eq!(origin.synchroniser(&cog('z'), 0, Some(&tete), &[], T0), Err(RefusSynchro::CogInconnu));
+        let z = RegistreCog::new(cog('z'));
+        assert_eq!(z.envoi(&origin, 0, Some(&tete), &[], T0).unwrap_err(), RefusSynchro::CogInconnu);
         let trop = vec![Vec::new(); MAX_ENTREES_SYNCHRO + 1];
-        assert_eq!(origin.synchroniser(&r.cog, 0, Some(&tete), &trop, T0), Err(RefusSynchro::TropDEntrees));
+        assert_eq!(r.envoi(&origin, 0, Some(&tete), &trop, T0).unwrap_err(), RefusSynchro::TropDEntrees);
         // Déclaration en double refusée.
         assert!(RevocationsReconnues::new(&[r.declaration(), r.declaration()]).is_err());
     }
@@ -640,7 +1040,7 @@ mod tests {
     /// Pousse `entrees` par morceaux de `pas` puis la tête seule.
     fn pousser_par_morceaux(
         origin: &RevocationsReconnues,
-        c: &CogId,
+        r: &RegistreCog,
         depuis: u64,
         tete: &[u8],
         entrees: &[Vec<u8>],
@@ -649,15 +1049,15 @@ mod tests {
     ) -> Result<Synchronise, RefusSynchro> {
         let mut position = depuis;
         for morceau in entrees.chunks(pas) {
-            let s = origin.synchroniser(c, position, None, morceau, t)?;
+            let s = r.envoyer(origin, position, None, morceau, t)?;
             position += morceau.len() as u64;
             assert_eq!(s.taille + s.en_attente, position);
         }
-        origin.synchroniser(c, position, Some(tete), &[], t)
+        r.envoyer(origin, position, Some(tete), &[], t)
     }
 
     #[test]
-    fn registre_de_5000_entrees_synchronise_par_morceaux() {
+    fn registre_de_5000_entrees_synchronise_par_morceaux_authentifies() {
         let mut r = RegistreCog::new(cog('h'));
         let origin = RevocationsReconnues::new(&[r.declaration()]).unwrap();
         for i in 0..5000u32 {
@@ -668,46 +1068,130 @@ mod tests {
         let (tete, entrees) = r.publier(0, T0);
         assert_eq!(entrees.len(), 5000);
         // D'un seul envoi : impossible (borne par envoi).
-        assert_eq!(origin.synchroniser(&r.cog, 0, Some(&tete), &entrees, T0), Err(RefusSynchro::TropDEntrees));
-        let s = pousser_par_morceaux(&origin, &r.cog, 0, &tete, &entrees, MAX_ENTREES_SYNCHRO, T0).unwrap();
+        assert_eq!(r.envoi(&origin, 0, Some(&tete), &entrees, T0).unwrap_err(), RefusSynchro::TropDEntrees);
+        let s = pousser_par_morceaux(&origin, &r, 0, &tete, &entrees, MAX_ENTREES_SYNCHRO, T0).unwrap();
         assert_eq!((s.taille, s.en_attente, s.ajoutees, s.a_jour_au), (5000, 0, 5000, Some(T0)));
+        assert_eq!(origin.attente_globale(), (0, 0), "budget global rendu");
         let mut derniere = [0u8; 32];
         derniere[..4].copy_from_slice(&4999u32.to_be_bytes());
         assert_eq!(origin.est_revoque(&r.cog, &CibleRevocation::Cle(derniere), T0), Ok(true));
-        // Rejeu à l'identique : 200, rien de recalculé.
-        let s = origin.synchroniser(&r.cog, 5000, Some(&tete), &[], T0 + 1).unwrap();
+        // Rejeu de tête à l'identique (nouvelle enveloppe) : 200, rien de recalculé.
+        let s = r.envoyer(&origin, 5000, Some(&tete), &[], T0 + 1).unwrap();
         assert!(s.rejeu);
         assert_eq!((s.taille, s.ajoutees), (5000, 0));
     }
 
     #[test]
-    fn morceau_incoherent_purge_l_attente() {
+    fn morceau_non_authentifie_refuse_sans_purge() {
         let mut r = RegistreCog::new(cog('h'));
         let origin = RevocationsReconnues::new(&[r.declaration()]).unwrap();
         for i in 0..10u8 {
             r.revoquer(&CibleRevocation::Cle([i; 32]), None, T0);
         }
         let (tete, entrees) = r.publier(0, T0);
-        assert_eq!(origin.synchroniser(&r.cog, 0, None, &entrees[..4], T0).unwrap().en_attente, 4);
-        // Morceau à une mauvaise position : attente purgée, reprendre à `taille`.
-        assert_eq!(origin.synchroniser(&r.cog, 6, None, &entrees[6..], T0), Err(RefusSynchro::Position { taille: 0 }));
-        assert_eq!(origin.synchroniser(&r.cog, 4, None, &entrees[4..], T0), Err(RefusSynchro::Position { taille: 0 }));
-        // Morceau falsifié : la tête refuse le tout, l'attente est purgée, rien n'est appliqué.
-        origin.synchroniser(&r.cog, 0, None, &entrees[..5], T0).unwrap();
-        origin.synchroniser(&r.cog, 5, None, &[b"faux".to_vec()], T0).unwrap();
-        assert!(matches!(origin.synchroniser(&r.cog, 6, Some(&tete), &entrees[6..], T0), Err(RefusSynchro::Registre(_))));
+        assert_eq!(r.envoyer(&origin, 0, None, &entrees[..4], T0).unwrap().en_attente, 4);
+        let echeance = T0 + VALIDITE;
+        let tenter = |depuis: u64, morceau: &[Vec<u8>], sig: &[u8; 64], echeance: u64| {
+            origin.authentifier(&r.cog, depuis, None, morceau.to_vec(), echeance, sig, T0).map(|_| ())
+        };
+        // Non signé (signature nulle), mal signé (autre contenu), signé par une autre clé :
+        // refusés à l'authentification ; aucun ne peut purger (mauvaise position 6) ni enrichir.
+        assert_eq!(tenter(6, &entrees[6..], &[0u8; 64], echeance), Err(RefusSynchro::NonAuthentifie));
+        let sig_autre_contenu = signer(&r.cle_journal, &r.cog, 4, None, &entrees[4..6], echeance);
+        assert_eq!(tenter(6, &entrees[6..], &sig_autre_contenu, echeance), Err(RefusSynchro::NonAuthentifie));
+        let intrus = CleSignature::generer();
+        let sig_intrus = signer(&intrus, &r.cog, 6, None, &entrees[6..], echeance);
+        assert_eq!(tenter(6, &entrees[6..], &sig_intrus, echeance), Err(RefusSynchro::NonAuthentifie));
+        let sig_intrus = signer(&intrus, &r.cog, 4, None, &[b"faux".to_vec()], echeance);
+        assert_eq!(tenter(4, &[b"faux".to_vec()], &sig_intrus, echeance), Err(RefusSynchro::NonAuthentifie));
+        // Échéance trop lointaine ou dépassée : refus, même bien signée.
+        let loin = T0 + DUREE_MAX_ENVELOPPE_SECS + TOLERANCE_HORLOGE_SECS + 1;
+        let sig = signer(&r.cle_journal, &r.cog, 4, None, &entrees[4..6], loin);
+        assert_eq!(tenter(4, &entrees[4..6], &sig, loin), Err(RefusSynchro::EnveloppeExpiree));
+        let sig = signer(&r.cle_journal, &r.cog, 4, None, &entrees[4..6], T0 - 1);
+        assert_eq!(tenter(4, &entrees[4..6], &sig, T0 - 1), Err(RefusSynchro::EnveloppeExpiree));
+        assert_eq!(origin.en_attente(&r.cog), Some(4), "attente intacte");
+
+        // Par la route : sans enveloppe, mal signée ⇒ 401, attente intacte.
+        let b64 = |o: &[u8]| miyauth::http::b64_encoder(o);
+        let sans = serde_json::json!({"cog_id": r.cog.as_str(), "depuis": 9, "entrees": [b64(b"x")]}).to_string();
+        assert!(statut(&route_synchro(&origin, sans.as_bytes(), T0)).starts_with("401"));
+        let mal = serde_json::json!({
+            "cog_id": r.cog.as_str(), "depuis": 9, "entrees": [b64(b"x")], "echeance": echeance, "signature": b64(&sig_intrus),
+        })
+        .to_string();
+        assert!(statut(&route_synchro(&origin, mal.as_bytes(), T0)).starts_with("401"));
+        assert_eq!(origin.en_attente(&r.cog), Some(4), "attente intacte");
+
+        // Morceau authentifié à une mauvaise position : 409 avec la position attendue, sans purge.
+        assert_eq!(r.envoyer(&origin, 6, None, &entrees[6..], T0), Err(RefusSynchro::Position { taille: 0, attendu: 4 }));
+        assert_eq!(origin.en_attente(&r.cog), Some(4));
+        // Reprise à `attendu` : le flot authentique aboutit.
+        r.envoyer(&origin, 4, None, &entrees[4..8], T0).unwrap();
+        let s = r.envoyer(&origin, 8, Some(&tete), &entrees[8..], T0).unwrap();
+        assert_eq!((s.taille, s.ajoutees, s.en_attente), (10, 10, 0));
+    }
+
+    #[test]
+    fn rejeu_d_enveloppe_sans_effet() {
+        let mut r = RegistreCog::new(cog('h'));
+        let origin = RevocationsReconnues::new(&[r.declaration()]).unwrap();
+        for i in 0..6u8 {
+            r.revoquer(&CibleRevocation::Cle([i; 32]), None, T0);
+        }
+        let (tete, entrees) = r.publier(0, T0);
+        let morceau = r.envoi(&origin, 0, None, &entrees[..3], T0).unwrap();
+        assert_eq!(origin.synchroniser(&morceau, T0).unwrap().en_attente, 3);
+        // Même enveloppe rejouée : sans effet (pas de doublon dans l'attente, pas de 409).
+        let s = origin.synchroniser(&morceau, T0 + 1).unwrap();
+        assert!(s.rejeu);
+        assert_eq!((s.taille, s.en_attente), (0, 3));
+        // Même enveloppe reçue de nouveau par la route : idem.
+        let corps = r.corps_json(0, None, &entrees[..3], T0);
+        let rep = route_synchro(&origin, corps.as_bytes(), T0);
+        assert!(statut(&rep).starts_with("200"));
+        assert_eq!(json(&rep)["rejeu"], true);
+        assert_eq!(origin.en_attente(&r.cog), Some(3));
+        // Le flot continue ; la tête rejouée après application est sans effet.
+        r.envoyer(&origin, 3, None, &entrees[3..], T0).unwrap();
+        let fin = r.envoi(&origin, 6, Some(&tete), &[], T0).unwrap();
+        assert_eq!(origin.synchroniser(&fin, T0).unwrap().ajoutees, 6);
+        let s = origin.synchroniser(&fin, T0 + 2).unwrap();
+        assert!(s.rejeu);
+        assert_eq!((s.taille, s.ajoutees), (6, 0));
+        // Enveloppe échue : refusée même à l'application.
+        assert_eq!(origin.synchroniser(&fin, T0 + VALIDITE + 1), Err(RefusSynchro::EnveloppeExpiree));
+    }
+
+    #[test]
+    fn morceau_authentifie_incoherent() {
+        let mut r = RegistreCog::new(cog('h'));
+        let origin = RevocationsReconnues::new(&[r.declaration()]).unwrap();
+        for i in 0..10u8 {
+            r.revoquer(&CibleRevocation::Cle([i; 32]), None, T0);
+        }
+        let (tete, entrees) = r.publier(0, T0);
+        // Morceau falsifié mais signé par le COG : la tête refuse le tout, l'attente est purgée.
+        r.envoyer(&origin, 0, None, &entrees[..5], T0).unwrap();
+        r.envoyer(&origin, 5, None, &[b"faux".to_vec()], T0).unwrap();
+        assert!(matches!(r.envoyer(&origin, 6, Some(&tete), &entrees[6..], T0), Err(RefusSynchro::Registre(_))));
         assert_eq!(origin.taille(&r.cog), Some(0));
-        assert_eq!(origin.synchroniser(&r.cog, 6, None, &[], T0), Err(RefusSynchro::Position { taille: 0 }));
-        // Tête avant la fin des morceaux : position à reprendre, attente purgée.
-        origin.synchroniser(&r.cog, 0, None, &entrees[..5], T0).unwrap();
-        assert_eq!(origin.synchroniser(&r.cog, 5, Some(&tete), &[], T0), Err(RefusSynchro::Position { taille: 0 }));
+        assert_eq!(origin.en_attente(&r.cog), Some(0));
+        assert_eq!(origin.attente_globale(), (0, 0));
+        // Même morceau, même enveloppe : rejeu sans effet (rien n'est remis en attente).
+        assert!(r.envoyer(&origin, 0, None, &entrees[..5], T0).unwrap().rejeu);
+        assert_eq!(origin.en_attente(&r.cog), Some(0));
+        // Tête avant la fin des morceaux : position à reprendre, attente conservée.
+        r.envoyer(&origin, 0, None, &entrees[..5], T0 + 1).unwrap();
+        assert_eq!(r.envoyer(&origin, 3, Some(&tete), &[], T0 + 1), Err(RefusSynchro::Position { taille: 0, attendu: 5 }));
+        assert_eq!(origin.en_attente(&r.cog), Some(5));
         // Attente abandonnée plus de 15 min : purgée au morceau suivant.
-        origin.synchroniser(&r.cog, 0, None, &entrees[..5], T0).unwrap();
-        let tard = T0 + DUREE_ATTENTE_SECS + 1;
-        assert_eq!(origin.synchroniser(&r.cog, 5, None, &entrees[5..], tard), Err(RefusSynchro::Position { taille: 0 }));
+        let tard = T0 + 1 + DUREE_ATTENTE_SECS + 1;
+        assert_eq!(r.envoyer(&origin, 5, None, &entrees[5..], tard), Err(RefusSynchro::Position { taille: 0, attendu: 0 }));
+        assert_eq!(origin.attente_globale(), (0, 0));
         // Puis tout en règle : accepté (dernière partie portée par l'envoi de la tête).
-        origin.synchroniser(&r.cog, 0, None, &entrees[..5], T0).unwrap();
-        let s = origin.synchroniser(&r.cog, 5, Some(&tete), &entrees[5..], T0).unwrap();
+        r.envoyer(&origin, 0, None, &entrees[..5], tard).unwrap();
+        let s = r.envoyer(&origin, 5, Some(&tete), &entrees[5..], tard).unwrap();
         assert_eq!((s.taille, s.ajoutees, s.en_attente), (10, 10, 0));
     }
 
@@ -717,20 +1201,46 @@ mod tests {
         let origin = RevocationsReconnues::new(&[r.declaration()]).unwrap();
         // Octets : 256 Mio au plus en attente. Pages nulles non touchées : rien n'est
         // réellement occupé, le refus a lieu avant toute copie.
-        origin.synchroniser(&r.cog, 0, None, &[vec![1u8]], T0).unwrap();
+        r.envoyer(&origin, 0, None, &[vec![1u8]], T0).unwrap();
         let gros: Vec<Vec<u8>> = (0..MAX_ENTREES_SYNCHRO).map(|_| vec![0u8; 64 * 1024]).collect();
-        assert_eq!(origin.synchroniser(&r.cog, 1, None, &gros, T0), Err(RefusSynchro::Bornes));
-        drop(gros);
+        let envoi = r.envoi_vec(&origin, 1, gros, T0).unwrap();
+        assert_eq!(origin.synchroniser(&envoi, T0), Err(RefusSynchro::Bornes));
+        drop(envoi);
         // Purgée : on repart de 0.
-        assert_eq!(origin.synchroniser(&r.cog, 1, None, &[], T0), Err(RefusSynchro::Position { taille: 0 }));
+        assert_eq!(r.envoyer(&origin, 1, None, &[], T0), Err(RefusSynchro::Position { taille: 0, attendu: 0 }));
+        assert_eq!(origin.attente_globale(), (0, 0));
         // Entrées : miroir + attente ≤ 1 048 576.
         let petit = vec![vec![1u8]; MAX_ENTREES_SYNCHRO];
         let mut position = 0;
         while position + (MAX_ENTREES_SYNCHRO as u64) <= MAX_ENTREES_SUIVI {
-            origin.synchroniser(&r.cog, position, None, &petit, T0).unwrap();
+            r.envoyer(&origin, position, None, &petit, T0).unwrap();
             position += MAX_ENTREES_SYNCHRO as u64;
         }
-        assert_eq!(origin.synchroniser(&r.cog, position, None, &petit[..1], T0), Err(RefusSynchro::Bornes));
+        assert_eq!(r.envoyer(&origin, position, None, &petit[..1], T0), Err(RefusSynchro::Bornes));
+        assert_eq!(origin.attente_globale(), (0, 0));
+    }
+
+    #[test]
+    fn attente_bornee_globalement() {
+        let (a, b, c) = (RegistreCog::new(cog('a')), RegistreCog::new(cog('b')), RegistreCog::new(cog('c')));
+        // Budget global : 10 entrées, 1 000 octets.
+        let origin = RevocationsReconnues::avec_budget(&[a.declaration(), b.declaration(), c.declaration()], 10, 1000).unwrap();
+        let e = |n: usize, l: usize| vec![vec![7u8; l]; n];
+        a.envoyer(&origin, 0, None, &e(6, 10), T0).unwrap();
+        assert_eq!(origin.attente_globale(), (6, 60));
+        // B dépasserait le budget en entrées : 503 sans purge ni effet sur A.
+        assert_eq!(b.envoyer(&origin, 0, None, &e(5, 10), T0), Err(RefusSynchro::BudgetGlobal));
+        b.envoyer(&origin, 0, None, &e(4, 10), T0).unwrap();
+        assert_eq!(origin.attente_globale(), (10, 100));
+        assert_eq!((origin.en_attente(&a.cog), origin.en_attente(&b.cog)), (Some(6), Some(4)));
+        // Octets : C seul, mais au-delà de 1 000 octets cumulés.
+        assert_eq!(c.envoyer(&origin, 0, None, &e(1, 1), T0), Err(RefusSynchro::BudgetGlobal));
+        // Les attentes de A et B périment : le budget est récupéré au besoin (balayage).
+        let tard = T0 + DUREE_ATTENTE_SECS + 1;
+        c.envoyer(&origin, 0, None, &e(1, 901), tard).unwrap();
+        assert_eq!(origin.attente_globale(), (1, 901));
+        assert_eq!(c.envoyer(&origin, 1, None, &e(1, 100), tard), Err(RefusSynchro::BudgetGlobal));
+        assert_eq!(origin.en_attente(&c.cog), Some(1), "attente conservée");
     }
 
     #[test]
@@ -750,10 +1260,6 @@ mod tests {
     fn route_controle_avant_decodage() {
         let mut r = RegistreCog::new(cog('h'));
         let origin = RevocationsReconnues::new(&[r.declaration()]).unwrap();
-        let statut = |rep: &RouteResponse| match rep {
-            RouteResponse::Normal { status, .. } => status.clone(),
-            _ => String::new(),
-        };
         // Trop d'entrées : refus avant de décoder (chaînes invalides en base64).
         let corps = serde_json::json!({
             "cog_id": r.cog.as_str(), "depuis": 0, "entrees": vec!["!!"; MAX_ENTREES_SYNCHRO + 1],
@@ -767,10 +1273,13 @@ mod tests {
         // Morceau puis tête, par la route.
         r.revoquer(&CibleRevocation::Cle([3; 32]), None, T0);
         let (tete, entrees) = r.publier(0, T0);
-        let b64 = |o: &[u8]| miyauth::http::b64_encoder(o);
-        let corps = serde_json::json!({"cog_id": r.cog.as_str(), "depuis": 0, "entrees": [b64(&entrees[0])]}).to_string();
+        let corps = r.corps_json(0, None, &entrees[..1], T0);
         assert!(statut(&route_synchro(&origin, corps.as_bytes(), T0)).starts_with("200"));
-        let corps = serde_json::json!({"cog_id": r.cog.as_str(), "depuis": 1, "tete": b64(&tete), "entrees": []}).to_string();
+        // Mauvaise position : 409 avec `taille` et `attendu`.
+        let rep = route_synchro(&origin, r.corps_json(0, Some(&tete), &[], T0).as_bytes(), T0);
+        assert!(statut(&rep).starts_with("409"));
+        assert_eq!((json(&rep)["taille"].as_u64(), json(&rep)["attendu"].as_u64()), (Some(0), Some(1)));
+        let corps = r.corps_json(1, Some(&tete), &[], T0);
         assert!(statut(&route_synchro(&origin, corps.as_bytes(), T0)).starts_with("200"));
         assert_eq!(origin.est_revoque(&r.cog, &CibleRevocation::Cle([3; 32]), T0), Ok(true));
         assert_ne!(cle_debit(&r.cog), cle_debit(&cog('z')));

@@ -951,13 +951,8 @@ mod tests {
         /// Pousse le registre de `h` par la route HTTP (`depuis` = taille du miroir).
         fn pousser_http(&mut self, depuis: u64) -> RouteResponse {
             let (tete, entrees) = self.registre.publier(depuis, epoch_secs());
-            let corps = serde_json::json!({
-                "cog_id": self.cog_h.as_str(),
-                "depuis": depuis,
-                "tete": b64_encoder(&tete),
-                "entrees": entrees.iter().map(|e| b64_encoder(e)).collect::<Vec<_>>(),
-            })
-            .to_string();
+            // Envoi signé (enveloppe) par la clé de journal du registre.
+            let corps = self.registre.corps_json(depuis, Some(&tete), &entrees, epoch_secs());
             crate::web::revocations::route_synchro(&self.revocations, corps.as_bytes(), epoch_secs())
         }
 
@@ -1102,9 +1097,9 @@ mod tests {
         assert!(status_of(&m.login(&m.passeport(600, &m.cle_h))).starts_with("401"));
         registre.pousser(&revocations, epoch_secs()).unwrap();
         assert!(status_of(&m.login(&m.passeport(600, &m.cle_h))).starts_with("200"));
-        // Tête signée par une autre clé que la clé de journal déclarée : refusée.
+        // Envoi signé par une autre clé que la clé de journal déclarée : refusé (401).
         m.registre = RegistreCog::new(m.cog_h.clone());
-        assert!(status_of(&m.pousser_http(0)).starts_with("400"));
+        assert!(status_of(&m.pousser_http(0)).starts_with("401"));
     }
 
     #[test]

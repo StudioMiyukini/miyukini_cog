@@ -187,12 +187,13 @@ pub struct WebServer {
 }
 
 /// Route `POST /api/auth/revocations/sync` : suivi partagé (forum, admin) et
-/// limiteur de débit propre (par IP et par COG).
+/// limiteur de débit propre (par IP, puis par COG authentifié).
 #[derive(Clone)]
 pub struct SynchroRevocations {
     /// Suivis des registres des COG reconnus.
     pub suivi: Arc<revocations::RevocationsReconnues>,
-    /// Limiteur : `check_connection` par IP, `check_message` par COG ([`revocations::cle_debit`]).
+    /// Limiteur : `check_connection` par IP (avant tout), `check_message` par COG
+    /// authentifié ([`revocations::cle_debit`], après vérification de l'enveloppe).
     pub limiteur: Arc<RateLimiter>,
 }
 
@@ -412,8 +413,10 @@ async fn read_body(
 }
 
 /// `POST /api/auth/revocations/sync` : débit par IP (avant lecture du corps), corps
-/// borné, débit par COG (après analyse, avant décodage), application hors de la
-/// boucle async (vérifications et racine Merkle).
+/// borné, analyse (avant décodage), authentification de l'enveloppe par la clé
+/// de journal du COG (hors de la boucle async), **puis seulement** débit par COG
+/// (un tiers ne peut pas épuiser le quota d'un COG), enfin application (hors de
+/// la boucle async : vérifications et racine Merkle).
 async fn route_revocations(
     reader: &mut (impl AsyncReadExt + Unpin),
     headers: &[String],
@@ -438,11 +441,18 @@ async fn route_revocations(
         Err(refus) => return Ok(refus),
     };
     drop(body);
-    if !synchro.limiteur.check_message(&revocations::cle_debit(&requete.cog)).await.is_allowed() {
+    let suivi = Arc::clone(&synchro.suivi);
+    let envoi =
+        match tokio::task::spawn_blocking(move || revocations::authentifier_requete(&suivi, &requete, maintenant)).await {
+            Ok(Ok(envoi)) => envoi,
+            Ok(Err(refus)) => return Ok(refus),
+            Err(_) => return Ok(revocations::refus(&synchro.suivi, 503, "unavailable", maintenant)),
+        };
+    if !synchro.limiteur.check_message(&revocations::cle_debit(envoi.cog())).await.is_allowed() {
         return Ok(revocations::refus(&synchro.suivi, 429, "rate_limited_cog", maintenant));
     }
     let suivi = Arc::clone(&synchro.suivi);
-    match tokio::task::spawn_blocking(move || revocations::traiter(&suivi, &requete, maintenant)).await {
+    match tokio::task::spawn_blocking(move || revocations::appliquer_envoi(&suivi, &envoi, maintenant)).await {
         Ok(resp) => Ok(resp),
         Err(_) => Ok(revocations::refus(&synchro.suivi, 503, "unavailable", maintenant)),
     }
@@ -2235,6 +2245,52 @@ mod tests {
     use super::{
         extract_cog_slug, normalize_visit_path, parse_cog_id_from_query, rewrite_visit_location,
     };
+
+    /// Un tiers qui martèle la route avec le `cog_id` d'un COG (envois non signés,
+    /// depuis de nombreuses IP) n'épuise pas le quota par COG : le débit par COG
+    /// ne compte que les envois authentifiés.
+    #[tokio::test]
+    async fn spam_du_cog_id_n_epuise_pas_le_quota_du_cog() {
+        use super::{epoch_secs, revocations, route_revocations, RouteResponse, SynchroRevocations};
+        use miyauth::CogId;
+        use std::sync::Arc;
+
+        let statut = |r: &RouteResponse| match r {
+            RouteResponse::Normal { status, .. } => status.clone(),
+            _ => String::new(),
+        };
+        let mut r = revocations::banc::RegistreCog::new(CogId::new(&"h".repeat(26)).unwrap());
+        let suivi = Arc::new(revocations::RevocationsReconnues::new(&[r.declaration()]).unwrap());
+        let synchro = SynchroRevocations::new(Arc::clone(&suivi));
+        let envoyer = |corps: String, ip: std::net::IpAddr| {
+            let synchro = synchro.clone();
+            async move {
+                let entetes = vec![format!("Content-Length: {}", corps.len())];
+                route_revocations(&mut corps.as_bytes(), &entetes, ip, &synchro).await.unwrap()
+            }
+        };
+        // 400 envois forgés (> 300, quota par COG), répartis sur 4 IP (≤ 120 chacune).
+        let forge = serde_json::json!({
+            "cog_id": r.cog.as_str(), "depuis": 0, "entrees": ["eA"],
+            "echeance": epoch_secs() + 60, "signature": miyauth::http::b64_encoder(&[0u8; 64]),
+        })
+        .to_string();
+        for i in 0..400u32 {
+            let ip = std::net::IpAddr::from([203, 0, 113, u8::try_from(i / 100).unwrap()]);
+            assert!(statut(&envoyer(forge.clone(), ip).await).starts_with("401"));
+        }
+        assert_eq!(suivi.en_attente(&r.cog), Some(0));
+        // Le COG authentique passe encore : morceau puis tête.
+        let t = epoch_secs();
+        r.revoquer(&miyauth::CibleRevocation::Cle([5; 32]), None, t);
+        let (tete, entrees) = r.publier(0, t);
+        let ip = std::net::IpAddr::from([198, 51, 100, 7]);
+        let rep = envoyer(r.corps_json(0, None, &entrees, t), ip).await;
+        assert!(statut(&rep).starts_with("200"), "{}", statut(&rep));
+        let rep = envoyer(r.corps_json(1, Some(&tete), &[], t), ip).await;
+        assert!(statut(&rep).starts_with("200"), "{}", statut(&rep));
+        assert_eq!(suivi.taille(&r.cog), Some(1));
+    }
 
     #[test]
     fn parse_cog_id_from_query_decodes_value() {
