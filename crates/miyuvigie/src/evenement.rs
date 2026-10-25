@@ -131,3 +131,28 @@ pub trait SourceEvenements {
     /// Relève les événements disponibles.
     fn relever(&mut self) -> Result<Vec<EvenementFlux>, ErreurSource>;
 }
+
+/// Relevé d'une source de **lignes** de journal (relais NFLOG, convention
+/// `MDOU|`, A-004) : les lignes rendues, plus les entrées que la source n'a pas
+/// pu mettre en ligne (trame netlink ou paquet indécodable).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ReleveJournal {
+    /// Lignes au format canonique lu par [`crate::LecteurNftables`].
+    pub lignes: Vec<String>,
+    /// Entrées reçues mais non converties : comptées comme mal formées par la
+    /// Vigie (jamais bénignes, le capteur passe dégradé).
+    pub mal_formees: u64,
+}
+
+/// Source de lignes de journal relevée par une Vigie (relais NFLOG).
+///
+/// Même contrat que [`SourceEvenements`] : `Ok` = source vivante (même sans
+/// ligne), `Err` = source muette, défaillante ou ayant perdu des entrées —
+/// aucun pouls, capteur en échec (voie aveugle côté WorrySentinel, A-004).
+pub trait SourceJournal {
+    /// Capteur que représente cette source.
+    fn capteur(&self) -> &CapteurId;
+
+    /// Relève les lignes disponibles depuis la dernière relève.
+    fn relever_lignes(&mut self) -> Result<ReleveJournal, ErreurSource>;
+}

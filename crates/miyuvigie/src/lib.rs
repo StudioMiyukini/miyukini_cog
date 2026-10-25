@@ -18,7 +18,9 @@
 //! - [`SourceEvenements`] → [`EvenementFlux`] : événements de la Douane (adaptateur) ;
 //! - [`LecteurNftables`] : journaux NFLOG de la Douane, convention canonique
 //!   `MDOU|<lieu>|<chaine>|<MOTIF>|` + groupes 101–103 / 110–112 (A-004,
-//!   analyse stricte et recoupée avec les règles générées) ;
+//!   analyse stricte et recoupée avec les règles générées), relevées par
+//!   [`Vigie::relever_journal`] depuis une [`SourceJournal`] (relais NFLOG
+//!   `miyurelais`) ;
 //! - [`ControleSortie`] / [`analyser_proc_net_tcp`] : connexions de la zone COG
 //!   (toute destination hors boucle locale et hors Portail = critique, EX-12).
 //!
@@ -54,7 +56,9 @@ pub mod vigie;
 pub mod zone;
 
 pub use dedup::{Admission, Dedoublonneur};
-pub use evenement::{ErreurSource, EvenementFlux, Protocole, SourceEvenements, Verdict};
+pub use evenement::{
+    ErreurSource, EvenementFlux, Protocole, ReleveJournal, SourceEvenements, SourceJournal, Verdict,
+};
 pub use nftables::{Chaine, LecteurNftables, Lieu, MotifJournal, PrefixeDouane, ResultatLigne, MARQUEUR_PREFIXE};
 pub use regles::{
     Condition, Declenchement, ErreurRegles, JeuRegles, Regle, VerificateurJeuRegles,

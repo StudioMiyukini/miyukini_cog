@@ -1,0 +1,30 @@
+# Cible de fuzzing de miyurelais (EX-10, C-26) — cargo-fuzz, nightly.
+# Hors du workspace (table [workspace] propre) : les builds normaux l'ignorent.
+# Lancement : cd crates/miyurelais/fuzz && cargo +nightly fuzz run trame_nflog
+[package]
+name = "miyurelais-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+miyurelais = { path = ".." }
+miyuvigie = { path = "../../miyuvigie" }
+
+[workspace]
+members = ["."]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "trame_nflog"
+path = "fuzz_targets/trame_nflog.rs"
+test = false
+doc = false
+bench = false

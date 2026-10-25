@@ -19,7 +19,7 @@
 //! les connexions non attribuées (zone COG segmentée, INV-Z8).
 
 use crate::dedup::{Admission, Dedoublonneur};
-use crate::evenement::{EvenementFlux, SourceEvenements};
+use crate::evenement::{EvenementFlux, SourceEvenements, SourceJournal};
 use crate::nftables::{LecteurNftables, ResultatLigne};
 use crate::regles::{JeuRegles, REGLE_SORTIE};
 use crate::signal::{
@@ -111,6 +111,29 @@ impl Vigie {
         let mut c = Compteurs::default();
         let signaux = self.evaluer_flux(evts, &mut c);
         self.clore(signaux, c, maintenant_ms)
+    }
+
+    /// Relève une source de lignes de journal (relais NFLOG) et analyse.
+    ///
+    /// Source en erreur (muette, débordée, liaison perdue) ⇒ lot en échec, sans
+    /// pouls ; entrées non converties par la source ⇒ comptées mal formées,
+    /// capteur dégradé.
+    pub fn relever_journal(&mut self, source: &mut dyn SourceJournal, maintenant_ms: u64) -> LotVigie {
+        if source.capteur() != &self.config.capteur {
+            return self.lot_en_echec(maintenant_ms, "source rattachée à un autre capteur");
+        }
+        match source.relever_lignes() {
+            Ok(releve) => {
+                let mut lot = self.analyser_journal(releve.lignes.iter().map(String::as_str), maintenant_ms);
+                if releve.mal_formees > 0 {
+                    self.cumul.mal_formees += releve.mal_formees;
+                    lot.compteurs.mal_formees += releve.mal_formees;
+                    self.degrader(&mut lot, maintenant_ms);
+                }
+                lot
+            }
+            Err(e) => self.lot_en_echec(maintenant_ms, &e.to_string()),
+        }
     }
 
     /// Analyse des lignes de journal NFLOG de la Douane (convention `MDOU|`).

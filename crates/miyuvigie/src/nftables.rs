@@ -26,9 +26,10 @@
 //!
 //! # Format de ligne attendu
 //!
-//! Ligne textuelle rendue par le relais NFLOG (un abonné par groupe), au
-//! format des journaux netfilter du noyau précédé de l'horodatage, de l'hôte et
-//! du groupe :
+//! Ligne textuelle rendue par le relais NFLOG (`miyurelais`, un abonné par
+//! groupe ; format détaillé et origine de chaque jeton : `miyurelais::ligne`),
+//! au format des journaux netfilter du noyau précédé de l'horodatage, de
+//! l'hôte et du groupe :
 //!
 //! ```text
 //! 1729760000.123456 hote nflog-110: MDOU|zone-cog|transit|SORTIE-COG| IN=sv0 OUT=z-pi SRC=10.77.0.10 DST=93.184.216.34 LEN=60 TTL=64 PROTO=TCP SPT=40000 DPT=443 SYN

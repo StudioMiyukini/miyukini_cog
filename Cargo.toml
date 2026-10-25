@@ -19,6 +19,7 @@ members = [
     "crates/everbuddy",
     "crates/worrysentinel",
     "crates/miyuvigie",           # Vigies : capteurs IDS sous WorrySentinel (lot 3, EX-12, EX-49)
+    "crates/miyurelais",          # Relais NFLOG des Vigies : netlink en Rust pur, lignes MDOU|, capteur muet => voie aveugle (lot 3)
     "crates/miyuportail",         # Portail interne : voies à sens unique, MSCE, CDR, sas seccomp (lot 3, EX-44..46, EX-49)
     "crates/miyufrontiere",       # Câblage du lot 3 : Douane → Vigies, WorrySentinel → Portail + Douane, Portail → CDR (EX-12, EX-45, EX-49)
     "crates/miyuhybride",         # Services hybrides : manifeste signé H0–H3, moteur / façade / traité, façades jetables (lot 5, EX-16, EX-40..43, EX-48)

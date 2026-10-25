@@ -7502,10 +7502,30 @@ dependencies = [
 name = "miyuregistre"
 version = "0.1.0"
 dependencies = [
+ "axum 0.8.8",
+ "ed25519-dalek",
  "miyauth",
  "miyusceau",
+ "rustix",
+ "serde_json",
  "sha2",
+ "tempfile",
  "thiserror 2.0.18",
+ "tokio",
+ "ureq",
+ "zeroize",
+]
+
+[[package]]
+name = "miyurelais"
+version = "0.1.0"
+dependencies = [
+ "borderguard",
+ "caringnanny",
+ "miyudouane",
+ "miyuvigie",
+ "rustix",
+ "worrysentinel",
 ]
 
 [[package]]
