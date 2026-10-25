@@ -4,7 +4,7 @@
 //! @do     tester_service_h2_depuis_appareil_federe
 //! @role   test
 //! @layer  service
-//! @human  Sortie du lot 5 : un appareil fédéré réserve un créneau JayRDV par la façade (Franche), le moteur (zone COG) ne reçoit que des messages du traité via le Portail ; exposition désactivée et coupure de voie refusent, la façade est reconstruite.
+//! @human  Sortie du lot 5 : un appareil fédéré réserve un créneau JayRDV par la façade (Franche) — plusieurs appareils partagent une façade, anti-rejeu par auteur (A-007) —, le moteur (zone COG) ne reçoit que des messages du traité via le Portail ; exposition désactivée et coupure de voie refusent, la façade est reconstruite.
 //!
 //! Niveau bibliothèque, en processus, sans réseau : KindMother éphémère réel,
 //! Portail interne réel (sas en processus : même cœur que `portail-sas`),
@@ -229,12 +229,18 @@ impl Monde {
     /// Recalcule la preuve de possession d'une requête modifiée (client fautif
     /// qui détient sa clé d'appareil).
     fn reprouver(&mut self, req: &mut RequeteHttp) {
+        let cle = CleSignature::depuis_graine(&self.cle_appareil.graine());
+        self.reprouver_par(&cle, req);
+    }
+
+    /// Idem, pour la clé d'appareil donnée.
+    fn reprouver_par(&mut self, cle: &CleSignature, req: &mut RequeteHttp) {
         let r = self.envoyer(&ClientFedere::requete_defi());
         let v: serde_json::Value = serde_json::from_slice(&r.corps).unwrap();
         let id: [u8; 16] = miyauth::http::b64_decoder(v["id"].as_str().unwrap()).unwrap().try_into().unwrap();
         let defi: [u8; 32] = miyauth::http::b64_decoder(v["defi"].as_str().unwrap()).unwrap().try_into().unwrap();
         let liaison = liaison_requete(&req.methode, &req.chemin, &req.corps);
-        let pop = formater_pop(&id, &signer_pop(&self.cle_appareil, &defi, SERVICE, &liaison));
+        let pop = formater_pop(&id, &signer_pop(cle, &defi, SERVICE, &liaison));
         req.entetes.retain(|(n, _)| n != "x-miyu-pop");
         req.entetes.push(("x-miyu-pop".into(), pop));
     }
@@ -252,7 +258,17 @@ impl Monde {
     fn lire(&mut self, demande: &str) -> ReponseJson {
         let d = self.defi();
         let req = self.client.lire_reponse(&d, demande);
-        let r = self.envoyer(&req);
+        self.lire_requete(&req)
+    }
+
+    /// Lecture d'une réponse par un autre appareil de la même façade.
+    fn lire_par(&mut self, client: &ClientFedere, demande: &str) -> ReponseJson {
+        let d = self.defi();
+        self.lire_requete(&client.lire_reponse(&d, demande))
+    }
+
+    fn lire_requete(&mut self, req: &RequeteHttp) -> ReponseJson {
+        let r = self.envoyer(req);
         assert_eq!(r.statut, 200, "{}", String::from_utf8_lossy(&r.corps));
         serde_json::from_slice(&r.corps).unwrap()
     }
@@ -425,4 +441,109 @@ fn coupure_de_voie_la_facade_refuse_puis_est_reconstruite() {
     // La demande en vol a été purgée ; l'appareil réserve de nouveau, de bout en bout.
     assert_eq!(m.store.slot_by_id(&creneaux[1]).unwrap().unwrap().status, SlotStatus::Available);
     assert!(matches!(m.reserver(&creneaux[1]), ReponseJson::Confirmee { .. }));
+}
+
+/// Deux appareils fédérés, une seule instance de façade (A-007) : séquences
+/// anti-rejeu indépendantes, épinglage et retrait sans reconstruction, coupure
+/// qui condamne la façade pour tous.
+#[test]
+fn deux_appareils_federes_une_meme_facade() {
+    let mut m = monde();
+    m.service.activer_exposition().unwrap();
+    assert!(m.superviseur.surveiller().unwrap());
+    let cle_session = m.facade().cle_session();
+
+    // Appareil B (même COG reconnu, visa du COG hôte) : non épinglé, refusé.
+    let (cle_b, visa_b, passeport_b) = m.ids.appareil();
+    let pk_b = cle_b.cle_publique();
+    let copie_b = CleSignature::depuis_graine(&cle_b.graine());
+    let mut b = ClientFedere::new(cle_b, visa_b, passeport_b);
+    let d = m.defi();
+    let req = b.demander_creneaux(&d, "2026-11-02T00:00:00+00:00", "2026-11-03T00:00:00+00:00", T0).unwrap();
+    assert_eq!(m.envoyer(&req).statut, 403);
+
+    // Les Cores épinglent B dans la session ouverte : même façade, même clé.
+    m.superviseur.ajouter_auteur(pk_b).unwrap();
+    assert_eq!(m.superviseur.lancements(), 1);
+    assert_eq!(m.facade().cle_session(), cle_session);
+
+    // A avance seul (séquences 1 à 3).
+    let creneaux = m.creneaux();
+    assert_eq!(creneaux.len(), 3);
+    assert_eq!(m.creneaux(), creneaux);
+    let d = m.defi();
+    let rejouable_ada = m.client.demander_creneaux(&d, "2026-11-02T00:00:00+00:00", "2026-11-03T00:00:00+00:00", T0).unwrap();
+    let creneaux_ada = Monde::demande(&m.envoyer(&rejouable_ada));
+
+    // B dépose ses séquences 1 et 2, entrelacées avec A : toutes admises.
+    let d = m.defi();
+    let rejouable_bob = b.demander_creneaux(&d, "2026-11-02T00:00:00+00:00", "2026-11-03T00:00:00+00:00", T0).unwrap();
+    let creneaux_bob = Monde::demande(&m.envoyer(&rejouable_bob));
+    let d = m.defi();
+    let req = m.client.reserver(&d, &creneaux[0], "Ada", None, T0).unwrap();
+    let resa_ada = Monde::demande(&m.envoyer(&req));
+    let d = m.defi();
+    let req = b.reserver(&d, &creneaux[1], "Bob", None, T0).unwrap();
+    let resa_bob = Monde::demande(&m.envoyer(&req));
+    let rapport = m.moteur().traiter_lot(64).unwrap();
+    assert_eq!((rapport.recus.len(), rapport.refusees_portail), (4, 0));
+    assert!(matches!(m.lire(&creneaux_ada), ReponseJson::Creneaux { .. }));
+    assert!(matches!(m.lire_par(&b, &creneaux_bob), ReponseJson::Creneaux { .. }));
+    assert!(matches!(m.lire(&resa_ada), ReponseJson::Confirmee { .. }));
+    assert!(matches!(m.lire_par(&b, &resa_bob), ReponseJson::Confirmee { .. }));
+    // Chacun ne lit que ses réponses.
+    let d = m.defi();
+    assert_eq!(m.envoyer(&b.lire_reponse(&d, &creneaux_ada)).statut, 404);
+
+    // Rejeu de la trame A n° 3 (nouvelle preuve de possession), après l'avance de B : refusé.
+    let mut rejeu = rejouable_ada.clone();
+    m.reprouver(&mut rejeu);
+    assert_eq!(m.envoyer(&rejeu).statut, 409);
+    // Rejeu de B n° 1 : refusé aussi, chacun sa séquence.
+    let mut rejeu_bob = rejouable_bob.clone();
+    m.reprouver_par(&copie_b, &mut rejeu_bob);
+    assert_eq!(m.envoyer(&rejeu_bob).statut, 409);
+
+    // A dépose une réservation, puis les Cores le retirent avant le relevé :
+    // sa trame en quarantaine est refusée par le Portail ; B continue.
+    let d = m.defi();
+    let req = m.client.reserver(&d, &creneaux[2], "Ada", None, T0).unwrap();
+    let _en_vol = Monde::demande(&m.envoyer(&req));
+    let pk_a = m.cle_appareil.cle_publique();
+    m.superviseur.retirer_auteur(&pk_a).unwrap();
+    let d = m.defi();
+    let req = b.reserver(&d, &creneaux[2], "Bob", None, T0).unwrap();
+    let derniere_resa_bob = Monde::demande(&m.envoyer(&req));
+    let rapport = m.moteur().traiter_lot(64).unwrap();
+    assert_eq!(rapport.refusees_portail, 1, "trame de A refusée après son retrait");
+    assert!(matches!(rapport.recus.as_slice(), [Entrant::Reservation(r)] if r.creneau == creneaux[2]));
+    assert!(matches!(m.lire_par(&b, &derniere_resa_bob), ReponseJson::Confirmee { .. }));
+    // A retiré : toute nouvelle requête est refusée à la façade.
+    let d = m.defi();
+    let req = m.client.demander_creneaux(&d, "2026-11-02T00:00:00+00:00", "2026-11-03T00:00:00+00:00", T0).unwrap();
+    let r = m.envoyer(&req);
+    assert_eq!((r.statut, String::from_utf8_lossy(&r.corps).contains("auteur_hors_session")), (403, true));
+    assert_eq!(m.superviseur.lancements(), 1, "aucune reconstruction pour épingler ou retirer");
+
+    // A réépinglé : il reprend au-delà de sa marque haute ; son ancien rejeu reste refusé.
+    m.superviseur.ajouter_auteur(pk_a).unwrap();
+    let mut rejeu = rejouable_ada;
+    m.reprouver(&mut rejeu);
+    assert_eq!(m.envoyer(&rejeu).statut, 409);
+    let d = m.defi();
+    let req = m.client.demander_creneaux(&d, "2026-11-02T00:00:00+00:00", "2026-11-03T00:00:00+00:00", T0).unwrap();
+    let demande_a = Monde::demande(&m.envoyer(&req));
+    m.moteur().traiter_lot(64).unwrap();
+    assert!(matches!(m.lire(&demande_a), ReponseJson::Creneaux { .. }));
+
+    // Coupure de la voie : la façade est condamnée, les deux appareils refusés.
+    let (d_a, d_b) = (m.defi(), m.defi());
+    m.poignee.couper(&IdService::new(SERVICE).unwrap(), MotifCoupure::Anomalie).unwrap();
+    let req = m.client.reserver(&d_a, &creneaux[0], "Ada", None, T0).unwrap();
+    assert_eq!(m.envoyer(&req).statut, 503);
+    let req = b.reserver(&d_b, &creneaux[0], "Bob", None, T0).unwrap();
+    assert_eq!(m.envoyer(&req).statut, 503);
+    assert!(m.facade().db().est_vide());
+    assert!(!m.superviseur.surveiller().unwrap());
+    assert!(m.superviseur.facade().is_none());
 }

@@ -16,11 +16,17 @@
 //! - **INV-H5** : une coupure, une désactivation ou la fin de session
 //!   **condamnent** la façade : DB purgée, tout est refusé (503), la zone COG
 //!   la détruit et en reconstruit une neuve ([`miyuhybride::Superviseur`]) ;
+//! - **plusieurs appareils** (A-007) : une instance sert tous les auteurs
+//!   épinglés de la session ; chacun a sa propre séquence (filtre local, le
+//!   Portail fait foi) ; un appareil épinglé ou retiré par les Cores l'est
+//!   sans reconstruire la façade ;
 //! - DB secondaire : réponses publiées et cache des créneaux publiés, **jamais
 //!   autoritaire** (le moteur décide en zone COG à chaque réservation).
 //!
 //! La façade ne connaît ni l'adresse ni une poignée du moteur ou de
 //! KindMother : son seul lien est le [`GuichetFranche`] de sa voie.
+
+use std::collections::BTreeMap;
 
 use jayrdv_traite::{CreneauDisponible, DemandeCreneaux, Motif, Reservation, Sortant};
 use miyauth::http::{b64_decoder, b64_encoder, verifier_requete_visa, MagasinDefis, MagasinDefisMemoire};
@@ -58,7 +64,7 @@ pub struct ConfigurationFacade {
     pub revocations: RevocationsFederees,
 }
 
-/// Façade JayRDV : une instance par session, jetable.
+/// Façade JayRDV : une instance par session (tous ses appareils), jetable.
 #[derive(Debug)]
 pub struct FacadeJayRdv {
     guichet: GuichetFranche,
@@ -67,7 +73,9 @@ pub struct FacadeJayRdv {
     duree_max_session_secs: u64,
     config: ConfigurationFacade,
     defis: MagasinDefisMemoire,
-    derniere_sequence: Option<u64>,
+    /// Dernière séquence déposée **par auteur** (filtre précoce ; l'anti-rejeu
+    /// qui fait foi est celui du Portail, par auteur lui aussi).
+    dernieres_sequences: BTreeMap<[u8; 32], u64>,
     ouverte_le: Option<u64>,
     condamnee: bool,
 }
@@ -107,7 +115,7 @@ impl FacadeJayRdv {
             duree_max_session_secs: lancement.duree_max_session_secs,
             config,
             defis: MagasinDefisMemoire::new(CAPACITE_DEFIS, miyauth::http::DUREE_DEFI_SECS),
-            derniere_sequence: None,
+            dernieres_sequences: BTreeMap::new(),
             ouverte_le: None,
             condamnee: false,
         }
@@ -232,7 +240,7 @@ impl FacadeJayRdv {
         let Some(signature) = b64_taille::<64>(signature) else {
             return ReponseHttp::refus(400, "signature");
         };
-        if self.derniere_sequence.is_some_and(|s| sequence <= s) {
+        if self.dernieres_sequences.get(&auteur).is_some_and(|s| sequence <= *s) {
             return ReponseHttp::refus(409, "sequence");
         }
         let Ok(d) =
@@ -242,7 +250,7 @@ impl FacadeJayRdv {
         };
         match self.guichet.deposer(&d, &(auteur, signature)) {
             Ok(demande) => {
-                self.derniere_sequence = Some(sequence);
+                self.dernieres_sequences.insert(auteur, sequence);
                 if self.db.ecrire(T_ATTENTE, &demande, auteur.to_vec()).is_err() {
                     return ReponseHttp::refus(503, "db_secondaire_pleine");
                 }
@@ -267,7 +275,9 @@ impl FacadeJayRdv {
             ErreurHybride::Portail(ErreurPortail::FilePleine | ErreurPortail::DebitDepasse) => {
                 ReponseHttp::refus(429, "contre_pression")
             }
-            ErreurHybride::Portail(ErreurPortail::CleInvalide) => ReponseHttp::refus(403, "auteur"),
+            ErreurHybride::Portail(ErreurPortail::CleInvalide | ErreurPortail::AuteurNonEpingle) => {
+                ReponseHttp::refus(403, "auteur")
+            }
             ErreurHybride::Decodage(RefusDecodage::Signature | RefusDecodage::Signataires) => {
                 ReponseHttp::refus(403, "signature")
             }

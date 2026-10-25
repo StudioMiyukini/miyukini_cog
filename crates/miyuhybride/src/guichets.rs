@@ -32,7 +32,7 @@
 //! et le jeton d'une session close est refusé.
 
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 use ed25519_dalek::{Signer, SigningKey};
 use miyuportail::msce::{conforme_au_traite, decoder_trame, encoder_charge, octets_signes, sceller_cosigne, Contexte};
@@ -88,6 +88,11 @@ pub fn signer_auteur(cle: &CleSignature, d: &Declaration) -> Result<SignatureAut
 
 // ---------------------------------------------------------------- Franche
 
+/// Auteurs épinglés de la session, partagés entre les Cores (qui épinglent
+/// et retirent, A-007) et le guichet de la façade (qui filtre). La façade
+/// n'a qu'une lecture ; l'autorité reste l'épinglage du Portail.
+pub(crate) type AuteursSession = Arc<RwLock<Vec<[u8; 32]>>>;
+
 /// Guichet de la façade (Franche) : dépôt en quarantaine et lecture des publications.
 pub struct GuichetFranche {
     portail: Arc<PortailInterne>,
@@ -95,7 +100,7 @@ pub struct GuichetFranche {
     traite: Traite,
     cle_session: SigningKey,
     cle_publication: [u8; 32],
-    auteurs: Vec<[u8; 32]>,
+    auteurs: AuteursSession,
 }
 
 impl std::fmt::Debug for GuichetFranche {
@@ -110,7 +115,7 @@ impl GuichetFranche {
         service: IdService,
         traite: Traite,
         cle_session: SigningKey,
-        auteurs: Vec<[u8; 32]>,
+        auteurs: AuteursSession,
     ) -> Result<Self, ErreurHybride> {
         let cle_publication = portail.cle_publication(&service)?;
         Ok(Self { portail, service, traite, cle_session, cle_publication, auteurs })
@@ -131,9 +136,10 @@ impl GuichetFranche {
         self.cle_session.verifying_key().to_bytes()
     }
 
-    /// Vrai si `cle` est un auteur épinglé de la session.
+    /// Vrai si `cle` est un auteur épinglé de la session (plusieurs appareils
+    /// par façade, A-007 ; verrou empoisonné = faux, fail-closed).
     pub fn est_auteur(&self, cle: &[u8; 32]) -> bool {
-        self.auteurs.contains(cle)
+        self.auteurs.read().is_ok_and(|a| a.contains(cle))
     }
 
     /// Dépose une déclaration entrante signée par son auteur : contrôle du

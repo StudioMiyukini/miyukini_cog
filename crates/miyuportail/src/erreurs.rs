@@ -166,9 +166,18 @@ pub enum ErreurPortail {
     /// Deuxième validation en désaccord avec le sas.
     #[error("deuxième validation divergente")]
     ValidationDivergente,
-    /// Rejeu : numéro de séquence non strictement croissant.
+    /// Rejeu : numéro de séquence non strictement croissant pour cet auteur (A-007).
     #[error("séquence rejouée ou désordonnée")]
     Rejeu,
+    /// Auteur non épinglé dans la session (jamais épinglé ou retiré).
+    #[error("auteur non épinglé dans la session")]
+    AuteurNonEpingle,
+    /// Auteur déjà épinglé dans la session.
+    #[error("auteur déjà épinglé dans la session")]
+    AuteurDejaEpingle,
+    /// Trop d'auteurs épinglés ou connus dans la session.
+    #[error("trop d'auteurs dans la session")]
+    TropDAuteurs,
     /// Désarmement (CDR) refusé.
     #[error("désarmement refusé")]
     Desarmement,

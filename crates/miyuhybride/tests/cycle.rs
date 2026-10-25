@@ -226,3 +226,78 @@ fn coupure_condamne_puis_reconstruction_explicite() {
     assert_eq!(sup.lancements(), 2);
     assert_ne!(sup.facade().unwrap().guichet.cle_session(), cle1);
 }
+
+fn question_de(
+    auteur: &CleSignature,
+    g: &GuichetFranche,
+    seq: u64,
+    texte: &str,
+) -> Result<EmpreinteDemande, ErreurHybride> {
+    let d = declaration_entrante(g.service(), g.version_traite(), &Question { texte: texte.into() }, seq, T0).unwrap();
+    g.deposer(&d, &signer_auteur(auteur, &d).unwrap())
+}
+
+fn sequences(lot: Vec<Result<DemandeAdmise, ErreurPortail>>) -> Vec<Result<u64, ErreurPortail>> {
+    lot.into_iter().map(|r| r.map(|a| a.declaration.sequence)).collect()
+}
+
+#[test]
+fn plusieurs_appareils_une_seule_facade() {
+    let m = monde();
+    let b = CleSignature::generer();
+    m.service.activer_exposition().unwrap();
+    let mut sup =
+        Superviseur::new(Arc::clone(&m.service), IMAGE, vec![m.auteur.cle_publique()], |l: LancementFacade| {
+            FacadeEssai { guichet: l.guichet, condamnee: false }
+        });
+    // Façade lancée pour A seul.
+    assert!(sup.surveiller().unwrap());
+    assert!(!sup.facade().unwrap().guichet.est_auteur(&b.cle_publique()));
+
+    // B épinglé dans la session ouverte : même façade, même clé de session.
+    let cle = sup.facade().unwrap().guichet.cle_session();
+    sup.ajouter_auteur(b.cle_publique()).unwrap();
+    assert_eq!(sup.ajouter_auteur(b.cle_publique()), Err(ErreurHybride::Portail(ErreurPortail::AuteurDejaEpingle)));
+    assert_eq!(sup.lancements(), 1);
+    let g = &sup.facade().unwrap().guichet;
+    assert_eq!(g.cle_session(), cle);
+    assert!(g.est_auteur(&b.cle_publique()));
+
+    // Séquences propres à chaque appareil.
+    question_de(&m.auteur, g, 1, "a1").unwrap();
+    question_de(&b, g, 1, "b1").unwrap();
+    question_de(&b, g, 2, "b2").unwrap();
+    question_de(&m.auteur, g, 1, "a1 rejoué").unwrap();
+    let moteur = m.service.guichet_moteur();
+    assert_eq!(sequences(moteur.relever(8).unwrap()), vec![Ok(1), Ok(1), Ok(2), Err(ErreurPortail::Rejeu)]);
+
+    // A retiré : la façade le refuse, une trame en quarantaine aussi ; B continue.
+    question_de(&m.auteur, g, 2, "a2 en vol").unwrap();
+    let a = m.auteur.cle_publique();
+    sup.retirer_auteur(&a).unwrap();
+    let g = &sup.facade().unwrap().guichet;
+    assert!(!g.est_auteur(&a));
+    assert_eq!(question_de(&m.auteur, g, 3, "a3"), Err(ErreurHybride::Portail(ErreurPortail::CleInvalide)));
+    question_de(&b, g, 3, "b3").unwrap();
+    let lot = sequences(moteur.relever(8).unwrap());
+    assert!(lot[0].is_err());
+    assert_eq!(lot[1], Ok(3));
+    // Le dernier appareil ne se retire pas.
+    assert_eq!(
+        sup.retirer_auteur(&b.cle_publique()),
+        Err(ErreurHybride::Portail(ErreurPortail::TransitionRefusee))
+    );
+    assert_eq!(sup.auteurs(), &[b.cle_publique()]);
+    assert_eq!(sup.lancements(), 1);
+
+    // Coupure : la façade (donc les deux appareils) est condamnée.
+    sup.ajouter_auteur(a).unwrap();
+    m.poignee.couper(m.service.service(), MotifCoupure::Anomalie).unwrap();
+    let g = &sup.facade().unwrap().guichet;
+    assert!(question_de(&m.auteur, g, 10, "a").is_err());
+    assert!(question_de(&b, g, 10, "b").is_err());
+    sup.facade().unwrap().sonder();
+    assert!(!sup.surveiller().unwrap());
+    assert!(sup.facade().is_none());
+    assert_eq!(m.service.ajouter_auteur([1; 32]), Err(ErreurHybride::Portail(ErreurPortail::SessionAbsente)));
+}

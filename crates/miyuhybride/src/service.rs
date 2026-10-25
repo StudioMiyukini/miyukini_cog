@@ -14,20 +14,24 @@
 //!   conforme au manifeste (INV-H5), clé de session **éphémère générée en
 //!   zone COG** (INV-H6), auteurs épinglés, DB secondaire **vierge** ; le tout
 //!   remis à la façade dans un [`LancementFacade`] ;
+//! - **Appareils** ([`ServiceHybride::ajouter_auteur`],
+//!   [`ServiceHybride::retirer_auteur`]) : un appareil de plus (ou de moins)
+//!   est épinglé dans la session **ouverte**, sans reconstruire la façade ;
+//!   le Portail tient une séquence anti-rejeu **par auteur** (A-007) ;
 //! - **Fin de session / coupure** : façade détruite, DB purgée ; la façade
 //!   n'est jamais réparée, seulement reconstruite ([`Superviseur`]) ;
 //! - **Désinstallation** : voie supprimée, aucun résidu.
 
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, MutexGuard, RwLock};
 
 use ed25519_dalek::SigningKey;
-use miyuportail::{ClasseExposition, EtatVoie, IdService, PortailInterne, Traite};
+use miyuportail::{ClasseExposition, ErreurPortail, EtatVoie, IdService, PortailInterne, Traite};
 use rand_core::OsRng;
 
 use crate::db_secondaire::DbSecondaire;
 use crate::erreurs::ErreurHybride;
-use crate::guichets::{GuichetFranche, GuichetMoteur};
+use crate::guichets::{AuteursSession, GuichetFranche, GuichetMoteur};
 use crate::manifeste::{ContratFacade, ManifesteVerifie};
 
 const MIO: usize = 1024 * 1024;
@@ -52,6 +56,8 @@ pub struct ServiceHybride {
     traite: Traite,
     facade: ContratFacade,
     epoque: Arc<AtomicU64>,
+    /// Auteurs de la session ouverte, partagés avec le guichet de sa façade.
+    session: Mutex<Option<AuteursSession>>,
 }
 
 impl std::fmt::Debug for ServiceHybride {
@@ -67,7 +73,11 @@ impl ServiceHybride {
         let facade = manifeste.contrat().facade.ok_or(ErreurHybride::Classe)?;
         let traite = contrat.traite.clone();
         portail.declarer(contrat)?;
-        Ok(Self { portail, manifeste, traite, facade, epoque: Arc::new(AtomicU64::new(0)) })
+        Ok(Self { portail, manifeste, traite, facade, epoque: Arc::new(AtomicU64::new(0)), session: Mutex::new(None) })
+    }
+
+    fn session(&self) -> Result<MutexGuard<'_, Option<AuteursSession>>, ErreurHybride> {
+        self.session.lock().map_err(|_| ErreurHybride::EtatIndisponible)
     }
 
     /// Service.
@@ -93,6 +103,7 @@ impl ServiceHybride {
     /// Désactive l'exposition : session close, files purgées.
     pub fn desactiver_exposition(&self) -> Result<(), ErreurHybride> {
         self.epoque.fetch_add(1, Ordering::SeqCst);
+        self.session()?.take();
         Ok(self.portail.desactiver(self.service())?)
     }
 
@@ -115,20 +126,23 @@ impl ServiceHybride {
         }
         match self.etat()? {
             EtatVoie::Active => {}
-            EtatVoie::Desactivee => return Err(miyuportail::ErreurPortail::VoieDesactivee.into()),
-            EtatVoie::Coupee(_) => return Err(miyuportail::ErreurPortail::VoieCoupee.into()),
+            EtatVoie::Desactivee => return Err(ErreurPortail::VoieDesactivee.into()),
+            EtatVoie::Coupee(_) => return Err(ErreurPortail::VoieCoupee.into()),
         }
+        let mut session = self.session()?;
         let cle_session = SigningKey::generate(&mut OsRng);
         if self.manifeste.classe() != ClasseExposition::H1 {
             self.portail.ouvrir_session(self.service(), cle_session.verifying_key().to_bytes(), auteurs.clone())?;
         }
         self.epoque.fetch_add(1, Ordering::SeqCst);
+        let partages: AuteursSession = Arc::new(RwLock::new(auteurs));
+        *session = Some(Arc::clone(&partages));
         let guichet = GuichetFranche::new(
             Arc::clone(&self.portail),
             self.service().clone(),
             self.traite.clone(),
             cle_session,
-            auteurs,
+            partages,
         )?;
         Ok(LancementFacade {
             guichet,
@@ -138,15 +152,56 @@ impl ServiceHybride {
         })
     }
 
+    /// Épingle un appareil de plus dans la session ouverte (A-007) : la façade
+    /// en service l'accepte aussitôt, sans être reconstruite ; sa séquence
+    /// anti-rejeu est propre (neuve, ou reprise au-delà de sa marque haute
+    /// s'il avait été retiré de cette session). Le guichet des visas est
+    /// inchangé : l'appareil doit toujours présenter visa et PoP.
+    pub fn ajouter_auteur(&self, auteur: [u8; 32]) -> Result<(), ErreurHybride> {
+        let session = self.session()?;
+        let auteurs = session.as_ref().ok_or(ErreurPortail::SessionAbsente)?;
+        let mut a = auteurs.write().map_err(|_| ErreurHybride::EtatIndisponible)?;
+        if a.contains(&auteur) {
+            return Err(ErreurPortail::AuteurDejaEpingle.into());
+        }
+        if self.manifeste.classe() != ClasseExposition::H1 {
+            self.portail.ajouter_auteur(self.service(), auteur)?;
+        }
+        a.push(auteur);
+        Ok(())
+    }
+
+    /// Retire un appareil de la session ouverte (A-007) : ses trames sont
+    /// refusées par le Portail (même en vol), la façade le refuse ; les autres
+    /// appareils continuent. Le dernier appareil ne se retire pas.
+    pub fn retirer_auteur(&self, auteur: &[u8; 32]) -> Result<(), ErreurHybride> {
+        let session = self.session()?;
+        let auteurs = session.as_ref().ok_or(ErreurPortail::SessionAbsente)?;
+        let mut a = auteurs.write().map_err(|_| ErreurHybride::EtatIndisponible)?;
+        if !a.contains(auteur) {
+            return Err(ErreurPortail::AuteurNonEpingle.into());
+        }
+        if a.len() <= 1 {
+            return Err(ErreurPortail::TransitionRefusee.into());
+        }
+        if self.manifeste.classe() != ClasseExposition::H1 {
+            self.portail.retirer_auteur(self.service(), auteur)?;
+        }
+        a.retain(|x| x != auteur);
+        Ok(())
+    }
+
     /// Ferme la session (quarantaine purgée, réponses en attente périmées).
     pub fn fermer_session(&self) -> Result<(), ErreurHybride> {
         self.epoque.fetch_add(1, Ordering::SeqCst);
+        self.session()?.take();
         Ok(self.portail.fermer_session(self.service())?)
     }
 
     /// Désinstalle : voie supprimée, aucun résidu.
     pub fn desinstaller(self) -> Result<(), ErreurHybride> {
         self.epoque.fetch_add(1, Ordering::SeqCst);
+        self.session()?.take();
         Ok(self.portail.supprimer(self.service())?)
     }
 }
@@ -195,6 +250,39 @@ impl<F: FacadeJetable> Superviseur<F> {
         let lancement = self.service.ouvrir_session(&self.image, self.auteurs.clone())?;
         self.lancements += 1;
         Ok(self.facade.insert((self.fabrique)(lancement)))
+    }
+
+    /// Appareils épinglés à chaque lancement.
+    pub fn auteurs(&self) -> &[[u8; 32]] {
+        &self.auteurs
+    }
+
+    /// Épingle un appareil de plus : dans la session de la façade en service
+    /// (sans la reconstruire, A-007), et pour les lancements suivants.
+    pub fn ajouter_auteur(&mut self, auteur: [u8; 32]) -> Result<(), ErreurHybride> {
+        if self.auteurs.contains(&auteur) {
+            return Err(ErreurPortail::AuteurDejaEpingle.into());
+        }
+        if self.facade.is_some() {
+            self.service.ajouter_auteur(auteur)?;
+        }
+        self.auteurs.push(auteur);
+        Ok(())
+    }
+
+    /// Retire un appareil : de la session en service et des lancements suivants.
+    pub fn retirer_auteur(&mut self, auteur: &[u8; 32]) -> Result<(), ErreurHybride> {
+        if !self.auteurs.contains(auteur) {
+            return Err(ErreurPortail::AuteurNonEpingle.into());
+        }
+        if self.auteurs.len() <= 1 {
+            return Err(ErreurPortail::TransitionRefusee.into());
+        }
+        if self.facade.is_some() {
+            self.service.retirer_auteur(auteur)?;
+        }
+        self.auteurs.retain(|a| a != auteur);
+        Ok(())
     }
 
     /// Façade en service, s'il y en a une.
