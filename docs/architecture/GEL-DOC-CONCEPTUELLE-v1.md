@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.15 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.16 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16` (à poser au commit)
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -74,6 +74,7 @@
 | A-013 | 2026-10-25 | Corrections de la revue de sécurité du 2026-10-25 : formats révisés (liaison d'appareil v2, synchro par morceaux, `MFED` v2, sas code 7), chiffrement des blobs MiyuCloud `MIYUCENC` v1, garde-fous MAIA (provenance `Inconnue`, compétence `memoire`, clé d'approbation TAMR distincte, publication par capacité) ; **à valider par le propriétaire** | 1.13 |
 | A-014 | 2026-10-25 | Synchro des révocations vers Origin : chaque envoi (morceau ou tête) signé par la clé de journal du COG, débit par COG après authentification, budget global ; **à valider par le propriétaire** | 1.14 |
 | A-015 | 2026-10-25 | Éditeur du registre de révocation côté COG (dépôt et envois Origin) ; étiquette `publiable` de KindMother (EX-47) et règle de dérivation des Fiches ; relais NFLOG des Vigies (format de ligne, témoin) ; **à valider par le propriétaire** | 1.15 |
+| A-016 | 2026-10-25 | Table hôte de la Douane (description v2, flux de boucle locale par compte, aucun DNS), journalisation bornée, règle EX-12 des Vigies, relais (panne immédiate, ligne sans ports), étiquette `publiable` v2 (paramètres signés, propriété des bases), dérivation stricte des Fiches ; **à valider par le propriétaire** | 1.16 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -559,3 +560,32 @@
   - Capteur muet, perte (trou de séquence, `ENOBUFS`) ou datagramme tronqué ⇒ relève en échec ⇒ **voie aveugle coupée** ; « voie active » déclarée par l'appelant
   - NFQUEUE (verdicts en ligne) non implémenté : décision d'architecture (chemin critique, contournement interdit par C-12)
 - **Impact** : EX-12, EX-35, EX-36, EX-47, EX-57 ; plan lots 2, 3, 7
+
+### A-016 — Table hôte de la Douane, journalisation bornée, corrections de la revue (étiquettes, relais)
+
+<!-- @id arch.gel.a016 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a016 -->
+
+- **Date** : 2026-10-25 · **version** 1.16 · consignation de l'implémenté après la revue de sécurité du lot 3 / lot 7 (constats H1, H2, M1, M3..M6, B1..B6) ; **validation du propriétaire attendue**
+- **Table hôte `inet miyudouane_hote`** (`miyudouane hote`, `crates/miyudouane/src/hote.rs`)
+  - En déploiement réel, la zone COG sans sortie (INV-Z1, INV-Z4, EX-12) est portée sur l'hôte par une table propre à la Douane, générée depuis une **description** bornée ; remplacement atomique de cette seule table ; plus aucune table écrite à la main par les installateurs
+  - Description **version 2** (`miyudouane-hote 2` ; v1 refusée explicitement) : `groupe`, `compte`, `uid`, `port tcp|udp`, `exception <voie>` (liée à un arrêté signé), **`boucle <compte> <tcp|udp> <127.0.0.1|::1> <port>`** (port 53 refusé, ≤ 128 lignes, doublons refusés)
+  - Chaîne `sortie` : boucle locale ouverte aux seuls comptes **non** COG ; pour les comptes COG, seulement les réponses (`ct state established,related`) et les flux `boucle` déclarés **pour ce compte** ; **aucune résolution DNS** ; tout le reste journalisé `MDOU|zone-cog|sortie|SORTIE-COG|` puis rejeté
+  - `auditer_hote` refuse toute acceptation `oifname "lo"` hors de ces formes
+- **Journalisation bornée** (toutes les tables de la Douane, anti-inondation du relais, constat H2)
+  - Rejet journalisé = au plus **une ligne par flux et par seconde** (ensembles dynamiques ≤ 65 536 flux, expiration 10 s) et au plus **50 lignes/s** (rafale 100) par table ; le rejet lui-même reste inconditionnel, volume compté par le compteur nommé `rejets`
+- **Règle EX-12 des Vigies** : toute ligne du lieu `zone-cog` en chaîne `sortie` (tables `miyudouane_hote` et `miyudouane_zone`) est traitée comme source en zone COG quelle que soit l'adresse ⇒ signal **critique** `R-EX12-SORTIE`
+- **Relais NFLOG** (précise A-015)
+  - Panne (trou de séquence, `ENOBUFS`, muet) signalée **dans la relève même** où elle survient, jamais reportée (`ReleveJournal::echec`) ; panne imputée au capteur entier
+  - Tampon `SO_RCVBUFFORCE` 16 Mio (repli `SO_RCVBUF`, taille effective journalisée) ; socket vidée à chaque relève (≤ 32 768 lectures) ; datagramme d'émetteur `nl_pid ≠ 0` écarté et compté ; index d'interface résolu en nom à la réception
+  - **Ligne sans ports** : fragment non initial ou en-tête de transport absent ⇒ `PROTO=6|17 FRAG|TRONQUE` sans `SPT`/`DPT` ; copie par défaut 256 octets ; toute autre combinaison sans ports refusée par le lecteur
+  - Binaire : `--voie-active` ou `--sans-veille` obligatoire ; sortie cassée ⇒ arrêt, code 4
+- **Étiquette `publiable` v2** (remplace la v1 d'A-015, qui est refusée)
+  - Domaine `miyukini/kindmother/etiquette/v2\0`, JSON `"version": 2` ; à la pose, la signature de l'utilisateur couvre aussi `type`, `langue`, `licence`, `audience` (1 membres, 2 invités, 3 COG nommés triés) ; détail d'audit `v2;<empreinte>;<utilisateur>;<kid>;<horodatage>;<paramètres|->` (entrées v1 lisibles, jamais publiables)
+  - **Propriété des bases** : `<credentials>/utilisateurs/<u>.bases` (un nom `[a-z0-9_-]{1,64}` par ligne), validé au démarrage ; étiqueter hors de ses bases ⇒ refus ; noms de base d'étiquette en minuscules, `maia-*` comparé sans casse
+  - Journal : lectures autorisées non journalisées ; refus agrégés par opérateur (période 60 s) ; ≤ 120 requêtes d'étiquette par opérateur et par 60 s
+  - Clés, `.bases` et révocations lus **au démarrage seulement** : tout changement exige un redémarrage
+- **Règle de dérivation des Fiches originales** (précise A-015) : `id` = `km.` + 32 hex de l'empreinte de la référence de donnée ; `date` à ±300 s ; `version` = dernière publiée + 1 ; `type`, `langue`, `licence`, `audience` égaux aux paramètres signés ; ≤ 8 attestations par donnée et par 24 h
+- **Éditeur du registre** (précise A-015) : une tête n'est jamais datée au-delà de `maintenant + tolérance` (horloge en recul ⇒ refus explicite) ; verrou `flock` avec délai 10 s ; graine effacée après usage
+- **Impact** : EX-12, EX-35, EX-47, EX-57 ; INV-Z1, INV-Z4 ; plan lots 3, 7
