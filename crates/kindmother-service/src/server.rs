@@ -214,7 +214,9 @@ impl KindMotherServer {
         )?);
 
         // Étiquettes `publiable` (EX-47) : clés des utilisateurs déposées par l'administrateur,
-        // jamais une clé de service ; bases `nationale` (maia-* et déclarées).
+        // jamais une clé de service, et leurs bases (`<u>.bases`, M5) ; bases `nationale`
+        // (maia-* et déclarées). Lues au démarrage seulement : ajouter / retirer une clé
+        // d'utilisateur exige un redémarrage (B6).
         let cles_utilisateurs = ClesUtilisateurs::charger(
             &credentials.dir().join(DOSSIER_CLES_UTILISATEURS),
             &credentials.service_public_keys(),
@@ -604,16 +606,22 @@ impl KindMotherServer {
         }
     }
 
-    /// Étiquette `publiable` (EX-47) : l'opérateur relais doit pouvoir lire la table ;
-    /// la signature de l'utilisateur, la sensibilité et le contenu sont vérifiés ensuite.
+    /// Étiquette `publiable` (EX-47) : débit de l'opérateur (M6), puis l'opérateur
+    /// relais doit pouvoir lire la table ; la signature de l'utilisateur, la
+    /// propriété de la base (M5), la sensibilité et le contenu sont vérifiés ensuite.
+    /// Refus agrégés par opérateur (M6).
     async fn handle_etiqueter(&self, operator_id: &str, intention: &IntentionEtiquette) -> Response {
         let d = &intention.donnee;
+        let operation = intention.action.as_str();
+        if let Err(e) = self.etiquettes.admettre(&self.database, operator_id, d, operation) {
+            return error_response(&e);
+        }
         if let Err(e) = self
             .arbitration
             .authorize_table(operator_id, &d.base, &d.table, AccessMode::Read)
             .await
         {
-            self.audit_refusal(AuditKind::Etiquette, operator_id, &d.base, intention.action.as_str(), Some(&d.table), &e);
+            self.etiquettes.refuser(&self.database, operator_id, d, operation, &e);
             return error_response(&e);
         }
         match self.etiquettes.etiqueter(&self.database, operator_id, intention).await {
@@ -622,14 +630,19 @@ impl KindMotherServer {
         }
     }
 
-    /// Lecture typée de l'étiquette d'une donnée (droit de lecture sur la table requis).
+    /// Lecture typée de l'étiquette d'une donnée (débit de l'opérateur, droit de
+    /// lecture sur la table requis). Lecture autorisée non journalisée ; refus
+    /// agrégés par opérateur (M6).
     async fn handle_lire_etiquette(&self, operator_id: &str, donnee: &RefDonnee) -> Response {
+        if let Err(e) = self.etiquettes.admettre(&self.database, operator_id, donnee, "publiable.lire") {
+            return error_response(&e);
+        }
         if let Err(e) = self
             .arbitration
             .authorize_table(operator_id, &donnee.base, &donnee.table, AccessMode::Read)
             .await
         {
-            self.audit_refusal(AuditKind::Etiquette, operator_id, &donnee.base, "publiable.lire", Some(&donnee.table), &e);
+            self.etiquettes.refuser(&self.database, operator_id, donnee, "publiable.lire", &e);
             return error_response(&e);
         }
         match self.etiquettes.lire(&self.database, operator_id, donnee).await {

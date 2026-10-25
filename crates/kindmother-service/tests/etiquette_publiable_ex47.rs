@@ -13,7 +13,8 @@ use std::path::{Path, PathBuf};
 
 use ed25519_dalek::{Signer, SigningKey};
 use kindmother::etiquette::{
-    encode_hex, ActionEtiquette, IntentionEtiquette, RefDonnee, Sensibilite, DOMAINE_CONTENU,
+    encode_hex, ActionEtiquette, AudiencePublication, IntentionEtiquette, ParametresPublication, RefDonnee, Sensibilite,
+    TypePublication, DOMAINE_CONTENU, VERSION_INTENTION,
 };
 use kindmother::intent::{SchemaMigration, TypedWriteIntent};
 use kindmother_client::{ClientError, KindMotherClient, OperatorCredential};
@@ -33,6 +34,8 @@ fn preparer_dossier(cle_utilisateur: &[u8; 32]) -> PathBuf {
     let utilisateurs = dir.join("credentials").join("utilisateurs");
     std::fs::create_dir_all(&utilisateurs).expect("dossier");
     std::fs::write(utilisateurs.join("alice.pub"), format!("{}\n", encode_hex(cle_utilisateur))).expect("clé");
+    // Bases dont Alice est propriétaire (M5) ; jay1tribu n'en fait pas partie.
+    std::fs::write(utilisateurs.join("alice.bases"), "# bases d'Alice\njaykonta\njaykoa\nmaia-alice\n").expect("bases");
     std::fs::write(dir.join("maia-utilisateurs"), "alice\n").expect("maia");
     std::fs::write(dir.join("bases-nationales"), "# déclarée nationale\njaykoa\n").expect("nationales");
     dir
@@ -76,7 +79,15 @@ fn signee(
     empreinte_contenu: Option<String>,
     horodatage: u64,
 ) -> IntentionEtiquette {
+    let parametres = (action == ActionEtiquette::Poser).then(|| ParametresPublication {
+        type_fiche: TypePublication::Fait,
+        langue: "fr".into(),
+        licence: "CC-BY-4.0".into(),
+        audience: AudiencePublication::Membres,
+    });
     let mut i = IntentionEtiquette {
+        version: VERSION_INTENTION,
+        parametres,
         action,
         donnee,
         utilisateur: "alice".into(),
@@ -125,6 +136,9 @@ async fn posee_par_l_utilisateur_lue_puis_retiree() {
     assert!(etat.posee && etat.publiable);
     assert_eq!(etat.utilisateur.as_deref(), Some("alice"));
     assert!(etat.seq.is_some());
+    // Paramètres signés par l'utilisateur et identité de la donnée rendus (M1).
+    assert_eq!(etat.parametres.as_ref().map(|p| p.licence.as_str()), Some("CC-BY-4.0"));
+    assert_eq!(etat.empreinte_donnee.as_ref().map(String::len), Some(64));
     // Une autre donnée de la même table reste non publiable.
     assert!(!jk.lire_etiquette(donnee("jaykonta", "n2")).await.expect("lire").publiable);
 
@@ -147,13 +161,19 @@ async fn posee_par_l_utilisateur_lue_puis_retiree() {
     let etat = jk.lire_etiquette(donnee("jaykonta", "n1")).await.expect("lire");
     assert!(etat.posee && !etat.publiable, "contenu changé depuis la pose");
 
-    // Tout est tracé dans le journal chaîné (poses, retrait, refus, lectures).
+    // Journal chaîné : poses, retrait et refus agrégés par opérateur (M6) ; le
+    // premier refus est écrit aussitôt, les deux suivants juste après la pose suivante.
+    // Les lectures autorisées ne sont pas journalisées.
     drop(jk);
     let journal = AuditJournal::open(&dir, journal_key(&dir).as_deref()).expect("journal");
     journal.verify().expect("chaîne");
     let entrees: Vec<_> = journal.entries().expect("entrées").into_iter().filter(|e| e.record.kind == AuditKind::Etiquette).collect();
-    let verdicts: Vec<&str> = entrees.iter().filter(|e| e.record.operation != "publiable.lire").map(|e| e.record.verdict.as_str()).collect();
-    assert_eq!(verdicts, ["posee", "refusee", "retiree", "refusee", "refusee", "posee"]);
+    let verdicts: Vec<&str> = entrees.iter().map(|e| e.record.verdict.as_str()).collect();
+    assert_eq!(verdicts, ["posee", "refusee", "retiree", "posee", "refusee"]);
+    assert!(entrees[1].record.detail.starts_with("refus=1;"), "{}", entrees[1].record.detail);
+    assert!(entrees[4].record.detail.starts_with("refus=2;"), "{}", entrees[4].record.detail);
+    assert!(entrees.iter().all(|e| e.record.operation != "publiable.lire"));
+    assert!(entrees[0].record.detail.starts_with("v2;"));
     assert!(entrees.iter().all(|e| e.record.operator_id == "jaykonta"));
 }
 
@@ -211,6 +231,20 @@ async fn refus_nationale_contenu_et_autres_chemins() {
     assert!(matches!(maia.lire_etiquette(d()).await, Err(ClientError::PermissionDenied(_))));
     // L'utilisateur, relayé par l'opérateur légitime : accepté.
     assert!(jk.etiqueter(pose).await.expect("poser").publiable);
+
+    // M5 : base dont l'utilisateur n'est pas propriétaire (absente de alice.bases) : refus,
+    // pour poser comme pour retirer, malgré une signature valide.
+    let tribu = client(addr, &dir, "jay1tribu").await;
+    table_notes(&tribu, "jay1tribu").await;
+    let p = signee(&alice(), &srv, ActionEtiquette::Poser, donnee("jay1tribu", "n1"), Some(empreinte(TEXTE)), t + 2);
+    assert!(refus(tribu.etiqueter(p).await).contains("not owned"));
+    let r = signee(&alice(), &srv, ActionEtiquette::Retirer, donnee("jay1tribu", "n1"), None, t + 3);
+    assert!(refus(tribu.etiqueter(r).await).contains("not owned"));
+
+    // M1 : intention v1 refusée (version absente ou ≠ 2).
+    let mut v1 = signee(&alice(), &srv, ActionEtiquette::Poser, d(), Some(empreinte(TEXTE)), t + 4);
+    v1.version = 1;
+    assert!(jk.etiqueter(v1).await.is_err());
 }
 
 #[tokio::test]

@@ -368,13 +368,15 @@ impl EncryptedDatabase {
         Ok(conn)
     }
 
-    /// Valide un nom de base de données.
+    /// Valide un nom de base de données : `[a-z0-9_-]`, 1 à 64 caractères, sans `-`/`_`
+    /// initial. Minuscules seulement : `Foo` et `foo` ne doivent pas désigner deux bases
+    /// distinctes qui se confondraient sur un système de fichiers insensible à la casse.
     fn is_valid_database_name(name: &str) -> bool {
         !name.is_empty()
             && name.len() <= 64
             && name
                 .chars()
-                .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+                .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_' || c == '-')
             && !name.starts_with('-')
             && !name.starts_with('_')
     }
@@ -1140,4 +1142,32 @@ fn base64_encode(data: &[u8]) -> String {
     }
 
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::EncryptedDatabase;
+
+    #[test]
+    fn nom_de_base_minuscules_chiffres_tiret_souligne_acceptes() {
+        for nom in ["miyucloud", "jay_rdv", "maia-memoire", "a1", "0base"] {
+            assert!(EncryptedDatabase::is_valid_database_name(nom), "{nom}");
+        }
+    }
+
+    #[test]
+    fn nom_de_base_avec_majuscule_refuse() {
+        for nom in ["MiyuCloud", "A", "jayRdv", "BASE"] {
+            assert!(!EncryptedDatabase::is_valid_database_name(nom), "{nom}");
+        }
+    }
+
+    #[test]
+    fn nom_de_base_hors_alphabet_ou_mal_forme_refuse() {
+        let trop_long = "a".repeat(65);
+        for nom in ["", "-base", "_base", "a.b", "a/b", "../x", "é", trop_long.as_str()] {
+            assert!(!EncryptedDatabase::is_valid_database_name(nom), "{nom}");
+        }
+        assert!(EncryptedDatabase::is_valid_database_name(&"a".repeat(64)));
+    }
 }

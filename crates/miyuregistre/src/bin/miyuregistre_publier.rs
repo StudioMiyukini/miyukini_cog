@@ -15,7 +15,11 @@
 //! - `--journal` : dossier du journal (`entrees.mrgj`, `tetes.mrgj`, verrou
 //!   `verrou`) ; propriétaire = uid effectif, sans écriture pour le groupe ni
 //!   les autres. Tout écrivain du journal prend le verrou `flock` exclusif
-//!   `<journal>/verrou` (pris ici le temps d'émettre la tête et de lire les entrées).
+//!   `<journal>/verrou` (pris ici le temps d'émettre la tête et de lire les
+//!   entrées, avec un délai de 10 s : au-delà, le cycle échoue explicitement).
+//! - Horloge : une tête n'est jamais datée au-delà de `maintenant + tolérance`
+//!   (`miyusceau::TOLERANCE_HORLOGE_SECS`) ; saut d'horloge en arrière au-delà
+//!   ⇒ cycle refusé (« horloge en recul »), à corriger par l'opérateur.
 //! - `--cle-journal` : fichier de la graine (voir `editeur::cle`) ; la clé
 //!   n'est **jamais** passée en argument. La clé publique est affichée au
 //!   démarrage (à épingler chez Origin et MiyuCloud).
@@ -41,7 +45,8 @@ use miyuregistre::editeur::origin::{maintenant_unix, PublicationOrigin};
 use miyuregistre::editeur::{Instantane, INTERVALLE_MAX_SECS};
 use miyuregistre::{Journal, StockageFichier};
 use miyusceau::CleSignature;
-use rustix::fs::{FlockOperation, Mode, OFlags};
+use miyuregistre::editeur::verrou::{verrouiller_exclusif, DELAI_VERROU};
+use rustix::fs::{Mode, OFlags};
 
 /// Fichier des entrées du journal.
 const JOURNAL_ENTREES: &str = "entrees.mrgj";
@@ -145,7 +150,8 @@ fn verrouiller(dossier: &Path) -> Result<File, String> {
         Mode::from_raw_mode(0o600),
     )
     .map_err(|e| format!("verrou du journal : {e}"))?;
-    rustix::fs::flock(&fd, FlockOperation::LockExclusive).map_err(|e| format!("verrou du journal : {e}"))?;
+    // Délai borné : un écrivain figé ne bloque jamais le cycle indéfiniment.
+    verrouiller_exclusif(&fd, DELAI_VERROU).map_err(|e| format!("verrou du journal : {e}"))?;
     Ok(File::from(fd))
 }
 

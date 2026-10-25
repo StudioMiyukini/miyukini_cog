@@ -266,6 +266,15 @@ impl ServiceRequete {
         &self.cog_local
     }
 
+    /// Dernière version publiée de la Fiche locale `id` (0 : jamais publiée) :
+    /// à passer à [`crate::PublieurOriginal::attester`].
+    pub fn derniere_version(&self, id: &str) -> u64 {
+        self.publiees
+            .iter()
+            .find(|p| p.fiche.cog() == &self.cog_local && p.fiche.fiche().id == id)
+            .map_or(0, |p| p.fiche.fiche().version)
+    }
+
     /// Publie une Fiche **signée par le COG local** (IA-FEDEREE §5, F1) :
     ///
     /// - [`Publication::Originale`] : seules les données étiquetées
@@ -299,6 +308,10 @@ impl ServiceRequete {
                     || maintenant - capacite.atteste_a > VALIDITE_PUBLIABLE_SECS
                 {
                     return Err(ErreurFederee::NonPubliable);
+                }
+                // M1 : version d'une originale = dernière publiée + 1, exactement.
+                if self.derniere_version(&fiche.fiche().id).checked_add(1) != Some(fiche.fiche().version) {
+                    return Err(ErreurFederee::VersionObsolete);
                 }
             }
             Publication::Reprise { sources, validation } => {

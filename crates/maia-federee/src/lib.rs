@@ -49,7 +49,10 @@ pub use base::{BaseEtrangere, Qualite, VueFederale, MAX_FICHES_PAR_EMETTEUR};
 pub use consultation::{consulter, Consultation, Plan, Planificateur, ReponseSourcee};
 pub use corroboration::{corroborer, Affirmation, Etablissement, PolitiqueCorroboration, Source, K_DEFAUT, PLAFOND_DEFAUT};
 pub use erreurs::ErreurFederee;
-pub use etiquettes::{empreinte_contenu, verifier_derivation, EtiquetteLue, LecteurEtiquettes, PublieurOriginal};
+pub use etiquettes::{
+    empreinte_contenu, id_fiche_derivee, verifier_derivation, EtiquetteLue, LecteurEtiquettes, ParametresLus,
+    PublieurOriginal, FENETRE_DATE_SECS, MAX_ATTESTATIONS_PAR_PERIODE, PERIODE_ATTESTATIONS_SECS, PREFIXE_ID_FICHE,
+};
 pub use fiche::{cog_de_cle, sceller_fiche, verifier_fiche, Audience, Fiche, FicheVerifiee, Relation, Reprise, TypeFiche, TYPE_FICHE};
 pub use lecteur::{extraire, Ancrage, ExtraitType, ModeleLecteur};
 pub use marquage::{autoriser, AutoriteConfirmation, Effet, Etranger, Provenance, ValidationUtilisateur};

@@ -219,9 +219,12 @@ fn motif(json: Option<&serde_json::Value>) -> String {
 impl<T: Transport> PublicationOrigin<T> {
     /// Client pour `cog`, envois signés par `cle` (clé de journal).
     pub fn new(cog: CogId, cle: &CleSignature, transport: T) -> Self {
+        // Graine copiée dans un tampon effacé à la sortie de portée (aucune
+        // copie temporaire non effacée sur la pile).
+        let graine = zeroize::Zeroizing::new(cle.graine());
         Self {
             cog,
-            cle: SigningKey::from_bytes(&cle.graine()),
+            cle: SigningKey::from_bytes(&graine),
             transport,
             reglages: ReglagesOrigin::default(),
             position: None,
