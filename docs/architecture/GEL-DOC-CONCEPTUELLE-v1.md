@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.14 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.15 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -73,6 +73,7 @@
 | A-012 | 2026-10-25 | Lot 2 §6, §8 · Services hybrides §3 · Zones §7 : choix consignés tels qu'implémentés — clé d'appareil par COG de destination, transport des registres de révocation vers Origin et MiyuCloud, fichiers MiyuCloud `inconnu`, Landlock du sas, installateur de modèles de Central ; **à valider par le propriétaire** | 1.12 |
 | A-013 | 2026-10-25 | Corrections de la revue de sécurité du 2026-10-25 : formats révisés (liaison d'appareil v2, synchro par morceaux, `MFED` v2, sas code 7), chiffrement des blobs MiyuCloud `MIYUCENC` v1, garde-fous MAIA (provenance `Inconnue`, compétence `memoire`, clé d'approbation TAMR distincte, publication par capacité) ; **à valider par le propriétaire** | 1.13 |
 | A-014 | 2026-10-25 | Synchro des révocations vers Origin : chaque envoi (morceau ou tête) signé par la clé de journal du COG, débit par COG après authentification, budget global ; **à valider par le propriétaire** | 1.14 |
+| A-015 | 2026-10-25 | Éditeur du registre de révocation côté COG (dépôt et envois Origin) ; étiquette `publiable` de KindMother (EX-47) et règle de dérivation des Fiches ; relais NFLOG des Vigies (format de ligne, témoin) ; **à valider par le propriétaire** | 1.15 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -533,3 +534,28 @@
 - **Comportement** : signature vérifiée avant toute lecture ou modification d'état ; non authentifié ⇒ 401 **sans purge** ; mauvaise position authentifiée ⇒ 409 sans purge ; purge seulement sur tête authentifiée refusée, bornes du COG dépassées ou attente de plus de 15 min ; enveloppe rejouée sans effet (mémorisée jusqu'à son échéance, ≤ 8 192 par COG)
 - **Débit et budget** : limite par IP avant analyse, limite par COG **après** authentification ; budget global de l'attente 2 097 152 entrées et 512 Mio, en plus des bornes par COG
 - **Impact** : EX-35, EX-36 ; client côté COG à écrire (format fixé ici)
+
+### A-015 — Éditeur de révocations, étiquette `publiable`, relais NFLOG
+
+<!-- @id arch.gel.a015 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a015 -->
+
+- **Date** : 2026-10-25 · **version** 1.15 · consignation de l'implémenté (restes des lots 2, 3, 7) ; **validation du propriétaire attendue**
+- **Éditeur du registre de révocation** (`miyuregistre::editeur`, binaire `miyuregistre-publier`)
+  - Format de l'enveloppe A-014 défini une seule fois (`miyuregistre::enveloppe`), utilisé par Origin et par l'éditeur
+  - **Dépôt** pour MiyuCloud : entrées écrites d'abord, tête ensuite (le lecteur lit la tête puis les entrées) ; chaque fichier par temporaire exclusif, `fsync`, renommage, `fsync` du dossier ; fichiers 0640, dossier 0750 appartenant à l'éditeur, aucun lien suivi, verrou exclusif ; bornes de MiyuCloud
+  - **Envois Origin** : sonde par la tête seule si la position est inconnue ; morceaux ≤ 4 096 entrées ; échéance 10 min strictement croissante ; 409 ⇒ reprise à la position attendue ; 401/403 ⇒ arrêt définitif des envois vers Origin ; HTTPS obligatoire hors boucle locale ; ≥ 550 ms entre deux envois
+  - Une tête émise à chaque cycle (validité 900 s, cycle 240 s par défaut, ≤ 300 s) ; clé de journal lue dans un fichier strict (0600, propriétaire, O_NOFOLLOW), jamais en argument ; écrivain unique du journal (verrou `<journal>/verrou`)
+- **Étiquette `publiable`** (KindMother, EX-47)
+  - Intention signée Ed25519 par une clé d'**utilisateur** (`<credentials>/utilisateurs/<u>.pub`, déposée par l'administrateur ; égale à une clé de service ⇒ démarrage refusé) ; message `miyukini/kindmother/etiquette/v1` incluant la clé du serveur ; fenêtre ±300 s ; horodatage strictement croissant par donnée ; anti-rejeu par empreinte de signature
+  - Désigne une cellule de texte exacte (base, table, clé, colonne) ; empreinte du contenu `SHA-256("miyukini/kindmother/publiable/contenu/v1\0" || texte)` vérifiée à la pose ; une donnée modifiée après la pose n'est plus publiable
+  - Données `nationale` (bases `maia-*` et `<data_dir>/bases-nationales`) jamais étiquetables ; état = dernier événement `posee`/`retiree` du journal d'audit chaîné (`AuditKind::Etiquette`)
+  - **Règle de dérivation** : la Fiche est publiable seulement si elle est normalisée, si l'empreinte de son **texte** égale l'empreinte étiquetée, et si son sujet, ses relations et ses sources apparaissent dans ce texte ; capacité `Publiable` valable 60 s, étiquette relue à chaque attestation
+  - Limites : toute clé d'utilisateur épinglée peut étiqueter toute base non `nationale` ; retrait perdu si la fin du journal d'audit est tronquée (ancrage externe à prévoir) ; pas encore de route de publication dans le pont
+- **Relais NFLOG** (`crates/miyurelais`, Rust pur, sans code GPL)
+  - Décodage strict et borné de `NFNL_SUBSYS_ULOG` ; ligne `<sec>.<µs6> <hôte> nflog-<G>: <préfixe> IN= OUT= SRC= DST= LEN= TTL= PROTO= [SPT= DPT=] [TYPE= CODE=] [drapeaux] [MARK=]` lue par le lecteur nftables des Vigies ; préfixe limité aux octets 0x21..0x7e ; horodatages strictement croissants ; en famille pont, `IN=`/`OUT=` = port physique (attribution de voie d'A-005)
+  - Préfixe témoin `MDOU-TEMOIN|<lieu>|` : preuve de vie seulement, aucune ligne produite
+  - Capteur muet, perte (trou de séquence, `ENOBUFS`) ou datagramme tronqué ⇒ relève en échec ⇒ **voie aveugle coupée** ; « voie active » déclarée par l'appelant
+  - NFQUEUE (verdicts en ligne) non implémenté : décision d'architecture (chemin critique, contournement interdit par C-12)
+- **Impact** : EX-12, EX-35, EX-36, EX-47, EX-57 ; plan lots 2, 3, 7
