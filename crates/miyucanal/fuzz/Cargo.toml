@@ -1,0 +1,39 @@
+# Cibles de fuzzing de miyucanal (EX-10, C-26) — cargo-fuzz, nightly.
+# Hors du workspace (table [workspace] propre) : les builds normaux l'ignorent.
+# Lancement : cd crates/miyucanal/fuzz && cargo +nightly fuzz run mcan
+# Corpus initial : cargo run --example generer_graines (stable) → seeds/<cible>/.
+[package]
+name = "miyucanal-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+miyucanal = { path = ".." }
+miyuregistre = { path = "../../miyuregistre" }
+miyusceau = { path = "../../miyusceau" }
+
+[workspace]
+members = ["."]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "mcan"
+path = "fuzz_targets/mcan.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "quarantaine"
+path = "fuzz_targets/quarantaine.rs"
+test = false
+doc = false
+bench = false

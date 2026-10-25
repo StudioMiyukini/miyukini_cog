@@ -1,0 +1,40 @@
+# Cibles de fuzzing de miyauth (EX-10, C-26) — cargo-fuzz, nightly.
+# Hors du workspace (table [workspace] propre) : les builds normaux l'ignorent.
+# Lancement : cd crates/miyauth/fuzz && cargo +nightly fuzz run titres
+# Corpus initial : cargo run --example generer_graines (stable) → seeds/<cible>/.
+[package]
+name = "miyauth-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+miyauth = { path = "..", features = ["http"] }
+miyusceau = { path = "../../miyusceau" }
+ed25519-dalek = "2"
+sha2 = "0.10"
+
+[workspace]
+members = ["."]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "titres"
+path = "fuzz_targets/titres.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "entetes_http"
+path = "fuzz_targets/entetes_http.rs"
+test = false
+doc = false
+bench = false

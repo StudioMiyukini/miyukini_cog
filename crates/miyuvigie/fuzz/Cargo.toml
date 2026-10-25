@@ -1,0 +1,44 @@
+# Cibles de fuzzing de miyuvigie (EX-10, C-26) — cargo-fuzz, nightly.
+# Hors du workspace (table [workspace] propre) : les builds normaux l'ignorent.
+# Lancement : cd crates/miyuvigie/fuzz && cargo +nightly fuzz run journal_douane
+# Corpus initial : cargo run --example generer_graines (stable) → seeds/<cible>/.
+[package]
+name = "miyuvigie-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+miyuvigie = { path = ".." }
+
+[workspace]
+members = ["."]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "journal_douane"
+path = "fuzz_targets/journal_douane.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "proc_net_tcp"
+path = "fuzz_targets/proc_net_tcp.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "regles"
+path = "fuzz_targets/regles.rs"
+test = false
+doc = false
+bench = false

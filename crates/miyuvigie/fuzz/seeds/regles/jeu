@@ -1,0 +1,5 @@
+# essai
+vigies-regles 1
+regle R-FR-EXT si zone_src=franche et zone_dst=ext et verdict=autorise et octets>1048576 alors elevee flux_hors_contrat
+regle R-PORT si zone_src=cog et port_dst=22 et voie=- alors critique sortie_zone_cog
+regle R-VOIE si voie=jayoffice et verdict=bloque alors info mouvement_lateral
