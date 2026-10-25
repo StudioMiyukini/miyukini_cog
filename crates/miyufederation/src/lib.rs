@@ -28,13 +28,34 @@
 //!   suspensions, levées, révocations, note locale), titres signés
 //!   revérifiés au chargement, reste scellé par HMAC du secret local ;
 //!   reprise fail-closed (à consigner par amendement)
+//! - [`support`] : trait [`SupportEtat`] (octets scellés, écriture atomique) —
+//!   fichier ([`StockageFederal`]), mémoire de test ([`SupportMemoire`]),
+//!   KindMother (fonctionnalité `kindmother`, base dédiée `miyufederation`)
+//! - [`persistante`] : [`FederationPersistante`], chaque transition écrite
+//!   atomiquement avant d'être visible, rechargement revérifié, hors service
+//!   après un échec d'écriture
 //!
 //! **Sans Origin** (EX-30) : Origin n'est qu'un témoin facultatif.
 //! **Aucune destruction à distance** (EX-33) : seule sanction, la révocation
 //! d'identité ([`Sanction`]).
 //!
-//! Aucune dépendance réseau : la crate décide ; le transport (commérage
-//! `inv` / `getdata`, WireGuard) reste hors de son périmètre.
+//! Aucune dépendance réseau par défaut : la crate décide ; le transport
+//! (commérage `inv` / `getdata`, WireGuard) reste hors de son périmètre. La
+//! fonctionnalité `kindmother` ajoute seulement le client IPC local de
+//! KindMother (seul écrivain du COG) pour la persistance.
+
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
 
 pub mod calcul;
 pub mod eclipse;
@@ -42,11 +63,16 @@ pub mod erreurs;
 pub mod federation;
 pub mod note;
 pub mod persistance;
+pub mod persistante;
 pub mod preuve;
 pub mod statut;
+pub mod support;
 pub mod titres;
 
-pub use eclipse::CarnetPairs;
+#[cfg(feature = "kindmother")]
+pub mod kindmother;
+
+pub use eclipse::{CarnetPairs, MAX_PAIRS_CARNET};
 pub use erreurs::ErreurFederation;
 pub use federation::{
     Federation, Parametres, RevocationFederale, RevocationsFederation, SuspensionFederale, MOTIF_REVOCATION_FEDERALE,
@@ -56,7 +82,12 @@ pub use note::{NoteLocale, Observation, SEUIL_BANNISSEMENT};
 pub use persistance::{
     AncreRegistre, CleEtatFederal, ErreurEtat, RegistreLocal, Reprise, StockageFederal, FICHIER_ETAT, FICHIER_VERROU,
 };
+pub use persistante::{BilanReprise, ErreurTransition, FederationPersistante};
 pub use preuve::Preuve;
+pub use support::{SupportEtat, SupportMemoire};
+
+#[cfg(feature = "kindmother")]
+pub use kindmother::SupportKindMother;
 pub use statut::{
     Sanction, Statut, CONFIRMATIONS_INVITE, CONFIRMATIONS_MEMBRE, DELAI_CONTESTATION_SECS, DUREE_CONFIRMATION_MAX_SECS,
     DUREE_MEMBRE_SECS, QUORUM_BLACKLIST, QUORUM_RECOURS,

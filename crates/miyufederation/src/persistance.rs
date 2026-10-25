@@ -50,6 +50,10 @@
 //!   rend de nouveau la révocation : la réinscrire est sans effet (même
 //!   cible), l'appelant peut aussi l'acquitter en désignant l'entrée.
 //!
+//! Autres supports (KindMother, mémoire de test) : [`crate::support`] et
+//! [`crate::FederationPersistante`], même reprise revérifiée (une seule
+//! implémentation, partagée avec [`StockageFederal::charger`]).
+//!
 //! Limite : un accès en écriture au disque peut encore **supprimer** l'état
 //! **et** le registre local ensemble, ou les remplacer par une paire
 //! cohérente plus ancienne ; il ne peut ni forger ni modifier un état sans le
@@ -126,6 +130,10 @@ pub enum ErreurEtat {
     /// Dossier déjà verrouillé par un autre processus (ou une autre ouverture).
     #[error("état fédéral : dossier verrouillé par un autre processus")]
     Verrouille,
+    /// Support de stockage (KindMother, autre) injoignable, refus ou issue
+    /// inconnue : rien n'est réputé écrit.
+    #[error("état fédéral : support de stockage : {0}")]
+    Support(String),
 }
 
 /// Tête du registre local scellée dans l'état (`taille` entrées, racine Merkle).
@@ -139,7 +147,7 @@ pub struct AncreRegistre {
 
 impl AncreRegistre {
     /// Tête courante d'un registre local.
-    pub fn de(registre: &dyn RegistreLocal) -> Self {
+    pub fn de<R: RegistreLocal + ?Sized>(registre: &R) -> Self {
         Self { taille: registre.taille(), racine: registre.racine() }
     }
 }
@@ -199,23 +207,90 @@ fn revocation_federale(octets: &[u8]) -> Option<(Kid, u64)> {
     }
 }
 
+/// Vue reprise d'octets `MFED` et confrontée au registre local.
+pub(crate) struct Repris {
+    pub(crate) federation: Federation,
+    /// Révocations du registre postérieures à l'ancre, ré-appliquées.
+    pub(crate) reappliquees: usize,
+    /// La vue a changé (rattrapage, ré-application) ou le registre a avancé :
+    /// l'état doit être réécrit (nouvelle ancre) avant de rendre la main.
+    pub(crate) a_reecrire: bool,
+}
+
+/// Reprise commune à tous les supports : revérification complète
+/// ([`Federation::reprendre`]), rattrapage jusqu'à `maintenant`, ancre
+/// préfixe du registre local (sinon [`ErreurEtat::RegistreIncoherent`]),
+/// révocations fédérales inscrites après l'ancre ré-appliquées.
+pub(crate) fn reprendre_avec_registre<R: RegistreLocal + ?Sized>(
+    octets: &[u8],
+    cle: &CleEtatFederal,
+    parametres: Parametres,
+    origin: Option<[u8; 32]>,
+    maintenant: u64,
+    registre: &R,
+) -> Result<Repris, ErreurEtat> {
+    let (mut federation, definitives, ancre) = Federation::reprendre(octets, cle, parametres, origin, maintenant)?;
+    if !registre.prolonge(&ancre) {
+        return Err(ErreurEtat::RegistreIncoherent);
+    }
+    let mut reappliquees = 0;
+    for index in ancre.taille..registre.taille() {
+        let entree = registre.entree(index).ok_or(ErreurEtat::RegistreIncoherent)?;
+        if let Some((kid, inscrite_a)) = revocation_federale(&entree) {
+            if federation.appliquer_revocation_inscrite(kid, inscrite_a) {
+                reappliquees += 1;
+            }
+        }
+    }
+    let a_reecrire = !definitives.is_empty()
+        || reappliquees > 0
+        || AncreRegistre::de(registre) != ancre
+        || octets.get(4) != Some(&crate::federation::VERSION_ECRITE);
+    Ok(Repris { federation, reappliquees, a_reecrire })
+}
+
+/// L'entrée `index` du registre local doit être la révocation fédérale de `kid`.
+pub(crate) fn controler_inscription<R: RegistreLocal + ?Sized>(
+    registre: &R,
+    kid: &Kid,
+    index: u64,
+) -> Result<(), ErreurEtat> {
+    let inscrite = registre.entree(index).and_then(|e| revocation_federale(&e));
+    if inscrite.is_none_or(|(k, _)| k != *kid) {
+        return Err(ErreurEtat::Incoherent("révocation absente du registre à l'index donné"));
+    }
+    Ok(())
+}
+
 /// Clé de scellement de l'état fédéral, dérivée du secret local du COG ;
 /// effacée à la libération.
 pub struct CleEtatFederal {
     cle: [u8; 32],
 }
 
+/// HMAC-SHA256 keyé par 32 octets, sans chemin d'erreur : la clé est
+/// complétée de zéros jusqu'au bloc de SHA-256 (64 octets), exactement ce que
+/// fait HMAC pour une clé plus courte que le bloc (RFC 2104) — même résultat
+/// que `new_from_slice`, sans `Result` à traiter.
+pub(crate) fn hmac_cle32(cle: &[u8; 32]) -> HmacSha256 {
+    use hmac::digest::KeyInit;
+    let mut bloc = hmac::digest::Key::<HmacSha256>::default();
+    bloc[..32].copy_from_slice(cle);
+    let mac = <HmacSha256 as KeyInit>::new(&bloc);
+    bloc.as_mut_slice().zeroize();
+    mac
+}
+
 impl CleEtatFederal {
     /// Dérive la clé : `HMAC-SHA256(secret_local, "miyukini/miyufederation/etat/v1")`.
     pub fn deriver(secret_local: &[u8; 32]) -> Self {
-        // Une clé HMAC de 32 octets est toujours acceptée.
-        let mut mac = <HmacSha256 as Mac>::new_from_slice(secret_local).unwrap_or_else(|_| unreachable!());
+        let mut mac = hmac_cle32(secret_local);
         mac.update(ETIQUETTE);
         Self { cle: mac.finalize().into_bytes().into() }
     }
 
     pub(crate) fn mac(&self) -> HmacSha256 {
-        <HmacSha256 as Mac>::new_from_slice(&self.cle).unwrap_or_else(|_| unreachable!())
+        hmac_cle32(&self.cle)
     }
 }
 
@@ -470,25 +545,12 @@ impl StockageFederal {
                 premier_usage: true,
             });
         };
-        let (mut federation, definitives, ancre) =
-            Federation::reprendre(&octets, &self.cle, parametres, origin, maintenant)?;
-        if !registre.prolonge(&ancre) {
-            return Err(ErreurEtat::RegistreIncoherent);
+        let repris = reprendre_avec_registre(&octets, &self.cle, parametres, origin, maintenant, registre)?;
+        if repris.a_reecrire {
+            self.enregistrer(&repris.federation, registre)?;
         }
-        let mut reappliquees = 0;
-        for index in ancre.taille..registre.taille() {
-            let entree = registre.entree(index).ok_or(ErreurEtat::RegistreIncoherent)?;
-            if let Some((kid, inscrite_a)) = revocation_federale(&entree) {
-                if federation.appliquer_revocation_inscrite(kid, inscrite_a) {
-                    reappliquees += 1;
-                }
-            }
-        }
-        if !definitives.is_empty() || reappliquees > 0 || AncreRegistre::de(registre) != ancre {
-            self.enregistrer(&federation, registre)?;
-        }
-        let revocations = federation.revocations_a_publier();
-        Ok(Reprise { federation, revocations, reappliquees, premier_usage: false })
+        let revocations = repris.federation.revocations_a_publier();
+        Ok(Reprise { federation: repris.federation, revocations, reappliquees: repris.reappliquees, premier_usage: false })
     }
 
     /// Accusé d'inscription : l'entrée `index` du registre local doit être la
@@ -502,13 +564,27 @@ impl StockageFederal {
         index: u64,
         registre: &dyn RegistreLocal,
     ) -> Result<(), ErreurEtat> {
-        let inscrite = registre.entree(index).and_then(|e| revocation_federale(&e));
-        if inscrite.is_none_or(|(k, _)| k != *kid) {
-            return Err(ErreurEtat::Incoherent("révocation absente du registre à l'index donné"));
-        }
+        controler_inscription(registre, kid, index)?;
         if federation.acquitter(kid) {
             self.enregistrer(federation, registre)?;
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn hmac_cle32_egal_a_new_from_slice() {
+        for octet in [0u8, 0x5a, 0xff] {
+            let cle = [octet; 32];
+            let mut a = hmac_cle32(&cle);
+            let mut b = <HmacSha256 as Mac>::new_from_slice(&cle).unwrap();
+            a.update(b"miyukini");
+            b.update(b"miyukini");
+            assert_eq!(a.finalize().into_bytes(), b.finalize().into_bytes());
+        }
     }
 }

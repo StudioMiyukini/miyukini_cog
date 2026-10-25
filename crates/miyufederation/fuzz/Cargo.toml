@@ -17,6 +17,9 @@ libfuzzer-sys = "0.4"
 miyufederation = { path = ".." }
 miyusceau = { path = "../../miyusceau" }
 miyuracine = { path = "../../miyuracine" }
+miyauth = { path = "../../miyauth" }
+hmac = "0.12"
+sha2 = "0.10"
 
 [workspace]
 members = ["."]
@@ -34,6 +37,20 @@ bench = false
 [[bin]]
 name = "preuve"
 path = "fuzz_targets/preuve.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "etat"
+path = "fuzz_targets/etat.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "vue"
+path = "fuzz_targets/vue.rs"
 test = false
 doc = false
 bench = false

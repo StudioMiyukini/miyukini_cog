@@ -20,8 +20,8 @@
 //! # Enveloppe (big-endian, taille exacte)
 //!
 //! ```text
-//! "MFED" | version 0x02 | n (4, ≤ 64 Mio) | corps (n) | mac (32)
-//! mac = HMAC-SHA256(K, "MFED" | 0x02 | n | corps)
+//! "MFED" | version 0x03 | n (4, ≤ 64 Mio) | corps (n) | mac (32)
+//! mac = HMAC-SHA256(K, "MFED" | 0x03 | n | corps)
 //! K   = HMAC-SHA256(secret local du COG, "miyukini/miyufederation/etat/v1")
 //! ```
 //!
@@ -51,12 +51,15 @@
 //! | ancre du registre local | `taille (8)` \| `racine (32)` : tête du registre local à l'écriture | HMAC ; au chargement, doit être un **préfixe** du registre fourni ([`crate::persistance::StockageFederal::charger`]) |
 //! | révocations à publier | `compte` × `kid (32)`, strictement croissants | HMAC ; chaque `kid` est une révocation ci-dessus (pièces revérifiées) |
 //! | révocations inscrites | `compte` × (`kid (32)` \| `inscrite_a (8)`), `kid` strictement croissants | HMAC ; ni suspendu ni révoqué avec pièces, `inscrite_a` ≤ `heure` ; dossier éventuel au statut révoqué |
+//! | carnet de pairs (v3) | `compte (≤ 4 096)` × (`bloc` `cog_id` (26) \| `bloc` réseau (1..=64) \| `premier_contact (8)`), `cog_id` strictement croissants | HMAC ; `cog_id` valide, réseau valide, `premier_contact` ≤ `heure` |
 //!
-//! Version `0x02` (amendement à consigner) : ajout des trois derniers champs
-//! (ancre du registre local, file des révocations à publier, révocations
-//! constatées au registre). La version `0x01` est **refusée**
-//! ([`ErreurEtat::VersionInconnue`]) : l'accepter rouvrirait le rejeu d'un
-//! état ancien sans ancre.
+//! Version `0x02` (A-013) : ajout de l'ancre du registre local, de la file
+//! des révocations à publier et des révocations constatées au registre.
+//! Version `0x03` (amendement à consigner) : ajout du **carnet de pairs**
+//! anti-éclipse (EX-37 : pairs anciens conservés au redémarrage). Un état
+//! `0x02` est encore **lu** (carnet vide, comme avant) puis réécrit en
+//! `0x03` ; la version `0x01` est **refusée** ([`ErreurEtat::VersionInconnue`]) :
+//! l'accepter rouvrirait le rejeu d'un état ancien sans ancre.
 //!
 //! # Reprise (fail-closed)
 //!
@@ -88,7 +91,10 @@ use super::{
     ancre, cog_de, sha2_256, Dossier, EnSuspension, Federation, Levee, Parametres, Pieces, PiecesRevocation, Quota,
     RevocationFederale, SuspensionFederale, TitreRecu,
 };
+use miyauth::CogId;
+
 use crate::calcul::DIFFICULTE_PLANCHER;
+use crate::eclipse::{reseau_valide, MAX_PAIRS_CARNET, TAILLE_MAX_RESEAU};
 use crate::erreurs::ErreurFederation;
 use crate::persistance::{AncreRegistre, CleEtatFederal, ErreurEtat};
 use crate::preuve::Preuve;
@@ -99,8 +105,10 @@ use crate::titres::{Accusation, Candidature, Confirmation, Recours};
 
 /// Magie du format.
 pub(crate) const MAGIC: &[u8; 4] = b"MFED";
-/// Version du format.
-pub(crate) const VERSION: u8 = 0x02;
+/// Version du format écrite.
+pub(crate) const VERSION: u8 = 0x03;
+/// Version précédente, encore lue (sans carnet de pairs).
+pub(crate) const VERSION_SANS_CARNET: u8 = 0x02;
 /// Entête : magie, version, longueur du corps.
 pub(crate) const TAILLE_ENTETE: usize = 4 + 1 + 4;
 /// Taille du MAC final.
@@ -115,6 +123,8 @@ const MAX_QUOTAS: usize = 1 << 20;
 const TAILLE_MAX_PREUVE: usize = 14 + 2 * TAILLE_MAX_SCEAU;
 /// Taille maximale d'un état `MSRG`.
 const TAILLE_MAX_MSRG: usize = 9 + TAILLE_MAX_SCEAU;
+/// Taille maximale d'un `cog_id` persisté (26 en pratique).
+const TAILLE_MAX_COG_ID: usize = 64;
 
 // ── Écriture / lecture strictes ─────────────────────────────────────────────
 
@@ -277,13 +287,14 @@ struct Corps<'a> {
     ancre: AncreRegistre,
     a_publier: Vec<Kid>,
     inscrites: Vec<(Kid, u64)>,
+    carnet: Vec<(&'a [u8], &'a [u8], u64)>,
 }
 
 fn lire_sanction<'a>(l: &mut Lecteur<'a>, depuis: u64) -> Result<SanctionBrute<'a>, ErreurEtat> {
     Ok(SanctionBrute { depuis, accusation: l.bloc_non_vide(TAILLE_MAX_SCEAU)?, preuve: l.bloc_non_vide(TAILLE_MAX_PREUVE)? })
 }
 
-fn lire_corps(octets: &[u8]) -> Result<Corps<'_>, ErreurEtat> {
+fn lire_corps(octets: &[u8], version: u8) -> Result<Corps<'_>, ErreurEtat> {
     let mut l = Lecteur { octets, pos: 0 };
     let heure = l.u64()?;
     let vue_a_jour_au = if l.drapeau()? { Some(l.u64()?) } else { None };
@@ -348,6 +359,14 @@ fn lire_corps(octets: &[u8]) -> Result<Corps<'_>, ErreurEtat> {
     for _ in 0..ni {
         inscrites.push((l.b32()?, l.u64()?));
     }
+    let mut carnet = Vec::new();
+    if version != VERSION_SANS_CARNET {
+        let nc = l.compte(MAX_PAIRS_CARNET)?;
+        carnet.reserve(nc.min(1024));
+        for _ in 0..nc {
+            carnet.push((l.bloc_non_vide(TAILLE_MAX_COG_ID)?, l.bloc_non_vide(TAILLE_MAX_RESEAU)?, l.u64()?));
+        }
+    }
     if l.pos != octets.len() {
         return Err(illisible("octets en trop"));
     }
@@ -363,6 +382,7 @@ fn lire_corps(octets: &[u8]) -> Result<Corps<'_>, ErreurEtat> {
         ancre,
         a_publier,
         inscrites,
+        carnet,
     })
 }
 
@@ -458,6 +478,12 @@ impl Federation {
             e.b32(kid);
             e.u64(*inscrite_a);
         }
+        e.compte(self.carnet.len(), MAX_PAIRS_CARNET)?;
+        for (cog, reseau, premier) in self.carnet.pairs() {
+            e.bloc(cog.as_str().as_bytes(), TAILLE_MAX_COG_ID)?;
+            e.bloc(reseau.as_bytes(), TAILLE_MAX_RESEAU)?;
+            e.u64(premier);
+        }
         let corps = e.0;
         if corps.len() > TAILLE_MAX_ETAT {
             return Err(ErreurEtat::TropGrand);
@@ -494,8 +520,9 @@ impl Federation {
         if octets.len() < TAILLE_ENTETE + TAILLE_MAC || &octets[0..4] != MAGIC {
             return Err(illisible("magie"));
         }
-        if octets[4] != VERSION {
-            return Err(ErreurEtat::VersionInconnue(octets[4]));
+        let version = octets[4];
+        if version != VERSION && version != VERSION_SANS_CARNET {
+            return Err(ErreurEtat::VersionInconnue(version));
         }
         let n = u32::from_be_bytes([octets[5], octets[6], octets[7], octets[8]]) as usize;
         if n > TAILLE_MAX_ETAT || octets.len() != TAILLE_ENTETE + n + TAILLE_MAC {
@@ -508,7 +535,7 @@ impl Federation {
             verif.update(contenu);
             verif.verify_slice(m).map_err(|_| ErreurEtat::Altere)?;
         }
-        let corps = lire_corps(&contenu[TAILLE_ENTETE..])?;
+        let corps = lire_corps(&contenu[TAILLE_ENTETE..], version)?;
         let mut f = Self::new(parametres, origin);
         f.restaurer(&corps)?;
         let definitives = f.rattraper(maintenant)?;
@@ -768,6 +795,24 @@ impl Federation {
             self.note.restaurer(*kid, *points, *maj);
         }
 
+        // Carnet de pairs (HMAC) : identifiants et réseaux valides, contacts passés.
+        let mut precedent: Option<CogId> = None;
+        for (cog, reseau, premier) in &c.carnet {
+            let cog = std::str::from_utf8(cog).ok().and_then(CogId::new).ok_or(ErreurEtat::Incoherent("carnet : cog_id"))?;
+            let reseau = std::str::from_utf8(reseau)
+                .ok()
+                .filter(|r| reseau_valide(r))
+                .ok_or(ErreurEtat::Incoherent("carnet : réseau"))?;
+            if precedent.as_ref().is_some_and(|p| *p >= cog) {
+                return Err(ErreurEtat::Incoherent("ordre du carnet"));
+            }
+            if *premier > c.heure {
+                return Err(ErreurEtat::Incoherent("carnet : contact futur"));
+            }
+            precedent = Some(cog.clone());
+            self.carnet.restaurer(cog, reseau.to_string(), *premier);
+        }
+
         // Fraîcheur de la vue : jamais plus récente que la plus récente tête persistée.
         if let Some(v) = c.vue_a_jour_au {
             let plus_recente = self.dossiers.values().filter_map(|d| d.vue.as_ref()).map(|e| e.tete().emise_a).max();
@@ -961,6 +1006,98 @@ mod tests {
         let (g, _, _) = Federation::reprendre(&o, &cle(), *f.parametres(), None, T + 10).unwrap();
         assert!(g.est_revoque(&[9; 32]));
         assert_eq!(g.sceller_etat(&cle(), &ANCRE).unwrap(), o);
+    }
+
+    fn reprendre(o: &[u8], f: &Federation, t: u64) -> Result<Federation, ErreurEtat> {
+        Federation::reprendre(o, &cle(), *f.parametres(), None, t).map(|(g, _, _)| g)
+    }
+
+    #[test]
+    fn carnet_persiste_et_version_2_lue() {
+        let (mut f, _) = exemple();
+        let cogs: Vec<CogId> = f.dossiers.values().map(|d| d.cog.clone()).collect();
+        assert!(f.noter_contact(&cogs[2], "r1", T + 10).unwrap());
+        assert!(f.noter_contact(&cogs[0], "r2", T + 10).unwrap());
+        assert!(!f.noter_contact(&cogs[1], "", T + 10).unwrap());
+        let o = f.sceller_etat(&cle(), &ANCRE).unwrap();
+        let g = reprendre(&o, &f, T + 10).unwrap();
+        assert_eq!(g.carnet().len(), 2);
+        assert_eq!(g.carnet().reseau(&cogs[0]), Some("r2"));
+        assert_eq!(g.carnet().premier_contact(&cogs[2]), Some(T + 10));
+        assert_eq!(g.choisir_pairs(5, T + 10), f.choisir_pairs(5, T + 10));
+        assert_eq!(g.sceller_etat(&cle(), &ANCRE).unwrap(), o);
+
+        // État 0x02 (sans carnet) : lu, carnet vide, réécrit en 0x03.
+        let (f2, _) = exemple();
+        let o3 = f2.sceller_etat(&cle(), &ANCRE).unwrap();
+        let fin = o3.len() - TAILLE_MAC;
+        assert_eq!(&o3[fin - 4..fin], &[0; 4], "carnet vide en fin de corps");
+        let corps = &o3[TAILLE_ENTETE..fin - 4];
+        let mut v2 = MAGIC.to_vec();
+        v2.push(VERSION_SANS_CARNET);
+        v2.extend_from_slice(&(corps.len() as u32).to_be_bytes());
+        v2.extend_from_slice(corps);
+        let m = mac(&cle(), &v2);
+        v2.extend_from_slice(&m);
+        let g2 = reprendre(&v2, &f2, T + 10).unwrap();
+        assert!(g2.carnet().is_empty());
+        assert_eq!(g2.sceller_etat(&cle(), &ANCRE).unwrap(), o3);
+        // Un carnet ajouté à un état 0x02 : octets en trop, refusé.
+        let mut v2_plus = MAGIC.to_vec();
+        v2_plus.push(VERSION_SANS_CARNET);
+        v2_plus.extend_from_slice(&((corps.len() + 4) as u32).to_be_bytes());
+        v2_plus.extend_from_slice(corps);
+        v2_plus.extend_from_slice(&[0; 4]);
+        let m = mac(&cle(), &v2_plus);
+        v2_plus.extend_from_slice(&m);
+        assert!(matches!(reprendre(&v2_plus, &f2, T + 10), Err(ErreurEtat::Illisible(_))));
+    }
+
+    #[test]
+    fn carnet_incoherent_refuse() {
+        let (f, _) = exemple();
+        let cog = f.dossiers.values().next().unwrap().cog.clone();
+        for (reseau, premier) in [("", T), ("r\n", T), ("r", T + 11)] {
+            let mut g = f.clone();
+            g.carnet.restaurer(cog.clone(), reseau.to_string(), premier);
+            let o = g.sceller_etat(&cle(), &ANCRE).unwrap();
+            let e = reprendre(&o, &g, T + 11).expect_err("carnet incohérent accepté");
+            assert!(matches!(e, ErreurEtat::Incoherent(_) | ErreurEtat::Illisible(_)), "{reseau:?} {premier} : {e:?}");
+        }
+    }
+
+    #[test]
+    fn carnet_plein_n_evince_qu_un_ineligible() {
+        let (mut f, ids) = exemple();
+        let membres: Vec<CogId> = f.dossiers.values().filter(|d| d.fondateur).map(|d| d.cog.clone()).collect();
+        for m in &membres {
+            assert!(f.noter_contact(m, "anciens", T + 10).unwrap());
+        }
+        // Remplissage par des inconnus (inéligibles).
+        let mut inconnus = Vec::new();
+        let mut i = 0u32;
+        while f.carnet().len() < MAX_PAIRS_CARNET {
+            let mut cle_pub = [0u8; 32];
+            cle_pub[..4].copy_from_slice(&i.to_be_bytes());
+            let cog = cog_de(&cle_pub).unwrap();
+            assert!(f.noter_contact(&cog, "sybilles", T + 20 + u64::from(i / 1000)).unwrap());
+            inconnus.push(cog);
+            i += 1;
+        }
+        // Carnet plein : un nouveau venu évince l'inéligible le plus récent, jamais un membre.
+        let nouveau = cog_de(&[0xab; 32]).unwrap();
+        assert!(f.noter_contact(&nouveau, "autre", T + 30).unwrap());
+        assert_eq!(f.carnet().len(), MAX_PAIRS_CARNET);
+        assert!(membres.iter().all(|m| f.carnet().reseau(m) == Some("anciens")));
+        // Persisté puis relu à l'identique.
+        let o = f.sceller_etat(&cle(), &ANCRE).unwrap();
+        assert_eq!(reprendre(&o, &f, T + 30).unwrap().sceller_etat(&cle(), &ANCRE).unwrap(), o);
+        // Carnet autonome plein : nouveau pair ignoré, pair connu toujours accepté.
+        let mut carnet = f.carnet().clone();
+        assert!(!carnet.noter_contact(&cog_de(&[0xcd; 32]).unwrap(), "x", T + 40));
+        assert!(carnet.noter_contact(&membres[0], "x", T + 40));
+        assert_eq!(carnet.reseau(&membres[0]), Some("anciens"));
+        let _ = ids;
     }
 
     #[test]

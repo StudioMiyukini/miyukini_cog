@@ -8,7 +8,7 @@
 
 use std::sync::OnceLock;
 
-use miyufederation::{Candidature, Federation, Parametres};
+use miyufederation::{Candidature, CleEtatFederal, Federation, Parametres};
 use miyuracine::{Racine, Usage};
 use miyusceau::{empreinte_cle, sceller, CleSignature, TeteRegistre};
 
@@ -28,7 +28,7 @@ pub struct CogFuzz {
 }
 
 impl CogFuzz {
-    fn nouveau(graine: u8) -> Self {
+    pub fn nouveau(graine: u8) -> Self {
         let racine = Racine::depuis_secret(&[graine; 32]);
         let identite = racine.cle(Usage::Identite, 0).expect("identité");
         let journal = racine.cle(Usage::Journal, 0).expect("journal");
@@ -48,6 +48,45 @@ impl CogFuzz {
     }
 }
 
+/// Secret local fixe des cibles (état `MFED`).
+pub const SECRET_LOCAL: [u8; 32] = [0x5a; 32];
+
+/// Politique des cibles : difficulté réduite, sans Origin.
+pub fn parametres() -> Parametres {
+    Parametres::default().avec_difficulte(DIFFICULTE).expect("difficulté")
+}
+
+/// Clé de scellement dérivée de [`SECRET_LOCAL`].
+pub fn cle_etat() -> &'static CleEtatFederal {
+    static CLE: OnceLock<CleEtatFederal> = OnceLock::new();
+    CLE.get_or_init(|| CleEtatFederal::deriver(&SECRET_LOCAL))
+}
+
+/// Enveloppe `MFED` d'un corps quelconque, scellée par le secret local fixe
+/// (même dérivation que `CleEtatFederal::deriver`, recalculée ici : le
+/// fuzzing franchit le HMAC et atteint la revérification du corps).
+pub fn envelopper(version: u8, corps: &[u8]) -> Vec<u8> {
+    use hmac::{Mac, SimpleHmac};
+    type H = SimpleHmac<sha2::Sha256>;
+    let mut k = <H as Mac>::new_from_slice(&SECRET_LOCAL).expect("clé");
+    k.update(b"miyukini/miyufederation/etat/v1");
+    let cle = k.finalize().into_bytes();
+    let mut s = Vec::with_capacity(9 + corps.len() + 32);
+    s.extend_from_slice(b"MFED");
+    s.push(version);
+    s.extend_from_slice(&u32::try_from(corps.len()).unwrap_or(u32::MAX).to_be_bytes());
+    s.extend_from_slice(corps);
+    let mut m = <H as Mac>::new_from_slice(&cle).expect("clé");
+    m.update(&s);
+    s.extend_from_slice(&m.finalize().into_bytes());
+    s
+}
+
+/// `cog_id` d'un COG de test.
+pub fn cog_id(c: &CogFuzz) -> miyauth::CogId {
+    miyauth::CogId::new(&miyuracine::cog_id_depuis_cle(&c.identite.cle_publique())).expect("cog_id")
+}
+
 /// Les 7 COG fondateurs (graines 1 à 7).
 pub fn cogs() -> &'static [CogFuzz] {
     static COGS: OnceLock<Vec<CogFuzz>> = OnceLock::new();
@@ -58,7 +97,7 @@ pub fn cogs() -> &'static [CogFuzz] {
 pub fn federation() -> Federation {
     static FED: OnceLock<Federation> = OnceLock::new();
     FED.get_or_init(|| {
-        let mut f = Federation::new(Parametres::default().avec_difficulte(DIFFICULTE).expect("difficulté"), None);
+        let mut f = Federation::new(parametres(), None);
         for c in cogs() {
             f.ajouter_fondateur(&c.candidature, T0).expect("fondateur");
         }

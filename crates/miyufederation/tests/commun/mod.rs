@@ -6,6 +6,8 @@
 
 #![allow(dead_code)]
 
+pub mod scenarios;
+
 use miyauth::CogId;
 use miyufederation::{Candidature, Confirmation, Federation, Parametres};
 use miyuracine::{Racine, Usage};

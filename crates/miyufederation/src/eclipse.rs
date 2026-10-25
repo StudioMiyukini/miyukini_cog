@@ -27,6 +27,15 @@ use crate::federation::Federation;
 
 /// Longueur maximale d'une étiquette de réseau.
 pub const TAILLE_MAX_RESEAU: usize = 64;
+/// Pairs au plus dans un carnet (borne mémoire et persistance ; au-delà, un
+/// nouveau pair n'entre qu'en évinçant un pair **inéligible** : les anciens
+/// pairs éligibles ne sont jamais chassés, voir [`Federation::noter_contact`]).
+pub const MAX_PAIRS_CARNET: usize = 4_096;
+
+/// Étiquette de réseau acceptée : non vide, ≤ [`TAILLE_MAX_RESEAU`] octets, sans caractère de contrôle.
+pub(crate) fn reseau_valide(reseau: &str) -> bool {
+    !reseau.is_empty() && reseau.len() <= TAILLE_MAX_RESEAU && !reseau.chars().any(char::is_control)
+}
 
 #[derive(Debug, Clone)]
 struct Pair {
@@ -48,14 +57,52 @@ impl CarnetPairs {
 
     /// Note un contact avec `cog` depuis `reseau`. Le premier contact et le
     /// premier réseau sont conservés. Étiquette vide ou trop longue : ignorée.
+    /// Carnet plein ([`MAX_PAIRS_CARNET`]) : nouveau pair ignoré (`false`) ;
+    /// [`Federation::noter_contact`] évince d'abord un pair inéligible.
     pub fn noter_contact(&mut self, cog: &CogId, reseau: &str, maintenant: u64) -> bool {
-        if reseau.is_empty() || reseau.len() > TAILLE_MAX_RESEAU || reseau.chars().any(char::is_control) {
+        if !reseau_valide(reseau) {
+            return false;
+        }
+        if !self.pairs.contains_key(cog) && self.pairs.len() >= MAX_PAIRS_CARNET {
             return false;
         }
         self.pairs
             .entry(cog.clone())
             .or_insert_with(|| Pair { reseau: reseau.to_string(), premier_contact: maintenant });
         true
+    }
+
+    /// Nombre de pairs connus.
+    pub fn len(&self) -> usize {
+        self.pairs.len()
+    }
+
+    /// Carnet vide.
+    pub fn is_empty(&self) -> bool {
+        self.pairs.is_empty()
+    }
+
+    /// Premier contact d'un pair.
+    pub fn premier_contact(&self, cog: &CogId) -> Option<u64> {
+        self.pairs.get(cog).map(|p| p.premier_contact)
+    }
+
+    /// Pairs dans l'ordre des `cog_id` : `(cog, réseau, premier contact)`.
+    pub(crate) fn pairs(&self) -> impl Iterator<Item = (&CogId, &str, u64)> {
+        self.pairs.iter().map(|(c, p)| (c, p.reseau.as_str(), p.premier_contact))
+    }
+
+    pub(crate) fn contient(&self, cog: &CogId) -> bool {
+        self.pairs.contains_key(cog)
+    }
+
+    pub(crate) fn retirer(&mut self, cog: &CogId) {
+        self.pairs.remove(cog);
+    }
+
+    /// Restauration d'un état persisté (contrôles faits par l'appelant).
+    pub(crate) fn restaurer(&mut self, cog: CogId, reseau: String, premier_contact: u64) {
+        self.pairs.insert(cog, Pair { reseau, premier_contact });
     }
 
     /// Réseau d'un pair.

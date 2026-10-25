@@ -194,7 +194,8 @@ fn alteration_d_un_octet_refusee() {
         m[i] ^= 0x01;
         let e = reprendre(&m).expect_err("octet altéré accepté");
         match i {
-            4 => assert!(matches!(e, ErreurEtat::VersionInconnue(0x03)), "{i} : {e:?}"),
+            // 0x03 ^ 1 = 0x02 : version encore lue, MAC faux.
+            4 => assert!(matches!(e, ErreurEtat::Altere), "{i} : {e:?}"),
             0..=8 => assert!(matches!(e, ErreurEtat::Illisible(_)), "{i} : {e:?}"),
             _ => assert!(matches!(e, ErreurEtat::Altere), "{i} : {e:?}"),
         }

@@ -56,6 +56,7 @@ use miyusceau::{
 };
 
 use crate::calcul::{DIFFICULTE_DEFAUT, DIFFICULTE_MAX, DIFFICULTE_PLANCHER};
+use crate::eclipse::{reseau_valide, CarnetPairs, MAX_PAIRS_CARNET};
 use crate::erreurs::ErreurFederation;
 use crate::note::{NoteLocale, Observation};
 use crate::preuve::Preuve;
@@ -68,6 +69,8 @@ use crate::titres::{Accusation, Candidature, Confirmation, Recours};
 mod etat;
 
 pub use etat::TAILLE_MAX_ETAT;
+/// Version du format `MFED` écrite (un état d'une version antérieure lue est réécrit).
+pub(crate) const VERSION_ECRITE: u8 = etat::VERSION;
 
 /// Nouveaux COG confirmés au plus par membre et par période (choix à amender :
 /// la doc dit « limité par membre et par mois » sans valeur).
@@ -318,6 +321,8 @@ pub struct Federation {
     heure: u64,
     vue_a_jour_au: Option<u64>,
     note: NoteLocale,
+    /// Carnet de pairs anti-éclipse (EX-37), persisté avec la vue.
+    carnet: CarnetPairs,
 }
 
 fn cog_de(racine: &[u8; 32]) -> Result<CogId, ErreurFederation> {
@@ -393,6 +398,7 @@ impl Federation {
             heure: 0,
             vue_a_jour_au: None,
             note: NoteLocale::new(),
+            carnet: CarnetPairs::new(),
         }
     }
 
@@ -411,6 +417,43 @@ impl Federation {
         let kid = *self.par_cog.get(cog).ok_or(ErreurFederation::Inconnu)?;
         self.note.observer(&kid, observation, maintenant);
         Ok(())
+    }
+
+    /// Carnet de pairs anti-éclipse de la vue (persisté avec elle).
+    pub fn carnet(&self) -> &CarnetPairs {
+        &self.carnet
+    }
+
+    /// Note un contact avec `cog` depuis `reseau` dans le carnet de la vue
+    /// (premier contact et premier réseau conservés). Carnet plein
+    /// ([`MAX_PAIRS_CARNET`]) : le pair **inéligible** le plus récent est
+    /// évincé ; s'il n'y en a pas, le nouveau pair est ignoré (`Ok(false)`) —
+    /// un afflux de nouveaux venus ne chasse jamais les anciens pairs
+    /// éligibles (EX-37). Étiquette invalide : `Ok(false)`.
+    pub fn noter_contact(&mut self, cog: &CogId, reseau: &str, maintenant: u64) -> Result<bool, ErreurFederation> {
+        self.horloge(maintenant)?;
+        if !reseau_valide(reseau) {
+            return Ok(false);
+        }
+        if !self.carnet.contient(cog) && self.carnet.len() >= MAX_PAIRS_CARNET {
+            let victime = self
+                .carnet
+                .pairs()
+                .filter(|(c, _, _)| !self.pair_eligible(c, maintenant))
+                .max_by_key(|(c, _, t)| (*t, (*c).clone()))
+                .map(|(c, _, _)| c.clone());
+            match victime {
+                Some(v) => self.carnet.retirer(&v),
+                None => return Ok(false),
+            }
+        }
+        Ok(self.carnet.noter_contact(cog, reseau, maintenant))
+    }
+
+    /// Choisit au plus `n` pairs éligibles du carnet de la vue (réseaux
+    /// alternés, anciens d'abord : [`CarnetPairs::choisir`]).
+    pub fn choisir_pairs(&self, n: usize, maintenant: u64) -> Vec<CogId> {
+        self.carnet.choisir(n, self, maintenant)
     }
 
     fn horloge(&mut self, maintenant: u64) -> Result<(), ErreurFederation> {

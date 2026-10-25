@@ -12,6 +12,12 @@ categories.workspace = true
 description = "Fédération COG — candidature hashcash, statuts invité / membre, blacklist sur preuves signées et quorum de 6, note locale, anti-éclipse, sans Origin (lot 6, EX-30..33, EX-35, EX-37, EX-38)"
 
 # Aucune dépendance réseau : la crate décide, le transport (commérage) est ailleurs.
+# Fonctionnalité `kindmother` : persistance de l'état fédéral dans KindMother
+# (seul écrivain du COG, base dédiée `miyufederation`, client IPC local).
+[features]
+default = []
+kindmother = ["dep:kindmother-client", "dep:serde_json"]
+
 [dependencies]
 miyusceau = { path = "../miyusceau" }
 miyuracine = { path = "../miyuracine" }
@@ -21,6 +27,8 @@ sha2 = "0.10"
 hmac = "0.12"
 zeroize = "1"
 thiserror = "2"
+kindmother-client = { path = "../kindmother-client", optional = true }
+serde_json = { version = "1", optional = true }
 
 # Verrou `flock`, uid effectif, ouverture sans suivre de lien : appels
 # système sans `unsafe` (le crate est `forbid(unsafe_code)`). Déjà dans le
@@ -29,6 +37,10 @@ thiserror = "2"
 rustix = { version = "1", default-features = false, features = ["std", "fs", "process"] }
 
 [dev-dependencies]
+# Exécuteur des tests de la vue persistante (supports asynchrones).
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+# Serveur KindMother réel (SQLCipher) pour les tests du support KindMother.
+kindmother-service = { path = "../kindmother-service" }
 
 [lints]
 workspace = true
