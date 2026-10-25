@@ -99,6 +99,41 @@ n'apparaît ni dans `argv` ni dans les journaux PostgreSQL.
 - binaires installés conformes au `MANIFESTE` du paquet ;
 - banc d'intrusion lot 3 (option `--banc`).
 
+## Scénarios LIVE (`scenarios.sh`)
+
+```sh
+cargo build --release -p maia-memoire --example proposer_essai
+COG_PROPOSER=target/release/examples/proposer_essai deploy/cog-vm/scenarios.sh --distant
+```
+
+`--distant` copie le script et les migrations (`apps/miyucloud/migrations`) dans la VM et l'y exécute ;
+sortie TAP, code de retour = nombre de « not ok ». Le script :
+
+- rejoue les migrations MiyuCloud sur une base vierge, en transaction (`ON_ERROR_STOP`), et vérifie celles
+  de l'instance (dont `20261025000002_cdr_reclassement`) ;
+- crée le premier administrateur au premier passage (identifiants dans `~/.cog-scenarios/admin.env`, 0600, dans
+  la VM) puis teste EXIF / désarmement / chiffrement sur disque (`MIYUCENC`), plages, quarantaine, polyglotte,
+  copie + suppression de l'original (`ref_count`), corbeille et ramasse-miettes, réconciliation après corruption,
+  WebDAV, WOPI sans jeton, cohérence SQL de `storage.blobs` / `storage.files` ;
+- configure les routes mémoire de MAIA **dans la VM seulement** : déclaration de `alice` dans
+  `maia-utilisateurs` (KindMother provisionne `maia-alice`), drop-in systemd `memoire-essai.conf` avec deux clés
+  épinglées distinctes (utilisateur ≠ approbation), redémarrage de KindMother puis MAIA ; puis teste les requêtes
+  signées (200, 401, rejeu, autre utilisateur, cookie), les approbations TAMR (clé mémoire refusée, mauvaise
+  empreinte, approbation par la clé d'approbation, rejeu) et le refus de KindMother pour un client non autorisé.
+
+Limites connues de l'essai :
+
+- **`proposer_essai`** (`crates/maia-memoire/examples/proposer_essai.rs`) : appelle `MemoireMaia::proposer` (le chemin
+  du pipeline LLM, inaccessible sans modèle) ; sans `COG_PROPOSER`, le scénario 10 bis est « not ok ».
+- **WOPI** : désactivé dans l'unité MiyuCloud (`MIYUCLOUD_WOPI_ENABLED=false`) ; le refus sans jeton est donc
+  observé sur une réponse 404, non sur l'authentification WOPI.
+- Les routes mémoire restent configurées dans la VM après l'essai ; `tester.sh` attend alors 401 (et non 503).
+
+Ordre de démarrage : MAIA ouvre la mémoire une seule fois, au démarrage. L'unité MAIA démarre donc après
+`miyukini-kindmother.service` et attend (30 s au plus, sans échec fatal) que `127.0.0.1:50051` écoute. Sans cet
+ordre, un redémarrage de la VM laissait la mémoire désactivée (`Connection refused`) jusqu'au redémarrage manuel
+de MAIA ; `tester.sh` contrôle désormais cet ordre.
+
 ## Points à connaître
 
 - Le compte MiyuCloud n'est pas initialisé : le premier administrateur doit être créé via l'interface

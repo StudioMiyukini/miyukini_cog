@@ -350,9 +350,12 @@ Environment=KINDMOTHER_LISTEN_ADDR=127.0.0.1:50051"
 
 	# bridge.toml (B2) : /etc/miyukini/bridge.toml (root, lecture seule) monté en
 	# lecture seule à l'endroit où MAIA le lit ; ni réécriture ni remplacement.
+	# MAIA ouvre la mémoire (KindMother) une seule fois, au démarrage, sans nouvel essai : elle
+	# démarre après KindMother et attend (borné, sans échec fatal) que son port écoute.
 	ecrire_unite miyukini-maia "MAIA — orchestrateur d'agents IA (COG)" \
-		miyukini-maia "$VAR/maia" "$BIN/maia" "$VAR/maia" "" "$ETC/maia.env" \
+		miyukini-maia "$VAR/maia" "$BIN/maia" "$VAR/maia" "miyukini-kindmother.service" "$ETC/maia.env" \
 		"Environment=MAIA_LLM_URL=http://127.0.0.1:11435
+ExecStartPre=-/usr/bin/timeout 30 /bin/bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/50051) 2>/dev/null; do sleep 0.5; done'
 BindReadOnlyPaths=$ETC/bridge.toml:$VAR/maia/bridge.toml"
 
 	ecrire_unite miyukini-miyucloud "MiyuCloud — stockage et calendriers (COG)" \

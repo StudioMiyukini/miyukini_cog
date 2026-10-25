@@ -144,8 +144,19 @@ for chemin in /v1/agents /v1/skills /v1/security/status /v1/models/local; do
 done
 controle "MAIA POST /v1/llm/chat sans signature refusé (503)" \
 	test "$(code_http -X POST -H 'content-type: application/json' -d '{}' http://127.0.0.1:11435/v1/llm/chat)" = 503
-controle "MAIA routes mémoire désactivées par défaut (503)" \
-	test "$(code_http -X POST -H 'content-type: application/json' -d '{}' http://127.0.0.1:11435/v1/memoire/tests/consulter)" = 503
+# Routes mémoire : 503 tant que la mémoire n'est pas configurée ; une fois la configuration
+# d'essai posée par scenarios.sh (drop-in), elles sont actives et refusent sans signature (401).
+if [[ -e /etc/systemd/system/miyukini-maia.service.d/memoire-essai.conf ]]; then
+	controle "MAIA routes mémoire actives (configuration d'essai) : sans signature refusé (401)" \
+		test "$(code_http -X POST -H 'content-type: application/json' -d '{}' http://127.0.0.1:11435/v1/memoire/tests/consulter)" = 401
+else
+	controle "MAIA routes mémoire désactivées par défaut (503)" \
+		test "$(code_http -X POST -H 'content-type: application/json' -d '{}' http://127.0.0.1:11435/v1/memoire/tests/consulter)" = 503
+fi
+# MAIA n'ouvre la mémoire qu'une fois, au démarrage : elle doit démarrer après KindMother et
+# attendre que son port écoute (sinon, au redémarrage de la VM, la mémoire reste désactivée).
+controle "MAIA démarre après KindMother et attend son port (ordre au démarrage)" bash -c \
+	"systemctl show miyukini-maia -p After --value | grep -q 'miyukini-kindmother.service' && systemctl cat miyukini-maia | grep -q '127.0.0.1/50051'"
 
 refus_maia() {
 	local d="$TMP/maia-hors-boucle" rc

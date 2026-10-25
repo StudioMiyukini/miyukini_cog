@@ -117,6 +117,18 @@ impl FileHandler {
                     .unwrap_or("application/octet-stream")
                     .to_string();
 
+                // Sans dossier parent (champ `folder_id` absent ou placé après le fichier),
+                // le propriétaire est indéterminable : refus 400 avant tout spool. La
+                // version antérieure répondait 500 après écriture et passage au CDR.
+                if let Err(e) = exiger_dossier_parent(folder_id.as_deref()) {
+                    tracing::warn!(
+                        "⛔ UPLOAD REJECTED (folder_id absent) : user='{}', file='{}'",
+                        auth_user.username,
+                        filename,
+                    );
+                    return Err(Self::domain_error_response(e));
+                }
+
                 // ── SECURITY: Verify folder ownership before upload (IDOR V-03 fix) ──
                 if let Some(ref fid) = folder_id {
                     use crate::application::ports::inbound::FolderUseCase;
@@ -1273,6 +1285,12 @@ pub struct MoveFilePayload {
     pub folder_id: Option<String>,
 }
 
+/// Refus d'un téléversement sans dossier parent : le propriétaire du fichier
+/// ne peut pas être déterminé (`InvalidInput` ⇒ 400).
+pub(crate) fn exiger_dossier_parent(folder_id: Option<&str>) -> Result<&str, DomainError> {
+    folder_id.ok_or_else(|| DomainError::validation_error("folder_id requis avant le fichier"))
+}
+
 #[cfg(test)]
 mod tests_cdr {
     use super::*;
@@ -1441,5 +1459,12 @@ mod tests_cdr {
         assert!(accord_explicite(Some("1")));
         assert!(!EtatCdr::Quarantaine.autorise_telechargement(false));
         assert!(EtatCdr::Quarantaine.autorise_telechargement(true));
+    }
+
+    #[test]
+    fn upload_sans_dossier_parent_est_un_refus_de_saisie() {
+        let e = exiger_dossier_parent(None).expect_err("sans dossier parent");
+        assert_eq!(e.kind, ErrorKind::InvalidInput);
+        assert_eq!(exiger_dossier_parent(Some("dossier-1")).expect("dossier"), "dossier-1");
     }
 }
