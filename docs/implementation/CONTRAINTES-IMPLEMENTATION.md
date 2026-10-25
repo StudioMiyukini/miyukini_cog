@@ -46,7 +46,7 @@
 - **C-21 [B]** Exposition désactivée par défaut ; écoute sur `127.0.0.1` sauf contrat signé (EX-48)
 - **C-22 [B]** Authentification sur tout point d'accès non local ; comparaisons de secrets en temps constant
 - **C-23 [B]** Signature vérifiée **avant** tout décodage de contenu (EX-09)
-- **C-24 [B]** Cryptographie limitée à l'inventaire ci-dessous (révisée le 2026-10-24, amendement A-003, NC-ANSSI-09 ; complétée le 2026-10-25, A-004) ; toute primitive ou crate nouvelle = révision de C-24
+- **C-24 [B]** Cryptographie limitée à l'inventaire ci-dessous (révisée le 2026-10-24, amendement A-003, NC-ANSSI-09 ; complétée le 2026-10-25, A-004 et A-006) ; toute primitive ou crate nouvelle = révision de C-24
   - **Règle** : **aucune primitive maison** ; le code de schéma (Shamir GF(256), RS1024 et Feistel de SLIP-39, SLIP-10, Merkle RFC 9162) n'est admis qu'avec les **vecteurs de test officiels** de sa spécification
   - **Inventaire** (algorithme → crate → usage → statut), relevé sur les `Cargo.toml` du workspace :
     - **Ed25519** → `ed25519-dalek` 2, `verify_strict` → `miyusceau` (Sceau, seul format d'identité signée), `miyauth`, `miyuracine` (via `miyusceau`), `kindmother-client`, `kindmother-service`, `miyukini-cog-bridge`, `jaymessage`, `jay-collab`, `miyuwebway_participant`, `miyuportail` (trames de voie, A-004) → autorisé ; hors listes ANSSI, justification à produire (NC-ANSSI-10)
@@ -55,7 +55,7 @@
     - **ChaCha20-Poly1305** → `chacha20poly1305` 0.10 → `jaycloud` (`kits/crypto_kit.rs`), `crates/miyucloud` (`crypto/at_rest.rs`, `crypto/e2e.rs`) → autorisé
     - **AES-256-GCM** → `aes-gcm` 0.10 → `apps/miyucloud` (`blob_encryption_service.rs`), `apps/miou-llm-bridge` (`security.rs`) ; déclarée sans usage dans `miyukini-admin` → autorisé en 256 bits seulement (NC-ANSSI-15)
     - **HKDF-SHA256** → `hkdf` 0.12 → `miyauth` (identifiant par paire), `miyukini-cog-bridge`, `jaymessage`, `jaycloud`, `crates/miyucloud` → autorisé
-    - **HMAC-SHA256** → `hmac` 0.12 → `miyuracine` (SLIP-10, PBKDF2), `cog-web-portal`, `central-remote`, `origin`, `miou-llm-bridge` → autorisé
+    - **HMAC-SHA256** → `hmac` 0.12 → `miyuracine` (SLIP-10, PBKDF2), `miyucanal` (scellement local de la quarantaine, A-006), `cog-web-portal`, `central-remote`, `origin`, `miou-llm-bridge` → autorisé
     - **PBKDF2-HMAC-SHA256** → `pbkdf2` 0.12 → `miyuracine` (Feistel SLIP-39) → autorisé, réservé à SLIP-39
     - **Argon2id** → `argon2` 0.5 → `kindmother-db-key` (64 Mio, 3 passes, 4 voies), `origin`, `miyukini-central`, `miyukini-connect`, `miyukini-admin`, `miyualicia-api`, `jaycloud`, `apps/miyucloud`, `crates/miyucloud` → autorisé pour les secrets de faible entropie ; paramètres à documenter (NC-ANSSI-17)
     - **SHA-256** → `sha2` 0.10 → `miyusceau` (`kid`, identité des titres, Merkle), `miyauth`, `miyuracine`, `miyumarket` (`package_id`), `miyuportail` (empreintes des passages, A-004), `borderguard` (arrêtés), autres crates → autorisé

@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.5 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.6 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -64,6 +64,7 @@
 | A-003 | 2026-10-24 | Lot 2 §3.1, §5–§8 et Zones §15 : choix d'implémentation du lot 2 (tête de registre, racine, passeports et visas) ; détail ci-dessous | 1.3 |
 | A-004 | 2026-10-25 | Zones §5, §10–§12, §15 · Services hybrides §3 · Lot 2 §3.1, §4.1 : choix d'implémentation du lot 3 (Portail, CDR, arrêtés, Douane, Vigies, coupure de voie) ; détail ci-dessous | 1.4 |
 | A-005 | 2026-10-25 | Zones §12 : règles intégrées des Vigies sur le motif de la Douane (`LATERAL`, `NON-DECLARE` critiques, coupure de la voie fautive) ; attribution de voie par le seul côté d'entrée ; détail ci-dessous | 1.5 |
+| A-006 | 2026-10-25 | Lot 2 §3, §4.1, §8, §8.1, §8.2, §9 · Zones §7, §15, §17 : choix d'implémentation du lot 4 (entrées de registre `0x04`, stockage `MRGJ`, Median-Time-Past, relevé `MCAN`, quarantaine, registre fédéral) ; têtes du registre officiel par une clé de journal d'Origin ; révocations à seuil 1 ; quarantaine persistée et scellée ; détail ci-dessous | 1.6 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -204,3 +205,53 @@
   - **C** : C-12 appliquée (doute sur l'attribution ⇒ pas de voie, incident hors voie)
   - **Plan** : lot 3 — ligne « Vigies : motif Douane, anti-usurpation » à reporter au §5 (hors gel)
   - **Code** : `miyuvigie` (règles intégrées, motif porté par l'événement de flux, lecteur nftables), `miyudouane` (interface d'entrée de la métadonnée), `miyufrontiere` (attribution par le côté d'entrée)
+
+### A-006 — Lot 4 : registre et canal officiel
+
+<!-- @id arch.gel.a006 -->
+<!-- @role amendment -->
+<!-- @do record_lot4_registry_channel_choices -->
+
+- **Date / validation** : 2026-10-25, propriétaire du projet · **version** 1.6
+- **Motif**
+  - Lot 4 « Registre et canal officiel » : choix que la doc gelée ne fixait pas, faits dans le code (`miyuregistre`, `miyucanal`) et signalés « non spécifié par la doc gelée, à amender » dans la doc de leurs modules
+  - Consigner l'existant ; **trois décisions** du propriétaire (signataire des têtes du registre officiel, signataires des révocations, persistance de la quarantaine)
+- **Documents touchés**
+  - [Lot 2 — identité signée](../securite/ARCHITECTURE-lot2-identite-signee.md) : bandeau, §3 (clé de journal d'Origin), §4.1 (natures du type `0x04`), §8, §8.1, §8.2, §9
+  - [Zones et couches](MODELE-ZONES-ET-COUCHES-COG.md) : bandeau, §7 (canal officiel), §15 (clé de journal d'Origin), §17 (temps de confiance)
+  - Hors gel, alignés : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) C-24 (`hmac` → `miyucanal`) ; [plan](../implementation/PLAN-IMPLEMENTATION.md) §6 (à reporter)
+- **Décision** (consignation de l'implémenté)
+  - **Entrée de registre** : `Sceau` `0x04`, charge TLV — tags 1 `nature` (1 publication, 2 révocation, 3 émission, 4 décret, 5 événement) et 2 `inscrite_a` communs, puis champs propres à la nature, tous obligatoires, aucun champ en trop ; détail au [lot 2 §8](../securite/ARCHITECTURE-lot2-identite-signee.md)
+  - **Feuille** Merkle = `SHA-256(0x00 || octets du sceau)` (RFC 9162) ; **identité** d'un titre scellé = SHA-256 des octets signés (stable si l'on ajoute un cosignataire)
+  - **Annonce** de mise à jour = feuille `Publication` scellée **2 sur 2** sur l'ensemble **exact** {Origin, clé éditeur hors ligne} (aucun troisième signataire compté) ; inscription datée dans le futur au-delà de 120 s = refus
+  - **Stockage** append-only, format fichier **`MRGJ`** : entête `"MRGJ" | 0x01` ; enregistrement `longueur (4) | octets | contrôle (8)`, contrôle = `SHA-256(longueur || octets)[0..8]` ; `fsync` à chaque ajout ; fin tronquée (écriture interrompue) retirée à l'ouverture ; enregistrement altéré au milieu = refus, aucune réparation automatique
+  - **Median-Time-Past** : fenêtre de **11** têtes ; fenêtre paire (amorçage) ⇒ médiane **haute** ; horodatage **égal** au MTP accepté, strictement inférieur refusé ; un MTP **par registre** pour ses têtes, plus une **horloge de confiance globale** (monotone) alimentée par toutes les têtes acceptées (registre local, canal officiel, COG fédérés) ; état persistant `"MSMT" | 0x01 | dernier (8) | n (1) | n × horodatage (8)`
+  - **Miroir** du registre officiel : copie **intégrale** ; les entrées reçues doivent reconstruire exactement la racine signée, la preuve de cohérence est recalculée sur la copie ; entrée non confirmée par une tête retirée à la réouverture
+  - **Relevé** (zone COG → dépôt officiel, **pull seulement**, le dépôt ne pousse rien et reste non fiable) : demandes **`MCAN`** `"MCAN" | 0x01 | code` — `0x01` tête, `0x02` entrées `depuis (8) | nombre (4, 1..=1024)`, `0x03` artefact `empreinte (32) | taille (8)` ; décodage strict, taille exacte
+  - **Quarantaine** : **48 h** comptées depuis la **première vue locale** sur l'heure de confiance, jamais depuis l'horodatage signé (une annonce antidatée ne raccourcit rien) ; plus longue configurable, plus courte refusée ; installation seulement si une tête **émise après la fin de la quarantaine** est acceptée et fraîche (toute révocation publiée pendant la quarantaine est vue), inclusion revérifiée, version strictement supérieure à l'installée
+  - **Bornes** : **4 096** entrées nouvelles au plus par relevé ; **1 Mio** au plus par enregistrement stocké ; entrée reçue ≤ taille maximale d'un sceau ; artefact relevé par empreinte, **taille annoncée = borne de lecture**, taille et SHA-256 exacts exigés
+  - **Registre fédéral** (EX-34) : tête d'un COG acceptée seulement **cosignée** — 2 sur {clé de journal du COG, Origin}, Origin cosignant le même sceau ; clé de journal du COG ≠ clé d'Origin ; amorçage d'un COG au **premier usage** (TOFU)
+- **Décision du propriétaire 1 — têtes du registre officiel**
+  - Têtes signées par une **clé de journal d'Origin dédiée** (en ligne), **seuil 1** ; distincte de la clé de signature d'Origin et de la clé éditeur (configuration refusée sinon)
+  - Mises à jour inchangées : **2 sur 2** {Origin, éditeur}, portées par la feuille `Publication` (annonce)
+  - Politique plus stricte admise (`ConfigCanal::avec_tetes`) : **N sur N** d'un ensemble qui contient la clé de journal d'Origin, âge ≤ 24 h ; jamais plus laxiste
+  - **Emplacement** : la clé de journal d'Origin n'est **pas** un usage `miyuracine` (Origin n'est pas une racine COG) ; c'est une clé d'Origin, épinglée dans la **configuration** du canal de la zone COG (`ConfigCanal`) avec Origin et l'éditeur
+  - Risque accepté : la clé de journal seule ne forge aucune mise à jour ; elle peut geler le registre (refusé : tête gelée) ou présenter une vue scindée à un COG isolé (détectée par équivoque dès que deux vues se croisent ; voir journal fédéral agrégé, ci-dessous)
+- **Décision du propriétaire 2 — révocations du canal** : signées par **Origin ou l'éditeur**, **seuil 1** sur l'ensemble exact {Origin, éditeur} ; la clé de journal d'Origin n'est pas comptée ; une révocation ne peut qu'**empêcher** une installation
+- **Décision du propriétaire 3 — persistance de la quarantaine**
+  - Liste des annonces en attente persistée avec l'heure de **première vue** (heure de confiance, bornée par le MTP) ; après redémarrage, le décompte **reprend**
+  - Format **`MCQT`** : `"MCQT" | 0x01 | registre (32) | n (4) | n × (identité de l'annonce (32) | index (8) | vue_le (8) | mac (32))`, n ≤ 4 096
+  - Intégrité : **HMAC-SHA256** par enregistrement sur `"MCQT" | 0x01 | registre | identité | index | vue_le` ; clé = `HMAC-SHA256(secret local du COG, "miyukini/miyucanal/quarantaine/v1")`, le secret local ne quitte pas la zone COG
+  - Fail-closed : enregistrement altéré ⇒ quarantaine **complète relancée** pour cette annonce ; état illisible, d'un autre registre ou d'une autre version ⇒ relancée pour **toutes** ; jamais raccourcie ; refus signalé (événement à remonter à WorrySentinel)
+  - Limite : un accès en écriture au disque peut supprimer un enregistrement (relance) ou rejouer un enregistrement authentique plus ancien de la même annonce, qui porte sa vraie première vue : jamais moins de 48 h depuis la première vue locale
+- **À décider ultérieurement** (points ouverts, pas des décisions)
+  - Exception « correctif critique co-signé » de la quarantaine (EX-02) : co-signataire et règle ; **non implémentée** (aucun raccourcissement)
+  - Amorçage du registre officiel : ancres et première tête **épinglées dans l'image signée** ou premier usage (TOFU, implémenté)
+  - Journal fédéral **agrégé** tenu par Origin (aujourd'hui : un suivi par COG, cosigné)
+  - Règle de voie, à travers le CDR du Portail, des binaires dont l'intégrité tient à l'empreinte (le CDR refuse les exécutables)
+  - « Sens unique » face aux demandes de relevé : positions publiques du registre officiel et empreintes publiées sortent de la zone COG (demandes génériques, mais corrélables)
+- **Impact**
+  - **EX** : EX-01 (2 sur 2 par la feuille), EX-02 (quarantaine 48 h persistée ; exception non implémentée), EX-03 (anti-gel), EX-14 (révocations visibles par le miroir intégral), EX-20 (relevé seulement), EX-22 (Median-Time-Past), EX-26 (OS et modèles IA par le même canal), EX-34 (registre fédéral cosigné) consignés ; aucune exigence modifiée
+  - **C** : C-12 appliquée (état de quarantaine douteux ⇒ relance) ; C-24 — `hmac` 0.12 (déjà inventorié) utilisé par `miyucanal` ; C-26 : cibles de fuzzing `MRGJ`, `MCAN`, `MCQT` et entrée `0x04` à écrire
+  - **Plan** : lot 4 — statut « Fait / Reste » à reporter au §6 (hors gel)
+  - **Code** : `miyuregistre`, `miyucanal` (non encore commités)

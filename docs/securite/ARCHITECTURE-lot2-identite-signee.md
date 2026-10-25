@@ -1,6 +1,6 @@
 # Lot 2 — Identité signée : Passeports, Visas et paquets identifiables
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1) **A-003** (v1.3 : choix d'implémentation du lot 2) et **A-004** (v1.4 : type `0x08`, natures de certificat, indice d'usage 4 des arrêtés). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1) **A-003** (v1.3 : choix d'implémentation du lot 2) **A-004** (v1.4 : type `0x08`, natures de certificat, indice d'usage 4 des arrêtés) et **A-006** (v1.6 : registre et canal officiel du lot 4, §3, §4.1, §8, §8.3, §9). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id securite.lot2.identite-signee -->
 <!-- @role architecture-specification -->
@@ -48,7 +48,12 @@ Racine COG (hors ligne)           ── identité souveraine du « pays »
 Clé d'appareil (une par appareil)  ── porte le passeport, prouve la possession
 Clé éditeur (développeur)          ── signe les manifestes de paquets
 Racine Origin                      ── certifie les éditeurs du Market officiel
+Clé de journal d'Origin (en ligne) ── signe les têtes du registre officiel (A-006)
 ```
+
+Amendé A-006 : la **clé de journal d'Origin** est dédiée (distincte de la clé de signature d'Origin et de la
+clé éditeur) ; ce n'est **pas** un usage `miyuracine` (Origin n'est pas une racine COG) : elle est épinglée
+dans la **configuration** du canal officiel de la zone COG (`ConfigCanal`), avec Origin et l'éditeur.
 
 | Clé | Génération | Stockage | Révocation |
 |---|---|---|---|
@@ -96,6 +101,7 @@ alg         1 o   algorithme de signature du sceau (table ci-dessous)
 type        1 o   0x01 passeport | 0x02 visa | 0x03 manifeste paquet | 0x04 entrée registre
                   0x05 tête registre | 0x06 certificat (émission, éditeur) | 0x07 reconnaissance
                   0x08 déclaration de voie (A-004, Portail)
+                  0x04 : nature 1 publication · 2 révocation · 3 émission · 4 décret · 5 événement (A-006, §8.3)
 len         4 o   longueur de la charge utile (≤ 65 536)
 payload   len o   champs TLV canoniques (4.2)
 nombre      1 o   nombre de signatures, 1 ≤ n ≤ 8
@@ -155,6 +161,8 @@ Vérification à seuil (politique = seuil `m ≥ 1` + jeu d'ancres) :
 7. Puis décodage canonique de la charge et fenêtre de validité
 
 Signature simple = seuil 1. EX-01 (mise à jour des Cores) = seuil 2 sur le jeu {Origin, éditeur}.
+Amendé A-006 : ce seuil 2 porte sur l'**annonce** (entrée `0x04` de nature publication), pas sur la tête
+du registre officiel (clé de journal d'Origin, seuil 1, §8.1).
 
 ### 4.2 Charge utile TLV canonique
 
@@ -262,8 +270,10 @@ signature = Ed25519(device_sk, "miyukini/pop/v1" || defi(32 o) || audience || li
 Un journal **append-only** par COG, et un pour le Market Origin, au format **arbre de Merkle**
 (modèle Certificate Transparency, RFC 9162) :
 
-- **Entrées** : `Publication(paquet)`, `Revocation(serial | package_id | kid)`, `Emission(cert éditeur)`.
-- **Tête signée** : `{taille, racine Merkle, horodatage}` signée par la clé de journal.
+- **Entrées** : `Publication(paquet)`, `Revocation(serial | package_id | kid)`, `Emission(cert éditeur)` ;
+  amendé A-006 : `Decret`, `Evenement`, révocation d'une annonce ; encodage au §8.3.
+- **Tête signée** : `{taille, racine Merkle, horodatage}` signée par la clé de journal (registre
+  officiel : clé de journal **d'Origin**, A-006).
 - **Preuve d'inclusion** : livrée avec chaque paquet ; Central la vérifie hors ligne.
 - **Preuve de cohérence** : Central mémorise la dernière tête vue et refuse une tête qui
   réécrit l'histoire → un Origin compromis ne peut pas substituer une version déjà publiée
@@ -292,6 +302,7 @@ Implémenté par `crates/miyusceau` (`registre.rs`, `merkle.rs` ; 7ed62645, 6774
 
 - **Fraîcheur** (EX-03) : âge accepté = `min(validite_max_secs, âge max de la politique)` ; défaut **24 h** (`AGE_MAX_TETE_DEFAUT_SECS`), plafond **7 j** ; tolérance d'horloge **120 s** ; tête trop ancienne = « registre gelé », refus
 - **Politiques** : `journal_cog` = 1 signataire (clé de journal) ; `canal_officiel` (Market Origin, mises à jour) = **2 sur 2** ; politique explicite : seuil 1 à 8
+  - **Amendé A-006** (décision du propriétaire) : les têtes du **registre officiel** sont signées par la **clé de journal d'Origin**, **seuil 1** (âge 24 h) ; le 2 sur 2 des mises à jour est porté par l'annonce (§8.3) ; politique plus stricte admise seulement en **N sur N** d'un ensemble contenant la clé de journal d'Origin (par exemple `canal_officiel` sur {journal d'Origin, Origin})
 - **Registre attendu** : toute tête est vérifiée contre l'identifiant de registre attendu (`RegistreInattendu` sinon)
 - **Monotonie** (dernière tête acceptée) :
   - séquence en recul ou horodatage en recul ⇒ retour en arrière, refus
@@ -309,6 +320,41 @@ Implémenté par `crates/miyusceau` (`registre.rs`, `merkle.rs` ; 7ed62645, 6774
 - Cibles : série d'un titre, ou clé (appareil, émission) ; vérification passeport et visa contre série, appareil et clé d'émission
 - Fail-closed : liste absente, **plus ancienne que 15 min** (défaut, durée d'un visa) ou datée dans le futur au-delà de la tolérance d'horloge ⇒ refus
 - Interface indépendante du stockage (`SourceRevocation`) ; adaptateur ← tête de registre vérifiée : reste à faire (plan, lot 2)
+- **Canal officiel (amendé A-006)** : révocation = entrée `0x04` de nature 2, signée par **Origin ou l'éditeur** (**seuil 1** sur l'ensemble exact {Origin, éditeur} ; la clé de journal d'Origin n'est pas comptée) ; cibles série, **annonce** (identité du sceau), **artefact** (SHA-256), **clé** (tout ce qu'elle a signé) ; une révocation ne peut qu'**empêcher** une installation ; vue par le miroir intégral du registre officiel
+
+### 8.3 Entrées, stockage et canal officiel — amendement A-006
+
+<!-- @id securite.lot2.registre-entrees -->
+<!-- @role registry-entries -->
+<!-- @do encode_registry_entries -->
+
+Implémenté par `crates/miyuregistre` et `crates/miyucanal` (lot 4).
+
+**Entrée** = `Sceau` type `0x04`, TLV (tags strictement croissants, tous obligatoires pour la nature, aucun en trop) :
+
+| Tag | Champ | Natures | Valeur |
+|---|---|---|---|
+| 1 | `nature` | toutes | `u64` : 1 publication, 2 révocation, 3 émission, 4 décret, 5 événement |
+| 2 | `inscrite_a` | toutes | secondes Unix |
+| 3 | `categorie` | publication | `u64` : 1 Cores, 2 OS, 3 modèle IA |
+| 4 | `composant` | publication | texte `[a-z0-9._:-]`, 1..64 o |
+| 5 | `version` | publication | `u64`, strictement croissante par composant |
+| 6 | `empreinte` | publication | SHA-256 de l'artefact (32 o) |
+| 7 | `taille` | publication | taille exacte de l'artefact (`u64`, ≥ 1) |
+| 3 | `cible_nature` | révocation | `u64` : 1 série, 2 annonce, 3 artefact, 4 clé |
+| 4 | `cible` | révocation | 32 o |
+| 5 | `motif` | révocation | texte sans caractère de contrôle, 1..256 o |
+| 3 | `certificat` | émission | identité du certificat éditeur (32 o) |
+| 3 | `objet` | décret, événement | texte `[a-z0-9._:-]`, 1..64 o |
+| 4 | `empreinte` | décret, événement | 32 o |
+
+- **Feuille** = `SHA-256(0x00 || octets du sceau)` ; **identité** d'une annonce = SHA-256 des octets signés
+- **Annonce** = entrée de nature publication, **2 sur 2** sur l'ensemble exact {Origin, éditeur} ; inscription datée de plus de 120 s dans le futur = refus
+- **Stockage** `MRGJ` : `"MRGJ" | 0x01` puis `longueur (4) | octets | contrôle (8)`, contrôle = `SHA-256(longueur || octets)[0..8]`, ≤ 1 Mio par enregistrement ; `fsync` à chaque ajout ; fin tronquée retirée à l'ouverture, corruption au milieu refusée
+- **Median-Time-Past** : 11 dernières têtes, médiane haute si la fenêtre est paire, égal accepté ; un MTP par registre + horloge de confiance globale ([zones §17](../architecture/MODELE-ZONES-ET-COUCHES-COG.md)) ; état `MSMT`
+- **Miroir** du registre officiel : copie intégrale, racine reconstruite, cohérence recalculée ; ≤ 4 096 entrées nouvelles par relevé
+- **Registre fédéral** (EX-34) : tête d'un COG = 2 sur {clé de journal du COG, Origin}, Origin cosignant le même sceau ; amorçage au premier usage
+- Relevé, quarantaine et persistance : [zones §7](../architecture/MODELE-ZONES-ET-COUCHES-COG.md) ; détail et points ouverts : [A-006](../architecture/GEL-DOC-CONCEPTUELLE-v1.md)
 
 ## 9. Paquets identifiables (Market)
 
@@ -345,6 +391,11 @@ Reprend `miyumarket::ServiceManifest` et ajoute :
    (détection de modification sur disque).
 
 Le point d'extension `verify_package_signature` posé au lot 1 devient bloquant.
+
+Amendé A-006 — mises à jour du **canal officiel** (Cores, OS, modèles IA) : l'annonce 2 sur 2 (§8.3) tient lieu
+de manifeste ; inclusion vérifiée contre une tête fraîche du miroir du registre officiel ; quarantaine de 48 h ;
+artefact relevé par empreinte, taille et SHA-256 exacts ; version strictement supérieure à l'installée ; remise
+au chemin d'installation existant (Central, StrongFather).
 
 ## 10. Fédération (« diplomatie »)
 

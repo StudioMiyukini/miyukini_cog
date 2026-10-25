@@ -1,6 +1,6 @@
 # Modèle de zones et de couches — Miyukini COG
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-003** (v1.3 : clés par usage implémentées, §15) et **A-004** (v1.4 : frontières, Douane, Vigies, coupure de voie du lot 3, §5, §10–§12, §15) · amendé **A-005** (v1.5 : règles intégrées des Vigies sur le motif de la Douane, attribution de voie par le côté d'entrée, §12). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-003** (v1.3 : clés par usage implémentées, §15) et **A-004** (v1.4 : frontières, Douane, Vigies, coupure de voie du lot 3, §5, §10–§12, §15) · amendé **A-005** (v1.5 : règles intégrées des Vigies sur le motif de la Douane, attribution de voie par le côté d'entrée, §12) · amendé **A-006** (v1.6 : registre et canal officiel du lot 4, §7, §15, §17). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id arch.cog.zones-couches -->
 <!-- @role architecture-reference -->
@@ -147,6 +147,15 @@
   - sens unique : aucune donnée de la zone COG ne sort par ce canal
   - modèles IA chargés en sandbox
   - tout écart = intrusion → WorrySentinel (IDS), blocage BorderGuard (IPS)
+- **Implémenté (amendé A-006)** — `crates/miyucanal`, `crates/miyuregistre` ; détail : [A-006](GEL-DOC-CONCEPTUELLE-v1.md), [lot 2 §8.3](../securite/ARCHITECTURE-lot2-identite-signee.md)
+  - **Relevé seulement** : demandes génériques `MCAN` (tête, entrées `depuis | nombre ≤ 1 024`, artefact `empreinte | taille`) ; le dépôt ne pousse rien et reste non fiable (tout est revérifié)
+  - **Têtes** du registre officiel : **clé de journal d'Origin** dédiée, **seuil 1** (décision du propriétaire) ; registre gelé (tête de plus de 24 h) ⇒ aucune installation
+  - **Annonce** = entrée `0x04` de nature publication, **2 sur 2** {Origin, éditeur} ; **révocation** signée par Origin **ou** l'éditeur (seuil 1, décision du propriétaire), elle ne peut qu'empêcher une installation
+  - **Miroir intégral** du registre officiel (racine reconstruite, cohérence recalculée) ; ≤ 4 096 entrées nouvelles par relevé
+  - **Quarantaine** : 48 h depuis la **première vue locale** (heure de confiance), jamais depuis l'horodatage signé ; installation seulement après une tête **émise après la fin** de la quarantaine, acceptée et fraîche ; plus longue configurable, plus courte refusée
+  - **Persistance de la quarantaine** (décision du propriétaire) : liste en attente + première vue, format `MCQT`, **HMAC-SHA256** par enregistrement (clé dérivée du secret local du COG) ; le décompte reprend après redémarrage ; altéré ou illisible ⇒ quarantaine **relancée** pour les annonces concernées, jamais raccourcie
+  - **Artefact** relevé par empreinte, taille annoncée = borne de lecture, taille et SHA-256 exacts ; version strictement supérieure ; remise au chemin d'installation existant
+  - **Non implémenté, à décider** (A-006) : exception « correctif critique co-signé » (aucun raccourcissement) ; amorçage du registre officiel épinglé dans l'image signée (TOFU aujourd'hui) ; « sens unique » face aux positions et empreintes publiques des demandes ; voie des binaires à travers le CDR du Portail
 
 ## 8. Rupture protocolaire et dédouanement
 
@@ -381,6 +390,7 @@
 - **Une clé par usage** (passeports, visas, arrêtés, journal), **dérivée de la racine en SLIP-10** (dérivation durcie)
   - Implémenté (A-003, [lot 2 §3.1](../securite/ARCHITECTURE-lot2-identite-signee.md)) : identité (0), émission (1, **passeports et visas**, comme le lot 2 §3), journal (2), éditeur (3)
   - Arrêtés : indice **4** (`m/1296256839'/4'/g'`), attribué avec leur format (A-004) ; indices ≥ 5 réservés, jamais réattribués
+  - **Clé de journal d'Origin** (amendé A-006) : clé d'Origin, pas un usage dérivé d'une racine COG ; épinglée dans la configuration du canal officiel de la zone COG
 - Racine sauvegardée en **SLIP-39 2 sur 3** (parts en mots, sur USB et papier) ; cérémonie de rotation guidée
 - **Identifiant différent par COG visité** (pas de traçage entre COG)
 
@@ -434,6 +444,7 @@
 <!-- @do ensure_trust_and_resilience -->
 
 - **Temps de confiance** : horloge monotone qui ne recule jamais ; rejet de toute heure antérieure à la **médiane des 11 dernières têtes** de registre vues (Median-Time-Past) ; horodatages signés par Origin
+  - **Amendé A-006** : fenêtre de 11 têtes, médiane **haute** si paire (amorçage), heure **égale** au MTP acceptée ; un MTP **par registre** pour ses têtes + horloge **globale** alimentée par toutes les têtes acceptées (local, canal officiel, COG fédérés) ; état persistant `MSMT` ; registre fédéral : têtes cosignées par Origin, amorçage au premier usage, journal fédéral agrégé d'Origin **à décider**
 - **Sauvegarde hors site** : DB principale chiffrée par une clé hors ligne, publiée via la Franche vers un pair fédéré (flux déclaré)
 - **Amorçage** : image signée, empreinte publiée hors bande (site, papier, QR), clé Origin intégrée à l'image
 - **Gouvernance d'Origin** : à seuil (plusieurs détenteurs), plan de succession ; la Fédération fonctionne sans Origin
