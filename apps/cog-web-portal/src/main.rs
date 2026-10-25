@@ -52,23 +52,17 @@ pub struct AppState {
     pub central_remote_addr: Option<String>,
 }
 
-#[tokio::main]
-async fn main() {
-    // Initialise le subscriber de logs.
-    fmt()
-        .with_env_filter(
-            EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
-        )
-        .init();
-
-    let state = build_app_state();
-
+/// Construit le routeur HTTP du portail (routes, en-têtes de sécurité, limitation de débit).
+///
+/// Les chemins utilisent la syntaxe axum 0.8 (`{param}`) : la forme `:param` panique
+/// à la construction du routeur.
+pub fn routeur(state: AppState) -> Router {
     let rate_limiter = RateLimiterLayer::new(RateLimiterConfig {
         max_requests: 60,
         ..Default::default()
     });
 
-    let app = Router::new()
+    Router::new()
         .route("/", get(routes::home::home))
         .route(
             "/central-remote",
@@ -78,15 +72,27 @@ async fn main() {
             "/central-remote/app",
             get(routes::central_remote::central_remote_app),
         )
-        .route("/:service", get(routes::service::service_home))
+        .route("/{service}", get(routes::service::service_home))
         .route(
-            "/:service/contact",
+            "/{service}/contact",
             get(routes::contact::contact_get).post(routes::contact::contact_post),
         )
-        .route("/:service/:slug", get(routes::service::service_page))
+        .route("/{service}/{slug}", get(routes::service::service_page))
         .with_state(state)
         .layer(SecurityHeadersLayer)
-        .layer(rate_limiter);
+        .layer(rate_limiter)
+}
+
+#[tokio::main]
+async fn main() {
+    // Initialise le subscriber de logs.
+    fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
+        )
+        .init();
+
+    let app = routeur(build_app_state());
 
     let addr = adresse_ecoute(std::env::var("PORTAL_LISTEN").ok());
 
@@ -149,6 +155,24 @@ mod tests {
         assert_eq!(adresse_ecoute(None), "127.0.0.1:8090");
         assert_eq!(adresse_ecoute(Some("  ".into())), "127.0.0.1:8090");
         assert_eq!(adresse_ecoute(Some("0.0.0.0:9000".into())), "0.0.0.0:9000");
+    }
+
+    #[tokio::test]
+    async fn routeur_se_construit_et_repond() {
+        // Régression : la forme `/:service` (axum 0.7) faisait paniquer la construction
+        // du routeur au démarrage (boucle de redémarrage systemd observée en VM).
+        use tower::ServiceExt;
+        let app = routeur(build_app_state());
+        let reponse = app
+            .oneshot(
+                axum::http::Request::builder()
+                    .uri("/")
+                    .body(axum::body::Body::empty())
+                    .expect("requête de test"),
+            )
+            .await
+            .expect("réponse");
+        assert_eq!(reponse.status(), axum::http::StatusCode::OK);
     }
 
     #[test]
