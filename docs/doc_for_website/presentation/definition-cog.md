@@ -2,7 +2,7 @@
 
 ## Core-Orchestrated Governance Environment
 
-Un **COG** (Core-Orchestrated Governance Environment) est l'unité fondamentale du système Miyukini. C'est une entité **souveraine, versionnée, isolée et identifiée**.
+Un **COG** est l'unité fondamentale du système Miyukini : un environnement **souverain, gouverné, isolé et identifié**, qui tourne sur votre propre matériel.
 
 ### Décryptage de l'acronyme
 
@@ -14,150 +14,131 @@ Un **COG** (Core-Orchestrated Governance Environment) est l'unité fondamentale 
 
 ### Formulations courtes
 
-- **Français** : *Miyukini est un COG — un environnement de gouvernance orchestré par des Cores. Il coordonne, sécurise et fait fonctionner des systèmes logiciels complets, du noyau jusqu'à l'utilisateur final.*
+- **Français** : *Miyukini est un COG — un environnement de gouvernance orchestré par des Cores. Il coordonne, sécurise et fait fonctionner des services complets, du noyau jusqu'à l'utilisateur.*
 - **English** : *Miyukini is a COG — a Core-Orchestrated Governance Environment. It governs, coordinates and operates software systems from the core to the end user.*
 
 ### Analogie de l'engrenage
 
-Le mot « cog » (engrenage) en anglais évoque : **système** (pièces qui fonctionnent ensemble), **interconnexion**, **précision**, **transmission** de la force de manière prévisible. Phrase signature : *"Miyukini is not an OS. It's the cog that makes digital systems work together."*
+Le mot « cog » (engrenage) évoque des pièces qui fonctionnent ensemble, avec précision, et transmettent la force de manière prévisible. Phrase signature : *"Miyukini is not an OS. It's the cog that makes digital systems work together."*
 
 ## Qu'est-ce qu'un COG ?
 
 Un COG n'est **pas** :
-- Un simple conteneur ou une VM
-- Une instance cloud
-- Un processus isolé
+- un simple conteneur ou une VM ;
+- une instance cloud ;
+- un processus isolé.
 
 Un COG **est** :
-- Un environnement complet et autonome
-- Gouverné par une version figée des Cores
-- Identifié de manière unique
-- Capable de fonctionner en isolation totale
+- un environnement complet et autonome ;
+- gouverné par les **10 Cores** ;
+- identifié par une **racine cryptographique** ;
+- capable de fonctionner en **isolation totale**.
 
-## Caractéristiques Fondamentales
+## Caractéristiques fondamentales
 
 ### Souveraineté
 
-Chaque COG est maître de son domaine. Aucune entité externe ne peut :
-- Modifier son état sans autorisation
-- Forcer une mise à jour
-- Accéder à ses données sans consentement
+L'état local est souverain (LOI-3). Aucune entité externe ne peut :
+- modifier son état sans autorisation ;
+- **pousser** une mise à jour : le COG relève lui-même les mises à jour du canal officiel, signées (2 sur 2), et c'est son propriétaire qui décide ;
+- accéder à ses données sans consentement ;
+- **détruire** quoi que ce soit à distance.
 
-### Versionnement
+### Gouvernance
 
-Un COG est lié à une **version spécifique et immuable** des Cores. Cette version ne change jamais — l'évolution passe par la création d'un nouveau COG et la migration diplomatique des données.
+Rien n'est implicite : toute action est une **intention** décidée par StrongFather (refus par défaut), persistée par KindMother (seul écrivain), surveillée par WorrySentinel, et les décisions critiques passent par une validation humaine (TAMR).
 
 ### Isolation
 
-Les frontières d'un COG sont strictes :
-- Chaque opérateur est lié à un environnement unique
-- Aucune interférence entre COGs
-- Communication explicite et contrôlée uniquement
+Les frontières d'un COG sont strictes et organisées en **zones** :
+
+```
+  Extérieur ──► Douane ──► Zone Franche ──► Portail ◄── Zone COG (aucune sortie)
+                           (façades,                    (Cores, services,
+                            quarantaine)                 bases principales)
+```
+
+- la **zone COG** ne sort jamais : elle tire ce dont elle a besoin par le Portail ;
+- chaque service n'a droit qu'aux flux qu'il déclare ;
+- toute communication avec l'extérieur est explicite et contrôlée.
 
 ### Identification
 
-Chaque COG possède un **identifiant unique** généré par le Kernel, garantissant son unicité dans le réseau Webway.
+Un COG est identifié par l'**empreinte de sa racine**, une clé conservée hors ligne. De cette racine dérivent les clés du COG, les **passeports** des personnes et des appareils, et les **visas** d'accès aux services.
 
 ## L'analogie du « pays »
 
-| Analogie | Environnement COG |
-|----------|-------------------|
-| Territoire | Frontières définies par BorderGuard |
-| Constitution | Invariants et contrats (Strate 3) |
-| Gouvernement | Cores système (Strate 4) |
-| Citoyens | Opérateurs assujettis (Strate 7) |
-| Identité nationale | ID d'environnement unique |
-| Relations diplomatiques | Migration via protocoles formels (LOI-8) |
+| Analogie | Dans un COG |
+|----------|-------------|
+| Territoire | Zones et frontières définies par BorderGuard |
+| Douane | La Douane (pare-feu) et la quarantaine |
+| Constitution | Doc gelée, invariants et contrats |
+| Gouvernement | Les 10 Cores |
+| Citoyens | Services et opérateurs, assujettis aux Cores |
+| Papiers d'identité | Passeports et visas signés |
+| Relations diplomatiques | Fédération : reconnaissance mutuelle, quorum, preuves signées |
 
 *C'est une instance de gouvernance, pas un simple runtime.*
 
-## Niveaux d'Identité
+## Confiance et fédération
 
-Un COG peut avoir différents niveaux de confiance dans le réseau :
+Un COG peut choisir de :
 
-| Niveau | Nom | Description |
-|--------|-----|-------------|
-| **LSI** | Local Sovereign ID | Identité auto-déclarée, confiance minimale |
-| **VID** | Verified ID | Identité attestée par un tiers de confiance |
-| **WID** | Witnessed ID | Identité témoignée par d'autres COGs |
+1. **Rester seul** : fonctionnement totalement autonome, aucune communication externe (LOI-2).
+2. **Rejoindre la Fédération** : il est reconnu progressivement par les autres COG.
 
-## Types de COG
+| Statut fédéral | Comment on l'obtient |
+|----------------|----------------------|
+| **Candidat** | Candidature signée, avec une preuve de calcul légère |
+| **Invité** | Confirmé par au moins 2 membres |
+| **Membre** | Confirmé par au moins 4 membres pendant 7 jours |
+| **Suspendu** | Accusé au quorum de 6, preuve signée à l'appui |
+| **Révoqué** | 72 h de suspension sans recours accepté |
 
-Selon leur rôle dans le réseau Webway :
+Côté frontières, BorderGuard classe chaque interlocuteur : **TRUSTED**, **VERIFIED**, **UNKNOWN** ou **HOSTILE**.
 
-| Type | Description |
-|------|-------------|
-| **ORIGIN** | Source de vérité, héberge les services d'authentification |
-| **RELAY** | Nœud de distribution et de vérification |
-| **TRACKER** | Découverte et contrôle des autres COGs |
-| **STABLE** | COG standard avec présence permanente |
-| **TERMINAL** | COG client léger, dépendant d'un Origin |
-| **LONE** | COG isolé, sans participation réseau |
-
-## Cycle de Vie
+## Cycle de vie
 
 ### Création
 
 Un COG naît avec :
-1. Une version des Cores (figée définitivement)
-2. Un identifiant unique
-3. Un ensemble d'opérateurs initiaux
-4. Des frontières définies
+1. une **racine** (clé hors ligne) et son identifiant ;
+2. ses **zones** et ses frontières ;
+3. un ensemble de services initiaux, chacun avec son compte, son profil AppArmor et ses flux déclarés.
 
 ### Évolution
 
-Un COG **n'évolue pas** au sens traditionnel :
-- Les Cores restent figés (LOI-7)
-- Les nouvelles fonctionnalités = nouveau COG + migration
-- Les données migrent via un processus diplomatique (LOI-8)
+- Les mises à jour arrivent par le **canal officiel** signé ; le COG les **relève**, les vérifie, et peut revenir en arrière automatiquement en cas d'échec.
+- **EverBuddy** garde l'historique immuable des évolutions.
+- La doc de référence est **gelée** : toute évolution de conception passe par un amendement écrit avant le code.
 
-### Migration
+### Données
 
-La migration entre COGs est un acte formel :
-- Jamais une simple copie de données
-- Négociation entre environnements
-- Validation des invariants
-- Préservation de la souveraineté
+- Les données restent sur le COG, chiffrées, une clé par base.
+- L'**oubli** est réel : une donnée oubliée est effacée physiquement, journal compris.
 
-## COG et Fédération
-
-Un COG peut choisir de :
-
-1. **Rester isolé** (mode LONE)
-   - Fonctionnement totalement autonome
-   - Aucune communication externe
-   - Conformité LOI-2
-
-2. **Rejoindre le réseau Webway**
-   - Découverte par les Trackers
-   - Communication via les Relays
-   - Fédération optionnelle (LOI-6)
-
-## Exemple Concret
-
-Imaginez votre COG personnel :
+## Exemple concret
 
 ```
-Mon COG "Maison"
-├── Cores v1.2.0 (figés)
-├── Identité : LSI-abc123...
-├── Services actifs :
-│   ├── Miyukini Central
-│   ├── JayKonta (comptabilité)
-│   └── Miou (assistant)
-└── Réseau : STABLE (connecté au Webway)
+Mon COG « Cabinet »
+├── Racine : clé hors ligne (empreinte = identité du COG)
+├── Zone COG : Cores, KindMother, MAIA, JayKoa, JayKonta, JayRDV
+├── Zone Franche : page de prise de rendez-vous publique
+├── Passeports : moi, mon téléphone, mon assistante
+└── Fédération : membre (ou seul, au choix)
 ```
 
 Ce COG :
-- Fonctionne même sans Internet
-- Garde vos données localement
-- Peut communiquer avec d'autres COGs si vous le souhaitez
-- Reste sous votre contrôle total
+- fonctionne même sans Internet ;
+- garde vos données chez vous, chiffrées ;
+- laisse MAIA vous aider sans jamais sortir vos données ;
+- peut coopérer avec d'autres COG si vous le souhaitez ;
+- reste sous votre contrôle total.
 
 ## Voir aussi
 
 - [Présentation générale](presentation-generale.md)
-- [Lois d'autonomie](../architecture/lois-autonomie.md) — LOI-7 (immutabilité Cores), LOI-8 (migration)
+- [Lois d'autonomie](../architecture/lois-autonomie.md)
 - [Souveraineté environnement](../architecture/souverainete-environnement.md)
 - [Pyramide des strates](../architecture/pyramide-strates.md)
 - [Glossaire](../reference/glossaire.md)

@@ -1,164 +1,190 @@
 # Miyukini COG
 
-> Votre ecosysteme numerique souverain — un seul environnement pour gerer votre activite, vos evenements, vos finances, votre cloud et vos jeux. Sans abonnement cloud. Sans dependance externe. Vos donnees restent chez vous.
+> Votre environnement numérique souverain : vos services (agenda, comptabilité, documents, cloud, domotique, IA locale) dans un seul système qui tourne chez vous, sans abonnement cloud et sans dépendance externe. Une IA qui **propose**, des règles qui **décident**.
+
+**Version** : 0.9.0-beta.1 (recette) · **Dernière mise à jour** : 2026-10-25
 
 ---
 
-## A qui s'adresse Miyukini ?
+## En bref
 
-| Vous etes... | Miyukini vous apporte |
+- **Tout est local** : vos données restent sur votre machine, chiffrées, et tout fonctionne hors ligne.
+- **Gouverné** : chaque action passe par des composants de gouvernance (les **Cores**) qui décident, persistent, surveillent et tracent. Rien n'est implicite, tout est refusé par défaut.
+- **IA locale bornée** : MAIA tourne sur votre matériel ; elle ne décide jamais seule, et sa mémoire ne quitte jamais votre COG.
+- **Fédérable** : plusieurs COG peuvent coopérer comme des pays souverains (passeports, visas, quorum), sans serveur central obligatoire.
+
+---
+
+## À qui s'adresse Miyukini ?
+
+| Vous êtes... | Miyukini vous apporte |
 |---|---|
-| **Independant, auto-entrepreneur** | Comptabilite, devis, factures, suivi de tresorerie |
-| **Association, collectif** | Calendrier partage, rendez-vous, contacts, documents |
-| **Particulier** | Budget personnel, cloud prive, calendrier, jeux |
-| **Equipe collaborative** | Suite bureautique souveraine (docs, sheets, slides, mail, message) |
-| **Restaurateur, food truck** | Commande en ligne, reservation de tables, gestion de stock |
-| **Developpeur curieux** | Architecture gouvernee en Rust, 70+ crates, moteur de jeu, IA locale |
+| **Indépendant, profession réglementée** (santé, droit, expertise comptable) | Agenda, rendez-vous, comptabilité, IA locale qui ne sort pas vos données |
+| **TPE, PME, association** | Calendrier partagé, contacts, documents, cloud privé, un seul serveur |
+| **Particulier** | Budget, cloud privé, calendrier, domotique, assistant vocal local |
+| **Équipe** | Suite bureautique souveraine (Docs, Sheets, Slides, Formulaire, Réunion, Mail, Message) |
+| **Développeur curieux** | Architecture gouvernée en Rust, 134 crates, IA locale, sécurité vérifiable |
 
 ---
 
-## Ce que Miyukini fait concretement
+## Ce que Miyukini fait
 
-### Services prets a l'emploi
-
-| Service | Ce qu'il fait | Statut |
-|---|---|---|
-| **Miyukini Central** | Hub desktop — point d'entree unique vers tous vos services | Fonctionnel |
-| **JayKoa** | Calendrier universel — vue jour, semaine, mois, planning | Fonctionnel |
-| **JayKonta** | Budget personnel + comptabilite entreprise | Fonctionnel (Bourse) |
-| **Miyukini Cloud** | Cloud prive avec fichiers, calendriers, contacts (WebDAV/CalDAV/CardDAV) | Fonctionnel |
-| **Jay Bureau** | Suite collaborative (Docs, Sheets, Slides, Formulaire, Reunion, Club, Mail, Message) | Fonctionnel |
-| **Alicia** | Assistante domotique — controle vocal, MQTT, automatisations | MVP |
-| **MAIA** | IA locale (LLM, STT) — fonctionne sans internet | Fonctionnel |
-| **Miyukini Whisper** | Dictee locale STT/TTS avec presets hardware | Fonctionnel |
-| **MiyukiniWatch** | Tableau de bord metriques et habitudes | Fonctionnel |
-
-### Services en preparation
-
-| Service | Ce qu'il fera |
+| Domaine | Services |
 |---|---|
-| **JayRDV** | Prise de rendez-vous en ligne (B2B2C) |
-| **JayFaim** | Reservation de tables et commande en ligne |
-| **JayShop** | Boutique et point de vente unifies |
-| **JayCloud** | Sauvegarde souveraine (snapshots, restauration, WebDAV) — distinct de Miyukini Cloud |
-| **MiyukiniSales** | Cycle complet devis, commandes, facturation, paiements |
-| **MIPowa** | Editeur de workflows visuels |
-| **Jay1Tribu** | Reseau social prive pour groupes et familles |
-| **JayManga** | Lecteur et bibliotheque manga/BD |
+| **Hub** | **Miyukini Central** — point d'entrée unique, lance et surveille chaque service |
+| **Organisation** | **JayKoa** (calendrier universel), **JayRDV** (rendez-vous), **MiyukiniWatch** (métriques et habitudes) |
+| **Finances** | **JayKonta** (budget, comptabilité), **MiyukiniSales** (devis, commandes, factures) |
+| **Collaboratif** | **Jay Bureau** (Docs, Sheets, Slides, Formulaire, Réunion, Club, Mail, Message), **Jay1Tribu** (réseau privé) |
+| **Fichiers** | **MiyuCloud** (fichiers, CalDAV, CardDAV, WebDAV, WOPI), **JayCloud** (sauvegardes et restauration) |
+| **IA locale** | **MAIA** (LLM local, mémoire chiffrée, Fiches fédérées), **Miyukini Whisper** (dictée et voix locales) |
+| **Domotique** | **Alicia** (assistante vocale, MQTT, automatisations) |
 
-### Services retires
-
-Voir [docs/services/DEPRECATED.md](docs/services/DEPRECATED.md) pour les details.
-
-| Service | Date de retrait | Raison |
-|---|---|---|
-| **JayXpose** | 2026-04-29 | Sortie du perimetre — vitrine professionnelle non priorisee |
-| **JayFestival** | 2026-04-29 | Sortie du perimetre — gestion de festivals non priorisee |
+Au total : **30 services et applications** dans le workspace. Retirés : MGE, Allumina, Sodomight, MiyuClicker, Survivor (2026-10), JayXpose, JayFestival (2026-04).
 
 ---
 
-## Pourquoi choisir Miyukini ?
+## Comment c'est construit
 
-### Avantages et securite
+### Le principe : l'IA propose, les règles décident
 
-| | Miyukini | SaaS classique (Google, Odoo...) |
-|---|---|---|
-| **Vos donnees** | Restent sur votre machine, chiffrees AES-256 | Stockees sur des serveurs tiers |
-| **Connexion internet** | Facultative — tout fonctionne hors-ligne | Obligatoire en permanence |
-| **Abonnement mensuel** | Aucun pour usage personnel | 5 a 50 euros/mois par service |
-| **Nombre de services** | Illimite, tous integres dans un seul Hub | Un abonnement par service |
-| **Vie privee** | Zero telemetrie, zero tracking | Profilage publicitaire |
-| **Mise a jour** | Vous decidez quand et si vous mettez a jour | Imposee par l'editeur |
-| **Interoperabilite** | Export iCal, WebDAV, CalDAV, CardDAV | Formats proprietaires |
-| **Performance** | Application native Rust — rapide, legere | Application web — lente, gourmande |
-| **Personnalisation** | Theme clair/sombre, interface modulaire | Limitee au plan paye |
-| **IA integree** | LLM local, reconnaissance vocale, sans cloud | Dependante de services tiers |
+```mermaid
+flowchart LR
+    U[Vous / un service] -->|intention| BB[BondingBrother<br/>passerelle]
+    BB --> SF{StrongFather<br/>décide}
+    SF -->|ALLOW| KM[(KindMother<br/>seul écrivain)]
+    SF -->|DENY| R[refus tracé]
+    SF -.->|cas critique| T[TAMR<br/>validation humaine]
+    WS[WorrySentinel<br/>sécurité T0–T4] -.contraintes.-> SF
+    CN[CaringNanny<br/>observe] -.signaux.-> WS
+    MAIA[MAIA<br/>IA locale] -->|propose| BB
+```
 
-### Securite en detail
+- Un service ou MAIA n'écrit jamais directement : il émet une **intention**, **StrongFather** décide (refus par défaut), **KindMother** est le **seul** à écrire, dans des bases chiffrées et avec un journal d'audit chaîné.
+- Les décisions sensibles passent par une **validation humaine** encadrée (TAMR).
+
+### Les 10 Cores
+
+| Core | Rôle |
+|---|---|
+| **StrongFather** | Décide (autorise ou refuse) — n'exécute ni ne persiste |
+| **KindMother** | Persiste — seul validateur des écritures, ne décide jamais |
+| **BondingBrother** | Passerelle — traduit, filtre, transmet |
+| **BorderGuard** | Définit les frontières et les niveaux de confiance |
+| **WorrySentinel** | Gouverne la sécurité (états T0 à T4) |
+| **CaringNanny** | Observe l'état, ne modifie rien |
+| **MasterButler** | Registre des capacités et permissions |
+| **LogisticsSteward** | Arbitre ressources et quotas |
+| **EverBuddy** | Cycle de vie, historique immuable |
+| **TAMR** | Cadre de l'intervention humaine, traçabilité absolue |
+
+### Les zones : rien n'entre sans contrôle, rien ne sort de la zone COG
+
+```mermaid
+flowchart TB
+    subgraph EXT[Extérieur]
+      INT[Internet]
+      FED[Fédération<br/>autres COG]
+      ORI[Origin<br/>canal officiel]
+    end
+    DOU[Douane<br/>pare-feu, IDS/IPS]
+    subgraph FR[Zone Franche]
+      FAC[Façades web<br/>DB de session]
+      QUA[Quarantaine<br/>CDR]
+    end
+    POR[Portail<br/>voies déclarées]
+    subgraph ZC[Zone COG — aucune sortie]
+      CORES[Cores]
+      SVC[Services, MAIA]
+      DBP[(Bases principales)]
+    end
+    INT --> DOU
+    FED --> DOU
+    ORI --> DOU
+    DOU --> FAC
+    DOU --> QUA
+    FAC --> POR
+    QUA --> POR
+    POR -->|la zone COG tire| ZC
+```
+
+- **La zone COG ne sort jamais** : elle va chercher ce dont elle a besoin à travers le **Portail**, par des voies déclarées. Une sortie bloquée est un incident critique.
+- **La Douane** filtre en bordure ; les **Vigies** détectent et coupent une voie en cas d'anomalie ou de capteur muet.
+- **La quarantaine** désarme les fichiers entrants (CDR) avant qu'ils n'atteignent vos données.
+
+### Identité : des signatures, pas des secrets partagés
+
+- Chaque COG a une **racine** (clé hors ligne) ; chaque personne et chaque appareil reçoivent un **passeport**, et un **visa** pour accéder à un service.
+- Tout titre est un **Sceau** signé (Ed25519, multi-signature possible) ; les révocations sont publiées dans des **registres Merkle** vérifiables.
+- Les mises à jour arrivent par un **canal officiel** signé (2 signatures sur 2) ; c'est vous qui les relevez, rien n'est poussé de force.
+
+### Fédération
+
+```mermaid
+stateDiagram-v2
+    [*] --> Candidat
+    Candidat --> Invité: confirmé par ≥ 2 membres
+    Invité --> Membre: ≥ 4 membres pendant 7 jours
+    Membre --> Suspendu: accusation au quorum de 6
+    Suspendu --> Membre: recours accepté (72 h)
+    Suspendu --> Révoqué: 72 h sans recours
+```
+
+- Les COG se reconnaissent entre eux ; une faute se prouve par des **preuves signées** (équivoque), jamais par simple réputation.
+- La Fédération fonctionne **sans Origin** ; un COG peut aussi rester seul, sans aucun réseau.
+
+### MAIA, l'IA locale
+
+- Modèles locaux adaptés au matériel (des petites configurations à Strata).
+- **Mémoire chiffrée par utilisateur**, classée nationale : jamais publiée, jamais synchronisée, **oubli réel** à la demande (effacement physique vérifié).
+- **Fiches fédérées** : MAIA peut lire des connaissances d'autres COG, marquées étrangères, corroborées par plusieurs sources ; elle ne publie une Fiche que sur une donnée que **vous** avez étiquetée et signée.
+
+---
+
+## Sécurité
 
 | Couche | Protection |
 |---|---|
-| **Donnees au repos** | Base chiffree AES-256-CBC (libSQL + SQLCipher) |
-| **Mots de passe** | Hachage Argon2id (resistant aux attaques GPU) |
-| **Sessions admin** | Tokens JWT avec expiration |
-| **Connexions reseau** | TLS 1.2+ obligatoire (rustls) |
-| **Acces aux donnees** | Chaque service n'accede qu'a ses propres donnees |
-| **Ecritures** | Systeme WriteIntent — toute modification est auditee |
-| **Code** | Rust — zero `unsafe`, pas de failles memoire |
-| **Rate limiting** | Protection anti-abus sur tous les endpoints |
-| **Firewall / SELinux** | Configures en production |
-| **RGPD** | Donnees locales = conformite native |
+| **Données au repos** | SQLCipher (AES-256), une clé par base ; effacement physique des données oubliées |
+| **Écritures** | KindMother seul écrivain : intentions typées, refus par défaut, journal d'audit chaîné |
+| **Identité** | Passeports, visas et preuves de possession signés ; aucun secret partagé là où une signature suffit |
+| **Réseau** | Zone COG sans sortie, Douane nftables générée et auditée, journaux bornés, Vigies IDS |
+| **Système** | Profils AppArmor en mode enforce pour chaque service |
+| **Mises à jour** | Canal officiel signé ; paquet vérifié (liste exacte, signature) avant toute installation ; retour arrière automatique |
+| **Code** | Rust ; aucun `unwrap`/`panic` dans le code exposé au réseau ; fuzzing des formats binaires (13 crates) |
+| **Conformité** | Référentiels visés : ANSSI (CSPN), CRA, RGPD, AI Act, OWASP ASVS — voir [conformité](docs/conformite/CONFORMITE-SYNTHESE.md) |
 
 ---
 
-## Comment ca marche (en bref)
+## État du projet
 
-```
-Vous
-  |
-  v
-Miyukini Central (le Hub)
-  |
-  +---> JayKoa         (votre calendrier)
-  +---> JayKonta       (vos finances)
-  +---> Jay Bureau     (vos documents collaboratifs)
-  +---> Miyukini Cloud (vos fichiers)
-  +---> MAIA           (votre IA locale)
-  +---> Jeux           (vos loisirs)
-  +---> ...
-```
+- **0.9.0-beta.1** : version de **recette**, à installer sur une machine dédiée, jamais en production. Procédure : [notes de version](docs/recette/NOTES-DE-VERSION-0.9.0-beta.1.md).
+- **Conception gelée** : [doc conceptuelle v1](docs/architecture/GEL-DOC-CONCEPTUELLE-v1.md), modifiée seulement par amendements (21 à ce jour), écrits **avant** le code.
+- **Plan** : [plan d'implémentation](docs/implementation/PLAN-IMPLEMENTATION.md) — lots 0 à 7 atteints au niveau bibliothèque ; restent notamment les vrais modèles d'IA, le transport entre COG et la séparation entrée / sortie du Portail.
+- **En conception (v2)** : les [Alliances](docs/architecture/alliance/_index.md), fédérations privées d'organisations avec un centre de commandement au quorum et un annuaire « AD maison ».
+- **Pas encore** : certification, audit externe, déploiement en production.
 
-Vous lancez **une seule application**. Elle vous donne acces a tous vos services. Chaque service garde son propre etat, meme en arriere-plan. Pas besoin de navigateur, pas besoin de compte cloud, pas besoin d'internet.
-
----
-
-## Pour les curieux — L'architecture
-
-Miyukini n'est pas un simple logiciel. C'est un **environnement gouverne** (COG — Core-Orchestrated Governance) organise en strates, comme un pays numerique :
-
-| Strate | Role | En langage simple |
-|---|---|---|
-| **Kernel** | Fondations techniques | L'electricite et la plomberie |
-| **Cores** (x10) | Gouvernance du systeme | Les ministeres qui fixent les regles |
-| **Toolkits** (x49) | Capacites metier | La boite a outils universelle |
-| **Services** | Ce que vous utilisez | Les guichets ouverts au public |
-| **Admin** | Autorite souveraine | Le bureau du president |
-
-**Principes fondateurs :**
-
-- **Autonomie** — fonctionne sans reseau, sans cloud, sans service tiers
-- **Souverainete** — vos donnees, vos regles, votre environnement
-- **Gouvernance** — chaque composant a un role strict, rien n'est implicite
-- **Federation** — plusieurs COG peuvent echanger comme des pays souverains, par "diplomatie" (visas, passeports, ponts)
-
-### Chiffres cles
+### Chiffres clés
 
 ```
  10 Cores de gouvernance
- 49 Toolkits implementes (crates Rust)
- 70+ crates dans le workspace
- 30 services et applications (dont 9 dans la suite Jay Bureau)
-  2 jeux jouables
-  1 assistante domotique (Alicia)
-  1 IA locale (MAIA — LLM + STT)
-  1 cloud prive (Miyukini Cloud) + 1 service de sauvegarde (JayCloud)
+134 crates Rust · 17 applications
+ 30 services et applications
+3857 tests automatisés (workspace)
+ 21 amendements à la doc gelée
 ```
 
 ---
 
-## Vibe Coding — Un projet pilote par IA
+## Un projet piloté par IA
 
-Miyukini COG est l'un des plus gros projets entierement concu en **Vibe Coding** — pilotage integral par agents IA (Claude, GPT-4, Gemini), sous supervision humaine.
+Miyukini COG est conçu en **Vibe Coding** : l'auteur définit l'intention, la vision et les contraintes ; des agents IA génèrent, implémentent et revoient, sous supervision humaine. Pour tenir la cohérence à cette échelle :
 
-L'auteur n'est pas codeur de formation. Il definit l'intention, la vision et les contraintes. L'IA genere, structure et implemente. Pour garder la coherence a cette echelle, le projet a invente ses propres protocoles :
-
-| Protocole | Role |
+| Protocole | Rôle |
 |---|---|
-| **MSCM** | Balisage semantique dans le code — chaque bloc porte son identite |
-| **MIP** | Index structurel global — l'IA navigue le projet via un graphe JSON |
-| **Skills IA** | Instructions normatives pour les agents — conventions, architecture, glossaire |
-
-> *"Documenter d'abord. Indexer pour que l'IA navigue. Implementer en parallele. Auditer. Puis passer au suivant."*
+| **Doc gelée + amendements** | Toute évolution est écrite et validée avant le code |
+| **MSCM** | Balisage sémantique — chaque bloc de code porte son identité |
+| **MIP** | Index structurel global, navigable par l'IA |
+| **Revues de sécurité** | Chaque lot est relu ; chaque constat devient un test de non-régression |
 
 ---
 
@@ -166,30 +192,27 @@ L'auteur n'est pas codeur de formation. Il definit l'intention, la vision et les
 
 | Composant | Technologie |
 |---|---|
-| Langage principal | **Rust** (zero unsafe, performance native) |
-| Interface desktop | **Dioxus** (UI reactive, pur Rust) |
-| Base de donnees | **libSQL** + chiffrement AES-256 |
-| IA locale | **llama.cpp** (LLM) + **Whisper** (STT) |
-| Cloud prive | **WebDAV / CalDAV / CardDAV** |
-| Domotique | **MQTT** + HTTP + automatisations |
-| Reseau | **TLS 1.2+** (rustls), protocole binaire custom |
-| Serveur Origin | **Relay + Tracker + Web + Admin** (multi-port) |
+| Langage | **Rust** |
+| Interface | **Dioxus** |
+| Données | **SQLCipher** via KindMother |
+| Signature | **Ed25519** (Sceau), registres Merkle |
+| IA locale | **llama.cpp** (LLM), **Whisper** (STT) |
+| Réseau | **nftables** (Douane), **rustls**, **WireGuard** (Fédération) |
+| Cloud privé | **WebDAV / CalDAV / CardDAV / WOPI** |
+| Domotique | **MQTT** + HTTP |
 
 ---
 
-## Demarrage rapide
+## Démarrage rapide (développement)
 
 ```bash
-# Cloner le depot
-git clone <repo-url> miyukini-cog
-cd miyukini-cog
-
-# Compiler et lancer le Hub
+git clone https://github.com/StudioMiyukini/miyukini_cog.git
+cd miyukini_cog
 cargo build -p miyukini-central-native
 cargo run -p miyukini-central-native
 ```
 
-Prerequis : [Rust](https://rustup.rs/) (edition 2021, version 1.75+).
+Prérequis : [Rust](https://rustup.rs/) 1.75+. Pour une installation de recette complète (services, AppArmor, zone COG), voir [deploy/recette](deploy/recette/).
 
 ---
 
@@ -198,11 +221,8 @@ Prerequis : [Rust](https://rustup.rs/) (edition 2021, version 1.75+).
 - **Usage personnel** (personne physique, non commercial) : **gratuit**
 - **Usage professionnel** (entreprise, association, administration) : **licence commerciale requise**
 
-Details : [Politique de licence](docs/legal/Miyukini%20-%20Politique%20de%20Licence.md)
+Détails : [politique de licence](docs/legal/Miyukini%20-%20Politique%20de%20Licence.md)
 
 ---
 
-> *"Miyukini n'est pas un logiciel. C'est un environnement gouverne dans lequel vos services operent — souverainement, localement, sans compromis."*
-
-**Version** : 0.1.0
-**Derniere mise a jour** : 2026-05-05
+> *« Miyukini n'est pas un logiciel de plus. C'est un environnement gouverné dans lequel vos services opèrent — souverainement, localement, et sous votre contrôle. »*

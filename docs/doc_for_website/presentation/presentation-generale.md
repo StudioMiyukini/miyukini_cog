@@ -2,113 +2,176 @@
 
 ## Qu'est-ce que Miyukini ?
 
-**Miyukini COG** (Core-Orchestrated Governance Environment) est un écosystème logiciel souverain et autonome, conçu pour offrir une alternative complète aux solutions cloud centralisées.
+**Miyukini COG** (Core-Orchestrated Governance Environment) est un environnement numérique **souverain** : il réunit vos services (agenda, comptabilité, documents, cloud privé, domotique, IA locale) sur votre propre matériel, sans abonnement cloud et sans dépendance externe critique.
 
-Miyukini n'est **pas** un système d'exploitation. C'est un **environnement de gouvernance** orchestré par des composants appelés **Cores**, qui garantissent l'intégrité, la sécurité et l'autonomie de chaque installation.
+Miyukini n'est **pas** un système d'exploitation. C'est un **environnement de gouvernance** qui tourne *sur* un OS : chaque action y est décidée, persistée, surveillée et tracée par des composants dédiés, les **Cores**.
 
 ### Vision en une phrase
 
-> **Miyukini est un écosystème logiciel autonome et gouverné, capable de remplacer CMS et SaaS tout en offrant souveraineté technique, fonctionnement offline et contrôle total de la chaîne, du noyau jusqu'à l'utilisateur.**
+> **Un environnement gouverné où vos services fonctionnent chez vous, hors ligne, sous votre contrôle — et où l'IA propose mais ne décide jamais.**
 
-### L'ampleur du projet
+### Où en est le projet (octobre 2026)
 
-- **Architecture complète** : Kernel + 8 Cores + 49 Toolkits en Rust
-- **Souveraineté** : versionning immuable (LOI-7, LOI-8), évolution par environnements
-- **Offline-first** : SQLite local, aucune dépendance externe critique
-- **Gouvernance structurelle** : StrongFather, KindMother, WorrySentinel, TAMR, BorderGuard
-- **Recomposition** : briques (Outils, Toolkits) recomposables en Opérateurs et Services
+- **Version 0.9.0-beta.1** : version de **recette**, à installer sur une machine dédiée pour être testée
+- **Conception gelée** (doc conceptuelle v1) : toute évolution passe par un **amendement écrit avant le code** (21 à ce jour)
+- **134 crates Rust**, **30 services et applications**, **3 857 tests automatisés**
+- **Pas encore** : certification, audit externe, production
 
-## Philosophie Fondatrice
+## Le principe : l'IA propose, les règles décident
 
-### Autonomie Totale
+```
+   Vous / un service / MAIA
+              │  intention
+              ▼
+      ┌───────────────┐
+      │ BondingBrother│  passerelle : traduit, filtre
+      └───────┬───────┘
+              ▼
+      ┌───────────────┐   contraintes   ┌──────────────┐
+      │ StrongFather  │◄────────────────│ WorrySentinel│◄── CaringNanny
+      │   DÉCIDE      │                 │  sécurité    │    (observe)
+      └──┬─────────┬──┘                 └──────────────┘
+   ALLOW │         │ DENY ──► refus tracé
+         ▼         │
+  ┌─────────────┐  └─ cas critique ──► TAMR (validation humaine)
+  │ KindMother  │
+  │SEUL ÉCRIVAIN│  bases chiffrées, journal d'audit chaîné
+  └─────────────┘
+```
 
-Miyukini est construit sur le principe fondamental que **votre environnement vous appartient**. Aucune dépendance externe critique n'est requise pour le fonctionnement du système. Vous pouvez opérer en isolation complète ou en fédération avec d'autres COGs.
+- Aucun service, et pas même l'IA, n'écrit directement : il émet une **intention**.
+- **StrongFather** décide, avec un **refus par défaut** ; **KindMother** est le **seul** à écrire.
+- Les décisions sensibles exigent une **validation humaine** encadrée par **TAMR**.
 
-### Gouvernance par les Cores
+## Les 10 Cores
 
-Huit **Cores** immuables gouvernent le système selon des règles strictes et non négociables. Ces Cores ne sont jamais modifiés — ils évoluent uniquement par création de nouveaux environnements.
+| Core | Rôle | Ne fait jamais |
+|------|------|----------------|
+| **StrongFather** | Décide (autorise / refuse) | N'exécute ni ne persiste |
+| **KindMother** | Persiste, seul validateur des écritures | Ne décide pas |
+| **BondingBrother** | Passerelle : traduit, filtre, transmet | — |
+| **BorderGuard** | Définit frontières et niveaux de confiance | Ne filtre pas lui-même |
+| **WorrySentinel** | Gouverne la sécurité (T0 à T4) | Ne lance aucune vérification |
+| **CaringNanny** | Observe l'état | Ne modifie rien |
+| **MasterButler** | Registre des capacités et permissions | — |
+| **LogisticsSteward** | Arbitre ressources et quotas | Ne mesure pas (le Kernel mesure) |
+| **EverBuddy** | Cycle de vie, historique immuable | — |
+| **TAMR** | Cadre de l'intervention humaine | — |
 
-### Souveraineté des Données
+## Les strates
 
-Vos données restent sur votre matériel. Le système est conçu pour fonctionner offline-first, avec la fédération comme option, jamais comme obligation.
+| Strate | Nom | Rôle |
+|--------|-----|------|
+| **A** | MiyukiniAdmin | Opérateur souverain, en zone COG uniquement, jamais exposé |
+| **S** | Services / Opérateurs | Ce que vous utilisez ; émettent des intentions |
+| **T** | Toolkits | Capacités techniques composables, cataloguées par MasterButler |
+| **C** | Cores | Les 10 Cores de gouvernance |
+| **K** | Kernel | Socle neutre : configuration, identité, temps, journal, cycle de vie |
+| **H** | Classes de services H0–H3 | Degré d'exposition d'un service (de « jamais exposé » à « actif vers l'extérieur ») |
 
-## Architecture en Strates
+## Les zones : rien n'entre sans contrôle, rien ne sort de la zone COG
 
-Miyukini est structuré en **strates hiérarchiques**, de la réalité physique (Strate 0) jusqu'à l'administration souveraine (Strate 9) :
+```
+  EXTÉRIEUR          Internet · Fédération (autres COG) · Origin (canal officiel)
+      │
+      ▼
+  ┌────────┐
+  │ DOUANE │  pare-feu nftables, IDS/IPS, journaux bornés
+  └───┬────┘
+      ▼
+  ┌──────────────────────────────┐
+  │ ZONE FRANCHE                 │  façades web, DB de session,
+  │                              │  quarantaine + désarmement des fichiers (CDR)
+  └──────────────┬───────────────┘
+                 ▼
+            ┌─────────┐
+            │ PORTAIL │  voies déclarées uniquement
+            └────┬────┘
+                 ▲  la zone COG TIRE ce dont elle a besoin
+  ┌──────────────┴───────────────┐
+  │ ZONE COG — aucune sortie     │  Cores, services, MAIA,
+  │                              │  bases principales chiffrées
+  └──────────────────────────────┘
+```
 
-| Strate | Nom | Description |
-|--------|-----|-------------|
-| **9** | MiyukiniAdmin | Opérateur souverain d'administration |
-| **7** | Opérateurs | Services fonctionnels (JayKoa, JayKonta...) |
-| **6** | Outils | Capacités techniques (MiyuAuth, MiyuSQL...) |
-| **5** | Interface | BondingBrother (adaptation Cores ↔ Outils) |
-| **4** | Cores | 8 Cores de gouvernance immuables |
-| **3** | Invariants | Principes architecturaux fondamentaux |
-| **K** | Kernel | Substrat technique neutre |
-| **0** | Hardware | Réalité physique (OS, matériel) |
+- La **zone COG ne sort jamais** : une tentative de sortie est bloquée et déclenche une **alerte critique**.
+- Les **Vigies** surveillent chaque voie ; un capteur muet ou une anomalie **coupe la voie** (fail-closed).
+- Chaque service tourne sous son propre compte, avec un **profil AppArmor** en mode enforce, et n'a droit qu'aux flux locaux qu'il déclare.
 
-## Les 8 Lois d'Autonomie
+## Identité et confiance
 
-Le système repose sur **8 lois non négociables** qui garantissent l'indépendance de chaque COG :
+- Chaque COG possède une **racine** (clé hors ligne) ; personnes et appareils reçoivent un **passeport**, et un **visa** pour accéder à un service.
+- Tous les titres sont des **Sceaux** signés ; les révocations sont publiées dans des **registres Merkle** vérifiables.
+- **Aucun secret partagé** là où une signature suffit.
+- Les mises à jour arrivent par un **canal officiel** signé (2 sur 2) ; c'est vous qui les relevez.
 
-1. **LOI-1** : Aucune dépendance externe critique à l'exécution
-2. **LOI-2** : Le système accepte l'isolement comme état normal
-3. **LOI-3** : L'état local est souverain
-4. **LOI-4** : Pas de temps global requis
-5. **LOI-5** : Le coût doit être proportionnel au hardware
-6. **LOI-6** : L'autonomie n'empêche pas la fédération
-7. **LOI-7** : La strate Cores est immuable
-8. **LOI-8** : Migration = diplomatie entre environnements
+## Les lois d'autonomie
 
-## Services Intégrés
+1. **LOI-1** : aucune dépendance externe critique à l'exécution
+2. **LOI-2** : l'isolement est un état normal
+3. **LOI-3** : l'état local est souverain
+4. **LOI-4** : pas de temps global requis
+5. **LOI-5** : le coût est proportionnel au matériel
+6. **LOI-6** : l'autonomie n'empêche pas la fédération, qui reste explicite
 
-Miyukini propose une suite complète de services professionnels et personnels :
+## MAIA, l'IA locale
 
-- **Miyukini Central** : Hub principal et point d'accès
-- **Miou** : Assistant intelligent intégré
-- **JayKoa** : Calendrier universel du COG
-- **JayKonta** : Comptabilité et gestion financière
-- **JayRDV** : Gestion de rendez-vous
-- **JayShop** : Commerce en ligne et point de vente
-- **Jay Bureau** : Suite collaborative (Docs, Sheets, Slides, Mail, Message)
-- **Miyukini Cloud** : Cloud privé (WebDAV, CalDAV, CardDAV)
-- **MAIA** : IA locale (LLM, STT) sans internet
-- Et plus encore...
+- Modèles **locaux**, adaptés au matériel ; aucune donnée envoyée à un service d'IA externe.
+- **Mémoire chiffrée par utilisateur**, jamais publiée ni synchronisée ; **oubli réel** à la demande (effacement physique vérifié).
+- **Fiches fédérées** : MAIA peut s'appuyer sur des connaissances d'autres COG, marquées étrangères et corroborées ; elle ne publie que ce que **vous** avez étiqueté et signé.
+- **Bornée** : MAIA ne décide rien ; elle propose, les Cores décident.
 
-## Réseau Webway (MWS)
+## Services intégrés
 
-Le **Miyukini Webway System** permet aux COGs de se découvrir et de communiquer entre eux de manière sécurisée et optionnelle. Ce système comprend :
+| Domaine | Services |
+|---------|----------|
+| Hub | **Miyukini Central** |
+| Organisation | **JayKoa** (calendrier universel), **JayRDV** (rendez-vous), **MiyukiniWatch** |
+| Finances | **JayKonta**, **MiyukiniSales** |
+| Collaboratif | **Jay Bureau** (Docs, Sheets, Slides, Formulaire, Réunion, Club, Mail, Message), **Jay1Tribu** |
+| Fichiers | **MiyuCloud** (cloud privé), **JayCloud** (sauvegardes) |
+| IA | **MAIA**, **Miyukini Whisper** |
+| Domotique | **Alicia** |
 
-- **Origin** : Source de vérité du réseau
-- **Relays** : Nœuds de distribution et vérification
-- **Trackers** : Découverte et contrôle des COGs
+## Fédération
 
-## Pour Qui ?
+```
+  Candidat ──(≥ 2 membres confirment)──► Invité ──(≥ 4 membres, 7 jours)──► Membre
+                                                                           │
+                       recours accepté ◄── Suspendu ◄── accusation au quorum de 6
+                                              │
+                                              └── 72 h sans recours ──► Révoqué
+```
 
-Miyukini s'adresse à :
+- Les COG se reconnaissent entre eux ; une faute se **prouve** par des preuves signées, jamais par simple réputation.
+- La Fédération fonctionne **sans Origin** ; un COG peut aussi rester **seul**, sans réseau.
 
-- **Professionnels indépendants** (kiné, artisan, restaurateur) : JayRDV + JayKonta + JayKoa interconnectés, un seul COG, données unifiées
-- **Collectivités et associations** : déploiement sur mini PC ou NAS, budget maîtrisé, données citoyens en local
-- **Équipes collaboratives** : suite Jay Bureau souveraine (documents, tableurs, présentations, messagerie chiffrée) sans cloud tiers
-- **Décideurs techniques** : éviter le lock-in vendor, traçabilité structurelle, évolution sans refonte
-- **Développeurs** : 49 Toolkits composables sous gouvernance, contrats clairs, pas de dépendance externe critique
+## Et ensuite : les Alliances (conception v2)
+
+Pour les organisations : une **Alliance** est une fédération **privée** de COG, administrée par un **centre de commandement** de 6 à 7 COG au quorum (tolérant aux membres compromis), avec un annuaire « AD maison » (**Alliance-Admin**) et une IA d'administration bornée (**HECTOR**). Voir la [conception des Alliances](../../architecture/alliance/_index.md).
+
+## Pour qui ?
+
+- **Indépendants et professions réglementées** : agenda, rendez-vous, comptabilité et IA locale, sans sortir les données de l'entreprise
+- **TPE, PME, associations, petites collectivités** : un seul serveur, budget maîtrisé, données en local
+- **Équipes** : suite bureautique souveraine sans cloud tiers
+- **Particuliers** : cloud privé, budget, domotique, assistant vocal local
+- **Développeurs** : architecture gouvernée en Rust, contrats explicites, sécurité vérifiable
 
 ## Ce que Miyukini n'est pas
 
 | Ce n'est pas | C'est |
-|--------------|--------|
-| Un OS (Linux, Windows) | Un **environnement de gouvernance** qui tourne *sur* un OS |
-| Un framework « ouvert » où chacun fait comme il veut | Un **environnement gouverné** : les Cores sont le socle non substituable |
-| Une application ou un CMS amélioré (WordPress++, Shopify++) | Un **écosystème** qui permet de déployer des Services gouvernés |
-| Un outil no-code magique sans contraintes | Un socle **exigeant** (autonomie, contrats, traçabilité) en échange de garanties (offline, souveraineté, pérennité) |
+|--------------|-------|
+| Un OS | Un **environnement de gouvernance** qui tourne *sur* un OS |
+| Un framework où chacun fait comme il veut | Un environnement **gouverné** : les Cores sont le socle non substituable |
+| Un CMS ou un SaaS de plus | Un **écosystème** de services gouvernés, chez vous |
+| Une IA qui agit à votre place | Une IA **bornée** qui propose ; les règles et vous décidez |
 
 ## Commencer
 
-Explorez la documentation par catégorie :
-
-- 📐 **Architecture** : Comprendre la structure du système
-- ⚙️ **Cores** : Les 8 piliers de gouvernance
-- 🔧 **Outils** : Les capacités techniques disponibles
-- 📱 **Services** : Les applications intégrées
-- 🌐 **MWS** : Le réseau de fédération
-- 🔒 **Sécurité** : Protection et confiance
+- 📐 **Architecture** : comprendre la structure du système
+- ⚙️ **Cores** : les 10 piliers de gouvernance
+- 🔧 **Outils** : les capacités techniques disponibles
+- 📱 **Services** : les applications intégrées
+- 🌐 **MWS** : le réseau de fédération
+- 🔒 **Sécurité** : protection et confiance
