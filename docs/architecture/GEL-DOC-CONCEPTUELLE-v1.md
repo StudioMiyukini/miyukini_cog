@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.7 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.8 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -66,6 +66,7 @@
 | A-005 | 2026-10-25 | Zones §12 : règles intégrées des Vigies sur le motif de la Douane (`LATERAL`, `NON-DECLARE` critiques, coupure de la voie fautive) ; attribution de voie par le seul côté d'entrée ; détail ci-dessous | 1.5 |
 | A-006 | 2026-10-25 | Lot 2 §3, §4.1, §8, §8.1, §8.2, §9 · Zones §7, §15, §17 : choix d'implémentation du lot 4 (entrées de registre `0x04`, stockage `MRGJ`, Median-Time-Past, relevé `MCAN`, quarantaine, registre fédéral) ; têtes du registre officiel par une clé de journal d'Origin ; révocations à seuil 1 ; quarantaine persistée et scellée ; détail ci-dessous | 1.6 |
 | A-007 | 2026-10-25 | Zones §7, §10, §16, §17 · Services hybrides §1, §3.1, §4.1 · Lot 2 §4.1, §8.2, §8.3, §9, §10 · IA fédérée §2, §7 · Menaces EX-32, EX-34 : intégrations du lot 4, choix des lots 5 (services hybrides) et 6 (fédération) ; délai de contestation 72 h ; registre fédéral sans Origin (≥ 3 témoins membres, **remplace** une phrase d'A-006) ; anti-rejeu du Portail par auteur ; code des Fiches ≠ `0x08` ; détail ci-dessous | 1.7 |
+| A-008 | 2026-10-25 | Lot 2 §4.1, §10.1 · Services hybrides §3.1, §4.1 : nature `0x44` du recours accepté (encodage prévu par A-007) ; règles de suspension et de levée ; alignements consignés (recours, témoins membres, séquence par auteur) | 1.8 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -343,3 +344,23 @@
   - **C** : C-12 appliquée (configuration ou état douteux ⇒ canal désactivé ; H3 et entrées non spécifiées ⇒ refus) ; C-24 — inventaire à compléter (`rand_core` `OsRng` : secret local, clés de session) ; C-26 : cibles de fuzzing écrites pour `MCAN`, `MCQT`, `MRGJ`, entrée `0x04`, miroir, MSCE, sas ; restent manifeste de service, titres fédéraux, `MFPV`, `MCCE`, `MMIA`
   - **Plan** : lots 4, 5, 6 — statut « Fait / Reste » ; lot 7 — « Fiches (type à attribuer, ≠ `0x08`) »
   - **Code** : non encore commité ; alignements à faire : suspension 72 h et recours (`miyufederation`), `miyuregistre::federal` (2 sur {COG, Origin}) vers ≥ 3 témoins membres, séquence par auteur (`miyuportail`, `jayrdv-facade`)
+
+### A-008 — Recours accepté et alignements du code sur A-007
+
+<!-- @id arch.gel.a008 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a008 -->
+
+- **Motif** : A-007 prévoit que l'encodage du « recours accepté » soit fixé à l'implémentation et consigné par amendement ; le code des trois décisions d'A-007 est écrit
+- **Documents touchés** : `docs/securite/ARCHITECTURE-lot2-identite-signee.md` §4.1, §10.1 ; `docs/architecture/SERVICES-HYBRIDES-ET-PORTAIL.md` §3.1, §4.1
+- **Décision** (consignée telle qu'implémentée, `crates/miyufederation`)
+  - **Recours accepté** : certificat `0x06`, nature **`0x44`** (« D »), un sceau cosigné par 6 à 8 membres courants distincts, **jamais** le mis en cause ; champs 1 `nature`, 2 `accuse`, 3 `type_preuve`, 4 `empreinte_preuve`, 5 `accusation` (SHA-256 des octets signés de l'accusation visée), 6 `emise_a` ; reçu avant l'échéance de 72 h
+  - **Suspension** : statut `Suspendu { depuis, accusation }` ; titres du mis en cause refusés, accès fédéré, têtes et confirmations qu'il signe refusés ; il ne compte plus comme membre ; les membres peuvent continuer à le confirmer
+  - **Levée** : recours accepté ⇒ statut antérieur rétabli, compteur des 7 jours **relancé** depuis la levée ; une accusation levée ne peut pas être rejouée ; une nouvelle accusation avec un quorum neuf peut suspendre à nouveau
+  - **Révocation définitive** : à 72 h sans recours accepté, entrée `Revocation{cible: Cle(kid)}` produite une seule fois ; recours tardif refusé ; pénalité des confirmateurs appliquée à la révocation définitive
+  - **Registre fédéral** : règle commune `verifier_temoins` (≥ 3 témoins membres distincts, clé du COG jamais comptée, Origin un témoin au plus) partagée par `miyuregistre` et `miyufederation`
+  - **Portail** : anti-rejeu par auteur implémenté (marque haute conservée pour un auteur retiré ; retrait du dernier auteur refusé ; 32 épinglés, 256 connus par session)
+- **Impact**
+  - **EX** : EX-32 et EX-34 implémentées ; EX-44 (multi-appareils) implémentée
+  - **Plan** : lot 6 — décisions d'A-007 faites ; lot 5 — multi-appareils fait
+  - **Code** : `miyufederation`, `miyuregistre::federal`, `miyuportail`, `miyuhybride`, `jayrdv-facade`

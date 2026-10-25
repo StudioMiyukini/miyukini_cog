@@ -1,6 +1,6 @@
 # Lot 2 — Identité signée : Passeports, Visas et paquets identifiables
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1) **A-003** (v1.3 : choix d'implémentation du lot 2) **A-004** (v1.4 : type `0x08`, natures de certificat, indice d'usage 4 des arrêtés) et **A-006** (v1.6 : registre et canal officiel du lot 4, §3, §4.1, §8, §8.3, §9) · amendé **A-007** (v1.7 : natures `0x42` / `0x43`, usage fédéral de `0x07`, tag 5 du manifeste, série miyauth au registre, registre fédéral sans Origin, §4.1, §8.2, §8.3, §9, §10). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1) **A-003** (v1.3 : choix d'implémentation du lot 2) **A-004** (v1.4 : type `0x08`, natures de certificat, indice d'usage 4 des arrêtés) **A-006** (v1.6 : registre et canal officiel du lot 4, §3, §4.1, §8, §8.3, §9) · amendé **A-007** (v1.7 : natures `0x42` / `0x43`, usage fédéral de `0x07`, tag 5 du manifeste, série miyauth au registre, registre fédéral sans Origin, §4.1, §8.2, §8.3, §9, §10) · amendé **A-008** (v1.8 : nature `0x44`, recours accepté, §4.1, §10.1). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id securite.lot2.identite-signee -->
 <!-- @role architecture-specification -->
@@ -130,6 +130,7 @@ Compléments A-004 :
 | `0x41` (« A ») | arrêté de frontière | clé d'usage `arretes` (indice 4) |
 | `0x42` (« B ») | accusation fédérale (A-007, §10) | membres qui ont vérifié la preuve, un sceau cosigné (quorum 6, ≤ 8) |
 | `0x43` (« C ») | candidature fédérale (A-007, §10) | identité du candidat (auto-signée) |
+| `0x44` (« D ») | recours accepté (A-008, §10) | 6 à 8 membres courants, jamais le mis en cause |
 | autre | réservé | refusé par les décodeurs |
 
 Compléments A-007 :
@@ -431,6 +432,7 @@ Implémenté par `crates/miyufederation` (lot 6). TLV canoniques, tous les champ
 | Candidature | `0x06`, nature `0x43` | identité du candidat | 1 `nature`, 2 `racine`, 3 `journal`, 4 `registre`, 5 `emise_a` (validité 48 h), 6 `difficulte` (1..=40), 7 `nonce` |
 | Confirmation | `0x07` | identité d'un membre | 1 `reconnue`, 2 `confirmatrice`, 3 `niveau` (= 1), 4 `perimetre` (= `federation`), 5 `emise_a`, 6 `expire_a` (≤ 24 h) |
 | Accusation | `0x06`, nature `0x42` | membres, un sceau cosigné (≤ 8) | 1 `nature`, 2 `accuse`, 3 `type_preuve` (1 = équivoque), 4 `empreinte_preuve`, 5 `emise_a` |
+| Recours accepté | `0x06`, nature `0x44` | membres, un sceau cosigné (6 à 8, sans le mis en cause) | 1 `nature`, 2 `accuse`, 3 `type_preuve`, 4 `empreinte_preuve`, 5 `accusation` (SHA-256 des octets signés), 6 `emise_a` (avant l'échéance de 72 h) |
 
 - **Preuve de calcul** : `SHA-256("miyukini/federation/candidature/v1" || 0x00 || racine || jour (8, BE) || nonce (8, BE))`, `jour = emise_a / 86 400`, bits nuls en tête ≥ `difficulte`
 - **Preuve de faute** `MFPV` : `"MFPV" | 0x01 | type (1) | long. A (4, BE) | A | long. B (4, BE) | B`, sceaux rangés par octets croissants ; empreinte = SHA-256 de l'encodage ; seule la signature du mis en cause compte

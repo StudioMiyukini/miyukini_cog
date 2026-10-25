@@ -1,6 +1,6 @@
 # Services hybrides et durcissement du Portail interne
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-004** (v1.4 : Portail, CDR et quarantaine du lot 3, §1, §3.1) · amendé **A-007** (v1.7 : services hybrides du lot 5, H3 refusé, anti-rejeu par auteur, §1, §3.1, §4.1). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-004** (v1.4 : Portail, CDR et quarantaine du lot 3, §1, §3.1) · amendé **A-007** (v1.7 : services hybrides du lot 5, H3 refusé, anti-rejeu par auteur, §1, §3.1, §4.1) · amendé **A-008** (v1.8 : anti-rejeu par auteur implémenté, §3.1, §4.1). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id arch.cog.services-hybrides -->
 <!-- @role architecture-specification -->
@@ -115,7 +115,7 @@ Implémenté par `crates/miyuportail` et `crates/miyucdr` (lot 3).
 | 2 | `sens` | `0x01` entrante, `0x02` sortante |
 | 3 | `version du traité` | u64, **égale** à celle du traité |
 | 4 | `type` | u64, déclaré par le traité pour ce sens |
-| 5 | `séquence` | u64, **strictement croissante** ~~par session~~ **par auteur dans la session** (anti-rejeu ; amendé A-007, implémentation : par session, à aligner) |
+| 5 | `séquence` | u64, **strictement croissante** ~~par session~~ **par auteur dans la session** (anti-rejeu ; amendé A-007, implémenté A-008) |
 | 6 | `émise le` | u64, secondes Unix |
 | 7 | `champs` | TLV imbriqué, schéma du traité (≤ 32 champs ; traité ≤ 64 types) |
 
@@ -220,7 +220,7 @@ Implémenté par `crates/miyuhybride`, `crates/jayrdv-traite`, `crates/jayrdv-fa
 **Multi-appareils** (décision du propriétaire, A-007)
 - Anti-rejeu **par auteur** dans une session : chaque appareil épinglé a sa propre séquence strictement croissante
 - Plusieurs appareils partagent **une** instance de façade
-- Implémentation actuelle : séquence par session (à aligner)
+- Implémenté (A-008) : marque haute conservée pour un auteur retiré ; retrait du dernier auteur refusé ; 32 auteurs épinglés, 256 connus par session
 
 **À décider** (A-007) : encodage de H3 ; liste blanche de pairs (Origin, International) ; point d'application des quotas de disque et de sessions ; emplacement du guichet des visas ; rafraîchissement des révocations d'une façade ; image de façade signée réelle
 
