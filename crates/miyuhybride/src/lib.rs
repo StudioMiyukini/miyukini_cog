@@ -20,6 +20,8 @@
 //! - **EX-43** façades jetables : clé de session éphémère émise par la zone
 //!   COG, DB secondaire vierge, destruction et reconstruction
 //!   ([`ServiceHybride`], [`Superviseur`]) ;
+//! - **quotas** du contrat (disque, sessions, tâches) appliqués par
+//!   compteurs atomiques, refus au-delà ([`quotas`]) ;
 //! - **EX-48** exposition désactivée par défaut (manifeste qui la demande :
 //!   refusé ; voie installée désactivée).
 //!
@@ -38,6 +40,9 @@ pub mod erreurs;
 pub mod guichets;
 pub mod manifeste;
 pub mod message;
+pub mod quotas;
+#[cfg(feature = "revocations")]
+pub mod revocations;
 pub mod service;
 
 pub use db_secondaire::DbSecondaire;
@@ -51,6 +56,12 @@ pub use manifeste::{
     ManifesteVerifie, OrigineExterne, PointEntree, Ressources, Transport, GENRE_CONTRAT,
 };
 pub use message::{traite, ChampScalaire, ChampType, MessageTraite};
+pub use quotas::{
+    JetonSession, JetonTache, Quota, QuotasService, ReservationDisque, Ressource, SessionsClients,
+    DELAI_INACTIVITE_DEFAUT_SECS,
+};
+#[cfg(feature = "revocations")]
+pub use revocations::{RefusRemise, RevocationsFacade, FRAICHEUR_REVOCATIONS_FACADE_SECS};
 pub use service::{FacadeJetable, LancementFacade, ServiceHybride, Superviseur};
 
 // Réexportations nécessaires à la macro et aux services.

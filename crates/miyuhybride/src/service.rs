@@ -18,6 +18,8 @@
 //!   [`ServiceHybride::retirer_auteur`]) : un appareil de plus (ou de moins)
 //!   est épinglé dans la session **ouverte**, sans reconstruire la façade ;
 //!   le Portail tient une séquence anti-rejeu **par auteur** (A-007) ;
+//! - **Quotas** ([`ServiceHybride::quotas`]) : disque, sessions et tâches du
+//!   contrat, comptés par service et remis à chaque façade (crate::quotas) ;
 //! - **Fin de session / coupure** : façade détruite, DB purgée ; la façade
 //!   n'est jamais réparée, seulement reconstruite ([`Superviseur`]) ;
 //! - **Désinstallation** : voie supprimée, aucun résidu.
@@ -33,6 +35,7 @@ use crate::db_secondaire::DbSecondaire;
 use crate::erreurs::ErreurHybride;
 use crate::guichets::{AuteursSession, GuichetFranche, GuichetMoteur};
 use crate::manifeste::{ContratFacade, ManifesteVerifie};
+use crate::quotas::QuotasService;
 
 const MIO: usize = 1024 * 1024;
 
@@ -47,6 +50,9 @@ pub struct LancementFacade {
     pub audience: String,
     /// Durée maximale de la session (secondes).
     pub duree_max_session_secs: u64,
+    /// Quotas du contrat (disque, sessions, tâches), partagés par toutes les
+    /// façades du service ; la DB secondaire y est déjà adossée.
+    pub quotas: QuotasService,
 }
 
 /// Service hybride installé (côté Cores, zone COG).
@@ -55,6 +61,7 @@ pub struct ServiceHybride {
     manifeste: ManifesteVerifie,
     traite: Traite,
     facade: ContratFacade,
+    quotas: QuotasService,
     epoque: Arc<AtomicU64>,
     /// Auteurs de la session ouverte, partagés avec le guichet de sa façade.
     session: Mutex<Option<AuteursSession>>,
@@ -72,8 +79,17 @@ impl ServiceHybride {
         let contrat = manifeste.contrat_voies().ok_or(ErreurHybride::Classe)?;
         let facade = manifeste.contrat().facade.ok_or(ErreurHybride::Classe)?;
         let traite = contrat.traite.clone();
+        let quotas = QuotasService::depuis(&manifeste.contrat().ressources);
         portail.declarer(contrat)?;
-        Ok(Self { portail, manifeste, traite, facade, epoque: Arc::new(AtomicU64::new(0)), session: Mutex::new(None) })
+        Ok(Self {
+            portail,
+            manifeste,
+            traite,
+            facade,
+            quotas,
+            epoque: Arc::new(AtomicU64::new(0)),
+            session: Mutex::new(None),
+        })
     }
 
     fn session(&self) -> Result<MutexGuard<'_, Option<AuteursSession>>, ErreurHybride> {
@@ -88,6 +104,11 @@ impl ServiceHybride {
     /// Manifeste vérifié.
     pub fn manifeste(&self) -> &ManifesteVerifie {
         &self.manifeste
+    }
+
+    /// Quotas du contrat appliqués au service (compteurs partagés).
+    pub fn quotas(&self) -> &QuotasService {
+        &self.quotas
     }
 
     /// État de la voie.
@@ -130,6 +151,8 @@ impl ServiceHybride {
             EtatVoie::Coupee(_) => return Err(ErreurPortail::VoieCoupee.into()),
         }
         let mut session = self.session()?;
+        // Quota disque : la DB secondaire est comptée avant toute écriture.
+        let db = DbSecondaire::avec_quota((self.facade.db_secondaire_max_mio as usize).saturating_mul(MIO), &self.quotas)?;
         let cle_session = SigningKey::generate(&mut OsRng);
         if self.manifeste.classe() != ClasseExposition::H1 {
             self.portail.ouvrir_session(self.service(), cle_session.verifying_key().to_bytes(), auteurs.clone())?;
@@ -146,9 +169,10 @@ impl ServiceHybride {
         )?;
         Ok(LancementFacade {
             guichet,
-            db: DbSecondaire::vierge((self.facade.db_secondaire_max_mio as usize).saturating_mul(MIO)),
+            db,
             audience: self.manifeste.audience().to_string(),
             duree_max_session_secs: self.facade.duree_max_session_secs,
+            quotas: self.quotas.clone(),
         })
     }
 

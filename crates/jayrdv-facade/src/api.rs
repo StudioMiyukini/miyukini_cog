@@ -13,6 +13,10 @@
 //! | `POST` | `/v1/reservations` | visa + PoP | [`ReservationJson`] | 202 [`AccepteJson`] |
 //! | `GET` | `/v1/reponses/<demande>` | visa + PoP | vide | 200 [`ReponseJson`] ou 202 en attente |
 //! | `GET` | `/v1/creneaux` | visa + PoP | vide | 200 cache des créneaux publiés (non autoritaire) |
+//! | `DELETE` | `/v1/session` | visa + PoP | vide | 204 : session cliente de l'appareil close (quota rendu) |
+//!
+//! Refus de quota (contrat de service) : 429 `quota_sessions`, 429
+//! `quota_taches` ; 503 `db_secondaire_pleine` (disque).
 //!
 //! Les corps entrants portent les champs du message du traité, la séquence,
 //! la date d'émission et la **signature de l'auteur** (clé d'appareil du

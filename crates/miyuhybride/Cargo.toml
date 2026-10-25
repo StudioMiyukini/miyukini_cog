@@ -21,12 +21,17 @@ thiserror = "2"
 # Génération des entrées Douane / BorderGuard (côté Cores uniquement, feature `douane`).
 borderguard = { path = "../borderguard", optional = true }
 miyudouane = { path = "../miyudouane", optional = true }
+# Révocations d'une façade (miyauth ← registre vérifié), feature `revocations`.
+miyauth = { path = "../miyauth", optional = true }
+miyuregistre = { path = "../miyuregistre", features = ["miyauth"], optional = true }
 
 [features]
 default = []
 # Dérivation des entrées Douane (flux d'arrêté, sandbox Franche) depuis le manifeste.
 # Réservée aux Cores : une façade n'en a pas besoin et ne l'active pas.
 douane = ["dep:borderguard", "dep:miyudouane"]
+# Rafraîchissement des révocations d'une façade (`revocations::RevocationsFacade`).
+revocations = ["dep:miyauth", "dep:miyuregistre"]
 
 [lints]
 workspace = true

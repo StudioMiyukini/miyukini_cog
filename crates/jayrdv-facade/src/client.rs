@@ -54,6 +54,11 @@ impl ClientFedere {
         Self { cle, visa, passeport, sequence: 0 }
     }
 
+    /// Clé publique d'appareil (auteur épinglé par les Cores).
+    pub fn cle_appareil(&self) -> [u8; 32] {
+        self.cle.cle_publique()
+    }
+
     /// Remplace le visa (renouvellement).
     pub fn changer_visa(&mut self, visa: Vec<u8>) {
         self.visa = visa;
@@ -125,6 +130,11 @@ impl ClientFedere {
     /// `GET /v1/reponses/<demande>`.
     pub fn lire_reponse(&self, defi: &DefiRecu, demande: &str) -> RequeteHttp {
         self.authentifiee(defi, "GET", &format!("/v1/reponses/{demande}"), Vec::new())
+    }
+
+    /// `DELETE /v1/session` : fin explicite de la session cliente.
+    pub fn fermer_session(&self, defi: &DefiRecu) -> RequeteHttp {
+        self.authentifiee(defi, "DELETE", "/v1/session", Vec::new())
     }
 
     /// `GET /v1/creneaux` (cache de la façade).

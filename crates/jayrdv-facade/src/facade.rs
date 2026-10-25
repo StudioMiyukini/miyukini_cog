@@ -20,6 +20,17 @@
 //!   épinglés de la session ; chacun a sa propre séquence (filtre local, le
 //!   Portail fait foi) ; un appareil épinglé ou retiré par les Cores l'est
 //!   sans reconstruire la façade ;
+//! - **révocations rafraîchies** (A-007) : la zone COG remet les listes
+//!   miyauth ← registre vérifié pendant la vie de la façade
+//!   ([`miyuhybride::RevocationsFacade`]) ; une liste de plus de 15 min, ou
+//!   absente, refuse tout titre (fail-closed). Sans poignée de
+//!   rafraîchissement, l'instantané du lancement ne vaut que 15 min après
+//!   l'ouverture ;
+//! - **quotas du contrat** : une session cliente par appareil (quota
+//!   `sessions` du service, libérée à la fin explicite `DELETE /v1/session`,
+//!   après 15 min d'inactivité, au retrait de l'appareil ou à la destruction
+//!   de la façade) ; une tâche par requête (quota `tâches`) ; DB secondaire
+//!   comptée sur le quota `disque` avant écriture ;
 //! - DB secondaire : réponses publiées et cache des créneaux publiés, **jamais
 //!   autoritaire** (le moteur décide en zone COG à chaque réservation).
 //!
@@ -30,10 +41,14 @@ use std::collections::BTreeMap;
 
 use jayrdv_traite::{CreneauDisponible, DemandeCreneaux, Motif, Reservation, Sortant};
 use miyauth::http::{b64_decoder, b64_encoder, verifier_requete_visa, MagasinDefis, MagasinDefisMemoire};
-use miyauth::{AnnuaireEmetteurs, CogId, PolitiqueIdentite, RevocationsFederees};
+use miyauth::{
+    AnnuaireEmetteurs, CibleRevocation, CogId, ErreurRevocation, PolitiqueIdentite, RevocationsFederees,
+    SourceRevocation,
+};
 use miyuhybride::{
     declaration_entrante, DbSecondaire, ErreurHybride, ErreurPortail, EtatVoie, FacadeJetable, GuichetFranche,
-    LancementFacade, MessageTraite, RefusDecodage,
+    LancementFacade, MessageTraite, QuotasService, RefusDecodage, RevocationsFacade, SessionsClients,
+    DELAI_INACTIVITE_DEFAUT_SECS, FRAICHEUR_REVOCATIONS_FACADE_SECS,
 };
 
 use crate::api::{
@@ -60,8 +75,30 @@ pub struct ConfigurationFacade {
     pub cog_local: CogId,
     /// Clés d'émission épinglées (COG hôte souverain, COG reconnus).
     pub annuaire: AnnuaireEmetteurs,
-    /// Instantané des révocations, remis à chaque lancement.
+    /// Instantané des révocations, remis à chaque lancement : utilisé
+    /// seulement sans poignée de rafraîchissement
+    /// ([`FacadeJayRdv::avec_revocations`]), et 15 min au plus après
+    /// l'ouverture de la façade (puis tout titre est refusé).
     pub revocations: RevocationsFederees,
+}
+
+/// Instantané borné : refuse tout au-delà de `valable_jusqu_a`.
+struct InstantaneBorne<'a> {
+    liste: &'a RevocationsFederees,
+    valable_jusqu_a: u64,
+}
+
+impl SourceRevocation for InstantaneBorne<'_> {
+    fn est_revoque(&self, emetteur: &CogId, cible: &CibleRevocation, maintenant_secs: u64)
+        -> Result<bool, ErreurRevocation> {
+        if maintenant_secs > self.valable_jusqu_a {
+            return Err(ErreurRevocation::Perimee {
+                a_jour_au: self.valable_jusqu_a.saturating_sub(FRAICHEUR_REVOCATIONS_FACADE_SECS),
+                maintenant: maintenant_secs,
+            });
+        }
+        self.liste.est_revoque(emetteur, cible, maintenant_secs)
+    }
 }
 
 /// Façade JayRDV : une instance par session (tous ses appareils), jetable.
@@ -72,6 +109,11 @@ pub struct FacadeJayRdv {
     audience: String,
     duree_max_session_secs: u64,
     config: ConfigurationFacade,
+    /// Révocations rafraîchies par la zone COG (prioritaires sur l'instantané).
+    revocations: Option<RevocationsFacade>,
+    quotas: QuotasService,
+    /// Sessions clientes (une par appareil), sous le quota `sessions`.
+    sessions: SessionsClients<[u8; 32]>,
     defis: MagasinDefisMemoire,
     /// Dernière séquence déposée **par auteur** (filtre précoce ; l'anti-rejeu
     /// qui fait foi est celui du Portail, par auteur lui aussi).
@@ -107,13 +149,30 @@ fn cle_partiel(demande: &[u8], rang: u64) -> Vec<u8> {
 
 impl FacadeJayRdv {
     /// Façade neuve depuis ce que la zone COG lui remet.
+    ///
+    /// Révocations : instantané de `config`, valable 15 min après l'ouverture ;
+    /// préférer [`FacadeJayRdv::avec_revocations`].
     pub fn new(lancement: LancementFacade, config: ConfigurationFacade) -> Self {
+        Self::construire(lancement, config, None)
+    }
+
+    /// Façade neuve dont les révocations sont **rafraîchies** par la zone COG
+    /// (poignée `revocations`, A-007 : 15 min au plus) ; l'instantané de
+    /// `config` est ignoré.
+    pub fn avec_revocations(lancement: LancementFacade, config: ConfigurationFacade, revocations: RevocationsFacade) -> Self {
+        Self::construire(lancement, config, Some(revocations))
+    }
+
+    fn construire(lancement: LancementFacade, config: ConfigurationFacade, revocations: Option<RevocationsFacade>) -> Self {
         Self {
             guichet: lancement.guichet,
             db: lancement.db,
             audience: lancement.audience,
             duree_max_session_secs: lancement.duree_max_session_secs,
             config,
+            revocations,
+            sessions: SessionsClients::new(lancement.quotas.clone(), DELAI_INACTIVITE_DEFAUT_SECS),
+            quotas: lancement.quotas,
             defis: MagasinDefisMemoire::new(CAPACITE_DEFIS, miyauth::http::DUREE_DEFI_SECS),
             dernieres_sequences: BTreeMap::new(),
             ouverte_le: None,
@@ -131,9 +190,15 @@ impl FacadeJayRdv {
         self.guichet.cle_session()
     }
 
+    /// Sessions clientes ouvertes (non encore libérées).
+    pub fn sessions_ouvertes(&self) -> usize {
+        self.sessions.len()
+    }
+
     fn condamner(&mut self) {
         self.condamnee = true;
         self.db.purger();
+        self.sessions.vider();
     }
 
     /// Une façade ne sert que sur une voie active, dans sa durée de session.
@@ -158,11 +223,17 @@ impl FacadeJayRdv {
         if r.corps.len() > MAX_CORPS {
             return ReponseHttp::refus(413, "corps_trop_grand");
         }
+        self.sessions.expirer(maintenant);
+        // Quota `tâches` : une par requête traitée, rendue à la fin (Drop).
+        let Ok(_tache) = self.quotas.lancer_tache() else {
+            return ReponseHttp::refus(429, "quota_taches");
+        };
         match (r.methode.as_str(), r.chemin.as_str()) {
             ("POST", "/v1/defi") if r.corps.is_empty() => self.defi(maintenant),
             ("POST", "/v1/creneaux") => self.demander_creneaux(r, maintenant),
             ("POST", "/v1/reservations") => self.reserver(r, maintenant),
             ("GET", "/v1/creneaux") if r.corps.is_empty() => self.cache_creneaux(r, maintenant),
+            ("DELETE", "/v1/session") if r.corps.is_empty() => self.fermer_session(r, maintenant),
             ("GET", chemin) if r.corps.is_empty() && chemin.starts_with("/v1/reponses/") => {
                 self.reponse(r, &chemin["/v1/reponses/".len()..], maintenant)
             }
@@ -177,8 +248,29 @@ impl FacadeJayRdv {
         }
     }
 
-    /// Visa + PoP pour l'audience du service ; rend la clé d'appareil (= auteur).
-    fn authentifier(&self, r: &RequeteHttp, maintenant: u64) -> Result<[u8; 32], ReponseHttp> {
+    /// Visa + PoP, puis session cliente de l'appareil (ouverte sous le quota
+    /// `sessions`, ou prolongée) ; rend la clé d'appareil (= auteur).
+    fn authentifier(&mut self, r: &RequeteHttp, maintenant: u64) -> Result<[u8; 32], ReponseHttp> {
+        let cle = self.verifier_titres(r, maintenant)?;
+        if self.sessions.toucher(&cle, maintenant).is_err() {
+            return Err(ReponseHttp::refus(429, "quota_sessions"));
+        }
+        Ok(cle)
+    }
+
+    /// Fin explicite de la session cliente de l'appareil (quota rendu).
+    fn fermer_session(&mut self, r: &RequeteHttp, maintenant: u64) -> ReponseHttp {
+        match self.verifier_titres(r, maintenant) {
+            Ok(cle) => {
+                self.sessions.fermer(&cle);
+                ReponseHttp { statut: 204, corps: Vec::new() }
+            }
+            Err(refus) => refus,
+        }
+    }
+
+    /// Visa + PoP pour l'audience du service, révocations fraîches ; rend la clé d'appareil.
+    fn verifier_titres(&mut self, r: &RequeteHttp, maintenant: u64) -> Result<[u8; 32], ReponseHttp> {
         let requete = miyauth::http::RequeteHttp {
             methode: &r.methode,
             chemin: &r.chemin,
@@ -187,21 +279,29 @@ impl FacadeJayRdv {
             pop: r.entete("x-miyu-pop"),
             liaison: None,
         };
-        let politique = PolitiqueIdentite {
-            cog_local: self.config.cog_local.clone(),
-            annuaire: &self.config.annuaire,
-            revocations: &self.config.revocations,
+        let instantane = InstantaneBorne {
+            liste: &self.config.revocations,
+            valable_jusqu_a: self.ouverte_le.unwrap_or(0).saturating_add(FRAICHEUR_REVOCATIONS_FACADE_SECS),
         };
+        let revocations: &dyn SourceRevocation = match &self.revocations {
+            Some(r) => r,
+            None => &instantane,
+        };
+        let politique =
+            PolitiqueIdentite { cog_local: self.config.cog_local.clone(), annuaire: &self.config.annuaire, revocations };
         let acces = verifier_requete_visa(&requete, &self.audience, &politique, &self.defis, maintenant)
             .map_err(|e| ReponseHttp::refus(e.statut(), "identite"))?;
         let visa = acces.acces().visa();
         if !visa.portees.contient(PORTEE_RESERVER) {
             return Err(ReponseHttp::refus(403, "portee"));
         }
-        if !self.guichet.est_auteur(&visa.cle_appareil) {
+        let cle = visa.cle_appareil;
+        if !self.guichet.est_auteur(&cle) {
+            // Appareil retiré par les Cores : sa session cliente est libérée.
+            self.sessions.fermer(&cle);
             return Err(ReponseHttp::refus(403, "auteur_hors_session"));
         }
-        Ok(visa.cle_appareil)
+        Ok(cle)
     }
 
     fn demander_creneaux(&mut self, r: &RequeteHttp, maintenant: u64) -> ReponseHttp {

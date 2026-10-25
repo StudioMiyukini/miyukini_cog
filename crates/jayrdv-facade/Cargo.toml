@@ -14,13 +14,18 @@ description = "Façade JayRDV (Franche) : API de réservation pour appareil féd
 # Règle d'architecture (vérifiée par tests/architecture.rs) : aucune dépendance,
 # même transitive, vers le moteur (`jayrdv`), KindMother ou le Central.
 [dependencies]
-miyuhybride = { path = "../miyuhybride" }
+miyuhybride = { path = "../miyuhybride", features = ["revocations"] }
 jayrdv-traite = { path = "../jayrdv-traite" }
 miyauth = { path = "../miyauth", features = ["http"] }
 miyusceau = { path = "../miyusceau" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
+
+[dev-dependencies]
+# Banc d'essai : registre vérifié dont la zone COG tire les révocations remises à la façade.
+miyuregistre = { path = "../miyuregistre", features = ["miyauth"] }
+miyuportail = { path = "../miyuportail" }
 
 [lints]
 workspace = true

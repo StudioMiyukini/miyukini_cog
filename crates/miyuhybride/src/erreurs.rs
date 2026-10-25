@@ -8,6 +8,8 @@ use miyuportail::{ErreurPortail, RefusDecodage};
 use miyusceau::ErreurSceau;
 use thiserror::Error;
 
+use crate::quotas::Ressource;
+
 /// Refus d'un manifeste de service (EX-16, EX-40). Toute variante = refus d'installation.
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum ErreurManifeste {
@@ -87,6 +89,9 @@ pub enum ErreurHybride {
     /// Base secondaire pleine (taille du contrat).
     #[error("base secondaire pleine")]
     BaseSecondairePleine,
+    /// Quota du contrat de service épuisé (disque, sessions, tâches) : refus.
+    #[error("quota du contrat dépassé : {0}")]
+    QuotaDepasse(Ressource),
     /// Verrou interne empoisonné.
     #[error("état interne indisponible")]
     EtatIndisponible,
