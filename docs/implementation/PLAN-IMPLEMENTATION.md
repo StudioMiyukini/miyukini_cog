@@ -116,13 +116,13 @@
 - **Incrément 2** : signature à seuil (2 sur 2), fraîcheur de tête de registre, fuzzing du décodeur (EX-01, EX-03, EX-10)
   - **Fait** (amendement A-002) : format Sceau v1.1 — identifiant d'algorithme signé, bloc multi-signature, `verifier_seuil`, `cosigner`, vecteurs simple et 2 sur 2 (30 tests)
   - **Fait** : tête de registre fraîche et monotone, preuves Merkle RFC 9162, fuzzing (4 cibles, job CI) (7ed62645, 6774aaa6)
-  - **Reste** : politique 2 sur 2 branchée sur les mises à jour des Cores (lot 4, canal officiel)
+  - **Reste** : ~~politique 2 sur 2 branchée sur les mises à jour des Cores~~ (fait, testé de bout en bout, A-012)
 - **Incrément 3** : racine SLIP-39 2 sur 3 sur USB, clés SLIP-10 par usage, cérémonie de rotation (EX-24, EX-25)
   - **Fait** : crate `miyuracine` (vecteurs officiels SLIP-39 et SLIP-10), CLI hors ligne, passation scellée (7e6719ca)
-  - **Reste** : fichier chiffré Argon2id sur support amovible ; `mlock` et désactivation des core dumps (NC-ANSSI-25)
+  - **Reste** : ~~fichier chiffré Argon2id ; mlock et core dumps~~ (faits, `MYRC`, A-011)
 - **Incrément 4** : passeport et visa émis et vérifiés par `miyauth`, révocation d'appareil (EX-14, EX-36)
   - **Fait** : passeport par COG de destination, visa après preuve de possession, identifiant par COG, révocation fail-closed (4277203c, e34f1f08)
-  - **Reste** : chaîne racine → clé d'émission ; adaptateur révocation ← tête de registre ; une clé d'appareil par COG (non-corrélation complète)
+  - **Reste** : chaîne racine → clé d'émission (**format à décider** : nature de certificat absente, A-012) ; ~~adaptateur révocation ← tête de registre~~ et ~~une clé d'appareil par COG~~ (faits, A-012 : Origin, MiyuCloud, façade)
 - **Sortie** : plus aucune authentification par secret partagé sur les points exposés
   - **Statut (2026-10-24)** : **atteinte** — les 23 points de l'[inventaire](INVENTAIRE-SECRETS-PARTAGES.md) sont remplacés (passeport, visa et preuve de possession ; requêtes machine signées ; sessions serveur) ou classés exceptions justifiées (DAV Basic en TLS, WOPI ≤ 15 min, salon Tracker, admin local de miyukini-admin) (053c3c38, 2a8378e5, 2cf67520, 283e11e1, 9203b811, b820fadb)
   - **Reste (lot 2 suite)** : clients de connexion admin Origin et forum (Central émetteur de passeports vers Origin, extension phpBB) ; flux de révocation entre COG (Origin et MiyuCloud se reposent sur la durée ≤ 15 min) ; interface MiyuCloud de liaison d'identité et de clé d'appareil ; régénération d'identité dans l'application mobile ; défis et nonces en mémoire (une instance) ; PoP liée à la requête, pas au canal TLS (lot 3) ; clé LM Studio présente dans l'historique git (à révoquer)
@@ -152,15 +152,15 @@
   - **Reste** :
     - règles Vigies sur le motif de la Douane (LATERAL, NON-DECLARE intra-zone, COG → adresse du Portail hors port déclaré) : amendement à prévoir
     - format de ligne du relais NFLOG à confirmer quand le relais existe
-    - reclassement des fichiers MiyuCloud `inconnu` hérités ; migration à exécuter sur PostgreSQL
-    - séparation des processus entrant / sortant ; Portail en micro-VM ou espace réseau dédié
+    - ~~reclassement des fichiers MiyuCloud `inconnu`~~ (fait, A-012) ; migration `20261025000002` à exécuter sur PostgreSQL
+    - séparation des processus entrant / sortant (**spécification à écrire**, A-012) ; Portail en micro-VM ou espace réseau dédié
     - source de paquets NFQUEUE / NFLOG pour l'IPS et les Vigies
     - mise en forme du débit (`tc`)
-    - cibles de fuzzing MSCE et sas (C-26, EX-10)
+    - ~~cibles de fuzzing MSCE et sas~~ (faites, 6 cibles) ; ~~Landlock du sas~~ (fait, A-012)
     - registre Merkle réel (lot 4)
     - profils Landlock / AppArmor
     - application des scripts de déploiement (zones, nftables, systemd)
-    - **test d'intrusion** = critère de sortie du lot
+    - ~~test d'intrusion~~ : banc 100/100 en VM jetable (a64d1583)
 
 ## 6. Lot 4 — Canal officiel et registre
 
@@ -174,7 +174,7 @@
 - **Sortie** : une mise à jour signée installée de bout en bout ; une mise à jour altérée refusée
 - **Statut (2026-10-25)** — [A-006](../architecture/GEL-DOC-CONCEPTUELLE-v1.md) (doc v1.6) : **sortie atteinte au niveau bibliothèque** (`miyuregistre`, `miyucanal`, 6b546458 ; test `sortie_lot4.rs`)
   - **Fait (2026-10-25, [A-007](../architecture/GEL-DOC-CONCEPTUELLE-v1.md), doc v1.7, non commité)** : installateur Central (`apps/central/src/canal_officiel/`, opération StrongFather `mettre_a_jour_canal`, politique `market-canal-officiel`) ; installateur de modèles maia-llm (`canal.rs`, artefact `MMIA`) ; adaptateur `SourceRevocation` ← registre vérifié (`miyuregistre::revocation`) ; refus → WorrySentinel ; persistance `etat.mcce` / `quarantaine.mcqt` / secret local ; configuration `canal-officiel.json` (désactivé par défaut) ; banc d'essai `miyucanal::banc`
-  - **Reste** : transport du canal sur une voie réservée du Portail (aucun cycle lancé ; règle des binaires vérifiés par empreinte face au CDR) ; brancher l'installateur de modèles dans Central (`avec_modeles`) ; brancher `RevocationsRegistre` chez les vérificateurs miyauth ; installateur d'OS inexistant (correctifs d'OS refusés) ; fuzzing `MCCE`, `MMIA` ; points « à décider ultérieurement » d'A-006
+  - **Reste** : transport du canal sur une voie réservée du Portail (aucun cycle lancé ; règle des binaires vérifiés par empreinte face au CDR) ; ~~installateur de modèles dans Central~~ (fait, A-012) ; ~~`RevocationsRegistre` chez les vérificateurs~~ (Origin, MiyuCloud, façade ; `central-remote` : source à décider) ; installateur d'OS inexistant (correctifs d'OS refusés) ; ~~fuzzing `MCCE`, `MMIA`~~ ; points « à décider ultérieurement » d'A-006
 
 ## 7. Lot 5 — Services hybrides
 
