@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.12 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.13 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -71,6 +71,7 @@
 | A-010 | 2026-10-25 | Mémoire MAIA §9 : « note ordinaire » écrite par MAIA = note des strates N2 / N3 seulement (jamais N0 ni N1) ; précision fail-closed d'A-009 | 1.10 |
 | A-011 | 2026-10-25 | Lot 2 §5 · Zones §16 · Services hybrides §4.1 · Mémoire MAIA §9 : formats et choix consignés tels qu'implémentés — fichier de clé racine `MYRC`, durcissement du processus, état fédéral `MFED`, quotas et révocations de la façade, chemin TAMR et routes de la mémoire ; **à valider par le propriétaire** | 1.11 |
 | A-012 | 2026-10-25 | Lot 2 §6, §8 · Services hybrides §3 · Zones §7 : choix consignés tels qu'implémentés — clé d'appareil par COG de destination, transport des registres de révocation vers Origin et MiyuCloud, fichiers MiyuCloud `inconnu`, Landlock du sas, installateur de modèles de Central ; **à valider par le propriétaire** | 1.12 |
+| A-013 | 2026-10-25 | Corrections de la revue de sécurité du 2026-10-25 : formats révisés (liaison d'appareil v2, synchro par morceaux, `MFED` v2, sas code 7), chiffrement des blobs MiyuCloud `MIYUCENC` v1, garde-fous MAIA (provenance `Inconnue`, compétence `memoire`, clé d'approbation TAMR distincte, publication par capacité) ; **à valider par le propriétaire** | 1.13 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -491,3 +492,31 @@
   - Séparation des processus entrant / sortant du Portail : protocole interprocessus, répartition de l'état et propagation des coupures non spécifiés
   - Source des révocations des vérificateurs de `central-remote` : liste locale du COG ou registre du COG
 - **Impact** : EX-14, EX-36 ; EX-44, EX-45 ; plan lots 2, 3, 4 mis à jour
+
+### A-013 — Corrections de la revue de sécurité (2026-10-25)
+
+<!-- @id arch.gel.a013 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a013 -->
+
+- **Date** : 2026-10-25 · **version** 1.13 · formats et règles **révisés** après une revue de sécurité en quatre parties ; remplace les points correspondants d'A-011 et A-012 ; **validation du propriétaire attendue**
+- **Identité et révocations** (remplace A-012 sur ces points)
+  - Liaison d'appareil **v2** : domaine `miyukini/miyauth/liaison-appareil/v2`, message `0x00 || origine || destination || clé de destination || pas_apres (u64 BE)` ; échéance ≤ 5 min ; la clé principale doit être non révoquée ; registre des liaisons : révoquer un appareil = un geste unique qui révoque toutes ses clés de destination
+  - Suivi d'un registre de révocation : **un seul type** (`miyuregistre::SuiviRevocationsRegistre`) partagé par Origin, MiyuCloud et la façade ; ancre de journal au niveau `Reconnu`, seuil 1 ; fraîcheur de 15 min imposée par le type ; chevauchement toléré ; ≤ 1 048 576 entrées et ≤ 256 Mio
+  - Origin : synchro **par morceaux** (`tete` absente = entrées mises en attente, ≤ 15 min ; la tête valide le tout), débit 120/min par IP et 300/min par COG, rejeu identique sans recalcul ; route indépendante du forum
+  - Façade : remise d'une liste seulement si elle inclut l'ancienne (même COG, date non reculée) ; session libérée au retrait d'un appareil
+- **État fédéral `MFED` v2** (remplace A-011) : ancre du registre local (taille, racine) scellée dans l'état et contrôlée au chargement (anti-rejeu d'un état ancien) ; file persistée des révocations à publier, purgée seulement par accusé ; révocations inscrites au registre ré-appliquées ; v1 refusée ; dossier 0700, propriétaire vérifié, verrou exclusif ; option `etat_attendu` qui refuse l'absence de fichier
+- **Sas du Portail** : aucun descripteur > 2 hérité (refusé par le parent, et par le sas : code de sortie **7**) ; `mmap` seulement anonyme et sans exécution ; chemin du binaire absolu ; verrou par voie
+- **Clé racine** : tout fichier secret (part, phrase, mot de passe) lu comme le fichier `MYRC` (O_NOFOLLOW, 0600, propriétaire) ; `mlockall` tenté même sous limite basse avec privilège ; changement de mot de passe à l'export
+- **Modèles** : crate `maia-modeles` partagée (plus d'inclusion de sources) ; fichier imposé `<composant>.gguf` ; installation par temporaire vérifié puis renommage, ancien modèle restauré en cas d'échec ; dérogation « non signé » décidée par le binaire, jamais par la bibliothèque
+- **MiyuCloud**
+  - Chiffrement des blobs **réellement actif** quand `MIYUCLOUD_ENCRYPTION_ENABLED` vaut autre chose que faux : format **`MIYUCENC` v1** = en-tête 16 o (`MIYUCENC`, `0x01`, préfixe de nonce 7 o) puis segments AES-256-GCM de ≤ 64 Kio (nonce = préfixe ‖ index u32 ‖ drapeau dernier, données associées = en-tête) ; clé de 32 octets exactement, sinon démarrage refusé ; empreinte BLAKE3 du clair ; blobs clairs hérités relus mais non migrés ; restent en clair : vignettes, transcodages, temporaires d'envoi
+  - Toute modification de `blob_hash` ajuste `ref_count` dans la même transaction ; réconciliation horaire et ramasse-miettes ; tâches de fond supervisées
+  - Contrôle CDR dans le service de lecture lui-même ; WOPI limité au titulaire du jeton et soumis au budget d'envoi
+- **MAIA**
+  - Provenance des résultats d'outils `Locale | Etranger | Inconnue` ; `Inconnue` traitée comme étranger ; liste blanche des résultats locaux ; note directe seulement si tout le tour est local
+  - Note directe seulement dans un domaine **déjà établi par l'utilisateur** et non sensible ; candidats plafonnés (100 en attente, 100 par 24 h), dédoublonnés
+  - Compétence `memoire` explicite (seule l'agente Alicia l'a parmi les agents intégrés) ; refus critique StrongFather d'une écriture directe sur contenu étranger
+  - Approbation TAMR signée par une clé **distincte** (`MAIA_TAMR_CLES_APPROBATION`, usage `maia/tamr-approbation/<instance>/<utilisateur>`) ; la description et l'empreinte couvrent la cible et sa version ; constructeurs TAMR scellés (jeton unique par processus) ; signatures des routes liées à l'instance (en-tête `x-maia-instance`) ; débit 60/min par IP
+  - Publication fédérée par **capacité** : seule une Fiche du COG local est publiable ; Fiche originale publiable seulement via l'étiquette `publiable` de KindMother (EX-47, pas encore implémentée : aucune publication originale possible) ; `reprises` sans doublon et égales aux sources
+- **Impact** : EX-14, EX-36, EX-32..35, EX-44, EX-45, EX-50..56, EX-57, EX-60 ; NC-ANSSI-25
