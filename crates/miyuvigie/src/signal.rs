@@ -40,6 +40,15 @@ macro_rules! identifiant {
                 identifiant_valide(&s).then_some(Self(s))
             }
 
+            /// Identifiant constant interne à la crate (règles intégrées). Le format
+            /// est vérifié par les tests unitaires de chaque constante ; aucun chemin
+            /// d'échec à l'exécution.
+            #[allow(dead_code)]
+            pub(crate) fn constante(s: &'static str) -> Self {
+                debug_assert!(identifiant_valide(s), "identifiant constant invalide");
+                Self(s.to_owned())
+            }
+
             /// Valeur textuelle.
             pub fn as_str(&self) -> &str {
                 &self.0

@@ -332,14 +332,14 @@ impl JeuRegles {
 }
 
 fn integree(
-    id: &str,
+    id: &'static str,
     severite: Severite,
     categorie: Categorie,
     explication: String,
 ) -> Declenchement {
     Declenchement {
-        // Identifiants constants valides par construction.
-        regle: RegleId::new(id).unwrap_or_else(|| unreachable!()),
+        // Identifiants constants valides par construction (vérifiés par test).
+        regle: RegleId::constante(id),
         severite,
         categorie,
         explication,
@@ -421,6 +421,21 @@ fn analyser_condition(j: &str) -> Result<Condition, &'static str> {
 mod tests {
     use super::*;
     use crate::signal::EvenementId;
+
+    #[test]
+    fn identifiants_de_regles_integrees_valides() {
+        for id in [
+            REGLE_SORTIE,
+            REGLE_ENTREE,
+            REGLE_INDETERMINE,
+            REGLE_A005_LATERAL,
+            REGLE_A005_NON_DECLARE,
+            crate::vigie::REGLE_CAPTEUR_DEGRADE,
+            crate::vigie::REGLE_LATERAL,
+        ] {
+            assert_eq!(RegleId::new(id), Some(RegleId::constante(id)), "{id}");
+        }
+    }
 
     fn evt(src: Zone, dst: Zone, verdict: Verdict, octets: u64) -> EvenementFlux {
         EvenementFlux {

@@ -21,6 +21,19 @@
 //! leur API reste à mettre au plan (constat K-17, suite du lot C « Cores réels »).
 //! Aucun appelant ne doit supposer qu'une approbation TAMR a eu lieu.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod classification;
 pub mod metadata;
 pub mod taxonomy;

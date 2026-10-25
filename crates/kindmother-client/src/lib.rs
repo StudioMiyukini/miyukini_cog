@@ -56,6 +56,19 @@
 //! let rows = client.select(TypedSelect::from("entries").filter("active", 1_i64)).await?;
 //! ```
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 mod client;
 mod credential;
 mod errors;

@@ -62,6 +62,19 @@
 //! - [Intent Model Contract](../../docs/core/StrongFather/contracts/intent/StrongFather%20-%20Intent%20Model%20Contract.md)
 //! - [Policy Engine Contract](../../docs/core/StrongFather/contracts/policy/StrongFather%20-%20Policy%20Engine%20Contract.md)
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 /// @id strongfather_module_intent
 /// @role infrastructure
 /// @layer core

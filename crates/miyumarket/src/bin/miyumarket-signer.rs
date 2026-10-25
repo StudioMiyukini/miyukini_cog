@@ -17,6 +17,19 @@
 //! en 0600 (Unix) et n'est jamais écrasé. La clé publique affichée se colle
 //! dans `market-editeurs.json` de Central (voir docs/tools/MiyuSceau).
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 use std::path::Path;
 use std::process::ExitCode;
 

@@ -35,6 +35,7 @@
 
 use std::collections::HashMap;
 
+use hmac::digest::{Key, KeyInit};
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
 use zeroize::Zeroize;
@@ -60,15 +61,27 @@ pub struct CleQuarantaine {
 impl CleQuarantaine {
     /// Dérive la clé : `HMAC-SHA256(secret_local, "miyukini/miyucanal/quarantaine/v1")`.
     pub fn deriver(secret_local: &[u8; 32]) -> Self {
-        // Une clé HMAC de 32 octets est toujours acceptée.
-        let mut mac = <HmacSha256 as Mac>::new_from_slice(secret_local).unwrap_or_else(|_| unreachable!());
+        let mut mac = hmac_cle_32(secret_local);
         mac.update(ETIQUETTE);
         Self { cle: mac.finalize().into_bytes().into() }
     }
 
     fn mac(&self) -> HmacSha256 {
-        <HmacSha256 as Mac>::new_from_slice(&self.cle).unwrap_or_else(|_| unreachable!())
+        hmac_cle_32(&self.cle)
     }
+}
+
+/// HMAC-SHA256 sur une clé de 32 octets, sans chemin d'échec.
+///
+/// RFC 2104 complète toute clé plus courte que le bloc (64 o) par des zéros :
+/// la clé complétée donne exactement le même MAC que `new_from_slice(cle)`,
+/// mais par le constructeur infaillible `KeyInit::new`.
+fn hmac_cle_32(cle: &[u8; 32]) -> HmacSha256 {
+    let mut bloc = Key::<HmacSha256>::default();
+    bloc[..32].copy_from_slice(cle);
+    let mac = <HmacSha256 as KeyInit>::new(&bloc);
+    bloc.as_mut_slice().zeroize();
+    mac
 }
 
 impl Drop for CleQuarantaine {
@@ -188,6 +201,16 @@ mod tests {
             VuePersistee { identite: [1; 32], index: 0, vue_le: 1_000 },
             VuePersistee { identite: [2; 32], index: 3, vue_le: 2_000 },
         ]
+    }
+
+    #[test]
+    fn hmac_cle_32_identique_a_new_from_slice() {
+        let cle = [0xA5; 32];
+        let mut a = hmac_cle_32(&cle);
+        let mut b = <HmacSha256 as Mac>::new_from_slice(&cle).unwrap();
+        a.update(b"essai");
+        b.update(b"essai");
+        assert_eq!(a.finalize().into_bytes(), b.finalize().into_bytes());
     }
 
     #[test]

@@ -25,6 +25,19 @@
 //!
 //! Spécification : `docs/securite/ARCHITECTURE-lot2-identite-signee.md`, section 4.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod ancres;
 pub mod cles;
 pub mod erreurs;

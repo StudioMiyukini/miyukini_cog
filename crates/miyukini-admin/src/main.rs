@@ -3,6 +3,19 @@
 //! Détection d'état au démarrage (VIERGE / INITIALISE / COMPROMIS) et routage conditionnel
 //! selon Auth and First-Boot Contract et Implementation Security and Controls §13.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 // delete et put sont utilisés dans router_full (l.154) ; le compilateur les signale à tort comme non utilisés.
 #[allow(unused_imports)]
 use axum::{
@@ -345,10 +358,19 @@ async fn main() {
         println!("Note: HTTPS configuré — en production, utilisez un reverse proxy (nginx, Caddy) avec TLS devant MiyukiniAdmin.");
     }
 
-    let listener = tokio::net::TcpListener::bind(addr).await.expect("bind");
-    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>())
-        .await
-        .expect("serve");
+    let listener = match tokio::net::TcpListener::bind(addr).await {
+        Ok(l) => l,
+        Err(e) => {
+            eprintln!("MiyukiniAdmin: écoute impossible sur {addr} : {e}");
+            std::process::exit(1);
+        }
+    };
+    if let Err(e) =
+        axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>()).await
+    {
+        eprintln!("MiyukiniAdmin: arrêt du serveur sur erreur : {e}");
+        std::process::exit(1);
+    }
 }
 
 /// Routes lorsque l'environnement est VIERGE : uniquement /setup, /health, /api/status, /api/setup/create-admin (Auth and First-Boot §5).
@@ -816,10 +838,9 @@ async fn api_table_update_row(
         None => return Json(serde_json::json!({ "error": "table not found" })),
     };
     let idx: usize = id.parse().unwrap_or(0);
-    if idx == 0 || idx > rows.len() {
+    let Some(row) = idx.checked_sub(1).and_then(|i| rows.get_mut(i)) else {
         return Json(serde_json::json!({ "error": "row not found", "id": id }));
-    }
-    let row = rows.get_mut(idx - 1).unwrap();
+    };
     if let (Some(obj_row), Some(obj_body)) = (row.as_object_mut(), body.as_object()) {
         for (k, v) in obj_body {
             if k != "id" {

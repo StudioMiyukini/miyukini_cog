@@ -12,6 +12,19 @@
 //! d'appareil fail-closed (EX-14), preuve de possession, résolution du rôle.
 //! Ne décide pas de la confiance ni de l'autorisation (StrongFather, KindMother).
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod admin_cell;
 pub mod attest;
 pub mod context;

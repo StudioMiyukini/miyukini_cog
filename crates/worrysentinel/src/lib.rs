@@ -31,6 +31,19 @@
 //! BorderGuard, soumission TAMR des décisions en T3, inscription du journal au
 //! registre Merkle (lot 4) et OVERRIDE (constat K-17, à mettre au plan).
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod degradation;
 pub mod security_level;
 pub mod threat_detector;

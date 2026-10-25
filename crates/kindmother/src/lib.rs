@@ -28,6 +28,19 @@
 //! - [CoreDataAPI Contract](../../docs/core/KindMother/contracts/api/KindMother%20-%20CoreDataAPI%20Contract.md)
 //! - [Write Intent Lifecycle Contract](../../docs/core/KindMother/contracts/lifecycle/KindMother%20-%20Write%20Intent%20Lifecycle%20Contract.md)
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 /// @id kindmother_module_state
 /// @role infrastructure
 /// @layer core

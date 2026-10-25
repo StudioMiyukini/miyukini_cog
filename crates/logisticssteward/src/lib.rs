@@ -21,6 +21,19 @@
 //! Prévu, non implémenté : application réelle des quotas et mécanismes
 //! d'APPROVAL / OVERRIDE / ESCALATION (constat K-17, à mettre au plan).
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod allocation;
 pub mod optimization;
 pub mod resource;

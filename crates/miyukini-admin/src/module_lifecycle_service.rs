@@ -13,7 +13,7 @@ use crate::admin_cell::{
     AdminCellRef, LifecycleActionResult, ModuleInfo, ModuleLifecycleAction, ModuleType,
 };
 use std::collections::HashMap;
-use std::sync::RwLock;
+use std::sync::{PoisonError, RwLock};
 
 /// Erreur du service de cycle de vie des modules.
 #[derive(Debug, Clone)]
@@ -24,6 +24,14 @@ pub enum ModuleLifecycleError {
     InvalidState(String),
     /// Validation StrongFather refusée (stub : non implémenté).
     StrongFatherRejected(String),
+}
+
+/// Verrou du registre empoisonné (un écrivain a paniqué) : toute modification est
+/// refusée (fail-closed) plutôt que de paniquer à son tour.
+fn registre_indisponible() -> ModuleLifecycleError {
+    ModuleLifecycleError::InvalidState(
+        "Registre des modules indisponible (verrou empoisonné).".to_string(),
+    )
 }
 
 impl std::fmt::Display for ModuleLifecycleError {
@@ -91,7 +99,7 @@ impl ModuleLifecycleService {
         };
         self.modules
             .write()
-            .expect("RwLock poisoned")
+            .map_err(|_| registre_indisponible())?
             .insert(module_id.clone(), info);
         Ok(LifecycleActionResult {
             action: ModuleLifecycleAction::Add,
@@ -108,7 +116,7 @@ impl ModuleLifecycleService {
         &self,
         module_id: &str,
     ) -> Result<LifecycleActionResult, ModuleLifecycleError> {
-        let mut modules = self.modules.write().expect("RwLock poisoned");
+        let mut modules = self.modules.write().map_err(|_| registre_indisponible())?;
         let info = modules
             .get_mut(module_id)
             .ok_or_else(|| ModuleLifecycleError::ModuleNotFound(module_id.to_string()))?;
@@ -133,7 +141,7 @@ impl ModuleLifecycleService {
         &self,
         module_id: &str,
     ) -> Result<LifecycleActionResult, ModuleLifecycleError> {
-        let mut modules = self.modules.write().expect("RwLock poisoned");
+        let mut modules = self.modules.write().map_err(|_| registre_indisponible())?;
         let info = modules
             .get_mut(module_id)
             .ok_or_else(|| ModuleLifecycleError::ModuleNotFound(module_id.to_string()))?;
@@ -156,7 +164,7 @@ impl ModuleLifecycleService {
         &self,
         module_id: &str,
     ) -> Result<LifecycleActionResult, ModuleLifecycleError> {
-        let mut modules = self.modules.write().expect("RwLock poisoned");
+        let mut modules = self.modules.write().map_err(|_| registre_indisponible())?;
         if modules.remove(module_id).is_none() {
             return Err(ModuleLifecycleError::ModuleNotFound(module_id.to_string()));
         }
@@ -175,7 +183,7 @@ impl ModuleLifecycleService {
     pub fn list_modules(&self) -> Vec<ModuleInfo> {
         self.modules
             .read()
-            .expect("RwLock poisoned")
+            .unwrap_or_else(PoisonError::into_inner)
             .values()
             .cloned()
             .collect()
@@ -185,7 +193,7 @@ impl ModuleLifecycleService {
     pub fn get_module(&self, module_id: &str) -> Option<ModuleInfo> {
         self.modules
             .read()
-            .expect("RwLock poisoned")
+            .unwrap_or_else(PoisonError::into_inner)
             .get(module_id)
             .cloned()
     }

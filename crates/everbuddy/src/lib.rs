@@ -10,6 +10,19 @@
 //!
 //! EverBuddy gouverne l'évolution des structures, des contrats, et des entités dans le temps.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod compatibility;
 pub mod migration;
 pub mod version;

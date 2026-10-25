@@ -46,6 +46,19 @@
 //! permet d'installer et de lancer une archive non signée, journalisé en erreur,
 //! sans jamais lui transmettre de secret.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod manifest;
 pub mod package;
 pub mod protocol;

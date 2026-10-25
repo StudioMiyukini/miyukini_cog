@@ -74,7 +74,11 @@ pub fn identifiant_pairwise(secret: &SecretTitulaire, cog_visite: &CogId) -> [u8
     info.extend_from_slice(b"cog:");
     info.extend_from_slice(cog_visite.as_str().as_bytes());
     let mut sortie = [0u8; 32];
-    // 32 o ≤ 255 × 32 o : l'expansion HKDF ne peut pas échouer.
+    // 32 o ≤ 255 × 32 o : l'expansion HKDF-SHA256 ne peut pas échouer (longueur de
+    // sortie constante, connue à la compilation). Seule exception C-10 de la crate :
+    // la signature publique infaillible est utilisée par apps/origin, et toute valeur
+    // de repli (sortie nulle) serait un identifiant constant, donc fail-open.
+    #[allow(clippy::expect_used)]
     hk.expand(&info, &mut sortie).expect("longueur HKDF valide");
     sortie
 }

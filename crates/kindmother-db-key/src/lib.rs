@@ -9,6 +9,20 @@
 //!
 //! @id     kindmother_db_key
 //! @do     derive_encryption_keys_for_sqlite
+
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 //@human ! @layer  core
 
 mod key_derivation;

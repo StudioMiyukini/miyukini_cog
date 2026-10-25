@@ -13,6 +13,19 @@
 //! par défaut refuse donc explicitement toute exécution (K-15) tant que cette
 //! délégation n'est pas câblée.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod orchestrator;
 pub mod step;
 pub mod workflow;

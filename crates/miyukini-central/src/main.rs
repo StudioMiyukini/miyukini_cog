@@ -10,6 +10,19 @@
 //! Ce binaire permet de garder `cargo install -p miyukini-central` et
 //! `cargo uninstall -p miyukini-central` fonctionnels.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 fn main() {
     eprintln!("Miyukini Central: l'application est désormais lancée via l'app (apps/central).");
     eprintln!("Depuis la racine du dépôt: cargo run -p miyukini-central-native");

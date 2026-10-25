@@ -33,6 +33,19 @@
 //! Chaque service décrit son [`PlanImport`] à côté de sa couche KindMother
 //! (feature `import-heritage` des services) ; le binaire `kindmother-import` les expose.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 mod import;
 mod lecture;
 

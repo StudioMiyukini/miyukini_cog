@@ -71,6 +71,19 @@
 //! assert_eq!(resultat.unwrap(), "maia-lit-agenda");
 //! ```
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod connection;
 pub mod gate;
 pub mod sync;

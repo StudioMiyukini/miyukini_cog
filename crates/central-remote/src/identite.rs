@@ -195,18 +195,20 @@ impl AutoriteAppareils {
         PolitiqueIdentite { cog_local: self.cog.clone(), annuaire: &self.annuaire, revocations: self }
     }
 
-    fn secret_titulaire(&self, profile_id: Option<&str>) -> SecretTitulaire {
+    fn secret_titulaire(&self, profile_id: Option<&str>) -> Result<SecretTitulaire, RefusIdentite> {
         let hk = Hkdf::<Sha256>::new(Some(SEL_TITULAIRE), self.titulaires.as_slice());
         let info = match profile_id {
             Some(p) => format!("profil:{p}"),
             None => "proprietaire".to_string(),
         };
         let mut sortie = [0u8; 32];
-        // 32 o ≤ 255 × 32 o : l'expansion HKDF ne peut pas échouer.
-        hk.expand(info.as_bytes(), &mut sortie).expect("longueur HKDF valide");
+        // 32 o ≤ 255 × 32 o : l'expansion HKDF ne peut pas échouer ; refus par
+        // principe (fail-closed) si la bibliothèque l'indiquait quand même.
+        hk.expand(info.as_bytes(), &mut sortie)
+            .map_err(|_| RefusIdentite::ParametreInvalide("hkdf"))?;
         let s = SecretTitulaire::depuis_octets(sortie);
         zeroize::Zeroize::zeroize(&mut sortie);
-        s
+        Ok(s)
     }
 
     /// Émet un défi de possession (audience [`AUDIENCE`], usage unique, 60 s).
@@ -252,7 +254,7 @@ impl AutoriteAppareils {
             maintenant,
         )?;
         let pas_apres = maintenant.saturating_add(DUREE_PASSEPORT_APPAREIL_SECS);
-        let secret = self.secret_titulaire(appareil.profile_id.as_deref());
+        let secret = self.secret_titulaire(appareil.profile_id.as_deref())?;
         let portees = Portees::new([PORTEE_PILOTAGE])
             .ok_or(RefusIdentite::ParametreInvalide("portees"))?;
         let passeport = emettre_passeport(
@@ -467,8 +469,8 @@ mod tests {
         let s2 = visa(&a, &cle, &passeport(&a, &cle)).acces.identite;
         assert_eq!(s1, s2);
         assert_ne!(
-            a.secret_titulaire(Some("prof-1")).octets(),
-            a.secret_titulaire(None).octets()
+            a.secret_titulaire(Some("prof-1")).unwrap().octets(),
+            a.secret_titulaire(None).unwrap().octets()
         );
     }
 

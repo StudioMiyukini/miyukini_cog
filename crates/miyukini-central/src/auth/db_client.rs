@@ -95,17 +95,23 @@ const DEFAULT_KINDMOTHER_ADDR: &str = "127.0.0.1:50051";
 static CLIENT: OnceCell<Arc<KindMotherClient>> = OnceCell::const_new();
 
 /// Runtime Tokio global (multi-thread) qui exécute tous les appels async.
-static RUNTIME: OnceLock<tokio::runtime::Runtime> = OnceLock::new();
+///
+/// Un échec de construction est mémorisé : tous les appels suivants sont refusés
+/// (fail-closed) au lieu de paniquer.
+static RUNTIME: OnceLock<Result<tokio::runtime::Runtime, String>> = OnceLock::new();
 
-fn runtime() -> &'static tokio::runtime::Runtime {
-    RUNTIME.get_or_init(|| {
-        tokio::runtime::Builder::new_multi_thread()
-            .worker_threads(2)
-            .thread_name("central-auth-kindmother")
-            .enable_all()
-            .build()
-            .expect("Failed to create Tokio runtime")
-    })
+fn runtime() -> Result<&'static tokio::runtime::Runtime, AuthDbError> {
+    RUNTIME
+        .get_or_init(|| {
+            tokio::runtime::Builder::new_multi_thread()
+                .worker_threads(2)
+                .thread_name("central-auth-kindmother")
+                .enable_all()
+                .build()
+                .map_err(|e| e.to_string())
+        })
+        .as_ref()
+        .map_err(|e| AuthDbError::Internal(format!("Failed to create Tokio runtime: {e}")))
 }
 
 /// Exécute un future de manière bloquante sur le runtime global.
@@ -115,19 +121,25 @@ fn runtime() -> &'static tokio::runtime::Runtime {
 ///   `block_on` y paniquerait, et `block_in_place` panique sur un runtime current-thread ;
 ///   le future est donc exécuté sur un fil dédié (portée bornée) qui bloque sur le
 ///   runtime global. Les E/S du client restent ainsi toujours pilotées par le même runtime.
-fn run_blocking<F>(f: F) -> F::Output
+///
+/// Un runtime indisponible ou un fil d'exécution interrompu est rendu en
+/// [`AuthDbError::Internal`] (refus), jamais en panique.
+fn run_blocking<F, T, E>(f: F) -> Result<T, AuthDbError>
 where
-    F: Future + Send,
-    F::Output: Send,
+    F: Future<Output = Result<T, E>> + Send,
+    T: Send,
+    E: Send + Into<AuthDbError>,
 {
+    let rt = runtime()?;
     if tokio::runtime::Handle::try_current().is_err() {
-        return runtime().block_on(f);
+        return rt.block_on(f).map_err(Into::into);
     }
     std::thread::scope(|scope| {
         scope
-            .spawn(|| runtime().block_on(f))
+            .spawn(|| rt.block_on(f))
             .join()
-            .unwrap_or_else(|panic| std::panic::resume_unwind(panic))
+            .map_err(|_| AuthDbError::Internal("KindMother worker thread panicked".to_string()))?
+            .map_err(Into::into)
     })
 }
 
@@ -206,7 +218,7 @@ impl CentralAuthDb {
                 client: Arc::new(client),
             };
             db.init_schema_async().await?;
-            Ok(db)
+            Ok::<_, AuthDbError>(db)
         })
     }
 

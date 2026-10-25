@@ -25,6 +25,19 @@
 //! Le canal n'installe rien : l'installation réelle reste le chemin gouverné
 //! existant (Central / StrongFather), branché via [`Installateur`].
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod annonce;
 #[cfg(feature = "banc-essai")]
 pub mod banc;

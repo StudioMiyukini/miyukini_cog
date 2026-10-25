@@ -26,6 +26,19 @@
 //! - [Structure du Kernel](../../docs/kernel/Miyukini%20Core%20System%20-%20Structure%20du%20Kernel.md)
 //! - [Invariants & Guarantees](../../docs/kernel/contracts/Kernel%20-%20Invariants%20&%20Guarantees.md)
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 /// @id kernel_module_config
 /// @role infrastructure
 /// @layer kernel

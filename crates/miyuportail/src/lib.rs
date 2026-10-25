@@ -24,6 +24,19 @@
 //! hors traité, signature absente, sas défaillant, validations divergentes,
 //! CDR absent → refus.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod bac_a_sable;
 pub mod cdr;
 pub mod erreurs;

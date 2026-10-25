@@ -42,6 +42,19 @@
 //! // côté Vigies : while let Ok(ev) = rx.recv() { … ev.gravite, ev.nature, ev.flux … }
 //! ```
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod application;
 pub mod compilation;
 pub mod instance;

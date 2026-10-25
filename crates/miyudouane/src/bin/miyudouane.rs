@@ -34,6 +34,19 @@
 //! L'ordre des `--sandbox` fixe les adresses et les ports de pont : il doit
 //! être identique pour toutes les commandes d'un même déploiement.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 use std::collections::BTreeSet;
 use std::path::PathBuf;
 use std::process::ExitCode;

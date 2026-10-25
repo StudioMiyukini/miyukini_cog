@@ -351,7 +351,7 @@ impl Vigie {
     }
 }
 
-fn regle(id: &str) -> RegleId {
-    // Identifiants constants valides par construction.
-    RegleId::new(id).unwrap_or_else(|| unreachable!())
+fn regle(id: &'static str) -> RegleId {
+    // Identifiants constants valides par construction (vérifiés par test).
+    RegleId::constante(id)
 }

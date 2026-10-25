@@ -18,6 +18,19 @@
 //! Les modules UI (app, loading, theme) ont été supprimés ; catalog minimal conservé.
 //! Voir docs/implementation/Miyukini - Plan Migration Tauri React TypeScript.md
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod auth;
 pub mod catalog;
 pub mod chemins;

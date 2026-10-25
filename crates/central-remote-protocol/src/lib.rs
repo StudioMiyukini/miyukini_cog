@@ -12,6 +12,19 @@
 //! Ce crate est volontairement léger (serde uniquement, pas d'axum/tower)
 //! pour compiler sur toutes les cibles dont Android.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 use serde::{Deserialize, Serialize};
 
 pub mod identite;

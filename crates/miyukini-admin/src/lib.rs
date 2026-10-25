@@ -5,6 +5,19 @@
 //! MiyukiniAdmin est un Opérateur Souverain autonome qui observe, installe, arbitre,
 //! mais ne vit pas dans le flux normal. Il est out-of-band, comme un BIOS/hyperviseur.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 /// @id miyukiniadmin_module_config
 /// @role infrastructure
 /// @layer operator

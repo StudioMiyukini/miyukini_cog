@@ -15,7 +15,7 @@ use crate::admin_cell::{
     IntegrityVerificationResult, ModuleInfo, TestVerdict,
 };
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, PoisonError, RwLock};
 
 /// Erreur du service de tests des modules.
 #[derive(Debug, Clone)]
@@ -210,7 +210,7 @@ impl StubModuleDiscovery {
 
     /// Enregistre un module pour la découverte (démo / tests).
     pub fn register_module(&self, info: ModuleInfo) {
-        let mut m = self.modules.write().expect("RwLock poisoned");
+        let mut m = self.modules.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(pos) = m.iter().position(|x| x.id == info.id) {
             m[pos] = info;
         } else {
@@ -220,7 +220,7 @@ impl StubModuleDiscovery {
 
     /// Retourne les modules enregistrés.
     pub fn list(&self) -> Vec<ModuleInfo> {
-        self.modules.read().expect("RwLock poisoned").clone()
+        self.modules.read().unwrap_or_else(PoisonError::into_inner).clone()
     }
 }
 
@@ -249,7 +249,7 @@ impl StubAdminCellReader {
     pub fn register_cell(&self, module_id: String, cell: AdminCell) {
         self.cells
             .write()
-            .expect("RwLock poisoned")
+            .unwrap_or_else(PoisonError::into_inner)
             .insert(module_id, cell);
     }
 }
@@ -258,7 +258,7 @@ impl AdminCellReader for StubAdminCellReader {
     fn read_admin_cell(&self, module_id: &str) -> Option<AdminCell> {
         self.cells
             .read()
-            .expect("RwLock poisoned")
+            .unwrap_or_else(PoisonError::into_inner)
             .get(module_id)
             .cloned()
     }

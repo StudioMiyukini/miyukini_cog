@@ -23,6 +23,19 @@
 //! Codes de sortie : 0 succès (ou déjà importé), 1 échec (aucun marqueur écrit),
 //! 2 usage.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 

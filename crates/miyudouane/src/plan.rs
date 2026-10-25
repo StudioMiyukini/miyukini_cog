@@ -187,8 +187,8 @@ fn v4(a: u8, b: u8, c: u8, d: u8) -> IpAddr {
     IpAddr::V4(Ipv4Addr::new(a, b, c, d))
 }
 
-fn reseau(s: &str) -> Reseau {
-    s.parse().unwrap_or_else(|()| unreachable!("réseau constant invalide : {s}"))
+fn reseau(s: &str) -> Result<Reseau, ErreurPlan> {
+    s.parse().map_err(|()| ErreurPlan(format!("réseau constant invalide : {s}")))
 }
 
 impl PlanReseau {
@@ -198,21 +198,21 @@ impl PlanReseau {
             DefinitionZone {
                 zone: Zone::Cog,
                 netns: "mcog-z-cog".into(),
-                reseau: reseau("10.77.0.0/24"),
+                reseau: reseau("10.77.0.0/24")?,
                 passerelle: None,
                 groupe_nflog: 110,
             },
             DefinitionZone {
                 zone: Zone::Franche,
                 netns: "mcog-z-franche".into(),
-                reseau: reseau("10.77.1.0/24"),
+                reseau: reseau("10.77.1.0/24")?,
                 passerelle: Some(v4(10, 77, 1, 254)),
                 groupe_nflog: 111,
             },
             DefinitionZone {
                 zone: Zone::FrancheLocale,
                 netns: "mcog-z-locale".into(),
-                reseau: reseau("10.77.2.0/24"),
+                reseau: reseau("10.77.2.0/24")?,
                 passerelle: None,
                 groupe_nflog: 112,
             },
@@ -261,7 +261,7 @@ impl PlanReseau {
         let mut plan = Self {
             zones,
             frontieres,
-            reseaux_exterieurs: vec![(Zone::Federation, reseau("10.78.0.0/16"))],
+            reseaux_exterieurs: vec![(Zone::Federation, reseau("10.78.0.0/16")?)],
             sandboxes: Vec::new(),
         };
         for (zone, service) in services {

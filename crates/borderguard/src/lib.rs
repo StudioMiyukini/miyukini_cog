@@ -5,6 +5,19 @@
 //! BorderGuard définit les frontières, classifie les niveaux de confiance, et établit
 //! les règles de franchissement sans jamais appliquer ces règles.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 /// @id borderguard_module_boundary
 /// @role infrastructure
 /// @layer core

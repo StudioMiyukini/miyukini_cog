@@ -28,6 +28,19 @@
 //! Fail-closed : toute donnée non vérifiée, incohérente ou hors politique est
 //! un refus ; aucun état n'est modifié par une opération refusée.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod entree;
 pub mod erreurs;
 pub mod federal;

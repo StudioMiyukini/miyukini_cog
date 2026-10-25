@@ -13,6 +13,11 @@
 //! [`crate::Releveur`], le banc produit donc de vraies annonces 2 sur 2 et de
 //! vraies têtes. Clés générées à chaque banc, jamais persistées.
 
+// Banc d'essai réservé aux tests (fonctionnalité `banc-essai`, jamais activée en
+// production) : un échec de préparation du banc doit interrompre le test qui l'utilise.
+// Exception C-10 justifiée, limitée à ce module.
+#![allow(clippy::panic, clippy::unreachable)]
+
 use miyuregistre::{Categorie, Cible, Journal, Publication, StockageMemoire};
 use miyusceau::CleSignature;
 use sha2::{Digest, Sha256};

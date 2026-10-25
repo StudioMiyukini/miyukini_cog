@@ -49,6 +49,19 @@
 //!   bornées, poignées de main non authentifiées bornées à part (éviction des plus
 //!   anciennes), emplacement principal pris après authentification, délai d'inactivité
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 mod arbitration;
 pub mod audit;
 mod credentials;

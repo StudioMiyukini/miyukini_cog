@@ -57,6 +57,19 @@
 //! sas de décodage du Portail ; un appelant en processus (MiyuCloud) bénéficie
 //! du plafond et de l'annulation, pas d'un confinement.
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 mod detection;
 mod images;
 mod json;
