@@ -119,13 +119,22 @@ fi
 
 # ------------------------------------------------------------------ export au chemin fixe
 
+# Chemin fixe (la reproductibilité en dépend) sous /var/tmp, partagé et inscriptible par tous :
+# le dossier doit appartenir à l'utilisateur courant, en 0700, sans lien symbolique, sinon refus
+# (un autre compte qui le créerait d'avance pourrait empoisonner la construction).
 CONSTRUCTION=/var/tmp/cog-construction
 SRC=$CONSTRUCTION/src
-install -d -m 0755 "$CONSTRUCTION"
-exec 9>"$CONSTRUCTION/verrou"
+if [[ ! -e $CONSTRUCTION && ! -L $CONSTRUCTION ]]; then
+	mkdir -m 0700 "$CONSTRUCTION" || die "création de $CONSTRUCTION impossible"
+fi
+[[ -d $CONSTRUCTION && ! -L $CONSTRUCTION ]] || die "$CONSTRUCTION n'est pas un dossier (lien symbolique ou fichier) : refus"
+[[ $(stat -c %u "$CONSTRUCTION") == "$(id -u)" ]] || die "$CONSTRUCTION n'appartient pas à l'utilisateur courant : refus"
+chmod 0700 "$CONSTRUCTION"
+[[ ! -L $CONSTRUCTION/verrou ]] || die "$CONSTRUCTION/verrou est un lien symbolique : refus"
+exec 9>>"$CONSTRUCTION/verrou"
 flock -n 9 || die "une autre construction utilise $CONSTRUCTION (verrou)"
 rm -rf "$SRC"
-install -d -m 0755 "$SRC"
+install -d -m 0700 "$SRC"
 if ((MODIFS > 0)); then
 	# Fichiers suivis de l'arbre de travail (modifications comprises, fichiers supprimés ignorés).
 	(cd "$RACINE" && git ls-files -z | while IFS= read -r -d '' f; do [[ -e $f || -L $f ]] && printf '%s\0' "$f"; done |
