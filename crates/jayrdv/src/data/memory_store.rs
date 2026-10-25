@@ -54,6 +54,10 @@ impl JayRdvStore {
     // -----------------------------------------------------------------------
 
     /// Insère un rendez-vous. Erreur si l'id existe déjà.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant existe déjà.
     pub fn appointment_create(&self, a: Appointment) -> Result<(), DbError> {
         let id = a.id.clone();
         let mut map = self
@@ -68,14 +72,18 @@ impl JayRdvStore {
     }
 
     /// Met à jour un rendez-vous existant. Erreur si l'id n'existe pas.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant est inconnu.
     pub fn appointment_update(&self, a: Appointment) -> Result<(), DbError> {
         let id = a.id.clone();
         let mut map = self
             .appointments
             .write()
             .map_err(|e| DbError(e.to_string()))?;
-        if map.contains_key(&id) {
-            map.insert(id, a);
+        if let Some(existant) = map.get_mut(&id) {
+            *existant = a;
             Ok(())
         } else {
             Err(DbError(format!("appointment not found: {id}")))
@@ -83,6 +91,10 @@ impl JayRdvStore {
     }
 
     /// Récupère un rendez-vous par id.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn appointment_by_id(&self, id: &str) -> Result<Option<Appointment>, DbError> {
         let map = self
             .appointments
@@ -94,6 +106,10 @@ impl JayRdvStore {
     /// Liste les rendez-vous avec filtres optionnels.
     /// Les filtres de dates (from_date, to_date) sont parsés en `chrono::DateTime<Utc>` ;
     /// les rendez-vous dont les champs start_at/end_at ne sont pas des dates ISO 8601 valides sont exclus.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn appointment_list(
         &self,
         resource_id: Option<&str>,
@@ -148,6 +164,10 @@ impl JayRdvStore {
     }
 
     /// Supprime un rendez-vous par id.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn appointment_delete(&self, id: &str) -> Result<bool, DbError> {
         let mut map = self
             .appointments
@@ -161,6 +181,10 @@ impl JayRdvStore {
     // -----------------------------------------------------------------------
 
     /// Insère un créneau. Erreur si l'id existe déjà.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant existe déjà.
     pub fn slot_create(&self, s: Slot) -> Result<(), DbError> {
         let id = s.id.clone();
         let mut map = self.slots.write().map_err(|e| DbError(e.to_string()))?;
@@ -172,11 +196,15 @@ impl JayRdvStore {
     }
 
     /// Met à jour un créneau existant.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant est inconnu.
     pub fn slot_update(&self, s: Slot) -> Result<(), DbError> {
         let id = s.id.clone();
         let mut map = self.slots.write().map_err(|e| DbError(e.to_string()))?;
-        if map.contains_key(&id) {
-            map.insert(id, s);
+        if let Some(existant) = map.get_mut(&id) {
+            *existant = s;
             Ok(())
         } else {
             Err(DbError(format!("slot not found: {id}")))
@@ -184,12 +212,20 @@ impl JayRdvStore {
     }
 
     /// Récupère un créneau par id.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn slot_by_id(&self, id: &str) -> Result<Option<Slot>, DbError> {
         let map = self.slots.read().map_err(|e| DbError(e.to_string()))?;
         Ok(map.get(id).cloned())
     }
 
     /// Liste les créneaux avec filtres optionnels.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn slot_list(
         &self,
         resource_id: Option<&str>,
@@ -218,6 +254,10 @@ impl JayRdvStore {
     }
 
     /// Liste les ids de créneaux en statut Held dont le verrouillage a expiré (held_until < now).
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn slot_list_expired_holds(&self) -> Result<Vec<String>, DbError> {
         let now = Utc::now();
         let map = self.slots.read().map_err(|e| DbError(e.to_string()))?;
@@ -245,6 +285,10 @@ impl JayRdvStore {
     // -----------------------------------------------------------------------
 
     /// Insère une ressource.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn resource_create(&self, r: Resource) -> Result<(), DbError> {
         let id = r.id.clone();
         let mut map = self.resources.write().map_err(|e| DbError(e.to_string()))?;
@@ -253,6 +297,10 @@ impl JayRdvStore {
     }
 
     /// Liste toutes les ressources.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn resource_list(&self) -> Result<Vec<Resource>, DbError> {
         let map = self.resources.read().map_err(|e| DbError(e.to_string()))?;
         let mut out: Vec<Resource> = map.values().cloned().collect();
@@ -261,6 +309,10 @@ impl JayRdvStore {
     }
 
     /// Récupère une ressource par id.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn resource_by_id(&self, id: &str) -> Result<Option<Resource>, DbError> {
         let map = self.resources.read().map_err(|e| DbError(e.to_string()))?;
         Ok(map.get(id).cloned())
@@ -271,6 +323,10 @@ impl JayRdvStore {
     // -----------------------------------------------------------------------
 
     /// Insère un rappel.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn reminder_create(&self, r: Reminder) -> Result<(), DbError> {
         let id = r.id.clone();
         let mut map = self.reminders.write().map_err(|e| DbError(e.to_string()))?;
@@ -279,6 +335,10 @@ impl JayRdvStore {
     }
 
     /// Liste les rappels d'un rendez-vous.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn reminder_list_for_appointment(
         &self,
         appointment_id: &str,
@@ -293,6 +353,10 @@ impl JayRdvStore {
     }
 
     /// Marque un rappel comme envoyé.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant est inconnu.
     pub fn reminder_mark_sent(&self, id: &str) -> Result<(), DbError> {
         let mut map = self.reminders.write().map_err(|e| DbError(e.to_string()))?;
         if let Some(r) = map.get_mut(id) {
@@ -308,6 +372,10 @@ impl JayRdvStore {
     // -----------------------------------------------------------------------
 
     /// Insère un service (prestation).
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant existe déjà.
     pub fn service_create(&self, s: Service) -> Result<(), DbError> {
         let id = s.id.clone();
         let mut map = self.services.write().map_err(|e| DbError(e.to_string()))?;
@@ -319,11 +387,15 @@ impl JayRdvStore {
     }
 
     /// Met à jour un service.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant est inconnu.
     pub fn service_update(&self, s: Service) -> Result<(), DbError> {
         let id = s.id.clone();
         let mut map = self.services.write().map_err(|e| DbError(e.to_string()))?;
-        if map.contains_key(&id) {
-            map.insert(id, s);
+        if let Some(existant) = map.get_mut(&id) {
+            *existant = s;
             Ok(())
         } else {
             Err(DbError(format!("service not found: {id}")))
@@ -331,12 +403,20 @@ impl JayRdvStore {
     }
 
     /// Récupère un service par id.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn service_by_id(&self, id: &str) -> Result<Option<Service>, DbError> {
         let map = self.services.read().map_err(|e| DbError(e.to_string()))?;
         Ok(map.get(id).cloned())
     }
 
     /// Liste tous les services (actifs par défaut).
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn service_list(&self, active_only: bool) -> Result<Vec<Service>, DbError> {
         let map = self.services.read().map_err(|e| DbError(e.to_string()))?;
         let mut out: Vec<Service> = map
@@ -353,6 +433,10 @@ impl JayRdvStore {
     // -----------------------------------------------------------------------
 
     /// Insère un client.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant existe déjà.
     pub fn client_create(&self, c: Client) -> Result<(), DbError> {
         let id = c.id.clone();
         let mut map = self.clients.write().map_err(|e| DbError(e.to_string()))?;
@@ -364,11 +448,15 @@ impl JayRdvStore {
     }
 
     /// Met à jour un client.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant est inconnu.
     pub fn client_update(&self, c: Client) -> Result<(), DbError> {
         let id = c.id.clone();
         let mut map = self.clients.write().map_err(|e| DbError(e.to_string()))?;
-        if map.contains_key(&id) {
-            map.insert(id, c);
+        if let Some(existant) = map.get_mut(&id) {
+            *existant = c;
             Ok(())
         } else {
             Err(DbError(format!("client not found: {id}")))
@@ -376,18 +464,30 @@ impl JayRdvStore {
     }
 
     /// Récupère un client par id.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn client_by_id(&self, id: &str) -> Result<Option<Client>, DbError> {
         let map = self.clients.read().map_err(|e| DbError(e.to_string()))?;
         Ok(map.get(id).cloned())
     }
 
     /// Recherche un client par téléphone.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn client_by_phone(&self, phone: &str) -> Result<Option<Client>, DbError> {
         let map = self.clients.read().map_err(|e| DbError(e.to_string()))?;
         Ok(map.values().find(|c| c.phone == phone).cloned())
     }
 
     /// Liste tous les clients.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn client_list(&self) -> Result<Vec<Client>, DbError> {
         let map = self.clients.read().map_err(|e| DbError(e.to_string()))?;
         let mut out: Vec<Client> = map.values().cloned().collect();
@@ -396,6 +496,10 @@ impl JayRdvStore {
     }
 
     /// Incrémente le compteur de rendez-vous d'un client.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant est inconnu.
     pub fn client_increment_appointments(&self, id: &str) -> Result<(), DbError> {
         let mut map = self.clients.write().map_err(|e| DbError(e.to_string()))?;
         if let Some(c) = map.get_mut(id) {
@@ -407,6 +511,10 @@ impl JayRdvStore {
     }
 
     /// Incrémente le compteur no-show d'un client.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant est inconnu.
     pub fn client_increment_no_show(&self, id: &str) -> Result<(), DbError> {
         let mut map = self.clients.write().map_err(|e| DbError(e.to_string()))?;
         if let Some(c) = map.get_mut(id) {
@@ -422,6 +530,10 @@ impl JayRdvStore {
     // -----------------------------------------------------------------------
 
     /// Insère un professionnel.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant existe déjà.
     pub fn professional_create(&self, p: Professional) -> Result<(), DbError> {
         let id = p.id.clone();
         let mut map = self
@@ -436,6 +548,10 @@ impl JayRdvStore {
     }
 
     /// Récupère un professionnel par id.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn professional_by_id(&self, id: &str) -> Result<Option<Professional>, DbError> {
         let map = self
             .professionals
@@ -445,6 +561,10 @@ impl JayRdvStore {
     }
 
     /// Liste tous les professionnels.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn professional_list(&self) -> Result<Vec<Professional>, DbError> {
         let map = self
             .professionals
@@ -460,6 +580,10 @@ impl JayRdvStore {
     // -----------------------------------------------------------------------
 
     /// Insère un praticien.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant existe déjà.
     pub fn practitioner_create(&self, p: Practitioner) -> Result<(), DbError> {
         let id = p.id.clone();
         let mut map = self
@@ -474,6 +598,10 @@ impl JayRdvStore {
     }
 
     /// Récupère un praticien par id.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn practitioner_by_id(&self, id: &str) -> Result<Option<Practitioner>, DbError> {
         let map = self
             .practitioners
@@ -483,6 +611,10 @@ impl JayRdvStore {
     }
 
     /// Liste les praticiens (optionnellement par professional_id).
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn practitioner_list(
         &self,
         professional_id: Option<&str>,
@@ -493,7 +625,7 @@ impl JayRdvStore {
             .map_err(|e| DbError(e.to_string()))?;
         let mut out: Vec<Practitioner> = map
             .values()
-            .filter(|p| professional_id.map_or(true, |pid| p.professional_id == pid))
+            .filter(|p| professional_id.is_none_or(|pid| p.professional_id == pid))
             .cloned()
             .collect();
         out.sort_by(|a, b| a.name.cmp(&b.name));
@@ -505,6 +637,10 @@ impl JayRdvStore {
     // -----------------------------------------------------------------------
 
     /// Insère un planning récurrent.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant existe déjà.
     pub fn schedule_create(&self, s: Schedule) -> Result<(), DbError> {
         let id = s.id.clone();
         let mut map = self.schedules.write().map_err(|e| DbError(e.to_string()))?;
@@ -516,17 +652,25 @@ impl JayRdvStore {
     }
 
     /// Récupère un planning par id.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn schedule_by_id(&self, id: &str) -> Result<Option<Schedule>, DbError> {
         let map = self.schedules.read().map_err(|e| DbError(e.to_string()))?;
         Ok(map.get(id).cloned())
     }
 
     /// Liste les plannings (optionnellement par owner_id).
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn schedule_list(&self, owner_id: Option<&str>) -> Result<Vec<Schedule>, DbError> {
         let map = self.schedules.read().map_err(|e| DbError(e.to_string()))?;
         let mut out: Vec<Schedule> = map
             .values()
-            .filter(|s| owner_id.map_or(true, |oid| s.owner_id == oid))
+            .filter(|s| owner_id.is_none_or(|oid| s.owner_id == oid))
             .cloned()
             .collect();
         out.sort_by(|a, b| {
@@ -540,6 +684,10 @@ impl JayRdvStore {
     // -----------------------------------------------------------------------
 
     /// Insère une exception.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné ou si l'identifiant existe déjà.
     pub fn exception_create(&self, e: Exception) -> Result<(), DbError> {
         let id = e.id.clone();
         let mut map = self
@@ -554,12 +702,20 @@ impl JayRdvStore {
     }
 
     /// Récupère une exception par id.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn exception_by_id(&self, id: &str) -> Result<Option<Exception>, DbError> {
         let map = self.exceptions.read().map_err(|e| DbError(e.to_string()))?;
         Ok(map.get(id).cloned())
     }
 
     /// Liste les exceptions (optionnellement par owner_id, et par plage de dates).
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DbError`] si le verrou interne est empoisonné.
     pub fn exception_list(
         &self,
         owner_id: Option<&str>,

@@ -48,10 +48,8 @@ impl SupabaseConfig {
 /// Retourne une config vide si le fichier est absent ou invalide.
 #[must_use]
 pub fn load_supabase_config() -> SupabaseConfig {
-    let path = find_env_file();
-    let path = match path {
-        Some(p) => p,
-        None => return SupabaseConfig::default(),
+    let Some(path) = find_env_file() else {
+        return SupabaseConfig::default();
     };
 
     match dotenvy::from_path(&path) {

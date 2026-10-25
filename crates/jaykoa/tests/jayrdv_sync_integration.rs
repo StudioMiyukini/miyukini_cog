@@ -67,7 +67,7 @@ fn sync_appointments_from_store_creates_reflections() {
     store.appointment_create(a1.clone()).expect("create a1");
     store.appointment_create(a2.clone()).expect("create a2");
 
-    let _ = JayKoaDb::init_global_sync(None).expect("KindMother init");
+    let () = JayKoaDb::init_global_sync(None).expect("KindMother init");
     let db = JayKoaDb::open(".jaykoa_jayrdv_test").expect("open db");
     db.init_schema_sync().expect("init schema");
     let db = Arc::new(db);

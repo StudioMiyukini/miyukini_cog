@@ -50,10 +50,9 @@ impl FileSystemI18nService {
         let mut current = data;
 
         for part in &parts[0..parts.len() - 1] {
-            if let Some(next) = current.get(part) {
+            {
+                let next = current.get(part)?;
                 current = next;
-            } else {
-                return None;
             }
         }
 

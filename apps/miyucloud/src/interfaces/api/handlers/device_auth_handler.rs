@@ -76,6 +76,7 @@ async fn device_authorize(
 
 /// Client sends: `{ "device_code": "...", "grant_type": "urn:ietf:params:oauth:grant-type:device_code" }`
 /// Returns tokens on success, or RFC 8628 error codes while pending.
+#[allow(clippy::result_large_err)] // Err = `Response` axum, convention des handlers.
 async fn device_token(
     State(state): State<Arc<AppState>>,
     Json(body): Json<DeviceTokenRequestDto>,

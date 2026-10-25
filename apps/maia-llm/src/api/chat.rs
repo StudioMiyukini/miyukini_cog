@@ -68,6 +68,8 @@ struct ChatChoice {
 }
 
 #[derive(Serialize)]
+// Noms de champs imposés par le format `usage` OpenAI.
+#[allow(clippy::struct_field_names)]
 struct UsageInfo {
     prompt_tokens: u32,
     completion_tokens: u32,
@@ -90,9 +92,7 @@ pub async fn chat_handler(
 
     let model_name = state
         .engine
-        .model_info()
-        .map(|m| m.name)
-        .unwrap_or_else(|| "unknown".into());
+        .model_info().map_or_else(|| "unknown".into(), |m| m.name);
 
     if req.stream {
         handle_stream(state, req, model_name).await

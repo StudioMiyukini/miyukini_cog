@@ -38,6 +38,7 @@ pub enum AuditResult {
 
 impl AuditResult {
     /// Chaine pour la DB.
+    #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Ok => "ok",
@@ -49,11 +50,18 @@ impl AuditResult {
 
 impl AuditService {
     /// Cree le service d'audit.
+    #[must_use]
     pub fn new(db: Arc<JayKontaDb>) -> Self {
         Self { db }
     }
 
     /// Journalise une operation (CK-AUD-01).
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
+    // Un argument par champ de l'enregistrement CK-AUD-01 (API publique stable).
+    #[allow(clippy::too_many_arguments)]
     pub fn log(
         &self,
         contract_id: &str,
@@ -79,6 +87,10 @@ impl AuditService {
     }
 
     /// Raccourci : log un mouvement cree.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn log_movement_created(&self, actor: &str, movement_id: &str) -> Result<(), DbError> {
         self.log(
             "CK-AUD-01",
@@ -92,6 +104,10 @@ impl AuditService {
     }
 
     /// Raccourci : log un budget cree.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn log_budget_created(&self, actor: &str, budget_id: &str) -> Result<(), DbError> {
         self.log(
             "CK-AUD-01",
@@ -105,6 +121,10 @@ impl AuditService {
     }
 
     /// Raccourci : log un objectif cree.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn log_goal_created(&self, actor: &str, goal_id: &str) -> Result<(), DbError> {
         self.log(
             "CK-AUD-01",
@@ -118,6 +138,10 @@ impl AuditService {
     }
 
     /// Raccourci : log un devis cree (Account).
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn log_quote_created(&self, actor: &str, quote_id: &str) -> Result<(), DbError> {
         self.log(
             "CK-AUD-01",
@@ -131,6 +155,10 @@ impl AuditService {
     }
 
     /// Raccourci : log une facture emise (Account).
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn log_invoice_issued(&self, actor: &str, invoice_id: &str) -> Result<(), DbError> {
         self.log(
             "CK-AUD-01",
@@ -144,6 +172,10 @@ impl AuditService {
     }
 
     /// Raccourci : log un paiement enregistre (Account).
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn log_payment_recorded(&self, actor: &str, payment_id: &str) -> Result<(), DbError> {
         self.log(
             "CK-AUD-01",
@@ -157,6 +189,10 @@ impl AuditService {
     }
 
     /// Nombre total d'entrees d'audit.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn count(&self) -> Result<i64, DbError> {
         self.db.audit_count()
     }

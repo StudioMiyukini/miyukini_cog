@@ -288,7 +288,7 @@ mod tests {
 
     #[test]
     fn test_history_params_defaults() {
-        let json = r#"{}"#;
+        let json = r"{}";
         let params: HistoryParams = serde_json::from_str(json).expect("deserialize");
         assert_eq!(params.limit, 50);
         assert_eq!(params.offset, 0);

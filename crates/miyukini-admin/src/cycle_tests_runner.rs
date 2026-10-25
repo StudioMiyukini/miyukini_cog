@@ -3,6 +3,10 @@
 //! PERF/LAT/LOAD/RES + MiyukiniSQLtest : orchestration des 8 étapes (WriteIntent,
 //! validations, create table, colonne, insert, read, assert, delete), appel au flux gouverné.
 
+// Blocs MSCM (`/// @id ...`) autonomes, lus par tools/mscm-generator : la ligne vide
+// qui les suit est voulue (ils ne documentent pas l'item suivant).
+#![allow(clippy::empty_line_after_doc_comments)]
+
 use serde::{Deserialize, Serialize};
 
 /// @id miyukiniadmin_cycle_runner

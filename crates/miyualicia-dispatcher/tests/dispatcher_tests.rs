@@ -133,8 +133,8 @@ async fn write_capability_returns_pending_under_strict_policy() {
 
     assert!(matches!(decision, Decision::PendingConfirmation { .. }));
     // Aucun appel service ni épisode
-    assert!(svc.calls().is_empty());
-    assert!(mem.recent_episodes(10).unwrap().is_empty());
+    assert_eq!(svc.calls(), [] as [(std::string::String, serde_json::Value); 0]);
+    assert_eq!(mem.recent_episodes(10).unwrap(), [] as [miyualicia_memory::Episode; 0]);
 }
 
 #[tokio::test]
@@ -218,7 +218,7 @@ async fn permissive_policy_skips_confirmation() {
 
     match decision {
         Decision::Executed(_) => {}
-        _ => panic!("expected Executed under permissive"),
+        Decision::PendingConfirmation { .. } => panic!("expected Executed under permissive"),
     }
 }
 
@@ -290,7 +290,7 @@ async fn cores_denial_records_failed_episode_and_errors() {
     assert_eq!(recent[0].outcome, EpisodeOutcome::Failed);
     assert!(recent[0].error.as_deref().unwrap().contains("cores denied"));
     // Le service n'a pas été appelé
-    assert!(svc.calls().is_empty());
+    assert_eq!(svc.calls(), [] as [(std::string::String, serde_json::Value); 0]);
 }
 
 #[tokio::test]
@@ -321,7 +321,7 @@ async fn bypass_cores_validation_skips_gate() {
         .unwrap();
     match decision {
         Decision::Executed(_) => {}
-        _ => panic!("expected Executed under bypass_cores"),
+        Decision::PendingConfirmation { .. } => panic!("expected Executed under bypass_cores"),
     }
     // Service appelé malgré DenyAllGate (bypass actif)
     assert_eq!(svc.calls().len(), 1);
@@ -384,7 +384,7 @@ async fn user_pref_capability_defaults_to_pending_when_no_pref_set() {
         .unwrap();
     assert!(matches!(decision, Decision::PendingConfirmation { .. }));
     // Aucun appel service ni épisode (pas encore confirmé)
-    assert!(svc.calls().is_empty());
+    assert_eq!(svc.calls(), [] as [(std::string::String, serde_json::Value); 0]);
 }
 
 #[tokio::test]
@@ -418,7 +418,7 @@ async fn user_pref_with_skip_preference_executes_immediately() {
         .unwrap();
     match decision {
         Decision::Executed(r) => assert_eq!(r.service_result.data["deleted"], "evt_1"),
-        _ => panic!("expected Executed (préférence = ne pas demander)"),
+        Decision::PendingConfirmation { .. } => panic!("expected Executed (préférence = ne pas demander)"),
     }
     assert_eq!(svc.calls().len(), 1);
 }

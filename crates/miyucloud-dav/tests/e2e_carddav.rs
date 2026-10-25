@@ -37,7 +37,7 @@ fn davx5_flow_create_book_and_contacts() {
     let vcard = "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Jean Dupont\r\nEMAIL:jean@example.com\r\nTEL:+33612345678\r\nUID:ct-001@miyucloud\r\nEND:VCARD";
     let ct = svc.create_contact(&book_id, vcard).unwrap();
     assert_eq!(ct.uid, "ct-001@miyucloud");
-    assert!(!ct.etag.is_empty());
+    assert_ne!(ct.etag, "");
 
     // 4. Ajouter un second contact
     let vcard2 = "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Marie Martin\r\nEMAIL:marie@example.com\r\nUID:ct-002@miyucloud\r\nEND:VCARD";

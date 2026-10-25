@@ -98,19 +98,16 @@ impl CoreGate for BorderGuardCoreGate {
     ) -> CoreGateOutcome {
         let boundary_id = Self::boundary_id_for(&capability.service_id);
 
-        let rules = match self.registry.get_crossing_rules(&boundary_id) {
-            Some(r) => r,
-            None => {
-                tracing::warn!(
-                    %boundary_id,
-                    persona = %persona,
-                    qualified_id = %capability.qualified_id(),
-                    "aucune règle BorderGuard pour la frontière — refus conservateur"
-                );
-                return CoreGateOutcome::Denied(format!(
-                    "aucune règle de franchissement pour '{boundary_id}'"
-                ));
-            }
+        let Some(rules) = self.registry.get_crossing_rules(&boundary_id) else {
+            tracing::warn!(
+                %boundary_id,
+                persona = %persona,
+                qualified_id = %capability.qualified_id(),
+                "aucune règle BorderGuard pour la frontière — refus conservateur"
+            );
+            return CoreGateOutcome::Denied(format!(
+                "aucune règle de franchissement pour '{boundary_id}'"
+            ));
         };
 
         let trust = self.classifier.classify(persona);

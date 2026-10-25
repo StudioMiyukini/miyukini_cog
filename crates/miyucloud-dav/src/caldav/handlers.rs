@@ -89,7 +89,7 @@ pub async fn handle_propfind(
             }];
             for cal in &calendars {
                 let href = format!("{}/{}/", validated.trim_end_matches('/'), cal.display_name);
-                responses.push(calendar_propfind_response(&cal, &href));
+                responses.push(calendar_propfind_response(cal, &href));
             }
             let xml = response::build_multistatus(&responses);
             Ok((StatusCode::MULTI_STATUS, [("content-type", "application/xml; charset=utf-8")], xml).into_response())
@@ -172,6 +172,7 @@ pub async fn handle_report(
 }
 
 /// Handle GET: download event .ics
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_get(
     State(service): State<CalDavService>,
     req: Request,
@@ -182,10 +183,10 @@ pub async fn handle_get(
 
     let cal_name = parsed
         .calendar_name
-        .ok_or_else(|| DavError::MethodNotAllowed)?;
+        .ok_or(DavError::MethodNotAllowed)?;
     let uid = parsed
         .event_uid
-        .ok_or_else(|| DavError::MethodNotAllowed)?;
+        .ok_or(DavError::MethodNotAllowed)?;
 
     let cal = service
         .get_calendar_by_owner_and_name(parsed.owner_id, cal_name)?
@@ -248,6 +249,7 @@ pub async fn handle_put(
 }
 
 /// Handle DELETE: delete calendar or event
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_delete(
     State(service): State<CalDavService>,
     req: Request,
@@ -303,6 +305,7 @@ pub async fn handle_mkcalendar(
 }
 
 /// Handle OPTIONS
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_options() -> Response {
     (
         StatusCode::OK,

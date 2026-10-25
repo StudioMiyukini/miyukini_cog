@@ -31,7 +31,7 @@ fn recall_empty_query_returns_nothing() {
     let s = store();
     let f = Fact::new("voice".into(), "user".into(), "x".into(), "user".into());
     s.remember(&f).unwrap();
-    assert!(s.recall("   ", 5).unwrap().is_empty());
+    assert_eq!(s.recall("   ", 5).unwrap(), [] as [miyualicia_memory::Fact; 0]);
 }
 
 #[test]
@@ -47,7 +47,7 @@ fn forget_removes_fact_and_fts_entry() {
     assert_eq!(s.recall("Mochi", 5).unwrap().len(), 1);
     let n = s.forget(f.id, "user", "test").unwrap();
     assert_eq!(n, 1);
-    assert!(s.recall("Mochi", 5).unwrap().is_empty());
+    assert_eq!(s.recall("Mochi", 5).unwrap(), [] as [miyualicia_memory::Fact; 0]);
 }
 
 #[test]
@@ -160,7 +160,7 @@ fn recent_episodes_for_personas_filtre_en_sql() {
     assert_eq!(un.len(), 1);
     assert_ne!(un[0].persona, "intrus");
     // Aucune persona autorisée → rien.
-    assert!(s.recent_episodes_for_personas(&[], 10).unwrap().is_empty());
+    assert_eq!(s.recent_episodes_for_personas(&[], 10).unwrap(), [] as [miyualicia_memory::Episode; 0]);
 }
 
 #[test]
@@ -233,7 +233,7 @@ fn upsert_persona_and_default() {
 #[test]
 fn upsert_persona_rejects_empty_id() {
     let s = store();
-    let p = Persona::new("".into(), "X".into(), "Y".into(), false);
+    let p = Persona::new(String::new(), "X".into(), "Y".into(), false);
     let err = s.upsert_persona(&p).unwrap_err();
     assert!(matches!(
         err,
@@ -247,11 +247,11 @@ fn personas_list_sorted() {
     s.upsert_persona(&Persona::new(
         "voice".into(),
         "Voix".into(),
-        "".into(),
+        String::new(),
         false,
     ))
     .unwrap();
-    s.upsert_persona(&Persona::new("work".into(), "Travail".into(), "".into(), false))
+    s.upsert_persona(&Persona::new("work".into(), "Travail".into(), String::new(), false))
         .unwrap();
     let list = s.personas().unwrap();
     let ids: Vec<_> = list.iter().map(|p| p.id.clone()).collect();
@@ -268,14 +268,14 @@ fn active_persona_falls_back_to_default_when_unset() {
     s.upsert_persona(&Persona::new(
         "voice".into(),
         "Voix".into(),
-        "".into(),
+        String::new(),
         true,
     ))
     .unwrap();
     s.upsert_persona(&Persona::new(
         "work".into(),
         "Travail".into(),
-        "".into(),
+        String::new(),
         false,
     ))
     .unwrap();
@@ -294,14 +294,14 @@ fn set_active_persona_overrides_default() {
     s.upsert_persona(&Persona::new(
         "voice".into(),
         "Voix".into(),
-        "".into(),
+        String::new(),
         true,
     ))
     .unwrap();
     s.upsert_persona(&Persona::new(
         "work".into(),
         "Travail".into(),
-        "".into(),
+        String::new(),
         false,
     ))
     .unwrap();
@@ -746,7 +746,7 @@ fn pending_confirmations_for_persona_filters() {
     let work = s.pending_confirmations_for_persona("work").unwrap();
     assert_eq!(work.len(), 1);
     let other = s.pending_confirmations_for_persona("other").unwrap();
-    assert!(other.is_empty());
+    assert_eq!(other, [] as [miyualicia_memory::PendingConfirmation; 0]);
 }
 
 #[test]
@@ -922,8 +922,8 @@ fn finalize_sets_confirmed_or_failed_only_from_executing() {
 // ancienne → Cancelled), motif "expired"
 // ----------------------------------------------------------------------
 
-const TTL_EXEC: std::time::Duration = std::time::Duration::from_secs(15 * 60);
-const TTL_PENDING: std::time::Duration = std::time::Duration::from_secs(24 * 3600);
+const TTL_EXEC: std::time::Duration = std::time::Duration::from_mins(15);
+const TTL_PENDING: std::time::Duration = std::time::Duration::from_hours(24);
 
 #[test]
 fn executing_older_than_ttl_becomes_failed_and_is_never_reclaimable() {

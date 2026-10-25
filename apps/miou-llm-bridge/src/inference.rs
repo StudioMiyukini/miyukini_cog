@@ -74,6 +74,7 @@ pub struct Choice {
 }
 
 #[derive(Debug, Clone, Serialize)]
+#[allow(clippy::struct_field_names)] // noms imposés par le format OpenAI `usage`
 pub struct Usage {
     pub prompt_tokens: u32,
     pub completion_tokens: u32,
@@ -131,7 +132,11 @@ pub struct MaiaLlmClient {
 }
 
 impl MaiaLlmClient {
-    pub fn new(base_url: String, cle: Option<Arc<miyusceau::CleSignature>>, client: reqwest::Client) -> Self {
+    pub fn new(
+        base_url: String,
+        cle: Option<Arc<miyusceau::CleSignature>>,
+        client: reqwest::Client,
+    ) -> Self {
         Self {
             base_url,
             cle,
@@ -159,19 +164,33 @@ impl MaiaLlmClient {
             .client
             .request(methode.clone(), url)
             .header(reqwest::header::CONTENT_TYPE, "application/json");
-        crate::signature::signer(rb, self.cle.as_deref(), usage, methode.as_str(), url, &octets).body(octets)
+        crate::signature::signer(
+            rb,
+            self.cle.as_deref(),
+            usage,
+            methode.as_str(),
+            url,
+            &octets,
+        )
+        .body(octets)
     }
 
     // ── Méthodes synchrones (cache local) ──────────────────────────
 
     /// Vérifie si un modèle est chargé (via cache local).
     pub fn is_loaded(&self) -> bool {
-        self.loaded_model.read().unwrap_or_else(PoisonError::into_inner).is_some()
+        self.loaded_model
+            .read()
+            .unwrap_or_else(PoisonError::into_inner)
+            .is_some()
     }
 
     /// Retourne le nom du modèle chargé (via cache local).
     pub fn loaded_model_name(&self) -> Option<String> {
-        self.loaded_model.read().unwrap_or_else(PoisonError::into_inner).clone()
+        self.loaded_model
+            .read()
+            .unwrap_or_else(PoisonError::into_inner)
+            .clone()
     }
 
     // ── Méthodes async (appels HTTP maia-llm) ─────────────────────
@@ -191,8 +210,11 @@ impl MaiaLlmClient {
                     let model_name = body
                         .get("model_name")
                         .and_then(|m| m.as_str())
-                        .map(|s| s.to_string());
-                    *self.loaded_model.write().unwrap_or_else(PoisonError::into_inner) = model_name;
+                        .map(std::string::ToString::to_string);
+                    *self
+                        .loaded_model
+                        .write()
+                        .unwrap_or_else(PoisonError::into_inner) = model_name;
                 }
                 true
             }
@@ -201,10 +223,7 @@ impl MaiaLlmClient {
     }
 
     /// Charge un modèle dans maia-llm via POST /maia/llm/models/load.
-    pub async fn load_model(
-        &self,
-        path: std::path::PathBuf,
-    ) -> Result<String, InferenceError> {
+    pub async fn load_model(&self, path: std::path::PathBuf) -> Result<String, InferenceError> {
         let filename = path
             .file_name()
             .unwrap_or(path.as_os_str())
@@ -241,7 +260,10 @@ impl MaiaLlmClient {
             .unwrap_or(&filename)
             .to_string();
 
-        *self.loaded_model.write().unwrap_or_else(PoisonError::into_inner) = Some(model_name.clone());
+        *self
+            .loaded_model
+            .write()
+            .unwrap_or_else(PoisonError::into_inner) = Some(model_name.clone());
 
         Ok(model_name)
     }
@@ -255,11 +277,13 @@ impl MaiaLlmClient {
             .timeout(std::time::Duration::from_secs(30))
             .send()
             .await
-            .map(|r| r.status().is_success())
-            .unwrap_or(false);
+            .is_ok_and(|r| r.status().is_success());
 
         if success {
-            *self.loaded_model.write().unwrap_or_else(PoisonError::into_inner) = None;
+            *self
+                .loaded_model
+                .write()
+                .unwrap_or_else(PoisonError::into_inner) = None;
         }
 
         success
@@ -362,8 +386,7 @@ impl UpstreamBackend {
             .timeout(std::time::Duration::from_secs(5))
             .send()
             .await
-            .map(|r| r.status().is_success())
-            .unwrap_or(false)
+            .is_ok_and(|r| r.status().is_success())
     }
 
     pub async fn chat_completion(
@@ -460,7 +483,7 @@ impl InferenceRouter {
         body: &serde_json::Value,
     ) -> Result<ChatCompletionResponse, InferenceError> {
         let raw = self.native.chat_completion(body).await?;
-        parse_response(raw, BackendKind::Native)
+        Ok(parse_response(raw, BackendKind::Native))
     }
 
     async fn try_upstream(
@@ -468,16 +491,13 @@ impl InferenceRouter {
         body: &serde_json::Value,
     ) -> Result<ChatCompletionResponse, InferenceError> {
         let raw = self.upstream.chat_completion(body).await?;
-        parse_response(raw, BackendKind::Upstream)
+        Ok(parse_response(raw, BackendKind::Upstream))
     }
 }
 
 // ── Helpers ────────────────────────────────────────────────────────
 
-fn parse_response(
-    raw: serde_json::Value,
-    backend: BackendKind,
-) -> Result<ChatCompletionResponse, InferenceError> {
+fn parse_response(raw: serde_json::Value, backend: BackendKind) -> ChatCompletionResponse {
     let model = raw
         .get("model")
         .and_then(|m| m.as_str())
@@ -506,14 +526,14 @@ fn parse_response(
     let usage = raw.get("usage").cloned().unwrap_or(serde_json::json!({}));
     let prompt_tokens = usage
         .get("prompt_tokens")
-        .and_then(|t| t.as_u64())
+        .and_then(serde_json::Value::as_u64)
         .unwrap_or(0) as u32;
     let completion_tokens = usage
         .get("completion_tokens")
-        .and_then(|t| t.as_u64())
+        .and_then(serde_json::Value::as_u64)
         .unwrap_or(0) as u32;
 
-    Ok(ChatCompletionResponse {
+    ChatCompletionResponse {
         id: raw
             .get("id")
             .and_then(|i| i.as_str())
@@ -524,10 +544,10 @@ fn parse_response(
         usage: Usage {
             prompt_tokens,
             completion_tokens,
-            total_tokens: prompt_tokens + completion_tokens,
+            total_tokens: prompt_tokens.saturating_add(completion_tokens),
         },
         backend,
-    })
+    }
 }
 
 #[cfg(test)]
@@ -564,7 +584,15 @@ mod tests {
                 let (parts, corps) = req.into_parts();
                 let corps = axum::body::to_bytes(corps, 1 << 20).await.unwrap();
                 let chemin = parts.uri.path_and_query().unwrap().as_str().to_string();
-                garde_srv.verifier(&entetes, usage, parts.method.as_str(), &chemin, &corps, instant)
+                garde_srv
+                    .verifier(
+                        &entetes,
+                        usage,
+                        parts.method.as_str(),
+                        &chemin,
+                        &corps,
+                        instant,
+                    )
                     .map_err(|_| StatusCode::UNAUTHORIZED)?;
                 let reponse = match parts.uri.path() {
                     "/maia/llm/models" => serde_json::json!([{ "model_id": "m1" }]),
@@ -601,9 +629,22 @@ mod tests {
 
         // Sans clé, ou avec une clé non épinglée : refus.
         let anonyme = MaiaLlmClient::new(url.clone(), None, reqwest::Client::new());
-        assert!(anonyme.available_models().await.is_empty());
-        assert!(anonyme.chat_completion(&serde_json::json!({})).await.is_err());
-        let intrus = MaiaLlmClient::new(url, Some(Arc::new(CleSignature::generer())), reqwest::Client::new());
-        assert!(intrus.chat_completion(&serde_json::json!({})).await.is_err());
+        assert_eq!(
+            anonyme.available_models().await,
+            [] as [std::string::String; 0]
+        );
+        assert!(anonyme
+            .chat_completion(&serde_json::json!({}))
+            .await
+            .is_err());
+        let intrus = MaiaLlmClient::new(
+            url,
+            Some(Arc::new(CleSignature::generer())),
+            reqwest::Client::new(),
+        );
+        assert!(intrus
+            .chat_completion(&serde_json::json!({}))
+            .await
+            .is_err());
     }
 }

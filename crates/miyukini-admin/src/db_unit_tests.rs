@@ -3,6 +3,10 @@
 //! COH-001 à COH-007, CONF-001 à CONF-005, STRUCT-001 à STRUCT-005, SEC-001 à SEC-006.
 //! Requêtes en lecture seule via KindMother ; évaluation critères ; rapport PASS/WARN/FAIL.
 
+// Blocs MSCM (`/// @id ...`) autonomes, lus par tools/mscm-generator : la ligne vide
+// qui les suit est voulue (ils ne documentent pas l'item suivant).
+#![allow(clippy::empty_line_after_doc_comments)]
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::Duration;

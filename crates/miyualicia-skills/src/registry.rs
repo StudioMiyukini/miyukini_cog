@@ -164,6 +164,8 @@ impl SkillRegistry {
                         .filter(|w| example_words.contains(w))
                         .count();
                     let denom = words.len().max(example_words.len());
+                    // Nombre de mots d'une phrase : très inférieur à 2^23, conversion exacte.
+                    #[allow(clippy::cast_precision_loss)]
                     let score = common as f32 / denom as f32;
                     if score > best_score {
                         best_score = score * 0.9;
@@ -299,7 +301,7 @@ mod tests {
     fn search_returns_empty_on_empty_phrase() {
         let mut reg = SkillRegistry::new();
         reg.register(skill("jaykoa", "x", &["foo"])).unwrap();
-        assert!(reg.search_by_phrase("   ", 5).is_empty());
+        assert_eq!(reg.search_by_phrase("   ", 5).len(), 0);
     }
 
     #[test]
@@ -319,7 +321,7 @@ mod tests {
         let cal: Vec<_> = reg.by_category("calendar").collect();
         assert_eq!(cal.len(), 1);
         let none: Vec<_> = reg.by_category("finance").collect();
-        assert!(none.is_empty());
+        assert_eq!(none.len(), 0);
     }
 
     #[test]

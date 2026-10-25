@@ -55,9 +55,9 @@ mod tests {
     #[test]
     fn governed_context_default() {
         let ctx = GovernedContext::default();
-        assert!(ctx.owner_id.is_empty());
+        assert_eq!(ctx.owner_id, "");
         assert!(ctx.storage_root.as_os_str().is_empty());
-        assert!(ctx.cog_id.is_empty());
+        assert_eq!(ctx.cog_id, "");
     }
 
     #[test]

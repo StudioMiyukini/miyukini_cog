@@ -38,7 +38,7 @@ fn thunderbird_flow_create_calendar_and_events() {
     let ical_data = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nSUMMARY:Reunion standup\r\nDTSTART:20260310T090000Z\r\nDTEND:20260310T093000Z\r\nUID:evt-001@miyucloud\r\nEND:VEVENT\r\nEND:VCALENDAR";
     let evt = svc.create_event(&cal_id, ical_data).unwrap();
     assert_eq!(evt.uid, "evt-001@miyucloud");
-    assert!(!evt.etag.is_empty());
+    assert_ne!(evt.etag, "");
 
     // 4. Ajouter un second evenement
     let ical_data2 = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nSUMMARY:Dejeuner equipe\r\nDTSTART:20260310T120000Z\r\nDTEND:20260310T130000Z\r\nUID:evt-002@miyucloud\r\nEND:VEVENT\r\nEND:VCALENDAR";

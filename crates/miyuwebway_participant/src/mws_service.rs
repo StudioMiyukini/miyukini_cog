@@ -111,7 +111,7 @@ impl MwsService {
         Self::partager_identite(&mut config);
         let mut relay_config = config.relay.clone();
         if relay_config.home_http_bind.is_none() && config.home_http_bind.is_some() {
-            relay_config.home_http_bind = config.home_http_bind.clone();
+            relay_config.home_http_bind.clone_from(&config.home_http_bind);
         }
         Self {
             relay_client: Arc::new(RelayClient::new(relay_config)),
@@ -142,7 +142,7 @@ impl MwsService {
 
     /// Configure l'adresse Origin personnalisée.
     pub fn with_origin(mut self, relay_address: String, tracker_address: String) -> Self {
-        self.config.relay.relay_address = relay_address.clone();
+        self.config.relay.relay_address.clone_from(&relay_address);
         self.config.relay.tls_domain = relay_address
             .split(':')
             .next()
@@ -298,7 +298,7 @@ impl MwsService {
 
                 // Envoyer heartbeat
                 match tracker.heartbeat(&cog_id, 100, 0).await {
-                    Ok(_) => debug!("Heartbeat sent successfully"),
+                    Ok(()) => debug!("Heartbeat sent successfully"),
                     Err(e) => {
                         warn!("Heartbeat failed: {}", e);
                         // TODO: déclencher reconnexion si nécessaire
@@ -393,7 +393,7 @@ impl MwsService {
         {
             let mut lobbys = self.lobbys.write().await;
             let mut new_lobby = lobby;
-            new_lobby.lobby_id = lobby_id.clone();
+            new_lobby.lobby_id.clone_from(&lobby_id);
             lobbys.push(new_lobby);
         }
 
@@ -526,7 +526,12 @@ impl MwsService {
 mod hex {
     #[allow(dead_code)]
     pub fn encode(data: &[u8]) -> String {
-        data.iter().map(|b| format!("{:02x}", b)).collect()
+        use std::fmt::Write as _;
+        data.iter().fold(String::with_capacity(data.len() * 2), |mut s, b| {
+            // L'écriture dans une String ne peut pas échouer.
+            let _ = write!(s, "{b:02x}");
+            s
+        })
     }
 }
 

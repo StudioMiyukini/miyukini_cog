@@ -198,9 +198,7 @@ pub fn check_agent_skill_permission(agent: &AgentDef, skill_id: &str) -> Permiss
     // Vérifier le niveau de sécurité minimum du skill
     let required_level = match skill_id {
         "shell_exec" => SecurityLevel::Extended,
-        "file_ops" => SecurityLevel::Sandboxed,
-        "web_fetch" => SecurityLevel::Sandboxed,
-        "cog_services" => SecurityLevel::Sandboxed,
+        "file_ops" | "web_fetch" | "cog_services" => SecurityLevel::Sandboxed,
         _ => SecurityLevel::ReadOnly,
     };
 
@@ -255,10 +253,7 @@ pub fn resolve_client_ip(
     if !ip_in_list(peer, trusted_proxies) {
         return peer;
     }
-    let Some(xff) = headers
-        .get("x-forwarded-for")
-        .and_then(|v| v.to_str().ok())
-    else {
+    let Some(xff) = headers.get("x-forwarded-for").and_then(|v| v.to_str().ok()) else {
         return peer;
     };
     for part in xff.rsplit(',') {
@@ -283,7 +278,9 @@ fn ip_in_list(ip: IpAddr, list: &[String]) -> bool {
         if entry.contains('/') {
             match_cidr(&ip_s, entry)
         } else {
-            entry.parse::<IpAddr>().map(|e| e.to_canonical() == ip).unwrap_or(false)
+            entry
+                .parse::<IpAddr>()
+                .is_ok_and(|e| e.to_canonical() == ip)
         }
     })
 }

@@ -68,11 +68,11 @@ impl WeatherCondition {
     pub fn from_wmo_code(code: u16) -> Self {
         match code {
             0 | 1 => Self::Clear,
-            2 | 3 => Self::Cloudy,
             45 | 48 => Self::Fog,
             51..=57 | 61..=67 | 80..=82 => Self::Rain,
             71..=77 | 85 | 86 => Self::Snow,
             95..=99 => Self::Storm,
+            // 2 | 3 (nuageux) et tout code inconnu.
             _ => Self::Cloudy,
         }
     }
@@ -132,6 +132,8 @@ pub enum JayMeteoError {
 
 /// Trait abstrait pour un fournisseur de météo.
 #[async_trait]
+// `#[async_trait]` pose lui-même `#[must_use]` sur la future retournée (déjà must_use).
+#[allow(clippy::double_must_use)]
 pub trait JayMeteoBackend: Send + Sync {
     /// Renvoie la météo courante pour `location` (ville ou alias `home`).
     async fn current_weather(&self, location: &str) -> Result<WeatherNow, JayMeteoError>;
@@ -188,7 +190,7 @@ impl JayMeteoClient {
             Some(Value::Number(n)) => n
                 .as_u64()
                 .filter(|v| (1..=7).contains(v))
-                .map(|v| v as u8)
+                .and_then(|v| u8::try_from(v).ok())
                 .ok_or_else(|| {
                     JayMeteoError::InvalidParam(format!(
                         "days doit être un entier entre 1 et 7, reçu {n}"

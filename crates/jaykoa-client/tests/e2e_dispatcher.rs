@@ -285,7 +285,7 @@ fn registry_with_user_pref_capability() -> SkillRegistry {
         service_id: "jaykoa".into(),
         intent: "delete_event".into(),
         phrases_examples: vec!["supprime mon événement".into()],
-        params: Default::default(),
+        params: std::collections::BTreeMap::default(),
         writes: true,
         confirmation_default: ConfirmationPolicy::UserPreference,
         description: Some("Supprime un événement.".into()),
@@ -304,7 +304,7 @@ fn registry_with_user_pref_capability() -> SkillRegistry {
 async fn user_preference_pending_then_skip_after_remember_choice() {
     let reg = registry_with_user_pref_capability();
     let mem = MemoryStore::open_in_memory().unwrap();
-    mem.upsert_persona(&Persona::new("voice".into(), "Voix".into(), "".into(), true))
+    mem.upsert_persona(&Persona::new("voice".into(), "Voix".into(), String::new(), true))
         .unwrap();
 
     // delete_event est une capability synthétique purement pour tester la
@@ -387,7 +387,7 @@ async fn full_hermes_loop_observe_propose_accept_resolve_dispatch() {
     mem.upsert_persona(&Persona::new(
         "voice".into(),
         "Voix".into(),
-        "".into(),
+        String::new(),
         true,
     ))
     .unwrap();
@@ -458,9 +458,8 @@ async fn full_hermes_loop_observe_propose_accept_resolve_dispatch() {
         )
         .await
         .unwrap();
-    let result = match decision {
-        Decision::Executed(r) => r,
-        _ => panic!("expected Executed"),
+    let Decision::Executed(result) = decision else {
+        panic!("expected Executed");
     };
     assert!(result.service_result.success);
     assert_eq!(result.service_result.data["event"]["title"], "Stand-up");
@@ -531,7 +530,7 @@ async fn hot_swap_add_then_remove_jaykoa_manifest() {
     match watcher.tick(tmp.path(), &mut reg).unwrap() {
         TickOutcome::Reloaded(r) => {
             assert_eq!(r.added, vec!["jaykoa".to_string()]);
-            assert!(r.removed.is_empty());
+            assert_eq!(r.removed, [] as [std::string::String; 0]);
         }
         TickOutcome::Unchanged => panic!("expected reload after manifest drop"),
     }

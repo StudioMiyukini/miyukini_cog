@@ -162,7 +162,7 @@ mod tests {
     fn setup() -> (MiyucloudDb, LocalFsStorage, KeyManager) {
         let db = MiyucloudDb::open(":memory:").unwrap();
         let dir = tempfile::tempdir().unwrap();
-        let storage = LocalFsStorage::new(dir.into_path()).unwrap();
+        let storage = LocalFsStorage::new(dir.keep()).unwrap();
         let km = KeyManager::from_master_key([1u8; 32]);
         (db, storage, km)
     }
@@ -183,7 +183,7 @@ mod tests {
 
         assert_eq!(report.migrated, 1);
         assert_eq!(report.skipped, 0);
-        assert!(report.errors.is_empty());
+        assert_eq!(report.errors, [] as [(std::string::String, std::string::String); 0]);
 
         // Verify file exists in MiyuCloud
         let files = db.file_list(None, "owner1").unwrap();
@@ -251,6 +251,6 @@ mod tests {
                 .unwrap();
         assert_eq!(report2.migrated, 1);
         assert_eq!(report2.skipped, 2);
-        assert!(report2.errors.is_empty());
+        assert_eq!(report2.errors, [] as [(std::string::String, std::string::String); 0]);
     }
 }

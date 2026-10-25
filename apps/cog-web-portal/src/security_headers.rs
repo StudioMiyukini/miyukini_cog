@@ -83,7 +83,7 @@ where
 
             // connect-src élargi pour CentralRemote (WS + HTTP vers le serveur remote).
             let connect_src = match std::env::var("PORTAL_CENTRAL_REMOTE_ADDR") {
-                Ok(addr) => format!("connect-src 'self' http://{addr} ws://{addr}", addr = addr),
+                Ok(addr) => format!("connect-src 'self' http://{addr} ws://{addr}"),
                 Err(_) => "connect-src 'self'".to_string(),
             };
             let csp = format!(

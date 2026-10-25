@@ -104,8 +104,10 @@ pub fn run_all() -> JayKoaTestReport {
         &mut results,
     );
 
-    let passed = results.iter().filter(|r| r.passed).count() as u32;
-    let failed = results.len() as u32 - passed;
+    // Nombre de tests embarqués : quelques dizaines, saturation par sécurité.
+    let total = u32::try_from(results.len()).unwrap_or(u32::MAX);
+    let passed = u32::try_from(results.iter().filter(|r| r.passed).count()).unwrap_or(u32::MAX);
+    let failed = total.saturating_sub(passed);
     let status = if failed == 0 {
         "ok".to_string()
     } else {
@@ -115,7 +117,7 @@ pub fn run_all() -> JayKoaTestReport {
     JayKoaTestReport {
         passed,
         failed,
-        total: results.len() as u32,
+        total,
         status,
         results,
     }
@@ -150,7 +152,7 @@ fn run_entry_type_roundtrip() -> Result<(), String> {
     for v in variants {
         let roundtripped = EntryType::from_str(v.as_str());
         if roundtripped != v {
-            return Err(format!("roundtrip failed for {:?}", v));
+            return Err(format!("roundtrip failed for {v:?}"));
         }
     }
     Ok(())
@@ -175,7 +177,7 @@ fn run_temporal_status_roundtrip() -> Result<(), String> {
     for v in variants {
         let roundtripped = TemporalStatus::from_str(v.as_str());
         if roundtripped != v {
-            return Err(format!("roundtrip failed for {:?}", v));
+            return Err(format!("roundtrip failed for {v:?}"));
         }
     }
     Ok(())
@@ -190,7 +192,7 @@ fn run_event_source_roundtrip() -> Result<(), String> {
     for v in variants {
         let roundtripped = EventSource::from_str(v.as_str());
         if roundtripped != v {
-            return Err(format!("roundtrip failed for {:?}", v));
+            return Err(format!("roundtrip failed for {v:?}"));
         }
     }
     Ok(())
@@ -205,7 +207,7 @@ fn run_calendar_type_roundtrip() -> Result<(), String> {
     for v in variants {
         let roundtripped = CalendarType::from_str(v.as_str());
         if roundtripped != v {
-            return Err(format!("roundtrip failed for {:?}", v));
+            return Err(format!("roundtrip failed for {v:?}"));
         }
     }
     Ok(())

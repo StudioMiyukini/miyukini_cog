@@ -91,7 +91,7 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
             let target = &full_path;
             let recursive = params
                 .get("recursive")
-                .and_then(|v| v.as_bool())
+                .and_then(serde_json::Value::as_bool)
                 .unwrap_or(false);
             list_dir(target, recursive).await
         }
@@ -275,6 +275,8 @@ async fn list_dir(path: &Path, recursive: bool) -> SkillResult {
     }
 }
 
+// `async_recursion` génère un `#[must_use]` sur un `Pin<Box<dyn Future>>`.
+#[allow(clippy::double_must_use)]
 #[async_recursion::async_recursion]
 async fn collect_entries(
     base: &Path,
@@ -288,9 +290,8 @@ async fn collect_entries(
         return;
     }
 
-    let mut read_dir = match tokio::fs::read_dir(dir).await {
-        Ok(rd) => rd,
-        Err(_) => return,
+    let Ok(mut read_dir) = tokio::fs::read_dir(dir).await else {
+        return;
     };
 
     while let Ok(Some(entry)) = read_dir.next_entry().await {
@@ -335,6 +336,8 @@ async fn search_files(path: &Path, pattern: &str) -> SkillResult {
     }
 }
 
+// `async_recursion` génère un `#[must_use]` sur un `Pin<Box<dyn Future>>`.
+#[allow(clippy::double_must_use)]
 #[async_recursion::async_recursion]
 async fn search_recursive(
     dir: &Path,
@@ -346,9 +349,8 @@ async fn search_recursive(
         return;
     }
 
-    let mut read_dir = match tokio::fs::read_dir(dir).await {
-        Ok(rd) => rd,
-        Err(_) => return,
+    let Ok(mut read_dir) = tokio::fs::read_dir(dir).await else {
+        return;
     };
 
     let pattern_lower = pattern.to_lowercase();

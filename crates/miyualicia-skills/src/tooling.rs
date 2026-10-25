@@ -390,7 +390,7 @@ mod tests {
     #[test]
     fn capabilities_to_tools_handles_empty() {
         let tools = capabilities_to_tools(std::iter::empty());
-        assert!(tools.is_empty());
+        assert_eq!(tools.len(), 0);
     }
 
     #[test]
@@ -398,7 +398,7 @@ mod tests {
         let cap1 = schedule_event_capability();
         let mut cap2 = cap1.clone();
         cap2.intent = "delete_event".into();
-        let caps = vec![cap1, cap2];
+        let caps = [cap1, cap2];
         let tools = capabilities_to_tools(caps.iter());
         assert_eq!(tools.len(), 2);
         assert_eq!(tools[0].function.name, "jaykoa.schedule_event");
@@ -445,7 +445,7 @@ mod tests {
             tool_type: "function".into(),
             function: FunctionCall {
                 name: "jaykoa.list_today".into(),
-                arguments: "".into(),
+                arguments: String::new(),
             },
         };
         let r = resolve_tool_call(&call).unwrap();

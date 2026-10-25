@@ -15,6 +15,7 @@ use crate::data::types::{TemporalConflict, TemporalEntry};
 ///
 /// Deux entrées sont en conflit si leurs plages [start, end] se chevauchent
 /// (start_a < end_b && end_a > start_b). Les entrées annulées sont ignorées.
+#[must_use]
 pub fn compute_conflicts(entries: &[TemporalEntry]) -> Vec<TemporalConflict> {
     let mut conflicts = Vec::new();
     let active: Vec<&TemporalEntry> = entries
@@ -38,7 +39,7 @@ pub fn compute_conflicts(entries: &[TemporalEntry]) -> Vec<TemporalConflict> {
                     entry_b_id: b.id.clone(),
                     overlap_start: Some(overlap_start.clone()),
                     overlap_end: Some(overlap_end.clone()),
-                    description: Some(format!("Chevauchement {} - {}", overlap_start, overlap_end)),
+                    description: Some(format!("Chevauchement {overlap_start} - {overlap_end}")),
                 });
             }
         }
@@ -77,7 +78,7 @@ mod tests {
             entry("2", "2025-02-16T10:00:00Z", "2025-02-16T11:00:00Z"),
         ];
         let c = compute_conflicts(&entries);
-        assert!(c.is_empty());
+        assert_eq!(c.len(), 0);
     }
 
     #[test]

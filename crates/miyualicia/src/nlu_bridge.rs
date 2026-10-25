@@ -488,7 +488,7 @@ mod tests {
                 assert_eq!(room_id, Some("salon".to_string()));
                 assert_eq!(action, "on");
             }
-            other => panic!("attendu ControlDevice, obtenu {:?}", other),
+            other => panic!("attendu ControlDevice, obtenu {other:?}"),
         }
     }
 
@@ -557,7 +557,7 @@ mod tests {
                 assert_eq!(device_type, "light");
                 assert_eq!(action, "on");
             }
-            other => panic!("attendu ControlDevice via fallback, obtenu {:?}", other),
+            other => panic!("attendu ControlDevice via fallback, obtenu {other:?}"),
         }
     }
 
@@ -616,7 +616,7 @@ mod tests {
             .await
             .expect("stt contract should return transcript");
 
-        assert!(!transcript.trim().is_empty());
+        assert_ne!(transcript.trim(), "");
     }
 
     #[tokio::test]

@@ -122,7 +122,7 @@ pub fn skill_to_tool(skill: &SkillInfo) -> ToolDefinition {
             let prefix = param_desc.split('(').next().unwrap_or(param_desc);
             let enum_values: Vec<serde_json::Value> = prefix
                 .split('|')
-                .map(|s| s.trim())
+                .map(str::trim)
                 .filter(|s| !s.is_empty() && !s.contains(' '))
                 .map(|s| serde_json::Value::String(s.to_string()))
                 .collect();
@@ -289,7 +289,10 @@ impl<'a> GardeTour<'a> {
     }
 
     /// Attache la mémoire de l'utilisateur pour l'outil `memoire_noter`.
-    pub fn avec_memoire(mut self, memoire: Option<&'a dyn crate::outil_memoire::CarnetMaia>) -> Self {
+    pub fn avec_memoire(
+        mut self,
+        memoire: Option<&'a dyn crate::outil_memoire::CarnetMaia>,
+    ) -> Self {
         self.memoire = memoire;
         self
     }
@@ -342,7 +345,10 @@ pub async fn execute_tool_call(
         if let security::PermissionCheck::Denied(reason) =
             security::check_agent_skill_permission(agent, crate::outil_memoire::COMPETENCE_MEMOIRE)
         {
-            let msg = message_refus(tool_call, serde_json::json!({ "success": false, "error": reason }));
+            let msg = message_refus(
+                tool_call,
+                serde_json::json!({ "success": false, "error": reason }),
+            );
             return (msg, log_entry);
         }
         return executer_noter(tool_call, agent, audit_log, garde, log_entry).await;
@@ -512,13 +518,19 @@ async fn executer_noter(
     // Écriture directe seulement si TOUS les résultats d'outils du tour sont `locale` (F3).
     let etranger = !garde.etat.tous_locaux();
     let resultat =
-        crate::outil_memoire::executer(garde.gouvernance, garde.memoire, agent, &params, etranger).await;
+        crate::outil_memoire::executer(garde.gouvernance, garde.memoire, agent, &params, etranger)
+            .await;
     let succes = resultat.get("success").and_then(serde_json::Value::as_bool) == Some(true);
     audit_log.log(AuditEntry {
         timestamp: security::epoch_now(),
         agent_id: agent.id.clone(),
         skill_id: tool_call.function.name.clone(),
-        action: if etranger { "memoire_candidat_tour_etranger" } else { "memoire_noter" }.into(),
+        action: if etranger {
+            "memoire_candidat_tour_etranger"
+        } else {
+            "memoire_noter"
+        }
+        .into(),
         details: tool_call.function.arguments.clone(),
         success: succes,
         client_id: "tool_calling".into(),
@@ -536,10 +548,7 @@ fn injecter_avertissement(messages: &mut Vec<serde_json::Value>) {
         .and_then(|r| r.as_str())
         == Some("system");
     if premier_systeme {
-        if let Some(contenu) = messages
-            .first_mut()
-            .and_then(|m| m.get_mut("content"))
-        {
+        if let Some(contenu) = messages.first_mut().and_then(|m| m.get_mut("content")) {
             let texte = contenu.as_str().unwrap_or("").to_string();
             *contenu = serde_json::Value::String(texte + garde_etranger::AVERTISSEMENT_SYSTEME);
         }
@@ -732,9 +741,15 @@ pub fn repondre_consultation_federee(
     politique: &maia_federee::PolitiqueCorroboration,
     maintenant: u64,
 ) -> Option<ToolChatResult> {
-    let maia_federee::Consultation::Reponse(reponse) =
-        maia_federee::consulter(question, planificateur, lecteur, base, vue, politique, maintenant)
-    else {
+    let maia_federee::Consultation::Reponse(reponse) = maia_federee::consulter(
+        question,
+        planificateur,
+        lecteur,
+        base,
+        vue,
+        politique,
+        maintenant,
+    ) else {
         return None;
     };
     let mut etat = EtatTour::new();
@@ -821,7 +836,9 @@ mod tests {
 
     #[tokio::test]
     async fn memoire_noter_dans_la_boucle_tour_etranger_candidat_seulement() {
-        use maia_memoire::{BorneOctets, Branche, Ecrit, EntrepotMemoire, MemoireMaia, TypeUnite, VueMaia};
+        use maia_memoire::{
+            BorneOctets, Branche, Ecrit, EntrepotMemoire, MemoireMaia, TypeUnite, VueMaia,
+        };
         let agents = AgentRegistry::new();
         // `alicia` déclare la compétence `memoire` (F6) ; `victor` non.
         let alicia = agents.get_agent("alicia").expect("alicia built-in");
@@ -829,61 +846,139 @@ mod tests {
         let audit = AuditLog::new(100);
         let registre = RegistreConfirmations::new();
         let exec = ExecuteurFactice::default();
-        let base = std::fs::read_to_string(crate::gouvernance::tests::chemin_politiques_de_base()).expect("base");
+        let base = std::fs::read_to_string(crate::gouvernance::tests::chemin_politiques_de_base())
+            .expect("base");
         // La politique « maia-memoire-noter » fait partie des politiques de base (config/strongfather/maia.toml).
         let gouv = crate::tamr::tests::gouvernance(&base);
         assert!(gouv.est_operationnelle());
-        let m = std::sync::Arc::new(MemoireMaia::ouvrir(EntrepotMemoire::new(), std::sync::Arc::new(BorneOctets)).await.expect("m"));
+        let m = std::sync::Arc::new(
+            MemoireMaia::ouvrir(EntrepotMemoire::new(), std::sync::Arc::new(BorneOctets))
+                .await
+                .expect("m"),
+        );
         // Domaine « travail » établi par l'utilisateur (F4).
-        m.utilisateur().ecrire(Ecrit::new(Branche::parse("travail.lot").expect("b"), TypeUnite::Fait, "Lot 7", 5)).await.expect("e");
+        m.utilisateur()
+            .ecrire(Ecrit::new(
+                Branche::parse("travail.lot").expect("b"),
+                TypeUnite::Fait,
+                "Lot 7",
+                5,
+            ))
+            .await
+            .expect("e");
         let vue = VueMaia::new(std::sync::Arc::clone(&m));
         let note = |texte: &str| serde_json::json!({ "branche": "travail", "type": "fait", "texte": texte, "importance": 3 });
 
         // Agent sans la compétence `memoire` : refusé avant toute exécution (F6).
         let mut garde = GardeTour::new(&registre, &exec, &gouv).avec_memoire(Some(&vue));
-        let (msg, log) = execute_tool_call(&appel("0", "memoire_noter", note("Aime Rust")), &victor, &audit, &mut garde).await;
-        assert!(contenu(&msg).contains("\"success\":false"), "{}", contenu(&msg));
+        let (msg, log) = execute_tool_call(
+            &appel("0", "memoire_noter", note("Aime Rust")),
+            &victor,
+            &audit,
+            &mut garde,
+        )
+        .await;
+        assert!(
+            contenu(&msg).contains("\"success\":false"),
+            "{}",
+            contenu(&msg)
+        );
         assert!(!log.result_success);
         assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 1);
         assert_eq!(m.utilisateur().candidats().await.expect("k").len(), 0);
 
         // Tour sain : note ordinaire écrite directement.
         let mut garde = GardeTour::new(&registre, &exec, &gouv).avec_memoire(Some(&vue));
-        let (msg, log) = execute_tool_call(&appel("1", "memoire_noter", note("Aime Rust")), &alicia, &audit, &mut garde).await;
-        assert!(contenu(&msg).contains("\"ecrite\":\"travail.f1\""), "{}", contenu(&msg));
+        let (msg, log) = execute_tool_call(
+            &appel("1", "memoire_noter", note("Aime Rust")),
+            &alicia,
+            &audit,
+            &mut garde,
+        )
+        .await;
+        assert!(
+            contenu(&msg).contains("\"ecrite\":\"travail.f1\""),
+            "{}",
+            contenu(&msg)
+        );
         assert!(log.result_success);
 
         // Tour contaminé par web_fetch : la même note n'est qu'un candidat.
         let mut garde = GardeTour::new(&registre, &exec, &gouv).avec_memoire(Some(&vue));
-        execute_tool_call(&appel("2", "web_fetch", serde_json::json!({ "url": "https://exemple.org/" })), &alicia, &audit, &mut garde).await;
+        execute_tool_call(
+            &appel(
+                "2",
+                "web_fetch",
+                serde_json::json!({ "url": "https://exemple.org/" }),
+            ),
+            &alicia,
+            &audit,
+            &mut garde,
+        )
+        .await;
         assert!(garde.contient_etranger());
-        let (msg, log) = execute_tool_call(&appel("3", "memoire_noter", note("Aime Rust")), &alicia, &audit, &mut garde).await;
+        let (msg, log) = execute_tool_call(
+            &appel("3", "memoire_noter", note("Aime Rust")),
+            &alicia,
+            &audit,
+            &mut garde,
+        )
+        .await;
         assert!(contenu(&msg).contains("\"candidat\""), "{}", contenu(&msg));
         assert!(!log.blocked);
-        assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 2, "aucune écriture directe de plus");
+        assert_eq!(
+            m.utilisateur().consulter().await.expect("c").len(),
+            2,
+            "aucune écriture directe de plus"
+        );
         assert_eq!(m.utilisateur().candidats().await.expect("k").len(), 1);
-        assert!(registre.lister().is_empty(), "aucune action suspendue exécutable");
+        assert!(
+            registre.lister().is_empty(),
+            "aucune action suspendue exécutable"
+        );
 
         // Tour avec un fichier lu (provenance `inconnue`, F3) : candidat `etranger` seulement.
         let mut garde = GardeTour::new(&registre, &exec, &gouv).avec_memoire(Some(&vue));
         let (msg, log) = execute_tool_call(
-            &appel("5", "file_ops", serde_json::json!({ "action": "read", "path": "page.html" })),
+            &appel(
+                "5",
+                "file_ops",
+                serde_json::json!({ "action": "read", "path": "page.html" }),
+            ),
             &alicia,
             &audit,
             &mut garde,
         )
         .await;
         assert_eq!(log.provenance, Some(Provenance::Inconnue));
-        assert!(contenu(&msg).starts_with("<<<CONTENU_ETRANGER source=file_ops"), "{}", contenu(&msg));
-        let (msg, _) = execute_tool_call(&appel("6", "memoire_noter", note("Aime Zig")), &alicia, &audit, &mut garde).await;
+        assert!(
+            contenu(&msg).starts_with("<<<CONTENU_ETRANGER source=file_ops"),
+            "{}",
+            contenu(&msg)
+        );
+        let (msg, _) = execute_tool_call(
+            &appel("6", "memoire_noter", note("Aime Zig")),
+            &alicia,
+            &audit,
+            &mut garde,
+        )
+        .await;
         assert!(contenu(&msg).contains("\"candidat\""), "{}", contenu(&msg));
         assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 2);
         let k = m.utilisateur().candidats().await.expect("k");
-        assert!(k.iter().all(|k| k.provenance == maia_memoire::Provenance::Etranger));
+        assert!(k
+            .iter()
+            .all(|k| k.provenance == maia_memoire::Provenance::Etranger));
 
         // Sans mémoire attachée : refus.
         let mut garde = GardeTour::new(&registre, &exec, &gouv);
-        let (msg, _) = execute_tool_call(&appel("4", "memoire_noter", serde_json::json!({})), &alicia, &audit, &mut garde).await;
+        let (msg, _) = execute_tool_call(
+            &appel("4", "memoire_noter", serde_json::json!({})),
+            &alicia,
+            &audit,
+            &mut garde,
+        )
+        .await;
         assert!(contenu(&msg).contains("\"success\":false"));
     }
 
@@ -899,7 +994,11 @@ mod tests {
 
         // 1. web_fetch : exécuté, résultat marqué étranger et délimité.
         let (msg, log) = execute_tool_call(
-            &appel("1", "web_fetch", serde_json::json!({ "url": "https://exemple.org/" })),
+            &appel(
+                "1",
+                "web_fetch",
+                serde_json::json!({ "url": "https://exemple.org/" }),
+            ),
             &victor,
             &audit,
             &mut garde,
@@ -1068,13 +1167,21 @@ rule = "data.outil == 'file_ops'"
         );
         let mut garde = GardeTour::new(&registre, &exec, &gouv);
         let (msg, log) = execute_tool_call(
-            &appel("1", "web_fetch", serde_json::json!({ "url": "https://exemple.org/" })),
+            &appel(
+                "1",
+                "web_fetch",
+                serde_json::json!({ "url": "https://exemple.org/" }),
+            ),
             &victor,
             &audit,
             &mut garde,
         )
         .await;
-        assert!(contenu(&msg).contains("refusé par StrongFather"), "{}", contenu(&msg));
+        assert!(
+            contenu(&msg).contains("refusé par StrongFather"),
+            "{}",
+            contenu(&msg)
+        );
         assert!(!log.result_success);
         assert!(exec.appels().is_empty(), "outil refusé ⇒ non exécuté");
         assert!(!garde.contient_etranger());
@@ -1082,7 +1189,11 @@ rule = "data.outil == 'file_ops'"
 
         // Le skill autorisé passe.
         let (_, log) = execute_tool_call(
-            &appel("2", "file_ops", serde_json::json!({ "action": "read", "path": "a" })),
+            &appel(
+                "2",
+                "file_ops",
+                serde_json::json!({ "action": "read", "path": "a" }),
+            ),
             &victor,
             &audit,
             &mut garde,
@@ -1102,7 +1213,11 @@ rule = "data.outil == 'file_ops'"
         let gouv = GouvernanceMaia::depuis_fichier("/chemin/inexistant/maia.toml");
         let mut garde = GardeTour::new(&registre, &exec, &gouv);
         let (msg, _) = execute_tool_call(
-            &appel("1", "file_ops", serde_json::json!({ "action": "read", "path": "a" })),
+            &appel(
+                "1",
+                "file_ops",
+                serde_json::json!({ "action": "read", "path": "a" }),
+            ),
             &victor,
             &audit,
             &mut garde,
@@ -1123,9 +1238,11 @@ rule = "data.outil == 'file_ops'"
         )
         .await;
         let id = log.confirmation_id.expect("suspendue");
-        assert!(executer_confirmation(&id, &registre, &agents, &audit, &exec, &gouv)
-            .await
-            .is_err());
+        assert!(
+            executer_confirmation(&id, &registre, &agents, &audit, &exec, &gouv)
+                .await
+                .is_err()
+        );
         assert!(exec.appels().is_empty(), "refus ⇒ aucune exécution");
     }
 
@@ -1137,9 +1254,10 @@ rule = "data.outil == 'file_ops'"
         let victor = agents.get_agent("victor").expect("victor built-in");
         let exec = ExecuteurFactice::default();
         let gouv = crate::gouvernance::tests::gouvernance_de_base();
-        let params: HashMap<String, serde_json::Value> =
-            serde_json::from_value(serde_json::json!({ "action": "write", "path": "x", "content": "y" }))
-                .unwrap_or_default();
+        let params: HashMap<String, serde_json::Value> = serde_json::from_value(
+            serde_json::json!({ "action": "write", "path": "x", "content": "y" }),
+        )
+        .unwrap_or_default();
         let demande = DemandeOutil {
             agent: &victor,
             skill_id: "file_ops",
@@ -1149,11 +1267,18 @@ rule = "data.outil == 'file_ops'"
             mode: ModeExecution::Boucle,
             appelant: gouvernance::APPELANT_LOCAL,
         };
-        let refus = executer_outil_gouverne(&gouv, &exec, &demande).await.unwrap_err();
+        let refus = executer_outil_gouverne(&gouv, &exec, &demande)
+            .await
+            .unwrap_err();
         assert!(refus.contains("maia-etranger-effet-en-boucle"), "{refus}");
         assert!(exec.appels().is_empty(), "refus ⇒ aucune exécution");
-        let sain = DemandeOutil { contenu_etranger: false, ..demande };
-        let (r, regle) = executer_outil_gouverne(&gouv, &exec, &sain).await.expect("autorisé");
+        let sain = DemandeOutil {
+            contenu_etranger: false,
+            ..demande
+        };
+        let (r, regle) = executer_outil_gouverne(&gouv, &exec, &sain)
+            .await
+            .expect("autorisé");
         assert!(r.success);
         assert_eq!(regle, "maia-outil-file-ops");
     }
@@ -1183,8 +1308,9 @@ mod tests_federee {
     use super::*;
     use crate::agents::AgentRegistry;
     use maia_federee::{
-        cog_de_cle, sceller_fiche, Audience, BaseEtrangere, Fiche, ModeleLecteur, Plan, Planificateur,
-        PolitiqueCorroboration, Qualite, Relation, RequeteTypee, TypeFiche, VueFederale,
+        cog_de_cle, sceller_fiche, Audience, BaseEtrangere, Fiche, ModeleLecteur, Plan,
+        Planificateur, PolitiqueCorroboration, Qualite, Relation, RequeteTypee, TypeFiche,
+        VueFederale,
     };
     use miyusceau::CleSignature;
     use std::collections::BTreeMap;
@@ -1210,7 +1336,14 @@ mod tests_federee {
             if let Ok(mut n) = self.0.lock() {
                 *n += 1;
             }
-            Box::pin(async { SkillResult { success: true, output: serde_json::json!({}), error: None, duration_ms: 0 } })
+            Box::pin(async {
+                SkillResult {
+                    success: true,
+                    output: serde_json::json!({}),
+                    error: None,
+                    duration_ms: 0,
+                }
+            })
         }
     }
 
@@ -1244,7 +1377,10 @@ mod tests_federee {
             let mut a = Vec::new();
             if let Some(l) = invite.lines().find_map(|l| l.strip_prefix("relations : ")) {
                 for r in l.split(" ; ") {
-                    let t: Vec<&str> = r.trim_matches(|c| c == '(' || c == ')').split(" | ").collect();
+                    let t: Vec<&str> = r
+                        .trim_matches(|c| c == '(' || c == ')')
+                        .split(" | ")
+                        .collect();
                     if let [s, p, o] = t.as_slice() {
                         a.push(serde_json::json!({"sujet": s, "predicat": p, "objet": o}));
                     }
@@ -1261,7 +1397,11 @@ mod tests_federee {
             sujet: "Capitale de la France".into(),
             type_fiche: TypeFiche::Fait,
             texte: texte.into(),
-            relations: vec![Relation { sujet: rel.0.into(), predicat: rel.1.into(), objet: rel.2.into() }],
+            relations: vec![Relation {
+                sujet: rel.0.into(),
+                predicat: rel.1.into(),
+                objet: rel.2.into(),
+            }],
             sources: vec!["atlas".into()],
             date: T - 100,
             version: 1,
@@ -1277,10 +1417,18 @@ mod tests_federee {
     async fn reponse_sourcee_puis_injection_sans_effet_au_tour_suivant() {
         let local = CleSignature::generer();
         let membres: Vec<CleSignature> = (0..4).map(|_| CleSignature::generer()).collect();
-        let vue = Vue(membres.iter().map(|c| (cog_de_cle(&c.cle_publique()).expect("cog"), Qualite::Membre)).collect());
+        let vue = Vue(membres
+            .iter()
+            .map(|c| (cog_de_cle(&c.cle_publique()).expect("cog"), Qualite::Membre))
+            .collect());
         let mut base = BaseEtrangere::new(cog_de_cle(&local.cle_publique()).expect("cog"));
         for (i, c) in membres[..3].iter().enumerate() {
-            let o = fiche(c, &format!("f{i}"), "Paris est la capitale de la France.", ("Paris", "capitale de", "France"));
+            let o = fiche(
+                c,
+                &format!("f{i}"),
+                "Paris est la capitale de la France.",
+                ("Paris", "capitale de", "France"),
+            );
             base.recevoir(&o, &vue, T).expect("reçue");
         }
         let piege = fiche(
@@ -1294,16 +1442,35 @@ mod tests_federee {
         let planificateur = PlanificateurEspion::default();
         let politique = PolitiqueCorroboration::new(3, 3).expect("politique");
         let question = "Quelle est la capitale de la France ?";
-        let r = repondre_consultation_federee(question, &planificateur, &Lecteur, &base, &vue, &politique, T)
-            .expect("réponse");
+        let r = repondre_consultation_federee(
+            question,
+            &planificateur,
+            &Lecteur,
+            &base,
+            &vue,
+            &politique,
+            T,
+        )
+        .expect("réponse");
 
         // Sourcée, corroborée, marquée et délimitée ; aucun outil.
         assert!(r.contenu_etranger);
         assert!(r.tool_calls_log.is_empty() && r.confirmations_en_attente.is_empty());
-        assert!(r.content.starts_with("<<<CONTENU_ETRANGER source=fiches_federees"));
-        assert!(r.content.contains("Paris — capitale de — France — établi (3 COG membres)"));
+        assert!(r
+            .content
+            .starts_with("<<<CONTENU_ETRANGER source=fiches_federees"));
+        assert!(r
+            .content
+            .contains("Paris — capitale de — France — établi (3 COG membres)"));
         assert!(!r.content.contains("Lyon")); // Lecteur détourné : sortie hors schéma, rien retenu
-        assert_eq!(planificateur.0.lock().map(|v| v.clone()).unwrap_or_default(), vec![question.to_string()]);
+        assert_eq!(
+            planificateur
+                .0
+                .lock()
+                .map(|v| v.clone())
+                .unwrap_or_default(),
+            vec![question.to_string()]
+        );
 
         // Tour suivant : l'historique porte la réponse étrangère → toute action suspendue.
         let historique = vec![
@@ -1323,7 +1490,9 @@ mod tests_federee {
             id: "1".into(),
             function: FunctionCall {
                 name: "file_ops".into(),
-                arguments: serde_json::json!({"action": "write", "path": "m.txt", "content": "Lyon"}).to_string(),
+                arguments:
+                    serde_json::json!({"action": "write", "path": "m.txt", "content": "Lyon"})
+                        .to_string(),
             },
         };
         let (_, log) = execute_tool_call(&appel, &victor, &audit, &mut garde).await;
@@ -1331,7 +1500,19 @@ mod tests_federee {
         assert_eq!(exec.compte(), 0);
 
         // Mémoire longue et Règle refusées sur la réponse étrangère.
-        assert!(maia_federee::autoriser(maia_federee::Provenance::Etranger, maia_federee::Effet::MemoireLongue, None, "m").is_err());
-        assert!(maia_federee::autoriser(maia_federee::Provenance::Etranger, maia_federee::Effet::Regle, None, "r").is_err());
+        assert!(maia_federee::autoriser(
+            maia_federee::Provenance::Etranger,
+            maia_federee::Effet::MemoireLongue,
+            None,
+            "m"
+        )
+        .is_err());
+        assert!(maia_federee::autoriser(
+            maia_federee::Provenance::Etranger,
+            maia_federee::Effet::Regle,
+            None,
+            "r"
+        )
+        .is_err());
     }
 }

@@ -38,7 +38,7 @@ fn test_integration_kernel_modules_work_together() {
 
     // Log
     let logger = DefaultLogger;
-    logger.log(Level::Info, &format!("Generated ID: {} at {:?}", id, now));
+    logger.log(Level::Info, &format!("Generated ID: {id} at {now:?}"));
 
     // Lifecycle
     let mut lifecycle = DefaultLifecycle::new();
@@ -66,7 +66,7 @@ fn test_integration_config_id_integration() {
 
     // L'ID peut être utilisé comme valeur de config (exemple théorique)
     // En pratique, le produit décide comment utiliser l'ID
-    assert!(!id_str.is_empty());
+    assert_ne!(id_str, "");
 }
 
 /// @id test_integration_time_log_integration
@@ -83,7 +83,7 @@ fn test_integration_time_log_integration() {
     let timestamp = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
 
     // Logger avec timestamp (le produit formate)
-    logger.log(Level::Info, &format!("Event at timestamp: {}", timestamp));
+    logger.log(Level::Info, &format!("Event at timestamp: {timestamp}"));
 
     // Pas de panic
     assert!(timestamp > 0);
@@ -250,7 +250,7 @@ fn test_integration_invariant_k10_governance() {
     let id_generator = UuidIdGenerator;
 
     // Le Kernel fournit l'ID, le produit décide comment l'utiliser
-    let id = id_generator.generate();
+    let _id = id_generator.generate();
 
     // Le Kernel fournit la config, le produit décide des clés
     let _value = config.get("PRODUCT_KEY");

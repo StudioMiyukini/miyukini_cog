@@ -77,6 +77,7 @@ impl FileHandler {
     /// propagated without an extra database round-trip so that callers
     /// (e.g. thumbnail generation) can resolve the physical blob path
     /// immediately.
+    #[allow(clippy::result_large_err)] // Err = `Response` axum, convention des handlers.
     async fn upload_file_inner(
         state: &GlobalState,
         auth_user: &AuthUser,

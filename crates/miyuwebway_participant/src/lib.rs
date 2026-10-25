@@ -139,7 +139,7 @@ mod tests {
     fn test_discovery_build_send() {
         let c = ctx();
         assert_eq!(discovery_request_build(&c, Some("p")).unwrap(), b"p");
-        assert!(discovery_request_build(&c, None).unwrap().is_empty());
+        assert_eq!(discovery_request_build(&c, None).unwrap(), [] as [u8; 0]);
         let e = discovery_request_send(&c, &[], b"").unwrap_err();
         assert!(matches!(e, MiyuwebwayParticipantError::ConnectionFailed(_)));
     }
@@ -164,7 +164,7 @@ mod tests {
     #[test]
     fn test_cog_list_get_update_merge() {
         let c = ctx();
-        assert!(cog_list_get(&c).unwrap().is_empty());
+        assert_eq!(cog_list_get(&c).unwrap(), [] as [std::string::String; 0]);
         cog_list_update(&c, "cog-1", "data").unwrap();
         let list = cog_list_get(&c).unwrap();
         assert_eq!(list.len(), 1);

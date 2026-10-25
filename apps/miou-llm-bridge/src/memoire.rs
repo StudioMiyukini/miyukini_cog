@@ -36,7 +36,9 @@ pub struct MemoireUtilisateur {
 
 impl std::fmt::Debug for MemoireUtilisateur {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MemoireUtilisateur").field("budget", &self.budget).finish_non_exhaustive()
+        f.debug_struct("MemoireUtilisateur")
+            .field("budget", &self.budget)
+            .finish_non_exhaustive()
     }
 }
 
@@ -50,7 +52,11 @@ impl MemoireUtilisateur {
     pub async fn bloc(&self, requete: &str) -> Option<String> {
         match self.vue.assembler(requete, self.budget).await {
             Ok(bloc) => {
-                tracing::debug!(jetons = bloc.jetons, budget = bloc.budget, "mémoire assemblée");
+                tracing::debug!(
+                    jetons = bloc.jetons,
+                    budget = bloc.budget,
+                    "mémoire assemblée"
+                );
                 Some(bloc.texte)
             }
             Err(e) => {
@@ -74,10 +80,16 @@ pub struct MemoireOuverte {
 
 /// Ouvre la mémoire configurée par l'environnement ; `None` si non configurée ou refusée.
 pub async fn ouvrir_depuis_env() -> Option<MemoireOuverte> {
-    let utilisateur = std::env::var(ENV_UTILISATEUR).ok().filter(|u| !u.trim().is_empty())?;
+    let utilisateur = std::env::var(ENV_UTILISATEUR)
+        .ok()
+        .filter(|u| !u.trim().is_empty())?;
     let utilisateur = utilisateur.trim().to_string();
     let (vue, proprietaire) = ouvrir(&utilisateur).await?;
-    Some(MemoireOuverte { vue, proprietaire, utilisateur })
+    Some(MemoireOuverte {
+        vue,
+        proprietaire,
+        utilisateur,
+    })
 }
 
 /// Ouvre la mémoire configurée par l'environnement (vue MAIA seule).
@@ -86,7 +98,9 @@ pub async fn depuis_env() -> Option<MemoireUtilisateur> {
     ouvrir_depuis_env().await.map(|o| o.vue)
 }
 
-async fn ouvrir(utilisateur: &str) -> Option<(MemoireUtilisateur, Arc<MemoireMaia<EntrepotKindMother>>)> {
+async fn ouvrir(
+    utilisateur: &str,
+) -> Option<(MemoireUtilisateur, Arc<MemoireMaia<EntrepotKindMother>>)> {
     let profil = std::env::var(ENV_PROFIL)
         .ok()
         .and_then(|p| Profil::depuis_str(&p))

@@ -19,6 +19,7 @@ pub enum EntryPoint {
 
 impl EntryPoint {
     /// Label lisible en UI.
+    #[must_use]
     pub const fn label(self) -> &'static str {
         match self {
             Self::Account => "Account",
@@ -54,6 +55,7 @@ pub enum DashboardSection {
 
 impl DashboardSection {
     /// Titre de la section.
+    #[must_use]
     pub const fn label(self) -> &'static str {
         match self {
             Self::Overview => "Vue globale",

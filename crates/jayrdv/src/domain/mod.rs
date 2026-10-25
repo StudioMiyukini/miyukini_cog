@@ -1,7 +1,7 @@
-//! Logique métier JayRDV : création, validation, mise à jour d'entités.
+//! Logique métier `JayRDV` : création, validation, mise à jour d'entités.
 //!
-//! @id     jayrdv_domain
-//! @do     implement_jayrdv_business_logic
+//! @id     `jayrdv_domain`
+//! @do     `implement_jayrdv_business_logic`
 //@human ! @role   domain
 //! @layer  domain
 //! @human  Couche domain pure — validations temporelles, cycles de vie des statuts,
@@ -47,6 +47,13 @@ fn validate_date_range(start_at: &str, end_at: &str) -> Result<(), DbError> {
 // ---------------------------------------------------------------------------
 
 /// Crée un rendez-vous avec validation temporelle.
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si les dates sont invalides ou mal ordonnées, ou si le stockage échoue.
+// Signature plate conservée : chaque champ correspond à un paramètre de l'API JayRDV ;
+// un regroupement en structure est prévu avec la refonte de l'API (hors périmètre beta).
+#[allow(clippy::too_many_arguments)]
 pub fn appointment_create(
     store: &JayRdvStore,
     title: String,
@@ -87,6 +94,10 @@ pub fn appointment_create(
 }
 
 /// Met à jour le statut d'un rendez-vous (hors annulation — voir `appointment_cancel`).
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si le statut demandé est `Cancelled`, si le rendez-vous est introuvable ou si le stockage échoue.
 pub fn appointment_set_status(
     store: &JayRdvStore,
     id: &str,
@@ -107,6 +118,10 @@ pub fn appointment_set_status(
 }
 
 /// Annule un rendez-vous avec motif et acteur (client ou professionnel).
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si le rendez-vous est introuvable, déjà annulé, ou si le stockage échoue.
 pub fn appointment_cancel(
     store: &JayRdvStore,
     id: &str,
@@ -132,6 +147,10 @@ pub fn appointment_cancel(
 // ---------------------------------------------------------------------------
 
 /// Crée une ressource.
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si le stockage échoue (verrou empoisonné ou identifiant déjà présent).
 pub fn resource_create(
     store: &JayRdvStore,
     name: String,
@@ -155,6 +174,10 @@ pub fn resource_create(
 // ---------------------------------------------------------------------------
 
 /// Crée un créneau disponible avec validation temporelle.
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si les dates sont invalides ou mal ordonnées, ou si le stockage échoue.
 pub fn slot_create(
     store: &JayRdvStore,
     resource_id: String,
@@ -185,6 +208,10 @@ pub fn slot_create(
 const HOLD_DEFAUT: chrono::Duration = chrono::Duration::seconds(300);
 
 /// Verrouille temporairement un créneau (hold pendant le parcours client).
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si le créneau est introuvable, non disponible, ou si le stockage échoue.
 pub fn slot_hold(
     store: &JayRdvStore,
     slot_id: &str,
@@ -211,6 +238,10 @@ pub fn slot_hold(
 }
 
 /// Libère un créneau verrouillé (revient à Available).
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si le créneau est introuvable, non verrouillé, ou si le stockage échoue.
 pub fn slot_release(store: &JayRdvStore, slot_id: &str) -> Result<Slot, DbError> {
     let mut s = store
         .slot_by_id(slot_id)?
@@ -229,7 +260,11 @@ pub fn slot_release(store: &JayRdvStore, slot_id: &str) -> Result<Slot, DbError>
     Ok(s)
 }
 
-/// Libère tous les créneaux dont le hold a expiré (held_until < now). Retourne le nombre de créneaux libérés.
+/// Libère tous les créneaux dont le hold a expiré (`held_until` < now). Retourne le nombre de créneaux libérés.
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si la lecture des créneaux expirés échoue.
 pub fn slot_release_expired(store: &JayRdvStore) -> Result<usize, DbError> {
     let ids = store.slot_list_expired_holds()?;
     let mut count = 0;
@@ -246,6 +281,13 @@ pub fn slot_release_expired(store: &JayRdvStore) -> Result<usize, DbError> {
 // ---------------------------------------------------------------------------
 
 /// Crée un professionnel avec paramètres par défaut.
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si le stockage échoue (verrou empoisonné ou identifiant déjà présent).
+// Signature plate conservée : chaque champ correspond à un paramètre de l'API JayRDV ;
+// un regroupement en structure est prévu avec la refonte de l'API (hors périmètre beta).
+#[allow(clippy::too_many_arguments)]
 pub fn professional_create(
     store: &JayRdvStore,
     name: String,
@@ -284,6 +326,10 @@ pub fn professional_create(
 // ---------------------------------------------------------------------------
 
 /// Crée un praticien (collaborateur).
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si le stockage échoue (verrou empoisonné ou identifiant déjà présent).
 pub fn practitioner_create(
     store: &JayRdvStore,
     professional_id: String,
@@ -312,6 +358,10 @@ pub fn practitioner_create(
 // ---------------------------------------------------------------------------
 
 /// Crée une plage horaire récurrente (planning).
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si `day_of_week` dépasse 6 ou si le stockage échoue.
 pub fn schedule_create(
     store: &JayRdvStore,
     owner_type: ScheduleOwner,
@@ -342,6 +392,10 @@ pub fn schedule_create(
 // ---------------------------------------------------------------------------
 
 /// Crée une exception (congés, absence, fermeture).
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si le stockage échoue (verrou empoisonné ou identifiant déjà présent).
 pub fn exception_create(
     store: &JayRdvStore,
     owner_type: ScheduleOwner,
@@ -369,6 +423,10 @@ pub fn exception_create(
 // ---------------------------------------------------------------------------
 
 /// Crée un service (prestation).
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si le stockage échoue (verrou empoisonné ou identifiant déjà présent).
 pub fn service_create(
     store: &JayRdvStore,
     name: String,
@@ -399,6 +457,10 @@ pub fn service_create(
 // ---------------------------------------------------------------------------
 
 /// Crée une fiche client.
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si le stockage échoue (verrou empoisonné ou identifiant déjà présent).
 pub fn client_create(
     store: &JayRdvStore,
     name: String,
@@ -428,6 +490,10 @@ pub fn client_create(
 // ---------------------------------------------------------------------------
 
 /// Enregistre un rappel pour un rendez-vous.
+///
+/// # Errors
+///
+/// Retourne [`DbError`] si le stockage échoue (verrou empoisonné ou identifiant déjà présent).
 pub fn reminder_create(
     store: &JayRdvStore,
     appointment_id: String,

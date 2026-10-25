@@ -86,12 +86,12 @@ pub struct NativeInferenceConfig {
 }
 
 /// Configuration de sécurité renforcée.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct SecurityConfig {
     /// Origines autorisées (IP/CIDR source). Vide = loopback uniquement
     /// (ce qui n'est PAS une restriction si le bridge est derrière un proxy
     /// local : voir `trusted_proxies`).
-    /// Exemples : ["127.0.0.1", "::1", "192.168.1.0/24"]
+    /// Exemples : `["127.0.0.1", "::1", "192.168.1.0/24"]`
     #[serde(default)]
     pub allowed_origins: Vec<String>,
 
@@ -117,7 +117,7 @@ pub struct SecurityConfig {
     #[serde(default)]
     pub trusted_proxies: Vec<String>,
 
-    /// Origines CORS autorisées (ex: ["http://localhost:3000"]).
+    /// Origines CORS autorisées (ex: `["http://localhost:3000"]`).
     /// Vide (défaut) = pas de CORS cross-origin. Le joker `*` est ignoré.
     #[serde(default)]
     pub cors_allowed_origins: Vec<String>,
@@ -140,23 +140,6 @@ pub struct SecurityConfig {
     /// Vide = mêmes règles que allowed_origins.
     #[serde(default)]
     pub admin_origins: Vec<String>,
-}
-
-impl Default for SecurityConfig {
-    fn default() -> Self {
-        Self {
-            allowed_origins: Vec::new(),
-            cles_appelants: Vec::new(),
-            cles_hub_team: Vec::new(),
-            require_auth_all: None,
-            trusted_proxies: Vec::new(),
-            cors_allowed_origins: Vec::new(),
-            hmac_secret: None,
-            encryption_key: None,
-            strict_user_agent: false,
-            admin_origins: Vec::new(),
-        }
-    }
 }
 
 fn default_bind_addr() -> String {
@@ -212,8 +195,7 @@ impl Default for BridgeConfig {
 pub fn is_loopback_bind(bind_addr: &str) -> bool {
     bind_addr
         .parse::<std::net::SocketAddr>()
-        .map(|a| a.ip().to_canonical().is_loopback())
-        .unwrap_or(false)
+        .is_ok_and(|a| a.ip().to_canonical().is_loopback())
 }
 
 /// Clés publiques épinglées `(appelants, hubs TEAM)`.
@@ -267,7 +249,10 @@ impl BridgeConfig {
             return 0;
         };
         let mut ajoutees = 0;
-        for cle in valeur.split(|c: char| c == ',' || c.is_whitespace()).filter(|c| !c.is_empty()) {
+        for cle in valeur
+            .split(|c: char| c == ',' || c.is_whitespace())
+            .filter(|c| !c.is_empty())
+        {
             if !self.security.cles_appelants.iter().any(|c| c.trim() == cle) {
                 self.security.cles_appelants.push(cle.to_string());
                 ajoutees += 1;
@@ -279,7 +264,9 @@ impl BridgeConfig {
     /// Valide la configuration (fail-closed). À appeler avant d'ouvrir le port :
     /// clés épinglées bien formées, et pas de bind non-loopback sans appelant.
     pub fn validate_startup(&self) -> Result<(), String> {
-        let (appelants, hubs) = self.cles_epinglees().map_err(|e| format!("Refus de démarrer : {e}"))?;
+        let (appelants, hubs) = self
+            .cles_epinglees()
+            .map_err(|e| format!("Refus de démarrer : {e}"))?;
         if !is_loopback_bind(&self.bind_addr) && appelants.is_empty() && hubs.is_empty() {
             return Err(format!(
                 "Refus de démarrer : bind_addr={} n'est pas loopback et aucun appelant \
@@ -363,7 +350,9 @@ mod tests {
     use super::*;
 
     fn cle_b64() -> String {
-        miyauth::http::service::encoder_cle_publique(&miyusceau::CleSignature::generer().cle_publique())
+        miyauth::http::service::encoder_cle_publique(
+            &miyusceau::CleSignature::generer().cle_publique(),
+        )
     }
 
     #[test]
@@ -401,9 +390,18 @@ mod tests {
             "auth_token = \"s3cret\"\n[security]\nrequire_auth_all = true\nhmac_secret = \"h\"\n",
         )
         .unwrap();
-        assert_eq!(c.champs_obsoletes(), vec!["auth_token", "security.require_auth_all", "security.hmac_secret"]);
+        assert_eq!(
+            c.champs_obsoletes(),
+            vec![
+                "auth_token",
+                "security.require_auth_all",
+                "security.hmac_secret"
+            ]
+        );
         let t = toml::to_string(&c).unwrap();
-        assert!(!t.contains("s3cret") && !t.contains("hmac_secret") && !t.contains("require_auth_all"));
+        assert!(
+            !t.contains("s3cret") && !t.contains("hmac_secret") && !t.contains("require_auth_all")
+        );
     }
 
     #[test]

@@ -14,6 +14,7 @@
 //!
 //! Seul C conservé : llama.cpp (moteur tenseur GPU — irremplaçable en pur Rust pour GGUF).
 
+use std::fmt::Write as _;
 use std::path::PathBuf;
 // C-10 : un mutex empoisonné est levé sans panique (l'état — modèle chargé,
 // cache de scan — reste utilisable ; chaque inférence recrée son contexte).
@@ -249,9 +250,10 @@ impl LlmEngine {
 
         let eos = loaded.model.token_eos();
         let mut output = Vec::new();
-        let mut n_cur = tokens.len() as i32;
+        let debut = i32::try_from(tokens.len())
+            .map_err(|_| LlmError::LlamaError("Prompt trop long pour le contexte".into()))?;
 
-        for _ in 0..max_tokens {
+        for n_cur in (debut..=i32::MAX).take(max_tokens as usize) {
             let mut candidates = ctx.token_data_array();
             sampler.apply(&mut candidates);
             let token = candidates
@@ -271,7 +273,6 @@ impl LlmEngine {
                 .map_err(|e| LlmError::LlamaError(format!("Batch add : {e}")))?;
             ctx.decode(&mut batch)
                 .map_err(|e| LlmError::LlamaError(format!("Decode gen : {e}")))?;
-            n_cur += 1;
         }
 
         let text: String = output
@@ -294,6 +295,8 @@ impl LlmEngine {
     /// au fur et à mesure de leur génération.
     ///
     /// La tâche bloquante est gérée en interne via `tokio::task::spawn_blocking`.
+    // `async` conservé : API publique appelée avec `.await` par les handlers HTTP.
+    #[allow(clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn chat_stream(
         &self,
         messages: Vec<serde_json::Value>,
@@ -342,7 +345,8 @@ fn decode_prompt(
         } else {
             let mut batch = LlamaBatch::new(chunk.len(), 1);
             for (i, token) in chunk.iter().enumerate() {
-                let pos = (n_cur + i) as i32;
+                let pos = i32::try_from(n_cur + i)
+                    .map_err(|_| LlmError::LlamaError("Position de token hors bornes".into()))?;
                 let is_last = n_cur + i == tokens.len() - 1;
                 batch
                     .add(*token, pos, &[0], is_last)
@@ -368,12 +372,9 @@ fn stream_inference(
     tx: mpsc::Sender<StreamMsg>,
 ) {
     let state = engine.state.lock().unwrap_or_else(PoisonError::into_inner);
-    let loaded = match state.loaded.as_ref() {
-        Some(l) => l,
-        None => {
-            let _ = tx.blocking_send(StreamMsg::Error("Aucun modèle chargé".into()));
-            return;
-        }
+    let Some(loaded) = state.loaded.as_ref() else {
+        let _ = tx.blocking_send(StreamMsg::Error("Aucun modèle chargé".into()));
+        return;
     };
 
     let prompt = build_chat_prompt(messages);
@@ -421,14 +422,16 @@ fn stream_inference(
 
     let eos = loaded.model.token_eos();
     let mut completion_tokens = 0u32;
-    let mut n_cur = tokens.len() as i32;
+    let Ok(debut) = i32::try_from(tokens.len()) else {
+        let _ = tx.blocking_send(StreamMsg::Error("Prompt trop long pour le contexte".into()));
+        return;
+    };
 
-    for _ in 0..max_tokens {
+    for n_cur in (debut..=i32::MAX).take(max_tokens as usize) {
         let mut candidates = ctx.token_data_array();
         sampler.apply(&mut candidates);
-        let token = match candidates.selected_token() {
-            Some(t) => t,
-            None => break,
+        let Some(token) = candidates.selected_token() else {
+            break;
         };
         sampler.accept(token);
 
@@ -444,12 +447,11 @@ fn stream_inference(
             .and_then(|b| String::from_utf8(b).ok())
             .unwrap_or_default();
 
-        if !piece.is_empty() {
-            if tx.blocking_send(StreamMsg::Token(piece)).is_err() {
+        if !piece.is_empty()
+            && tx.blocking_send(StreamMsg::Token(piece)).is_err() {
                 // Le receiver a été drop — arrêter la génération
                 return;
             }
-        }
 
         completion_tokens += 1;
 
@@ -460,7 +462,6 @@ fn stream_inference(
         if ctx.decode(&mut batch).is_err() {
             break;
         }
-        n_cur += 1;
     }
 
     let _ = tx.blocking_send(StreamMsg::Done(prompt_tokens, completion_tokens));
@@ -476,7 +477,8 @@ pub fn build_chat_prompt(messages: &[serde_json::Value]) -> String {
         let role = msg.get("role").and_then(|r| r.as_str()).unwrap_or("user");
         let content = msg.get("content").and_then(|c| c.as_str()).unwrap_or("");
 
-        prompt.push_str(&format!("<|im_start|>{role}\n{content}<|im_end|>\n"));
+        // L'écriture dans une String ne peut pas échouer.
+        let _ = writeln!(prompt, "<|im_start|>{role}\n{content}<|im_end|>");
     }
 
     // Amorcer la réponse assistant

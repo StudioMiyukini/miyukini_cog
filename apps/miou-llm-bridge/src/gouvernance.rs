@@ -448,7 +448,11 @@ pub(crate) mod tests {
         for resume in agents.list_agents() {
             let agent = agents.get_agent(&resume.id).expect("agent");
             // `memoire` est une compétence (outil `memoire_noter`, intention propre), pas un skill.
-            for skill in agent.skill_ids.iter().filter(|s| s.as_str() != crate::outil_memoire::COMPETENCE_MEMOIRE) {
+            for skill in agent
+                .skill_ids
+                .iter()
+                .filter(|s| s.as_str() != crate::outil_memoire::COMPETENCE_MEMOIRE)
+            {
                 let p = match skill.as_str() {
                     "file_ops" => &lecture,
                     "web_fetch" => &url,

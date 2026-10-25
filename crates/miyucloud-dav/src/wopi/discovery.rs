@@ -58,10 +58,7 @@ pub async fn handle_check_file_info(
     // We search by looking up the file directly using the store's resolve approach.
     // For WOPI, we use a simplified path: /{file_id} which the store treats as a name lookup at root.
     let resource = state.store.resolve_path(&owner_id, &format!("/{file_id}"))?;
-    let file = match resource {
-        DavResource::File(f) => f,
-        _ => return Err(DavError::NotFound("File not found".into())),
-    };
+    let DavResource::File(file) = resource else { return Err(DavError::NotFound("File not found".into())) };
 
     Ok(Json(CheckFileInfoResponse {
         base_file_name: file.name.clone(),

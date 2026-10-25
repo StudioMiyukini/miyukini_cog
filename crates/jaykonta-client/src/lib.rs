@@ -116,6 +116,8 @@ pub enum JayKontaError {
 
 /// Trait abstrait pour les opérations JayKonta exposables à Alicia.
 #[async_trait]
+// `#[async_trait]` pose lui-même `#[must_use]` sur la future retournée (déjà must_use).
+#[allow(clippy::double_must_use)]
 pub trait JayKontaBackend: Send + Sync {
     /// Crée un mouvement et retourne le `MovementSummary` posé.
     async fn add_movement(
@@ -204,7 +206,7 @@ impl JayKontaClient {
             Some(Value::Number(n)) => n
                 .as_u64()
                 .filter(|v| *v > 0)
-                .map(|v| v as usize)
+                .and_then(|v| usize::try_from(v).ok())
                 .ok_or_else(|| {
                     JayKontaError::InvalidParam(format!(
                         "limit doit être un entier > 0, reçu {n}"

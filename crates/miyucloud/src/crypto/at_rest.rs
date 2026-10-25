@@ -134,7 +134,7 @@ mod tests {
         let key = test_key();
         let encrypted = encrypt_chunk(&key, b"").unwrap();
         let decrypted = decrypt_chunk(&key, &encrypted).unwrap();
-        assert!(decrypted.is_empty());
+        assert_eq!(decrypted, [] as [u8; 0]);
     }
 
     #[test]

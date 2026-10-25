@@ -22,11 +22,16 @@ pub struct IntegrationPipeline {
 
 impl IntegrationPipeline {
     /// Cree le pipeline pour une DB JayKonta.
+    #[must_use]
     pub fn new(db: Arc<JayKontaDb>) -> Self {
         Self { db }
     }
 
     /// Applique un flux CK-INT-02 (JayRDV -> JayKonta).
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`IntegrationError`] si l'événement est rejeté ou si son écriture en base échoue.
     pub fn apply_jayrdv(&self, event: JayRDVEvent) -> Result<(), IntegrationError> {
         match event {
             JayRDVEvent::QuoteCreate(meta, payload) => {
@@ -112,7 +117,11 @@ impl IntegrationPipeline {
     }
 
     /// Applique un flux CK-INT-03 (JayKoa reminder publish).
-    pub fn apply_jaykoa(&self, event: JayKoaReminderEvent) -> Result<(), IntegrationError> {
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`IntegrationError`] si l'événement est rejeté ou si son écriture en base échoue.
+    pub fn apply_jaykoa(&self, event: &JayKoaReminderEvent) -> Result<(), IntegrationError> {
         self.db
             .insert_reminder(&ReminderRecord {
                 id: uuid::Uuid::new_v4().to_string(),

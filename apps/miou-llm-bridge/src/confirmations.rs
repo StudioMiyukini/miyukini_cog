@@ -116,8 +116,7 @@ impl RegistreConfirmations {
             .values()
             .map(|a| {
                 let mut a = a.clone();
-                a.expire_dans_s =
-                    DUREE_VIE_SECS.saturating_sub(a.cree_a.elapsed().as_secs());
+                a.expire_dans_s = DUREE_VIE_SECS.saturating_sub(a.cree_a.elapsed().as_secs());
                 a
             })
             .collect()
@@ -189,7 +188,10 @@ mod tests {
     #[test]
     fn identifiant_inconnu_refuse() {
         let r = RegistreConfirmations::new();
-        assert_eq!(r.prendre("nimporte").unwrap_err(), RefusConfirmation::Inconnue);
+        assert_eq!(
+            r.prendre("nimporte").unwrap_err(),
+            RefusConfirmation::Inconnue
+        );
     }
 
     #[test]
@@ -207,7 +209,8 @@ mod tests {
             r.suspendre("victor", "file_ops", params(), "test").unwrap();
         }
         assert_eq!(
-            r.suspendre("victor", "file_ops", params(), "test").unwrap_err(),
+            r.suspendre("victor", "file_ops", params(), "test")
+                .unwrap_err(),
             RefusConfirmation::RegistrePlein
         );
     }

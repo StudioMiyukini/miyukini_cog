@@ -184,6 +184,8 @@ impl CapabilitiesRuntime {
     /// Si `services_dir` est défini, un premier scan est lancé pour peupler
     /// le registre. Si `memory_db_path` est `None`, la mémoire est
     /// volatile (in-memory).
+    // API async publique conservée (appelants externes en `.await`).
+    #[allow(clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn new(
         config: CapabilitiesRuntimeConfig,
         core_gate: Arc<dyn CoreGate + Send + Sync>,
@@ -197,10 +199,10 @@ impl CapabilitiesRuntime {
             if dir.exists() {
                 let (count, errors) = miyualicia_skills::discover_in_dir(dir, &mut registry)
                     .map_err(skills_err)?;
-                if !errors.is_empty() {
-                    tracing::warn!(?errors, "{count} capability(ies) chargée(s) avec erreurs");
-                } else {
+                if errors.is_empty() {
                     tracing::info!("{count} capability(ies) chargée(s) depuis {dir:?}");
+                } else {
+                    tracing::warn!(?errors, "{count} capability(ies) chargée(s) avec erreurs");
                 }
             } else {
                 tracing::warn!(?dir, "services_dir absent — registre vide");
@@ -445,6 +447,8 @@ impl CapabilitiesRuntime {
     }
 
     /// Détecte les patterns de répétition pour une persona donnée.
+    // API async publique conservée (appelants externes en `.await`).
+    #[allow(clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn detect_patterns(
         &self,
         persona: &str,
@@ -454,6 +458,8 @@ impl CapabilitiesRuntime {
     }
 
     /// Transforme un pattern en `LearnedSkill` proposée (statut `Proposed`).
+    // API async publique conservée (appelants externes en `.await`).
+    #[allow(clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn propose_pattern(
         &self,
         pattern: &RepetitionPattern,
@@ -506,6 +512,8 @@ impl CapabilitiesRuntime {
     }
 
     /// Liste les `PendingConfirmation` `Pending` (toutes personas).
+    // API async publique conservée (appelants externes en `.await`).
+    #[allow(clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn list_pending_confirmations(
         &self,
     ) -> Result<Vec<PendingConfirmation>, AliciaError> {
@@ -514,6 +522,8 @@ impl CapabilitiesRuntime {
     }
 
     /// Liste les `PendingConfirmation` `Pending` filtrées par persona.
+    // API async publique conservée (appelants externes en `.await`).
+    #[allow(clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn pending_confirmations_for(
         &self,
         persona: &str,
@@ -525,6 +535,8 @@ impl CapabilitiesRuntime {
     }
 
     /// Récupère une `PendingConfirmation` par son id (tous statuts).
+    // API async publique conservée (appelants externes en `.await`).
+    #[allow(clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn pending_confirmation(
         &self,
         id: uuid::Uuid,
@@ -580,7 +592,7 @@ impl CapabilitiesRuntime {
     /// `Pending → Cancelled` d'abord (refus si déjà réclamée / résolue), puis
     /// épisode `Cancelled` dans l'audit à partir de l'enregistrement stocké.
     // API async conservée (symétrie avec `confirm_queued`, appelants existants).
-    #[allow(clippy::unused_async)]
+    #[allow(clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn cancel_queued(&self, id: uuid::Uuid) -> Result<(), AliciaError> {
         self.sweep_expired_confirmations()?;
         let pc = self
@@ -740,8 +752,8 @@ mod tests {
             CapabilitiesRuntime::new_with_bypass_gate(CapabilitiesRuntimeConfig::default())
                 .await
                 .unwrap();
-        assert!(runtime.list_tools().await.is_empty());
-        assert!(runtime.registered_services().await.is_empty());
+        assert_eq!(runtime.list_tools().await, [] as [miyualicia_skills::ToolDefinition; 0]);
+        assert_eq!(runtime.registered_services().await, [] as [std::string::String; 0]);
     }
 
     #[tokio::test]

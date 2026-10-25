@@ -47,7 +47,7 @@ impl AutoRecoveryService {
     /// @do run_auto_recovery
     //@human / @human Exécute la recovery automatique (rollback stub puis destruction si échec).
     pub async fn run(&self) -> AutoRecoveryResult {
-        let recovery_ok = self.try_recovery().await;
+        let recovery_ok = self.try_recovery();
         if recovery_ok {
             return AutoRecoveryResult {
                 success: true,
@@ -72,7 +72,7 @@ impl AutoRecoveryService {
 
     /// Tente recovery/rollback (stub : toujours échec).
     /// En production : restaurer depuis backup local ou réparer EIP/registre/schema.
-    async fn try_recovery(&self) -> bool {
+    fn try_recovery(&self) -> bool {
         let _ = self;
         false
     }

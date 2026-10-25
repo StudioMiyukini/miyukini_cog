@@ -151,8 +151,7 @@ impl AuthService {
         let path = self.admin_registry_path();
         if !fs::metadata(&path)
             .await
-            .map(|m| m.is_file())
-            .unwrap_or(false)
+            .is_ok_and(|m| m.is_file())
         {
             return Ok(Vec::new());
         }
@@ -233,9 +232,12 @@ impl AuthService {
         let account = &accounts[idx];
 
         let now = Utc::now();
-        let expires_at = now
-            + Duration::seconds(self.session_idle_timeout_secs as i64)
-                .min(Duration::seconds(self.session_absolute_timeout_secs as i64));
+        // Durées configurées hors bornes : session expirée d'emblée (échec fermé, jamais de panique).
+        let duree = |secs: u64| i64::try_from(secs).ok().and_then(Duration::try_seconds);
+        let expires_at = duree(self.session_idle_timeout_secs)
+            .zip(duree(self.session_absolute_timeout_secs))
+            .and_then(|(idle, absolue)| now.checked_add_signed(idle.min(absolue)))
+            .unwrap_or(now);
         let session_id = Uuid::new_v4().to_string();
         let session = AdminSession {
             session_id: session_id.clone(),

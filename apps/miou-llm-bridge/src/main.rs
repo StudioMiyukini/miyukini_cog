@@ -46,13 +46,13 @@ mod inference;
 mod llm_api;
 mod memoire;
 mod mode;
-mod outil_memoire;
 mod model_manager;
+mod outil_memoire;
 mod persona;
 mod proxy;
 mod recommend;
-mod security;
 mod routes_memoire;
+mod security;
 mod signature;
 mod skills;
 mod tamr;
@@ -85,7 +85,9 @@ async fn main() {
         std::process::exit(1);
     }
     for champ in cfg.champs_obsoletes() {
-        tracing::warn!("`{champ}` est obsolète et ignoré (lot 2 : requêtes signées, plus de secret partagé)");
+        tracing::warn!(
+            "`{champ}` est obsolète et ignoré (lot 2 : requêtes signées, plus de secret partagé)"
+        );
     }
     let gardes = match cfg.cles_epinglees() {
         Ok((appelants, hubs)) => std::sync::Arc::new(signature::GardesMaia::new(appelants, hubs)),
@@ -95,7 +97,9 @@ async fn main() {
         }
     };
     if !gardes.est_configuree() {
-        tracing::warn!("Aucun appelant épinglé ([security] cles_appelants) : API protégée refusée (503)");
+        tracing::warn!(
+            "Aucun appelant épinglé ([security] cles_appelants) : API protégée refusée (503)"
+        );
     }
     // Clé de service de MAIA : signe ses appels à maia-llm et au hub TEAM.
     let chemin_cle = cfg.chemin_cle_service();
@@ -103,7 +107,10 @@ async fn main() {
         Ok(c) => std::sync::Arc::new(c),
         Err(e) => {
             tracing::error!("Clé de service illisible ({}) : {e}", chemin_cle.display());
-            eprintln!("Refus de démarrer : clé de service ({}) : {e}", chemin_cle.display());
+            eprintln!(
+                "Refus de démarrer : clé de service ({}) : {e}",
+                chemin_cle.display()
+            );
             std::process::exit(1);
         }
     };
@@ -174,13 +181,10 @@ async fn main() {
 
     // Client maia-llm (GGUF local — remplace NativeBackend llama-cpp-2)
     // maia-llm tourne en parallèle sur le port 11435 par défaut.
-    let maia_llm_url = std::env::var("MAIA_LLM_URL")
-        .unwrap_or_else(|_| "http://localhost:11435".into());
-    let maia_client = MaiaLlmClient::new(
-        maia_llm_url.clone(),
-        Some(cle.clone()),
-        http_client.clone(),
-    );
+    let maia_llm_url =
+        std::env::var("MAIA_LLM_URL").unwrap_or_else(|_| "http://localhost:11435".into());
+    let maia_client =
+        MaiaLlmClient::new(maia_llm_url.clone(), Some(cle.clone()), http_client.clone());
     let model_manager = ModelManager::new(&cfg.native.models_dir);
 
     // Backend upstream (LM Studio / Ollama — backup)
@@ -202,9 +206,9 @@ async fn main() {
                 tracing::info!("Auto-chargement via maia-llm : {}", model.filename);
                 match inference_router.native.load_model(model.path.clone()).await {
                     Ok(name) => tracing::info!("Modèle chargé : {name}"),
-                    Err(e) => tracing::warn!(
-                        "Échec du chargement auto (maia-llm disponible ?) : {e}"
-                    ),
+                    Err(e) => {
+                        tracing::warn!("Échec du chargement auto (maia-llm disponible ?) : {e}");
+                    }
                 }
             }
         }
@@ -315,7 +319,13 @@ async fn main() {
         tracing::info!("║  Persona  : {:<37}║", p.display_name);
         tracing::info!("║  Mode     : {:<37}║", mode_label);
         tracing::info!("║  Wake     : {:<37}║", p.wake_word.word);
-        tracing::info!("║  LLM pref : {:<37}║", p.llm.preferred_patterns.first().map(|s| s.as_str()).unwrap_or("-"));
+        tracing::info!(
+            "║  LLM pref : {:<37}║",
+            p.llm
+                .preferred_patterns
+                .first()
+                .map_or("-", std::string::String::as_str)
+        );
     }
     tracing::info!("╚══════════════════════════════════════════════════╝");
 
@@ -326,15 +336,18 @@ async fn main() {
             let persona_name = active_persona.as_ref().map(|p| p.name.clone());
             let node = team_client::NodeInfo::new(
                 hostname::get()
-                    .map(|h| h.to_string_lossy().to_string())
-                    .unwrap_or_else(|_| "maia-node".into()),
-                format!("http://localhost:{}", cfg.bind_addr.split(':').last().unwrap_or("11434")),
+                    .map_or_else(|_| "maia-node".into(), |h| h.to_string_lossy().to_string()),
+                format!(
+                    "http://localhost:{}",
+                    cfg.bind_addr.split(':').next_back().unwrap_or("11434")
+                ),
                 &hw,
                 maia_mode,
                 inference_router.native.loaded_model_name(),
                 persona_name,
             );
-            let client = team_client::TeamClient::new(http_client.clone(), team_url, node, cle.clone());
+            let client =
+                team_client::TeamClient::new(http_client.clone(), team_url, node, cle.clone());
             team_registered = client.register().await;
         }
     }
@@ -388,11 +401,11 @@ async fn main() {
         listener,
         app.into_make_service_with_connect_info::<std::net::SocketAddr>(),
     )
-        .with_graceful_shutdown(shutdown_signal())
-        .await
-        .unwrap_or_else(|e| {
-            tracing::error!("Erreur serveur : {e}");
-        });
+    .with_graceful_shutdown(shutdown_signal())
+    .await
+    .unwrap_or_else(|e| {
+        tracing::error!("Erreur serveur : {e}");
+    });
 
     tracing::info!("AI Studio arrêté");
 }
@@ -409,15 +422,11 @@ fn parse_profile_arg() -> Option<persona::PersonaConfig> {
 
     match persona::load_persona(name_or_path) {
         Ok(p) => {
-            tracing::info!(
-                "Persona chargée : {} ({})",
-                p.display_name,
-                name_or_path
-            );
+            tracing::info!("Persona chargée : {} ({})", p.display_name, name_or_path);
             Some(p)
         }
         Err(e) => {
-            eprintln!("Erreur chargement persona '{}': {e}", name_or_path);
+            eprintln!("Erreur chargement persona '{name_or_path}': {e}");
             eprintln!(
                 "Personas disponibles : {}",
                 persona::builtin_personas().join(", ")

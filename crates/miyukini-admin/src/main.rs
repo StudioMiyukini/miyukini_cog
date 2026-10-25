@@ -113,14 +113,12 @@ const SESSION_COOKIE_NAME: &str = "miyukini_admin_session";
 fn session_id_from_headers(headers: &axum::http::HeaderMap) -> Option<String> {
     let cookie_header = headers.get(header::COOKIE)?.to_str().ok()?;
     cookie_header
-        .split(';')
-        .filter_map(|s| {
+        .split(';').find_map(|s| {
             let s = s.trim();
             let prefix = format!("{SESSION_COOKIE_NAME}=");
             s.starts_with(prefix.as_str())
                 .then(|| s[prefix.len()..].trim().to_string())
         })
-        .next()
 }
 
 /// Chemins publics (pas de session requise) en environnement INITIALISE.
@@ -513,15 +511,12 @@ async fn api_setup_create_admin(
         return refuse(StatusCode::FORBIDDEN, "Setup accessible uniquement depuis la boucle locale.");
     }
     // Revérifie l'état SUR DISQUE à chaque appel (et non l'état figé au démarrage).
-    match state.environment_state_svc.detect().await {
-        Ok(EnvironmentState::Vierge) => {}
-        _ => {
-            state.setup_guard.close();
-            return refuse(
-                StatusCode::FORBIDDEN,
-                "Setup fermé : l'environnement n'est pas vierge.",
-            );
-        }
+    if let Ok(EnvironmentState::Vierge) = state.environment_state_svc.detect().await {} else {
+        state.setup_guard.close();
+        return refuse(
+            StatusCode::FORBIDDEN,
+            "Setup fermé : l'environnement n'est pas vierge.",
+        );
     }
     if state.environment_state != EnvironmentState::Vierge || !state.setup_guard.is_open() {
         return refuse(StatusCode::FORBIDDEN, "Setup fermé.");
@@ -566,13 +561,14 @@ async fn api_setup_create_admin(
             return refuse(StatusCode::OK, message);
         }
     }
-    if let Err(_) = state.environment_state_svc.write_eip_stub().await {
+    if state.environment_state_svc.write_eip_stub().await.is_err() {
         return refuse(StatusCode::OK, "Profil admin créé mais échec de la génération EIP. Consultez les logs.");
     }
-    if let Err(_) = state
+    if state
         .environment_state_svc
         .write_bootstrap_schema_initial()
         .await
+        .is_err()
     {
         return refuse(StatusCode::OK, "Profil admin et EIP créés mais échec du schéma bootstrap. Consultez les logs.");
     }
@@ -806,9 +802,8 @@ async fn api_table_get_row(
     Path((name, id)): Path<(String, String)>,
 ) -> Json<serde_json::Value> {
     let tables = state.crud.tables.read().await;
-    let rows = match tables.get(&name) {
-        Some(r) => r,
-        None => return Json(serde_json::json!({ "error": "table not found" })),
+    let Some(rows) = tables.get(&name) else {
+        return Json(serde_json::json!({ "error": "table not found" }));
     };
     let idx: usize = id.parse().unwrap_or(0);
     if idx == 0 || idx > rows.len() {
@@ -833,9 +828,8 @@ async fn api_table_update_row(
     JsonExtract(body): JsonExtract<serde_json::Value>,
 ) -> impl IntoResponse {
     let mut tables = state.crud.tables.write().await;
-    let rows = match tables.get_mut(&name) {
-        Some(r) => r,
-        None => return Json(serde_json::json!({ "error": "table not found" })),
+    let Some(rows) = tables.get_mut(&name) else {
+        return Json(serde_json::json!({ "error": "table not found" }));
     };
     let idx: usize = id.parse().unwrap_or(0);
     let Some(row) = idx.checked_sub(1).and_then(|i| rows.get_mut(i)) else {
@@ -862,9 +856,8 @@ async fn api_table_delete_row(
     Path((name, id)): Path<(String, String)>,
 ) -> impl IntoResponse {
     let mut tables = state.crud.tables.write().await;
-    let rows = match tables.get_mut(&name) {
-        Some(r) => r,
-        None => return Json(serde_json::json!({ "error": "table not found" })),
+    let Some(rows) = tables.get_mut(&name) else {
+        return Json(serde_json::json!({ "error": "table not found" }));
     };
     let idx: usize = id.parse().unwrap_or(0);
     if idx == 0 || idx > rows.len() {

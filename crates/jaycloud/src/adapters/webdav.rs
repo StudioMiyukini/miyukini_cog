@@ -279,8 +279,7 @@ impl JayCloudDavFile {
         }
         let now = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
-            .map(|d| d.as_secs() as i64)
-            .unwrap_or(0);
+            .map_or(0, |d| i64::try_from(d.as_secs()).unwrap_or(i64::MAX));
         self.files.put(&self.path, &self.content, now)?;
         self.modified = false;
         Ok(())
@@ -304,7 +303,7 @@ impl DavFile for JayCloudDavFile {
             }
             while buf.has_remaining() {
                 let chunk = buf.chunk();
-                self.append_at_pos(chunk);
+                self.append_at_pos(chunk)?;
                 let len = chunk.len();
                 buf.advance(len);
             }
@@ -318,7 +317,7 @@ impl DavFile for JayCloudDavFile {
             if !self.is_writing {
                 return Err(FsError::Forbidden);
             }
-            self.append_at_pos(&buf);
+            self.append_at_pos(&buf)?;
             self.modified = true;
             Ok(())
         })
@@ -326,11 +325,13 @@ impl DavFile for JayCloudDavFile {
 
     fn read_bytes(&'_ mut self, count: usize) -> FsFuture<'_, Bytes> {
         Box::pin(async move {
-            let start = self.pos as usize;
+            let Ok(start) = usize::try_from(self.pos) else {
+                return Ok(Bytes::new());
+            };
             if start >= self.content.len() {
                 return Ok(Bytes::new());
             }
-            let end = (start + count).min(self.content.len());
+            let end = start.saturating_add(count).min(self.content.len());
             let slice = Bytes::copy_from_slice(&self.content[start..end]);
             self.pos = end as u64;
             Ok(slice)
@@ -339,15 +340,20 @@ impl DavFile for JayCloudDavFile {
 
     fn seek(&'_ mut self, pos: SeekFrom) -> FsFuture<'_, u64> {
         Box::pin(async move {
-            let new_pos: i64 = match pos {
-                SeekFrom::Start(n) => n as i64,
-                SeekFrom::End(d) => self.content.len() as i64 + d,
-                SeekFrom::Current(d) => self.pos as i64 + d,
+            // Arithmétique vérifiée : un décalage hors bornes (négatif ou
+            // débordant) est refusé au lieu de boucler silencieusement.
+            let new_pos: Option<i64> = match pos {
+                SeekFrom::Start(n) => i64::try_from(n).ok(),
+                SeekFrom::End(d) => i64::try_from(self.content.len())
+                    .ok()
+                    .and_then(|l| l.checked_add(d)),
+                SeekFrom::Current(d) => i64::try_from(self.pos)
+                    .ok()
+                    .and_then(|p| p.checked_add(d)),
             };
-            if new_pos < 0 {
-                return Err(FsError::GeneralFailure);
-            }
-            self.pos = new_pos as u64;
+            self.pos = new_pos
+                .and_then(|p| u64::try_from(p).ok())
+                .ok_or(FsError::GeneralFailure)?;
             Ok(self.pos)
         })
     }
@@ -362,14 +368,19 @@ impl DavFile for JayCloudDavFile {
 
 impl JayCloudDavFile {
     /// Append-or-overwrite à la position courante.
-    fn append_at_pos(&mut self, chunk: &[u8]) {
-        let pos = self.pos as usize;
-        let end = pos + chunk.len();
+    ///
+    /// # Errors
+    ///
+    /// [`FsError::GeneralFailure`] si la position ne tient pas dans la mémoire adressable.
+    fn append_at_pos(&mut self, chunk: &[u8]) -> Result<(), FsError> {
+        let pos = usize::try_from(self.pos).map_err(|_| FsError::GeneralFailure)?;
+        let end = pos.checked_add(chunk.len()).ok_or(FsError::GeneralFailure)?;
         if end > self.content.len() {
             self.content.resize(end, 0);
         }
         self.content[pos..end].copy_from_slice(chunk);
         self.pos = end as u64;
+        Ok(())
     }
 }
 
@@ -407,8 +418,7 @@ impl JayCloudDavMeta {
             is_dir: false,
             modified_unix: SystemTime::now()
                 .duration_since(SystemTime::UNIX_EPOCH)
-                .map(|d| d.as_secs() as i64)
-                .unwrap_or(0),
+                .map_or(0, |d| i64::try_from(d.as_secs()).unwrap_or(i64::MAX)),
         }
     }
 
@@ -427,7 +437,7 @@ impl DavMetaData for JayCloudDavMeta {
     }
 
     fn modified(&self) -> FsResult<SystemTime> {
-        Ok(SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(self.modified_unix.max(0) as u64))
+        Ok(SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(u64::try_from(self.modified_unix).unwrap_or(0)))
     }
 
     fn is_dir(&self) -> bool {
@@ -483,11 +493,11 @@ impl DavDirEntry for JayCloudDavDirEntry {
 
 // Compile-time check : laisse Rust valider que la signature ci-dessus est
 // correcte (futures bornés par Pin<Box<dyn Future ... + Send + 'a>>).
-fn _assert_send<T: Send>() {}
-fn _assert_impls() {
-    _assert_send::<Pin<Box<dyn DavFile>>>();
-    _assert_send::<JayCloudDavFs>();
-}
+const _: fn() = || {
+    fn assert_send<T: Send>() {}
+    assert_send::<Pin<Box<dyn DavFile>>>();
+    assert_send::<JayCloudDavFs>();
+};
 
 // ─────────────────────────────────────────────────────────────────────────
 // Tests

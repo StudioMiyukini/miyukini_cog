@@ -126,7 +126,7 @@ impl FilesOp {
             .unwrap_or_else(PoisonError::into_inner)
             .get(&canonical)
             .cloned()
-            .ok_or_else(|| FilesOpError::NotFound(canonical))
+            .ok_or(FilesOpError::NotFound(canonical))
     }
 
     /// Liste les entrées (P3.a : flat ; sub-dirs en P3.b).

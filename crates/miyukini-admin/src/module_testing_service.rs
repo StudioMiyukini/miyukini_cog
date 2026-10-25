@@ -179,13 +179,10 @@ where
 /// Exécution d'un seul test embarqué (stub : simule succès selon critères ; en production, invoque le protocole du module).
 fn execute_single_embedded_test(test: &EmbeddedTestDef) -> (TestVerdict, u64) {
     let start = std::time::Instant::now();
-    // Stub : selon le critère "pass", on simule un verdict (en production : appel au module selon protocol).
-    let verdict =
-        if test.criteria.pass == "zero_violations" || test.criteria.pass == "all_checks_ok" {
-            TestVerdict::Pass
-        } else {
-            TestVerdict::Pass
-        };
+    // Stub : quel que soit le critère "pass", le verdict simulé est Pass
+    // (en production : appel au module selon protocol).
+    let _ = &test.criteria.pass;
+    let verdict = TestVerdict::Pass;
     let duration_ms = start.elapsed().as_millis() as u64;
     (verdict, duration_ms)
 }

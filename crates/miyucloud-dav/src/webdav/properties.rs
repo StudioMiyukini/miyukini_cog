@@ -95,3 +95,9 @@ impl DeadPropertyStore {
         Ok(())
     }
 }
+
+impl Default for DeadPropertyStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}

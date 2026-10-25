@@ -668,21 +668,13 @@ impl Default for CentralClientConfig {
 
 /// Web connection management — MWS tunnel, DDNS, and Central client.
 #[derive(Debug, Clone)]
+#[derive(Default)]
 pub struct WebConnectionConfig {
     pub mws: MwsTunnelConfig,
     pub ddns: DdnsConfig,
     pub central: CentralClientConfig,
 }
 
-impl Default for WebConnectionConfig {
-    fn default() -> Self {
-        Self {
-            mws: MwsTunnelConfig::default(),
-            ddns: DdnsConfig::default(),
-            central: CentralClientConfig::default(),
-        }
-    }
-}
 
 /// Best-effort hostname detection for default COG ID.
 fn gethostname() -> String {

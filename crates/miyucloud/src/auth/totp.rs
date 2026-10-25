@@ -443,8 +443,7 @@ mod tests {
             .expect_err("should error for missing TOTP");
         assert!(
             err.to_string().contains("not configured"),
-            "Should indicate not configured: {}",
-            err
+            "Should indicate not configured: {err}"
         );
     }
 
@@ -537,8 +536,7 @@ mod tests {
         let err = regenerate_recovery_codes(&db, owner).expect_err("should fail without TOTP");
         assert!(
             err.to_string().contains("not enabled"),
-            "Should indicate TOTP not enabled: {}",
-            err
+            "Should indicate TOTP not enabled: {err}"
         );
     }
 

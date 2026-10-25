@@ -56,7 +56,6 @@ pub struct RecommendResponse {
     pub models_available: usize,
 }
 
-
 // ── Moteur de recommandation ─────────────────────────────────────────────
 
 /// Score combiné : 70% qualité + 30% français.

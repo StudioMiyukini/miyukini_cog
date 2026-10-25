@@ -355,7 +355,7 @@ mod tests {
                 folder_ids,
             } => {
                 assert_eq!(sender_cog_id, "cog-test");
-                assert!(folder_ids.is_empty());
+                assert_eq!(folder_ids, [] as [std::string::String; 0]);
             }
             _ => panic!("Wrong message type"),
         }

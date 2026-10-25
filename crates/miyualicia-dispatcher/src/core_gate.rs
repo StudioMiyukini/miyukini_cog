@@ -77,6 +77,8 @@ pub enum CoreGateOutcome {
 /// allow/deny. Les détails plus fins (raison structurée, suggestion
 /// alternative...) viendront avec les vraies impls.
 #[async_trait]
+// `#[async_trait]` pose lui-même `#[must_use]` sur la future retournée (déjà must_use).
+#[allow(clippy::double_must_use)]
 pub trait CoreGate: Send + Sync {
     /// Soumet la demande aux cores. Doit être idempotente côté lecture
     /// (ne pas modifier l'état).

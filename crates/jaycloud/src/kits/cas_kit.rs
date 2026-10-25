@@ -185,8 +185,8 @@ pub fn exists(hash: &BlobHash, root_dir: &Path) -> bool {
 /// Garbage-collect les blobs orphelins (non référencés par `referenced`).
 ///
 /// Renvoie le nombre de blobs supprimés.
-pub fn delete_orphans(
-    referenced: &std::collections::HashSet<BlobHash>,
+pub fn delete_orphans<S: std::hash::BuildHasher>(
+    referenced: &std::collections::HashSet<BlobHash, S>,
     root_dir: &Path,
 ) -> Result<usize, CasKitError> {
     let mut deleted = 0;
@@ -205,7 +205,10 @@ pub fn delete_orphans(
             }
             let filename = blob.file_name().to_string_lossy().to_string();
             // Skip les .tmp d'écritures interrompues si jamais ils restent.
-            if filename.ends_with(".tmp") {
+            if Path::new(&filename)
+                .extension()
+                .is_some_and(|e| e.eq_ignore_ascii_case("tmp"))
+            {
                 continue;
             }
             if let Ok(hash) = BlobHash::from_hex(&filename) {

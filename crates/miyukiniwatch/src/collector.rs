@@ -29,6 +29,10 @@ impl MiyukiniWatchCollector {
 
     /// Enregistre une métrique si la collecte est activée.
     /// Non bloquant : l'écriture est synchrone mais légère.
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la lecture des préférences ou l'écriture de la métrique en base échoue.
     pub fn record(
         &self,
         profile_id: &str,
@@ -61,7 +65,7 @@ impl MiyukiniWatchCollector {
             "services" => prefs.collect_services,
             "friends" => prefs.collect_friends,
             "activity" => prefs.collect_activity,
-            "lifecycle" => true,
+            // "lifecycle" et catégories inconnues : toujours autorisées.
             _ => true,
         }
     }
@@ -86,6 +90,10 @@ impl MiyukiniWatchCollector {
 /// Helpers pour émettre des métriques depuis Central.
 impl MiyukiniWatchCollector {
     /// Session démarrée (S-01).
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la lecture des préférences ou l'écriture de la métrique en base échoue.
     pub fn record_session_start(
         &self,
         profile_id: &str,
@@ -101,12 +109,16 @@ impl MiyukiniWatchCollector {
             service_id: None,
             friend_id: None,
             value_int: None,
-            value_str: Some(format!("{:?}", slot)),
+            value_str: Some(format!("{slot:?}")),
         };
         self.record(profile_id, &record)
     }
 
     /// Session terminée (S-02, S-03).
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la lecture des préférences ou l'écriture de la métrique en base échoue.
     pub fn record_session_end(
         &self,
         profile_id: &str,
@@ -142,6 +154,10 @@ impl MiyukiniWatchCollector {
     }
 
     /// Service ouvert (SV-01).
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la lecture des préférences ou l'écriture de la métrique en base échoue.
     pub fn record_service_opened(
         &self,
         profile_id: &str,
@@ -163,6 +179,10 @@ impl MiyukiniWatchCollector {
     }
 
     /// Service fermé (SV-02, SV-03).
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la lecture des préférences ou l'écriture de la métrique en base échoue.
     pub fn record_service_closed(
         &self,
         profile_id: &str,
@@ -199,6 +219,10 @@ impl MiyukiniWatchCollector {
     }
 
     /// Clic utilisateur (I-01) — agrégat uniquement, pas de cible.
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la lecture des préférences ou l'écriture de la métrique en base échoue.
     pub fn record_click(
         &self,
         profile_id: &str,

@@ -75,6 +75,8 @@ pub enum JaySlidesError {
 
 /// Trait async des opérations Jay Slides exposées à Alicia.
 #[async_trait]
+// `#[async_trait]` pose lui-même `#[must_use]` sur la future retournée (déjà must_use).
+#[allow(clippy::double_must_use)]
 pub trait JaySlidesBackend: Send + Sync {
     /// Crée une nouvelle présentation.
     async fn create_presentation(
@@ -135,7 +137,7 @@ impl JaySlidesClient {
             Some(Value::Number(n)) => n
                 .as_u64()
                 .filter(|v| *v > 0)
-                .map(|v| v as usize)
+                .and_then(|v| usize::try_from(v).ok())
                 .ok_or_else(|| {
                     JaySlidesError::InvalidParam(format!("{key} doit être > 0, reçu {n}"))
                 }),

@@ -23,7 +23,9 @@
 
 use axum::{body::Body, extract::Request, http::StatusCode};
 use miyauth::http::service::{entetes_signees, maintenant_unix, GardeSignee};
-use miyauth::http::{RefusHttp, ENTETE_HORODATAGE, ENTETE_NONCE, ENTETE_SIGNATAIRE, ENTETE_SIGNATURE};
+use miyauth::http::{
+    RefusHttp, ENTETE_HORODATAGE, ENTETE_NONCE, ENTETE_SIGNATAIRE, ENTETE_SIGNATURE,
+};
 use miyusceau::CleSignature;
 
 /// Usage signé des appels à l'API protégée de MAIA.
@@ -52,7 +54,10 @@ pub struct GardesMaia {
 impl GardesMaia {
     /// Gardes à partir des clés publiques déjà analysées.
     pub fn new(appelants: Vec<[u8; 32]>, hubs_team: Vec<[u8; 32]>) -> Self {
-        Self { appelants: GardeSignee::new(appelants), hubs_team: GardeSignee::new(hubs_team) }
+        Self {
+            appelants: GardeSignee::new(appelants),
+            hubs_team: GardeSignee::new(hubs_team),
+        }
     }
 
     /// Vrai si au moins une clé est épinglée.
@@ -97,14 +102,23 @@ fn refus_http(r: &RefusHttp) -> Refus {
 /// TEAM n'est accepté que sur la route de chat d'agent, avec son usage.
 pub async fn verifier(gardes: &GardesMaia, req: Request) -> Result<Request, Refus> {
     if !gardes.est_configuree() {
-        return Err(Refus { statut: StatusCode::SERVICE_UNAVAILABLE, motif: "aucun_appelant_epingle" });
+        return Err(Refus {
+            statut: StatusCode::SERVICE_UNAVAILABLE,
+            motif: "aucun_appelant_epingle",
+        });
     }
     let maintenant = maintenant_unix();
     let route_team = est_route_team(req.method().as_str(), req.uri().path());
     let h = req.headers();
     let valeur = |n: &str| h.get(n).and_then(|v| v.to_str().ok());
-    let brut = (valeur(ENTETE_SIGNATAIRE), valeur(ENTETE_HORODATAGE), valeur(ENTETE_NONCE), valeur(ENTETE_SIGNATURE));
-    let controler = |g: &GardeSignee| g.controler_entetes(brut.0, brut.1, brut.2, brut.3, maintenant);
+    let brut = (
+        valeur(ENTETE_SIGNATAIRE),
+        valeur(ENTETE_HORODATAGE),
+        valeur(ENTETE_NONCE),
+        valeur(ENTETE_SIGNATURE),
+    );
+    let controler =
+        |g: &GardeSignee| g.controler_entetes(brut.0, brut.1, brut.2, brut.3, maintenant);
     let (garde, usage, entetes) = match controler(&gardes.appelants) {
         Ok(e) => (&gardes.appelants, USAGE_API, e),
         Err(RefusHttp::SignataireNonAutorise) if route_team => match controler(&gardes.hubs_team) {
@@ -116,10 +130,23 @@ pub async fn verifier(gardes: &GardesMaia, req: Request) -> Result<Request, Refu
     let (parts, corps) = req.into_parts();
     let corps = axum::body::to_bytes(corps, MAX_CORPS_SIGNE)
         .await
-        .map_err(|_| Refus { statut: StatusCode::PAYLOAD_TOO_LARGE, motif: "corps_trop_volumineux" })?;
-    let chemin = parts.uri.path_and_query().map_or_else(|| parts.uri.path(), |pq| pq.as_str());
+        .map_err(|_| Refus {
+            statut: StatusCode::PAYLOAD_TOO_LARGE,
+            motif: "corps_trop_volumineux",
+        })?;
+    let chemin = parts
+        .uri
+        .path_and_query()
+        .map_or_else(|| parts.uri.path(), |pq| pq.as_str());
     garde
-        .verifier(&entetes, usage, parts.method.as_str(), chemin, &corps, maintenant)
+        .verifier(
+            &entetes,
+            usage,
+            parts.method.as_str(),
+            chemin,
+            &corps,
+            maintenant,
+        )
         .map_err(|r| refus_http(&r))?;
     let mut parts = parts;
     parts.extensions.insert(UsageAppelant(usage));
@@ -176,7 +203,12 @@ mod tests {
 
     /// Requête construite comme le client de Central (`apps/central/src/cle_service.rs`) :
     /// en-têtes `entetes_signees(cle, "maia/api", méthode, chemin+requête, corps)`.
-    fn requete(cle: Option<&CleSignature>, methode: &str, chemin: &str, corps: &'static [u8]) -> Request {
+    fn requete(
+        cle: Option<&CleSignature>,
+        methode: &str,
+        chemin: &str,
+        corps: &'static [u8],
+    ) -> Request {
         let mut rb = axum::http::Request::builder().method(methode).uri(chemin);
         if let Some(cle) = cle {
             for (nom, valeur) in entetes_signees(cle, USAGE_API, methode, chemin, corps) {
@@ -191,20 +223,41 @@ mod tests {
         let central = CleSignature::generer();
         let gardes = GardesMaia::new(vec![central.cle_publique()], vec![]);
         let corps: &[u8] = br#"{"model":"m","messages":[]}"#;
-        let ok = verifier(&gardes, requete(Some(&central), "POST", "/v1/chat/completions", corps)).await;
+        let ok = verifier(
+            &gardes,
+            requete(Some(&central), "POST", "/v1/chat/completions", corps),
+        )
+        .await;
         assert!(ok.is_ok());
-        let ok = verifier(&gardes, requete(Some(&central), "GET", "/v1/models?x=1", b"")).await;
+        let ok = verifier(
+            &gardes,
+            requete(Some(&central), "GET", "/v1/models?x=1", b""),
+        )
+        .await;
         assert!(ok.is_ok());
-        let refus = verifier(&gardes, requete(None, "GET", "/v1/models", b"")).await.unwrap_err();
-        assert_eq!((refus.statut, refus.motif), (StatusCode::UNAUTHORIZED, "signature_absente"));
+        let refus = verifier(&gardes, requete(None, "GET", "/v1/models", b""))
+            .await
+            .unwrap_err();
+        assert_eq!(
+            (refus.statut, refus.motif),
+            (StatusCode::UNAUTHORIZED, "signature_absente")
+        );
         let autre = CleSignature::generer();
-        let refus = verifier(&gardes, requete(Some(&autre), "GET", "/v1/models", b"")).await.unwrap_err();
+        let refus = verifier(&gardes, requete(Some(&autre), "GET", "/v1/models", b""))
+            .await
+            .unwrap_err();
         assert_eq!(refus.motif, "signataire_non_autorise");
     }
 
     #[test]
     fn chemin_url_avec_requete() {
-        assert_eq!(chemin_url("http://127.0.0.1:11435/v1/models?x=1"), "/v1/models?x=1");
-        assert_eq!(chemin_url("http://127.0.0.1:11435/maia/llm/models"), "/maia/llm/models");
+        assert_eq!(
+            chemin_url("http://127.0.0.1:11435/v1/models?x=1"),
+            "/v1/models?x=1"
+        );
+        assert_eq!(
+            chemin_url("http://127.0.0.1:11435/maia/llm/models"),
+            "/maia/llm/models"
+        );
     }
 }

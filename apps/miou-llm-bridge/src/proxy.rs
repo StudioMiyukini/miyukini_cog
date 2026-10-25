@@ -273,13 +273,19 @@ async fn create_agent(
     );
     let registre = &state.agent_registry;
     // Insertion conditionnelle : un agent apparu depuis la décision n'est pas écrasé.
-    match state.gouvernance.executer(&intent, |_| registre.inserer_nouvel_agent(agent)) {
+    match state
+        .gouvernance
+        .executer(&intent, |_| registre.inserer_nouvel_agent(agent))
+    {
         Ok(Ok(())) => (
             StatusCode::CREATED,
             Json(serde_json::json!({ "created": id })),
         )
             .into_response(),
-        Ok(Err(msg)) => (StatusCode::CONFLICT, Json(serde_json::json!({ "error": msg })))
+        Ok(Err(msg)) => (
+            StatusCode::CONFLICT,
+            Json(serde_json::json!({ "error": msg })),
+        )
             .into_response(),
         Err(motif) => refus_gouvernance(motif),
     }
@@ -303,12 +309,14 @@ async fn update_agent(
             );
             let registre = &state.agent_registry;
             // Remplacement conditionnel : la décision porte sur `existant`.
-            match state
-                .gouvernance
-                .executer(&intent, |_| registre.remplacer_si_inchange(&existant, agent))
-            {
+            match state.gouvernance.executer(&intent, |_| {
+                registre.remplacer_si_inchange(&existant, agent)
+            }) {
                 Ok(Ok(())) => Json(serde_json::json!({ "updated": id })).into_response(),
-                Ok(Err(msg)) => (StatusCode::CONFLICT, Json(serde_json::json!({ "error": msg })))
+                Ok(Err(msg)) => (
+                    StatusCode::CONFLICT,
+                    Json(serde_json::json!({ "error": msg })),
+                )
                     .into_response(),
                 Err(motif) => refus_gouvernance(motif),
             }
@@ -340,7 +348,10 @@ async fn delete_agent(
         crate::gouvernance::APPELANT_LOCAL,
     );
     let registre = &state.agent_registry;
-    match state.gouvernance.executer(&intent, |_| registre.supprimer_si_inchange(&existant)) {
+    match state
+        .gouvernance
+        .executer(&intent, |_| registre.supprimer_si_inchange(&existant))
+    {
         Ok(Ok(())) => Json(serde_json::json!({ "deleted": id })).into_response(),
         Ok(Err(msg)) => (
             StatusCode::FORBIDDEN,
@@ -380,15 +391,12 @@ async fn chat_with_agent(
     usage: Option<axum::Extension<crate::signature::UsageAppelant>>,
     Json(req): Json<AgentChatRequest>,
 ) -> impl IntoResponse {
-    let agent = match state.agent_registry.get_agent(&id) {
-        Some(a) => a,
-        None => {
-            return (
-                StatusCode::NOT_FOUND,
-                Json(serde_json::json!({ "error": format!("Agent '{id}' introuvable") })),
-            )
-                .into_response();
-        }
+    let Some(agent) = state.agent_registry.get_agent(&id) else {
+        return (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({ "error": format!("Agent '{id}' introuvable") })),
+        )
+            .into_response();
     };
 
     // Vérifier la disponibilité LLM (native → upstream → fallback)
@@ -414,12 +422,12 @@ async fn chat_with_agent(
     }
 
     // Construire le contexte enrichi
-    let context_text = if !req.context_ids.is_empty() {
+    let context_text = if req.context_ids.is_empty() {
+        String::new()
+    } else {
         state
             .context_registry
             .compile_context(&req.context_ids, 4096)
-    } else {
-        String::new()
     };
 
     let mut system_prompt = agent.system_prompt.clone();
@@ -447,7 +455,11 @@ async fn chat_with_agent(
         None
     };
     // Outil `memoire_noter` (A-009) : seulement si la mémoire est jointe à ce tour.
-    let carnet = if avec_memoire { state.context_registry.carnet_memoire() } else { None };
+    let carnet = if avec_memoire {
+        state.context_registry.carnet_memoire()
+    } else {
+        None
+    };
     let messages = vec![
         serde_json::json!({ "role": "system", "content": system_prompt }),
         serde_json::json!({ "role": "user", "content": crate::memoire::avec_memoire(bloc, &req.message) }),
@@ -595,9 +607,11 @@ async fn execute_skill(
     Json(req): Json<SkillExecRequest>,
 ) -> impl IntoResponse {
     // Fail-closed : un agent_id connu et autorisé pour ce skill est obligatoire.
-    if let Err(reason) =
-        crate::security::authorize_skill_request(&state.agent_registry, req.agent_id.as_deref(), &id)
-    {
+    if let Err(reason) = crate::security::authorize_skill_request(
+        &state.agent_registry,
+        req.agent_id.as_deref(),
+        &id,
+    ) {
         return (
             StatusCode::FORBIDDEN,
             Json(serde_json::json!({ "error": reason })),
@@ -826,15 +840,12 @@ async fn team_task(
     Path(id): Path<String>,
     Json(req): Json<TeamTaskRequest>,
 ) -> impl IntoResponse {
-    let team = match state.agent_registry.get_team(&id) {
-        Some(t) => t,
-        None => {
-            return (
-                StatusCode::NOT_FOUND,
-                Json(serde_json::json!({ "error": format!("Équipe '{id}' introuvable") })),
-            )
-                .into_response();
-        }
+    let Some(team) = state.agent_registry.get_team(&id) else {
+        return (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({ "error": format!("Équipe '{id}' introuvable") })),
+        )
+            .into_response();
     };
 
     let target_id = req
@@ -894,10 +905,8 @@ async fn load_model(
     State(state): State<ProxyState>,
     Json(req): Json<LoadModelRequest>,
 ) -> impl IntoResponse {
-    let model = match state.model_manager.find_model(&req.filename) {
-        Some(m) => m,
-        None => {
-            return (
+    let Some(model) = state.model_manager.find_model(&req.filename) else {
+        return (
                 StatusCode::NOT_FOUND,
                 Json(serde_json::json!({
                     "error": format!("Modèle '{}' introuvable dans {}", req.filename, state.model_manager.models_dir().display()),
@@ -905,7 +914,6 @@ async fn load_model(
                 })),
             )
                 .into_response();
-        }
     };
 
     let path = model.path.clone();
@@ -999,12 +1007,9 @@ async fn security_middleware(
         )
             .into_response();
     };
-    let source_ip = crate::security::resolve_client_ip(
-        peer,
-        &headers,
-        &state.security_config.trusted_proxies,
-    )
-    .to_string();
+    let source_ip =
+        crate::security::resolve_client_ip(peer, &headers, &state.security_config.trusted_proxies)
+            .to_string();
 
     // 1. Validation d'origine
     match crate::security::check_origin(Some(&source_ip), &headers, &state.security_config) {
@@ -1197,7 +1202,6 @@ fn build_upstream_uri(upstream_base: &str, uri: &Uri) -> String {
 
 fn to_reqwest_method(method: &Method) -> reqwest::Method {
     match *method {
-        Method::GET => reqwest::Method::GET,
         Method::POST => reqwest::Method::POST,
         Method::PUT => reqwest::Method::PUT,
         Method::DELETE => reqwest::Method::DELETE,
@@ -1226,8 +1230,10 @@ mod tests {
     fn etat(gardes: GardesMaia) -> ProxyState {
         let client = reqwest::Client::new();
         // Backends injoignables (port 9) : seule l'authentification est testée.
-        let maia = crate::inference::MaiaLlmClient::new("http://127.0.0.1:9".into(), None, client.clone());
-        let amont = crate::inference::UpstreamBackend::new(client.clone(), "http://127.0.0.1:9".into());
+        let maia =
+            crate::inference::MaiaLlmClient::new("http://127.0.0.1:9".into(), None, client.clone());
+        let amont =
+            crate::inference::UpstreamBackend::new(client.clone(), "http://127.0.0.1:9".into());
         ProxyState {
             client: client.clone(),
             upstream_url: "http://127.0.0.1:9".into(),
@@ -1239,7 +1245,9 @@ mod tests {
             rate_limiter: RateLimiter::new(crate::security::RateLimitConfig::default()),
             audit_log: AuditLog::new(100),
             inference: InferenceRouter::new(maia, amont, true),
-            model_manager: ModelManager::new(std::env::temp_dir().join("maia-test-modeles-absents")),
+            model_manager: ModelManager::new(
+                std::env::temp_dir().join("maia-test-modeles-absents"),
+            ),
             security_config: SecurityConfig::default(),
             security_audit: SecurityAuditLog::new(100),
             active_persona: None,
@@ -1254,10 +1262,18 @@ mod tests {
     }
 
     fn securise() -> Router {
-        proxy_router(etat(GardesMaia::new(vec![cle_appelant().cle_publique()], vec![cle_hub().cle_publique()])))
+        proxy_router(etat(GardesMaia::new(
+            vec![cle_appelant().cle_publique()],
+            vec![cle_hub().cle_publique()],
+        )))
     }
 
-    fn requete(methode: &str, chemin: &str, corps: &str, cle: Option<(&CleSignature, &str)>) -> Request<Body> {
+    fn requete(
+        methode: &str,
+        chemin: &str,
+        corps: &str,
+        cle: Option<(&CleSignature, &str)>,
+    ) -> Request<Body> {
         let mut b = Request::builder()
             .method(methode)
             .uri(chemin)
@@ -1282,17 +1298,29 @@ mod tests {
         let app = securise();
         let r = requete("GET", "/v1/agents", "", Some((&cle_appelant(), USAGE_API)));
         assert_eq!(statut(&app, r).await, StatusCode::OK);
-        let r = requete("GET", "/v1/security/status", "", Some((&cle_appelant(), USAGE_API)));
+        let r = requete(
+            "GET",
+            "/v1/security/status",
+            "",
+            Some((&cle_appelant(), USAGE_API)),
+        );
         assert_eq!(statut(&app, r).await, StatusCode::OK);
     }
 
     #[tokio::test]
     async fn non_signe_cle_inconnue_bearer_refuses() {
         let app = securise();
-        assert_eq!(statut(&app, requete("GET", "/v1/agents", "", None)).await, StatusCode::UNAUTHORIZED);
-        assert_eq!(statut(&app, requete("GET", "/status", "", None)).await, StatusCode::UNAUTHORIZED);
+        assert_eq!(
+            statut(&app, requete("GET", "/v1/agents", "", None)).await,
+            StatusCode::UNAUTHORIZED
+        );
+        assert_eq!(
+            statut(&app, requete("GET", "/status", "", None)).await,
+            StatusCode::UNAUTHORIZED
+        );
         let mut r = requete("GET", "/v1/agents", "", None);
-        r.headers_mut().insert(header::AUTHORIZATION, "Bearer secret".parse().unwrap());
+        r.headers_mut()
+            .insert(header::AUTHORIZATION, "Bearer secret".parse().unwrap());
         assert_eq!(statut(&app, r).await, StatusCode::UNAUTHORIZED);
         let intrus = CleSignature::generer();
         let r = requete("GET", "/v1/agents", "", Some((&intrus, USAGE_API)));
@@ -1301,7 +1329,10 @@ mod tests {
         let r = requete("POST", "/v1/chat/completions", "{}", None);
         assert_eq!(statut(&app, r).await, StatusCode::UNAUTHORIZED);
         // Santé publique.
-        assert_eq!(statut(&app, requete("GET", "/health", "", None)).await, StatusCode::OK);
+        assert_eq!(
+            statut(&app, requete("GET", "/health", "", None)).await,
+            StatusCode::OK
+        );
     }
 
     #[tokio::test]
@@ -1312,29 +1343,59 @@ mod tests {
         let r = requete("GET", "/v1/agents", "", Some((&cle_hub(), USAGE_API)));
         assert_eq!(statut(&app, r).await, StatusCode::UNAUTHORIZED);
         // Usage d'appelant sur la route TEAM : signature invalide.
-        let r = requete("POST", "/v1/agents/inconnu/chat", "{}", Some((&cle_hub(), USAGE_API)));
+        let r = requete(
+            "POST",
+            "/v1/agents/inconnu/chat",
+            "{}",
+            Some((&cle_hub(), USAGE_API)),
+        );
         assert_eq!(statut(&app, r).await, StatusCode::UNAUTHORIZED);
         // Route TEAM avec l'usage TEAM : authentifié (l'agent inconnu donne 404, pas 401).
-        let r = requete("POST", "/v1/agents/inconnu/chat", "{\"messages\":[]}", Some((&cle_hub(), USAGE_TEAM)));
+        let r = requete(
+            "POST",
+            "/v1/agents/inconnu/chat",
+            "{\"messages\":[]}",
+            Some((&cle_hub(), USAGE_TEAM)),
+        );
         let s = statut(&app, r).await;
-        assert!(s != StatusCode::UNAUTHORIZED && s != StatusCode::SERVICE_UNAVAILABLE, "{s}");
+        assert!(
+            s != StatusCode::UNAUTHORIZED && s != StatusCode::SERVICE_UNAVAILABLE,
+            "{s}"
+        );
     }
 
     #[tokio::test]
     async fn rejeu_perime_corps_altere_refuses() {
         let app = securise();
         let corps = "{\"name\":\"x\"}";
-        let signe = requete("POST", "/v1/contexts", corps, Some((&cle_appelant(), USAGE_API)));
+        let signe = requete(
+            "POST",
+            "/v1/contexts",
+            corps,
+            Some((&cle_appelant(), USAGE_API)),
+        );
         let entetes = signe.headers().clone();
         assert_ne!(statut(&app, signe).await, StatusCode::UNAUTHORIZED);
         let mut rejeu = requete("POST", "/v1/contexts", corps, None);
         rejeu.headers_mut().extend(entetes);
         assert_eq!(statut(&app, rejeu).await, StatusCode::UNAUTHORIZED);
-        let signe = requete("POST", "/v1/contexts", corps, Some((&cle_appelant(), USAGE_API)));
+        let signe = requete(
+            "POST",
+            "/v1/contexts",
+            corps,
+            Some((&cle_appelant(), USAGE_API)),
+        );
         let mut altere = requete("POST", "/v1/contexts", "{\"name\":\"y\"}", None);
         altere.headers_mut().extend(signe.headers().clone());
         assert_eq!(statut(&app, altere).await, StatusCode::UNAUTHORIZED);
-        let vieux = miyauth::http::signer_requete(&cle_appelant(), USAGE_API, "GET", "/v1/agents", b"", maintenant_unix() - 600);
+        let vieux = miyauth::http::signer_requete(
+            &cle_appelant(),
+            USAGE_API,
+            "GET",
+            "/v1/agents",
+            b"",
+            maintenant_unix() - 600,
+        );
         let mut r = requete("GET", "/v1/agents", "", None);
         for (n, v) in vieux.en_entetes() {
             r.headers_mut().insert(n, v.parse().unwrap());
@@ -1346,11 +1407,16 @@ mod tests {
     async fn aucune_cle_epinglee_tout_refuse_meme_en_loopback() {
         let app = proxy_router(etat(GardesMaia::default()));
         let mut r = requete("GET", "/v1/agents", "", Some((&cle_appelant(), USAGE_API)));
-        r.headers_mut().insert(header::HOST, "127.0.0.1:11435".parse().unwrap());
+        r.headers_mut()
+            .insert(header::HOST, "127.0.0.1:11435".parse().unwrap());
         assert_eq!(statut(&app, r).await, StatusCode::SERVICE_UNAVAILABLE);
         let mut r = requete("GET", "/v1/agents", "", None);
-        r.headers_mut().insert(header::HOST, "localhost:11435".parse().unwrap());
+        r.headers_mut()
+            .insert(header::HOST, "localhost:11435".parse().unwrap());
         assert_eq!(statut(&app, r).await, StatusCode::SERVICE_UNAVAILABLE);
-        assert_eq!(statut(&app, requete("GET", "/health", "", None)).await, StatusCode::OK);
+        assert_eq!(
+            statut(&app, requete("GET", "/health", "", None)).await,
+            StatusCode::OK
+        );
     }
 }

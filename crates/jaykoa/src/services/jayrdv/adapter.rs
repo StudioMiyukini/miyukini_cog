@@ -27,6 +27,11 @@ pub struct JayRDVAdapter;
 
 impl JayRDVAdapter {
     /// Synchronise les rendez-vous depuis le store JayRDV vers un agenda JayKoa (reflets).
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`JayRDVSyncError`] si la lecture des rendez-vous JayRDV ou l'écriture
+    /// d'un reflet dans JayKoa échoue.
     pub fn sync_appointments_from_store(
         koa_db: &Arc<JayKoaDb>,
         target_agenda_id: &str,
@@ -68,6 +73,10 @@ impl JayRDVAdapter {
     }
 
     /// Synchronise avec des données mock (stub lorsque aucun store JayRDV n'est fourni).
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`JayRDVSyncError`] si l'écriture d'un reflet dans JayKoa échoue.
     pub fn sync_appointments(
         koa_db: &Arc<JayKoaDb>,
         target_agenda_id: &str,
@@ -102,7 +111,7 @@ impl JayRDVAdapter {
                 id: Some(uuid::Uuid::new_v4().to_string()),
                 agenda_id: Some(target_agenda_id.to_string()),
                 title: Some(title.to_string()),
-                description: Some(format!("RDV JayRDV : {}", title)),
+                description: Some(format!("RDV JayRDV : {title}")),
                 start_datetime: Some(start.to_string()),
                 end_datetime: Some(end.to_string()),
                 all_day: false,

@@ -132,11 +132,10 @@ impl AliciaPolicy {
         }
         match default {
             ConfirmationPolicy::Never => false,
-            ConfirmationPolicy::Always => true,
             ConfirmationPolicy::AlwaysForWrites => writes,
-            // Default conservateur : si rien n'est posé côté préférence, on
-            // demande confirmation. Le caller peut overrider.
-            ConfirmationPolicy::UserPreference => true,
+            // UserPreference — default conservateur : si rien n'est posé côté
+            // préférence, on demande confirmation. Le caller peut overrider.
+            ConfirmationPolicy::Always | ConfirmationPolicy::UserPreference => true,
         }
     }
 }

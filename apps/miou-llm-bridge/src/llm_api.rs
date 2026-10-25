@@ -238,8 +238,7 @@ pub async fn llm_models(State(state): State<ProxyState>) -> impl IntoResponse {
         models.push(LlmModelEntry {
             id: native_name.clone(),
             display_name: catalog_match
-                .map(|c| c.display_name.to_string())
-                .unwrap_or_else(|| native_name.clone()),
+                .map_or_else(|| native_name.clone(), |c| c.display_name.to_string()),
             loaded: true,
             backend: "native".into(),
             params: catalog_match.map(|c| c.params.to_string()),
@@ -259,8 +258,7 @@ pub async fn llm_models(State(state): State<ProxyState>) -> impl IntoResponse {
         models.push(LlmModelEntry {
             id: model_id.clone(),
             display_name: catalog_match
-                .map(|c| c.display_name.to_string())
-                .unwrap_or_else(|| model_id.clone()),
+                .map_or_else(|| model_id.clone(), |c| c.display_name.to_string()),
             loaded: true,
             backend: "upstream".into(),
             params: catalog_match.map(|c| c.params.to_string()),
@@ -273,7 +271,7 @@ pub async fn llm_models(State(state): State<ProxyState>) -> impl IntoResponse {
     let local_models = state.model_manager.scan_models();
     let native_name = state.inference.native.loaded_model_name();
     for local in &local_models {
-        let already_listed = native_name.as_ref().map_or(false, |n| *n == local.filename);
+        let already_listed = native_name.as_ref().is_some_and(|n| *n == local.filename);
         if !already_listed {
             models.push(LlmModelEntry {
                 id: local.filename.clone(),

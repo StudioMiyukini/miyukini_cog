@@ -122,6 +122,8 @@ pub enum QuoteStatus {
 
 impl QuoteStatus {
     /// Convertit depuis chaine SQL.
+    #[must_use]
+    #[allow(clippy::should_implement_trait)] // infaillible (valeur par défaut), pas la sémantique de FromStr
     pub fn from_str(s: &str) -> Self {
         match s {
             "sent" => Self::Sent,
@@ -133,6 +135,7 @@ impl QuoteStatus {
     }
 
     /// Convertit en chaine SQL.
+    #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Draft => "draft",
@@ -144,6 +147,7 @@ impl QuoteStatus {
     }
 
     /// Label lisible en UI.
+    #[must_use]
     pub const fn label(self) -> &'static str {
         match self {
             Self::Draft => "Brouillon",
@@ -266,6 +270,8 @@ pub enum InvoiceStatus {
 
 impl InvoiceStatus {
     /// Convertit depuis chaine SQL.
+    #[must_use]
+    #[allow(clippy::should_implement_trait)] // infaillible (valeur par défaut), pas la sémantique de FromStr
     pub fn from_str(s: &str) -> Self {
         match s {
             "sent" => Self::Sent,
@@ -278,6 +284,7 @@ impl InvoiceStatus {
     }
 
     /// Convertit en chaine SQL.
+    #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Issued => "issued",
@@ -290,6 +297,7 @@ impl InvoiceStatus {
     }
 
     /// Label lisible en UI.
+    #[must_use]
     pub const fn label(self) -> &'static str {
         match self {
             Self::Issued => "Emise",
@@ -370,6 +378,8 @@ pub enum PaymentMethod {
 
 impl PaymentMethod {
     /// Convertit depuis chaine SQL.
+    #[must_use]
+    #[allow(clippy::should_implement_trait)] // infaillible (valeur par défaut), pas la sémantique de FromStr
     pub fn from_str(s: &str) -> Self {
         match s {
             "cb" => Self::Cb,
@@ -381,6 +391,7 @@ impl PaymentMethod {
     }
 
     /// Convertit en chaine SQL.
+    #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Virement => "virement",
@@ -392,6 +403,7 @@ impl PaymentMethod {
     }
 
     /// Label lisible en UI.
+    #[must_use]
     pub const fn label(self) -> &'static str {
         match self {
             Self::Virement => "Virement",

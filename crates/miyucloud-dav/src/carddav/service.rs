@@ -96,7 +96,7 @@ impl CardDavService {
         Ok(())
     }
 
-    fn bump_ctag_with_conn(&self, conn: &rusqlite::Connection, addressbook_id: &str) -> Result<(), DavError> {
+    fn bump_ctag_with_conn(conn: &rusqlite::Connection, addressbook_id: &str) -> Result<(), DavError> {
         let new_ctag = uuid::Uuid::new_v4().to_string();
         conn.execute(
             "UPDATE cloud_addressbooks SET ctag = ?1, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?2",
@@ -132,7 +132,7 @@ impl CardDavService {
                 email,
             ],
         )?;
-        self.bump_ctag_with_conn(&conn, addressbook_id)?;
+        Self::bump_ctag_with_conn(&conn, addressbook_id)?;
         Ok(contact)
     }
 
@@ -183,7 +183,7 @@ impl CardDavService {
         for uid in uids {
             params_vec.push(Box::new(uid.clone()));
         }
-        let params_refs: Vec<&dyn rusqlite::types::ToSql> = params_vec.iter().map(|p| p.as_ref()).collect();
+        let params_refs: Vec<&dyn rusqlite::types::ToSql> = params_vec.iter().map(std::convert::AsRef::as_ref).collect();
         let rows = stmt.query_map(&*params_refs, |row| Ok(row_to_contact(row)))?;
         let mut contacts = Vec::new();
         for row in rows {
@@ -215,7 +215,7 @@ impl CardDavService {
         if affected == 0 {
             return Err(DavError::NotFound(format!("Contact {uid} not found")));
         }
-        self.bump_ctag_with_conn(&conn, addressbook_id)?;
+        Self::bump_ctag_with_conn(&conn, addressbook_id)?;
         drop(conn);
 
         self.get_contact(addressbook_id, uid)?
@@ -228,7 +228,7 @@ impl CardDavService {
             "DELETE FROM cloud_contacts WHERE addressbook_id = ?1 AND uid = ?2",
             params![addressbook_id, uid],
         )?;
-        self.bump_ctag_with_conn(&conn, addressbook_id)?;
+        Self::bump_ctag_with_conn(&conn, addressbook_id)?;
         Ok(())
     }
 }

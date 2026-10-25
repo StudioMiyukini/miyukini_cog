@@ -63,8 +63,8 @@ mod tests {
     fn admin_cell_default_is_initialized() {
         let cell = MiyucloudAdminCell::default();
         assert_eq!(cell.status, ServiceStatus::Initialized);
-        assert!(!cell.service_id.is_empty());
-        assert!(!cell.created_at.is_empty());
+        assert_ne!(cell.service_id, "");
+        assert_ne!(cell.created_at, "");
     }
 
     #[test]

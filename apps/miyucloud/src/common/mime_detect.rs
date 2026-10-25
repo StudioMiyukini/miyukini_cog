@@ -104,7 +104,7 @@ pub async fn refine_content_type_from_file(
 /// 1. Always checks magic bytes regardless of the claimed type.
 /// 2. Rejects files whose detected type is in the blocklist.
 /// 3. Detects mismatches between claimed and actual type for executables.
-/// Explicit magic-byte detection of executable formats (ELF, PE/MZ, Mach-O).
+///    Explicit magic-byte detection of executable formats (ELF, PE/MZ, Mach-O).
 fn detect_executable(buf: &[u8]) -> Option<&'static str> {
     const MACHO: [[u8; 4]; 6] = [
         [0xFE, 0xED, 0xFA, 0xCE],

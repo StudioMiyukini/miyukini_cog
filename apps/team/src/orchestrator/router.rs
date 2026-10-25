@@ -63,8 +63,7 @@ pub fn select_node(registry: &NodeRegistry, selector: &NodeSelector) -> Option<N
                     .info
                     .model_active
                     .as_deref()
-                    .map(|m| m.to_lowercase().contains(&pattern.to_lowercase()))
-                    .unwrap_or(false);
+                    .is_some_and(|m| m.to_lowercase().contains(&pattern.to_lowercase()));
                 if !model_match {
                     // Accepter quand même — le modèle pourra être chargé
                     // mais on lui donnera une priorité plus basse
@@ -80,21 +79,19 @@ pub fn select_node(registry: &NodeRegistry, selector: &NodeSelector) -> Option<N
 
     // Trier : modèle chargé > tier élevé
     candidates.sort_by(|a, b| {
-        let a_model_match = selector.model_pattern.as_ref().map(|p| {
+        let a_model_match = selector.model_pattern.as_ref().is_none_or(|p| {
             a.info
                 .model_active
                 .as_deref()
-                .map(|m| m.to_lowercase().contains(&p.to_lowercase()))
-                .unwrap_or(false)
-        }).unwrap_or(true);
+                .is_some_and(|m| m.to_lowercase().contains(&p.to_lowercase()))
+        });
 
-        let b_model_match = selector.model_pattern.as_ref().map(|p| {
+        let b_model_match = selector.model_pattern.as_ref().is_none_or(|p| {
             b.info
                 .model_active
                 .as_deref()
-                .map(|m| m.to_lowercase().contains(&p.to_lowercase()))
-                .unwrap_or(false)
-        }).unwrap_or(true);
+                .is_some_and(|m| m.to_lowercase().contains(&p.to_lowercase()))
+        });
 
         // Modèle chargé en premier
         b_model_match.cmp(&a_model_match)
@@ -121,7 +118,7 @@ mod tests {
             cpu: "CPU".into(),
             ram_mb: 16_384,
             gpu: None,
-            model_active: model.map(|m| m.into()),
+            model_active: model.map(std::convert::Into::into),
             persona: None,
         }
     }

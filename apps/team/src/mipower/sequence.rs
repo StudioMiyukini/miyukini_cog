@@ -101,7 +101,7 @@ pub fn load_sequence(dir: &Path) -> Result<MiPowerSequence, SequenceError> {
     // Lire index.json
     let index_path = dir.join("index.json");
     let index_content = std::fs::read_to_string(&index_path)
-        .map_err(|e| SequenceError::IoError(format!("{index_path:?}: {e}")))?;
+        .map_err(|e| SequenceError::IoError(format!("{}: {e}", index_path.display())))?;
 
     let steps: Vec<SequenceStep> = serde_json::from_str(&index_content)
         .map_err(|e| SequenceError::ParseError(format!("index.json: {e}")))?;

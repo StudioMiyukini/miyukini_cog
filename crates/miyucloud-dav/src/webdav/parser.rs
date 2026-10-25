@@ -20,7 +20,8 @@ pub enum DavMethod {
 }
 
 impl DavMethod {
-    pub fn from_str(s: &str) -> Option<Self> {
+    /// Reconnaît une méthode WebDAV étendue (nom en majuscules).
+    pub fn parse(s: &str) -> Option<Self> {
         match s {
             "PROPFIND" => Some(Self::Propfind),
             "PROPPATCH" => Some(Self::Proppatch),
@@ -47,7 +48,8 @@ impl Depth {
         match value {
             Some("0") => Self::Zero,
             Some("1") => Self::One,
-            Some("infinity") | None => Self::Infinity,
+            // « infinity », en-tête absent ou valeur inconnue : profondeur infinie
+            // (valeur par défaut de la RFC 4918 §10.2).
             _ => Self::Infinity,
         }
     }

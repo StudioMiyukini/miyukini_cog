@@ -67,6 +67,7 @@ pub enum CalendarType {
 
 impl CalendarType {
     /// Représentation textuelle pour persistance.
+    #[must_use]
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Personal => "personal",
@@ -75,11 +76,14 @@ impl CalendarType {
         }
     }
     /// Parse depuis une chaîne.
+    #[must_use]
+    // Infaillible (repli sur une valeur par défaut), donc distinct de `FromStr`.
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Self {
         match s {
-            "personal" => Self::Personal,
             "work" => Self::Work,
             "synced_service" => Self::SyncedService,
+            // "personal" et valeurs inconnues.
             _ => Self::Personal,
         }
     }
@@ -153,6 +157,7 @@ pub enum EntryType {
 
 impl EntryType {
     /// Représentation textuelle pour persistance.
+    #[must_use]
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Internal => "internal",
@@ -161,15 +166,19 @@ impl EntryType {
         }
     }
     /// Parse depuis une chaîne.
+    #[must_use]
+    // Infaillible (repli sur une valeur par défaut), donc distinct de `FromStr`.
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Self {
         match s {
-            "internal" => Self::Internal,
             "reflect_jayrdv" => Self::ReflectJayRDV,
             "reflect_other" => Self::ReflectOther,
+            // "internal" et valeurs inconnues.
             _ => Self::Internal,
         }
     }
     /// L'entrée est-elle en lecture seule (reflet externe) ?
+    #[must_use]
     pub fn is_readonly(self) -> bool {
         !matches!(self, Self::Internal)
     }
@@ -192,6 +201,7 @@ pub enum TemporalStatus {
 
 impl TemporalStatus {
     /// Représentation textuelle pour persistance.
+    #[must_use]
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Confirmed => "confirmed",
@@ -200,11 +210,14 @@ impl TemporalStatus {
         }
     }
     /// Parse depuis une chaîne.
+    #[must_use]
+    // Infaillible (repli sur une valeur par défaut), donc distinct de `FromStr`.
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Self {
         match s {
-            "confirmed" => Self::Confirmed,
             "tentative" => Self::Tentative,
             "cancelled" => Self::Cancelled,
+            // "confirmed" et valeurs inconnues.
             _ => Self::Confirmed,
         }
     }
@@ -230,6 +243,7 @@ pub enum EventSource {
 
 impl EventSource {
     /// Représentation textuelle pour persistance.
+    #[must_use]
     pub fn as_str(self) -> &'static str {
         match self {
             Self::JayKoa => "jaykoa",
@@ -238,6 +252,9 @@ impl EventSource {
         }
     }
     /// Parse depuis une chaîne.
+    #[must_use]
+    // Infaillible (repli sur une valeur par défaut), donc distinct de `FromStr`.
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Self {
         match s {
             "jaykoa" => Self::JayKoa,
@@ -246,6 +263,7 @@ impl EventSource {
         }
     }
     /// Libellé affiché dans l'UI.
+    #[must_use]
     pub fn display_label(self) -> &'static str {
         match self {
             Self::JayKoa => "JayKoa",
@@ -254,6 +272,7 @@ impl EventSource {
         }
     }
     /// Couleur par défaut du badge source.
+    #[must_use]
     pub fn default_color(self) -> &'static str {
         match self {
             Self::JayKoa => "#4285F4",
@@ -359,7 +378,7 @@ mod tests {
         ];
         for v in variants {
             let roundtripped = EntryType::from_str(v.as_str());
-            assert_eq!(roundtripped, v, "roundtrip failed for {:?}", v);
+            assert_eq!(roundtripped, v, "roundtrip failed for {v:?}");
         }
     }
 
@@ -388,7 +407,7 @@ mod tests {
         ];
         for v in variants {
             let roundtripped = TemporalStatus::from_str(v.as_str());
-            assert_eq!(roundtripped, v, "roundtrip failed for {:?}", v);
+            assert_eq!(roundtripped, v, "roundtrip failed for {v:?}");
         }
     }
 
@@ -401,7 +420,7 @@ mod tests {
         ];
         for v in variants {
             let roundtripped = EventSource::from_str(v.as_str());
-            assert_eq!(roundtripped, v, "roundtrip failed for {:?}", v);
+            assert_eq!(roundtripped, v, "roundtrip failed for {v:?}");
         }
     }
 
@@ -414,7 +433,7 @@ mod tests {
         ];
         for v in variants {
             let roundtripped = CalendarType::from_str(v.as_str());
-            assert_eq!(roundtripped, v, "roundtrip failed for {:?}", v);
+            assert_eq!(roundtripped, v, "roundtrip failed for {v:?}");
         }
     }
 

@@ -64,7 +64,7 @@ async fn add_movement_returns_pending_under_strict_policy() {
         .unwrap();
     assert!(matches!(decision, Decision::PendingConfirmation { .. }));
     // Aucun épisode ni mouvement
-    assert!(mem.recent_episodes(10).unwrap().is_empty());
+    assert_eq!(mem.recent_episodes(10).unwrap(), [] as [miyualicia_memory::Episode; 0]);
 }
 
 #[tokio::test]

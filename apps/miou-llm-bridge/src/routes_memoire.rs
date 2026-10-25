@@ -71,7 +71,9 @@ use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 use axum::routing::{delete, post};
 use axum::{Extension, Json, Router};
-use maia_memoire::{Branche, Entrepot, ErreurMemoire, IdMemoire, Issue, MemoireMaia, Uuid, Validation};
+use maia_memoire::{
+    Branche, Entrepot, ErreurMemoire, IdMemoire, Issue, MemoireMaia, Uuid, Validation,
+};
 use miyauth::http::service::{analyser_cles_publiques, maintenant_unix, GardeSignee};
 use miyauth::http::{ENTETE_HORODATAGE, ENTETE_NONCE, ENTETE_SIGNATAIRE, ENTETE_SIGNATURE};
 use serde::Deserialize;
@@ -79,7 +81,10 @@ use serde::Deserialize;
 use crate::config::SecurityConfig;
 use crate::gouvernance::GouvernanceMaia;
 use crate::security::{RateLimitConfig, RateLimiter};
-use crate::tamr::{ActionTamr, RefusTamr, RegistreApprobations, SignatureApprobation, ENV_CLES_APPROBATION, USAGE_APPROBATION};
+use crate::tamr::{
+    ActionTamr, RefusTamr, RegistreApprobations, SignatureApprobation, ENV_CLES_APPROBATION,
+    USAGE_APPROBATION,
+};
 
 /// Usage signé (préfixe) des requêtes de l'utilisateur sur sa mémoire ; usage
 /// complet : `maia/memoire/<instance>/<utilisateur>` (L2).
@@ -111,7 +116,11 @@ pub struct EtatMemoireHttp<E: Entrepot> {
 
 fn analyser_env(nom: &str) -> Vec<[u8; 32]> {
     let brut = std::env::var(nom).unwrap_or_default();
-    let textes: Vec<&str> = brut.split(',').map(str::trim).filter(|t| !t.is_empty()).collect();
+    let textes: Vec<&str> = brut
+        .split(',')
+        .map(str::trim)
+        .filter(|t| !t.is_empty())
+        .collect();
     match analyser_cles_publiques(&textes) {
         Ok(c) => c,
         Err(e) => {
@@ -132,7 +141,10 @@ impl<E: Entrepot> EtatMemoireHttp<E> {
         gouvernance: Arc<GouvernanceMaia>,
         securite: SecurityConfig,
     ) -> Self {
-        let cles_approbation = if cles_approbation.iter().any(|c| cles_utilisateur.contains(c)) {
+        let cles_approbation = if cles_approbation
+            .iter()
+            .any(|c| cles_utilisateur.contains(c))
+        {
             tracing::error!("{ENV_CLES_APPROBATION} : clé aussi épinglée pour « {USAGE_MEMOIRE} » — approbations TAMR refusées");
             Vec::new()
         } else {
@@ -143,7 +155,10 @@ impl<E: Entrepot> EtatMemoireHttp<E> {
             garde: GardeSignee::new(cles_utilisateur),
             garde_approbation: GardeSignee::new(cles_approbation),
             instance: crate::garde_etranger::identifiant_aleatoire(),
-            limiteur: RateLimiter::new(RateLimitConfig { max_requests: DEBIT_MAX_PAR_MINUTE, window: std::time::Duration::from_secs(60) }),
+            limiteur: RateLimiter::new(RateLimitConfig {
+                max_requests: DEBIT_MAX_PAR_MINUTE,
+                window: std::time::Duration::from_secs(60),
+            }),
             approbations: RegistreApprobations::new(),
             gouvernance,
             securite,
@@ -157,14 +172,24 @@ impl<E: Entrepot> EtatMemoireHttp<E> {
         gouvernance: Arc<GouvernanceMaia>,
         securite: SecurityConfig,
     ) -> Self {
-        let etat = Self::new(acces, analyser_env(ENV_CLES_UTILISATEUR), analyser_env(ENV_CLES_APPROBATION), gouvernance, securite);
+        let etat = Self::new(
+            acces,
+            analyser_env(ENV_CLES_UTILISATEUR),
+            analyser_env(ENV_CLES_APPROBATION),
+            gouvernance,
+            securite,
+        );
         if etat.est_active() {
             tracing::info!("routes mémoire actives (requêtes signées « {USAGE_MEMOIRE}/<instance>/<utilisateur> » de l'utilisateur)");
         } else {
-            tracing::info!("routes mémoire désactivées (mémoire non ouverte ou {ENV_CLES_UTILISATEUR} vide)");
+            tracing::info!(
+                "routes mémoire désactivées (mémoire non ouverte ou {ENV_CLES_UTILISATEUR} vide)"
+            );
         }
         if !etat.garde_approbation.est_configuree() {
-            tracing::info!("approbations TAMR désactivées ({ENV_CLES_APPROBATION} vide ou invalide)");
+            tracing::info!(
+                "approbations TAMR désactivées ({ENV_CLES_APPROBATION} vide ou invalide)"
+            );
         }
         etat
     }
@@ -201,23 +226,39 @@ impl<E: Entrepot> EtatMemoireHttp<E> {
 pub fn routeur<E: Entrepot + 'static>(etat: Arc<EtatMemoireHttp<E>>) -> Router {
     Router::new()
         .route("/v1/memoire/{utilisateur}/consulter", post(consulter::<E>))
-        .route("/v1/memoire/{utilisateur}/historique", post(historique::<E>))
+        .route(
+            "/v1/memoire/{utilisateur}/historique",
+            post(historique::<E>),
+        )
         .route("/v1/memoire/{utilisateur}/exporter", post(exporter::<E>))
         .route("/v1/memoire/{utilisateur}/corriger", post(corriger::<E>))
         .route("/v1/memoire/{utilisateur}/notes", delete(oublier::<E>))
         .route("/v1/memoire/{utilisateur}/regles", post(poser_regle::<E>))
-        .route("/v1/memoire/{utilisateur}/candidats/{id}/valider", post(valider::<E>))
-        .route("/v1/memoire/{utilisateur}/candidats/{id}", delete(rejeter::<E>))
+        .route(
+            "/v1/memoire/{utilisateur}/candidats/{id}/valider",
+            post(valider::<E>),
+        )
+        .route(
+            "/v1/memoire/{utilisateur}/candidats/{id}",
+            delete(rejeter::<E>),
+        )
         .route(
             "/v1/memoire/{utilisateur}/approbations/{intervention}",
             post(approuver::<E>).delete(refuser_approbation::<E>),
         )
-        .layer(axum::middleware::from_fn_with_state(Arc::clone(&etat), garde::<E>))
+        .layer(axum::middleware::from_fn_with_state(
+            Arc::clone(&etat),
+            garde::<E>,
+        ))
         .with_state(etat)
 }
 
 fn refus(statut: StatusCode, motif: &str) -> Response {
-    (statut, Json(serde_json::json!({ "error": "accès mémoire refusé", "reason": motif }))).into_response()
+    (
+        statut,
+        Json(serde_json::json!({ "error": "accès mémoire refusé", "reason": motif })),
+    )
+        .into_response()
 }
 
 /// `POST /v1/memoire/{u}/approbations/{iv}` : approbation TAMR (F7).
@@ -230,7 +271,11 @@ fn est_approbation(methode: &axum::http::Method, chemin: &str) -> bool {
 /// Garde : débit, routes actives, pas de cookie, origine, requête signée par
 /// une clé de l'utilisateur (ou d'approbation), usage lié à l'instance.
 /// Toute réponse porte [`ENTETE_INSTANCE`].
-async fn garde<E: Entrepot + 'static>(State(etat): State<Arc<EtatMemoireHttp<E>>>, req: Request, next: Next) -> Response {
+async fn garde<E: Entrepot + 'static>(
+    State(etat): State<Arc<EtatMemoireHttp<E>>>,
+    req: Request,
+    next: Next,
+) -> Response {
     let mut reponse = garder(&etat, req, next).await;
     if let Ok(v) = axum::http::HeaderValue::from_str(&etat.instance) {
         reponse.headers_mut().insert(ENTETE_INSTANCE, v);
@@ -238,11 +283,21 @@ async fn garde<E: Entrepot + 'static>(State(etat): State<Arc<EtatMemoireHttp<E>>
     reponse
 }
 
-async fn garder<E: Entrepot + 'static>(etat: &EtatMemoireHttp<E>, req: Request, next: Next) -> Response {
-    let Some(peer) = req.extensions().get::<ConnectInfo<SocketAddr>>().map(|ci| ci.0.ip()) else {
+async fn garder<E: Entrepot + 'static>(
+    etat: &EtatMemoireHttp<E>,
+    req: Request,
+    next: Next,
+) -> Response {
+    let Some(peer) = req
+        .extensions()
+        .get::<ConnectInfo<SocketAddr>>()
+        .map(|ci| ci.0.ip())
+    else {
         return refus(StatusCode::FORBIDDEN, "no_connect_info");
     };
-    let ip = crate::security::resolve_client_ip(peer, req.headers(), &etat.securite.trusted_proxies).to_string();
+    let ip =
+        crate::security::resolve_client_ip(peer, req.headers(), &etat.securite.trusted_proxies)
+            .to_string();
     // L3 : limiteur de débit avant tout autre travail.
     if etat.limiteur.check(&format!("memoire:{ip}")).is_err() {
         tracing::warn!(target: "maia::memoire_http", ip = %ip, "débit dépassé sur les routes mémoire");
@@ -254,7 +309,9 @@ async fn garder<E: Entrepot + 'static>(etat: &EtatMemoireHttp<E>, req: Request, 
     if req.headers().contains_key(axum::http::header::COOKIE) {
         return refus(StatusCode::BAD_REQUEST, "cookie_refuse");
     }
-    if let crate::security::OriginCheck::Blocked(_) = crate::security::check_origin(Some(&ip), req.headers(), &etat.securite) {
+    if let crate::security::OriginCheck::Blocked(_) =
+        crate::security::check_origin(Some(&ip), req.headers(), &etat.securite)
+    {
         return refus(StatusCode::FORBIDDEN, "origin_blocked");
     }
     let approbation = est_approbation(req.method(), req.uri().path());
@@ -269,28 +326,63 @@ async fn garder<E: Entrepot + 'static>(etat: &EtatMemoireHttp<E>, req: Request, 
     let maintenant = maintenant_unix();
     let h = req.headers();
     let v = |n: &str| h.get(n).and_then(|x| x.to_str().ok());
-    let entetes = match garde.controler_entetes(v(ENTETE_SIGNATAIRE), v(ENTETE_HORODATAGE), v(ENTETE_NONCE), v(ENTETE_SIGNATURE), maintenant) {
+    let entetes = match garde.controler_entetes(
+        v(ENTETE_SIGNATAIRE),
+        v(ENTETE_HORODATAGE),
+        v(ENTETE_NONCE),
+        v(ENTETE_SIGNATURE),
+        maintenant,
+    ) {
         Ok(e) => e,
         Err(r) => {
             tracing::warn!(target: "maia::memoire_http", refus = ?r, approbation, "requête mémoire refusée");
-            return refus(StatusCode::UNAUTHORIZED, if approbation { "signature_approbation_requise" } else { "signature_utilisateur_requise" });
+            return refus(
+                StatusCode::UNAUTHORIZED,
+                if approbation {
+                    "signature_approbation_requise"
+                } else {
+                    "signature_utilisateur_requise"
+                },
+            );
         }
     };
     let (parts, corps) = req.into_parts();
     let Ok(corps) = axum::body::to_bytes(corps, MAX_CORPS).await else {
         return refus(StatusCode::PAYLOAD_TOO_LARGE, "corps_trop_volumineux");
     };
-    let chemin = parts.uri.path_and_query().map_or_else(|| parts.uri.path(), |pq| pq.as_str());
-    if let Err(r) = garde.verifier(&entetes, &usage, parts.method.as_str(), chemin, &corps, maintenant) {
+    let chemin = parts
+        .uri
+        .path_and_query()
+        .map_or_else(|| parts.uri.path(), |pq| pq.as_str());
+    if let Err(r) = garde.verifier(
+        &entetes,
+        &usage,
+        parts.method.as_str(),
+        chemin,
+        &corps,
+        maintenant,
+    ) {
         tracing::warn!(target: "maia::memoire_http", refus = ?r, approbation, "requête mémoire refusée");
-        return refus(StatusCode::UNAUTHORIZED, if approbation { "signature_approbation_requise" } else { "signature_utilisateur_requise" });
+        return refus(
+            StatusCode::UNAUTHORIZED,
+            if approbation {
+                "signature_approbation_requise"
+            } else {
+                "signature_utilisateur_requise"
+            },
+        );
     }
     let mut parts = parts;
-    parts.extensions.insert(UtilisateurAuthentifie(utilisateur.clone()));
+    parts
+        .extensions
+        .insert(UtilisateurAuthentifie(utilisateur.clone()));
     if approbation {
-        parts.extensions.insert(SignatureApprobation::verifiee(&entetes.signataire));
+        parts
+            .extensions
+            .insert(SignatureApprobation::verifiee(&entetes.signataire));
     }
-    next.run(Request::from_parts(parts, Body::from(corps))).await
+    next.run(Request::from_parts(parts, Body::from(corps)))
+        .await
 }
 
 /// Refus léger (statut, motif), rendu en JSON.
@@ -319,16 +411,16 @@ fn memoire<'a, E: Entrepot>(
 
 fn erreur(e: &ErreurMemoire) -> Response {
     let statut = match e {
-        ErreurMemoire::TamrRequis(_) | ErreurMemoire::RegleReserveeUtilisateur | ErreurMemoire::ProvenanceRefusee(_) => {
-            StatusCode::FORBIDDEN
-        }
+        ErreurMemoire::TamrRequis(_)
+        | ErreurMemoire::RegleReserveeUtilisateur
+        | ErreurMemoire::ProvenanceRefusee(_) => StatusCode::FORBIDDEN,
         ErreurMemoire::CandidatInconnu(_) | ErreurMemoire::NoteInconnue(_) => StatusCode::NOT_FOUND,
         ErreurMemoire::NoteOubliee(_) => StatusCode::GONE,
         ErreurMemoire::Conflit(_) => StatusCode::CONFLICT,
         ErreurMemoire::CandidatsPlafond(_) => StatusCode::TOO_MANY_REQUESTS,
-        ErreurMemoire::Entrepot(_) | ErreurMemoire::NonChiffree | ErreurMemoire::EtiquetteInvalide(_) => {
-            StatusCode::SERVICE_UNAVAILABLE
-        }
+        ErreurMemoire::Entrepot(_)
+        | ErreurMemoire::NonChiffree
+        | ErreurMemoire::EtiquetteInvalide(_) => StatusCode::SERVICE_UNAVAILABLE,
         _ => StatusCode::BAD_REQUEST,
     };
     (statut, Json(serde_json::json!({ "error": e.to_string() }))).into_response()
@@ -337,19 +429,28 @@ fn erreur(e: &ErreurMemoire) -> Response {
 fn refus_tamr(r: &RefusTamr) -> Response {
     let statut = match r {
         RefusTamr::Inconnue => StatusCode::NOT_FOUND,
-        RefusTamr::RegistrePlein | RefusTamr::Indisponible | RefusTamr::AutoriteIndisponible | RefusTamr::Serialisation => {
-            StatusCode::SERVICE_UNAVAILABLE
-        }
+        RefusTamr::RegistrePlein
+        | RefusTamr::Indisponible
+        | RefusTamr::AutoriteIndisponible
+        | RefusTamr::Serialisation => StatusCode::SERVICE_UNAVAILABLE,
         RefusTamr::SignatureRequise => StatusCode::UNAUTHORIZED,
         _ => StatusCode::FORBIDDEN,
     };
-    (statut, Json(serde_json::json!({ "error": r.to_string(), "tamr": "refus" }))).into_response()
+    (
+        statut,
+        Json(serde_json::json!({ "error": r.to_string(), "tamr": "refus" })),
+    )
+        .into_response()
 }
 
 fn issue(i: Issue) -> Response {
     match i {
         Issue::Ecrite(id) => Json(serde_json::json!({ "ecrite": id.as_str() })).into_response(),
-        Issue::EnAttente(k) => (StatusCode::ACCEPTED, Json(serde_json::json!({ "candidat": k.to_string() }))).into_response(),
+        Issue::EnAttente(k) => (
+            StatusCode::ACCEPTED,
+            Json(serde_json::json!({ "candidat": k.to_string() })),
+        )
+            .into_response(),
     }
 }
 
@@ -365,11 +466,17 @@ macro_rules! essayer {
 type Etat<E> = State<Arc<EtatMemoireHttp<E>>>;
 type Auth = Extension<UtilisateurAuthentifie>;
 
-async fn consulter<E: Entrepot + 'static>(State(etat): Etat<E>, Extension(auth): Auth, Path(u): Path<String>) -> Response {
+async fn consulter<E: Entrepot + 'static>(
+    State(etat): Etat<E>,
+    Extension(auth): Auth,
+    Path(u): Path<String>,
+) -> Response {
     let m = essayer!(memoire(&etat, &auth, &u));
     let acces = m.utilisateur();
     match (acces.consulter().await, acces.candidats().await) {
-        (Ok(notes), Ok(candidats)) => Json(serde_json::json!({ "notes": notes, "candidats": candidats })).into_response(),
+        (Ok(notes), Ok(candidats)) => {
+            Json(serde_json::json!({ "notes": notes, "candidats": candidats })).into_response()
+        }
         (Err(e), _) | (_, Err(e)) => erreur(&e),
     }
 }
@@ -394,7 +501,11 @@ async fn historique<E: Entrepot + 'static>(
     }
 }
 
-async fn exporter<E: Entrepot + 'static>(State(etat): Etat<E>, Extension(auth): Auth, Path(u): Path<String>) -> Response {
+async fn exporter<E: Entrepot + 'static>(
+    State(etat): Etat<E>,
+    Extension(auth): Auth,
+    Path(u): Path<String>,
+) -> Response {
     let m = essayer!(memoire(&etat, &auth, &u));
     match m.utilisateur().exporter().await {
         Ok(x) => {
@@ -464,7 +575,11 @@ async fn poser_regle<E: Entrepot + 'static>(
 ) -> Response {
     let m = essayer!(memoire(&etat, &auth, &utilisateur));
     let branche = essayer!(Branche::parse(&corps.branche).map_err(|e| erreur(&e)));
-    match m.utilisateur().poser_regle(branche, &corps.texte, corps.importance).await {
+    match m
+        .utilisateur()
+        .poser_regle(branche, &corps.texte, corps.importance)
+        .await
+    {
         Ok(issue_ecrite) => issue(issue_ecrite),
         Err(e) => erreur(&e),
     }
@@ -504,8 +619,16 @@ async fn valider<E: Entrepot + 'static>(
         }
         None => None,
     };
-    match etat.approbations.demander(ActionTamr::ValiderCandidat { proprietaire: u, candidat: k, cible_actuelle }) {
-        Ok(d) => (StatusCode::ACCEPTED, Json(serde_json::json!({ "approbation": d }))).into_response(),
+    match etat.approbations.demander(ActionTamr::ValiderCandidat {
+        proprietaire: u,
+        candidat: k,
+        cible_actuelle,
+    }) {
+        Ok(d) => (
+            StatusCode::ACCEPTED,
+            Json(serde_json::json!({ "approbation": d })),
+        )
+            .into_response(),
         Err(r) => refus_tamr(&r),
     }
 }
@@ -544,7 +667,13 @@ async fn approuver<E: Entrepot + 'static>(
     };
     let ok = essayer!(etat
         .approbations
-        .approuver(&intervention, &auth.0, &c.empreinte, &signature, &etat.gouvernance)
+        .approuver(
+            &intervention,
+            &auth.0,
+            &c.empreinte,
+            &signature,
+            &etat.gouvernance
+        )
         .map_err(|r| refus_tamr(&r)));
     let ActionTamr::ValiderCandidat { candidat, .. } = ok.action() else {
         return refus_tamr(&RefusTamr::HorsPortee);
@@ -552,7 +681,9 @@ async fn approuver<E: Entrepot + 'static>(
     let uid = candidat.id;
     let validation = essayer!(ok.validation_memoire(uid).map_err(|r| refus_tamr(&r)));
     match m.utilisateur().valider(uid, validation).await {
-        Ok(id) => Json(serde_json::json!({ "ecrite": id.as_str(), "tamr": "approuve" })).into_response(),
+        Ok(id) => {
+            Json(serde_json::json!({ "ecrite": id.as_str(), "tamr": "approuve" })).into_response()
+        }
         Err(e) => erreur(&e),
     }
 }
@@ -599,7 +730,11 @@ mod tests {
     }
 
     async fn monter(gouvernance: GouvernanceMaia) -> (Router, Arc<MemoireMaia<EntrepotMemoire>>) {
-        let m = Arc::new(MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets)).await.expect("m"));
+        let m = Arc::new(
+            MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets))
+                .await
+                .expect("m"),
+        );
         let r = monter_sur(Arc::clone(&m), gouvernance);
         (r, m)
     }
@@ -617,32 +752,56 @@ mod tests {
         ))
     }
 
-    fn requete(methode: &str, chemin: &str, corps: &str, cle: Option<(&CleSignature, &str)>) -> Request {
-        let mut b = axum::http::Request::builder().method(methode).uri(chemin).header(header::CONTENT_TYPE, "application/json");
+    fn requete(
+        methode: &str,
+        chemin: &str,
+        corps: &str,
+        cle: Option<(&CleSignature, &str)>,
+    ) -> Request {
+        let mut b = axum::http::Request::builder()
+            .method(methode)
+            .uri(chemin)
+            .header(header::CONTENT_TYPE, "application/json");
         if let Some((cle, usage)) = cle {
             for (n, v) in entetes_signees(cle, usage, methode, chemin, corps.as_bytes()) {
                 b = b.header(n, v);
             }
         }
         let mut r = b.body(Body::from(corps.to_string())).expect("requête");
-        r.extensions_mut().insert(ConnectInfo(SocketAddr::from(([127, 0, 0, 1], 40001))));
+        r.extensions_mut()
+            .insert(ConnectInfo(SocketAddr::from(([127, 0, 0, 1], 40001))));
         r
     }
 
     fn signee(methode: &str, chemin: &str, corps: &str) -> Request {
-        requete(methode, chemin, corps, Some((&alice(), usage_memoire().as_str())))
+        requete(
+            methode,
+            chemin,
+            corps,
+            Some((&alice(), usage_memoire().as_str())),
+        )
     }
 
     /// Requête d'approbation signée par la clé d'approbation (F7).
     fn approuvee(chemin: &str, corps: &str) -> Request {
-        requete("POST", chemin, corps, Some((&alice_approbation(), usage_approbation().as_str())))
+        requete(
+            "POST",
+            chemin,
+            corps,
+            Some((&alice_approbation(), usage_approbation().as_str())),
+        )
     }
 
     async fn appel(app: &Router, r: Request) -> (StatusCode, serde_json::Value) {
         let rep = app.clone().oneshot(r).await.expect("réponse");
         let s = rep.status();
-        let o = axum::body::to_bytes(rep.into_body(), 1 << 20).await.expect("corps");
-        (s, serde_json::from_slice(&o).unwrap_or(serde_json::Value::Null))
+        let o = axum::body::to_bytes(rep.into_body(), 1 << 20)
+            .await
+            .expect("corps");
+        (
+            s,
+            serde_json::from_slice(&o).unwrap_or(serde_json::Value::Null),
+        )
     }
 
     fn sans_tamr() -> GouvernanceMaia {
@@ -652,19 +811,45 @@ mod tests {
     #[tokio::test]
     async fn fusion_avec_le_passthrough_sans_conflit() {
         let (memoire, _) = monter(sans_tamr()).await;
-        let app = Router::new().route("/v1/{*path}", axum::routing::any(|| async { "amont" })).merge(memoire);
-        let (s, _) = appel(&app, requete("POST", "/v1/memoire/alice/consulter", "", None)).await;
-        assert_eq!(s, StatusCode::UNAUTHORIZED, "route mémoire prioritaire sur le passthrough");
+        let app = Router::new()
+            .route("/v1/{*path}", axum::routing::any(|| async { "amont" }))
+            .merge(memoire);
+        let (s, _) = appel(
+            &app,
+            requete("POST", "/v1/memoire/alice/consulter", "", None),
+        )
+        .await;
+        assert_eq!(
+            s,
+            StatusCode::UNAUTHORIZED,
+            "route mémoire prioritaire sur le passthrough"
+        );
         let (s, _) = appel(&app, signee("POST", "/v1/memoire/alice/consulter", "")).await;
         assert_eq!(s, StatusCode::OK);
     }
 
     #[tokio::test]
     async fn desactivees_par_defaut() {
-        let m = Arc::new(MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets)).await.expect("m"));
+        let m = Arc::new(
+            MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets))
+                .await
+                .expect("m"),
+        );
         for etat in [
-            EtatMemoireHttp::new(Some(("alice".into(), Arc::clone(&m))), Vec::new(), Vec::new(), Arc::new(sans_tamr()), SecurityConfig::default()),
-            EtatMemoireHttp::new(None, vec![alice().cle_publique()], Vec::new(), Arc::new(sans_tamr()), SecurityConfig::default()),
+            EtatMemoireHttp::new(
+                Some(("alice".into(), Arc::clone(&m))),
+                Vec::new(),
+                Vec::new(),
+                Arc::new(sans_tamr()),
+                SecurityConfig::default(),
+            ),
+            EtatMemoireHttp::new(
+                None,
+                vec![alice().cle_publique()],
+                Vec::new(),
+                Arc::new(sans_tamr()),
+                SecurityConfig::default(),
+            ),
         ] {
             assert!(!etat.est_active());
             let app = routeur(Arc::new(etat));
@@ -676,14 +861,36 @@ mod tests {
     #[tokio::test]
     async fn sans_authentification_ou_autre_cle_refuse() {
         let (app, _) = monter(sans_tamr()).await;
-        let (s, _) = appel(&app, requete("POST", "/v1/memoire/alice/consulter", "", None)).await;
+        let (s, _) = appel(
+            &app,
+            requete("POST", "/v1/memoire/alice/consulter", "", None),
+        )
+        .await;
         assert_eq!(s, StatusCode::UNAUTHORIZED);
         // Clé de service (Central) avec l'usage de l'API : refusée ici.
         let central = CleSignature::depuis_graine(&[3_u8; 32]);
-        let (s, _) = appel(&app, requete("POST", "/v1/memoire/alice/consulter", "", Some((&central, crate::signature::USAGE_API)))).await;
+        let (s, _) = appel(
+            &app,
+            requete(
+                "POST",
+                "/v1/memoire/alice/consulter",
+                "",
+                Some((&central, crate::signature::USAGE_API)),
+            ),
+        )
+        .await;
         assert_eq!(s, StatusCode::UNAUTHORIZED);
         // Clé de l'utilisateur, mauvais usage : refusée.
-        let (s, _) = appel(&app, requete("POST", "/v1/memoire/alice/consulter", "", Some((&alice(), crate::signature::USAGE_API)))).await;
+        let (s, _) = appel(
+            &app,
+            requete(
+                "POST",
+                "/v1/memoire/alice/consulter",
+                "",
+                Some((&alice(), crate::signature::USAGE_API)),
+            ),
+        )
+        .await;
         assert_eq!(s, StatusCode::UNAUTHORIZED);
         // Rejeu.
         let r = signee("POST", "/v1/memoire/alice/consulter", "");
@@ -694,21 +901,39 @@ mod tests {
         assert_eq!(appel(&app, rejeu).await.0, StatusCode::UNAUTHORIZED);
         // Cookie ambiant : refusé même signé.
         let mut r = signee("POST", "/v1/memoire/alice/consulter", "");
-        r.headers_mut().insert(header::COOKIE, "session=x".parse().expect("cookie"));
+        r.headers_mut()
+            .insert(header::COOKIE, "session=x".parse().expect("cookie"));
         assert_eq!(appel(&app, r).await.0, StatusCode::BAD_REQUEST);
         // Méthode GET : non routée.
-        assert_eq!(appel(&app, signee("GET", "/v1/memoire/alice/consulter", "")).await.0, StatusCode::METHOD_NOT_ALLOWED);
+        assert_eq!(
+            appel(&app, signee("GET", "/v1/memoire/alice/consulter", ""))
+                .await
+                .0,
+            StatusCode::METHOD_NOT_ALLOWED
+        );
     }
 
     #[tokio::test]
     async fn autre_utilisateur_refuse() {
         let (app, m) = monter(sans_tamr()).await;
-        m.utilisateur().ecrire(Ecrit::new(Branche::parse("travail").expect("b"), TypeUnite::Fait, "Secret", 5)).await.expect("e");
+        m.utilisateur()
+            .ecrire(Ecrit::new(
+                Branche::parse("travail").expect("b"),
+                TypeUnite::Fait,
+                "Secret",
+                5,
+            ))
+            .await
+            .expect("e");
         // Alice authentifiée demande la base de Bob : 403.
         for (methode, chemin, corps) in [
             ("POST", "/v1/memoire/bob/consulter", ""),
             ("POST", "/v1/memoire/bob/exporter", ""),
-            ("DELETE", "/v1/memoire/bob/notes", r#"{"chemin":"travail","motif":"x"}"#),
+            (
+                "DELETE",
+                "/v1/memoire/bob/notes",
+                r#"{"chemin":"travail","motif":"x"}"#,
+            ),
         ] {
             let (s, v) = appel(&app, signee(methode, chemin, corps)).await;
             assert_eq!(s, StatusCode::FORBIDDEN, "{chemin}");
@@ -716,31 +941,105 @@ mod tests {
         }
         // La clé de Bob n'est pas épinglée : 401, même sur sa propre base.
         let bob = CleSignature::depuis_graine(&[9_u8; 32]);
-        let (s, _) = appel(&app, requete("POST", "/v1/memoire/bob/consulter", "", Some((&bob, usage_memoire().as_str())))).await;
+        let (s, _) = appel(
+            &app,
+            requete(
+                "POST",
+                "/v1/memoire/bob/consulter",
+                "",
+                Some((&bob, usage_memoire().as_str())),
+            ),
+        )
+        .await;
         assert_eq!(s, StatusCode::UNAUTHORIZED);
-        assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 1, "rien d'oublié");
+        assert_eq!(
+            m.utilisateur().consulter().await.expect("c").len(),
+            1,
+            "rien d'oublié"
+        );
     }
 
     #[tokio::test]
     async fn voir_corriger_exporter_regle_oublier() {
         let (app, m) = monter(sans_tamr()).await;
-        m.utilisateur().ecrire(Ecrit::new(Branche::parse("travail").expect("b"), TypeUnite::Fait, "Lot 7", 5)).await.expect("e");
+        m.utilisateur()
+            .ecrire(Ecrit::new(
+                Branche::parse("travail").expect("b"),
+                TypeUnite::Fait,
+                "Lot 7",
+                5,
+            ))
+            .await
+            .expect("e");
         let (s, v) = appel(&app, signee("POST", "/v1/memoire/alice/consulter", "")).await;
         assert_eq!(s, StatusCode::OK);
         assert_eq!(v["notes"][0]["id"], "travail.f1");
-        let (s, v) = appel(&app, signee("POST", "/v1/memoire/alice/corriger", r#"{"id":"travail.f1","texte":"Lot 8"}"#)).await;
-        assert_eq!((s, v["ecrite"].as_str()), (StatusCode::OK, Some("travail.f1")));
-        let (s, v) = appel(&app, signee("POST", "/v1/memoire/alice/historique", r#"{"id":"travail.f1"}"#)).await;
-        assert_eq!((s, v["versions"].as_array().map(Vec::len)), (StatusCode::OK, Some(2)));
-        let (s, v) = appel(&app, signee("POST", "/v1/memoire/alice/regles", r#"{"branche":"moi","texte":"Tutoie-moi","importance":9}"#)).await;
+        let (s, v) = appel(
+            &app,
+            signee(
+                "POST",
+                "/v1/memoire/alice/corriger",
+                r#"{"id":"travail.f1","texte":"Lot 8"}"#,
+            ),
+        )
+        .await;
+        assert_eq!(
+            (s, v["ecrite"].as_str()),
+            (StatusCode::OK, Some("travail.f1"))
+        );
+        let (s, v) = appel(
+            &app,
+            signee(
+                "POST",
+                "/v1/memoire/alice/historique",
+                r#"{"id":"travail.f1"}"#,
+            ),
+        )
+        .await;
+        assert_eq!(
+            (s, v["versions"].as_array().map(Vec::len)),
+            (StatusCode::OK, Some(2))
+        );
+        let (s, v) = appel(
+            &app,
+            signee(
+                "POST",
+                "/v1/memoire/alice/regles",
+                r#"{"branche":"moi","texte":"Tutoie-moi","importance":9}"#,
+            ),
+        )
+        .await;
         assert_eq!(s, StatusCode::OK, "{v}");
         let (s, v) = appel(&app, signee("POST", "/v1/memoire/alice/exporter", "")).await;
-        assert_eq!((s, v["format"].as_str()), (StatusCode::OK, Some("maia-memoire/v1")));
-        let (s, _) = appel(&app, signee("DELETE", "/v1/memoire/alice/notes", r#"{"chemin":"travail","motif":"plus utile"}"#)).await;
+        assert_eq!(
+            (s, v["format"].as_str()),
+            (StatusCode::OK, Some("maia-memoire/v1"))
+        );
+        let (s, _) = appel(
+            &app,
+            signee(
+                "DELETE",
+                "/v1/memoire/alice/notes",
+                r#"{"chemin":"travail","motif":"plus utile"}"#,
+            ),
+        )
+        .await;
         assert_eq!(s, StatusCode::OK);
-        assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 1, "seule la règle reste");
+        assert_eq!(
+            m.utilisateur().consulter().await.expect("c").len(),
+            1,
+            "seule la règle reste"
+        );
         // Champ inconnu : refus.
-        let (s, _) = appel(&app, signee("POST", "/v1/memoire/alice/corriger", r#"{"id":"moi.r1","texte":"x","auteur":"maia"}"#)).await;
+        let (s, _) = appel(
+            &app,
+            signee(
+                "POST",
+                "/v1/memoire/alice/corriger",
+                r#"{"id":"moi.r1","texte":"x","auteur":"maia"}"#,
+            ),
+        )
+        .await;
         assert_eq!(s, StatusCode::UNPROCESSABLE_ENTITY);
     }
 
@@ -760,9 +1059,24 @@ mod tests {
         };
         let k1 = m.proposer(p("Un")).await.expect("k1");
         let k2 = m.proposer(p("Deux")).await.expect("k2");
-        let (s, v) = appel(&app, signee("POST", &format!("/v1/memoire/alice/candidats/{k1}/valider"), "")).await;
-        assert_eq!((s, v["ecrite"].as_str()), (StatusCode::OK, Some("travail.f1")));
-        let (s, _) = appel(&app, signee("DELETE", &format!("/v1/memoire/alice/candidats/{k2}"), "")).await;
+        let (s, v) = appel(
+            &app,
+            signee(
+                "POST",
+                &format!("/v1/memoire/alice/candidats/{k1}/valider"),
+                "",
+            ),
+        )
+        .await;
+        assert_eq!(
+            (s, v["ecrite"].as_str()),
+            (StatusCode::OK, Some("travail.f1"))
+        );
+        let (s, _) = appel(
+            &app,
+            signee("DELETE", &format!("/v1/memoire/alice/candidats/{k2}"), ""),
+        )
+        .await;
         assert_eq!(s, StatusCode::OK);
         assert!(m.utilisateur().candidats().await.expect("k").is_empty());
     }
@@ -770,10 +1084,17 @@ mod tests {
     async fn candidat_sensible(m: &MemoireMaia<EntrepotMemoire>) -> Uuid {
         let issue = m
             .utilisateur()
-            .ecrire(Ecrit::new(Branche::parse("sante.sommeil").expect("b"), TypeUnite::Fait, "Dort 6 h", 6))
+            .ecrire(Ecrit::new(
+                Branche::parse("sante.sommeil").expect("b"),
+                TypeUnite::Fait,
+                "Dort 6 h",
+                6,
+            ))
             .await
             .expect("écrire");
-        let Issue::EnAttente(k) = issue else { panic!("TAMR attendu") };
+        let Issue::EnAttente(k) = issue else {
+            panic!("TAMR attendu")
+        };
         k
     }
 
@@ -781,60 +1102,131 @@ mod tests {
     async fn sensible_tamr_refuse_rien_ecrit() {
         let (app, m) = monter(sans_tamr()).await;
         let k = candidat_sensible(&m).await;
-        let (s, v) = appel(&app, signee("POST", &format!("/v1/memoire/alice/candidats/{k}/valider"), "")).await;
+        let (s, v) = appel(
+            &app,
+            signee(
+                "POST",
+                &format!("/v1/memoire/alice/candidats/{k}/valider"),
+                "",
+            ),
+        )
+        .await;
         assert_eq!(s, StatusCode::ACCEPTED, "{v}");
         let d = &v["approbation"];
         assert_eq!(d["type_intervention"], "APPROVAL");
         let iv = d["intervention_id"].as_str().expect("iv");
         let corps = serde_json::json!({ "empreinte": d["empreinte"] }).to_string();
         // StrongFather sans règle TAMR : refus, rien n'est écrit.
-        let (s, v) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
+        let (s, v) = appel(
+            &app,
+            approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps),
+        )
+        .await;
         assert_eq!(s, StatusCode::FORBIDDEN, "{v}");
         assert!(m.utilisateur().consulter().await.expect("c").is_empty());
-        assert_eq!(m.utilisateur().candidats().await.expect("k").len(), 1, "candidat conservé");
+        assert_eq!(
+            m.utilisateur().candidats().await.expect("k").len(),
+            1,
+            "candidat conservé"
+        );
         // Demande consommée : pas de seconde réponse.
-        let (s, _) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
+        let (s, _) = appel(
+            &app,
+            approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps),
+        )
+        .await;
         assert_eq!(s, StatusCode::NOT_FOUND);
         // StrongFather indisponible : refus.
         let app2 = monter_sur(Arc::clone(&m), GouvernanceMaia::indisponible("test"));
-        let (_, v) = appel(&app2, signee("POST", &format!("/v1/memoire/alice/candidats/{k}/valider"), "")).await;
+        let (_, v) = appel(
+            &app2,
+            signee(
+                "POST",
+                &format!("/v1/memoire/alice/candidats/{k}/valider"),
+                "",
+            ),
+        )
+        .await;
         let d = &v["approbation"];
         let iv = d["intervention_id"].as_str().expect("iv");
         let corps = serde_json::json!({ "empreinte": d["empreinte"] }).to_string();
-        let (s, _) = appel(&app2, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
+        let (s, _) = appel(
+            &app2,
+            approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps),
+        )
+        .await;
         assert_eq!(s, StatusCode::FORBIDDEN);
         assert!(m.utilisateur().consulter().await.expect("c").is_empty());
     }
 
     #[tokio::test]
     async fn sensible_tamr_accorde_pour_le_candidat_exact() {
-        let (app, m) = monter(crate::tamr::tests::gouvernance(crate::tamr::tests::POLITIQUE_TAMR)).await;
+        let (app, m) = monter(crate::tamr::tests::gouvernance(
+            crate::tamr::tests::POLITIQUE_TAMR,
+        ))
+        .await;
         let k = candidat_sensible(&m).await;
-        let (_, v) = appel(&app, signee("POST", &format!("/v1/memoire/alice/candidats/{k}/valider"), "")).await;
+        let (_, v) = appel(
+            &app,
+            signee(
+                "POST",
+                &format!("/v1/memoire/alice/candidats/{k}/valider"),
+                "",
+            ),
+        )
+        .await;
         let d = &v["approbation"];
         let iv = d["intervention_id"].as_str().expect("iv").to_string();
         // Empreinte d'une autre action : refus, demande consommée, rien n'est écrit.
         let faux = serde_json::json!({ "empreinte": "00".repeat(32) }).to_string();
-        let (s, _) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &faux)).await;
+        let (s, _) = appel(
+            &app,
+            approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &faux),
+        )
+        .await;
         assert_eq!(s, StatusCode::FORBIDDEN);
         assert!(m.utilisateur().consulter().await.expect("c").is_empty());
         // Candidat rejeté entre la demande et l'approbation : approbation accordée mais rien n'est écrit.
-        let (_, v) = appel(&app, signee("POST", &format!("/v1/memoire/alice/candidats/{k}/valider"), "")).await;
+        let (_, v) = appel(
+            &app,
+            signee(
+                "POST",
+                &format!("/v1/memoire/alice/candidats/{k}/valider"),
+                "",
+            ),
+        )
+        .await;
         let d = v["approbation"].clone();
         let iv = d["intervention_id"].as_str().expect("iv").to_string();
         m.utilisateur().rejeter(k).await.expect("rejet");
         let k2 = candidat_sensible(&m).await;
         let corps = serde_json::json!({ "empreinte": d["empreinte"] }).to_string();
-        let (s, _) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
+        let (s, _) = appel(
+            &app,
+            approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps),
+        )
+        .await;
         assert_eq!(s, StatusCode::NOT_FOUND);
         assert!(m.utilisateur().consulter().await.expect("c").is_empty());
         // Approbation du candidat exact : écrit.
         let k = k2;
-        let (_, v) = appel(&app, signee("POST", &format!("/v1/memoire/alice/candidats/{k}/valider"), "")).await;
+        let (_, v) = appel(
+            &app,
+            signee(
+                "POST",
+                &format!("/v1/memoire/alice/candidats/{k}/valider"),
+                "",
+            ),
+        )
+        .await;
         let d = v["approbation"].clone();
         let iv = d["intervention_id"].as_str().expect("iv").to_string();
         let corps = serde_json::json!({ "empreinte": d["empreinte"] }).to_string();
-        let (s, v) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
+        let (s, v) = appel(
+            &app,
+            approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps),
+        )
+        .await;
         assert_eq!(s, StatusCode::OK, "{v}");
         assert_eq!(v["ecrite"], "sante.sommeil.f1");
         assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 1);
@@ -846,29 +1238,88 @@ mod tests {
     async fn l2_usage_lie_a_l_instance_et_a_l_utilisateur() {
         let (app, _) = monter(sans_tamr()).await;
         // Ancienne forme (usage seul) : rejouable après redémarrage ⇒ refusée.
-        let (s, _) = appel(&app, requete("POST", "/v1/memoire/alice/consulter", "", Some((&alice(), USAGE_MEMOIRE)))).await;
+        let (s, _) = appel(
+            &app,
+            requete(
+                "POST",
+                "/v1/memoire/alice/consulter",
+                "",
+                Some((&alice(), USAGE_MEMOIRE)),
+            ),
+        )
+        .await;
         assert_eq!(s, StatusCode::UNAUTHORIZED);
         // Requête signée pour une autre instance (avant redémarrage) : refusée.
         let ancienne = format!("{USAGE_MEMOIRE}/instance-precedente/alice");
-        let (s, _) = appel(&app, requete("POST", "/v1/memoire/alice/consulter", "", Some((&alice(), ancienne.as_str())))).await;
+        let (s, _) = appel(
+            &app,
+            requete(
+                "POST",
+                "/v1/memoire/alice/consulter",
+                "",
+                Some((&alice(), ancienne.as_str())),
+            ),
+        )
+        .await;
         assert_eq!(s, StatusCode::UNAUTHORIZED);
         // L'identifiant d'instance est annoncé dans toute réponse, même un refus.
-        let rep = app.clone().oneshot(requete("POST", "/v1/memoire/alice/consulter", "", None)).await.expect("r");
-        assert_eq!(rep.headers().get(ENTETE_INSTANCE).and_then(|v| v.to_str().ok()), Some(INSTANCE));
-        assert_eq!(appel(&app, signee("POST", "/v1/memoire/alice/consulter", "")).await.0, StatusCode::OK);
+        let rep = app
+            .clone()
+            .oneshot(requete("POST", "/v1/memoire/alice/consulter", "", None))
+            .await
+            .expect("r");
+        assert_eq!(
+            rep.headers()
+                .get(ENTETE_INSTANCE)
+                .and_then(|v| v.to_str().ok()),
+            Some(INSTANCE)
+        );
+        assert_eq!(
+            appel(&app, signee("POST", "/v1/memoire/alice/consulter", ""))
+                .await
+                .0,
+            StatusCode::OK
+        );
         // Instances distinctes à chaque démarrage.
-        let m = Arc::new(MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets)).await.expect("m"));
-        let e1 = EtatMemoireHttp::new(Some(("alice".into(), Arc::clone(&m))), vec![alice().cle_publique()], Vec::new(), Arc::new(sans_tamr()), SecurityConfig::default());
-        let e2 = EtatMemoireHttp::new(Some(("alice".into(), m)), vec![alice().cle_publique()], Vec::new(), Arc::new(sans_tamr()), SecurityConfig::default());
+        let m = Arc::new(
+            MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets))
+                .await
+                .expect("m"),
+        );
+        let e1 = EtatMemoireHttp::new(
+            Some(("alice".into(), Arc::clone(&m))),
+            vec![alice().cle_publique()],
+            Vec::new(),
+            Arc::new(sans_tamr()),
+            SecurityConfig::default(),
+        );
+        let e2 = EtatMemoireHttp::new(
+            Some(("alice".into(), m)),
+            vec![alice().cle_publique()],
+            Vec::new(),
+            Arc::new(sans_tamr()),
+            SecurityConfig::default(),
+        );
         assert_ne!(e1.instance(), e2.instance());
-        assert_eq!(e1.usage_memoire("alice"), format!("maia/memoire/{}/alice", e1.instance()));
+        assert_eq!(
+            e1.usage_memoire("alice"),
+            format!("maia/memoire/{}/alice", e1.instance())
+        );
     }
 
     #[tokio::test]
     async fn l3_debit_limite_sur_les_routes_memoire() {
         let (app, _) = monter(sans_tamr()).await;
         for _ in 0..DEBIT_MAX_PAR_MINUTE {
-            assert_eq!(appel(&app, requete("POST", "/v1/memoire/alice/consulter", "", None)).await.0, StatusCode::UNAUTHORIZED);
+            assert_eq!(
+                appel(
+                    &app,
+                    requete("POST", "/v1/memoire/alice/consulter", "", None)
+                )
+                .await
+                .0,
+                StatusCode::UNAUTHORIZED
+            );
         }
         let (s, v) = appel(&app, signee("POST", "/v1/memoire/alice/consulter", "")).await;
         assert_eq!(s, StatusCode::TOO_MANY_REQUESTS, "{v}");
@@ -876,43 +1327,85 @@ mod tests {
 
     async fn demande_sensible(app: &Router, m: &MemoireMaia<EntrepotMemoire>) -> (String, String) {
         let k = candidat_sensible(m).await;
-        let (_, v) = appel(app, signee("POST", &format!("/v1/memoire/alice/candidats/{k}/valider"), "")).await;
+        let (_, v) = appel(
+            app,
+            signee(
+                "POST",
+                &format!("/v1/memoire/alice/candidats/{k}/valider"),
+                "",
+            ),
+        )
+        .await;
         let d = &v["approbation"];
-        (d["intervention_id"].as_str().expect("iv").to_string(), serde_json::json!({ "empreinte": d["empreinte"] }).to_string())
+        (
+            d["intervention_id"].as_str().expect("iv").to_string(),
+            serde_json::json!({ "empreinte": d["empreinte"] }).to_string(),
+        )
     }
 
     #[tokio::test]
     async fn f7_approbation_exige_la_cle_d_approbation_distincte() {
-        let (app, m) = monter(crate::tamr::tests::gouvernance(crate::tamr::tests::POLITIQUE_TAMR)).await;
+        let (app, m) = monter(crate::tamr::tests::gouvernance(
+            crate::tamr::tests::POLITIQUE_TAMR,
+        ))
+        .await;
         let (iv, corps) = demande_sensible(&app, &m).await;
         let chemin = format!("/v1/memoire/alice/approbations/{iv}");
         // Clé mémoire, avec l'usage mémoire ou l'usage d'approbation : 401, demande intacte.
         for usage in [usage_memoire(), usage_approbation()] {
-            let (s, v) = appel(&app, requete("POST", &chemin, &corps, Some((&alice(), usage.as_str())))).await;
+            let (s, v) = appel(
+                &app,
+                requete("POST", &chemin, &corps, Some((&alice(), usage.as_str()))),
+            )
+            .await;
             assert_eq!(s, StatusCode::UNAUTHORIZED, "{v}");
         }
         // Clé d'approbation avec l'usage mémoire : 401.
-        let (s, _) = appel(&app, requete("POST", &chemin, &corps, Some((&alice_approbation(), usage_memoire().as_str())))).await;
+        let (s, _) = appel(
+            &app,
+            requete(
+                "POST",
+                &chemin,
+                &corps,
+                Some((&alice_approbation(), usage_memoire().as_str())),
+            ),
+        )
+        .await;
         assert_eq!(s, StatusCode::UNAUTHORIZED);
         assert!(m.utilisateur().consulter().await.expect("c").is_empty());
         // Clé d'approbation et usage d'approbation : accordée.
         let (s, v) = appel(&app, approuvee(&chemin, &corps)).await;
         assert_eq!(s, StatusCode::OK, "{v}");
         // La clé d'approbation n'ouvre pas les autres routes.
-        let (s, _) = appel(&app, requete("POST", "/v1/memoire/alice/consulter", "", Some((&alice_approbation(), usage_memoire().as_str())))).await;
+        let (s, _) = appel(
+            &app,
+            requete(
+                "POST",
+                "/v1/memoire/alice/consulter",
+                "",
+                Some((&alice_approbation(), usage_memoire().as_str())),
+            ),
+        )
+        .await;
         assert_eq!(s, StatusCode::UNAUTHORIZED);
     }
 
     #[tokio::test]
     async fn f7_sans_cle_d_approbation_ou_cle_commune_approbations_refusees() {
-        let m = Arc::new(MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets)).await.expect("m"));
+        let m = Arc::new(
+            MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets))
+                .await
+                .expect("m"),
+        );
         for approbation in [Vec::new(), vec![alice().cle_publique()]] {
             let app = routeur(Arc::new(
                 EtatMemoireHttp::new(
                     Some(("alice".into(), Arc::clone(&m))),
                     vec![alice().cle_publique()],
                     approbation,
-                    Arc::new(crate::tamr::tests::gouvernance(crate::tamr::tests::POLITIQUE_TAMR)),
+                    Arc::new(crate::tamr::tests::gouvernance(
+                        crate::tamr::tests::POLITIQUE_TAMR,
+                    )),
                     SecurityConfig::default(),
                 )
                 .avec_instance(INSTANCE),
@@ -920,43 +1413,112 @@ mod tests {
             let (iv, corps) = demande_sensible(&app, &m).await;
             let chemin = format!("/v1/memoire/alice/approbations/{iv}");
             for cle in [alice(), alice_approbation()] {
-                let (s, v) = appel(&app, requete("POST", &chemin, &corps, Some((&cle, usage_approbation().as_str())))).await;
+                let (s, v) = appel(
+                    &app,
+                    requete(
+                        "POST",
+                        &chemin,
+                        &corps,
+                        Some((&cle, usage_approbation().as_str())),
+                    ),
+                )
+                .await;
                 assert_eq!(s, StatusCode::SERVICE_UNAVAILABLE, "{v}");
             }
             assert!(m.utilisateur().consulter().await.expect("c").is_empty());
             // Le refus d'une approbation reste possible avec la clé mémoire.
-            assert_eq!(appel(&app, signee("DELETE", &chemin, "")).await.0, StatusCode::OK);
+            assert_eq!(
+                appel(&app, signee("DELETE", &chemin, "")).await.0,
+                StatusCode::OK
+            );
         }
     }
 
     #[tokio::test]
     async fn f8_cible_modifiee_avant_approbation_refusee() {
-        let (app, m) = monter(crate::tamr::tests::gouvernance(crate::tamr::tests::POLITIQUE_TAMR)).await;
+        let (app, m) = monter(crate::tamr::tests::gouvernance(
+            crate::tamr::tests::POLITIQUE_TAMR,
+        ))
+        .await;
         // Note sensible v1 (validée sous TAMR), puis correction k2 demandée.
         let (iv, corps) = demande_sensible(&app, &m).await;
-        let (s, _) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps)).await;
+        let (s, _) = appel(
+            &app,
+            approuvee(&format!("/v1/memoire/alice/approbations/{iv}"), &corps),
+        )
+        .await;
         assert_eq!(s, StatusCode::OK);
-        let (s, v) = appel(&app, signee("POST", "/v1/memoire/alice/corriger", r#"{"id":"sante.sommeil.f1","texte":"Dort 7 h"}"#)).await;
+        let (s, v) = appel(
+            &app,
+            signee(
+                "POST",
+                "/v1/memoire/alice/corriger",
+                r#"{"id":"sante.sommeil.f1","texte":"Dort 7 h"}"#,
+            ),
+        )
+        .await;
         assert_eq!(s, StatusCode::ACCEPTED, "{v}");
         let k2 = v["candidat"].as_str().expect("k2").to_string();
-        let (_, v) = appel(&app, signee("POST", &format!("/v1/memoire/alice/candidats/{k2}/valider"), "")).await;
+        let (_, v) = appel(
+            &app,
+            signee(
+                "POST",
+                &format!("/v1/memoire/alice/candidats/{k2}/valider"),
+                "",
+            ),
+        )
+        .await;
         let d = v["approbation"].clone();
         let description = d["description"].as_str().expect("description");
-        assert!(description.contains("texte actuel : « Dort 6 h »"), "{description}");
+        assert!(
+            description.contains("texte actuel : « Dort 6 h »"),
+            "{description}"
+        );
         assert!(description.contains("version 1"), "{description}");
         let iv2 = d["intervention_id"].as_str().expect("iv").to_string();
         let corps2 = serde_json::json!({ "empreinte": d["empreinte"] }).to_string();
         // La cible change (k3 validé) avant l'approbation de k2.
-        let (_, v) = appel(&app, signee("POST", "/v1/memoire/alice/corriger", r#"{"id":"sante.sommeil.f1","texte":"Dort 8 h"}"#)).await;
+        let (_, v) = appel(
+            &app,
+            signee(
+                "POST",
+                "/v1/memoire/alice/corriger",
+                r#"{"id":"sante.sommeil.f1","texte":"Dort 8 h"}"#,
+            ),
+        )
+        .await;
         let k3 = v["candidat"].as_str().expect("k3").to_string();
-        let (_, v) = appel(&app, signee("POST", &format!("/v1/memoire/alice/candidats/{k3}/valider"), "")).await;
+        let (_, v) = appel(
+            &app,
+            signee(
+                "POST",
+                &format!("/v1/memoire/alice/candidats/{k3}/valider"),
+                "",
+            ),
+        )
+        .await;
         let d3 = v["approbation"].clone();
         let iv3 = d3["intervention_id"].as_str().expect("iv").to_string();
         let corps3 = serde_json::json!({ "empreinte": d3["empreinte"] }).to_string();
-        assert_eq!(appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv3}"), &corps3)).await.0, StatusCode::OK);
-        let (s, v) = appel(&app, approuvee(&format!("/v1/memoire/alice/approbations/{iv2}"), &corps2)).await;
+        assert_eq!(
+            appel(
+                &app,
+                approuvee(&format!("/v1/memoire/alice/approbations/{iv3}"), &corps3)
+            )
+            .await
+            .0,
+            StatusCode::OK
+        );
+        let (s, v) = appel(
+            &app,
+            approuvee(&format!("/v1/memoire/alice/approbations/{iv2}"), &corps2),
+        )
+        .await;
         assert_eq!(s, StatusCode::FORBIDDEN, "{v}");
         let n = m.utilisateur().consulter().await.expect("c");
-        assert_eq!(n[0].texte, "Dort 8 h", "la correction approuvée sur une cible périmée n'est pas écrite");
+        assert_eq!(
+            n[0].texte, "Dort 8 h",
+            "la correction approuvée sur une cible périmée n'est pas écrite"
+        );
     }
 }

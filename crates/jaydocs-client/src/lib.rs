@@ -62,6 +62,8 @@ pub enum JayDocsError {
 
 /// Trait async des opérations Jay Docs exposées à Alicia.
 #[async_trait]
+// `#[async_trait]` pose lui-même `#[must_use]` sur la future retournée (déjà must_use).
+#[allow(clippy::double_must_use)]
 pub trait JayDocsBackend: Send + Sync {
     /// Crée un nouveau document.
     async fn create_document(
@@ -123,7 +125,7 @@ impl JayDocsClient {
             Some(Value::Number(n)) => n
                 .as_u64()
                 .filter(|v| *v > 0)
-                .map(|v| v as usize)
+                .and_then(|v| usize::try_from(v).ok())
                 .ok_or_else(|| {
                     JayDocsError::InvalidParam(format!(
                         "{key} doit être > 0, reçu {n}"
@@ -315,14 +317,13 @@ impl JayDocsBackend for FakeJayDocsBackend {
         if let Some(msg) = &state.fail_with {
             return Err(JayDocsError::Backend(msg.clone()));
         }
-        let q = search.map(|s| s.to_lowercase());
+        let q = search.map(str::to_lowercase);
         let mut filtered: Vec<DocumentSummary> = state
             .documents
             .iter()
             .filter(|d| {
                 q.as_ref()
-                    .map(|q| d.title.to_lowercase().contains(q))
-                    .unwrap_or(true)
+                    .is_none_or(|q| d.title.to_lowercase().contains(q))
             })
             .cloned()
             .collect();

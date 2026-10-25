@@ -50,7 +50,7 @@ pub struct MaiaLlmConfig {
     #[serde(default, skip_serializing)]
     pub auth_key: Option<String>,
 
-    /// Origines CORS autorisées (ex: ["http://localhost:3000"]).
+    /// Origines CORS autorisées (ex: `["http://localhost:3000"]`).
     /// Vide (défaut) = aucun en-tête CORS émis, donc pas d'accès cross-origin
     /// depuis un navigateur. Jamais de joker `*`.
     #[serde(default)]
@@ -106,8 +106,7 @@ fn default_true() -> bool {
 pub fn is_loopback_bind(bind_addr: &str) -> bool {
     bind_addr
         .parse::<std::net::SocketAddr>()
-        .map(|a| a.ip().to_canonical().is_loopback())
-        .unwrap_or(false)
+        .is_ok_and(|a| a.ip().to_canonical().is_loopback())
 }
 
 /// Clés publiques épinglées `(inférence, modèles)`.
@@ -146,12 +145,9 @@ pub fn build_cors(origins: &[String]) -> tower_http::cors::CorsLayer {
     let values: Vec<HeaderValue> = origins
         .iter()
         .filter(|o| o.trim() != "*")
-        .filter_map(|o| match HeaderValue::from_str(o.trim()) {
-            Ok(v) => Some(v),
-            Err(_) => {
-                tracing::warn!("Origine CORS invalide ignorée : {o}");
-                None
-            }
+        .filter_map(|o| if let Ok(v) = HeaderValue::from_str(o.trim()) { Some(v) } else {
+            tracing::warn!("Origine CORS invalide ignorée : {o}");
+            None
         })
         .collect();
     if values.len() != origins.len() {

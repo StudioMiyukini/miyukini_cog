@@ -24,10 +24,7 @@ pub async fn handle_get_file(
     }
 
     let resource = state.store.resolve_path(&owner_id, &format!("/{file_id}"))?;
-    let file = match resource {
-        DavResource::File(f) => f,
-        _ => return Err(DavError::NotFound("File not found".into())),
-    };
+    let DavResource::File(file) = resource else { return Err(DavError::NotFound("File not found".into())) };
 
     let data = state.store.get_file(&file)?;
 
@@ -52,10 +49,7 @@ pub async fn handle_put_file(
     }
 
     let resource = state.store.resolve_path(&owner_id, &format!("/{file_id}"))?;
-    let file = match resource {
-        DavResource::File(f) => f,
-        _ => return Err(DavError::NotFound("File not found".into())),
-    };
+    let DavResource::File(file) = resource else { return Err(DavError::NotFound("File not found".into())) };
 
     // Delete old, create new (same approach as WebDAV PUT)
     state.store.delete_file(&file.id)?;

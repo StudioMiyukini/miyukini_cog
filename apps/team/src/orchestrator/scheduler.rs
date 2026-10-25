@@ -129,8 +129,8 @@ impl TaskScheduler {
         let entry = TaskEntry::new(task.clone());
         let key = (task.priority, entry.created_at.elapsed().subsec_nanos() as u128);
 
-        self.queue.lock().unwrap_or_else(|e| e.into_inner()).insert(key, id.clone());
-        self.tasks.lock().unwrap_or_else(|e| e.into_inner()).insert(id.clone(), entry);
+        self.queue.lock().unwrap_or_else(std::sync::PoisonError::into_inner).insert(key, id.clone());
+        self.tasks.lock().unwrap_or_else(std::sync::PoisonError::into_inner).insert(id.clone(), entry);
 
         tracing::info!("Tâche soumise : {id} (priority={})", task.priority);
         id
@@ -138,8 +138,8 @@ impl TaskScheduler {
 
     /// Prend la prochaine tâche en attente (FIFO prioritisé).
     pub fn next_pending(&self) -> Option<Task> {
-        let mut queue = self.queue.lock().unwrap_or_else(|e| e.into_inner());
-        let mut tasks = self.tasks.lock().unwrap_or_else(|e| e.into_inner());
+        let mut queue = self.queue.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let mut tasks = self.tasks.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
 
         // Trouver la première tâche pending dans l'ordre de priorité
         let found = queue.iter().find_map(|(key, id)| {
@@ -166,7 +166,7 @@ impl TaskScheduler {
 
     /// Marque une tâche comme terminée avec résultat.
     pub fn complete(&self, id: &str, result: serde_json::Value) {
-        let mut tasks = self.tasks.lock().unwrap_or_else(|e| e.into_inner());
+        let mut tasks = self.tasks.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
         if let Some(entry) = tasks.get_mut(id) {
             entry.status = TaskStatus::Done;
             entry.result = Some(result);
@@ -176,7 +176,7 @@ impl TaskScheduler {
 
     /// Marque une tâche comme échouée.
     pub fn fail(&self, id: &str, error: impl Into<String>) {
-        let mut tasks = self.tasks.lock().unwrap_or_else(|e| e.into_inner());
+        let mut tasks = self.tasks.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
         if let Some(entry) = tasks.get_mut(id) {
             entry.status = TaskStatus::Failed;
             entry.error = Some(error.into());
@@ -186,7 +186,7 @@ impl TaskScheduler {
 
     /// Retourne l'état d'une tâche.
     pub fn get_result(&self, id: &str) -> Option<TaskResult> {
-        let tasks = self.tasks.lock().unwrap_or_else(|e| e.into_inner());
+        let tasks = self.tasks.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
         tasks.get(id).map(|entry| {
             let elapsed_ms = entry
                 .started_at

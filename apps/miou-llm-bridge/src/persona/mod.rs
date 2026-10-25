@@ -224,7 +224,9 @@ impl std::fmt::Display for PersonaError {
 /// charge le fichier directement.
 pub fn load_persona(name_or_path: &str) -> Result<PersonaConfig, PersonaError> {
     // Détection chemin de fichier
-    if name_or_path.ends_with(".toml")
+    if std::path::Path::new(name_or_path)
+        .extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("toml"))
         || name_or_path.contains('/')
         || name_or_path.contains('\\')
     {
@@ -263,8 +265,8 @@ mod tests {
         let p = load_persona("alicia").expect("alicia parse");
         assert_eq!(p.name, "alicia");
         assert_eq!(p.mode.kind, PersonaModeKind::Standalone);
-        assert!(!p.llm.preferred_patterns.is_empty());
-        assert!(!p.llm.system_prompt.is_empty());
+        assert_ne!(p.llm.preferred_patterns, [] as [std::string::String; 0]);
+        assert_ne!(p.llm.system_prompt, "");
         assert_eq!(p.stt.language, "fr");
     }
 

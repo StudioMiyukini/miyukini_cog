@@ -52,8 +52,7 @@ impl EnvironmentStateService {
     async fn has_artifact(path: &PathBuf) -> bool {
         fs::metadata(path)
             .await
-            .map(|m| m.is_file())
-            .unwrap_or(false)
+            .is_ok_and(|m| m.is_file())
     }
 
     /// Vérifie l'intégrité EIP (stub : présence = valide pour implémentation minimale).
@@ -105,7 +104,9 @@ impl EnvironmentStateService {
     /// Cohérence globale : EIP + registre + schéma cohérents (stub : pas d'incohérence détectée).
     /// @id miyukiniadmin_env_state_verify_consistency
     /// @do verify_global_consistency
-    async fn verify_global_consistency(&self) -> Result<(), std::io::Error> {
+    // Stub : la vérification réelle (lecture EIP/registre/schéma) sera faillible.
+    #[allow(clippy::unnecessary_wraps)]
+    fn verify_global_consistency(&self) -> Result<(), std::io::Error> {
         let _ = self;
         Ok(())
     }
@@ -145,7 +146,7 @@ impl EnvironmentStateService {
             }
         }
 
-        self.verify_global_consistency().await?;
+        self.verify_global_consistency()?;
         Ok(EnvironmentState::Initialise)
     }
 

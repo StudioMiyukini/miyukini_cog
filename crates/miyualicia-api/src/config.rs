@@ -178,7 +178,7 @@ mod tests {
         assert_eq!(cfg.token_ttl_secs, 3600);
         assert_eq!(cfg.rate_limit_per_min, 100);
         assert!(!cfg.cors_enabled);
-        assert!(cfg.cors_origins.is_empty());
+        assert_eq!(cfg.cors_origins, [] as [std::string::String; 0]);
     }
 
     #[test]

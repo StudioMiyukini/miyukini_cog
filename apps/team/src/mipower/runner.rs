@@ -68,19 +68,16 @@ impl MiPowerRunner {
             persona: None,
         };
 
-        let node = match select_node(&self.registry, &selector) {
-            Some(n) => n,
-            None => {
-                return StepResult {
-                    step_id: req.step_id,
-                    node_id: String::new(),
-                    node_url: String::new(),
-                    response_text: String::new(),
-                    success: false,
-                    error: Some("Aucun nœud disponible".into()),
-                    elapsed_ms: start.elapsed().as_millis() as u64,
-                };
-            }
+        let Some(node) = select_node(&self.registry, &selector) else {
+            return StepResult {
+                step_id: req.step_id,
+                node_id: String::new(),
+                node_url: String::new(),
+                response_text: String::new(),
+                success: false,
+                error: Some("Aucun nœud disponible".into()),
+                elapsed_ms: start.elapsed().as_millis() as u64,
+            };
         };
 
         let url = format!(
@@ -128,7 +125,7 @@ impl MiPowerRunner {
                             .and_then(|c| c.get("message"))
                             .and_then(|m| m.get("content"))
                             .and_then(|c| c.as_str())
-                            .map(|s| s.to_string())
+                            .map(std::string::ToString::to_string)
                     })
                     .unwrap_or_default();
 

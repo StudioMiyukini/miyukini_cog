@@ -27,6 +27,10 @@ pub struct PurseService {
 
 impl PurseService {
     /// Cree le service pour un utilisateur donne.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn new(db: Arc<JayKontaDb>, user_id: &str) -> Result<Self, DbError> {
         let account_id = db.ensure_account("purse", user_id, "Budget personnel")?;
         db.ensure_default_categories(&account_id)?;
@@ -34,6 +38,7 @@ impl PurseService {
     }
 
     /// Identifiant du compte actif.
+    #[must_use]
     pub fn account_id(&self) -> &str {
         &self.account_id
     }
@@ -41,6 +46,10 @@ impl PurseService {
     // ─── Dashboard ───────────────────────────────────────────
 
     /// Construit la vue dashboard Purse complete (CK-OP-01).
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn dashboard(&self) -> Result<PurseDashboardView, DbError> {
         let month = Local::now().format("%Y-%m").to_string();
         let balance = self.db.solde_purse()?;
@@ -115,7 +124,11 @@ impl PurseService {
 
     /// Ajoute un mouvement Purse (CK-OP-02).
     /// Performance cible : < 2s, max 3 actions (NFR-PUR-05, NFR-PUR-06).
-    pub fn add_movement(&self, cmd: CreateMovement) -> Result<String, DbError> {
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
+    pub fn add_movement(&self, cmd: &CreateMovement) -> Result<String, DbError> {
         let id = uuid::Uuid::new_v4().to_string();
         self.db.create_purse_movement(
             &self.account_id,
@@ -130,6 +143,10 @@ impl PurseService {
     }
 
     /// Liste les mouvements Purse avec filtres et pagination (CK-TK-11).
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn list_movements(&self, filters: &MovementFilters) -> Result<MovementsPage, DbError> {
         let per_page = if filters.per_page == 0 {
             20
@@ -137,7 +154,7 @@ impl PurseService {
             filters.per_page
         };
         let (items, total_count) = self.db.list_purse_movements(&self.account_id, filters)?;
-        let total_pages = (total_count + per_page - 1) / per_page;
+        let total_pages = total_count.div_ceil(per_page);
 
         // Calcul totaux revenus/depenses sur les items de la page
         let total_income: f64 = items
@@ -164,6 +181,10 @@ impl PurseService {
     // ─── Categories ──────────────────────────────────────────
 
     /// Liste les categories du compte Purse.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn list_categories(&self) -> Result<Vec<Category>, DbError> {
         self.db.list_categories(&self.account_id)
     }
@@ -171,12 +192,20 @@ impl PurseService {
     // ─── Budgets occasionnels ────────────────────────────────
 
     /// Liste les budgets occasionnels (CK-OP-03).
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn list_budgets(&self) -> Result<Vec<OccasionalBudget>, DbError> {
         self.db.list_budgets(&self.account_id)
     }
 
     /// Cree un budget occasionnel.
-    pub fn create_budget(&self, cmd: CreateBudget) -> Result<String, DbError> {
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
+    pub fn create_budget(&self, cmd: &CreateBudget) -> Result<String, DbError> {
         let id = uuid::Uuid::new_v4().to_string();
         self.db.create_budget(
             &id,
@@ -190,6 +219,10 @@ impl PurseService {
     }
 
     /// Cloture un budget.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn close_budget(&self, budget_id: &str) -> Result<(), DbError> {
         self.db.close_budget(budget_id)
     }
@@ -197,12 +230,20 @@ impl PurseService {
     // ─── Objectifs ───────────────────────────────────────────
 
     /// Liste les objectifs (CK-TK-61).
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn list_goals(&self) -> Result<Vec<Goal>, DbError> {
         self.db.list_goals(&self.account_id)
     }
 
     /// Cree un objectif.
-    pub fn create_goal(&self, cmd: CreateGoal) -> Result<String, DbError> {
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
+    pub fn create_goal(&self, cmd: &CreateGoal) -> Result<String, DbError> {
         let id = uuid::Uuid::new_v4().to_string();
         self.db.create_goal(
             &id,
@@ -216,6 +257,10 @@ impl PurseService {
     }
 
     /// Ajoute un versement vers un objectif.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn add_goal_contribution(&self, goal_id: &str, amount: f64) -> Result<(), DbError> {
         self.db.update_goal_progress(goal_id, amount)
     }
@@ -223,15 +268,23 @@ impl PurseService {
     // ─── Transactions recurrentes ─────────────────────────────
 
     /// Liste les transactions recurrentes actives.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn list_recurring(&self, active_only: bool) -> Result<Vec<RecurringTransaction>, DbError> {
         self.db.list_recurring(&self.account_id, active_only)
     }
 
     /// Cree une transaction recurrente.
-    pub fn create_recurring(&self, cmd: CreateRecurring) -> Result<String, DbError> {
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
+    pub fn create_recurring(&self, cmd: &CreateRecurring) -> Result<String, DbError> {
         let id = uuid::Uuid::new_v4().to_string();
         // Calculer la prochaine echeance depuis start_date
-        let next_due = Self::compute_next_due(&cmd.start_date, &cmd.frequency, cmd.day_of_month);
+        let next_due = Self::compute_next_due(&cmd.start_date, cmd.frequency, cmd.day_of_month);
         self.db.create_recurring(
             &id,
             &self.account_id,
@@ -252,11 +305,19 @@ impl PurseService {
     }
 
     /// Active ou desactive une transaction recurrente.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn toggle_recurring(&self, recurring_id: &str, active: bool) -> Result<(), DbError> {
         self.db.toggle_recurring(recurring_id, active)
     }
 
     /// Supprime une transaction recurrente.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn delete_recurring(&self, recurring_id: &str) -> Result<(), DbError> {
         self.db.delete_recurring(recurring_id)
     }
@@ -264,6 +325,10 @@ impl PurseService {
     // ─── Previsionnel budget ──────────────────────────────────
 
     /// Construit la vue previsionnelle sur N mois.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si l'accès à la base JayKonta échoue.
     pub fn forecast(&self, months_ahead: u32) -> Result<BudgetForecastView, DbError> {
         let balance = self.db.solde_purse()?;
         let recurring = self.db.list_recurring(&self.account_id, true)?;
@@ -305,7 +370,7 @@ impl PurseService {
             monthly_recurring_expense,
             monthly_net,
             forecast,
-            active_recurring_count: recurring.len() as u32,
+            active_recurring_count: u32::try_from(recurring.len()).unwrap_or(u32::MAX),
         })
     }
 
@@ -314,7 +379,7 @@ impl PurseService {
     /// Calcule la prochaine echeance a partir d'une date de debut et frequence.
     fn compute_next_due(
         start: &str,
-        freq: &RecurringFrequency,
+        freq: RecurringFrequency,
         day_of_month: Option<i32>,
     ) -> String {
         use chrono::NaiveDate;
@@ -351,7 +416,8 @@ impl PurseService {
                 let year = candidate.year();
                 let month = candidate.month();
                 let max_day = Self::days_in_month(year, month);
-                let day = (dom as u32).min(max_day).max(1);
+                // Jour négatif ou nul : ramené au 1er du mois.
+                let day = u32::try_from(dom).unwrap_or(1).min(max_day).max(1);
                 if let Some(adjusted) = NaiveDate::from_ymd_opt(year, month, day) {
                     if adjusted >= today {
                         return adjusted.format("%Y-%m-%d").to_string();
@@ -366,9 +432,15 @@ impl PurseService {
     /// Ajoute N mois a une NaiveDate (clampe le jour).
     fn add_months_naive(date: chrono::NaiveDate, months: u32) -> chrono::NaiveDate {
         use chrono::NaiveDate;
-        let total_months = date.year() as u32 * 12 + date.month() - 1 + months;
-        let new_year = (total_months / 12) as i32;
-        let new_month = total_months % 12 + 1;
+        // Calcul en i64 : aucune troncature ni changement de signe possible.
+        let total_months =
+            i64::from(date.year()) * 12 + i64::from(date.month()) - 1 + i64::from(months);
+        let Ok(new_year) = i32::try_from(total_months.div_euclid(12)) else {
+            return date;
+        };
+        let Ok(new_month) = u32::try_from(total_months.rem_euclid(12) + 1) else {
+            return date;
+        };
         let max_day = Self::days_in_month(new_year, new_month);
         let day = date.day().min(max_day);
         NaiveDate::from_ymd_opt(new_year, new_month, day).unwrap_or(date)
@@ -382,8 +454,7 @@ impl PurseService {
         } else {
             NaiveDate::from_ymd_opt(year, month + 1, 1)
         }
-        .map(|d| d.pred_opt().map(|p| p.day()).unwrap_or(28))
-        .unwrap_or(28)
+        .map_or(28, |d| d.pred_opt().map_or(28, |p| p.day()))
     }
 
     /// Calcule les totaux de recurrents pour un mois donne (YYYY-MM).
@@ -422,7 +493,7 @@ impl PurseService {
 
             // Compter le nombre d'occurrences dans ce mois
             let occurrences = Self::occurrences_in_month(r, m_start, m_end);
-            let total = r.amount * occurrences as f64;
+            let total = r.amount * f64::from(occurrences);
 
             match r.direction {
                 crate::domain::purse::RecurringDirection::Income => income += total,
@@ -436,7 +507,7 @@ impl PurseService {
     /// Nombre d'occurrences d'un recurrent dans un mois [start, end[.
     fn occurrences_in_month(
         r: &RecurringTransaction,
-        _m_start: chrono::NaiveDate,
+        m_start: chrono::NaiveDate,
         _m_end: chrono::NaiveDate,
     ) -> u32 {
         match r.frequency {
@@ -445,26 +516,16 @@ impl PurseService {
             RecurringFrequency::Monthly => 1,
             RecurringFrequency::Quarterly => {
                 // 1 fois tous les 3 mois
-                let month = _m_start.month();
+                let month = m_start.month();
                 let start_month = chrono::NaiveDate::parse_from_str(&r.start_date, "%Y-%m-%d")
-                    .map(|d| d.month())
-                    .unwrap_or(1);
-                if (month + 12 - start_month) % 3 == 0 {
-                    1
-                } else {
-                    0
-                }
+                    .map_or(1, |d| d.month());
+                u32::from((month + 12 - start_month).is_multiple_of(3))
             }
             RecurringFrequency::Yearly => {
-                let month = _m_start.month();
+                let month = m_start.month();
                 let start_month = chrono::NaiveDate::parse_from_str(&r.start_date, "%Y-%m-%d")
-                    .map(|d| d.month())
-                    .unwrap_or(1);
-                if month == start_month {
-                    1
-                } else {
-                    0
-                }
+                    .map_or(1, |d| d.month());
+                u32::from(month == start_month)
             }
         }
     }

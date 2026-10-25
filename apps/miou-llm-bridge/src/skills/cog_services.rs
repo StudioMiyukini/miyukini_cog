@@ -288,7 +288,11 @@ pub async fn execute(
 
 /// Effet d'un appel (pour la garde). Appel invalide : `Ecriture` (fail-closed).
 pub fn effet_appel(params: &HashMap<String, serde_json::Value>) -> EffetOutil {
-    match params.get("action").and_then(|v| v.as_str()).unwrap_or("list") {
+    match params
+        .get("action")
+        .and_then(|v| v.as_str())
+        .unwrap_or("list")
+    {
         "list" | "status" => EffetOutil::Lecture,
         "call" => preparer_appel(params).map_or(EffetOutil::Ecriture, |a| a.endpoint.effet),
         _ => EffetOutil::Ecriture,
@@ -297,7 +301,11 @@ pub fn effet_appel(params: &HashMap<String, serde_json::Value>) -> EffetOutil {
 
 /// Provenance du résultat d'un appel. Service inconnu : `Etranger` (prudence).
 pub fn provenance_appel(params: &HashMap<String, serde_json::Value>) -> Provenance {
-    match params.get("action").and_then(|v| v.as_str()).unwrap_or("list") {
+    match params
+        .get("action")
+        .and_then(|v| v.as_str())
+        .unwrap_or("list")
+    {
         "list" => Provenance::Locale,
         _ => params
             .get("service")
@@ -400,8 +408,8 @@ pub fn preparer_appel(
     params: &HashMap<String, serde_json::Value>,
 ) -> Result<AppelPrepare, RefusEndpoint> {
     let service_id = params.get("service").and_then(|v| v.as_str()).unwrap_or("");
-    let service =
-        trouver_service(service_id).ok_or_else(|| RefusEndpoint::ServiceInconnu(service_id.into()))?;
+    let service = trouver_service(service_id)
+        .ok_or_else(|| RefusEndpoint::ServiceInconnu(service_id.into()))?;
 
     let brut = params
         .get("endpoint")
@@ -431,8 +439,7 @@ pub fn preparer_appel(
 
     let requete = valider_requete(params.get("query"))?;
 
-    let corps_objet =
-        objet_json(params.get("body")).map_err(|()| RefusEndpoint::CorpsInvalide)?;
+    let corps_objet = objet_json(params.get("body")).map_err(|()| RefusEndpoint::CorpsInvalide)?;
     let corps = match (endpoint.methode, corps_objet) {
         (Methode::Get, None) => None,
         (Methode::Get, Some(_)) => return Err(RefusEndpoint::CorpsInvalide),
@@ -487,7 +494,10 @@ pub fn valider_chemin(endpoint: &str) -> Result<String, RefusEndpoint> {
                 u8::from_str_radix(hex, 16).map_err(|_| RefusEndpoint::EncodageInterdit)?;
             // Seuls les caractères non réservés peuvent être encodés : un
             // `/`, `.`, `\`, `@` ou `%` encodé est refusé.
-            if !(valeur.is_ascii_alphanumeric() || valeur == b'-' || valeur == b'_' || valeur == b'~')
+            if !(valeur.is_ascii_alphanumeric()
+                || valeur == b'-'
+                || valeur == b'_'
+                || valeur == b'~')
             {
                 return Err(RefusEndpoint::EncodageInterdit);
             }
@@ -702,35 +712,61 @@ mod tests {
     #[test]
     fn table_ssrf_refusee() {
         let cas: &[(&str, Attendu)] = &[
-            ("@evil.com", |e| matches!(e, RefusEndpoint::PasUnCheminRelatif)),
+            ("@evil.com", |e| {
+                matches!(e, RefusEndpoint::PasUnCheminRelatif)
+            }),
             ("@127.0.0.1:11435/v1/agents", |e| {
                 matches!(e, RefusEndpoint::PasUnCheminRelatif)
             }),
-            ("/@evil.com", |e| matches!(e, RefusEndpoint::CaractereInterdit('@'))),
+            ("/@evil.com", |e| {
+                matches!(e, RefusEndpoint::CaractereInterdit('@'))
+            }),
             ("//evil", |e| matches!(e, RefusEndpoint::DoubleBarre)),
             ("//evil.com/x", |e| matches!(e, RefusEndpoint::DoubleBarre)),
             ("/a//b", |e| matches!(e, RefusEndpoint::DoubleBarre)),
             ("/..%2f", |e| matches!(e, RefusEndpoint::EncodageInterdit)),
-            ("/..%2F..%2Fetc", |e| matches!(e, RefusEndpoint::EncodageInterdit)),
-            ("/%2e%2e/admin", |e| matches!(e, RefusEndpoint::EncodageInterdit)),
+            ("/..%2F..%2Fetc", |e| {
+                matches!(e, RefusEndpoint::EncodageInterdit)
+            }),
+            ("/%2e%2e/admin", |e| {
+                matches!(e, RefusEndpoint::EncodageInterdit)
+            }),
             ("/%252e", |e| matches!(e, RefusEndpoint::EncodageInterdit)),
             ("/%4", |e| matches!(e, RefusEndpoint::EncodageInterdit)),
             ("/%zz", |e| matches!(e, RefusEndpoint::EncodageInterdit)),
-            ("/../v1/agents", |e| matches!(e, RefusEndpoint::SegmentPoint)),
-            ("/intents/./get_balance", |e| matches!(e, RefusEndpoint::SegmentPoint)),
-            ("http://evil.com/", |e| matches!(e, RefusEndpoint::PasUnCheminRelatif)),
+            ("/../v1/agents", |e| {
+                matches!(e, RefusEndpoint::SegmentPoint)
+            }),
+            ("/intents/./get_balance", |e| {
+                matches!(e, RefusEndpoint::SegmentPoint)
+            }),
+            ("http://evil.com/", |e| {
+                matches!(e, RefusEndpoint::PasUnCheminRelatif)
+            }),
             ("HTTP://127.0.0.1:11435/", |e| {
                 matches!(e, RefusEndpoint::PasUnCheminRelatif)
             }),
-            ("/x:y", |e| matches!(e, RefusEndpoint::CaractereInterdit(':'))),
-            ("/\\evil.com", |e| matches!(e, RefusEndpoint::CaractereInterdit('\\'))),
-            ("/health?x=@evil", |e| matches!(e, RefusEndpoint::CaractereInterdit('?'))),
-            ("/health#frag", |e| matches!(e, RefusEndpoint::CaractereInterdit('#'))),
-            ("/he alth", |e| matches!(e, RefusEndpoint::CaractereInterdit(' '))),
+            ("/x:y", |e| {
+                matches!(e, RefusEndpoint::CaractereInterdit(':'))
+            }),
+            ("/\\evil.com", |e| {
+                matches!(e, RefusEndpoint::CaractereInterdit('\\'))
+            }),
+            ("/health?x=@evil", |e| {
+                matches!(e, RefusEndpoint::CaractereInterdit('?'))
+            }),
+            ("/health#frag", |e| {
+                matches!(e, RefusEndpoint::CaractereInterdit('#'))
+            }),
+            ("/he alth", |e| {
+                matches!(e, RefusEndpoint::CaractereInterdit(' '))
+            }),
             ("/health\r\nHost: evil", |e| {
                 matches!(e, RefusEndpoint::CaractereInterdit('\r'))
             }),
-            ("/é", |e| matches!(e, RefusEndpoint::CaractereInterdit('é'))),
+            ("/é", |e| {
+                matches!(e, RefusEndpoint::CaractereInterdit('é'))
+            }),
             ("", |e| matches!(e, RefusEndpoint::Longueur)),
         ];
         for (endpoint, attendu) in cas {
@@ -747,7 +783,12 @@ mod tests {
 
     #[test]
     fn endpoint_inconnu_refuse() {
-        for endpoint in ["/api/balance", "/v1/agents", "/intents/delete_all", "/health/"] {
+        for endpoint in [
+            "/api/balance",
+            "/v1/agents",
+            "/intents/delete_all",
+            "/health/",
+        ] {
             assert!(
                 matches!(
                     preparer_appel(&appel("jaykonta", endpoint)),
@@ -811,7 +852,10 @@ mod tests {
         let mut p = appel("jaykonta", "/intents/add_movement");
         p.insert("body".into(), r#"{"amount": 3, "kind": "income"}"#.into());
         let a = preparer_appel(&p).unwrap();
-        assert_eq!(a.corps, Some(serde_json::json!({ "amount": 3, "kind": "income" })));
+        assert_eq!(
+            a.corps,
+            Some(serde_json::json!({ "amount": 3, "kind": "income" }))
+        );
 
         let mut q = appel("jaykoa", "/intents/list_events");
         q.insert("query".into(), r#"{"from": "2026-10-24"}"#.into());
@@ -820,7 +864,10 @@ mod tests {
 
         let mut mauvais = appel("jaykonta", "/intents/add_movement");
         mauvais.insert("body".into(), "[1,2]".into());
-        assert_eq!(preparer_appel(&mauvais).unwrap_err(), RefusEndpoint::CorpsInvalide);
+        assert_eq!(
+            preparer_appel(&mauvais).unwrap_err(),
+            RefusEndpoint::CorpsInvalide
+        );
     }
 
     #[test]
@@ -852,17 +899,26 @@ mod tests {
     fn corps_interdit_en_lecture_et_borne_en_ecriture() {
         let mut p = appel("jaykonta", "/intents/get_balance");
         p.insert("body".into(), serde_json::json!({ "x": 1 }));
-        assert_eq!(preparer_appel(&p).unwrap_err(), RefusEndpoint::CorpsInvalide);
+        assert_eq!(
+            preparer_appel(&p).unwrap_err(),
+            RefusEndpoint::CorpsInvalide
+        );
 
         let mut w = appel("jaykonta", "/intents/add_movement");
         w.insert(
             "body".into(),
             serde_json::json!({ "x": "a".repeat(TAILLE_MAX_CORPS) }),
         );
-        assert_eq!(preparer_appel(&w).unwrap_err(), RefusEndpoint::CorpsInvalide);
+        assert_eq!(
+            preparer_appel(&w).unwrap_err(),
+            RefusEndpoint::CorpsInvalide
+        );
 
         let mut ok = appel("jaykonta", "/intents/add_movement");
-        ok.insert("body".into(), serde_json::json!({ "amount": 12.0, "kind": "expense" }));
+        ok.insert(
+            "body".into(),
+            serde_json::json!({ "amount": 12.0, "kind": "expense" }),
+        );
         let a = preparer_appel(&ok).unwrap();
         assert_eq!(a.endpoint.methode, Methode::Post);
         assert_eq!(a.endpoint.effet, EffetOutil::Ecriture);
@@ -890,7 +946,10 @@ mod tests {
             EffetOutil::Ecriture
         );
         // Appel invalide : traité comme une écriture (fail-closed).
-        assert_eq!(effet_appel(&appel("jaykonta", "@evil.com")), EffetOutil::Ecriture);
+        assert_eq!(
+            effet_appel(&appel("jaykonta", "@evil.com")),
+            EffetOutil::Ecriture
+        );
         assert_eq!(
             provenance_appel(&appel("jaykonta", "/health")),
             Provenance::Locale
@@ -899,7 +958,10 @@ mod tests {
             provenance_appel(&appel("jay1tribu", "/health")),
             Provenance::Etranger
         );
-        assert_eq!(provenance_appel(&appel("x", "/health")), Provenance::Etranger);
+        assert_eq!(
+            provenance_appel(&appel("x", "/health")),
+            Provenance::Etranger
+        );
     }
 
     #[tokio::test]
@@ -915,7 +977,11 @@ mod tests {
 
     #[tokio::test]
     async fn refus_ssrf_par_execute() {
-        let r = execute(&appel("jaykonta", "@evil.com/x"), Autorisation::EcritureConfirmee).await;
+        let r = execute(
+            &appel("jaykonta", "@evil.com/x"),
+            Autorisation::EcritureConfirmee,
+        )
+        .await;
         assert!(!r.success);
         assert!(r.error.unwrap_or_default().starts_with("Appel refusé"));
     }

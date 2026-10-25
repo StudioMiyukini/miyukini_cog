@@ -91,6 +91,8 @@ pub enum JayKoaError {
 /// Toutes les méthodes sont read-only. Une vraie impl branchée sur KindMother
 /// viendra plus tard ; P3 utilise `FakeJayKoaBackend` pour les tests.
 #[async_trait]
+// `#[async_trait]` pose lui-même `#[must_use]` sur la future retournée (déjà must_use).
+#[allow(clippy::double_must_use)]
 pub trait JayKoaBackend: Send + Sync {
     /// Liste les événements dont la date de début est dans `[from, to]`
     /// (incl.). `to` peut être identique à `from`.

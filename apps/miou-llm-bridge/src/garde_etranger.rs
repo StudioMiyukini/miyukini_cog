@@ -140,7 +140,11 @@ pub fn provenance_resultat(
     match skill_id {
         "web_fetch" => Provenance::Etranger,
         "cog_services" => cog_services::provenance_appel(params),
-        "file_ops" => match params.get("action").and_then(|v| v.as_str()).unwrap_or("read") {
+        "file_ops" => match params
+            .get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("read")
+        {
             "exists" | "write" | "mkdir" | "delete" => Provenance::Locale,
             _ => Provenance::Inconnue,
         },
@@ -192,8 +196,7 @@ impl EtatTour {
                 && (m.get("tool_calls").is_some() || m.get("function_call").is_some());
             let balise = m
                 .get("content")
-                .map(|c| c.to_string().contains(BALISE_DEBUT))
-                .unwrap_or(false);
+                .is_some_and(|c| c.to_string().contains(BALISE_DEBUT));
             role_hors_liste || appels_outils || balise
         });
         let mut etat = Self::new();
@@ -261,7 +264,9 @@ impl EtatTour {
 pub fn depuis_provenance_federee(p: maia_federee::Provenance) -> Provenance {
     match p {
         maia_federee::Provenance::Etranger => Provenance::Etranger,
-        maia_federee::Provenance::Utilisateur | maia_federee::Provenance::Deduit => Provenance::Locale,
+        maia_federee::Provenance::Utilisateur | maia_federee::Provenance::Deduit => {
+            Provenance::Locale
+        }
     }
 }
 
@@ -332,7 +337,10 @@ mod tests {
         assert!(etat.contient_etranger());
         let mut p = HashMap::new();
         p.insert("action".to_string(), serde_json::json!("write"));
-        assert!(matches!(etat.decider("file_ops", &p), Decision::ConfirmationRequise(_)));
+        assert!(matches!(
+            etat.decider("file_ops", &p),
+            Decision::ConfirmationRequise(_)
+        ));
 
         let avec_balise = vec![serde_json::json!({
             "role": "assistant",
@@ -349,7 +357,10 @@ mod tests {
             serde_json::json!({"role": "assistant", "content": "", "tool_calls": []}),
             serde_json::json!({"role": "assistant", "function_call": {"name": "x"}}),
         ] {
-            assert!(EtatTour::depuis_historique(&[m.clone()]).contient_etranger(), "{m}");
+            assert!(
+                EtatTour::depuis_historique(std::slice::from_ref(&m)).contient_etranger(),
+                "{m}"
+            );
         }
         // Conversation ordinaire : propre.
         let ordinaire = vec![
@@ -362,7 +373,10 @@ mod tests {
 
     #[test]
     fn web_fetch_est_etranger() {
-        assert_eq!(provenance_resultat("web_fetch", &p(&[])), Provenance::Etranger);
+        assert_eq!(
+            provenance_resultat("web_fetch", &p(&[])),
+            Provenance::Etranger
+        );
     }
 
     #[test]
@@ -376,16 +390,26 @@ mod tests {
             ("shell_exec", p(&[("command", "cat page.html".into())])),
             ("outil_inconnu", p(&[])),
         ] {
-            assert_eq!(provenance_resultat(skill, &params), Provenance::Inconnue, "{skill} {params:?}");
+            assert_eq!(
+                provenance_resultat(skill, &params),
+                Provenance::Inconnue,
+                "{skill} {params:?}"
+            );
         }
         for action in ["exists", "write", "mkdir", "delete"] {
-            assert_eq!(provenance_resultat("file_ops", &p(&[("action", action.into())])), Provenance::Locale);
+            assert_eq!(
+                provenance_resultat("file_ops", &p(&[("action", action.into())])),
+                Provenance::Locale
+            );
         }
         // `inconnue` contamine le tour comme `etranger`.
         let mut etat = EtatTour::new();
         etat.enregistrer("file_ops", Provenance::Inconnue);
         assert!(etat.contient_etranger() && !etat.tous_locaux());
-        assert!(matches!(etat.decider("file_ops", &p(&[("action", "write".into())])), Decision::ConfirmationRequise(_)));
+        assert!(matches!(
+            etat.decider("file_ops", &p(&[("action", "write".into())])),
+            Decision::ConfirmationRequise(_)
+        ));
     }
 
     #[test]
@@ -415,10 +439,16 @@ mod tests {
         for (skill, params) in [
             ("file_ops", p(&[("action", "write".into())])),
             ("shell_exec", p(&[("command", "ls".into())])),
-            ("web_fetch", p(&[("url", "https://exemple.org/?d=secret".into())])),
+            (
+                "web_fetch",
+                p(&[("url", "https://exemple.org/?d=secret".into())]),
+            ),
         ] {
             assert!(
-                matches!(etat.decider(skill, &params), Decision::ConfirmationRequise(_)),
+                matches!(
+                    etat.decider(skill, &params),
+                    Decision::ConfirmationRequise(_)
+                ),
                 "{skill} devrait être suspendu"
             );
         }

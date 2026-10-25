@@ -182,6 +182,8 @@ pub enum BudgetStatus {
 
 impl BudgetStatus {
     /// Convertit depuis chaine SQL.
+    #[must_use]
+    #[allow(clippy::should_implement_trait)] // infaillible (valeur par défaut), pas la sémantique de FromStr
     pub fn from_str(s: &str) -> Self {
         match s {
             "closed" => Self::Closed,
@@ -191,6 +193,7 @@ impl BudgetStatus {
     }
 
     /// Convertit en chaine SQL.
+    #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Active => "active",
@@ -253,6 +256,8 @@ pub enum GoalType {
 
 impl GoalType {
     /// Convertit depuis chaine SQL.
+    #[must_use]
+    #[allow(clippy::should_implement_trait)] // infaillible (valeur par défaut), pas la sémantique de FromStr
     pub fn from_str(s: &str) -> Self {
         match s {
             "spending_limit" => Self::SpendingLimit,
@@ -261,6 +266,7 @@ impl GoalType {
     }
 
     /// Convertit en chaine SQL.
+    #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Savings => "savings",
@@ -284,6 +290,8 @@ pub enum GoalStatus {
 
 impl GoalStatus {
     /// Convertit depuis chaine SQL.
+    #[must_use]
+    #[allow(clippy::should_implement_trait)] // infaillible (valeur par défaut), pas la sémantique de FromStr
     pub fn from_str(s: &str) -> Self {
         match s {
             "reached" => Self::Reached,
@@ -294,6 +302,7 @@ impl GoalStatus {
     }
 
     /// Convertit en chaine SQL.
+    #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Active => "active",
@@ -354,6 +363,8 @@ pub enum RecurringDirection {
 
 impl RecurringDirection {
     /// Convertit depuis chaine SQL.
+    #[must_use]
+    #[allow(clippy::should_implement_trait)] // infaillible (valeur par défaut), pas la sémantique de FromStr
     pub fn from_str(s: &str) -> Self {
         match s {
             "income" => Self::Income,
@@ -362,6 +373,7 @@ impl RecurringDirection {
     }
 
     /// Convertit en chaine SQL.
+    #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Expense => "expense",
@@ -370,6 +382,7 @@ impl RecurringDirection {
     }
 
     /// Libelle lisible.
+    #[must_use]
     pub const fn label(self) -> &'static str {
         match self {
             Self::Expense => "Depense",
@@ -395,6 +408,8 @@ pub enum RecurringFrequency {
 
 impl RecurringFrequency {
     /// Convertit depuis chaine SQL.
+    #[must_use]
+    #[allow(clippy::should_implement_trait)] // infaillible (valeur par défaut), pas la sémantique de FromStr
     pub fn from_str(s: &str) -> Self {
         match s {
             "weekly" => Self::Weekly,
@@ -406,6 +421,7 @@ impl RecurringFrequency {
     }
 
     /// Convertit en chaine SQL.
+    #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Weekly => "weekly",
@@ -417,6 +433,7 @@ impl RecurringFrequency {
     }
 
     /// Libelle lisible.
+    #[must_use]
     pub const fn label(self) -> &'static str {
         match self {
             Self::Weekly => "Hebdomadaire",
@@ -540,6 +557,8 @@ pub enum AlertType {
 
 impl AlertType {
     /// Convertit depuis chaine SQL.
+    #[must_use]
+    #[allow(clippy::should_implement_trait)] // infaillible (valeur par défaut), pas la sémantique de FromStr
     pub fn from_str(s: &str) -> Self {
         match s {
             "goal_warning" => Self::GoalWarning,
@@ -549,6 +568,7 @@ impl AlertType {
     }
 
     /// Convertit en chaine SQL.
+    #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::CategoryThreshold => "category_threshold",
@@ -571,6 +591,8 @@ pub enum AlertFrequency {
 
 impl AlertFrequency {
     /// Convertit depuis chaine SQL.
+    #[must_use]
+    #[allow(clippy::should_implement_trait)] // infaillible (valeur par défaut), pas la sémantique de FromStr
     pub fn from_str(s: &str) -> Self {
         match s {
             "daily" => Self::Daily,
@@ -580,6 +602,7 @@ impl AlertFrequency {
     }
 
     /// Convertit en chaine SQL.
+    #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Daily => "daily",

@@ -31,19 +31,17 @@ impl ConnectionManagerService {
     /// Start all enabled connection modes as background tasks.
     pub async fn start_all(&self) -> Result<(), DomainError> {
         // Start MWS tunnel
-        if let Some(ref mws) = self.mws {
-            if let Err(e) = mws.connect().await {
+        if let Some(ref mws) = self.mws
+            && let Err(e) = mws.connect().await {
                 tracing::error!("MWS tunnel failed to connect: {}", e);
                 // Non-fatal — continue with other modes
             }
-        }
 
         // Start DDNS updates
-        if let Some(ref ddns) = self.ddns {
-            if let Err(e) = ddns.start().await {
+        if let Some(ref ddns) = self.ddns
+            && let Err(e) = ddns.start().await {
                 tracing::error!("DDNS service failed to start: {}", e);
             }
-        }
 
         // Register with Central and start health reporting
         if let Some(ref central) = self.central {

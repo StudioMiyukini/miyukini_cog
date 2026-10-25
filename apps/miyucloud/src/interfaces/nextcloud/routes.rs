@@ -180,6 +180,7 @@ fn verify_url_user(url_user: &str, auth_user: &CurrentUser) -> Result<(), Respon
     }
 }
 
+#[allow(clippy::result_large_err)] // Err = `Response` axum, convention des handlers.
 async fn handle_dav_files(
     State(state): State<Arc<AppState>>,
     Path((url_user, subpath)): Path<(String, String)>,
@@ -192,6 +193,7 @@ async fn handle_dav_files(
         .map_err(|e| e.into_response())
 }
 
+#[allow(clippy::result_large_err)] // Err = `Response` axum, convention des handlers.
 async fn handle_dav_files_root(
     State(state): State<Arc<AppState>>,
     Path(url_user): Path<String>,
@@ -204,6 +206,7 @@ async fn handle_dav_files_root(
         .map_err(|e| e.into_response())
 }
 
+#[allow(clippy::result_large_err)] // Err = `Response` axum, convention des handlers.
 async fn handle_dav_uploads(
     State(state): State<Arc<AppState>>,
     Path((url_user, upload_id, rest)): Path<(String, String, String)>,
@@ -216,6 +219,7 @@ async fn handle_dav_uploads(
         .map_err(|e| e.into_response())
 }
 
+#[allow(clippy::result_large_err)] // Err = `Response` axum, convention des handlers.
 async fn handle_dav_uploads_root(
     State(state): State<Arc<AppState>>,
     Path((url_user, upload_id)): Path<(String, String)>,
@@ -247,6 +251,7 @@ async fn handle_legacy_webdav_root(user_ext: AuthUser) -> Response {
         .ou_500()
 }
 
+#[allow(clippy::result_large_err)] // Err = `Response` axum, convention des handlers.
 async fn handle_dav_trashbin(
     State(state): State<Arc<AppState>>,
     Path((url_user, subpath)): Path<(String, String)>,
@@ -259,6 +264,7 @@ async fn handle_dav_trashbin(
         .map_err(|e| e.into_response())
 }
 
+#[allow(clippy::result_large_err)] // Err = `Response` axum, convention des handlers.
 async fn handle_dav_trashbin_root(
     State(state): State<Arc<AppState>>,
     Path(url_user): Path<String>,

@@ -71,7 +71,7 @@ impl AuditPgRepository {
             return;
         }
 
-        let events: Vec<AuditEvent> = batch.drain(..).collect();
+        let events: Vec<AuditEvent> = std::mem::take(batch);
         let count = events.len();
 
         // Use a single transaction with multiple inserts for efficiency

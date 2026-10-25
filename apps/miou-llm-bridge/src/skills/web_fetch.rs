@@ -139,7 +139,10 @@ pub struct CibleValidee {
 /// Métadonnées du skill.
 pub fn info() -> SkillInfo {
     let mut params = HashMap::new();
-    params.insert("url".into(), "URL publique http(s) à récupérer (obligatoire)".into());
+    params.insert(
+        "url".into(),
+        "URL publique http(s) à récupérer (obligatoire)".into(),
+    );
     params.insert("method".into(), "GET | HEAD".into());
     params.insert(
         "headers".into(),
@@ -214,8 +217,7 @@ pub async fn executer_avec(
             .clamp(1, MAX_TIMEOUT_SECS),
     );
 
-    match tokio::time::timeout(delai, recuperer(url, methode, &entetes, delai, resolveur)).await
-    {
+    match tokio::time::timeout(delai, recuperer(url, methode, &entetes, delai, resolveur)).await {
         Ok(Ok(sortie)) => sortie,
         Ok(Err(e)) => refus(&e),
         Err(_) => refus(&RefusWeb::DelaiDepasse),
@@ -305,7 +307,10 @@ pub async fn valider_cible(url: &str, resolveur: &dyn Resolveur) -> Result<Cible
     valider_url(url, resolveur).await
 }
 
-async fn valider_url(url: reqwest::Url, resolveur: &dyn Resolveur) -> Result<CibleValidee, RefusWeb> {
+async fn valider_url(
+    url: reqwest::Url,
+    resolveur: &dyn Resolveur,
+) -> Result<CibleValidee, RefusWeb> {
     if url.as_str().len() > LONGUEUR_MAX_URL {
         return Err(RefusWeb::UrlTropLongue);
     }
@@ -346,8 +351,7 @@ async fn valider_url(url: reqwest::Url, resolveur: &dyn Resolveur) -> Result<Cib
     let suffixe_interne = ["localhost", "local", "internal"]
         .iter()
         .any(|tld| minuscule.rsplit('.').next() == Some(*tld));
-    if suffixe_interne || !minuscule.contains('.')
-    {
+    if suffixe_interne || !minuscule.contains('.') {
         return Err(RefusWeb::HoteNonPublic(hote));
     }
 
@@ -571,7 +575,10 @@ mod tests {
             ("localtest.me", vec![ip("127.0.0.1")]),
             ("interne.exemple.org", vec![ip("10.0.0.5")]),
             ("meta.exemple.org", vec![ip("169.254.169.254")]),
-            ("mixte.exemple.org", vec![ip("93.184.216.34"), ip("192.168.1.1")]),
+            (
+                "mixte.exemple.org",
+                vec![ip("93.184.216.34"), ip("192.168.1.1")],
+            ),
             ("v6.exemple.org", vec![ip("::ffff:127.0.0.1")]),
             ("ula.exemple.org", vec![ip("fd00::1")]),
             ("vide.exemple.org", vec![]),
@@ -581,16 +588,44 @@ mod tests {
     #[test]
     fn plages_non_publiques_refusees() {
         for a in [
-            "127.0.0.1", "127.0.0.2", "10.1.2.3", "172.16.0.1", "172.31.255.255",
-            "192.168.0.1", "169.254.169.254", "100.64.0.1", "100.127.255.255", "0.0.0.0",
-            "224.0.0.1", "255.255.255.255", "240.0.0.1", "198.18.0.1", "192.0.2.1",
-            "::1", "::", "fe80::1", "fc00::1", "fd12:3456::1", "ff02::1",
-            "::ffff:127.0.0.1", "::ffff:10.0.0.1", "::127.0.0.1", "64:ff9b::7f00:1",
-            "2002:7f00:1::", "2001:0:4136:e378::1", "2001:db8::1",
+            "127.0.0.1",
+            "127.0.0.2",
+            "10.1.2.3",
+            "172.16.0.1",
+            "172.31.255.255",
+            "192.168.0.1",
+            "169.254.169.254",
+            "100.64.0.1",
+            "100.127.255.255",
+            "0.0.0.0",
+            "224.0.0.1",
+            "255.255.255.255",
+            "240.0.0.1",
+            "198.18.0.1",
+            "192.0.2.1",
+            "::1",
+            "::",
+            "fe80::1",
+            "fc00::1",
+            "fd12:3456::1",
+            "ff02::1",
+            "::ffff:127.0.0.1",
+            "::ffff:10.0.0.1",
+            "::127.0.0.1",
+            "64:ff9b::7f00:1",
+            "2002:7f00:1::",
+            "2001:0:4136:e378::1",
+            "2001:db8::1",
         ] {
             assert!(!ip_publique(ip(a)), "{a} devrait être refusée");
         }
-        for a in ["93.184.216.34", "1.1.1.1", "172.32.0.1", "100.128.0.1", "2606:4700::1111"] {
+        for a in [
+            "93.184.216.34",
+            "1.1.1.1",
+            "172.32.0.1",
+            "100.128.0.1",
+            "2606:4700::1111",
+        ] {
             assert!(ip_publique(ip(a)), "{a} devrait être publique");
         }
     }
@@ -613,10 +648,7 @@ mod tests {
             "http://192.168.1.1:8080/",
         ] {
             let e = valider_cible(u, &r).await.unwrap_err();
-            assert!(
-                matches!(e, RefusWeb::AdresseNonPublique(_)),
-                "{u} → {e:?}"
-            );
+            assert!(matches!(e, RefusWeb::AdresseNonPublique(_)), "{u} → {e:?}");
         }
     }
 
@@ -635,11 +667,15 @@ mod tests {
             assert!(matches!(e, RefusWeb::AdresseNonPublique(_)), "{u} → {e:?}");
         }
         assert_eq!(
-            valider_cible("https://vide.exemple.org/", &r).await.unwrap_err(),
+            valider_cible("https://vide.exemple.org/", &r)
+                .await
+                .unwrap_err(),
             RefusWeb::ResolutionImpossible
         );
         assert_eq!(
-            valider_cible("https://inconnu.exemple.org/", &r).await.unwrap_err(),
+            valider_cible("https://inconnu.exemple.org/", &r)
+                .await
+                .unwrap_err(),
             RefusWeb::ResolutionImpossible
         );
     }
@@ -650,19 +686,37 @@ mod tests {
         let cas: &[(&str, RefusWeb)] = &[
             ("ftp://exemple.org/", RefusWeb::SchemaInterdit),
             ("file:///etc/passwd", RefusWeb::SchemaInterdit),
-            ("http://user:pw@exemple.org/", RefusWeb::IdentifiantsInterdits),
-            ("http://exemple.org@127.0.0.1/", RefusWeb::IdentifiantsInterdits),
+            (
+                "http://user:pw@exemple.org/",
+                RefusWeb::IdentifiantsInterdits,
+            ),
+            (
+                "http://exemple.org@127.0.0.1/",
+                RefusWeb::IdentifiantsInterdits,
+            ),
             ("http://exemple.org:11435/", RefusWeb::PortInterdit(11435)),
-            ("http://localhost/", RefusWeb::HoteNonPublic("localhost".into())),
-            ("http://a.localhost/", RefusWeb::HoteNonPublic("a.localhost".into())),
-            ("http://intranet/", RefusWeb::HoteNonPublic("intranet".into())),
+            (
+                "http://localhost/",
+                RefusWeb::HoteNonPublic("localhost".into()),
+            ),
+            (
+                "http://a.localhost/",
+                RefusWeb::HoteNonPublic("a.localhost".into()),
+            ),
+            (
+                "http://intranet/",
+                RefusWeb::HoteNonPublic("intranet".into()),
+            ),
             ("pas une url", RefusWeb::UrlInvalide),
         ];
         for (u, attendu) in cas {
             assert_eq!(&valider_cible(u, &r).await.unwrap_err(), attendu, "{u}");
         }
         let long = format!("https://exemple.org/{}", "a".repeat(LONGUEUR_MAX_URL));
-        assert_eq!(valider_cible(&long, &r).await.unwrap_err(), RefusWeb::UrlTropLongue);
+        assert_eq!(
+            valider_cible(&long, &r).await.unwrap_err(),
+            RefusWeb::UrlTropLongue
+        );
     }
 
     #[tokio::test]
@@ -714,17 +768,29 @@ mod tests {
         p.insert("url".into(), serde_json::json!("https://exemple.org/"));
         p.insert("method".into(), serde_json::json!("POST"));
         let s = executer_avec(&p, &r).await;
-        assert!(s.error.unwrap_or_default().contains("méthode POST interdite"));
+        assert!(s
+            .error
+            .unwrap_or_default()
+            .contains("méthode POST interdite"));
 
         p.insert("method".into(), serde_json::json!("GET"));
-        p.insert("headers".into(), serde_json::json!({ "Authorization": "Bearer x" }));
+        p.insert(
+            "headers".into(),
+            serde_json::json!({ "Authorization": "Bearer x" }),
+        );
         let s = executer_avec(&p, &r).await;
-        assert!(s.error.unwrap_or_default().contains("en-tête Authorization"));
+        assert!(s
+            .error
+            .unwrap_or_default()
+            .contains("en-tête Authorization"));
 
         p.remove("headers");
         p.insert("body".into(), serde_json::json!({ "a": 1 }));
         let s = executer_avec(&p, &r).await;
-        assert!(s.error.unwrap_or_default().contains("corps de requête interdit"));
+        assert!(s
+            .error
+            .unwrap_or_default()
+            .contains("corps de requête interdit"));
     }
 
     #[tokio::test]
@@ -751,7 +817,13 @@ mod tests {
         ] {
             assert!(type_contenu_accepte(t), "{t}");
         }
-        for t in ["", "application/octet-stream", "image/png", "application/pdf", "video/mp4"] {
+        for t in [
+            "",
+            "application/octet-stream",
+            "image/png",
+            "application/pdf",
+            "video/mp4",
+        ] {
             assert!(!type_contenu_accepte(t), "{t}");
         }
     }

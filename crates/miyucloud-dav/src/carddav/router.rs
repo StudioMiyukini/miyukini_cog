@@ -43,22 +43,22 @@ async fn dispatch_by_method(
     match method.as_str() {
         "PROPFIND" => handlers::handle_propfind(state, req)
             .await
-            .unwrap_or_else(|e| e.into_response()),
+            .unwrap_or_else(axum::response::IntoResponse::into_response),
         "REPORT" => handlers::handle_report(state, req)
             .await
-            .unwrap_or_else(|e| e.into_response()),
+            .unwrap_or_else(axum::response::IntoResponse::into_response),
         "GET" | "HEAD" => handlers::handle_get(state, req)
             .await
-            .unwrap_or_else(|e| e.into_response()),
+            .unwrap_or_else(axum::response::IntoResponse::into_response),
         "PUT" => handlers::handle_put(state, req)
             .await
-            .unwrap_or_else(|e| e.into_response()),
+            .unwrap_or_else(axum::response::IntoResponse::into_response),
         "DELETE" => handlers::handle_delete(state, req)
             .await
-            .unwrap_or_else(|e| e.into_response()),
+            .unwrap_or_else(axum::response::IntoResponse::into_response),
         "MKCOL" => handlers::handle_mkcol(state, req)
             .await
-            .unwrap_or_else(|e| e.into_response()),
+            .unwrap_or_else(axum::response::IntoResponse::into_response),
         "OPTIONS" => handlers::handle_options().await,
         _ => axum::http::StatusCode::METHOD_NOT_ALLOWED.into_response(),
     }

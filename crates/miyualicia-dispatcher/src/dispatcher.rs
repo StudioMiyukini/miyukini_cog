@@ -96,6 +96,8 @@ impl Dispatcher {
     /// renvoie `Decision::PendingConfirmation` **sans appeler ni cores ni
     /// service**. Le caller doit ensuite appeler `execute_confirmed` après
     /// accord utilisateur.
+    // Signature plate conservée : appelée par les ponts vocaux/HTTP existants.
+    #[allow(clippy::too_many_arguments)]
     pub async fn execute(
         &self,
         qualified_id: &str,
@@ -144,6 +146,8 @@ impl Dispatcher {
 
     /// Reprise après que l'utilisateur a explicitement accepté la confirmation.
     /// Saute la gate UX, garde la gate cores et l'audit.
+    // Même signature plate que `execute` (symétrie de l'API).
+    #[allow(clippy::too_many_arguments)]
     pub async fn execute_confirmed(
         &self,
         qualified_id: &str,

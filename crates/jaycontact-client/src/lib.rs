@@ -98,6 +98,8 @@ pub enum JayContactError {
 
 /// Trait abstrait pour les opérations sur le carnet de contacts.
 #[async_trait]
+// `#[async_trait]` pose lui-même `#[must_use]` sur la future retournée (déjà must_use).
+#[allow(clippy::double_must_use)]
 pub trait JayContactBackend: Send + Sync {
     /// Ajoute un contact et retourne son `ContactSummary`.
     async fn add_contact(
@@ -139,7 +141,7 @@ impl JayContactClient {
     fn parse_string<'a>(params: &'a Value, key: &str) -> Result<&'a str, JayContactError> {
         match params.get(key) {
             Some(Value::String(s)) if !s.trim().is_empty() => Ok(s.as_str()),
-            Some(Value::String(_)) | None | Some(Value::Null) => Err(
+            Some(Value::String(_) | Value::Null) | None => Err(
                 JayContactError::InvalidParam(format!("{key} manquant ou vide")),
             ),
             Some(other) => Err(JayContactError::InvalidParam(format!(
@@ -182,7 +184,7 @@ impl JayContactClient {
             Some(Value::Number(n)) => n
                 .as_u64()
                 .filter(|v| *v > 0)
-                .map(|v| v as usize)
+                .and_then(|v| usize::try_from(v).ok())
                 .ok_or_else(|| {
                     JayContactError::InvalidParam(format!(
                         "limit doit être un entier > 0, reçu {n}"
@@ -401,7 +403,7 @@ impl JayContactBackend for FakeJayContactBackend {
         Ok(state
             .contacts
             .iter()
-            .filter(|c| kind.map_or(true, |k| c.kind == k))
+            .filter(|c| kind.is_none_or(|k| c.kind == k))
             .take(limit)
             .cloned()
             .collect())
@@ -551,7 +553,7 @@ mod tests {
             .call("jaycontact.remove_contact", &json!({"id": "u_x"}))
             .await;
         assert!(r.success);
-        assert!(backend.snapshot().is_empty());
+        assert_eq!(backend.snapshot(), [] as [ContactSummary; 0]);
     }
 
     #[tokio::test]

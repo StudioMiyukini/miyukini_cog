@@ -30,7 +30,10 @@ use std::pin::Pin;
 
 use bondingbrother::strongfather::{ActionType, CallContext, IntentData};
 use bondingbrother::Intent;
-use maia_memoire::{Branche, Entrepot, ErreurMemoire, IdMemoire, Notee, Proposition, Provenance, TypeUnite, Uuid, VueMaia};
+use maia_memoire::{
+    Branche, Entrepot, ErreurMemoire, IdMemoire, Notee, Proposition, Provenance, TypeUnite, Uuid,
+    VueMaia,
+};
 
 use crate::agents::AgentDef;
 use crate::garde_etranger;
@@ -99,12 +102,20 @@ pub fn definition_noter() -> crate::tools::ToolDefinition {
 
 /// Proposition construite à partir des arguments de l'outil. `contenu_etranger` :
 /// provenance `etranger` (EX-53, EX-60 : une valeur dérivée reste étrangère).
-pub fn proposition(params: &HashMap<String, serde_json::Value>, contenu_etranger: bool) -> Result<Proposition, String> {
+pub fn proposition(
+    params: &HashMap<String, serde_json::Value>,
+    contenu_etranger: bool,
+) -> Result<Proposition, String> {
     const CLES: [&str; 5] = ["branche", "type", "texte", "importance", "cible"];
     if let Some(k) = params.keys().find(|k| !CLES.contains(&k.as_str())) {
         return Err(format!("argument inconnu : {k}"));
     }
-    let texte = |k: &str| params.get(k).and_then(|v| v.as_str()).ok_or_else(|| format!("argument « {k} » manquant"));
+    let texte = |k: &str| {
+        params
+            .get(k)
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| format!("argument « {k} » manquant"))
+    };
     let type_unite = match texte("type")? {
         "fait" => TypeUnite::Fait,
         "preference" => TypeUnite::Preference,
@@ -120,7 +131,10 @@ pub fn proposition(params: &HashMap<String, serde_json::Value>, contenu_etranger
         .ok_or("argument « importance » invalide")?;
     let cible = match params.get("cible") {
         None | Some(serde_json::Value::Null) => None,
-        Some(v) => Some(IdMemoire::parse(v.as_str().ok_or("argument « cible » invalide")?).map_err(|e| e.to_string())?),
+        Some(v) => Some(
+            IdMemoire::parse(v.as_str().ok_or("argument « cible » invalide")?)
+                .map_err(|e| e.to_string())?,
+        ),
     };
     Ok(Proposition {
         cible,
@@ -130,7 +144,11 @@ pub fn proposition(params: &HashMap<String, serde_json::Value>, contenu_etranger
         importance,
         // Plafonnée par la bibliothèque selon la provenance (≤ 6 déduit, ≤ 4 étranger).
         confiance: 9,
-        provenance: if contenu_etranger { Provenance::Etranger } else { Provenance::Deduit },
+        provenance: if contenu_etranger {
+            Provenance::Etranger
+        } else {
+            Provenance::Deduit
+        },
         liens: Vec::new(),
         sources: Vec::new(),
     })
@@ -138,7 +156,11 @@ pub fn proposition(params: &HashMap<String, serde_json::Value>, contenu_etranger
 
 /// Note de MAIA : tour avec contenu étranger ⇒ **candidat** seulement ; sinon
 /// [`VueMaia::noter`] (écriture directe d'une note ordinaire ou candidat).
-pub async fn noter(carnet: &dyn CarnetMaia, mut p: Proposition, contenu_etranger: bool) -> Result<Notee, ErreurMemoire> {
+pub async fn noter(
+    carnet: &dyn CarnetMaia,
+    mut p: Proposition,
+    contenu_etranger: bool,
+) -> Result<Notee, ErreurMemoire> {
     if contenu_etranger || p.provenance == Provenance::Etranger {
         p.provenance = Provenance::Etranger;
         return carnet.proposer(p).await.map(Notee::Candidat);
@@ -157,11 +179,20 @@ pub fn intention_noter(agent: &AgentDef, contenu_etranger: bool) -> Intent {
     data.insert("operation".into(), OPERATION_NOTER.into());
     data.insert("outil".into(), NOM_OUTIL_NOTER.into());
     data.insert("agent".into(), agent.id.clone());
-    data.insert("competence_memoire".into(), competence_memoire(agent).to_string());
+    data.insert(
+        "competence_memoire".into(),
+        competence_memoire(agent).to_string(),
+    );
     data.insert("contenu_etranger".into(), contenu_etranger.to_string());
-    data.insert("ecriture_directe_possible".into(), (!contenu_etranger).to_string());
+    data.insert(
+        "ecriture_directe_possible".into(),
+        (!contenu_etranger).to_string(),
+    );
     Intent::new(
-        format!("maia-memoire-noter-{}", garde_etranger::identifiant_aleatoire()),
+        format!(
+            "maia-memoire-noter-{}",
+            garde_etranger::identifiant_aleatoire()
+        ),
         ActionType::Modification,
         format!("maia.agent.{}", agent.id.to_lowercase()),
         CallContext {
@@ -217,7 +248,11 @@ mod tests {
     use std::sync::Arc;
 
     async fn vue() -> (Arc<MemoireMaia<EntrepotMemoire>>, VueMaia<EntrepotMemoire>) {
-        let m = Arc::new(MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets)).await.expect("ouvrir"));
+        let m = Arc::new(
+            MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets))
+                .await
+                .expect("ouvrir"),
+        );
         (Arc::clone(&m), VueMaia::new(m))
     }
 
@@ -226,18 +261,27 @@ mod tests {
     }
 
     fn note() -> HashMap<String, serde_json::Value> {
-        params(serde_json::json!({ "branche": "travail.cog", "type": "fait", "texte": "Prépare le lot 8", "importance": 4 }))
+        params(
+            serde_json::json!({ "branche": "travail.cog", "type": "fait", "texte": "Prépare le lot 8", "importance": 4 }),
+        )
     }
 
     /// Agent intégré qui déclare la compétence `memoire` (F6).
     fn alicia() -> AgentDef {
-        crate::agents::AgentRegistry::new().get_agent("alicia").expect("alicia")
+        crate::agents::AgentRegistry::new()
+            .get_agent("alicia")
+            .expect("alicia")
     }
 
     /// Domaine « travail » établi par l'utilisateur (F4).
     async fn domaine_travail(m: &MemoireMaia<EntrepotMemoire>) {
         m.utilisateur()
-            .ecrire(maia_memoire::Ecrit::new(Branche::parse("travail.lot").expect("b"), TypeUnite::Fait, "Lot 7", 5))
+            .ecrire(maia_memoire::Ecrit::new(
+                Branche::parse("travail.lot").expect("b"),
+                TypeUnite::Fait,
+                "Lot 7",
+                5,
+            ))
             .await
             .expect("écrire");
     }
@@ -276,7 +320,9 @@ origins = ["maia"]
         let permissive = POLITIQUE_NOTER.replace(" && data.competence_memoire == 'true'", "");
         let g = crate::tamr::tests::gouvernance(&permissive);
         for id in ["maria", "victor", "denis"] {
-            let agent = crate::agents::AgentRegistry::new().get_agent(id).expect("agent");
+            let agent = crate::agents::AgentRegistry::new()
+                .get_agent(id)
+                .expect("agent");
             assert!(!competence_memoire(&agent), "{id}");
             let r = executer(&g, Some(&v), &agent, &note(), false).await;
             assert_eq!(r["success"], false, "{id} : {r}");
@@ -294,9 +340,16 @@ origins = ["maia"]
         let g = crate::tamr::tests::gouvernance(POLITIQUE_NOTER);
         let r = executer(&g, Some(&v), &alicia(), &note(), true).await;
         assert_eq!(r["success"], true, "{r}");
-        assert!(r.get("candidat").is_some() && r.get("ecrite").is_none(), "{r}");
+        assert!(
+            r.get("candidat").is_some() && r.get("ecrite").is_none(),
+            "{r}"
+        );
         let u = m.utilisateur();
-        assert_eq!(u.consulter().await.expect("c").len(), 1, "aucune écriture directe");
+        assert_eq!(
+            u.consulter().await.expect("c").len(),
+            1,
+            "aucune écriture directe"
+        );
         let k = u.candidats().await.expect("k");
         assert_eq!(k.len(), 1);
         assert_eq!(k[0].provenance, Provenance::Etranger);
@@ -330,12 +383,23 @@ origins = ["maia"]
         // F6 (config/strongfather/maia.toml) : compétence exigée ; écriture directe
         // annoncée dans un tour étranger ⇒ refus critique.
         let g = crate::gouvernance::tests::gouvernance_de_base();
-        assert!(g.executer(&intention_noter(&alicia(), false), |_| ()).is_ok());
-        assert!(g.executer(&intention_noter(&alicia(), true), |_| ()).is_ok(), "candidat seulement : autorisé");
-        let maria = crate::agents::AgentRegistry::new().get_agent("maria").expect("maria");
+        assert!(g
+            .executer(&intention_noter(&alicia(), false), |_| ())
+            .is_ok());
+        assert!(
+            g.executer(&intention_noter(&alicia(), true), |_| ())
+                .is_ok(),
+            "candidat seulement : autorisé"
+        );
+        let maria = crate::agents::AgentRegistry::new()
+            .get_agent("maria")
+            .expect("maria");
         assert!(g.executer(&intention_noter(&maria, false), |_| ()).is_err());
         let mut incoherente = intention_noter(&alicia(), true);
-        incoherente.data.content.insert("ecriture_directe_possible".into(), "true".into());
+        incoherente
+            .data
+            .content
+            .insert("ecriture_directe_possible".into(), "true".into());
         let e = g.executer(&incoherente, |_| ()).unwrap_err();
         assert!(e.contains("maia-memoire-noter-etranger-direct"), "{e}");
     }
@@ -348,7 +412,10 @@ origins = ["maia"]
         let mut p = note();
         p.insert("provenance".into(), serde_json::json!("utilisateur"));
         assert!(proposition(&p, false).is_err());
-        assert_eq!(proposition(&note(), true).expect("p").provenance, Provenance::Etranger);
+        assert_eq!(
+            proposition(&note(), true).expect("p").provenance,
+            Provenance::Etranger
+        );
         assert_eq!(definition_noter().function.name, NOM_OUTIL_NOTER);
     }
 }

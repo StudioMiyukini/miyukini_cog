@@ -37,7 +37,7 @@ mod tests {
         let encoded = encode(b"");
         assert_eq!(encoded, "");
         let decoded = decode("").unwrap();
-        assert!(decoded.is_empty());
+        assert_eq!(decoded, [] as [u8; 0]);
     }
 
     #[test]

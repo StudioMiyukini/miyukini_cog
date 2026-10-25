@@ -71,8 +71,7 @@ pub async fn list_available_handler(State(state): State<AppState>) -> impl IntoR
             let loaded = state
                 .engine
                 .model_info()
-                .map(|i| i.name == m.filename)
-                .unwrap_or(false);
+                .is_some_and(|i| i.name == m.filename);
             GgufModelInfo {
                 filename: m.filename,
                 model_id: m.model_id,
@@ -173,15 +172,12 @@ pub async fn hash_handler(
     State(state): State<AppState>,
     Path(model_id): Path<String>,
 ) -> impl IntoResponse {
-    let model_entry = match state.store.find(&model_id) {
-        Some(m) => m,
-        None => {
-            return (
-                StatusCode::NOT_FOUND,
-                Json(json!({"error": format!("Modèle '{}' non trouvé", model_id)})),
-            )
-                .into_response();
-        }
+    let Some(model_entry) = state.store.find(&model_id) else {
+        return (
+            StatusCode::NOT_FOUND,
+            Json(json!({"error": format!("Modèle '{}' non trouvé", model_id)})),
+        )
+            .into_response();
     };
 
     let path = model_entry.path.clone();

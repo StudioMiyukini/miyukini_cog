@@ -299,7 +299,7 @@ mod tests {
 
         let encrypted = encrypt_message(&key, b"").unwrap();
         let decrypted = decrypt_message(&key, &encrypted).unwrap();
-        assert!(decrypted.is_empty());
+        assert_eq!(decrypted, [] as [u8; 0]);
     }
 
     #[test]

@@ -25,6 +25,10 @@ impl MiyukiniWatchAggregator {
     }
 
     /// Calcule et retourne les agrégats pour Miou.
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la lecture en base (sessions, métriques, préférences) échoue.
     pub fn get_aggregates(
         &self,
         profile_id: &str,
@@ -33,9 +37,13 @@ impl MiyukiniWatchAggregator {
     }
 
     /// Purge les métriques brutes expirées (première session du jour).
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la lecture des préférences ou la purge en base échoue.
     pub fn purge_expired_raw(&self, profile_id: &str) -> Result<i64, MiyukiniWatchError> {
         let prefs = self.db.get_prefs(profile_id)?;
-        let cutoff = Local::now() - Duration::days(prefs.retention_raw_days as i64);
+        let cutoff = Local::now() - Duration::days(i64::from(prefs.retention_raw_days));
         let to_ts = cutoff.to_rfc3339();
         let deleted = self.db.purge_raw_before(profile_id, &to_ts)?;
 
@@ -43,7 +51,7 @@ impl MiyukiniWatchAggregator {
             let _ = self.db.insert_audit(
                 profile_id,
                 "purge_automatic",
-                Some(&format!("{} métriques brutes expirées", deleted)),
+                Some(&format!("{deleted} métriques brutes expirées")),
                 Some(deleted),
             );
         }

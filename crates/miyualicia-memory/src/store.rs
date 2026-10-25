@@ -336,55 +336,52 @@ impl MemoryStore {
             ],
         )?;
 
-        match actuel {
-            Some(a) => {
-                // Index FTS à contenu externe : retirer l'ancien contenu avant
-                // de mettre à jour la vue courante.
-                tx.execute(
-                    "INSERT INTO facts_fts(facts_fts, rowid, content) VALUES('delete', ?1, ?2)",
-                    params![a.rowid, a.content],
-                )?;
-                tx.execute(
-                    "UPDATE facts SET persona = ?2, subject = ?3, content = ?4, source = ?5,
-                                      confidence = ?6, updated_at = ?7
-                     WHERE id = ?1",
-                    params![
-                        id,
-                        fact.persona,
-                        fact.subject,
-                        fact.content,
-                        fact.source,
-                        fact.confidence,
-                        fact.updated_at.to_rfc3339(),
-                    ],
-                )?;
-                tx.execute(
-                    "INSERT INTO facts_fts(rowid, content) VALUES (?1, ?2)",
-                    params![a.rowid, fact.content],
-                )?;
-            }
-            None => {
-                tx.execute(
-                    "INSERT INTO facts(id, persona, subject, content, source, confidence,
-                                       created_at, updated_at)
-                     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-                    params![
-                        id,
-                        fact.persona,
-                        fact.subject,
-                        fact.content,
-                        fact.source,
-                        fact.confidence,
-                        fact.created_at.to_rfc3339(),
-                        fact.updated_at.to_rfc3339(),
-                    ],
-                )?;
-                tx.execute(
-                    "INSERT INTO facts_fts(rowid, content)
-                     SELECT rowid, content FROM facts WHERE id = ?1",
-                    params![id],
-                )?;
-            }
+        if let Some(a) = actuel {
+            // Index FTS à contenu externe : retirer l'ancien contenu avant
+            // de mettre à jour la vue courante.
+            tx.execute(
+                "INSERT INTO facts_fts(facts_fts, rowid, content) VALUES('delete', ?1, ?2)",
+                params![a.rowid, a.content],
+            )?;
+            tx.execute(
+                "UPDATE facts SET persona = ?2, subject = ?3, content = ?4, source = ?5,
+                                  confidence = ?6, updated_at = ?7
+                 WHERE id = ?1",
+                params![
+                    id,
+                    fact.persona,
+                    fact.subject,
+                    fact.content,
+                    fact.source,
+                    fact.confidence,
+                    fact.updated_at.to_rfc3339(),
+                ],
+            )?;
+            tx.execute(
+                "INSERT INTO facts_fts(rowid, content) VALUES (?1, ?2)",
+                params![a.rowid, fact.content],
+            )?;
+        } else {
+            tx.execute(
+                "INSERT INTO facts(id, persona, subject, content, source, confidence,
+                                   created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+                params![
+                    id,
+                    fact.persona,
+                    fact.subject,
+                    fact.content,
+                    fact.source,
+                    fact.confidence,
+                    fact.created_at.to_rfc3339(),
+                    fact.updated_at.to_rfc3339(),
+                ],
+            )?;
+            tx.execute(
+                "INSERT INTO facts_fts(rowid, content)
+                 SELECT rowid, content FROM facts WHERE id = ?1",
+                params![id],
+            )?;
         }
         tx.commit()?;
         Ok(())
@@ -512,7 +509,7 @@ impl MemoryStore {
         }
         let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
-            r#"
+            r"
             SELECT f.id, f.persona, f.subject, f.content, f.source, f.confidence,
                    f.created_at, f.updated_at
             FROM facts_fts ft
@@ -520,9 +517,9 @@ impl MemoryStore {
             WHERE facts_fts MATCH ?1
             ORDER BY rank
             LIMIT ?2
-            "#,
+            ",
         )?;
-        let rows = stmt.query_map(params![query, limit as i64], row_to_fact)?;
+        let rows = stmt.query_map(params![query, i64::try_from(limit).unwrap_or(i64::MAX)], row_to_fact)?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
     }
 
@@ -534,13 +531,13 @@ impl MemoryStore {
     pub fn prefer(&self, pref: &Preference) -> Result<(), MemoryError> {
         let value_json = serde_json::to_string(&pref.value)?;
         self.lock_conn()?.execute(
-            r#"
+            r"
             INSERT INTO preferences(scope, key, value_json, updated_at)
             VALUES (?1, ?2, ?3, ?4)
             ON CONFLICT(scope, key) DO UPDATE SET
                 value_json = excluded.value_json,
                 updated_at = excluded.updated_at
-            "#,
+            ",
             params![pref.scope, pref.key, value_json, pref.updated_at.to_rfc3339()],
         )?;
         Ok(())
@@ -628,11 +625,11 @@ impl MemoryStore {
             EpisodeOutcome::Failed => "failed",
         };
         self.lock_conn()?.execute(
-            r#"
+            r"
             INSERT INTO episodes(id, persona, service_id, intent, user_phrase, params_json,
                                  outcome, error, created_at)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
-            "#,
+            ",
             params![
                 ep.id.to_string(),
                 ep.persona,
@@ -660,7 +657,7 @@ impl MemoryStore {
                     outcome, error, created_at
              FROM episodes ORDER BY created_at DESC LIMIT ?1",
         )?;
-        let rows = stmt.query_map(params![limit as i64], row_to_episode)?;
+        let rows = stmt.query_map(params![i64::try_from(limit).unwrap_or(i64::MAX)], row_to_episode)?;
         rows.collect::<Result<Vec<_>, _>>()
             .map_err(MemoryError::from)
     }
@@ -708,7 +705,7 @@ impl MemoryStore {
              FROM episodes WHERE service_id = ?1
              ORDER BY created_at DESC LIMIT ?2",
         )?;
-        let rows = stmt.query_map(params![service_id, limit as i64], row_to_episode)?;
+        let rows = stmt.query_map(params![service_id, i64::try_from(limit).unwrap_or(i64::MAX)], row_to_episode)?;
         rows.collect::<Result<Vec<_>, _>>()
             .map_err(MemoryError::from)
     }
@@ -724,7 +721,7 @@ impl MemoryStore {
         }
         let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
-            r#"
+            r"
             SELECT e.id, e.persona, e.service_id, e.intent, e.user_phrase, e.params_json,
                    e.outcome, e.error, e.created_at
             FROM episodes_fts ft
@@ -732,9 +729,9 @@ impl MemoryStore {
             WHERE episodes_fts MATCH ?1
             ORDER BY rank
             LIMIT ?2
-            "#,
+            ",
         )?;
-        let rows = stmt.query_map(params![query, limit as i64], row_to_episode)?;
+        let rows = stmt.query_map(params![query, i64::try_from(limit).unwrap_or(i64::MAX)], row_to_episode)?;
         rows.collect::<Result<Vec<_>, _>>()
             .map_err(MemoryError::from)
     }
@@ -749,14 +746,14 @@ impl MemoryStore {
             return Err(MemoryError::InvalidId(persona.id.clone()));
         }
         self.lock_conn()?.execute(
-            r#"
+            r"
             INSERT INTO personas(id, display_name, description, is_default, created_at)
             VALUES (?1, ?2, ?3, ?4, ?5)
             ON CONFLICT(id) DO UPDATE SET
                 display_name = excluded.display_name,
                 description  = excluded.description,
                 is_default   = excluded.is_default
-            "#,
+            ",
             params![
                 persona.id,
                 persona.display_name,
@@ -904,7 +901,7 @@ impl MemoryStore {
     pub fn upsert_learned_skill(&self, skill: &LearnedSkill) -> Result<(), MemoryError> {
         let params_json = serde_json::to_string(&skill.params_template)?;
         self.lock_conn()?.execute(
-            r#"
+            r"
             INSERT INTO learned_skills(id, persona, trigger_phrase, qualified_id,
                                        params_template, status, created_at, accepted_at)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
@@ -915,7 +912,7 @@ impl MemoryStore {
                 params_template = excluded.params_template,
                 status          = excluded.status,
                 accepted_at     = excluded.accepted_at
-            "#,
+            ",
             params![
                 skill.id.to_string(),
                 skill.persona,
@@ -1137,11 +1134,11 @@ impl MemoryStore {
         );
         let params_json = serde_json::to_string(&pc.params)?;
         self.lock_conn()?.execute(
-            r#"
+            r"
             INSERT INTO pending_confirmations(id, qualified_id, params_json, persona,
                                               user_phrase, prompt, status, created_at, resolved_at)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
-            "#,
+            ",
             params![
                 pc.id.to_string(),
                 pc.qualified_id,

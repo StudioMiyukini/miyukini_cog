@@ -83,7 +83,7 @@ fn full_learning_cycle_propose_accept_lookup() {
     assert!(active[0].accepted_at.is_some());
 
     // Le pending est désormais vide
-    assert!(store.pending_learned_skills("voice").unwrap().is_empty());
+    assert_eq!(store.pending_learned_skills("voice").unwrap(), [] as [miyualicia_memory::LearnedSkill; 0]);
 
     // Étape 6 : le détecteur ne doit plus proposer la même chose
     let patterns_after = detect_repetitions(&store, "voice", &DetectorOptions::default()).unwrap();
@@ -134,8 +134,8 @@ fn personas_have_independent_learnings() {
     // Accepter dans voice ne doit rien changer pour work
     let v = propose_from_pattern(&store, &voice_patterns[0]).unwrap();
     store.accept_learned_skill(v.id).unwrap();
-    assert!(store.active_learned_skills("voice").unwrap().len() == 1);
-    assert!(store.active_learned_skills("work").unwrap().is_empty());
+    assert_eq!(store.active_learned_skills("voice").unwrap().len(), 1);
+    assert_eq!(store.active_learned_skills("work").unwrap(), [] as [miyualicia_memory::LearnedSkill; 0]);
 }
 
 #[test]
@@ -148,5 +148,5 @@ fn high_threshold_filters_low_frequency_patterns() {
         threshold: 5,
         ..Default::default()
     };
-    assert!(detect_repetitions(&store, "voice", &opts).unwrap().is_empty());
+    assert_eq!(detect_repetitions(&store, "voice", &opts).unwrap(), [] as [miyualicia_memory::RepetitionPattern; 0]);
 }

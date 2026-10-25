@@ -82,8 +82,7 @@ pub async fn handle_propfind(
     if resource.is_collection() && depth != Depth::Zero {
         let parent_id = match &resource {
             DavResource::Collection(f) => Some(f.id.as_str()),
-            DavResource::Root { .. } => None,
-            _ => None,
+            DavResource::Root { .. } | DavResource::File(_) => None,
         };
 
         let children = store.list_children(owner_id, parent_id)?;
@@ -108,6 +107,7 @@ pub async fn handle_propfind(
 }
 
 /// Handle GET requests (file download)
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_get(
     State(store): State<DavStore>,
     req: Request,
@@ -168,7 +168,7 @@ pub async fn handle_put(
         match store.resolve_path(owner_id, parent_path)? {
             DavResource::Collection(f) => Some(f.id),
             DavResource::Root { .. } => None,
-            _ => return Err(DavError::Conflict("Parent is not a collection".into())),
+            DavResource::File(_) => return Err(DavError::Conflict("Parent is not a collection".into())),
         }
     };
 
@@ -198,6 +198,7 @@ pub async fn handle_put(
 }
 
 /// Handle DELETE requests
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_delete(
     State(store): State<DavStore>,
     req: Request,
@@ -224,6 +225,7 @@ pub async fn handle_delete(
 }
 
 /// Handle MKCOL requests (create collection/directory)
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_mkcol(
     State(store): State<DavStore>,
     req: Request,
@@ -253,7 +255,7 @@ pub async fn handle_mkcol(
         match store.resolve_path(owner_id, parent_path)? {
             DavResource::Collection(f) => Some(f.id),
             DavResource::Root { .. } => None,
-            _ => return Err(DavError::Conflict("Parent is not a collection".into())),
+            DavResource::File(_) => return Err(DavError::Conflict("Parent is not a collection".into())),
         }
     };
 
@@ -263,6 +265,7 @@ pub async fn handle_mkcol(
 }
 
 /// Handle COPY requests
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_copy(
     State(store): State<DavStore>,
     req: Request,
@@ -297,7 +300,7 @@ pub async fn handle_copy(
                 match store.resolve_path(owner_id, parent_path)? {
                     DavResource::Collection(f) => Some(f.id),
                     DavResource::Root { .. } => None,
-                    _ => return Err(DavError::Conflict("Destination parent is not a collection".into())),
+                    DavResource::File(_) => return Err(DavError::Conflict("Destination parent is not a collection".into())),
                 }
             };
 
@@ -309,6 +312,7 @@ pub async fn handle_copy(
 }
 
 /// Handle MOVE requests
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_move(
     State(store): State<DavStore>,
     req: Request,
@@ -341,7 +345,7 @@ pub async fn handle_move(
                 match store.resolve_path(owner_id, parent_path)? {
                     DavResource::Collection(f) => Some(f.id),
                     DavResource::Root { .. } => None,
-                    _ => return Err(DavError::Conflict("Destination parent is not a collection".into())),
+                    DavResource::File(_) => return Err(DavError::Conflict("Destination parent is not a collection".into())),
                 }
             };
 
@@ -353,6 +357,7 @@ pub async fn handle_move(
 }
 
 /// Handle OPTIONS requests (DAV capabilities)
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_options() -> Response {
     (
         StatusCode::OK,

@@ -165,7 +165,7 @@ impl TrackerClient {
 
         {
             let mut official = self.official_trackers.write().await;
-            *official = trackers.clone();
+            official.clone_from(&trackers);
         }
 
         let mut config = self.config.write().await;
@@ -174,7 +174,7 @@ impl TrackerClient {
                 "Configured tracker {} is not official, switching to {}",
                 config.tracker_address, trackers[0]
             );
-            config.tracker_address = trackers[0].clone();
+            config.tracker_address.clone_from(&trackers[0]);
         }
 
         Ok(())
@@ -194,7 +194,7 @@ impl TrackerClient {
                     "Rejecting non-official tracker {}, switching to {}",
                     config.tracker_address, fallback
                 );
-                config.tracker_address = fallback.clone();
+                config.tracker_address.clone_from(fallback);
             }
         }
 
@@ -328,8 +328,7 @@ impl TrackerClient {
             cog_id: cog_id.to_string(),
             timestamp: std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
-                .map(|d| d.as_secs())
-                .unwrap_or(0),
+                .map_or(0, |d| d.as_secs()),
             health,
             load,
         };
@@ -347,15 +346,12 @@ impl TrackerClient {
         // Lire l'accusé
         let response = self.read_frame(&mut stream).await?;
 
-        match response.header.message_type {
-            TrackerMessageType::HeartbeatAck => {
-                debug!("Heartbeat acknowledged");
-                Ok(())
-            }
-            _ => {
-                warn!("Unexpected heartbeat response");
-                Err(MiyuwebwayParticipantError::UnexpectedMessage)
-            }
+        if response.header.message_type == TrackerMessageType::HeartbeatAck {
+            debug!("Heartbeat acknowledged");
+            Ok(())
+        } else {
+            warn!("Unexpected heartbeat response");
+            Err(MiyuwebwayParticipantError::UnexpectedMessage)
         }
     }
 

@@ -94,7 +94,7 @@ fn mauth_ctx_002_context_without_mandate() {
     let ctx = GovernedContext::new(String::new(), 1);
 
     assert!(!ctx.has_mandate());
-    assert!(ctx.mandate_id.is_empty());
+    assert_eq!(ctx.mandate_id, "");
 }
 
 /// @id MAUTH_CTX_003
@@ -145,7 +145,7 @@ fn mauth_t_002_identity_context_creation() {
     let context = sample_identity_context(IdentityRole::Citizen);
 
     assert_eq!(context.role, IdentityRole::Citizen);
-    assert!(!context.opaque_id.is_empty());
+    assert_ne!(context.opaque_id, "");
 }
 
 /// @id MAUTH_T_003
@@ -319,7 +319,7 @@ fn mauth_tool_010_resolve_with_mandate() {
     assert!(result.is_ok());
     let context = result.unwrap();
     assert_eq!(context.role, IdentityRole::External);
-    assert!(!context.opaque_id.is_empty());
+    assert_ne!(context.opaque_id, "");
     // Jamais repris tel quel : empreinte préfixée `sess:` (pas d'imitation de `pw:`).
     assert!(context.opaque_id.starts_with("sess:"));
     assert_ne!(context.opaque_id, "session-abc-123");
@@ -401,7 +401,7 @@ fn mauth_r_001_artefacts_empty_data() {
     assert!(result.is_ok());
     let context = result.unwrap();
     assert_eq!(context.role, IdentityRole::External);
-    assert!(!context.opaque_id.is_empty());
+    assert_ne!(context.opaque_id, "");
     assert!(context.opaque_id.starts_with("opaque:"));
 }
 
@@ -451,7 +451,7 @@ fn mauth_r_003_identity_context_empty_opaque_id() {
 #[test]
 fn mauth_d_001_debug_identity_role() {
     let citizen = IdentityRole::Citizen;
-    let debug_str = format!("{:?}", citizen);
+    let debug_str = format!("{citizen:?}");
 
     assert!(debug_str.contains("Citizen"));
 }
@@ -464,7 +464,7 @@ fn mauth_d_001_debug_identity_role() {
 #[test]
 fn mauth_d_002_debug_verification_result() {
     let valid = VerificationResult::Valid;
-    let debug_str = format!("{:?}", valid);
+    let debug_str = format!("{valid:?}");
 
     assert!(debug_str.contains("Valid"));
 }
@@ -477,7 +477,7 @@ fn mauth_d_002_debug_verification_result() {
 #[test]
 fn mauth_d_003_debug_error() {
     let err = MiyauthError::NoMandate;
-    let debug_str = format!("{:?}", err);
+    let debug_str = format!("{err:?}");
 
     assert!(debug_str.contains("NoMandate"));
 }

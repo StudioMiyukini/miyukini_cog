@@ -10,7 +10,7 @@
 //! Le résultat est caché une fois au démarrage dans `ProxyState`.
 
 use serde::{Deserialize, Serialize};
-use sysinfo::System;
+use sysinfo::{CpuRefreshKind, MemoryRefreshKind, RefreshKind, System};
 
 /// Informations hardware détectées sur la machine hôte.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -55,7 +55,7 @@ pub enum HardwareTier {
 }
 
 impl HardwareTier {
-    pub fn label(&self) -> &'static str {
+    pub fn label(self) -> &'static str {
         match self {
             Self::UltraLight => "Ultra-Light (Tier 1)",
             Self::Light => "Light (Tier 2)",
@@ -65,7 +65,7 @@ impl HardwareTier {
         }
     }
 
-    pub fn number(&self) -> u8 {
+    pub fn number(self) -> u8 {
         match self {
             Self::UltraLight => 1,
             Self::Light => 2,
@@ -78,14 +78,18 @@ impl HardwareTier {
 
 /// Détecte les specs hardware de la machine courante.
 pub fn detect_hardware() -> HardwareInfo {
-    let mut sys = System::new_all();
-    sys.refresh_all();
+    // CPU + mémoire seulement : `new_all`/`refresh_all` parcourraient aussi tous les
+    // processus (/proc/N/stat, /proc/N/task/), inutiles ici et refusés par AppArmor.
+    let sys = System::new_with_specifics(
+        RefreshKind::nothing()
+            .with_cpu(CpuRefreshKind::everything())
+            .with_memory(MemoryRefreshKind::everything()),
+    );
 
     let cpu_name = sys
         .cpus()
         .first()
-        .map(|c| c.brand().to_string())
-        .unwrap_or_else(|| "Unknown CPU".into());
+        .map_or_else(|| "Unknown CPU".into(), |c| c.brand().to_string());
     let cpu_cores = sys.physical_core_count().unwrap_or(1) as u32;
     let cpu_threads = sys.cpus().len() as u32;
     let ram_total_mb = sys.total_memory() / (1024 * 1024);
@@ -93,7 +97,7 @@ pub fn detect_hardware() -> HardwareInfo {
 
     let gpu = detect_gpu();
 
-    let tier = compute_tier(ram_total_mb, &gpu);
+    let tier = compute_tier(ram_total_mb, gpu.as_ref());
 
     HardwareInfo {
         cpu_name,
@@ -306,8 +310,7 @@ fn detect_gpu_amd_linux() -> Option<GpuInfo> {
         let vram_mb = std::fs::read_to_string(&vram_path)
             .ok()
             .and_then(|s| s.trim().parse::<u64>().ok())
-            .map(|bytes| bytes / (1024 * 1024))
-            .unwrap_or(0);
+            .map_or(0, |bytes| bytes / (1024 * 1024));
 
         return Some(GpuInfo {
             name: name.to_string(),
@@ -327,9 +330,9 @@ fn detect_gpu() -> Option<GpuInfo> {
 /// Calcule le tier hardware à partir de la RAM totale et du GPU.
 /// Note : la RAM déclarée par le système peut être légèrement sous le nominal
 /// (ex: 15 GB déclarés pour 16 GB installés). Seuils légèrement assouplis.
-fn compute_tier(ram_total_mb: u64, gpu: &Option<GpuInfo>) -> HardwareTier {
+fn compute_tier(ram_total_mb: u64, gpu: Option<&GpuInfo>) -> HardwareTier {
     let ram_gb = ram_total_mb / 1024;
-    let vram_mb = gpu.as_ref().map(|g| g.vram_mb).unwrap_or(0);
+    let vram_mb = gpu.map_or(0, |g| g.vram_mb);
     let vram_gb = vram_mb / 1024;
 
     // GPU discret détecté : le tier est piloté principalement par la VRAM
@@ -351,5 +354,20 @@ fn compute_tier(ram_total_mb: u64, gpu: &Option<GpuInfo>) -> HardwareTier {
         r if r >= 14 => HardwareTier::Standard,
         r if r >= 8 => HardwareTier::Light,
         _ => HardwareTier::UltraLight,
+    }
+}
+
+#[cfg(test)]
+mod tests_detection {
+    use super::detect_hardware;
+
+    /// Le rafraîchissement restreint (CPU + mémoire) renseigne toujours ces champs.
+    #[test]
+    fn detection_restreinte_renseigne_cpu_et_memoire() {
+        let hw = detect_hardware();
+        assert!(hw.cpu_threads >= 1);
+        assert!(hw.cpu_cores >= 1);
+        assert!(hw.ram_total_mb > 0);
+        assert!(hw.ram_available_mb <= hw.ram_total_mb);
     }
 }

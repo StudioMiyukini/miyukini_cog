@@ -90,6 +90,10 @@ pub struct ActivityLevelData {
 }
 
 /// Calcule les agrégats pour un profil.
+///
+/// # Errors
+///
+/// Renvoie une erreur si la lecture en base (sessions, métriques, préférences) échoue.
 #[allow(clippy::too_many_lines)]
 pub fn compute_aggregates(
     db: &MiyukiniWatchDb,
@@ -111,17 +115,15 @@ pub fn compute_aggregates(
     let last_end = db.get_last_session_end(profile_id)?;
     let days_away = last_end.as_ref().and_then(|ts| {
         chrono::DateTime::parse_from_rfc3339(ts).ok().map(|dt| {
-            (now - dt.with_timezone(&Local))
-                .num_days()
-                .unsigned_abs()
-                .min(u32::MAX as u64) as u32
+            u32::try_from((now - dt.with_timezone(&Local)).num_days().unsigned_abs())
+                .unwrap_or(u32::MAX)
         })
     });
     let total_sessions = db.get_global(profile_id, "total_sessions")?;
     aggregates.push(Aggregate {
         id: "AGG_SESSION_RETURN".to_string(),
         data: serde_json::json!({
-            "is_returning": days_away.map(|d| d > 1).unwrap_or(false),
+            "is_returning": days_away.is_some_and(|d| d > 1),
             "days_away": days_away,
         }),
     });

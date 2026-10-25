@@ -15,6 +15,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fmt::Write as _;
 // C-10 : un verrou empoisonné (panique d'un autre fil pendant l'écriture)
 // est levé sans panique ; les sections critiques ne laissent pas d'état
 // partiel et l'état réel est conservé (pas de remise à zéro permissive).
@@ -92,7 +93,7 @@ impl ContextBase {
     pub fn select_within_budget(&self, max_tokens: u32) -> Vec<&ContextDocument> {
         let mut docs: Vec<&ContextDocument> = self.documents.iter().collect();
         // Tri par priorité décroissante
-        docs.sort_by(|a, b| b.priority.cmp(&a.priority));
+        docs.sort_by_key(|d| std::cmp::Reverse(d.priority));
 
         let mut selected = Vec::new();
         let mut remaining = max_tokens;
@@ -222,7 +223,9 @@ impl ContextRegistry {
 
     /// Carnet de l'outil `memoire_noter` ; `None` sans mémoire.
     pub fn carnet_memoire(&self) -> Option<&dyn crate::outil_memoire::CarnetMaia> {
-        self.memoire.as_ref().map(crate::memoire::MemoireUtilisateur::carnet)
+        self.memoire
+            .as_ref()
+            .map(crate::memoire::MemoireUtilisateur::carnet)
     }
 
     /// Liste toutes les bases (résumés).
@@ -307,7 +310,7 @@ impl ContextRegistry {
         }
 
         // Tri par priorité décroissante
-        all_docs.sort_by(|a, b| b.0.priority.cmp(&a.0.priority));
+        all_docs.sort_by_key(|d| std::cmp::Reverse(d.0.priority));
 
         let mut result = String::new();
         let mut remaining = max_tokens;
@@ -317,10 +320,11 @@ impl ContextRegistry {
                 continue;
             }
             remaining -= doc.estimated_tokens;
-            result.push_str(&format!(
+            let _ = write!(
+                result,
                 "## [{base_name}] {}\n{}\n\n",
                 doc.title, doc.content
-            ));
+            );
         }
 
         result
@@ -350,5 +354,5 @@ fn now_iso() -> String {
 
 /// Estime le nombre de tokens d'un texte (~4 chars/token).
 pub fn estimate_tokens(text: &str) -> u32 {
-    (text.len() as u32 + 3) / 4
+    (text.len() as u32).div_ceil(4)
 }

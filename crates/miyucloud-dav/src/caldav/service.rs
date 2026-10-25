@@ -104,7 +104,7 @@ impl CalDavService {
         Ok(())
     }
 
-    fn bump_ctag_with_conn(&self, conn: &rusqlite::Connection, calendar_id: &str) -> Result<(), DavError> {
+    fn bump_ctag_with_conn(conn: &rusqlite::Connection, calendar_id: &str) -> Result<(), DavError> {
         let new_ctag = uuid::Uuid::new_v4().to_string();
         conn.execute(
             "UPDATE cloud_calendars SET ctag = ?1, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?2",
@@ -146,7 +146,7 @@ impl CalDavService {
                 dtend,
             ],
         )?;
-        self.bump_ctag_with_conn(&conn, calendar_id)?;
+        Self::bump_ctag_with_conn(&conn, calendar_id)?;
         Ok(event)
     }
 
@@ -201,7 +201,7 @@ impl CalDavService {
         for uid in uids {
             params_vec.push(Box::new(uid.clone()));
         }
-        let params_refs: Vec<&dyn rusqlite::types::ToSql> = params_vec.iter().map(|p| p.as_ref()).collect();
+        let params_refs: Vec<&dyn rusqlite::types::ToSql> = params_vec.iter().map(std::convert::AsRef::as_ref).collect();
         let rows = stmt.query_map(&*params_refs, |row| {
             Ok(row_to_event(row))
         })?;
@@ -236,7 +236,7 @@ impl CalDavService {
         if affected == 0 {
             return Err(DavError::NotFound(format!("Event {uid} not found")));
         }
-        self.bump_ctag_with_conn(&conn, calendar_id)?;
+        Self::bump_ctag_with_conn(&conn, calendar_id)?;
         drop(conn);
 
         self.get_event(calendar_id, uid)?
@@ -249,7 +249,7 @@ impl CalDavService {
             "DELETE FROM cloud_calendar_events WHERE calendar_id = ?1 AND uid = ?2",
             params![calendar_id, uid],
         )?;
-        self.bump_ctag_with_conn(&conn, calendar_id)?;
+        Self::bump_ctag_with_conn(&conn, calendar_id)?;
         Ok(())
     }
 }

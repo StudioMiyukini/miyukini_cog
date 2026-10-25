@@ -166,7 +166,7 @@ async fn learned_skill_resolution_via_runtime() {
             .unwrap(),
     );
     let mem = runtime.memory();
-    mem.upsert_persona(&Persona::new("voice".into(), "Voix".into(), "".into(), true))
+    mem.upsert_persona(&Persona::new("voice".into(), "Voix".into(), String::new(), true))
         .unwrap();
     let ls = mem
         .propose_learned_skill(
@@ -222,10 +222,10 @@ async fn dispatch_and_queue_executed_for_read_only_capability() {
         miyualicia::capabilities_runtime::QueuedDispatch::Executed(r) => {
             assert_eq!(r.service_result.data["pong"], true);
         }
-        _ => panic!("expected Executed (read-only sans confirmation)"),
+        miyualicia::capabilities_runtime::QueuedDispatch::Queued { .. } => panic!("expected Executed (read-only sans confirmation)"),
     }
     // Pas de pending posée
-    assert!(runtime.list_pending_confirmations().await.unwrap().is_empty());
+    assert_eq!(runtime.list_pending_confirmations().await.unwrap(), [] as [miyualicia_memory::PendingConfirmation; 0]);
 }
 
 #[tokio::test]
@@ -275,7 +275,7 @@ async fn dispatch_and_queue_queued_for_write_capability() {
             assert!(prompt.contains("Crier") || !prompt.is_empty());
             id
         }
-        _ => panic!("expected Queued"),
+        miyualicia::capabilities_runtime::QueuedDispatch::Executed(_) => panic!("expected Queued"),
     };
 
     let pending = runtime.list_pending_confirmations().await.unwrap();
@@ -320,16 +320,15 @@ async fn confirm_queued_executes_and_resolves() {
         .dispatch_and_queue("demo.shout", &json!({"loud": true}), "voice", "shout!")
         .await
         .unwrap();
-    let id = match outcome {
-        miyualicia::capabilities_runtime::QueuedDispatch::Queued { id, .. } => id,
-        _ => panic!("expected Queued"),
+    let miyualicia::capabilities_runtime::QueuedDispatch::Queued { id, .. } = outcome else {
+        panic!("expected Queued")
     };
 
     let result = runtime.confirm_queued(id).await.unwrap();
     assert_eq!(result.service_result.data["shouted"], true);
 
     // La pending est désormais Confirmed et n'apparaît plus dans la liste pending
-    assert!(runtime.list_pending_confirmations().await.unwrap().is_empty());
+    assert_eq!(runtime.list_pending_confirmations().await.unwrap(), [] as [miyualicia_memory::PendingConfirmation; 0]);
     let resolved = runtime.pending_confirmation(id).await.unwrap().unwrap();
     assert_eq!(
         resolved.status,
@@ -375,9 +374,8 @@ async fn cancel_queued_records_cancelled_episode_and_resolves() {
         .dispatch_and_queue("demo.shout", &Value::Null, "voice", "shout!")
         .await
         .unwrap();
-    let id = match outcome {
-        miyualicia::capabilities_runtime::QueuedDispatch::Queued { id, .. } => id,
-        _ => panic!("expected Queued"),
+    let miyualicia::capabilities_runtime::QueuedDispatch::Queued { id, .. } = outcome else {
+        panic!("expected Queued")
     };
 
     runtime.cancel_queued(id).await.unwrap();
@@ -448,9 +446,8 @@ async fn confirm_already_resolved_returns_error() {
         .dispatch_and_queue("demo.shout", &Value::Null, "voice", "x")
         .await
         .unwrap();
-    let id = match outcome {
-        miyualicia::capabilities_runtime::QueuedDispatch::Queued { id, .. } => id,
-        _ => panic!("expected Queued"),
+    let miyualicia::capabilities_runtime::QueuedDispatch::Queued { id, .. } = outcome else {
+        panic!("expected Queued")
     };
     runtime.confirm_queued(id).await.unwrap();
     // Re-confirm doit échouer

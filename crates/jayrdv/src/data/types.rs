@@ -15,8 +15,10 @@ use serde::{Deserialize, Serialize};
 /// Statut d'un rendez-vous.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[derive(Default)]
 pub enum AppointmentStatus {
     /// En attente de confirmation.
+    #[default]
     Pending,
     /// Confirmé.
     Confirmed,
@@ -42,17 +44,14 @@ impl AppointmentStatus {
     }
 }
 
-impl Default for AppointmentStatus {
-    fn default() -> Self {
-        Self::Pending
-    }
-}
 
 /// Statut d'un créneau.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[derive(Default)]
 pub enum SlotStatus {
     /// Disponible à la réservation.
+    #[default]
     Available,
     /// Verrouillé temporairement (hold pendant la confirmation).
     Held,
@@ -62,11 +61,6 @@ pub enum SlotStatus {
     Blocked,
 }
 
-impl Default for SlotStatus {
-    fn default() -> Self {
-        Self::Available
-    }
-}
 
 /// Qui a annulé un rendez-vous.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -121,6 +115,9 @@ pub enum ScheduleOwner {
 /// Paramètres du professionnel (politique annulation, préavis, rappels, etc.).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+// Drapeaux indépendants persistés tels quels (format sérialisé) : une machine à états
+// ne les représenterait pas mieux et casserait la compatibilité des données.
+#[allow(clippy::struct_excessive_bools)]
 pub struct ProfessionalSettings {
     /// Délai minimum (heures) avant RDV pour annuler gratuitement.
     pub cancellation_policy_hours: u32,

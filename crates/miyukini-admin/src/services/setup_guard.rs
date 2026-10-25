@@ -165,9 +165,9 @@ fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
     let n = a.len().max(b.len());
     let mut diff = u8::from(a.len() != b.len());
     for i in 0..n {
-        let x = a.get(i).copied().unwrap_or(0);
-        let y = b.get(i).copied().unwrap_or(0);
-        diff |= x ^ y;
+        let octet_a = a.get(i).copied().unwrap_or(0);
+        let octet_b = b.get(i).copied().unwrap_or(0);
+        diff |= octet_a ^ octet_b;
     }
     diff == 0
 }

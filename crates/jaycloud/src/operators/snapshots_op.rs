@@ -277,7 +277,7 @@ impl SnapshotsOp {
         let snapshots = self.snapshots.read().unwrap_or_else(PoisonError::into_inner);
         let mut out: Vec<_> = snapshots
             .values()
-            .filter(|s| target_id.map_or(true, |t| s.target_id == t))
+            .filter(|s| target_id.is_none_or(|t| s.target_id == t))
             .cloned()
             .collect();
         out.sort_by(|a, b| b.created_at.cmp(&a.created_at));

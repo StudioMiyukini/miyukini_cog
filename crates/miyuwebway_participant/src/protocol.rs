@@ -655,14 +655,12 @@ impl RegisterAckPayload {
         let official_trackers = parse_tracker_addresses(&data[i..i + tracker_len])?;
         i += tracker_len;
         let tracker_signature = data[i..i + 64].to_vec();
-        i += 64;
-        let _status = data[i];
+        // data[i + 64] : octet de statut, présent (longueur vérifiée) mais non exploité.
         let ttl = if permis_expires_at > 0 {
             let now = std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .ok()
-                .map(|d| d.as_secs())
-                .unwrap_or(0);
+                .map_or(0, |d| d.as_secs());
             (permis_expires_at.saturating_sub(now)) as u32
         } else {
             86400
@@ -862,7 +860,7 @@ pub struct CogInfo {
     pub last_seen: String,
     /// Nombre de lobbys (champ Origin, ignoré si absent).
     #[serde(default, rename = "lobby_count")]
-    pub _lobby_count: Option<u32>,
+    pub lobby_count: Option<u32>,
 }
 
 /// Payload de recherche de lobbys (aligné Origin : query, version, available_only, limit, offset).

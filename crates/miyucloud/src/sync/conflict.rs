@@ -178,7 +178,12 @@ mod tests {
         assert_eq!(conflict.file_id, file.id);
         assert_eq!(conflict.local_version, "document.pdf");
         assert!(conflict.remote_version.contains("conflict-remote-n"));
-        assert!(conflict.remote_version.ends_with(".pdf"));
+        assert_eq!(
+            std::path::Path::new(&conflict.remote_version)
+                .extension()
+                .and_then(|e| e.to_str()),
+            Some("pdf")
+        );
         assert_eq!(conflict.remote_node_id, "remote-node-abc12345");
         assert_eq!(conflict.status, ConflictStatus::Pending);
         assert!(conflict.resolved_at.is_none());
@@ -192,8 +197,11 @@ mod tests {
         assert!(conflict.remote_version.starts_with("Makefile.conflict-"));
         // Without extension, the name should NOT end with a file extension
         // (it ends with the timestamp, e.g. "Makefile.conflict-node-xyz-20260301120000")
-        assert!(
-            !conflict.remote_version.ends_with(".txt"),
+        assert_ne!(
+            std::path::Path::new(&conflict.remote_version)
+                .extension()
+                .and_then(|e| e.to_str()),
+            Some("txt"),
             "Should not have an extension appended"
         );
     }
@@ -209,7 +217,7 @@ mod tests {
 
         ConflictResolver::resolve(&db, &conflict.id, ConflictResolution::Local).unwrap();
         let pending = db.sync_conflict_list_pending().unwrap();
-        assert!(pending.is_empty());
+        assert_eq!(pending, [] as [crate::data::types::SyncConflict; 0]);
     }
 
     #[test]
@@ -223,7 +231,7 @@ mod tests {
 
         ConflictResolver::resolve(&db, &conflict.id, ConflictResolution::Remote).unwrap();
         let pending = db.sync_conflict_list_pending().unwrap();
-        assert!(pending.is_empty());
+        assert_eq!(pending, [] as [crate::data::types::SyncConflict; 0]);
     }
 
     #[test]

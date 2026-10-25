@@ -36,9 +36,10 @@ fn rfc3339_utc_now() -> String {
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
         .as_secs();
-    let days = (secs / 86400) as i64;
+    // secs / 86400 < 2^47 et secs % 86400 < 86400 : conversions toujours exactes.
+    let days = i64::try_from(secs / 86400).unwrap_or(0);
     let (y, mo, d) = unix_days_to_ymd(days);
-    let rem = (secs % 86400) as i64;
+    let rem = i64::try_from(secs % 86400).unwrap_or(0);
     let h = rem / 3600;
     let mi = (rem % 3600) / 60;
     let s = rem % 60;

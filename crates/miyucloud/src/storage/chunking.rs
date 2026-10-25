@@ -103,7 +103,7 @@ mod tests {
         let chunker = Chunker::new();
         let chunks = chunker.split(&[]);
         assert_eq!(chunks.len(), 1);
-        assert!(chunks[0].is_empty());
+        assert_eq!(chunks[0], [] as [u8; 0]);
     }
 
     #[test]

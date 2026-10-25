@@ -181,7 +181,7 @@ impl ShareOp {
             .filter(|l| l.owner_user_id == owner_user_id)
             .cloned()
             .collect();
-        out.sort_by(|a, b| a.created_at.cmp(&b.created_at));
+        out.sort_by_key(|a| a.created_at);
         out
     }
 

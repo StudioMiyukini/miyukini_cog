@@ -113,8 +113,14 @@ fn refuse(error: String) -> SkillResult {
 /// Vérifie que `command` est un nom nu présent dans la whitelist.
 fn check_command_allowed(command: &str) -> Result<(), String> {
     let bare = !command.is_empty()
-        && !command.chars().any(|c| c.is_whitespace() || c == '/' || c == '\\');
-    if bare && ALLOWED_COMMANDS.iter().any(|c| command.eq_ignore_ascii_case(c)) {
+        && !command
+            .chars()
+            .any(|c| c.is_whitespace() || c == '/' || c == '\\');
+    if bare
+        && ALLOWED_COMMANDS
+            .iter()
+            .any(|c| command.eq_ignore_ascii_case(c))
+    {
         return Ok(());
     }
     Err(format!(
@@ -166,9 +172,12 @@ fn check_args_allowed(command: &str, args: &[String]) -> Result<(), String> {
         let path = Path::new(arg);
         if path.is_absolute()
             || arg.starts_with('~')
-            || path
-                .components()
-                .any(|c| matches!(c, Component::ParentDir | Component::Prefix(_) | Component::RootDir))
+            || path.components().any(|c| {
+                matches!(
+                    c,
+                    Component::ParentDir | Component::Prefix(_) | Component::RootDir
+                )
+            })
         {
             return Err(format!("Argument hors sandbox refusé : {arg}"));
         }
@@ -178,16 +187,13 @@ fn check_args_allowed(command: &str, args: &[String]) -> Result<(), String> {
 
 /// Exécute une commande sandboxée (exécution directe, jamais via shell).
 pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult {
-    let command = match params.get("command").and_then(|v| v.as_str()) {
-        Some(cmd) => cmd,
-        None => {
-            return SkillResult {
-                success: false,
-                output: serde_json::Value::Null,
-                error: Some("Paramètre 'command' requis".into()),
-                duration_ms: 0,
-            };
-        }
+    let Some(command) = params.get("command").and_then(|v| v.as_str()) else {
+        return SkillResult {
+            success: false,
+            output: serde_json::Value::Null,
+            error: Some("Paramètre 'command' requis".into()),
+            duration_ms: 0,
+        };
     };
 
     // Vérifier les patterns bloqués
@@ -221,7 +227,7 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
     // Timeout
     let timeout_secs = params
         .get("timeout")
-        .and_then(|v| v.as_u64())
+        .and_then(serde_json::Value::as_u64)
         .unwrap_or(DEFAULT_TIMEOUT_SECS)
         .min(MAX_TIMEOUT_SECS);
 
@@ -231,7 +237,7 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
         .and_then(|v| v.as_array())
         .map(|arr| {
             arr.iter()
-                .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                .filter_map(|v| v.as_str().map(std::string::ToString::to_string))
                 .collect()
         })
         .unwrap_or_default();
@@ -322,7 +328,10 @@ mod tests {
 
     #[tokio::test]
     async fn shell_true_refuse() {
-        let r = execute(&p(serde_json::json!({"command": "echo", "args": ["x"], "shell": true}))).await;
+        let r = execute(&p(
+            serde_json::json!({"command": "echo", "args": ["x"], "shell": true}),
+        ))
+        .await;
         assert!(!r.success);
         assert!(r.error.unwrap().contains("shell"));
         // Valeur non booléenne : refusée aussi.
@@ -332,7 +341,10 @@ mod tests {
 
     #[tokio::test]
     async fn injection_shell_dans_command_refusee() {
-        let r = execute(&p(serde_json::json!({"command": "echo hi; id", "shell": true}))).await;
+        let r = execute(&p(
+            serde_json::json!({"command": "echo hi; id", "shell": true}),
+        ))
+        .await;
         assert!(!r.success);
         let r = execute(&p(serde_json::json!({"command": "echo hi; id"}))).await;
         assert!(!r.success);
@@ -350,14 +362,21 @@ mod tests {
 
     #[test]
     fn interpreteurs_et_outils_executants_refuses() {
-        for c in ["python", "python3", "node", "deno", "bun", "npx", "npm", "pip", "cargo", "rustc", "git", "find", "fd", "curl", "wget", "cp", "mv"] {
+        for c in [
+            "python", "python3", "node", "deno", "bun", "npx", "npm", "pip", "cargo", "rustc",
+            "git", "find", "fd", "curl", "wget", "cp", "mv",
+        ] {
             assert!(check_command_allowed(c).is_err(), "{c} devrait être refusé");
         }
     }
 
     #[test]
     fn arguments_hors_sandbox_refuses() {
-        let a = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        let a = |v: &[&str]| {
+            v.iter()
+                .map(std::string::ToString::to_string)
+                .collect::<Vec<_>>()
+        };
         assert!(check_args_allowed("cat", &a(&["notes.txt"])).is_ok());
         assert!(check_args_allowed("grep", &a(&["-n", "motif", "src"])).is_ok());
         assert!(check_args_allowed("ls", &a(&["-la", "docs"])).is_ok());
@@ -371,7 +390,11 @@ mod tests {
 
     #[test]
     fn contournements_revue_securite_refuses() {
-        let a = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        let a = |v: &[&str]| {
+            v.iter()
+                .map(std::string::ToString::to_string)
+                .collect::<Vec<_>>()
+        };
         // Valeur collée à une option courte (écriture hors sandbox).
         assert!(check_args_allowed("sort", &a(&["-o/etc/cron.d/x", "f"])).is_err());
         assert!(check_args_allowed("sort", &a(&["-T/tmp", "f"])).is_err());
@@ -389,7 +412,11 @@ mod tests {
 
     #[test]
     fn options_executantes_refusees() {
-        let a = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        let a = |v: &[&str]| {
+            v.iter()
+                .map(std::string::ToString::to_string)
+                .collect::<Vec<_>>()
+        };
         assert!(check_args_allowed("rg", &a(&["--pre=sh", "x"])).is_err());
         assert!(check_args_allowed("rg", &a(&["--pre", "sh", "x"])).is_err());
         assert!(check_args_allowed("sort", &a(&["--compress-program=sh"])).is_err());
@@ -407,7 +434,10 @@ mod tests {
     #[cfg(unix)]
     #[tokio::test]
     async fn execution_directe_whitelist_ok() {
-        let r = execute(&p(serde_json::json!({"command": "echo", "args": ["salut"]}))).await;
+        let r = execute(&p(
+            serde_json::json!({"command": "echo", "args": ["salut"]}),
+        ))
+        .await;
         assert!(r.success, "{:?}", r.error);
         assert!(r.output["stdout"].as_str().unwrap().contains("salut"));
     }

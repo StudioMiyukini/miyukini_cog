@@ -110,6 +110,8 @@ pub enum JayRdvError {
 
 /// Trait abstrait pour les opérations JayRDV exposables à Alicia.
 #[async_trait]
+// `#[async_trait]` pose lui-même `#[must_use]` sur la future retournée (déjà must_use).
+#[allow(clippy::double_must_use)]
 pub trait JayRdvBackend: Send + Sync {
     /// Réserve un rendez-vous et retourne le `AppointmentSummary` posé.
     async fn book_appointment(
@@ -517,11 +519,10 @@ impl JayRdvBackend for FakeJayRdvBackend {
             })
             .filter(|s| {
                 DateTime::parse_from_rfc3339(&s.start)
-                    .map(|d| {
+                    .is_ok_and(|d| {
                         let d = d.with_timezone(&Utc);
                         d >= from && d <= to
                     })
-                    .unwrap_or(false)
             })
             .cloned()
             .collect())

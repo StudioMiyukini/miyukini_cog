@@ -968,8 +968,8 @@ async fn handle_put(
     let hash = hasher.finalize().to_hex().to_string();
 
     // ── Quota enforcement ────────────────────────────────────
-    if let Some(storage_svc) = state.storage_usage_service.as_ref() {
-        if let Err(err) = storage_svc
+    if let Some(storage_svc) = state.storage_usage_service.as_ref()
+        && let Err(err) = storage_svc
             .check_storage_quota(user.id, total_bytes as u64)
             .await
         {
@@ -986,7 +986,6 @@ async fn handle_put(
                 "QuotaExceeded",
             ));
         }
-    }
 
     // EX-45 : le CDR se fonde sur le type déclaré ; un client DAV générique
     // n'en envoie souvent aucun (octet-stream) — affiner par signature et

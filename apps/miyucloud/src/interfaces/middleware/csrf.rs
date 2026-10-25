@@ -33,6 +33,7 @@ const SAFE_METHODS: [Method; 3] = [Method::GET, Method::HEAD, Method::OPTIONS];
 ///
 /// Must be applied **after** `auth_middleware` so that the
 /// `CookieAuthenticated` marker is available in extensions.
+#[allow(clippy::result_large_err)] // Err = `Response` axum, convention des handlers.
 pub async fn csrf_middleware(request: Request, next: Next) -> Result<Response, Response> {
     // Safe methods never need CSRF validation.
     if SAFE_METHODS.contains(request.method()) {

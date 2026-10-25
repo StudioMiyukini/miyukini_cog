@@ -145,6 +145,9 @@ pub enum JayCloudError {
 }
 
 /// Trait abstrait pour le service de sauvegarde.
+// `async_trait` pose lui-même `#[must_use]` sur le futur renvoyé : le doublon
+// signalé par clippy vient de la macro, pas de ce code.
+#[allow(clippy::double_must_use)]
 #[async_trait]
 pub trait JayCloudBackend: Send + Sync {
     /// Déclenche une sauvegarde. Si `target_name` est `None`, toutes les
@@ -224,7 +227,7 @@ impl JayCloudClient {
             Some(Value::Number(n)) => n
                 .as_u64()
                 .filter(|v| *v > 0)
-                .map(|v| v as usize)
+                .and_then(|v| usize::try_from(v).ok())
                 .ok_or_else(|| {
                     JayCloudError::InvalidParam(format!(
                         "limit doit être un entier > 0, reçu {n}"
@@ -241,8 +244,8 @@ impl JayCloudClient {
             None | Some(Value::Null) => Ok(None),
             Some(Value::Number(n)) => n
                 .as_u64()
-                .filter(|v| *v <= u64::from(u32::MAX))
-                .map(|v| Some(v as u32))
+                .and_then(|v| u32::try_from(v).ok())
+                .map(Some)
                 .ok_or_else(|| {
                     JayCloudError::InvalidParam(format!(
                         "{key} doit être un entier u32 valide, reçu {n}"
@@ -503,7 +506,7 @@ impl JayCloudBackend for FakeJayCloudBackend {
         Ok(state
             .snapshots
             .iter()
-            .filter(|s| target_name.map_or(true, |t| s.target_name == t))
+            .filter(|s| target_name.is_none_or(|t| s.target_name == t))
             .take(limit)
             .cloned()
             .collect())

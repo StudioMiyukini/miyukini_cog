@@ -51,7 +51,8 @@ pub static CATALOG: &[CatalogEntry] = &[
         quality_score: 30,
         french_score: 7,
         min_tier: 1,
-        description: "Qwen3 0.6B — smartphone/tablette, raisonnement basique, bon français pour sa taille",
+        description:
+            "Qwen3 0.6B — smartphone/tablette, raisonnement basique, bon français pour sa taille",
     },
     CatalogEntry {
         match_pattern: "qwen3-2b",
@@ -124,7 +125,8 @@ pub static CATALOG: &[CatalogEntry] = &[
         quality_score: 52,
         french_score: 8,
         min_tier: 2,
-        description: "Qwen3 4B — cible COG principale (tablette 8GB), thinking-mode, excellent français",
+        description:
+            "Qwen3 4B — cible COG principale (tablette 8GB), thinking-mode, excellent français",
     },
     // ── Tier 3 : Standard (16 GB RAM, 4-8 GB VRAM) ───────────────
     CatalogEntry {
@@ -173,7 +175,8 @@ pub static CATALOG: &[CatalogEntry] = &[
         quality_score: 67,
         french_score: 8,
         min_tier: 3,
-        description: "Qwen3 8B — serveur standard, thinking-mode, très bon français, code, raisonnement",
+        description:
+            "Qwen3 8B — serveur standard, thinking-mode, très bon français, code, raisonnement",
     },
     // ── Tier 4 : Power (32+ GB RAM, 8-12 GB VRAM) ────────────────
     CatalogEntry {
@@ -210,7 +213,8 @@ pub static CATALOG: &[CatalogEntry] = &[
         quality_score: 82,
         french_score: 8,
         min_tier: 4,
-        description: "Qwen3 30B MoE (3B actifs) — qualité 70B avec mémoire ~18GB, thinking-mode avancé",
+        description:
+            "Qwen3 30B MoE (3B actifs) — qualité 70B avec mémoire ~18GB, thinking-mode avancé",
     },
     // ── Tier 5 : Heavy (64+ GB RAM, 16+ GB VRAM) ─────────────────
     CatalogEntry {

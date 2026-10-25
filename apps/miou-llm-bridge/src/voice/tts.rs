@@ -103,7 +103,9 @@ pub fn synthesize_wav(text: &str, config: &PiperConfig) -> Result<Vec<u8>, TtsEr
 
 /// Convertit les bytes PCM 16-bit LE (raw piper --output_raw) en f32 mono.
 pub fn pcm16_to_f32(raw: &[u8]) -> Vec<f32> {
-    raw.chunks_exact(2)
+    raw.as_chunks::<2>()
+        .0
+        .iter()
         .map(|c| {
             let sample = i16::from_le_bytes([c[0], c[1]]);
             sample as f32 / 32768.0

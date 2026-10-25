@@ -42,6 +42,8 @@ impl TimeSlot {
 }
 
 /// Préférences de collecte et rétention.
+// Interrupteurs de collecte indépendants, choisis par l'utilisateur et sérialisés tels quels.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Prefs {
     pub profile_id: String,

@@ -299,7 +299,7 @@ impl RelayClient {
                         Some(ack.permis_id.clone())
                     };
                     session.scopes = vec!["tracker".to_string(), "relay".to_string()];
-                    session.official_trackers = ack.official_trackers.clone();
+                    session.official_trackers.clone_from(&ack.official_trackers);
                     if session.official_trackers.is_empty() {
                         warn!("Relay did not provide any official tracker");
                     } else {
@@ -358,13 +358,11 @@ impl RelayClient {
                     if verify.result == VerifyResult::Fail {
                         let msg = String::from_utf8_lossy(&verify.message).to_string();
                         return Err(MiyuwebwayParticipantError::RegistrationRejected(format!(
-                            "Verification failed: {}",
-                            msg
+                            "Verification failed: {msg}"
                         )));
                     }
                     // Phase A Ok ou autre : lire la suite (REGISTER_OK attendu)
                     response = self.read_frame(&mut tls_stream).await?;
-                    continue;
                 }
                 _ => {
                     error!("Unexpected response: {:?}", response.header.message_type);

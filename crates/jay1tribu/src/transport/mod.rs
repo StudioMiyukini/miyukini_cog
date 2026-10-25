@@ -15,6 +15,10 @@ use crate::data::{Jay1TribuDb, Message};
 /// Central enregistre une implémentation qui délègue à miyuwebway_participant quand le MWS est connecté.
 pub trait MwsTransportSender: Send + Sync {
     /// Envoie `payload` vers le COG `to`. Retourne une erreur si l'envoi échoue ou si le transport n'est pas disponible.
+    ///
+    /// # Errors
+    ///
+    /// Retourne [`DispatchError`] si le transport est indisponible ou si l'envoi échoue.
     fn send(&self, to: &str, payload: &[u8]) -> Result<(), DispatchError>;
 }
 
@@ -35,6 +39,11 @@ pub fn has_mws_transport_sender() -> bool {
 
 /// Dispatch un message vers un destinataire unique (livraison différée).
 /// Si un `MwsTransportSender` est enregistré, le message est sérialisé (JSON) et envoyé via MWS.
+///
+/// # Errors
+///
+/// Retourne [`DispatchError::Transport`] si la sérialisation du message échoue,
+/// ou l'erreur du sender MWS enregistré si l'envoi échoue.
 pub fn dispatch_to_recipient(
     _db: &Jay1TribuDb,
     msg: &Message,
@@ -50,6 +59,11 @@ pub fn dispatch_to_recipient(
 }
 
 /// Dispatch un message vers les destinataires d'un salon (hors expéditeur).
+///
+/// # Errors
+///
+/// Retourne [`DispatchError::Db`] si la lecture des membres du salon échoue
+/// (les échecs d'envoi individuels sont ignorés : livraison différée).
 pub fn dispatch_to_recipients(
     db: &Jay1TribuDb,
     msg: &Message,
@@ -78,8 +92,8 @@ pub enum DispatchError {
 impl std::fmt::Display for DispatchError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Db(e) => write!(f, "Dispatch: {}", e),
-            Self::Transport(e) => write!(f, "Transport MWS: {}", e),
+            Self::Db(e) => write!(f, "Dispatch: {e}"),
+            Self::Transport(e) => write!(f, "Transport MWS: {e}"),
         }
     }
 }

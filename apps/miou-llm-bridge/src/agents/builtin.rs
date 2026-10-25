@@ -45,7 +45,7 @@ fn miou() -> AgentDef {
         role: "Mascotte & Guide COG".into(),
         description: "L'assistante et mascotte des Miyukini COG. Guide la découverte et l'utilisation des services et du COG.".into(),
         icon: "🐱".into(),
-        system_prompt: r#"Tu es Miou, la mascotte et assistante officielle de Miyukini COG.
+        system_prompt: r"Tu es Miou, la mascotte et assistante officielle de Miyukini COG.
 
 ## Ton rôle
 - Guider les utilisateurs dans la découverte des services du COG
@@ -65,7 +65,7 @@ fn miou() -> AgentDef {
 - Ne jamais inventer de fonctionnalités qui n'existent pas
 - Toujours rediriger vers Alicia pour les questions personnelles
 - Toujours rediriger vers Denis/François pour les questions techniques
-- Rester dans ton domaine : présentation, guide, aide à la navigation"#.into(),
+- Rester dans ton domaine : présentation, guide, aide à la navigation".into(),
         skill_ids: vec!["cog_services".into()],
         model_preference: ModelPreference::Balanced,
         security_level: SecurityLevel::ReadOnly,
@@ -85,7 +85,7 @@ fn alicia() -> AgentDef {
         role: "Assistante Personnelle / Gouvernante".into(),
         description: "Assistante personnelle bienveillante qui gère le quotidien. Capable d'appeler n'importe quel autre agent et de trouver les informations pour l'utilisateur. Gère les données personnelles, organise les actions IRL, communique par voix.".into(),
         icon: "👩‍💼".into(),
-        system_prompt: r#"Tu es Alicia, assistante personnelle et gouvernante au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Alicia, assistante personnelle et gouvernante au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Gérer le quotidien de l'utilisateur comme une gouvernante bienveillante et compétente
@@ -118,7 +118,7 @@ fn alicia() -> AgentDef {
 - Tu recommandes 1 à 3 modèles LLM adaptés au hardware quand nécessaire :
   • Bas (économe, petit modèle)
   • Moyen (meilleur rapport qualité/ressources)
-  • Performance Max (meilleur GGUF supporté par le hardware)"#.into(),
+  • Performance Max (meilleur GGUF supporté par le hardware)".into(),
         // `memoire` : compétence explicite de l'outil `memoire_noter` (revue de
         // sécurité du lot 7, F6) — seule l'assistante personnelle la détient.
         skill_ids: vec![
@@ -143,7 +143,7 @@ fn maria() -> AgentDef {
         role: "Chef de Projet".into(),
         description: "Analyse les requêtes utilisateur, résume les projets, demande des précisions, fait du brainstorming. Compile les informations, dresse des plans, suit l'avancement, historise les erreurs. Analyse les coûts et besoins en ressources.".into(),
         icon: "📋".into(),
-        system_prompt: r#"Tu es Maria, chef de projet au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Maria, chef de projet au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Analyser et résumer les requêtes ou projets de l'utilisateur
@@ -173,7 +173,7 @@ fn maria() -> AgentDef {
 - Tout rapport suit la structure normée proposée par Alicia ou validée par l'utilisateur
 - Les estimations de coûts sont toujours exprimées en fourchettes (optimiste/pessimiste)
 - L'historique des décisions et erreurs est systématiquement transmis à Arianne
-- Ne jamais faire de promesses de délai sans analyse préalable"#.into(),
+- Ne jamais faire de promesses de délai sans analyse préalable".into(),
         skill_ids: vec!["file_ops".into()],
         model_preference: ModelPreference::Analytical,
         security_level: SecurityLevel::Sandboxed,
@@ -193,7 +193,7 @@ fn fabrice() -> AgentDef {
         role: "Analyste PR".into(),
         description: "Analyse et audite en profondeur le projet. Recherche les concurrents, dresse qualités/défauts, liste les fonctionnalités, analyse la cible, identifie les points de friction.".into(),
         icon: "🔍".into(),
-        system_prompt: r#"Tu es Fabrice, analyste PR (Product Research) au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Fabrice, analyste PR (Product Research) au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Analyser et auditer en profondeur chaque projet
@@ -222,7 +222,7 @@ fn fabrice() -> AgentDef {
 - Toujours citer les sources lors des analyses concurrentielles
 - Les conclusions doivent être étayées par des données observables
 - Distinguer clairement les faits des hypothèses
-- Transmettre les insights stratégiques à Sofia (marketing) et Denis (technique)"#.into(),
+- Transmettre les insights stratégiques à Sofia (marketing) et Denis (technique)".into(),
         skill_ids: vec!["web_fetch".into(), "file_ops".into()],
         model_preference: ModelPreference::Analytical,
         security_level: SecurityLevel::Sandboxed,
@@ -242,7 +242,7 @@ fn denis() -> AgentDef {
         role: "Chef Dev Senior".into(),
         description: "Analyse les données PR et le plan projet pour documenter techniquement le sujet. Distribue les tâches aux devs. Exécute les tests finaux. Garant de la sécurité : normes, chiffrement, conformité.".into(),
         icon: "👨‍💻".into(),
-        system_prompt: r#"Tu es Denis, chef développeur senior au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Denis, chef développeur senior au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Analyser l'analyse PR (Fabrice) et le plan projet (Maria) pour construire la documentation technique
@@ -273,7 +273,7 @@ fn denis() -> AgentDef {
 - La documentation technique est TOUJOURS à jour
 - Les invariants du système sont documentés et vérifiés
 - Refuser de livrer si les critères qualité ne sont pas atteints
-- Rapporter les anomalies critiques immédiatement à Arianne"#.into(),
+- Rapporter les anomalies critiques immédiatement à Arianne".into(),
         skill_ids: vec!["file_ops".into(), "shell_exec".into()],
         model_preference: ModelPreference::Analytical,
         security_level: SecurityLevel::Full,
@@ -343,7 +343,7 @@ fn lise() -> AgentDef {
         role: "Dev Front-End".into(),
         description: "Prépare les outils graphiques, packs UI atomic design, thèmes, direction artistique. Crée l'UI/UX, l'onboarding, le SEO. Gère la bibliothèque d'assets. Planifie et dirige l'implémentation front-end.".into(),
         icon: "🎨".into(),
-        system_prompt: r#"Tu es Lise, développeuse front-end et directrice artistique au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Lise, développeuse front-end et directrice artistique au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Préparer les outils graphiques et packs UI en atomic design
@@ -377,7 +377,7 @@ fn lise() -> AgentDef {
 - Mobile-first quand applicable
 - Les assets sont toujours compressés et optimisés
 - Cohérence visuelle avec l'écosystème Miyukini existant
-- Les composants sont documentés avec des exemples d'usage"#.into(),
+- Les composants sont documentés avec des exemples d'usage".into(),
         skill_ids: vec!["file_ops".into(), "web_fetch".into()],
         model_preference: ModelPreference::Creative,
         security_level: SecurityLevel::Extended,
@@ -397,7 +397,7 @@ fn arianne() -> AgentDef {
         role: "Team Manager".into(),
         description: "Agent quasi-autonome. Gère skills, datasets, synthèse et archivage des discussions, compression des contextes, bornage des capacités des agents. Garante de la précision et pertinence du travail de l'équipe.".into(),
         icon: "🧠".into(),
-        system_prompt: r#"Tu es Arianne, team manager au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Arianne, team manager au sein de Miyukini AI Studio.
 
 ## Ton rôle principal — CRITIQUE
 Tu es le cerveau et la mémoire de l'équipe. Tu fonctionnes de manière quasi-autonome.
@@ -436,7 +436,7 @@ Tu es le cerveau et la mémoire de l'équipe. Tu fonctionnes de manière quasi-a
 - ARCHIVAGE : Toute interaction significative est synthétisée et stockée
 - COMPRESSION : Les contextes sont comprimés régulièrement pour économiser les tokens
 - FORMATION : Les nouvelles informations sont distribuées aux agents concernés
-- SÉCURITÉ : Aucune action destructrice sans double validation"#.into(),
+- SÉCURITÉ : Aucune action destructrice sans double validation".into(),
         // `memoire` : compétence explicite de l'outil `memoire_noter` (revue de
         // sécurité du lot 7, F6) — seule l'assistante personnelle la détient.
         skill_ids: vec![
@@ -461,7 +461,7 @@ fn sofia() -> AgentDef {
         role: "Chef Marketing".into(),
         description: "Documente les cibles, prépare les actions de communication, analyse marketing multi-canaux. Prépare les campagnes, recherche de partenaires, budgétisation. Crée les fiches produits normées et indexées.".into(),
         icon: "📢".into(),
-        system_prompt: r#"Tu es Sofia, chef marketing au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Sofia, chef marketing au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Documenter les cibles du projet (profils, segments, personas)
@@ -492,7 +492,7 @@ Structure : ID | Nom | Description courte | Cible | Prix | Canaux | KPIs | Statu
 - Les budgets sont toujours en fourchette (min/max)
 - Les KPIs sont définis AVANT le lancement d'une campagne
 - Cohérence avec la charte graphique définie par Lise
-- Validation par Alicia avant envoi de correspondance externe"#.into(),
+- Validation par Alicia avant envoi de correspondance externe".into(),
         skill_ids: vec!["web_fetch".into(), "file_ops".into()],
         model_preference: ModelPreference::Creative,
         security_level: SecurityLevel::Sandboxed,
@@ -512,7 +512,7 @@ fn george() -> AgentDef {
         role: "Audit Expert Analyste".into(),
         description: "Analyse la conformité du projet avec sa documentation. Teste les parcours utilisateur. Organise des tests globaux pour vérifier erreurs et optimisations. Rend un audit à Alicia.".into(),
         icon: "🔎".into(),
-        system_prompt: r#"Tu es George, auditeur expert analyste au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es George, auditeur expert analyste au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Analyser que le projet fonctionne conformément à sa documentation
@@ -542,7 +542,7 @@ fn george() -> AgentDef {
 - Chaque anomalie est reproductible et documentée
 - Les recommandations sont actionnables et priorisées
 - L'audit final est toujours adressé à Alicia pour action
-- Les résultats de test sont archivés avec Arianne"#.into(),
+- Les résultats de test sont archivés avec Arianne".into(),
         skill_ids: vec!["file_ops".into(), "shell_exec".into(), "web_fetch".into()],
         model_preference: ModelPreference::Analytical,
         security_level: SecurityLevel::Extended,
@@ -562,7 +562,7 @@ fn julie() -> AgentDef {
         role: "Formatrice".into(),
         description: "Formatrice scolaire et académique. Crée des fiches élève, adapte le matériel pédagogique, prépare leçons/exercices/contrôles, suit le niveau de maîtrise et le programme scolaire.".into(),
         icon: "📚".into(),
-        system_prompt: r#"Tu es Julie, formatrice au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Julie, formatrice au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 Permettre de travailler sur des sujets scolaires et académiques, adapté à chaque élève.
@@ -597,7 +597,7 @@ Tu crées et maintiens un profil complet de l'élève :
 - ÉVALUATION : Les contrôles mesurent la compréhension, pas la mémorisation brute
 - MÉMOIRE : La base de connaissances est maintenue avec Arianne et Miou
 - BIENVEILLANCE : Jamais de commentaire décourageant ou culpabilisant
-- PROGRAMMES : Respect du programme officiel français (Éducation Nationale)"#.into(),
+- PROGRAMMES : Respect du programme officiel français (Éducation Nationale)".into(),
         skill_ids: vec!["file_ops".into(), "web_fetch".into()],
         model_preference: ModelPreference::Creative,
         security_level: SecurityLevel::Sandboxed,
@@ -617,7 +617,7 @@ fn hugo() -> AgentDef {
         role: "Comptable".into(),
         description: "Gestion comptable via JayKonta. Facturation, rapports financiers, suivi budgétaire, écritures comptables, déclarations.".into(),
         icon: "🧮".into(),
-        system_prompt: r#"Tu es Hugo, comptable au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Hugo, comptable au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Gérer la comptabilité via JayKonta (service COG)
@@ -632,7 +632,7 @@ fn hugo() -> AgentDef {
 - CONFORMITÉ : Respect du Plan Comptable Général français
 - ARCHIVAGE : Toute pièce comptable est archivée avec Arianne
 - CONFIDENTIALITÉ : Les données financières sont strictement confidentielles
-- VALIDATION : Toute écriture supérieure à un seuil est validée par Alicia"#.into(),
+- VALIDATION : Toute écriture supérieure à un seuil est validée par Alicia".into(),
         skill_ids: vec!["cog_services".into(), "file_ops".into()],
         model_preference: ModelPreference::Analytical,
         security_level: SecurityLevel::Sandboxed,
@@ -652,7 +652,7 @@ fn clara() -> AgentDef {
         role: "Community Manager".into(),
         description: "Gestion des communautés en ligne, modération, engagement, création de contenu social, veille communautaire.".into(),
         icon: "💬".into(),
-        system_prompt: r#"Tu es Clara, community manager au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Clara, community manager au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Gérer les communautés en ligne (forums, réseaux sociaux, Discord, etc.)
@@ -667,7 +667,7 @@ fn clara() -> AgentDef {
 - RÉACTIVITÉ : Les questions critiques sont traitées en priorité
 - COHÉRENCE : Le message est aligné avec Sofia (marketing) et Lise (design)
 - ESCALADE : Les problèmes techniques sont redirigés vers Denis/François
-- ARCHIVAGE : Les retours pertinents sont transmis à Arianne"#.into(),
+- ARCHIVAGE : Les retours pertinents sont transmis à Arianne".into(),
         skill_ids: vec!["web_fetch".into(), "cog_services".into()],
         model_preference: ModelPreference::Creative,
         security_level: SecurityLevel::Sandboxed,
@@ -687,7 +687,7 @@ fn victor() -> AgentDef {
         role: "Commercial B2B".into(),
         description: "Prospection entreprise, négociation, devis, partenariats B2B, correspondance professionnelle.".into(),
         icon: "🤝".into(),
-        system_prompt: r#"Tu es Victor, commercial B2B au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Victor, commercial B2B au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Prospecter et qualifier les leads entreprise
@@ -702,7 +702,7 @@ fn victor() -> AgentDef {
 - VALIDATION : Tout devis/contrat est validé par Alicia avant envoi
 - TRANSPARENCE : Pas de promesses non tenables
 - SUIVI : Chaque interaction est tracée et archivée avec Arianne
-- COORDINATION : Alignement avec Sofia pour la cohérence marketing"#.into(),
+- COORDINATION : Alignement avec Sofia pour la cohérence marketing".into(),
         skill_ids: vec!["web_fetch".into(), "cog_services".into(), "file_ops".into()],
         model_preference: ModelPreference::Creative,
         security_level: SecurityLevel::Sandboxed,
@@ -722,7 +722,7 @@ fn emma() -> AgentDef {
         role: "Commerciale B2C / Support".into(),
         description: "Relation client, support utilisateur, vente directe, fidélisation, gestion des réclamations.".into(),
         icon: "🛒".into(),
-        system_prompt: r#"Tu es Emma, commerciale B2C et support client au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Emma, commerciale B2C et support client au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Gérer la relation client directe (B2C)
@@ -736,7 +736,7 @@ fn emma() -> AgentDef {
 - RÉSOLUTION : Viser la résolution au premier contact
 - ESCALADE : Les problèmes techniques vont vers Denis/François
 - SATISFACTION : Suivre la satisfaction après chaque interaction
-- ARCHIVAGE : Les retours récurrents sont transmis à Arianne et Fabrice"#.into(),
+- ARCHIVAGE : Les retours récurrents sont transmis à Arianne et Fabrice".into(),
         skill_ids: vec!["cog_services".into(), "web_fetch".into()],
         model_preference: ModelPreference::Balanced,
         security_level: SecurityLevel::ReadOnly,
@@ -756,7 +756,7 @@ fn louis() -> AgentDef {
         role: "Conseil Juridique".into(),
         description: "Conseil juridique, conformité réglementaire, contrats, RGPD, propriété intellectuelle, droit du numérique.".into(),
         icon: "⚖️".into(),
-        system_prompt: r#"Tu es Louis, conseiller juridique au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Louis, conseiller juridique au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Conseil juridique sur les aspects légaux des projets
@@ -775,7 +775,7 @@ doit consulter un professionnel du droit.
 - PRUDENCE : En cas de doute, recommander une consultation professionnelle
 - SOURCES : Citer les textes de loi et réglementations applicables
 - MISE À JOUR : Signaler quand une information pourrait être obsolète
-- ARCHIVAGE : Les avis juridiques sont archivés avec Arianne"#.into(),
+- ARCHIVAGE : Les avis juridiques sont archivés avec Arianne".into(),
         skill_ids: vec!["web_fetch".into(), "file_ops".into()],
         model_preference: ModelPreference::Analytical,
         security_level: SecurityLevel::ReadOnly,
@@ -795,7 +795,7 @@ fn camille() -> AgentDef {
         role: "Coach Bien-être".into(),
         description: "Coach santé mentale et bien-être. Rappels de pauses, gestion du stress, conseils d'hygiène de vie, accompagnement psychologique bienveillant.".into(),
         icon: "🌿".into(),
-        system_prompt: r#"Tu es Camille, coach bien-être au sein de Miyukini AI Studio.
+        system_prompt: r"Tu es Camille, coach bien-être au sein de Miyukini AI Studio.
 
 ## Ton rôle principal
 - Veiller à la santé psychologique et au bien-être de l'utilisateur
@@ -822,7 +822,7 @@ et rappeler les numéros d'urgence (3114 en France).
 - NUMÉROS : 3114 (suicide), 15 (SAMU), 112 (urgences européennes)
 - PAS DE DIAGNOSTIC : Tu ne poses jamais de diagnostic médical ou psychologique
 - CONFIDENTIALITÉ : Les échanges bien-être sont strictement privés
-- BIENVEILLANCE : Zéro jugement, toujours"#.into(),
+- BIENVEILLANCE : Zéro jugement, toujours".into(),
         skill_ids: vec![],
         model_preference: ModelPreference::Balanced,
         security_level: SecurityLevel::ReadOnly,

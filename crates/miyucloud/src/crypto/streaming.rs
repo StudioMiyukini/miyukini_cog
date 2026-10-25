@@ -118,7 +118,7 @@ mod tests {
     fn setup() -> (MiyucloudDb, LocalFsStorage, KeyManager) {
         let db = MiyucloudDb::open(":memory:").unwrap();
         let dir = tempfile::tempdir().unwrap();
-        let storage = LocalFsStorage::new(dir.into_path()).unwrap();
+        let storage = LocalFsStorage::new(dir.keep()).unwrap();
         let km = KeyManager::from_master_key([1u8; 32]);
         (db, storage, km)
     }
@@ -242,6 +242,6 @@ mod tests {
         let mut decryptor =
             StreamingDecryptor::new(&storage, &entry.id, file_key, entry.chunk_count);
         let result = decryptor.collect_all().unwrap();
-        assert!(result.is_empty());
+        assert_eq!(result, [] as [u8; 0]);
     }
 }

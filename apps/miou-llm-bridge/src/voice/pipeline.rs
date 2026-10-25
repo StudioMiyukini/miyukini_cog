@@ -176,7 +176,11 @@ impl VoicePipeline {
         match (&self.state, event) {
             // Idle : activer sur wake word ou commande
             (PipelineState::Idle, PipelineEvent::WakeWord(ww)) => {
-                tracing::info!("Wake word '{}' détecté (conf={:.2}) → Listening", ww.word, ww.confidence);
+                tracing::info!(
+                    "Wake word '{}' détecté (conf={:.2}) → Listening",
+                    ww.word,
+                    ww.confidence
+                );
                 self.transition_to(PipelineState::Listening);
                 self.recording_buffer.clear();
             }
@@ -365,7 +369,7 @@ mod tests {
 
         let miou = persona::load_persona("miou").expect("miou");
         pipeline.drain_commands(); // vide le canal
-        // Simuler la commande via handle interne
+                                   // Simuler la commande via handle interne
         pipeline.persona = miou;
         assert_eq!(pipeline.persona.name, "miou");
     }

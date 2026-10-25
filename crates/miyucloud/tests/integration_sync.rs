@@ -190,7 +190,7 @@ mod integration_sync {
 
         assert_eq!(conflict.file_id, entry.id);
         assert_eq!(conflict.status, ConflictStatus::Pending);
-        assert!(!conflict.remote_version.is_empty());
+        assert_ne!(conflict.remote_version, "");
 
         // Store conflict in DB
         db.sync_conflict_create(&conflict).unwrap();
@@ -233,7 +233,7 @@ mod integration_sync {
             .unwrap();
 
         let pending = db.sync_conflict_list_pending().unwrap();
-        assert!(pending.is_empty());
+        assert_eq!(pending, [] as [miyucloud::data::SyncConflict; 0]);
     }
 
     // -----------------------------------------------------------------------
@@ -420,7 +420,7 @@ mod integration_sync {
         // Verify both files can be downloaded with B's key
         for file in &imported {
             let data = FileOps::download_file(&db_b, &storage_b, &km_b, &file.id).unwrap();
-            assert!(!data.is_empty());
+            assert_ne!(data, [] as [u8; 0]);
         }
 
         // Verify specific contents

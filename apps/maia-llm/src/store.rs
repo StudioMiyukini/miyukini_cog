@@ -129,7 +129,7 @@ impl ModelStore {
 
                 let size_bytes = meta.len();
                 let model_id = filename.trim_end_matches(".gguf").to_string();
-                let display_name = model_id.replace('-', " ").replace('_', " ");
+                let display_name = model_id.replace(['-', '_'], " ");
 
                 let sha256 = read_sidecar_sha256(&path);
 

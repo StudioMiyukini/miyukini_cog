@@ -62,6 +62,8 @@ pub enum JaySheetsError {
 
 /// Trait async des opérations Jay Sheets exposées à Alicia.
 #[async_trait]
+// `#[async_trait]` pose lui-même `#[must_use]` sur la future retournée (déjà must_use).
+#[allow(clippy::double_must_use)]
 pub trait JaySheetsBackend: Send + Sync {
     /// Crée un nouveau tableur.
     async fn create_sheet(&self, title: &str) -> Result<SheetSummary, JaySheetsError>;
@@ -116,7 +118,7 @@ impl JaySheetsClient {
             Some(Value::Number(n)) => n
                 .as_u64()
                 .filter(|v| *v > 0)
-                .map(|v| v as usize)
+                .and_then(|v| usize::try_from(v).ok())
                 .ok_or_else(|| {
                     JaySheetsError::InvalidParam(format!("{key} doit être > 0, reçu {n}"))
                 }),

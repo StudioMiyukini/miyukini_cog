@@ -81,6 +81,8 @@ pub enum JayMessageError {
 
 /// Trait abstrait pour les opérations Jay Message exposables à Alicia.
 #[async_trait]
+// `#[async_trait]` pose lui-même `#[must_use]` sur la future retournée (déjà must_use).
+#[allow(clippy::double_must_use)]
 pub trait JayMessageBackend: Send + Sync {
     /// Envoie un message dans un thread. Retourne le `MessageSummary` posé.
     async fn send_message(
@@ -143,7 +145,7 @@ impl JayMessageClient {
             Some(Value::Number(n)) => n
                 .as_u64()
                 .filter(|v| *v > 0)
-                .map(|v| v as usize)
+                .and_then(|v| usize::try_from(v).ok())
                 .ok_or_else(|| {
                     JayMessageError::InvalidParam(format!(
                         "{key} doit être un entier > 0, reçu {n}"
@@ -484,8 +486,8 @@ mod tests {
     #[tokio::test]
     async fn list_recent_threads_default_10() {
         let backend = Arc::new(FakeJayMessageBackend::new());
-        for i in 0..15 {
-            backend.push_thread(thread(&format!("t{i}"), &format!("nom{i}"), i as u32 % 2));
+        for i in 0..15_u32 {
+            backend.push_thread(thread(&format!("t{i}"), &format!("nom{i}"), i % 2));
         }
         let client = JayMessageClient::new(backend);
         let r = client

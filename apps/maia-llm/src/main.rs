@@ -201,14 +201,14 @@ fn parse_args_and_load_config() -> Arc<config::MaiaLlmConfig> {
         match args[i].as_str() {
             "--bind" | "-b" => {
                 if let Some(v) = args.get(i + 1) {
-                    cfg.bind_addr = v.clone();
+                    cfg.bind_addr.clone_from(v);
                     i += 2;
                     continue;
                 }
             }
             "--models-dir" | "-m" => {
                 if let Some(v) = args.get(i + 1) {
-                    cfg.models_dir = v.clone();
+                    cfg.models_dir.clone_from(v);
                     i += 2;
                     continue;
                 }

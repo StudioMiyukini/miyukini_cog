@@ -94,7 +94,12 @@ pub struct TeamClient {
 }
 
 impl TeamClient {
-    pub fn new(client: reqwest::Client, team_url: String, node_info: NodeInfo, cle: Arc<CleSignature>) -> Self {
+    pub fn new(
+        client: reqwest::Client,
+        team_url: String,
+        node_info: NodeInfo,
+        cle: Arc<CleSignature>,
+    ) -> Self {
         Self {
             client,
             team_url,
@@ -105,13 +110,27 @@ impl TeamClient {
 
     /// Requête signée par la clé de MAIA ; `corps` JSON éventuel (exactement
     /// les octets envoyés).
-    fn signee(&self, methode: reqwest::Method, url: &str, corps: Option<&serde_json::Value>) -> reqwest::RequestBuilder {
-        let octets = corps.map(|c| serde_json::to_vec(c).unwrap_or_default()).unwrap_or_default();
+    fn signee(
+        &self,
+        methode: reqwest::Method,
+        url: &str,
+        corps: Option<&serde_json::Value>,
+    ) -> reqwest::RequestBuilder {
+        let octets = corps
+            .map(|c| serde_json::to_vec(c).unwrap_or_default())
+            .unwrap_or_default();
         let mut rb = self.client.request(methode.clone(), url);
         if corps.is_some() {
             rb = rb.header(reqwest::header::CONTENT_TYPE, "application/json");
         }
-        let rb = crate::signature::signer(rb, Some(&self.cle), USAGE_TEAM_NOEUD, methode.as_str(), url, &octets);
+        let rb = crate::signature::signer(
+            rb,
+            Some(&self.cle),
+            USAGE_TEAM_NOEUD,
+            methode.as_str(),
+            url,
+            &octets,
+        );
         if corps.is_some() {
             rb.body(octets)
         } else {
@@ -139,10 +158,7 @@ impl TeamClient {
                 true
             }
             Ok(r) => {
-                tracing::warn!(
-                    "Échec enregistrement TEAM : HTTP {}",
-                    r.status()
-                );
+                tracing::warn!("Échec enregistrement TEAM : HTTP {}", r.status());
                 false
             }
             Err(e) => {
@@ -226,9 +242,8 @@ impl TeamClient {
 
 /// Génère un identifiant de nœud unique (basé sur hostname + timestamp).
 fn generate_node_id() -> String {
-    let hostname = hostname::get()
-        .map(|h| h.to_string_lossy().to_string())
-        .unwrap_or_else(|_| "unknown".into());
+    let hostname =
+        hostname::get().map_or_else(|_| "unknown".into(), |h| h.to_string_lossy().to_string());
     let ts = current_epoch_secs();
     format!("maia-{hostname}-{ts}")
 }
@@ -271,8 +286,18 @@ mod tests {
                             instant,
                         )
                         .map_err(|_| axum::http::StatusCode::UNAUTHORIZED)?;
-                    let corps = axum::body::to_bytes(req.into_body(), 1 << 20).await.unwrap();
-                    garde_srv.verifier(&entetes, USAGE_TEAM_NOEUD, "POST", "/team/register", &corps, instant)
+                    let corps = axum::body::to_bytes(req.into_body(), 1 << 20)
+                        .await
+                        .unwrap();
+                    garde_srv
+                        .verifier(
+                            &entetes,
+                            USAGE_TEAM_NOEUD,
+                            "POST",
+                            "/team/register",
+                            &corps,
+                            instant,
+                        )
                         .map_err(|_| axum::http::StatusCode::UNAUTHORIZED)?;
                     Ok::<_, axum::http::StatusCode>("ok")
                 }
@@ -289,7 +314,12 @@ mod tests {
         let client = TeamClient::new(reqwest::Client::new(), url.clone(), noeud.clone(), cle);
         assert!(client.register().await);
         // Une autre clé (non épinglée) est refusée par le même hub.
-        let intrus = TeamClient::new(reqwest::Client::new(), url, noeud, Arc::new(CleSignature::generer()));
+        let intrus = TeamClient::new(
+            reqwest::Client::new(),
+            url,
+            noeud,
+            Arc::new(CleSignature::generer()),
+        );
         assert!(!intrus.register().await);
     }
 }

@@ -52,7 +52,7 @@ pub enum Jay1TribuDomainError {
 impl std::fmt::Display for Jay1TribuDomainError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Db(e) => write!(f, "{}", e),
+            Self::Db(e) => write!(f, "{e}"),
             Self::WebwayRequired => write!(f, "Connexion au Webway requise"),
             Self::TransfertFichierReserveAmi => {
                 write!(
@@ -73,6 +73,10 @@ impl From<DbError> for Jay1TribuDomainError {
 }
 
 /// Liste des amis pour un profil (toujours disponible en local).
+///
+/// # Errors
+///
+/// Retourne une erreur si la lecture des amis en base échoue.
 pub fn get_friends_list(
     db: &Jay1TribuDb,
     profile_id: &str,
@@ -83,6 +87,10 @@ pub fn get_friends_list(
 
 /// Liste des amis avec indicateur de présence. Si le Webway n'est pas connecté,
 /// tous les amis sont renvoyés avec `online: false`.
+///
+/// # Errors
+///
+/// Retourne une erreur si la lecture des amis en base échoue.
 pub fn get_friends_with_presence(
     db: &Jay1TribuDb,
     profile_id: &str,
@@ -101,6 +109,10 @@ pub fn get_friends_with_presence(
 
 /// Amis actuellement en ligne (cog_ids). À fournir par le MWS quand connecté ;
 /// sinon retourne une liste vide (dégradation gracieuse).
+///
+/// # Errors
+///
+/// Retourne une erreur si la lecture des amis en base échoue.
 pub fn get_online_friends(
     db: &Jay1TribuDb,
     profile_id: &str,
@@ -121,6 +133,12 @@ pub fn get_online_friends(
 /// # Deprecation
 /// Cette fonction sera remplacee par MiyuCloud (transfert chiffre via lien de partage).
 /// Voir `miyucloud::domain::FileOps::upload_file` + `ShareLink` pour le nouveau flux.
+///
+/// # Errors
+///
+/// Retourne [`Jay1TribuDomainError::TransfertFichierReserveAmi`] si un destinataire
+/// n'est pas ami de l'émetteur, ou une erreur de base si la création du message,
+/// de la pièce jointe ou de la file de livraison échoue.
 #[deprecated(
     since = "0.2.0",
     note = "Utiliser MiyuCloud pour le transfert de fichiers. send_file sera supprime dans la v0.3.0."
@@ -145,7 +163,7 @@ pub fn send_file(
     let content = if kind.eq_ignore_ascii_case("image") {
         "[image]".to_string()
     } else {
-        format!("[fichier: {}]", local_path)
+        format!("[fichier: {local_path}]")
     };
     let msg = db.message_create(salon_id, sender_cog_id, &content)?;
     db.message_attachment_create(&msg.id, kind, local_path)?;
@@ -166,7 +184,7 @@ pub fn send_file(
         if *cog_id == sender_cog_id {
             continue;
         }
-        let is_online = online_set.as_ref().map_or(true, |s| s.contains(cog_id));
+        let is_online = online_set.as_ref().is_none_or(|s| s.contains(cog_id));
         if is_online {
             if crate::transport::dispatch_to_recipient(db, &msg, sender_cog_id, cog_id).is_err() {
                 let _ = db.pending_delivery_enqueue(&msg.id, cog_id);
@@ -183,6 +201,11 @@ pub fn send_file(
 ///
 /// # Deprecation
 /// Cette fonction sera remplacee par le systeme de permissions MiyuCloud (`SharePermission`).
+///
+/// # Errors
+///
+/// Retourne [`Jay1TribuDomainError::TransfertFichierReserveAmi`] si un destinataire
+/// n'est pas ami de l'émetteur, ou une erreur de base si la vérification échoue.
 #[deprecated(
     since = "0.2.0",
     note = "Utiliser MiyuCloud SharePermission pour le controle d'acces fichiers. Sera supprime dans la v0.3.0."
@@ -204,6 +227,11 @@ pub fn check_can_transfer_file(
 /// aux destinataires en ligne ; les destinataires hors ligne sont mis en file
 /// (livraison différée à la reconnexion). `online_cog_ids` : COGs actuellement
 /// en ligne (fourni par Central depuis le MWS) ; si `None`, tente l'envoi à tous.
+///
+/// # Errors
+///
+/// Retourne une erreur si la création du message, la lecture des membres du salon
+/// ou la mise en file de livraison (Webway déconnecté) échoue en base.
 pub fn send_message(
     db: &Jay1TribuDb,
     salon_id: &str,
@@ -231,7 +259,7 @@ pub fn send_message(
         if *cog_id == sender_cog_id {
             continue;
         }
-        let is_online = online_set.as_ref().map_or(true, |s| s.contains(cog_id));
+        let is_online = online_set.as_ref().is_none_or(|s| s.contains(cog_id));
         if is_online {
             if crate::transport::dispatch_to_recipient(db, &msg, sender_cog_id, cog_id).is_err() {
                 let _ = db.pending_delivery_enqueue(&msg.id, cog_id);
@@ -246,6 +274,11 @@ pub fn send_message(
 /// Traite les livraisons en attente pour l'émetteur : envoie les messages
 /// aux destinataires qui sont maintenant en ligne. À appeler par Central
 /// quand le Webway passe à connecté ou quand la liste des COGs en ligne est mise à jour.
+///
+/// # Errors
+///
+/// Retourne une erreur si la lecture ou la mise à jour des livraisons en attente
+/// échoue en base.
 pub fn process_pending_deliveries(
     db: &Jay1TribuDb,
     sender_cog_id: &str,
@@ -273,6 +306,10 @@ pub fn process_pending_deliveries(
 }
 
 /// Crée un salon (direct ou dans une tribu). Toujours possible en local.
+///
+/// # Errors
+///
+/// Retourne une erreur si la création du salon en base échoue.
 pub fn create_salon(
     db: &Jay1TribuDb,
     tribe_id: Option<&str>,
@@ -289,6 +326,10 @@ pub fn create_salon(
 }
 
 /// Retourne le salon direct entre deux COG s'il existe, sinon None (DAT-01).
+///
+/// # Errors
+///
+/// Retourne une erreur si la recherche du salon en base échoue.
 pub fn find_direct_salon_between(
     db: &Jay1TribuDb,
     cog_id_1: &str,
@@ -299,6 +340,11 @@ pub fn find_direct_salon_between(
 }
 
 /// Trouve ou crée le salon direct entre deux COG (au plus un par paire, DAT-01).
+///
+/// # Errors
+///
+/// Retourne une erreur si la recherche, la création du salon ou l'ajout
+/// d'un membre échoue en base.
 pub fn get_or_create_direct_salon(
     db: &Jay1TribuDb,
     cog_id_1: &str,
@@ -316,6 +362,10 @@ pub fn get_or_create_direct_salon(
 
 /// Crée une tribu. L'invitation des membres en temps réel requiert le Webway ;
 /// la création locale est toujours possible.
+///
+/// # Errors
+///
+/// Retourne une erreur si la création de la tribu en base échoue.
 pub fn create_tribe(
     db: &Jay1TribuDb,
     name: &str,
@@ -332,6 +382,12 @@ pub fn create_tribe(
 pub type PendingInvitation = (String, String, String);
 
 /// Invite un COG dans une tribu (création invitation status = pending).
+///
+/// # Errors
+///
+/// Retourne une erreur si la création de l'invitation en base échoue.
+// `inviter` / `invitee` : couple de termes du domaine, volontairement proches.
+#[allow(clippy::similar_names)]
 pub fn invite_to_tribe(
     db: &Jay1TribuDb,
     tribe_id: &str,
@@ -343,18 +399,32 @@ pub fn invite_to_tribe(
 }
 
 /// Accepte une invitation à une tribu (ajoute le membre avec rôle Membre).
+///
+/// # Errors
+///
+/// Retourne une erreur si l'invitation est introuvable ou si l'ajout du membre
+/// échoue en base.
 pub fn accept_tribe_invitation(db: &Jay1TribuDb, invitation_id: &str) -> Jay1TribuResult<()> {
     db.tribe_invitation_accept(invitation_id)
         .map_err(Into::into)
 }
 
 /// Refuse une invitation à une tribu.
+///
+/// # Errors
+///
+/// Retourne une erreur si l'invitation est introuvable ou si sa mise à jour
+/// échoue en base.
 pub fn refuse_tribe_invitation(db: &Jay1TribuDb, invitation_id: &str) -> Jay1TribuResult<()> {
     db.tribe_invitation_refuse(invitation_id)
         .map_err(Into::into)
 }
 
 /// Liste les invitations en attente pour un COG (invité).
+///
+/// # Errors
+///
+/// Retourne une erreur si la lecture des invitations en base échoue.
 pub fn list_pending_invitations(
     db: &Jay1TribuDb,
     invitee_cog_id: &str,

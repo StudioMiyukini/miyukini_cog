@@ -158,6 +158,7 @@ pub async fn handle_report(
     Ok((StatusCode::MULTI_STATUS, [("content-type", "application/xml; charset=utf-8")], xml).into_response())
 }
 
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_get(
     State(service): State<CardDavService>,
     req: Request,
@@ -166,8 +167,8 @@ pub async fn handle_get(
     let validated = path_validator::validate_dav_path(&path)?;
     let parsed = parse_carddav_path(&validated)?;
 
-    let book_name = parsed.book_name.ok_or_else(|| DavError::MethodNotAllowed)?;
-    let uid = parsed.contact_uid.ok_or_else(|| DavError::MethodNotAllowed)?;
+    let book_name = parsed.book_name.ok_or(DavError::MethodNotAllowed)?;
+    let uid = parsed.contact_uid.ok_or(DavError::MethodNotAllowed)?;
 
     let ab = service
         .get_addressbook_by_owner_and_name(parsed.owner_id, book_name)?
@@ -228,6 +229,7 @@ pub async fn handle_put(
         .into_response())
 }
 
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_delete(
     State(service): State<CardDavService>,
     req: Request,
@@ -276,6 +278,7 @@ pub async fn handle_mkcol(
     Ok(StatusCode::CREATED.into_response())
 }
 
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_options() -> Response {
     (
         StatusCode::OK,

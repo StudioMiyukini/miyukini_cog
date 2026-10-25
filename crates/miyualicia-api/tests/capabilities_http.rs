@@ -40,7 +40,7 @@ fn token_with(scopes: Vec<JwtScope>, personas: &[&str]) -> String {
 /// Construit un AppState minimal + un token JWT de test à scope admin.
 async fn setup_with_runtime(services_dir: Option<&Path>) -> (axum::Router, String, Arc<CapabilitiesRuntime>) {
     setup_with_runtime_cfg(CapabilitiesRuntimeConfig {
-        services_dir: services_dir.map(|p| p.to_path_buf()),
+        services_dir: services_dir.map(std::path::Path::to_path_buf),
         ..Default::default()
     })
     .await
@@ -161,7 +161,7 @@ async fn tools_empty_when_no_services_dir() {
     let (router, token, _runtime) = setup_with_runtime(None).await;
     let (status, body) = json_get(router, "/api/v1/alicia/capabilities/tools", &token).await;
     assert_eq!(status, StatusCode::OK);
-    assert!(body["tools"].as_array().unwrap().is_empty());
+    assert_eq!(body["tools"].as_array().unwrap().len(), 0);
 }
 
 // -------------------------------------------------------------------
@@ -725,9 +725,8 @@ async fn pending_confirm_endpoint_executes_and_resolves() {
         .dispatch_and_queue("demo.shout", &Value::Null, "voice", "x")
         .await
         .unwrap();
-    let id = match outcome {
-        miyualicia::capabilities_runtime::QueuedDispatch::Queued { id, .. } => id,
-        _ => panic!("expected Queued"),
+    let miyualicia::capabilities_runtime::QueuedDispatch::Queued { id, .. } = outcome else {
+        panic!("expected Queued");
     };
 
     let (status, body) = json_post(
@@ -756,9 +755,8 @@ async fn pending_cancel_endpoint_returns_204() {
         .dispatch_and_queue("demo.shout", &Value::Null, "voice", "x")
         .await
         .unwrap();
-    let id = match outcome {
-        miyualicia::capabilities_runtime::QueuedDispatch::Queued { id, .. } => id,
-        _ => panic!("expected Queued"),
+    let miyualicia::capabilities_runtime::QueuedDispatch::Queued { id, .. } = outcome else {
+        panic!("expected Queued");
     };
 
     let req = Request::builder()

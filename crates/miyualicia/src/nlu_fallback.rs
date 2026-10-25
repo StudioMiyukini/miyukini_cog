@@ -336,7 +336,7 @@ mod tests {
                 assert_eq!(action, "on");
                 assert_eq!(room_id, Some("salon".to_string()));
             }
-            other => panic!("attendu ControlDevice, obtenu {:?}", other),
+            other => panic!("attendu ControlDevice, obtenu {other:?}"),
         }
     }
 
@@ -356,7 +356,7 @@ mod tests {
                 assert_eq!(action, "off");
                 assert!(room_id.is_none());
             }
-            other => panic!("attendu ControlDevice off, obtenu {:?}", other),
+            other => panic!("attendu ControlDevice off, obtenu {other:?}"),
         }
     }
 
@@ -376,7 +376,7 @@ mod tests {
                 assert_eq!(action, "set_brightness");
                 assert_eq!(value, Some(serde_json::json!(50)));
             }
-            other => panic!("attendu set_brightness, obtenu {:?}", other),
+            other => panic!("attendu set_brightness, obtenu {other:?}"),
         }
     }
 
@@ -396,7 +396,7 @@ mod tests {
                 assert_eq!(action, "set_temperature");
                 assert_eq!(value, Some(serde_json::json!(20.0)));
             }
-            other => panic!("attendu set_temperature, obtenu {:?}", other),
+            other => panic!("attendu set_temperature, obtenu {other:?}"),
         }
     }
 
@@ -416,7 +416,7 @@ mod tests {
                 assert_eq!(action, "set_temperature");
                 assert_eq!(value, Some(serde_json::json!(18.0)));
             }
-            other => panic!("attendu set_temperature 18, obtenu {:?}", other),
+            other => panic!("attendu set_temperature 18, obtenu {other:?}"),
         }
     }
 
@@ -434,7 +434,7 @@ mod tests {
                 assert_eq!(device_type, "shutter");
                 assert_eq!(action, "open");
             }
-            other => panic!("attendu shutter open, obtenu {:?}", other),
+            other => panic!("attendu shutter open, obtenu {other:?}"),
         }
     }
 
@@ -499,7 +499,7 @@ mod tests {
                 assert_eq!(device_type, "shutter");
                 assert_eq!(action, "close");
             }
-            other => panic!("attendu shutter close, obtenu {:?}", other),
+            other => panic!("attendu shutter close, obtenu {other:?}"),
         }
     }
 
@@ -516,7 +516,7 @@ mod tests {
                 assert_eq!(device_type, "outlet");
                 assert_eq!(action, "off");
             }
-            other => panic!("attendu outlet off, obtenu {:?}", other),
+            other => panic!("attendu outlet off, obtenu {other:?}"),
         }
     }
 
@@ -533,7 +533,7 @@ mod tests {
                 assert_eq!(device_type, "lock");
                 assert_eq!(action, "lock");
             }
-            other => panic!("attendu lock, obtenu {:?}", other),
+            other => panic!("attendu lock, obtenu {other:?}"),
         }
     }
 
@@ -550,7 +550,7 @@ mod tests {
                 assert_eq!(device_type, "lock");
                 assert_eq!(action, "unlock");
             }
-            other => panic!("attendu unlock, obtenu {:?}", other),
+            other => panic!("attendu unlock, obtenu {other:?}"),
         }
     }
 

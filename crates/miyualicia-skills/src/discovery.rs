@@ -403,8 +403,8 @@ mod tests {
         let mut reg = SkillRegistry::new();
         let report = reload_in_dir(tmp.path(), &mut reg).unwrap();
         assert_eq!(report.added.len(), 2);
-        assert!(report.kept.is_empty());
-        assert!(report.removed.is_empty());
+        assert_eq!(report.kept.len(), 0);
+        assert_eq!(report.removed.len(), 0);
         assert!(report.errors.is_empty());
         assert_eq!(reg.len(), 2);
     }
@@ -418,9 +418,9 @@ mod tests {
         assert_eq!(r1.added, vec!["jaykoa".to_string()]);
 
         let r2 = reload_in_dir(tmp.path(), &mut reg).unwrap();
-        assert!(r2.added.is_empty());
+        assert_eq!(r2.added.len(), 0);
         assert_eq!(r2.kept, vec!["jaykoa".to_string()]);
-        assert!(r2.removed.is_empty());
+        assert_eq!(r2.removed.len(), 0);
         assert_eq!(reg.len(), 1);
     }
 
@@ -440,7 +440,7 @@ mod tests {
         // Suppression du dossier jaykonta
         std::fs::remove_dir_all(tmp.path().join("jaykonta")).unwrap();
         let report = reload_in_dir(tmp.path(), &mut reg).unwrap();
-        assert!(report.added.is_empty());
+        assert_eq!(report.added.len(), 0);
         assert_eq!(report.kept, vec!["jaykoa".to_string()]);
         assert_eq!(report.removed, vec!["jaykonta".to_string()]);
         assert_eq!(reg.len(), 1);
@@ -470,7 +470,7 @@ mod tests {
         )
         .unwrap();
         let report = reload_in_dir(tmp.path(), &mut reg).unwrap();
-        assert!(report.added.is_empty());
+        assert_eq!(report.added.len(), 0);
         assert_eq!(report.kept, vec!["jaykoa".to_string()]);
         assert!(reg.get("jaykoa.x").is_some());
         assert!(reg.get("jaykoa.y").is_some());

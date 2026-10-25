@@ -16,8 +16,10 @@ use serde::{Deserialize, Serialize};
 /// Mode de fonctionnement de MAIA.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+#[derive(Default)]
 pub enum MaiaMode {
     /// Aucune connexion TEAM. Fonctionne en totale autonomie.
+    #[default]
     Standalone,
     /// Enregistré auprès d'un hub TEAM — reçoit des tâches orchestrées.
     Pro,
@@ -29,12 +31,6 @@ impl std::fmt::Display for MaiaMode {
             Self::Standalone => write!(f, "standalone"),
             Self::Pro => write!(f, "pro"),
         }
-    }
-}
-
-impl Default for MaiaMode {
-    fn default() -> Self {
-        Self::Standalone
     }
 }
 

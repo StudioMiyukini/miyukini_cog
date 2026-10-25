@@ -102,7 +102,7 @@ mod tests {
         assert_eq!(addr.port(), 9999);
         assert_eq!(
             addr.ip(),
-            std::net::IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1))
+            std::net::IpAddr::V4(std::net::Ipv4Addr::LOCALHOST)
         );
     }
 

@@ -33,6 +33,7 @@ pub struct ThumbnailState {
 }
 
 /// GET /api/files/{owner_id}/{file_id}/thumbnail?width=256&height=256
+#[allow(clippy::unused_async)] // API homogène des handlers DAV, appelés avec `.await` par le routeur.
 pub async fn handle_thumbnail(
     State(state): State<ThumbnailState>,
     Path((owner_id, file_id)): Path<(String, String)>,
@@ -56,10 +57,7 @@ pub async fn handle_thumbnail(
 
     // Resolve file from store
     let resource = state.store.resolve_path(&owner_id, &format!("/{file_id}"))?;
-    let file = match resource {
-        crate::common::dav_store::DavResource::File(f) => f,
-        _ => return Err(DavError::BadRequest("Not a file".into())),
-    };
+    let crate::common::dav_store::DavResource::File(file) = resource else { return Err(DavError::BadRequest("Not a file".into())) };
 
     // Check if thumbnailable
     if !miyucloud::domain::thumbnail_ops::is_thumbnailable(&file.mime_type) {

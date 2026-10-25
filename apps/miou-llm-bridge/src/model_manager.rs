@@ -104,7 +104,7 @@ impl ModelManager {
         let models = self.scan_models();
 
         // Prendre le plus gros modèle qui rentre dans 75% de la RAM
-        let usable_ram_bytes = (available_ram_mb as u64) * 1024 * 1024 * 3 / 4;
+        let usable_ram_bytes = available_ram_mb * 1024 * 1024 * 3 / 4;
 
         models
             .into_iter()
@@ -120,10 +120,7 @@ impl ModelManager {
 
 /// Dérive un nom d'affichage à partir du nom de fichier GGUF.
 fn derive_display_name(filename: &str) -> String {
-    filename
-        .trim_end_matches(".gguf")
-        .replace('-', " ")
-        .replace('_', " ")
+    filename.trim_end_matches(".gguf").replace(['-', '_'], " ")
 }
 
 /// Formate une taille en octets en texte lisible.

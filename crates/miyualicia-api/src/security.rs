@@ -69,12 +69,15 @@ pub fn authenticate_client(config: &ApiConfig, client_id: &str, secret: &str) ->
     }
 }
 
+/// Compteurs par IP : début de fenêtre et nombre de requêtes.
+type CompteursParIp = HashMap<Option<IpAddr>, (Instant, u32)>;
+
 /// Limiteur de debit a fenetre fixe (60 s) par IP, en memoire.
 #[derive(Clone)]
 pub struct RateLimiter {
     max_per_min: u32,
     window: Duration,
-    hits: Arc<Mutex<HashMap<Option<IpAddr>, (Instant, u32)>>>,
+    hits: Arc<Mutex<CompteursParIp>>,
 }
 
 impl RateLimiter {

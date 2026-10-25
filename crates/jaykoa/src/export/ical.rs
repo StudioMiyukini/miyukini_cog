@@ -8,6 +8,8 @@
 //!         Propriétés custom X-JAYKOA-SOURCE et X-JAYKOA-ENTRY-TYPE pour traçabilité.
 
 use crate::data::types::TemporalEntry;
+// `write!` dans une `String` ne peut pas échouer : résultats ignorés (`let _`).
+use std::fmt::Write as _;
 
 /// Génère un calendrier iCalendar complet (VCALENDAR) à partir d'une liste
 /// d'entrées temporelles.
@@ -16,6 +18,7 @@ use crate::data::types::TemporalEntry;
 /// - `calendar_name` : nom affiché du calendrier (X-WR-CALNAME).
 ///
 /// Retourne une `String` au format `.ics` conforme RFC 5545.
+#[must_use]
 pub fn entries_to_ical(entries: &[TemporalEntry], calendar_name: &str) -> String {
     let mut out = String::with_capacity(entries.len() * 512 + 256);
 
@@ -25,10 +28,11 @@ pub fn entries_to_ical(entries: &[TemporalEntry], calendar_name: &str) -> String
     out.push_str("PRODID:-//Miyukini//JayKoa//FR\r\n");
     out.push_str("CALSCALE:GREGORIAN\r\n");
     out.push_str("METHOD:PUBLISH\r\n");
-    out.push_str(&format!(
+    let _ = write!(
+        out,
         "X-WR-CALNAME:{}\r\n",
         escape_ical_text(calendar_name)
-    ));
+    );
 
     // --- VEVENTs ---
     for entry in entries {
@@ -36,63 +40,63 @@ pub fn entries_to_ical(entries: &[TemporalEntry], calendar_name: &str) -> String
 
         // UID (obligatoire)
         let uid = entry.id.as_deref().unwrap_or("unknown");
-        out.push_str(&format!("UID:{}\r\n", uid));
+        let _ = write!(out, "UID:{uid}\r\n");
 
         // DTSTART / DTEND
         if let Some(ref dt) = entry.start_datetime {
-            out.push_str(&format!("DTSTART:{}\r\n", datetime_to_ical(dt)));
+            let _ = write!(out, "DTSTART:{}\r\n", datetime_to_ical(dt));
         }
         if let Some(ref dt) = entry.end_datetime {
-            out.push_str(&format!("DTEND:{}\r\n", datetime_to_ical(dt)));
+            let _ = write!(out, "DTEND:{}\r\n", datetime_to_ical(dt));
         }
 
         // SUMMARY
         let title = entry.title.as_deref().unwrap_or("(sans titre)");
-        out.push_str(&format!("SUMMARY:{}\r\n", escape_ical_text(title)));
+        let _ = write!(out, "SUMMARY:{}\r\n", escape_ical_text(title));
 
         // DESCRIPTION
         if let Some(ref desc) = entry.description {
             if !desc.is_empty() {
-                out.push_str(&format!("DESCRIPTION:{}\r\n", escape_ical_text(desc)));
+                let _ = write!(out, "DESCRIPTION:{}\r\n", escape_ical_text(desc));
             }
         }
 
         // LOCATION
         if let Some(ref loc) = entry.location {
             if !loc.is_empty() {
-                out.push_str(&format!("LOCATION:{}\r\n", escape_ical_text(loc)));
+                let _ = write!(out, "LOCATION:{}\r\n", escape_ical_text(loc));
             }
         }
 
         // STATUS (CONFIRMED / TENTATIVE / CANCELLED)
         let status = match entry.status.as_deref() {
-            Some("confirmed") => "CONFIRMED",
             Some("tentative") => "TENTATIVE",
             Some("cancelled") => "CANCELLED",
+            // "confirmed", absent ou inconnu.
             _ => "CONFIRMED",
         };
-        out.push_str(&format!("STATUS:{}\r\n", status));
+        let _ = write!(out, "STATUS:{status}\r\n");
 
         // X-JAYKOA-SOURCE (propriété custom)
         if let Some(ref src) = entry.source_service {
-            out.push_str(&format!("X-JAYKOA-SOURCE:{}\r\n", escape_ical_text(src)));
+            let _ = write!(out, "X-JAYKOA-SOURCE:{}\r\n", escape_ical_text(src));
         }
 
         // X-JAYKOA-ENTRY-TYPE (propriété custom)
         if let Some(ref et) = entry.entry_type {
-            out.push_str(&format!("X-JAYKOA-ENTRY-TYPE:{}\r\n", escape_ical_text(et)));
+            let _ = write!(out, "X-JAYKOA-ENTRY-TYPE:{}\r\n", escape_ical_text(et));
         }
 
         // RRULE (récurrence optionnelle)
         if let Some(ref rrule) = entry.recurrence_rule {
             if !rrule.is_empty() {
-                out.push_str(&format!("RRULE:{}\r\n", rrule));
+                let _ = write!(out, "RRULE:{rrule}\r\n");
             }
         }
 
         // DTSTAMP (obligatoire RFC 5545 — on utilise created_at ou now)
         if let Some(ref ca) = entry.created_at {
-            out.push_str(&format!("DTSTAMP:{}\r\n", datetime_to_ical(ca)));
+            let _ = write!(out, "DTSTAMP:{}\r\n", datetime_to_ical(ca));
         }
 
         out.push_str("END:VEVENT\r\n");

@@ -2,6 +2,10 @@
 //!
 //! Branchement des suites unit + cycle et génération rapports (structure conforme §9.1, §6).
 
+// Blocs MSCM (`/// @id ...`) autonomes, lus par tools/mscm-generator : la ligne vide
+// qui les suit est voulue (ils ne documentent pas l'item suivant).
+#![allow(clippy::empty_line_after_doc_comments)]
+
 use crate::cycle_tests_runner::{run_miyukinisqltest, CycleTestVerdict, MiyukiniSQLtestResult};
 use crate::db_unit_tests::{
     all_db_unit_test_definitions, coh_test_definitions, conf_test_definitions,

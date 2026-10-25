@@ -164,7 +164,7 @@ mod tests {
 
     #[test]
     fn schema_ddl_is_non_empty_and_idempotent() {
-        assert!(!SCHEMA_DDL.is_empty());
+        assert_ne!(SCHEMA_DDL, [] as [&str; 0]);
         for stmt in SCHEMA_DDL {
             assert!(
                 stmt.contains("IF NOT EXISTS"),

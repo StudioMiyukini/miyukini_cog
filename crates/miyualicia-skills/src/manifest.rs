@@ -92,10 +92,10 @@ impl AliciaCapabilityManifest {
     ) -> impl Iterator<Item = Result<ServiceCapability, SkillsError>> {
         let service_id = self.id.clone();
         let service_id_for_check = self.id.clone();
-        let header_check = if !is_valid_id(&service_id_for_check) {
-            Some(SkillsError::InvalidId(service_id_for_check))
-        } else {
+        let header_check = if is_valid_id(&service_id_for_check) {
             None
+        } else {
+            Some(SkillsError::InvalidId(service_id_for_check))
         };
         let entries = self.alicia_capabilities.into_iter();
         // Si l'identifiant du service est invalide, on retourne UNE erreur globale
@@ -184,7 +184,7 @@ mod tests {
         }"#;
         let m = AliciaCapabilityManifest::from_json(json, Path::new("t.json")).expect("parse");
         assert_eq!(m.id, "jaykonta");
-        assert!(m.alicia_capabilities.is_empty());
+        assert_eq!(m.alicia_capabilities.len(), 0);
     }
 
     #[test]
@@ -209,7 +209,7 @@ mod tests {
         let json = r#"{ "id": "jayshop" }"#;
         let m = AliciaCapabilityManifest::from_json(json, Path::new("t.json")).expect("parse");
         assert_eq!(m.id, "jayshop");
-        assert!(m.alicia_capabilities.is_empty());
+        assert_eq!(m.alicia_capabilities.len(), 0);
     }
 
     #[test]

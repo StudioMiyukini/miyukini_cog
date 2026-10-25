@@ -39,6 +39,9 @@ mod home;
 // CONFIGURATION
 // ═══════════════════════════════════════════════════════════════════════════════
 
+/// Rappel invoqué à chaque changement d'état de conformité MWS.
+type RappelEtat = Box<dyn Fn(MwsConformityState) + Send + Sync>;
+
 /// Configuration MWS pour le Central.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CentralMwsConfig {
@@ -180,8 +183,7 @@ impl MwsConformityState {
     /// Retourne le numéro d'étape (0-10).
     pub fn step_number(&self) -> u8 {
         match self {
-            Self::Uninitialized => 0,
-            Self::LoneMode => 0,
+            Self::Uninitialized | Self::LoneMode | Self::ConformityError(_) => 0,
             Self::ResolvingOrigin => 1,
             Self::ConnectingRelay => 2,
             Self::RegisteringRelay => 3,
@@ -192,7 +194,6 @@ impl MwsConformityState {
             Self::AnnouncingTracker => 8,
             Self::AwaitingTrackerAck => 9,
             Self::FullyConformant => 10,
-            Self::ConformityError(_) => 0,
         }
     }
 
@@ -256,7 +257,7 @@ pub struct CentralMwsManager {
     /// Lobbys hébergés.
     lobbys: Arc<RwLock<Vec<LobbyInfo>>>,
     /// Callback de mise à jour d'état.
-    state_callback: Arc<RwLock<Option<Box<dyn Fn(MwsConformityState) + Send + Sync>>>>,
+    state_callback: Arc<RwLock<Option<RappelEtat>>>,
     /// Envoi du signal d'arrêt du serveur Home (si actif).
     home_server_shutdown: Arc<RwLock<Option<oneshot::Sender<()>>>>,
     /// Handle de la tâche heartbeat (annulée à la déconnexion ou au drop).
@@ -486,7 +487,7 @@ impl CentralMwsManager {
 
         // Démarrer le service (inclut connexion Relay + annonce Tracker)
         match service.start(identity).await {
-            Ok(_) => {
+            Ok(()) => {
                 self.update_conformity(MwsConformityState::RelaySessionEstablished)
                     .await;
                 self.update_conformity(MwsConformityState::ObtainingPermis)
@@ -576,7 +577,7 @@ impl CentralMwsManager {
                         {
                             Ok(()) => info!("Serveur Home arrêté proprement"),
                             Err(e) => {
-                                error!("❌ Serveur Home ERREUR (bind={}): {}", bind_for_server, e)
+                                error!("❌ Serveur Home ERREUR (bind={}): {}", bind_for_server, e);
                             }
                         }
                     });
@@ -747,7 +748,7 @@ impl CentralMwsManager {
         {
             let mut lobbys = self.lobbys.write().await;
             let mut new_lobby = lobby;
-            new_lobby.lobby_id = lobby_id.clone();
+            new_lobby.lobby_id.clone_from(&lobby_id);
             lobbys.push(new_lobby);
         }
 
@@ -776,6 +777,8 @@ impl CentralMwsManager {
     }
 
     /// Vérifie si le COG est en mode Lone.
+    // `async` conservé : API symétrique de `is_online`, appelée avec `.await`.
+    #[allow(clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn is_lone(&self) -> bool {
         self.config.lone_mode
     }
@@ -842,7 +845,7 @@ impl CentralMwsManager {
         // Mettre à jour la liste locale
         {
             let mut local_services = self.services.write().await;
-            *local_services = services.clone();
+            local_services.clone_from(&services);
         }
         info!("Services locaux mis à jour: {:?}", services);
 
@@ -851,7 +854,7 @@ impl CentralMwsManager {
         if let Some(ref svc) = *service {
             svc.update_services(services)
                 .await
-                .map_err(|e| format!("Erreur RE-ANNOUNCE: {}", e))?;
+                .map_err(|e| format!("Erreur RE-ANNOUNCE: {e}"))?;
         } else {
             info!("Non connecté au MWS — mise à jour locale uniquement");
         }
@@ -1125,7 +1128,7 @@ fn home_portal_html(
     };
 
     format!(
-        r##"<!DOCTYPE html>
+        r#"<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -1170,7 +1173,7 @@ fn home_portal_html(
         <p>Propulsé par Miyukini COG · Réseau décentralisé souverain</p>
     </div>
 </body>
-</html>"##,
+</html>"#,
         cog_id = html_escape(cog_id),
         core_version = html_escape(core_version),
         services_cards = services_cards,

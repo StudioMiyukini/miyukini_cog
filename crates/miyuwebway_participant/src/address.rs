@@ -16,8 +16,6 @@ pub fn tracker_default(
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    let addr = host
-        .map(|h| format!("{h}:21000"))
-        .unwrap_or_else(|| "127.0.0.1:21000".to_string());
+    let addr = host.map_or_else(|| "127.0.0.1:21000".to_string(), |h| format!("{h}:21000"));
     Ok(addr)
 }

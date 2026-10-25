@@ -32,7 +32,7 @@ pub enum LlmAvailability {
 }
 
 impl LlmAvailability {
-    pub fn label(&self) -> &'static str {
+    pub fn label(self) -> &'static str {
         match self {
             Self::NativeOnline => "Natif (GGUF local — full power)",
             Self::UpstreamOnline => "Upstream (LM Studio — backup)",
@@ -41,12 +41,12 @@ impl LlmAvailability {
         }
     }
 
-    pub fn is_degraded(&self) -> bool {
+    pub fn is_degraded(self) -> bool {
         matches!(self, Self::Fallback | Self::Offline)
     }
 
     /// Vérifie si un LLM est effectivement disponible (natif ou upstream).
-    pub fn has_llm(&self) -> bool {
+    pub fn has_llm(self) -> bool {
         matches!(self, Self::NativeOnline | Self::UpstreamOnline)
     }
 }
@@ -227,8 +227,7 @@ pub async fn probe_availability(
         .timeout(std::time::Duration::from_secs(5))
         .send()
         .await
-        .map(|r| r.status().is_success())
-        .unwrap_or(false);
+        .is_ok_and(|r| r.status().is_success());
 
     if upstream_ok {
         return LlmAvailability::UpstreamOnline;
@@ -254,8 +253,7 @@ pub async fn probe_availability(
             .timeout(std::time::Duration::from_secs(3))
             .send()
             .await
-            .map(|r| r.status().is_success())
-            .unwrap_or(false);
+            .is_ok_and(|r| r.status().is_success());
 
         if ok {
             return LlmAvailability::UpstreamOnline;

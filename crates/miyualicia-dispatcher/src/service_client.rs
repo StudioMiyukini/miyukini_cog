@@ -56,6 +56,8 @@ impl ServiceCallResult {
 /// L'identifiant qualifié (`service_id.intent`) est passé en argument. L'impl
 /// route en interne vers le bon endpoint.
 #[async_trait]
+// `#[async_trait]` pose lui-même `#[must_use]` sur la future retournée (déjà must_use).
+#[allow(clippy::double_must_use)]
 pub trait ServiceClient: Send + Sync {
     /// Invoque la capability.
     async fn call(&self, qualified_id: &str, params: &Value) -> ServiceCallResult;
@@ -139,19 +141,12 @@ impl ServiceClient for MockServiceClient {
 /// Alicia interagit avec **plusieurs** services COG (JayKoa, JayKonta,
 /// Jay Bureau...). Ce routeur agrège les clients sous un trait object
 /// stable que le dispatcher peut consommer.
+#[derive(Default)]
 pub struct ServiceClientRouter {
     clients: std::collections::HashMap<
         String,
         std::sync::Arc<dyn ServiceClient + Send + Sync>,
     >,
-}
-
-impl Default for ServiceClientRouter {
-    fn default() -> Self {
-        Self {
-            clients: std::collections::HashMap::new(),
-        }
-    }
 }
 
 impl ServiceClientRouter {
@@ -189,13 +184,10 @@ impl ServiceClientRouter {
 #[async_trait]
 impl ServiceClient for ServiceClientRouter {
     async fn call(&self, qualified_id: &str, params: &serde_json::Value) -> ServiceCallResult {
-        let (service_id, _) = match qualified_id.split_once('.') {
-            Some(parts) => parts,
-            None => {
-                return ServiceCallResult::fail(format!(
-                    "qualified_id sans point : '{qualified_id}'"
-                ));
-            }
+        let Some((service_id, _)) = qualified_id.split_once('.') else {
+            return ServiceCallResult::fail(format!(
+                "qualified_id sans point : '{qualified_id}'"
+            ));
         };
         match self.clients.get(service_id) {
             Some(client) => client.call(qualified_id, params).await,

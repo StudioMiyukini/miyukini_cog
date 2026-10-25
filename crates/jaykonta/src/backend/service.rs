@@ -30,6 +30,10 @@ pub struct JayKontaBackend {
 
 impl JayKontaBackend {
     /// Cree le backend avec un chemin DB explicite.
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`DbError`] si la base ne peut pas être ouverte ou initialisée.
     pub fn new_with_db(path: &str) -> Result<Self, DbError> {
         Self::new_with_store(Arc::new(JayKontaDb::open(path)?))
     }
@@ -49,11 +53,13 @@ impl JayKontaBackend {
     }
 
     /// Retourne le point d'entree actif.
+    #[must_use]
     pub const fn entry_point(&self) -> EntryPoint {
         self.entry_point
     }
 
     /// Retourne la section active.
+    #[must_use]
     pub const fn section(&self) -> DashboardSection {
         self.section
     }
@@ -69,6 +75,7 @@ impl JayKontaBackend {
     }
 
     /// Construit le modele de vue courant.
+    #[must_use]
     pub fn view_model(&self) -> DashboardViewModel {
         let audit_count = self.db.audit_count().unwrap_or(0);
         match self.entry_point {
@@ -78,12 +85,20 @@ impl JayKontaBackend {
     }
 
     /// Ingestion reelle CK-INT-02 (JayRDV -> JayKonta).
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`IntegrationError`] si l'événement est rejeté ou si son écriture en base échoue.
     pub fn ingest_jayrdv_event(&self, event: JayRDVEvent) -> Result<(), IntegrationError> {
         IntegrationPipeline::new(self.db.clone()).apply_jayrdv(event)
     }
 
     /// Ingestion reelle CK-INT-03 (JayKoa -> JayKonta).
-    pub fn ingest_jaykoa_event(&self, event: JayKoaReminderEvent) -> Result<(), IntegrationError> {
+    ///
+    /// # Errors
+    ///
+    /// Retourne une [`IntegrationError`] si l'événement est rejeté ou si son écriture en base échoue.
+    pub fn ingest_jaykoa_event(&self, event: &JayKoaReminderEvent) -> Result<(), IntegrationError> {
         IntegrationPipeline::new(self.db.clone()).apply_jaykoa(event)
     }
 
@@ -102,13 +117,14 @@ impl Default for JayKontaBackend {
     fn default() -> Self {
         Self::new_with_db("jaykonta.db").unwrap_or_else(|e| {
             panic!(
-                "JayKonta: impossible d'ouvrir la base SQLite (KindMother fille): {}",
-                e
+                "JayKonta: impossible d'ouvrir la base SQLite (KindMother fille): {e}"
             )
         })
     }
 }
 
+// Littéral déclaratif du modèle de vue (données statiques), sans logique à découper.
+#[allow(clippy::too_many_lines)]
 fn account_view_model(db: &JayKontaDb, audit_count: i64) -> DashboardViewModel {
     let stats = db.account_stats().unwrap_or_default();
     let payment_rate = format!("{:.0}%", stats.payment_rate_pct);
@@ -133,11 +149,11 @@ fn account_view_model(db: &JayKontaDb, audit_count: i64) -> DashboardViewModel {
             KpiMetric {
                 label: "Factures emises",
                 value: stats.invoices_count.to_string(),
-                delta: format!("Taux paiement {}", payment_rate),
+                delta: format!("Taux paiement {payment_rate}"),
             },
             KpiMetric {
                 label: "Couverture audit",
-                value: format!("{} evenements", audit_count),
+                value: format!("{audit_count} evenements"),
                 delta: "CK-AUD-01/02/03 journalises".to_string(),
             },
         ],
@@ -219,6 +235,8 @@ fn account_view_model(db: &JayKontaDb, audit_count: i64) -> DashboardViewModel {
     }
 }
 
+// Littéral déclaratif du modèle de vue (données statiques), sans logique à découper.
+#[allow(clippy::too_many_lines)]
 fn purse_view_model(db: &JayKontaDb, audit_count: i64) -> DashboardViewModel {
     let stats = db.purse_stats().unwrap_or_default();
     DashboardViewModel {
@@ -246,7 +264,7 @@ fn purse_view_model(db: &JayKontaDb, audit_count: i64) -> DashboardViewModel {
             KpiMetric {
                 label: "Mouvements classes",
                 value: format!("{:.0}%", stats.categorized_pct),
-                delta: format!("{} evenements audit", audit_count),
+                delta: format!("{audit_count} evenements audit"),
             },
         ],
         quick_actions: vec![
@@ -382,7 +400,7 @@ fn bootstrap_int_02(pipeline: &IntegrationPipeline) {
 
 fn bootstrap_int_03(pipeline: &IntegrationPipeline) {
     let now = Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
-    let _ = pipeline.apply_jaykoa(JayKoaReminderEvent {
+    let _ = pipeline.apply_jaykoa(&JayKoaReminderEvent {
         meta: IntegrationMeta {
             contract_id: "CK-INT-03".to_string(),
             actor_ref: "jaykoa:reminder-engine".to_string(),

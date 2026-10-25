@@ -24,11 +24,19 @@ impl MiyukiniWatchPresenter {
     }
 
     /// Récupère les préférences.
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la lecture des préférences en base échoue.
     pub fn get_prefs(&self, profile_id: &str) -> Result<Prefs, MiyukiniWatchError> {
         self.db.get_prefs(profile_id)
     }
 
     /// Met à jour les préférences et enregistre l'audit.
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si l'écriture des préférences en base échoue (un échec de l'audit est ignoré).
     pub fn set_prefs(&self, prefs: &Prefs) -> Result<(), MiyukiniWatchError> {
         self.db.set_prefs(prefs)?;
         let _ = self.db.insert_audit(
@@ -41,17 +49,29 @@ impl MiyukiniWatchPresenter {
     }
 
     /// Vérifie si des données existent pour le profil.
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la requête en base échoue.
     pub fn has_data(&self, profile_id: &str) -> Result<bool, MiyukiniWatchError> {
         self.db.has_data(profile_id)
     }
 
     /// Vérifie si la collecte est active.
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la lecture des préférences en base échoue.
     pub fn is_collecting(&self, profile_id: &str) -> Result<bool, MiyukiniWatchError> {
         let prefs = self.db.get_prefs(profile_id)?;
         Ok(prefs.collect_enabled)
     }
 
     /// Récupère les agrégats (pour Miou ou l'UI).
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la lecture en base (sessions, métriques, préférences) échoue.
     pub fn get_aggregates(
         &self,
         profile_id: &str,
@@ -60,6 +80,10 @@ impl MiyukiniWatchPresenter {
     }
 
     /// Efface toutes les données du profil.
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si l'effacement en base échoue (un échec de l'audit est ignoré).
     pub fn delete_all(&self, profile_id: &str) -> Result<i64, MiyukiniWatchError> {
         let deleted = self.db.delete_all(profile_id)?;
         let _ = self.db.insert_audit(
@@ -72,6 +96,10 @@ impl MiyukiniWatchPresenter {
     }
 
     /// Liste les événements d'audit.
+    ///
+    /// # Errors
+    ///
+    /// Renvoie une erreur si la lecture du journal d'audit en base échoue.
     pub fn list_audit(
         &self,
         profile_id: &str,

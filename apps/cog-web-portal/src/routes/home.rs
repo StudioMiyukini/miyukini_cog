@@ -26,8 +26,7 @@ pub async fn home(
         .map(|svc| {
             let page_count = svc
                 .public_pages()
-                .map(|pages| pages.len())
-                .unwrap_or(0);
+                .map_or(0, |pages| pages.len());
             ServiceInfo {
                 slug: svc.service_slug().to_string(),
                 name: svc.service_name().to_string(),

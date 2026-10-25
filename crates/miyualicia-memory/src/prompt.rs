@@ -94,9 +94,7 @@ pub fn build_persona_context(
 
     let persona = store.persona(persona_id)?;
     let header_name = persona
-        .as_ref()
-        .map(|p| p.display_name.clone())
-        .unwrap_or_else(|| persona_id.to_string());
+        .as_ref().map_or_else(|| persona_id.to_string(), |p| p.display_name.clone());
 
     let _ = writeln!(out, "# Contexte Alicia — Persona « {header_name} »");
 
@@ -254,7 +252,7 @@ mod tests {
         s.upsert_persona(&Persona::new(
             "voice".into(),
             "Voix".into(),
-            "".into(),
+            String::new(),
             true,
         ))
         .unwrap();
@@ -282,7 +280,7 @@ mod tests {
         s.upsert_persona(&Persona::new(
             "voice".into(),
             "Voix".into(),
-            "".into(),
+            String::new(),
             true,
         ))
         .unwrap();

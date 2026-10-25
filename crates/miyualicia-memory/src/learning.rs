@@ -107,7 +107,7 @@ pub fn detect_repetitions(
         });
     }
 
-    out.sort_by(|a, b| b.occurrence_count.cmp(&a.occurrence_count));
+    out.sort_by_key(|p| std::cmp::Reverse(p.occurrence_count));
     Ok(out)
 }
 
@@ -177,7 +177,7 @@ mod tests {
         record(&s, "voice", "jaykoa", "next_event", "x");
         record(&s, "voice", "jaykoa", "list_events", "y");
         let patterns = detect_repetitions(&s, "voice", &DetectorOptions::default()).unwrap();
-        assert!(patterns.is_empty());
+        assert_eq!(patterns.len(), 0);
     }
 
     #[test]
@@ -201,7 +201,7 @@ mod tests {
             threshold: 3,
             ..Default::default()
         };
-        assert!(detect_repetitions(&s, "voice", &opts).unwrap().is_empty());
+        assert_eq!(detect_repetitions(&s, "voice", &opts).unwrap().len(), 0);
         let opts2 = DetectorOptions {
             threshold: 2,
             ..Default::default()
@@ -219,7 +219,7 @@ mod tests {
         record(&s, "work", "a", "b", "2");
         record(&s, "work", "a", "b", "3");
         let patterns = detect_repetitions(&s, "voice", &DetectorOptions::default()).unwrap();
-        assert!(patterns.is_empty());
+        assert_eq!(patterns.len(), 0);
     }
 
     #[test]
@@ -239,7 +239,7 @@ mod tests {
         .unwrap();
         // 2 Ok + 1 Failed → seuil 3 non atteint car on ne compte que les Ok
         let patterns = detect_repetitions(&s, "voice", &DetectorOptions::default()).unwrap();
-        assert!(patterns.is_empty());
+        assert_eq!(patterns.len(), 0);
     }
 
     #[test]
@@ -251,7 +251,7 @@ mod tests {
         s.propose_learned_skill("voice", "x", "a.b", json!({}))
             .unwrap();
         let patterns_default = detect_repetitions(&s, "voice", &DetectorOptions::default()).unwrap();
-        assert!(patterns_default.is_empty());
+        assert_eq!(patterns_default.len(), 0);
 
         let opts = DetectorOptions {
             skip_already_learned: false,
