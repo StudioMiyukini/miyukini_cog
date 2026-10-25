@@ -107,6 +107,7 @@ impl LecteurEtiquettes for EtiquettesUtilisateur {
                 licence: "CC-BY-4.0".into(),
                 audience: Audience::Membres,
             }),
+            proprietaire: Some("alice".into()),
         }))
     }
 }
@@ -216,7 +217,7 @@ fn reponse_sourcee_corroboree_et_injection_sans_effet() {
         // Chaque émetteur honnête publie sa propre Fiche, dérivée d'une donnée
         // étiquetée « publiable » par son utilisateur (F1, EX-47).
         let mut service = ServiceRequete::new(emetteur.cog.clone());
-        let capacite = bloquer(publieur.attester(&EtiquettesUtilisateur, texte, octets, 0, t)).unwrap();
+        let capacite = bloquer(publieur.attester(&EtiquettesUtilisateur, texte, "alice", octets, 0, t)).unwrap();
         service.publier(octets.clone(), Publication::Originale(capacite), t).unwrap();
         // Le service répond à L (membre) par des Fiches signées, sans aucun modèle.
         for recue in service.repondre(&l.cog, maia_federee::Qualite::Membre, &requete, t).unwrap() {
@@ -228,7 +229,7 @@ fn reponse_sourcee_corroboree_et_injection_sans_effet() {
     // dérivation) : sa Fiche signée arrive par un service modifié ; L la reçoit telle quelle.
     let (_, piegee) = &publications[3];
     assert!(matches!(
-        bloquer(publieur.attester(&EtiquettesUtilisateur, piege, piegee, 0, t)),
+        bloquer(publieur.attester(&EtiquettesUtilisateur, piege, "alice", piegee, 0, t)),
         Err(ErreurFederee::NonDerivee(_))
     ));
     base.recevoir(piegee, &vue_l, t).unwrap();
@@ -287,7 +288,7 @@ fn reponse_sourcee_corroboree_et_injection_sans_effet() {
     assert_eq!(autoriser(reponse.provenance(), Effet::Publication, None, "x"), Err(ErreurFederee::ValidationRequise));
     // L ne publie jamais une Fiche d'un autre COG comme sienne, même attestée (F1).
     let mut service_l = ServiceRequete::new(l.cog.clone());
-    let capacite = bloquer(publieur.attester(&EtiquettesUtilisateur, textes[0], &publications[0].1, 0, t)).unwrap();
+    let capacite = bloquer(publieur.attester(&EtiquettesUtilisateur, textes[0], "alice", &publications[0].1, 0, t)).unwrap();
     assert_eq!(
         service_l.publier(publications[0].1.clone(), Publication::Originale(capacite), t),
         Err(ErreurFederee::FicheNonLocale)

@@ -53,17 +53,25 @@
 //!   paramètres de publication choisis par l'**utilisateur** et signés avec la
 //!   pose (intention d'étiquette v2 de KindMother) ; pose sans paramètres ⇒
 //!   jamais publiable ;
-//! - au plus [`MAX_ATTESTATIONS_PAR_PERIODE`] attestations par donnée et par
-//!   [`PERIODE_ATTESTATIONS_SECS`] secondes (au-delà : [`ErreurFederee::Quota`]).
+//! - au plus [`MAX_ATTESTATIONS_PAR_PERIODE`] attestations **consommées** par
+//!   donnée et par [`PERIODE_ATTESTATIONS_SECS`] secondes (au-delà :
+//!   [`ErreurFederee::Quota`]). Une attestation n'est consommée que par une
+//!   publication effective ([`crate::ServiceRequete::publier`], après la décision
+//!   ALLOW de la porte des Cores) : un refus de la porte ne la décompte pas. Le
+//!   compte vit dans le service de publication (persisté par l'appelant,
+//!   restauré par [`PublieurOriginal::restaurer`]).
+//!
+//! **Propriétaire de l'étiquette** : l'étiquette relue doit avoir été posée par
+//! l'utilisateur qui propose la Fiche ([`EtiquetteLue::proprietaire`]) ; une
+//! étiquette posée par un autre utilisateur, ou dont le propriétaire a changé
+//! depuis la proposition, est un refus [`ErreurFederee::NonPubliable`].
 
-use std::collections::{BTreeMap, VecDeque};
 use std::future::Future;
-use std::sync::Mutex;
 
 use crate::erreurs::ErreurFederee;
 use crate::fiche::{verifier_fiche, Audience, FicheVerifiee, TypeFiche};
 use crate::normalisation::cle_comparaison;
-use crate::requete::{AutoriteEtiquettes, Publiable};
+use crate::requete::{AutoriteEtiquettes, Publiable, ServiceRequete};
 
 /// Préfixe fixe de l'identifiant d'une Fiche originale (dérivé de la donnée).
 pub const PREFIXE_ID_FICHE: &str = "km.";
@@ -131,6 +139,8 @@ pub struct EtiquetteLue {
     pub empreinte_donnee: Option<[u8; 32]>,
     /// Paramètres de publication signés par l'utilisateur (absents : jamais publiable).
     pub parametres: Option<ParametresLus>,
+    /// Utilisateur qui a posé l'étiquette (absent : jamais publiable).
+    pub proprietaire: Option<String>,
 }
 
 fn hex32(texte: &str) -> Option<[u8; 32]> {
@@ -158,6 +168,7 @@ impl EtiquetteLue {
             empreinte_actuelle: empreinte_actuelle.and_then(hex32),
             empreinte_donnee: None,
             parametres: None,
+            proprietaire: None,
         }
     }
 
@@ -172,6 +183,13 @@ impl EtiquetteLue {
     #[must_use]
     pub fn avec_parametres(mut self, parametres: Option<ParametresLus>) -> Self {
         self.parametres = parametres;
+        self
+    }
+
+    /// Utilisateur qui a posé l'étiquette (rendu par KindMother).
+    #[must_use]
+    pub fn avec_proprietaire(mut self, proprietaire: Option<&str>) -> Self {
+        self.proprietaire = proprietaire.map(str::to_string);
         self
     }
 }
@@ -273,24 +291,25 @@ fn verifier_structure(
 #[derive(Debug)]
 pub struct PublieurOriginal {
     autorite: AutoriteEtiquettes,
-    /// Instants des attestations récentes, par identité de donnée (plafond M1).
-    attestations: Mutex<BTreeMap<[u8; 32], VecDeque<u64>>>,
 }
 
 impl PublieurOriginal {
     /// Publieur détenteur de l'autorité (obtenue par [`AutoriteEtiquettes::instituer`]).
     pub fn new(autorite: AutoriteEtiquettes) -> Self {
-        Self { autorite, attestations: Mutex::new(BTreeMap::new()) }
+        Self { autorite }
     }
 
     /// Atteste que les octets signés `octets` sont publiables : étiquette de
-    /// `donnee` lue **maintenant** auprès de KindMother, puis règle de
-    /// dérivation (`derniere_version` : dernière version publiée de l'`id`
-    /// imposé, 0 si aucune), puis plafond d'attestations de la donnée.
+    /// `donnee` lue **maintenant** auprès de KindMother et posée par
+    /// `proprietaire` (l'utilisateur qui propose), puis règle de dérivation
+    /// (`derniere_version` : dernière version publiée de l'`id` imposé, 0 si
+    /// aucune). Rien n'est décompté ici : le plafond d'attestations est
+    /// appliqué et consommé par [`ServiceRequete::publier`].
     pub async fn attester<L: LecteurEtiquettes>(
         &self,
         lecteur: &L,
         donnee: &L::Donnee,
+        proprietaire: &str,
         octets: &[u8],
         derniere_version: u64,
         maintenant: u64,
@@ -300,8 +319,11 @@ impl PublieurOriginal {
             return Err(ErreurFederee::ValidationRequise);
         }
         let etiquette = lecteur.lire(donnee).await?;
-        let resultat = verifier_derivation(&fiche, &etiquette, derniere_version, maintenant)
-            .and_then(|()| self.compter_attestation(etiquette.empreinte_donnee, maintenant));
+        let resultat = if etiquette.proprietaire.as_deref() == Some(proprietaire) {
+            verifier_derivation(&fiche, &etiquette, derniere_version, maintenant)
+        } else {
+            Err(ErreurFederee::NonPubliable)
+        };
         if let Err(e) = resultat {
             tracing::warn!(target: "maia_federee::audit", fiche = %fiche.fiche().id, motif = %e, "publication originale refusée");
             return Err(e);
@@ -310,27 +332,19 @@ impl PublieurOriginal {
         Publiable::attestee(&self.autorite, &fiche, maintenant)
     }
 
-    /// Plafond : au plus [`MAX_ATTESTATIONS_PAR_PERIODE`] par donnée sur
-    /// [`PERIODE_ATTESTATIONS_SECS`] ; l'attestation est comptée si admise.
-    fn compter_attestation(&self, donnee: Option<[u8; 32]>, maintenant: u64) -> Result<(), ErreurFederee> {
-        let donnee = donnee.ok_or(ErreurFederee::NonPubliable)?;
-        let mut table = self
-            .attestations
-            .lock()
-            .map_err(|_| ErreurFederee::Interdit("état des attestations corrompu"))?;
-        let debut = maintenant.saturating_sub(PERIODE_ATTESTATIONS_SECS);
-        table.retain(|_, instants| {
-            while instants.front().is_some_and(|&t| t <= debut) {
-                instants.pop_front();
-            }
-            !instants.is_empty()
-        });
-        let instants = table.entry(donnee).or_default();
-        if instants.len() >= MAX_ATTESTATIONS_PAR_PERIODE {
-            return Err(ErreurFederee::Quota);
-        }
-        instants.push_back(maintenant);
-        Ok(())
+    /// Restaure dans `service` une Fiche originale **déjà publiée** et relue
+    /// depuis le stockage durable de l'appelant (KindMother), publiée à
+    /// `publiee_a` : à appeler dans l'ordre des versions, au démarrage. La Fiche
+    /// est revérifiée (signature du COG local, sans reprise, version = dernière
+    /// restaurée + 1) ; sa publication compte dans le plafond d'attestations.
+    pub fn restaurer(
+        &self,
+        service: &mut ServiceRequete,
+        octets: Vec<u8>,
+        publiee_a: u64,
+        maintenant: u64,
+    ) -> Result<(), ErreurFederee> {
+        service.restaurer_originale(&self.autorite, octets, publiee_a, maintenant)
     }
 }
 
@@ -376,6 +390,7 @@ mod tests {
             empreinte_actuelle: actuelle,
             empreinte_donnee: Some(identite(id)),
             parametres: Some(parametres()),
+            proprietaire: Some("alice".into()),
         }
     }
 
@@ -461,20 +476,20 @@ mod tests {
         let km = KindMotherFactice(Mutex::new(Vec::new()));
         let p = publieur();
         // Non étiquetée : refus.
-        assert_eq!(bloquer(p.attester(&km, "notes.n1", &octets, 0, T)), Err(ErreurFederee::NonPubliable));
+        assert_eq!(bloquer(p.attester(&km, "notes.n1", "alice", &octets, 0, T)), Err(ErreurFederee::NonPubliable));
         // Étiquetée par l'utilisateur : publication possible.
         km.poser("notes.n1", TEXTE);
-        let capacite = bloquer(p.attester(&km, "notes.n1", &octets, 0, T)).unwrap();
+        let capacite = bloquer(p.attester(&km, "notes.n1", "alice", &octets, 0, T)).unwrap();
         let mut s = ServiceRequete::new(cog(&cle));
         s.publier(octets.clone(), Publication::Originale(capacite), T + 1).unwrap();
         assert_eq!(s.derniere_version(&fiche_derivee(&cle).id), 1);
         // Retrait : plus de nouvelle publication (nouvelle version refusée).
         km.retirer("notes.n1");
         let v2 = sceller_fiche(&derivee(&cle, "notes.n1", 2), &cle).unwrap();
-        assert_eq!(bloquer(p.attester(&km, "notes.n1", &v2, 1, T)), Err(ErreurFederee::NonPubliable));
+        assert_eq!(bloquer(p.attester(&km, "notes.n1", "alice", &v2, 1, T)), Err(ErreurFederee::NonPubliable));
         // Capacité attestée avant le retrait : périmée après VALIDITE_PUBLIABLE_SECS.
         km.poser("notes.n1", TEXTE);
-        let ancienne = bloquer(p.attester(&km, "notes.n1", &v2, 1, T)).unwrap();
+        let ancienne = bloquer(p.attester(&km, "notes.n1", "alice", &v2, 1, T)).unwrap();
         km.retirer("notes.n1");
         assert_eq!(
             s.publier(v2, Publication::Originale(ancienne), T + VALIDITE_PUBLIABLE_SECS + 1),
@@ -490,18 +505,18 @@ mod tests {
         let p = publieur();
         // Mémoire de MAIA (`nationale`) : refus même « posée ».
         km.poser("maia-alice.n1", TEXTE);
-        assert!(matches!(bloquer(p.attester(&km, "maia-alice.n1", &octets, 0, T)), Err(ErreurFederee::Interdit(_))));
+        assert!(matches!(bloquer(p.attester(&km, "maia-alice.n1", "alice", &octets, 0, T)), Err(ErreurFederee::Interdit(_))));
         // Contenu courant modifié depuis la pose.
         let e = empreinte_contenu(TEXTE);
         km.fixer("notes.n1", lue("notes.n1", true, Some(e), Some(empreinte_contenu("autre"))));
-        assert_eq!(bloquer(p.attester(&km, "notes.n1", &octets, 0, T)), Err(ErreurFederee::NonPubliable));
+        assert_eq!(bloquer(p.attester(&km, "notes.n1", "alice", &octets, 0, T)), Err(ErreurFederee::NonPubliable));
         // Étiquette d'une autre donnée (autre contenu) : la Fiche n'en dérive pas.
         km.poser("notes.n2", "Note privée : code 1234.");
-        assert!(matches!(bloquer(p.attester(&km, "notes.n2", &octets, 0, T)), Err(ErreurFederee::NonDerivee(_))));
+        assert!(matches!(bloquer(p.attester(&km, "notes.n2", "alice", &octets, 0, T)), Err(ErreurFederee::NonDerivee(_))));
         // Autre donnée au même contenu : l'id imposé diffère.
         km.poser("notes.n3", TEXTE);
         assert_eq!(
-            bloquer(p.attester(&km, "notes.n3", &octets, 0, T)),
+            bloquer(p.attester(&km, "notes.n3", "alice", &octets, 0, T)),
             Err(ErreurFederee::NonDerivee("id non dérivé de la donnée étiquetée"))
         );
     }
@@ -525,15 +540,15 @@ mod tests {
         ];
         for f in refusees {
             let octets = sceller_fiche(&f, &cle).unwrap();
-            assert!(matches!(bloquer(p.attester(&km, "notes.n1", &octets, 0, T)), Err(ErreurFederee::NonDerivee(_))), "{f:?}");
+            assert!(matches!(bloquer(p.attester(&km, "notes.n1", "alice", &octets, 0, T)), Err(ErreurFederee::NonDerivee(_))), "{f:?}");
         }
         // Fiche à reprises : jamais par ce chemin.
         let source = verifier_fiche(&sceller_fiche(&base, &cle).unwrap(), T).unwrap();
         let reprise = Fiche { reprises: vec![crate::fiche::Reprise::de(&source)], id: "geo.reprise".into(), ..base.clone() };
         let octets = sceller_fiche(&reprise, &cle).unwrap();
-        assert_eq!(bloquer(p.attester(&km, "notes.n1", &octets, 0, T)), Err(ErreurFederee::ValidationRequise));
+        assert_eq!(bloquer(p.attester(&km, "notes.n1", "alice", &octets, 0, T)), Err(ErreurFederee::ValidationRequise));
         // La Fiche dérivée exacte passe.
-        assert!(bloquer(p.attester(&km, "notes.n1", &sceller_fiche(&base, &cle).unwrap(), 0, T)).is_ok());
+        assert!(bloquer(p.attester(&km, "notes.n1", "alice", &sceller_fiche(&base, &cle).unwrap(), 0, T)).is_ok());
     }
 
     /// M1 : champs structurels (id, date, version, type, langue, licence,
@@ -565,27 +580,27 @@ mod tests {
         for f in refusees {
             let octets = sceller_fiche(&f, &cle).unwrap();
             assert!(
-                matches!(bloquer(p.attester(&km, "notes.n1", &octets, 0, T)), Err(ErreurFederee::NonDerivee(_))),
+                matches!(bloquer(p.attester(&km, "notes.n1", "alice", &octets, 0, T)), Err(ErreurFederee::NonDerivee(_))),
                 "{f:?}"
             );
         }
         // Date au-delà de la fenêtre dans le futur : refusée (DateFuture ou NonDerivee).
         let future = Fiche { date: T + FENETRE_DATE_SECS + 1, ..base.clone() };
-        assert!(bloquer(p.attester(&km, "notes.n1", &sceller_fiche(&future, &cle).unwrap(), 0, T)).is_err());
+        assert!(bloquer(p.attester(&km, "notes.n1", "alice", &sceller_fiche(&future, &cle).unwrap(), 0, T)).is_err());
         // Date dans la fenêtre (passé proche) : admise.
         let ok = Fiche { date: T - FENETRE_DATE_SECS, ..base.clone() };
-        assert!(bloquer(p.attester(&km, "notes.n1", &sceller_fiche(&ok, &cle).unwrap(), 0, T)).is_ok());
+        assert!(bloquer(p.attester(&km, "notes.n1", "alice", &sceller_fiche(&ok, &cle).unwrap(), 0, T)).is_ok());
         // Version 2 seulement après la version 1.
         let v2 = sceller_fiche(&derivee(&cle, "notes.n1", 2), &cle).unwrap();
-        assert!(matches!(bloquer(p.attester(&km, "notes.n1", &v2, 0, T)), Err(ErreurFederee::NonDerivee(_))));
-        assert!(bloquer(p.attester(&km, "notes.n1", &v2, 1, T)).is_ok());
+        assert!(matches!(bloquer(p.attester(&km, "notes.n1", "alice", &v2, 0, T)), Err(ErreurFederee::NonDerivee(_))));
+        assert!(bloquer(p.attester(&km, "notes.n1", "alice", &v2, 1, T)).is_ok());
         // Pose sans paramètres (intention v1) ou sans identité : jamais publiable.
         let e = empreinte_contenu(TEXTE);
         km.fixer("notes.n1", EtiquetteLue { parametres: None, ..lue("notes.n1", true, Some(e), Some(e)) });
         let octets = sceller_fiche(&base, &cle).unwrap();
-        assert_eq!(bloquer(p.attester(&km, "notes.n1", &octets, 0, T)), Err(ErreurFederee::NonPubliable));
+        assert_eq!(bloquer(p.attester(&km, "notes.n1", "alice", &octets, 0, T)), Err(ErreurFederee::NonPubliable));
         km.fixer("notes.n1", EtiquetteLue { empreinte_donnee: None, ..lue("notes.n1", true, Some(e), Some(e)) });
-        assert_eq!(bloquer(p.attester(&km, "notes.n1", &octets, 0, T)), Err(ErreurFederee::NonPubliable));
+        assert_eq!(bloquer(p.attester(&km, "notes.n1", "alice", &octets, 0, T)), Err(ErreurFederee::NonPubliable));
     }
 
     /// M1 : le service de publication revérifie version = dernière + 1.
@@ -599,31 +614,102 @@ mod tests {
         let v1 = sceller_fiche(&fiche_derivee(&cle), &cle).unwrap();
         // Attestation obtenue en annonçant à tort « dernière = 2 » pour une v3.
         let v3 = sceller_fiche(&derivee(&cle, "notes.n1", 3), &cle).unwrap();
-        let triche = bloquer(p.attester(&km, "notes.n1", &v3, 2, T)).unwrap();
+        let triche = bloquer(p.attester(&km, "notes.n1", "alice", &v3, 2, T)).unwrap();
         assert_eq!(s.publier(v3, Publication::Originale(triche), T), Err(ErreurFederee::VersionObsolete));
-        let c = bloquer(p.attester(&km, "notes.n1", &v1, s.derniere_version(&fiche_derivee(&cle).id), T)).unwrap();
+        let c = bloquer(p.attester(&km, "notes.n1", "alice", &v1, s.derniere_version(&fiche_derivee(&cle).id), T)).unwrap();
         s.publier(v1, Publication::Originale(c), T).unwrap();
     }
 
-    /// M1 : plafond d'attestations par donnée et par 24 h.
+    /// M1 : plafond d'attestations par donnée et par 24 h, consommé par la
+    /// seule publication effective (une attestation non suivie de publication,
+    /// p. ex. refusée par la porte des Cores, ne compte pas).
     #[test]
-    fn plafond_d_attestations_par_donnee() {
+    #[allow(clippy::many_single_char_names)]
+    fn plafond_d_attestations_consomme_a_la_publication() {
+        let cle = CleSignature::generer();
+        let km = KindMotherFactice(Mutex::new(Vec::new()));
+        km.poser("notes.n1", TEXTE);
+        let p = publieur();
+        let mut s = ServiceRequete::new(cog(&cle));
+        let v1 = sceller_fiche(&fiche_derivee(&cle), &cle).unwrap();
+        // Attestations sans publication : rien n'est décompté.
+        for _ in 0..(2 * MAX_ATTESTATIONS_PAR_PERIODE) {
+            assert!(bloquer(p.attester(&km, "notes.n1", "alice", &v1, 0, T)).is_ok());
+        }
+        let id = fiche_derivee(&cle).id;
+        assert_eq!(s.attestations_recentes(&id, T), 0);
+        for v in 1..=MAX_ATTESTATIONS_PAR_PERIODE as u64 {
+            let o = sceller_fiche(&derivee(&cle, "notes.n1", v), &cle).unwrap();
+            let c = bloquer(p.attester(&km, "notes.n1", "alice", &o, v - 1, T)).unwrap();
+            s.publier(o, Publication::Originale(c), T).unwrap();
+        }
+        assert!(s.plafond_atteint(&id, T));
+        let n = MAX_ATTESTATIONS_PAR_PERIODE as u64 + 1;
+        let o = sceller_fiche(&derivee(&cle, "notes.n1", n), &cle).unwrap();
+        let c = bloquer(p.attester(&km, "notes.n1", "alice", &o, n - 1, T)).unwrap();
+        assert_eq!(s.controler(&o, &Publication::Originale(c), T).err(), Some(ErreurFederee::Quota));
+        let c = bloquer(p.attester(&km, "notes.n1", "alice", &o, n - 1, T)).unwrap();
+        assert_eq!(s.publier(o, Publication::Originale(c), T), Err(ErreurFederee::Quota));
+        assert_eq!(s.derniere_version(&id), n - 1);
+        // Autre donnée : plafond distinct.
+        km.poser("notes.n4", TEXTE);
+        let autre = sceller_fiche(&derivee(&cle, "notes.n4", 1), &cle).unwrap();
+        let c = bloquer(p.attester(&km, "notes.n4", "alice", &autre, 0, T)).unwrap();
+        s.publier(autre, Publication::Originale(c), T).unwrap();
+        // Après 24 h : de nouveau admise (Fiche redatée).
+        let t2 = T + PERIODE_ATTESTATIONS_SECS + 1;
+        assert!(!s.plafond_atteint(&id, t2));
+        let redatee = sceller_fiche(&Fiche { date: t2, ..derivee(&cle, "notes.n1", n) }, &cle).unwrap();
+        let c = bloquer(p.attester(&km, "notes.n1", "alice", &redatee, n - 1, t2)).unwrap();
+        s.publier(redatee, Publication::Originale(c), t2).unwrap();
+    }
+
+    /// L'étiquette relue doit avoir été posée par l'utilisateur qui propose ;
+    /// un changement de propriétaire entre la proposition et la relecture est un refus.
+    #[test]
+    fn etiquette_d_un_autre_utilisateur_refusee() {
         let cle = CleSignature::generer();
         let km = KindMotherFactice(Mutex::new(Vec::new()));
         km.poser("notes.n1", TEXTE);
         let p = publieur();
         let octets = sceller_fiche(&fiche_derivee(&cle), &cle).unwrap();
-        for _ in 0..MAX_ATTESTATIONS_PAR_PERIODE {
-            assert!(bloquer(p.attester(&km, "notes.n1", &octets, 0, T)).is_ok());
-        }
-        assert_eq!(bloquer(p.attester(&km, "notes.n1", &octets, 0, T)), Err(ErreurFederee::Quota));
-        // Autre donnée : plafond distinct.
-        km.poser("notes.n4", TEXTE);
-        let autre = sceller_fiche(&derivee(&cle, "notes.n4", 1), &cle).unwrap();
-        assert!(bloquer(p.attester(&km, "notes.n4", &autre, 0, T)).is_ok());
-        // Après 24 h : de nouveau admise (Fiche redatée).
-        let t2 = T + PERIODE_ATTESTATIONS_SECS + 1;
-        let redatee = sceller_fiche(&Fiche { date: t2, ..fiche_derivee(&cle) }, &cle).unwrap();
-        assert!(bloquer(p.attester(&km, "notes.n1", &redatee, 0, t2)).is_ok());
+        assert_eq!(bloquer(p.attester(&km, "notes.n1", "bob", &octets, 0, T)), Err(ErreurFederee::NonPubliable));
+        let e = empreinte_contenu(TEXTE);
+        km.fixer("notes.n1", EtiquetteLue { proprietaire: Some("bob".into()), ..lue("notes.n1", true, Some(e), Some(e)) });
+        assert_eq!(bloquer(p.attester(&km, "notes.n1", "alice", &octets, 0, T)), Err(ErreurFederee::NonPubliable));
+        km.fixer("notes.n1", EtiquetteLue { proprietaire: None, ..lue("notes.n1", true, Some(e), Some(e)) });
+        assert_eq!(bloquer(p.attester(&km, "notes.n1", "alice", &octets, 0, T)), Err(ErreurFederee::NonPubliable));
+        assert_eq!(EtiquetteLue::depuis_hex(false, true, None, None).avec_proprietaire(Some("alice")).proprietaire.as_deref(), Some("alice"));
+    }
+
+    /// Restauration (redémarrage) : versions et plafond rechargés, la version
+    /// déjà publiée est refusée, la suivante exigée ; restauration hors ordre refusée.
+    #[test]
+    fn restauration_versions_et_plafond() {
+        let cle = CleSignature::generer();
+        let km = KindMotherFactice(Mutex::new(Vec::new()));
+        km.poser("notes.n1", TEXTE);
+        let p = publieur();
+        let id = fiche_derivee(&cle).id;
+        let v1 = sceller_fiche(&derivee(&cle, "notes.n1", 1), &cle).unwrap();
+        let v2 = sceller_fiche(&derivee(&cle, "notes.n1", 2), &cle).unwrap();
+        let mut s = ServiceRequete::new(cog(&cle));
+        assert_eq!(p.restaurer(&mut s, v2.clone(), T, T), Err(ErreurFederee::VersionObsolete));
+        p.restaurer(&mut s, v1.clone(), T, T).unwrap();
+        p.restaurer(&mut s, v2, T, T).unwrap();
+        assert_eq!(p.restaurer(&mut s, v1.clone(), T, T), Err(ErreurFederee::VersionObsolete));
+        assert_eq!((s.derniere_version(&id), s.attestations_recentes(&id, T)), (2, 2));
+        // La version 2, rejouée avec un autre contenu : refusée ; la 3 est exigée.
+        let autre_v2 = sceller_fiche(&Fiche { sources: vec!["Paris".into()], ..derivee(&cle, "notes.n1", 2) }, &cle).unwrap();
+        assert!(bloquer(p.attester(&km, "notes.n1", "alice", &autre_v2, s.derniere_version(&id), T)).is_err());
+        let c = bloquer(p.attester(&km, "notes.n1", "alice", &autre_v2, 1, T)).unwrap();
+        assert_eq!(s.publier(autre_v2, Publication::Originale(c), T), Err(ErreurFederee::VersionObsolete));
+        let v3 = sceller_fiche(&derivee(&cle, "notes.n1", 3), &cle).unwrap();
+        let c = bloquer(p.attester(&km, "notes.n1", "alice", &v3, s.derniere_version(&id), T)).unwrap();
+        s.publier(v3, Publication::Originale(c), T).unwrap();
+        // Fiche d'un autre COG : jamais restaurée.
+        let autre = CleSignature::generer();
+        let etrangere = sceller_fiche(&derivee(&autre, "notes.n1", 1), &autre).unwrap();
+        assert_eq!(p.restaurer(&mut ServiceRequete::new(cog(&cle)), etrangere, T, T), Err(ErreurFederee::FicheNonLocale));
     }
 }

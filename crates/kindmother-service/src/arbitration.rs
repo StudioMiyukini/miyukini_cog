@@ -182,6 +182,9 @@ impl ArbitrationEngine {
         // MiyukiniWatch - observation (métriques, audit applicatif)
         self.register_operator(OperatorConfig::owner("miyukiniwatch", "miyukiniwatch"))
             .await;
+        // Pont MAIA - état des Fiches publiées (A-017) ; base réservée, jamais étiquetable
+        self.register_operator(OperatorConfig::owner("cog-federee", "cog-federee"))
+            .await;
 
         // === Hub Central ===
 

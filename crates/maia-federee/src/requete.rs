@@ -24,6 +24,7 @@ use miyusceau::{EcrivainTlv, LecteurTlv};
 
 use crate::base::Qualite;
 use crate::erreurs::ErreurFederee;
+use crate::etiquettes::{MAX_ATTESTATIONS_PAR_PERIODE, PERIODE_ATTESTATIONS_SECS};
 use crate::fiche::{reprises_distinctes, verifier_fiche, Audience, FicheVerifiee, Reprise, TypeFiche};
 use crate::marquage::{autoriser, Effet, Provenance, ValidationUtilisateur};
 use crate::normalisation::{cle_comparaison, normaliser_ligne};
@@ -252,13 +253,16 @@ pub struct ServiceRequete {
     cog_local: CogId,
     publiees: Vec<Publiee>,
     demandes: BTreeMap<CogId, Vec<u64>>,
+    /// Instants des publications originales récentes, par `id` (dérivé 1:1 de
+    /// la donnée) : plafond d'attestations consommées (M1).
+    attestations: BTreeMap<String, Vec<u64>>,
 }
 
 impl ServiceRequete {
     /// Service vide du COG `cog_local` : il ne publie que des Fiches signées
     /// par la clé d'identité de ce COG.
     pub fn new(cog_local: CogId) -> Self {
-        Self { cog_local, publiees: Vec::new(), demandes: BTreeMap::new() }
+        Self { cog_local, publiees: Vec::new(), demandes: BTreeMap::new(), attestations: BTreeMap::new() }
     }
 
     /// COG local.
@@ -275,25 +279,29 @@ impl ServiceRequete {
             .map_or(0, |p| p.fiche.fiche().version)
     }
 
-    /// Publie une Fiche **signée par le COG local** (IA-FEDEREE §5, F1) :
-    ///
-    /// - [`Publication::Originale`] : seules les données étiquetées
-    ///   `publiable` par l'utilisateur ([`Publiable`] couvrant les octets
-    ///   exacts) ; une Fiche à reprises est refusée ;
-    /// - [`Publication::Reprise`] : donnée étrangère (A-009), validation
-    ///   confirmée par TAMR liée aux octets exacts ; champ `reprises` égal,
-    ///   en tant qu'ensemble sans doublon, à `{Reprise::de(s)}` des sources
-    ///   (sans doublon) ; licence identique à chaque source ; audience au plus
-    ///   aussi large que chaque source. Elle ne compte jamais pour *k*.
-    ///
-    /// Jamais la mémoire de MAIA (`nationale`, qui n'a pas d'étiquette
-    /// `publiable`). Une version plus récente remplace la précédente ; une
-    /// version égale ou antérieure est refusée.
-    pub fn publier(&mut self, octets: Vec<u8>, publication: Publication<'_>, maintenant: u64) -> Result<(), ErreurFederee> {
-        if let Publication::Reprise { validation, .. } = &publication {
-            autoriser(Provenance::Etranger, Effet::Publication, Some(validation), &Self::description_republication(&octets))?;
+    /// Attestations consommées pour la Fiche originale `id` dans la période
+    /// glissante qui se termine à `maintenant`.
+    pub fn attestations_recentes(&self, id: &str, maintenant: u64) -> usize {
+        let debut = maintenant.saturating_sub(PERIODE_ATTESTATIONS_SECS);
+        self.attestations.get(id).map_or(0, |v| v.iter().filter(|&&t| t > debut).count())
+    }
+
+    /// Vrai si une nouvelle publication originale de `id` dépasserait le
+    /// plafond ([`MAX_ATTESTATIONS_PAR_PERIODE`] par [`PERIODE_ATTESTATIONS_SECS`]).
+    pub fn plafond_atteint(&self, id: &str, maintenant: u64) -> bool {
+        self.attestations_recentes(id, maintenant) >= MAX_ATTESTATIONS_PAR_PERIODE
+    }
+
+    /// Contrôles de [`Self::publier`] **sans effet** : la publication serait
+    /// admise à `maintenant` par l'état courant. Permet à l'appelant de rendre
+    /// la publication durable (KindMother) avant de l'inscrire ici, puis
+    /// d'appeler [`Self::publier`] avec le même `maintenant` (succès garanti si
+    /// l'état n'a pas changé entre les deux appels).
+    pub fn controler(&self, octets: &[u8], publication: &Publication<'_>, maintenant: u64) -> Result<FicheVerifiee, ErreurFederee> {
+        if let Publication::Reprise { validation, .. } = publication {
+            autoriser(Provenance::Etranger, Effet::Publication, Some(validation), &Self::description_republication(octets))?;
         }
-        let fiche = verifier_fiche(&octets, maintenant)?;
+        let fiche = verifier_fiche(octets, maintenant)?;
         if fiche.cog() != &self.cog_local {
             return Err(ErreurFederee::FicheNonLocale);
         }
@@ -313,13 +321,83 @@ impl ServiceRequete {
                 if self.derniere_version(&fiche.fiche().id).checked_add(1) != Some(fiche.fiche().version) {
                     return Err(ErreurFederee::VersionObsolete);
                 }
+                // M1 : plafond d'attestations consommées par donnée.
+                if self.plafond_atteint(&fiche.fiche().id, maintenant) {
+                    return Err(ErreurFederee::Quota);
+                }
             }
-            Publication::Reprise { sources, validation } => {
-                Self::controler_reprises(&fiche, sources)?;
+            Publication::Reprise { sources, .. } => Self::controler_reprises(&fiche, sources)?,
+        }
+        if let Some(p) = self.publiees.iter().find(|p| p.fiche.cog() == fiche.cog() && p.fiche.fiche().id == fiche.fiche().id) {
+            if fiche.fiche().version <= p.fiche.fiche().version {
+                return Err(ErreurFederee::VersionObsolete);
+            }
+        }
+        Ok(fiche)
+    }
+
+    /// Publie une Fiche **signée par le COG local** (IA-FEDEREE §5, F1) :
+    ///
+    /// - [`Publication::Originale`] : seules les données étiquetées
+    ///   `publiable` par l'utilisateur ([`Publiable`] couvrant les octets
+    ///   exacts) ; une Fiche à reprises est refusée ; au plus
+    ///   [`MAX_ATTESTATIONS_PAR_PERIODE`] publications par donnée et par
+    ///   [`PERIODE_ATTESTATIONS_SECS`] (l'attestation est **consommée ici**,
+    ///   seulement si la publication a lieu) ;
+    /// - [`Publication::Reprise`] : donnée étrangère (A-009), validation
+    ///   confirmée par TAMR liée aux octets exacts ; champ `reprises` égal,
+    ///   en tant qu'ensemble sans doublon, à `{Reprise::de(s)}` des sources
+    ///   (sans doublon) ; licence identique à chaque source ; audience au plus
+    ///   aussi large que chaque source. Elle ne compte jamais pour *k*.
+    ///
+    /// Jamais la mémoire de MAIA (`nationale`, qui n'a pas d'étiquette
+    /// `publiable`). Une version plus récente remplace la précédente ; une
+    /// version égale ou antérieure est refusée.
+    pub fn publier(&mut self, octets: Vec<u8>, publication: Publication<'_>, maintenant: u64) -> Result<(), ErreurFederee> {
+        let fiche = self.controler(&octets, &publication, maintenant)?;
+        match publication {
+            Publication::Originale(_) => self.consommer_attestation(&fiche.fiche().id, maintenant),
+            Publication::Reprise { validation, .. } => {
                 tracing::info!(target: "maia_federee::audit", fiche = %fiche.fiche().id, confirmation = validation.confirmation(), "republication validée");
             }
         }
         self.inserer(fiche, octets)
+    }
+
+    /// Restauration d'une Fiche originale déjà publiée (voir
+    /// [`crate::PublieurOriginal::restaurer`]) : réservée au détenteur de
+    /// l'autorité des étiquettes.
+    pub(crate) fn restaurer_originale(
+        &mut self,
+        _autorite: &AutoriteEtiquettes,
+        octets: Vec<u8>,
+        publiee_a: u64,
+        maintenant: u64,
+    ) -> Result<(), ErreurFederee> {
+        let fiche = verifier_fiche(&octets, maintenant)?;
+        if fiche.cog() != &self.cog_local {
+            return Err(ErreurFederee::FicheNonLocale);
+        }
+        if fiche.est_reprise() {
+            return Err(ErreurFederee::ValidationRequise);
+        }
+        if self.derniere_version(&fiche.fiche().id).checked_add(1) != Some(fiche.fiche().version) {
+            return Err(ErreurFederee::VersionObsolete);
+        }
+        if publiee_a > maintenant.saturating_add(VALIDITE_PUBLIABLE_SECS) {
+            return Err(ErreurFederee::ChampInvalide("instant de publication dans le futur"));
+        }
+        self.consommer_attestation(&fiche.fiche().id, publiee_a);
+        self.inserer(fiche, octets)
+    }
+
+    fn consommer_attestation(&mut self, id: &str, instant: u64) {
+        let debut = instant.saturating_sub(PERIODE_ATTESTATIONS_SECS);
+        self.attestations.retain(|_, v| {
+            v.retain(|&t| t > debut);
+            !v.is_empty()
+        });
+        self.attestations.entry(id.to_string()).or_default().push(instant);
     }
 
     /// Description canonique validée par l'utilisateur pour republier les

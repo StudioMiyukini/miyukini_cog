@@ -2,12 +2,12 @@
 //! @do     publier_fiche_derivee_d_une_donnee_etiquetee
 //! @role   security
 //! @layer  app
-//! @human  MAIA — route de publication des Fiches fédérées originales (EX-47, EX-57, A-016) : une
-//! @human  Fiche proposée n'est publiée que si elle dérive strictement d'une donnée que
-//! @human  l'utilisateur a étiquetée `publiable` dans KindMother ; le serveur calcule les champs
-//! @human  structurels, StrongFather tranche, chaque publication et chaque refus sont tracés.
+//! @human  MAIA — route de publication des Fiches fédérées originales (EX-47, EX-57, A-016, A-017) :
+//! @human  une Fiche proposée n'est publiée que si elle dérive strictement d'une donnée que
+//! @human  l'utilisateur a lui-même étiquetée `publiable` dans KindMother ; le serveur calcule les
+//! @human  champs structurels, StrongFather tranche, l'état de publication est durable (KindMother).
 
-//! # Publication d'une Fiche originale (EX-47, A-015, A-016)
+//! # Publication d'une Fiche originale (EX-47, A-015, A-016, A-017)
 //!
 //! | Méthode | Chemin | Effet |
 //! |---|---|---|
@@ -22,7 +22,7 @@
 //! - `id` = `km.` + 32 hex de l'empreinte de la référence de donnée rendue par
 //!   KindMother ([`maia_federee::id_fiche_derivee`]) ;
 //! - `version` = dernière version publiée de cet `id` + 1
-//!   ([`ServiceRequete::derniere_version`]) ;
+//!   ([`ServiceRequete::derniere_version`], état **rechargé de KindMother**) ;
 //! - `date` = horloge du serveur ;
 //! - `type`, `langue`, `licence`, `audience` = paramètres **signés par
 //!   l'utilisateur** avec la pose de l'étiquette (intention v2) ;
@@ -31,14 +31,77 @@
 //! Si la proposition **annonce** l'un de ces champs, il est comparé à la
 //! valeur calculée : écart ⇒ refus `champ_structurel_falsifie` (date : hors de
 //! ±[`FENETRE_DATE_SECS`] s ; version déjà publiée : `version_deja_publiee`).
-//! La Fiche signée passe ensuite par [`PublieurOriginal::attester`] (étiquette
-//! **relue** auprès de KindMother, règle de dérivation stricte, ≤ 8
-//! attestations par donnée et par 24 h), puis par la porte StrongFather
-//! (refus par défaut), qui seule exécute [`ServiceRequete::publier`].
+//!
+//! ## Propriétaire de l'étiquette
+//!
+//! L'étiquette doit avoir été **posée par l'utilisateur authentifié** de la
+//! route (`EtatEtiquette::utilisateur`), sinon refus 403 `non_publiable` (même
+//! code qu'une donnée non étiquetée : la route ne révèle pas qu'un autre
+//! utilisateur a étiqueté la donnée). Le propriétaire est **revérifié** par
+//! [`PublieurOriginal::attester`] à la relecture de l'étiquette : s'il a changé
+//! entre-temps, refus `non_publiable`. La propriété de la **base** (fichier
+//! `<u>.bases`, A-016) est vérifiée par KindMother à la pose : une étiquette
+//! posée par l'utilisateur l'a été sur une base dont il est propriétaire
+//! (le client KindMother n'expose pas la liste `.bases`).
+//!
+//! ## Ordre de la chaîne
+//!
+//! 1. débit, forme, refus sans appel à KindMother (ci-dessous) ;
+//! 2. lecture de l'étiquette (non `nationale`, posée **par l'utilisateur**,
+//!    contenu inchangé, paramètres présents) ;
+//! 3. **section critique** (verrou unique de publication, tenu jusqu'à la fin) :
+//!    état rechargé de KindMother si nécessaire, version calculée, plafond
+//!    d'attestations contrôlé **sans être décompté**, Fiche scellée,
+//!    attestation ([`PublieurOriginal::attester`] : étiquette relue,
+//!    propriétaire revérifié, dérivation stricte), contrôle sans effet du
+//!    service ([`ServiceRequete::controler`]) ;
+//! 4. porte StrongFather (refus par défaut) ; **seule une décision ALLOW**
+//!    exécute l'effet : écriture durable dans KindMother **puis** inscription
+//!    en mémoire ([`ServiceRequete::publier`], qui consomme l'attestation).
+//!
+//! Un refus de la porte ne consomme donc aucune attestation ; deux requêtes
+//! concurrentes sont sérialisées par le verrou : ni version dupliquée, ni
+//! plafond dépassé.
+//!
+//! ## Persistance (A-017, formats à consigner par amendement)
+//!
+//! KindMother est le seul écrivain. Base **dédiée** [`BASE_PUBLICATIONS_DEFAUT`]
+//! (`cog-federee`, surchargeable par [`ENV_PUBLICATIONS`]), dont l'opérateur
+//! KindMother homonyme est propriétaire. Elle n'est **pas** `nationale` (le nom
+//! ne commence pas par `maia-` ; un nom `maia-*` est refusé au démarrage) et ne
+//! doit figurer dans **aucun** fichier `<u>.bases` (jamais étiquetable par un
+//! utilisateur) ; une proposition dont `donnee.base` est cette base est
+//! refusée (`base_reservee`). Table [`TABLE_PUBLICATIONS`], une ligne par
+//! version publiée, clé primaire `(fiche, version)` :
+//!
+//! | colonne | type | contenu |
+//! |---|---|---|
+//! | `fiche` | TEXT | `id` de la Fiche (`km.<32 hex>`) |
+//! | `version` | INTEGER ≥ 1 | version publiée |
+//! | `donnee` | TEXT | empreinte (hex) de la référence de donnée étiquetée |
+//! | `empreinte` | TEXT | empreinte (hex) de publication des octets signés |
+//! | `utilisateur` | TEXT | utilisateur qui a proposé (propriétaire de l'étiquette) |
+//! | `publiee_a` | INTEGER | instant de publication = attestation consommée (s Unix) |
+//! | `octets` | TEXT | octets signés de la Fiche (base64 standard) |
+//!
+//! Une publication = **une** intention d'insertion typée (atomique : version,
+//! Fiche et attestation dans la même ligne). L'insertion échoue si `(fiche,
+//! version)` existe déjà : une version n'est enregistrée qu'une fois, jamais
+//! avec un autre contenu. Ordre : écriture KindMother **avant** l'état en
+//! mémoire et avant toute réponse. Crash avant l'écriture : rien n'a été rendu
+//! ni servi, la version reste libre. Crash ou réponse perdue après
+//! l'écriture : l'état est marqué « à recharger », la requête suivante relit
+//! KindMother et exige la version suivante. Au démarrage
+//! ([`EtatPublicationHttp::precharger`]) et après toute erreur de
+//! persistance, l'état est rechargé (Fiches revérifiées, versions contiguës,
+//! plafond glissant reconstitué par [`PublieurOriginal::restaurer`]) ;
+//! KindMother indisponible ou état incohérent ⇒ 503 (fail-closed), jamais de
+//! reprise à la version 1.
 //!
 //! ## Refus sans appel à KindMother
 //!
 //! - base `maia-*` (mémoire de MAIA, comparée sans casse) ⇒ `donnee_nationale` ;
+//! - base de l'état de publication ⇒ `base_reservee` ;
 //! - `provenance` autre que `locale`, ou champ `reprises` présent ⇒
 //!   `republication_tamr_requise` : une donnée étrangère ne se republie que par
 //!   le chemin TAMR (A-009 ; [`crate::tamr::ActionTamr::Republier`]), jamais
@@ -62,12 +125,17 @@
 //!   fichier régulier `0600`, jamais créé ici) ;
 //! - `MAIA_FEDEREE_OPERATEUR` : opérateur KindMother qui lit les étiquettes
 //!   (justificatif à l'emplacement standard, droit de lecture sur les bases
-//!   publiables) ; `KINDMOTHER_ADDR` (défaut `127.0.0.1:50051`).
+//!   publiables) ; `KINDMOTHER_ADDR` (défaut `127.0.0.1:50051`) ;
+//! - justificatif de l'opérateur de l'état de publication ([`ENV_PUBLICATIONS`],
+//!   défaut `cog-federee`) à l'emplacement standard.
 //!
 //! ## Limites (à consigner par amendement)
 //!
-//! - les Fiches publiées et le plafond d'attestations vivent **en mémoire** :
-//!   un redémarrage les oublie (versions recomptées depuis 1) ;
+//! - l'opérateur / la base `cog-federee` doit être déclaré côté KindMother
+//!   (`kindmother-service`, opérateurs par défaut) : sans lui, la route reste
+//!   désactivée ;
+//! - le journal des décisions reste en mémoire (la trace durable est le
+//!   journal `maia::federee::audit` et la table des publications) ;
 //! - la clé d'identité du COG est lue par le pont (détenteur à confirmer) ;
 //! - aucun transport vers les autres COG (lot 7 : reste à faire).
 
@@ -88,9 +156,10 @@ use base64::Engine as _;
 use bondingbrother::strongfather::{ActionType, CallContext, IntentData};
 use bondingbrother::Intent;
 use kindmother::etiquette::{
-    AudiencePublication, EtatEtiquette, ParametresPublication, RefDonnee, Sensibilite,
+    base_valide, AudiencePublication, EtatEtiquette, ParametresPublication, RefDonnee, Sensibilite,
     PREFIXE_NATIONALE,
 };
+use kindmother::intent::{SchemaMigration, SqlValue, TypedSelect, TypedWriteIntent};
 use kindmother_client::{ClientError, KindMotherClient, OperatorCredential};
 use maia_federee::{
     cog_de_cle, id_fiche_derivee, sceller_fiche, verifier_fiche, Audience, AutoriteEtiquettes,
@@ -115,6 +184,14 @@ pub const USAGE_FEDEREE: &str = "maia/federee";
 pub const ENV_CLE_IDENTITE: &str = "MAIA_FEDEREE_CLE_IDENTITE";
 /// Opérateur KindMother qui lit les étiquettes `publiable`.
 pub const ENV_OPERATEUR: &str = "MAIA_FEDEREE_OPERATEUR";
+/// Opérateur KindMother (et base homonyme) de l'état de publication.
+pub const ENV_PUBLICATIONS: &str = "MAIA_FEDEREE_PUBLICATIONS_OPERATEUR";
+/// Base (et opérateur propriétaire) de l'état de publication par défaut.
+pub const BASE_PUBLICATIONS_DEFAUT: &str = "cog-federee";
+/// Table des versions publiées (voir l'en-tête du module).
+pub const TABLE_PUBLICATIONS: &str = "fiches_publiees";
+/// Lignes lues par page au rechargement.
+const PAGE_RECHARGEMENT: u32 = 64;
 /// Utilisateur de l'instance (partagé avec la mémoire).
 pub const ENV_UTILISATEUR: &str = "MAIA_MEMOIRE_UTILISATEUR";
 const ENV_KINDMOTHER: &str = "KINDMOTHER_ADDR";
@@ -155,6 +232,129 @@ pub fn instituer_autorite() -> bool {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Connexion KindMother (partagée par la lecture des étiquettes et l'état)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Connexion authentifiée d'un opérateur KindMother, ouverte au premier usage
+/// et rouverte après une erreur de transport.
+pub struct ConnexionKindMother {
+    adresse: String,
+    operateur: String,
+    base: String,
+    justificatif: OperatorCredential,
+    client: tokio::sync::Mutex<Option<Arc<KindMotherClient>>>,
+}
+
+impl std::fmt::Debug for ConnexionKindMother {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ConnexionKindMother")
+            .field("adresse", &self.adresse)
+            .field("operateur", &self.operateur)
+            .field("base", &self.base)
+            .finish_non_exhaustive()
+    }
+}
+
+fn erreur_de_transport(e: &ClientError) -> bool {
+    matches!(
+        e,
+        ClientError::Transport(_)
+            | ClientError::Timeout(_)
+            | ClientError::Connection(_)
+            | ClientError::NotConnected
+    )
+}
+
+impl ConnexionKindMother {
+    /// Connexion de l'opérateur `operateur` (justificatif déjà chargé), base par
+    /// défaut `base`.
+    pub fn new(
+        adresse: &str,
+        operateur: &str,
+        base: &str,
+        justificatif: OperatorCredential,
+    ) -> Self {
+        Self {
+            adresse: adresse.to_string(),
+            operateur: operateur.to_string(),
+            base: base.to_string(),
+            justificatif,
+            client: tokio::sync::Mutex::new(None),
+        }
+    }
+
+    /// Justificatif `operateur` lu dans `credentials`, sinon à l'emplacement standard.
+    pub fn charger(
+        adresse: &str,
+        operateur: &str,
+        base: &str,
+        credentials: Option<&Path>,
+    ) -> Result<Self, String> {
+        let justificatif = match credentials {
+            Some(d) => OperatorCredential::load_from_dir(operateur, d),
+            None => OperatorCredential::load(operateur),
+        }
+        .map_err(|e| e.to_string())?;
+        Ok(Self::new(adresse, operateur, base, justificatif))
+    }
+
+    async fn client(&self) -> Result<Arc<KindMotherClient>, ClientError> {
+        let mut c = self.client.lock().await;
+        if let Some(x) = c.as_ref() {
+            return Ok(Arc::clone(x));
+        }
+        let x = Arc::new(
+            KindMotherClient::connect(&self.adresse, &self.justificatif, &self.base).await?,
+        );
+        *c = Some(Arc::clone(&x));
+        Ok(x)
+    }
+
+    async fn abandonner(&self, perdu: &Arc<KindMotherClient>) {
+        let mut c = self.client.lock().await;
+        if c.as_ref().is_some_and(|x| Arc::ptr_eq(x, perdu)) {
+            *c = None;
+        }
+    }
+
+    /// Exécute `f` ; une erreur de transport ferme la connexion et, si
+    /// `rejouable`, `f` est rejoué une fois sur une connexion neuve (jamais
+    /// pour une écriture : son issue serait ambiguë).
+    async fn executer<T, F, Fut>(&self, rejouable: bool, f: F) -> Result<T, String>
+    where
+        F: Fn(Arc<KindMotherClient>) -> Fut,
+        Fut: Future<Output = Result<T, ClientError>>,
+    {
+        let mut derniere = String::from("KindMother injoignable");
+        for tentative in 0..2 {
+            let c = match self.client().await {
+                Ok(c) => c,
+                Err(e) => {
+                    derniere = e.to_string();
+                    if rejouable && tentative == 0 && erreur_de_transport(&e) {
+                        continue;
+                    }
+                    return Err(derniere);
+                }
+            };
+            match f(Arc::clone(&c)).await {
+                Ok(v) => return Ok(v),
+                Err(e) if erreur_de_transport(&e) => {
+                    tracing::warn!(target: "maia::federee", operateur = %self.operateur, erreur = %e, "connexion KindMother perdue : rouverte");
+                    self.abandonner(&c).await;
+                    derniere = e.to_string();
+                    if !rejouable {
+                        return Err(derniere);
+                    }
+                }
+                Err(e) => return Err(e.to_string()),
+            }
+        }
+        Err(derniere)
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Lecture des étiquettes auprès de KindMother
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -167,34 +367,19 @@ pub trait SourceEtiquettes: Send + Sync + 'static {
     ) -> impl Future<Output = Result<EtatEtiquette, String>> + Send;
 }
 
-/// Lecteur d'étiquettes adossé à un opérateur KindMother authentifié
-/// (connexion ouverte au premier usage, rouverte une fois après une erreur de
-/// transport).
-pub struct EtiquettesKindMother {
-    adresse: String,
-    operateur: String,
-    justificatif: OperatorCredential,
-    client: tokio::sync::Mutex<Option<Arc<KindMotherClient>>>,
-}
-
-impl std::fmt::Debug for EtiquettesKindMother {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("EtiquettesKindMother")
-            .field("adresse", &self.adresse)
-            .field("operateur", &self.operateur)
-            .finish_non_exhaustive()
-    }
-}
+/// Lecteur d'étiquettes adossé à un opérateur KindMother authentifié.
+#[derive(Debug)]
+pub struct EtiquettesKindMother(ConnexionKindMother);
 
 impl EtiquettesKindMother {
     /// Lecteur de l'opérateur `operateur` (justificatif déjà chargé).
     pub fn new(adresse: &str, operateur: &str, justificatif: OperatorCredential) -> Self {
-        Self {
-            adresse: adresse.to_string(),
-            operateur: operateur.to_string(),
+        Self(ConnexionKindMother::new(
+            adresse,
+            operateur,
+            operateur,
             justificatif,
-            client: tokio::sync::Mutex::new(None),
-        }
+        ))
     }
 
     /// Justificatif `operateur` lu dans `credentials`, sinon à l'emplacement standard.
@@ -203,57 +388,203 @@ impl EtiquettesKindMother {
         operateur: &str,
         credentials: Option<&Path>,
     ) -> Result<Self, String> {
-        let justificatif = match credentials {
-            Some(d) => OperatorCredential::load_from_dir(operateur, d),
-            None => OperatorCredential::load(operateur),
-        }
-        .map_err(|e| e.to_string())?;
-        Ok(Self::new(adresse, operateur, justificatif))
-    }
-
-    async fn client(&self) -> Result<Arc<KindMotherClient>, String> {
-        let mut c = self.client.lock().await;
-        if let Some(x) = c.as_ref() {
-            return Ok(Arc::clone(x));
-        }
-        let x = Arc::new(
-            KindMotherClient::connect(&self.adresse, &self.justificatif, &self.operateur)
-                .await
-                .map_err(|e| e.to_string())?,
-        );
-        *c = Some(Arc::clone(&x));
-        Ok(x)
-    }
-
-    async fn abandonner(&self, perdu: &Arc<KindMotherClient>) {
-        let mut c = self.client.lock().await;
-        if c.as_ref().is_some_and(|x| Arc::ptr_eq(x, perdu)) {
-            *c = None;
-        }
+        ConnexionKindMother::charger(adresse, operateur, operateur, credentials).map(Self)
     }
 }
 
 impl SourceEtiquettes for EtiquettesKindMother {
     async fn lire(&self, donnee: &RefDonnee) -> Result<EtatEtiquette, String> {
-        let mut derniere = String::from("KindMother injoignable");
-        for tentative in 0..2 {
-            let c = self.client().await?;
-            match c.lire_etiquette(donnee.clone()).await {
-                Ok(e) => return Ok(e),
-                Err(
-                    e @ (ClientError::Transport(_)
-                    | ClientError::Timeout(_)
-                    | ClientError::Connection(_)
-                    | ClientError::NotConnected),
-                ) if tentative == 0 => {
-                    tracing::warn!(target: "maia::federee", erreur = %e, "connexion KindMother perdue : rouverte");
-                    self.abandonner(&c).await;
-                    derniere = e.to_string();
-                }
-                Err(e) => return Err(e.to_string()),
-            }
+        self.0
+            .executer(true, |c| {
+                let d = donnee.clone();
+                async move { c.lire_etiquette(d).await }
+            })
+            .await
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// État durable de publication (KindMother, A-017)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Une version publiée, telle qu'enregistrée (une ligne de [`TABLE_PUBLICATIONS`]).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PublicationDurable {
+    /// Identifiant de la Fiche.
+    pub fiche: String,
+    /// Version publiée.
+    pub version: u64,
+    /// Empreinte (hex) de la référence de donnée étiquetée.
+    pub donnee: String,
+    /// Empreinte (hex) de publication des octets signés.
+    pub empreinte: String,
+    /// Utilisateur qui a proposé.
+    pub utilisateur: String,
+    /// Instant de publication (attestation consommée).
+    pub publiee_a: u64,
+    /// Octets signés de la Fiche.
+    pub octets: Vec<u8>,
+}
+
+/// Stockage durable de l'état de publication.
+pub trait MagasinPublications: Send + Sync + 'static {
+    /// Nom de la base (refusée comme source de publication).
+    fn base(&self) -> &str;
+    /// Toutes les versions publiées ; erreur : motif lisible.
+    fn charger(&self) -> impl Future<Output = Result<Vec<PublicationDurable>, String>> + Send;
+    /// Enregistre **atomiquement** une version publiée ; échoue si `(fiche,
+    /// version)` existe déjà. Erreur : issue inconnue (l'appelant recharge).
+    fn enregistrer(
+        &self,
+        p: &PublicationDurable,
+    ) -> impl Future<Output = Result<(), String>> + Send;
+}
+
+/// État de publication dans la base KindMother dédiée (voir l'en-tête du module).
+#[derive(Debug)]
+pub struct PublicationsKindMother(ConnexionKindMother);
+
+/// Migrations de [`TABLE_PUBLICATIONS`] (v1 ; toute évolution : nouvelle étape).
+fn migrations_publications() -> Vec<SchemaMigration> {
+    vec![SchemaMigration::new(
+        1,
+        "maia-federee : versions publiees (A-017)",
+        &["CREATE TABLE IF NOT EXISTS fiches_publiees (\
+            fiche TEXT NOT NULL, \
+            version INTEGER NOT NULL CHECK (version >= 1), \
+            donnee TEXT NOT NULL, \
+            empreinte TEXT NOT NULL, \
+            utilisateur TEXT NOT NULL, \
+            publiee_a INTEGER NOT NULL, \
+            octets TEXT NOT NULL, \
+            PRIMARY KEY (fiche, version))"],
+    )]
+}
+
+/// Base admise pour l'état de publication : nom valide, jamais `nationale`.
+fn base_publications_admise(base: &str) -> bool {
+    base_valide(base) && !est_nationale_par_nom(base)
+}
+
+impl PublicationsKindMother {
+    /// État dans la base `operateur` (dont l'opérateur homonyme est
+    /// propriétaire) ; base `maia-*` ou invalide ⇒ erreur.
+    pub fn charger(
+        adresse: &str,
+        operateur: &str,
+        credentials: Option<&Path>,
+    ) -> Result<Self, String> {
+        if !base_publications_admise(operateur) {
+            return Err(format!(
+                "base de publication « {operateur} » refusée (invalide ou nationale)"
+            ));
         }
-        Err(derniere)
+        ConnexionKindMother::charger(adresse, operateur, operateur, credentials).map(Self)
+    }
+}
+
+fn texte_de(
+    ligne: &std::collections::HashMap<String, serde_json::Value>,
+    c: &str,
+) -> Result<String, String> {
+    ligne
+        .get(c)
+        .and_then(serde_json::Value::as_str)
+        .map(str::to_string)
+        .ok_or_else(|| format!("colonne {c} absente ou mal typée"))
+}
+
+fn entier_de(
+    ligne: &std::collections::HashMap<String, serde_json::Value>,
+    c: &str,
+) -> Result<u64, String> {
+    ligne
+        .get(c)
+        .and_then(serde_json::Value::as_u64)
+        .ok_or_else(|| format!("colonne {c} absente ou mal typée"))
+}
+
+fn publication_de(
+    ligne: &std::collections::HashMap<String, serde_json::Value>,
+) -> Result<PublicationDurable, String> {
+    Ok(PublicationDurable {
+        fiche: texte_de(ligne, "fiche")?,
+        version: entier_de(ligne, "version")?,
+        donnee: texte_de(ligne, "donnee")?,
+        empreinte: texte_de(ligne, "empreinte")?,
+        utilisateur: texte_de(ligne, "utilisateur")?,
+        publiee_a: entier_de(ligne, "publiee_a")?,
+        octets: base64::engine::general_purpose::STANDARD
+            .decode(texte_de(ligne, "octets")?)
+            .map_err(|e| format!("octets : {e}"))?,
+    })
+}
+
+fn entier_sql(v: u64) -> Result<SqlValue, String> {
+    i64::try_from(v)
+        .map(SqlValue::Integer)
+        .map_err(|_| "entier hors bornes".to_string())
+}
+
+impl MagasinPublications for PublicationsKindMother {
+    fn base(&self) -> &str {
+        &self.0.base
+    }
+
+    async fn charger(&self) -> Result<Vec<PublicationDurable>, String> {
+        self.0
+            .executer(true, |c| async move {
+                c.apply_migrations(migrations_publications()).await
+            })
+            .await?;
+        let mut toutes = Vec::new();
+        let mut decalage: u32 = 0;
+        loop {
+            let mut q = TypedSelect::from(TABLE_PUBLICATIONS)
+                .order_by("fiche", false)
+                .order_by("version", false)
+                .limit(PAGE_RECHARGEMENT);
+            q.offset = Some(decalage);
+            let lignes = self
+                .0
+                .executer(true, |c| {
+                    let q = q.clone();
+                    async move { c.select(q).await }
+                })
+                .await?;
+            let n = lignes.len();
+            for l in &lignes {
+                toutes.push(publication_de(l)?);
+            }
+            if n < PAGE_RECHARGEMENT as usize {
+                return Ok(toutes);
+            }
+            decalage = decalage
+                .checked_add(PAGE_RECHARGEMENT)
+                .ok_or_else(|| "trop de publications".to_string())?;
+        }
+    }
+
+    async fn enregistrer(&self, p: &PublicationDurable) -> Result<(), String> {
+        let intention = TypedWriteIntent::insert(TABLE_PUBLICATIONS)
+            .value("fiche", p.fiche.as_str())
+            .value("version", entier_sql(p.version)?)
+            .value("donnee", p.donnee.as_str())
+            .value("empreinte", p.empreinte.as_str())
+            .value("utilisateur", p.utilisateur.as_str())
+            .value("publiee_a", entier_sql(p.publiee_a)?)
+            .value(
+                "octets",
+                base64::engine::general_purpose::STANDARD.encode(&p.octets),
+            )
+            .purpose("maia-federee : version publiee (A-017)");
+        self.0
+            .executer(false, |c| {
+                let i = intention.clone();
+                async move { c.submit(i).await }
+            })
+            .await
+            .map(|_| ())
     }
 }
 
@@ -289,6 +620,7 @@ fn etiquette_lue(e: &EtatEtiquette) -> EtiquetteLue {
     )
     .avec_donnee(e.empreinte_donnee.as_deref())
     .avec_parametres(e.parametres.as_ref().and_then(parametres_lus))
+    .avec_proprietaire(e.utilisateur.as_deref())
 }
 
 /// Adaptateur [`LecteurEtiquettes`] : relit l'étiquette à chaque attestation ;
@@ -344,16 +676,20 @@ pub struct EntreeJournal {
 // État
 // ═══════════════════════════════════════════════════════════════════════════
 
-struct Actif<S> {
+struct Actif<S, M> {
     utilisateur: String,
     source: S,
+    magasin: M,
     identite: CleSignature,
-    service: Mutex<ServiceRequete>,
+    cog: CogId,
+    /// Verrou unique de publication ; `None` : état à (re)charger de KindMother.
+    publication: tokio::sync::Mutex<Option<ServiceRequete>>,
 }
 
 /// État de la route de publication.
-pub struct EtatPublicationHttp<S: SourceEtiquettes> {
-    actif: Option<Actif<S>>,
+pub struct EtatPublicationHttp<S: SourceEtiquettes, M: MagasinPublications = PublicationsKindMother>
+{
+    actif: Option<Actif<S, M>>,
     garde: GardeSignee,
     instance: String,
     limiteur_ip: RateLimiter,
@@ -363,28 +699,69 @@ pub struct EtatPublicationHttp<S: SourceEtiquettes> {
     journal: Mutex<VecDeque<EntreeJournal>>,
 }
 
-impl<S: SourceEtiquettes> EtatPublicationHttp<S> {
-    /// Route active pour `actif` = (utilisateur, lecteur d'étiquettes, clé
-    /// d'identité du COG) et les clés de l'utilisateur ; sans l'un d'eux :
-    /// désactivée. `instance` : identifiant lié dans l'usage signé (celui des
-    /// routes mémoire).
+fn indisponible(detail: impl Into<String>) -> Refus {
+    Refus::new(
+        StatusCode::SERVICE_UNAVAILABLE,
+        "kindmother_indisponible",
+        detail,
+    )
+}
+
+/// Reconstruit le service depuis les versions enregistrées (ordre `(fiche,
+/// version)`) : chaque Fiche est revérifiée et doit concorder avec sa ligne.
+fn restaurer(
+    publieur: &PublieurOriginal,
+    cog: &CogId,
+    mut lignes: Vec<PublicationDurable>,
+    maintenant: u64,
+) -> Result<ServiceRequete, String> {
+    lignes.sort_by(|a, b| a.fiche.cmp(&b.fiche).then(a.version.cmp(&b.version)));
+    let mut service = ServiceRequete::new(cog.clone());
+    for l in lignes {
+        let f = verifier_fiche(&l.octets, maintenant)
+            .map_err(|e| format!("{} v{} : {e}", l.fiche, l.version))?;
+        if f.fiche().id != l.fiche
+            || f.fiche().version != l.version
+            || hex::encode(f.empreinte()) != l.empreinte
+        {
+            return Err(format!("{} v{} : ligne discordante", l.fiche, l.version));
+        }
+        publieur
+            .restaurer(&mut service, l.octets, l.publiee_a, maintenant)
+            .map_err(|e| format!("{} v{} : {e}", l.fiche, l.version))?;
+    }
+    Ok(service)
+}
+
+impl<S: SourceEtiquettes, M: MagasinPublications> EtatPublicationHttp<S, M> {
+    /// Route active pour `actif` = (utilisateur, lecteur d'étiquettes, état
+    /// durable, clé d'identité du COG) et les clés de l'utilisateur ; sans
+    /// l'un d'eux : désactivée. `instance` : identifiant lié dans l'usage signé
+    /// (celui des routes mémoire). L'état durable est chargé par
+    /// [`Self::precharger`] ou à la première proposition.
     pub fn new(
-        actif: Option<(String, S, CleSignature)>,
+        actif: Option<(String, S, M, CleSignature)>,
         cles_utilisateur: Vec<[u8; 32]>,
         instance: String,
         gouvernance: Arc<GouvernanceMaia>,
         securite: SecurityConfig,
     ) -> Self {
-        let actif = actif.and_then(|(utilisateur, source, identite)| {
+        let actif = actif.and_then(|(utilisateur, source, magasin, identite)| {
             let Some(cog) = cog_de_cle(&identite.cle_publique()) else {
                 tracing::error!(target: "maia::federee", "clé d'identité sans cog_id valide : publication désactivée");
                 return None;
             };
+            if !base_publications_admise(magasin.base()) {
+                tracing::error!(target: "maia::federee", base = magasin.base(), "base de l'état de publication refusée (invalide ou nationale) : publication désactivée");
+                return None;
+            }
             Some(Actif {
                 utilisateur,
                 source,
+                magasin,
                 identite,
-                service: Mutex::new(ServiceRequete::new(cog)),
+                cog,
+                publication: tokio::sync::Mutex::new(None),
             })
         });
         Self {
@@ -415,13 +792,65 @@ impl<S: SourceEtiquettes> EtatPublicationHttp<S> {
         format!("{USAGE_FEDEREE}/{}/{utilisateur}", self.instance)
     }
 
-    /// Dernière version publiée de `id` (0 : jamais).
+    /// Charge l'état durable au démarrage ; `false` si la route est inactive
+    /// ou si KindMother est indisponible (la route répond alors 503 et
+    /// réessaie à chaque proposition).
+    pub async fn precharger(&self) -> bool {
+        let Some(actif) = self.actif.as_ref() else {
+            return false;
+        };
+        let mut garde = actif.publication.lock().await;
+        match Self::charger(actif, &mut garde).await {
+            Ok(()) => true,
+            Err(r) => {
+                tracing::error!(target: "maia::federee", motif = r.code, detail = %r.detail, "état de publication non chargé : route en 503 jusqu'au rechargement");
+                false
+            }
+        }
+    }
+
+    /// Recharge l'état si nécessaire (`None`) ; échec ⇒ 503, l'état reste à recharger.
+    async fn charger(actif: &Actif<S, M>, garde: &mut Option<ServiceRequete>) -> Result<(), Refus> {
+        if garde.is_some() {
+            return Ok(());
+        }
+        let publieur = publieur().ok_or_else(|| {
+            Refus::new(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "autorite_indisponible",
+                "autorité des étiquettes indisponible",
+            )
+        })?;
+        let lignes = actif.magasin.charger().await.map_err(|e| {
+            tracing::error!(target: "maia::federee", base = actif.magasin.base(), erreur = %e, "état de publication illisible");
+            indisponible(format!("état de publication illisible : {e}"))
+        })?;
+        let n = lignes.len();
+        let service = restaurer(publieur, &actif.cog, lignes, maintenant_unix()).map_err(|e| {
+            tracing::error!(target: "maia::federee::audit", base = actif.magasin.base(), erreur = %e, "état de publication incohérent : publication suspendue");
+            Refus::new(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "etat_publication_incoherent",
+                e,
+            )
+        })?;
+        tracing::info!(target: "maia::federee", base = actif.magasin.base(), versions = n, "état de publication chargé");
+        *garde = Some(service);
+        Ok(())
+    }
+
+    /// Dernière version publiée de `id` (0 : jamais ; état non chargé : 0).
     #[cfg(test)]
-    fn derniere_version(&self, id: &str) -> u64 {
-        self.actif
-            .as_ref()
-            .and_then(|a| a.service.lock().ok().map(|s| s.derniere_version(id)))
-            .unwrap_or(0)
+    async fn derniere_version(&self, id: &str) -> u64 {
+        match self.actif.as_ref() {
+            Some(a) => a
+                .publication
+                .lock()
+                .await
+                .as_ref()
+                .map_or(0, |s| s.derniere_version(id)),
+            None => 0,
+        }
     }
 
     /// Copie du journal des décisions (plus récentes en dernier).
@@ -452,7 +881,7 @@ impl<S: SourceEtiquettes> EtatPublicationHttp<S> {
     }
 }
 
-impl EtatPublicationHttp<EtiquettesKindMother> {
+impl EtatPublicationHttp<EtiquettesKindMother, PublicationsKindMother> {
     /// Configuration par l'environnement (voir l'en-tête du module) ; tout
     /// élément absent ou invalide ⇒ route désactivée (journalisé).
     pub fn depuis_env(
@@ -466,7 +895,7 @@ impl EtatPublicationHttp<EtiquettesKindMother> {
         if etat.est_active() {
             tracing::info!("route de publication fédérée active (requêtes signées « {USAGE_FEDEREE}/<instance>/<utilisateur> »)");
         } else {
-            tracing::info!("route de publication fédérée désactivée ({ENV_UTILISATEUR}, {ENV_CLES_UTILISATEUR}, {ENV_CLE_IDENTITE} ou {ENV_OPERATEUR} absent)");
+            tracing::info!("route de publication fédérée désactivée ({ENV_UTILISATEUR}, {ENV_CLES_UTILISATEUR}, {ENV_CLE_IDENTITE}, {ENV_OPERATEUR} ou justificatif de l'état de publication absent)");
         }
         etat
     }
@@ -479,7 +908,12 @@ fn env_non_vide(nom: &str) -> Option<String> {
         .filter(|v| !v.is_empty())
 }
 
-fn actif_depuis_env() -> Option<(String, EtiquettesKindMother, CleSignature)> {
+fn actif_depuis_env() -> Option<(
+    String,
+    EtiquettesKindMother,
+    PublicationsKindMother,
+    CleSignature,
+)> {
     let utilisateur = env_non_vide(ENV_UTILISATEUR)?;
     let chemin = env_non_vide(ENV_CLE_IDENTITE)?;
     let operateur = env_non_vide(ENV_OPERATEUR)?;
@@ -491,10 +925,19 @@ fn actif_depuis_env() -> Option<(String, EtiquettesKindMother, CleSignature)> {
         }
     };
     let adresse = env_non_vide(ENV_KINDMOTHER).unwrap_or_else(|| KINDMOTHER_DEFAUT.to_string());
-    match EtiquettesKindMother::charger(&adresse, &operateur, None) {
-        Ok(source) => Some((utilisateur, source, identite)),
+    let source = match EtiquettesKindMother::charger(&adresse, &operateur, None) {
+        Ok(s) => s,
         Err(e) => {
             tracing::error!(target: "maia::federee", "justificatif KindMother « {operateur} » : {e} — publication désactivée");
+            return None;
+        }
+    };
+    let base =
+        env_non_vide(ENV_PUBLICATIONS).unwrap_or_else(|| BASE_PUBLICATIONS_DEFAUT.to_string());
+    match PublicationsKindMother::charger(&adresse, &base, None) {
+        Ok(magasin) => Some((utilisateur, source, magasin, identite)),
+        Err(e) => {
+            tracing::error!(target: "maia::federee", "état de publication « {base} » : {e} — publication désactivée");
             None
         }
     }
@@ -505,12 +948,14 @@ fn actif_depuis_env() -> Option<(String, EtiquettesKindMother, CleSignature)> {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// Routeur de la publication (à fusionner avec le routeur principal).
-pub fn routeur<S: SourceEtiquettes>(etat: Arc<EtatPublicationHttp<S>>) -> Router {
+pub fn routeur<S: SourceEtiquettes, M: MagasinPublications>(
+    etat: Arc<EtatPublicationHttp<S, M>>,
+) -> Router {
     Router::new()
-        .route("/v1/federee/{utilisateur}/publier", post(publier::<S>))
+        .route("/v1/federee/{utilisateur}/publier", post(publier::<S, M>))
         .layer(axum::middleware::from_fn_with_state(
             Arc::clone(&etat),
-            garde::<S>,
+            garde::<S, M>,
         ))
         .with_state(etat)
 }
@@ -523,8 +968,8 @@ fn refus_http(statut: StatusCode, motif: &str) -> Response {
         .into_response()
 }
 
-async fn garde<S: SourceEtiquettes>(
-    State(etat): State<Arc<EtatPublicationHttp<S>>>,
+async fn garde<S: SourceEtiquettes, M: MagasinPublications>(
+    State(etat): State<Arc<EtatPublicationHttp<S, M>>>,
     req: Request,
     next: Next,
 ) -> Response {
@@ -537,8 +982,8 @@ async fn garde<S: SourceEtiquettes>(
 
 /// Débit par IP, route active, pas de cookie, origine, requête signée par une
 /// clé de l'utilisateur avec l'usage de publication lié à l'instance.
-async fn garder<S: SourceEtiquettes>(
-    etat: &EtatPublicationHttp<S>,
+async fn garder<S: SourceEtiquettes, M: MagasinPublications>(
+    etat: &EtatPublicationHttp<S, M>,
     req: Request,
     next: Next,
 ) -> Response {
@@ -870,9 +1315,10 @@ fn intention_publication(
 }
 
 /// Chaîne complète (voir l'en-tête du module) ; aucun effet avant la porte.
-async fn traiter<S: SourceEtiquettes>(
-    etat: &EtatPublicationHttp<S>,
-    actif: &Actif<S>,
+#[allow(clippy::too_many_lines)]
+async fn traiter<S: SourceEtiquettes, M: MagasinPublications>(
+    etat: &EtatPublicationHttp<S, M>,
+    actif: &Actif<S, M>,
     corps: &[u8],
 ) -> Result<Publiee, Refus> {
     let u = &actif.utilisateur;
@@ -903,6 +1349,13 @@ async fn traiter<S: SourceEtiquettes>(
             "mémoire de MAIA : jamais publiable",
         ));
     }
+    if p.donnee.base.eq_ignore_ascii_case(actif.magasin.base()) {
+        return Err(Refus::new(
+            StatusCode::FORBIDDEN,
+            "base_reservee",
+            "base de l'état de publication : jamais publiable",
+        ));
+    }
     p.donnee
         .check_shape()
         .map_err(|e| Refus::new(StatusCode::BAD_REQUEST, "donnee_invalide", e))?;
@@ -915,13 +1368,7 @@ async fn traiter<S: SourceEtiquettes>(
     })?;
 
     // Étiquette courante : base des champs structurels (relue par l'attestation).
-    let etat_km = actif.source.lire(&p.donnee).await.map_err(|e| {
-        Refus::new(
-            StatusCode::SERVICE_UNAVAILABLE,
-            "kindmother_indisponible",
-            e,
-        )
-    })?;
+    let etat_km = actif.source.lire(&p.donnee).await.map_err(indisponible)?;
     let lue = etiquette_lue(&etat_km);
     if lue.nationale {
         return Err(Refus::new(
@@ -930,34 +1377,32 @@ async fn traiter<S: SourceEtiquettes>(
             "donnée nationale : jamais publiable",
         ));
     }
-    let (Some(donnee_id), Some(parametres), true, Some(_)) = (
+    let (Some(donnee_id), Some(parametres), true, Some(_), true) = (
         lue.empreinte_donnee,
         lue.parametres.clone(),
         lue.posee,
         lue.empreinte_contenu
             .filter(|e| lue.empreinte_actuelle == Some(*e)),
+        lue.proprietaire.as_deref() == Some(u.as_str()),
     ) else {
         return Err(Refus::new(
             StatusCode::FORBIDDEN,
             "non_publiable",
-            "donnée non étiquetée, étiquette retirée, contenu modifié depuis la pose ou pose sans paramètres",
+            "donnée non étiquetée par cet utilisateur, étiquette retirée, contenu modifié depuis la pose ou pose sans paramètres",
         ));
+    };
+
+    // Section critique : un seul calcul de version / plafond / publication à la fois.
+    let mut garde = actif.publication.lock().await;
+    EtatPublicationHttp::<S, M>::charger(actif, &mut garde).await?;
+    let Some(service) = garde.as_ref() else {
+        return Err(indisponible("état de publication non chargé"));
     };
 
     // Champs structurels calculés par le serveur.
     let maintenant = maintenant_unix();
     let id = id_fiche_derivee(&donnee_id);
-    let derniere = actif
-        .service
-        .lock()
-        .map_err(|_| {
-            Refus::new(
-                StatusCode::SERVICE_UNAVAILABLE,
-                "service_indisponible",
-                "verrou",
-            )
-        })?
-        .derniere_version(&id);
+    let derniere = service.derniere_version(&id);
     let version = derniere.checked_add(1).ok_or_else(|| {
         Refus::new(
             StatusCode::CONFLICT,
@@ -968,6 +1413,10 @@ async fn traiter<S: SourceEtiquettes>(
     })?;
     controler_annonces(&p, &id, derniere, version, &parametres, maintenant)
         .map_err(|r| r.pour(&id, version))?;
+    // Plafond contrôlé ici, décompté seulement par la publication effective.
+    if service.plafond_atteint(&id, maintenant) {
+        return Err(refus_federee(&ErreurFederee::Quota).pour(&id, version));
+    }
 
     let fiche = Fiche {
         id: id.clone(),
@@ -1005,19 +1454,25 @@ async fn traiter<S: SourceEtiquettes>(
         ..r.pour(&id, version)
     };
 
-    // Attestation : étiquette relue, dérivation stricte, plafond par donnée.
+    // Attestation : étiquette relue, propriétaire revérifié, dérivation stricte.
     let capacite = publieur
         .attester(
             &Lecteur(&actif.source),
             &p.donnee,
+            u,
             &octets,
             derniere,
             maintenant,
         )
         .await
         .map_err(|e| avec(refus_federee(&e)))?;
+    let publication = Publication::Originale(capacite);
+    // Contrôle sans effet (version, plafond, capacité) avant la porte.
+    service
+        .controler(&octets, &publication, maintenant)
+        .map_err(|e| avec(refus_federee(&e)))?;
 
-    // Porte des Cores : seule une décision ALLOW exécute la publication.
+    // Porte des Cores : seule une décision ALLOW exécute l'effet (durable, puis mémoire).
     let intent = intention_publication(
         u,
         &fiche,
@@ -1025,18 +1480,56 @@ async fn traiter<S: SourceEtiquettes>(
         &hex::encode(donnee_id),
         &p.donnee.base,
     );
+    let durable = PublicationDurable {
+        fiche: id.clone(),
+        version,
+        donnee: hex::encode(donnee_id),
+        empreinte: empreinte.clone(),
+        utilisateur: u.clone(),
+        publiee_a: maintenant,
+        octets: octets.clone(),
+    };
+    let magasin = &actif.magasin;
     let a_publier = octets.clone();
-    let resultat = etat.gouvernance.executer(&intent, |jeton| {
+    let effet = etat.gouvernance.executer(&intent, |jeton| {
         let regle = jeton.regle().to_string();
-        actif
-            .service
-            .lock()
-            .map_err(|_| ErreurFederee::Interdit("service de publication indisponible"))
-            .and_then(|mut s| s.publier(a_publier, Publication::Originale(capacite), maintenant))
-            .map(|()| regle)
+        let garde = &mut garde;
+        async move {
+            if let Err(e) = magasin.enregistrer(&durable).await {
+                // Issue inconnue : l'état sera relu de KindMother avant toute autre publication.
+                **garde = None;
+                tracing::error!(target: "maia::federee::audit", fiche = %durable.fiche, version = durable.version, erreur = %e, "version non enregistrée (issue inconnue) : état à recharger");
+                return Err(Refus::new(
+                    StatusCode::SERVICE_UNAVAILABLE,
+                    "persistance_indisponible",
+                    "écriture de l'état de publication impossible",
+                ));
+            }
+            let inscrite = match garde.as_mut() {
+                Some(s) => s.publier(a_publier, publication, maintenant),
+                None => Err(ErreurFederee::Interdit("état de publication non chargé")),
+            };
+            if let Err(e) = inscrite {
+                // Durable mais pas en mémoire : relire KindMother (qui fait foi).
+                **garde = None;
+                tracing::error!(target: "maia::federee::audit", fiche = %durable.fiche, version = durable.version, erreur = %e, "version durable non inscrite en mémoire : état à recharger");
+                return Err(refus_federee(&e));
+            }
+            Ok(regle)
+        }
     });
+    let resultat = match effet {
+        Ok(f) => f.await,
+        Err(motif) => {
+            return Err(avec(Refus::new(
+                StatusCode::FORBIDDEN,
+                "refus_porte",
+                motif,
+            )))
+        }
+    };
     match resultat {
-        Ok(Ok(regle)) => Ok(Publiee {
+        Ok(regle) => Ok(Publiee {
             id: id.clone(),
             version,
             date: maintenant,
@@ -1044,18 +1537,13 @@ async fn traiter<S: SourceEtiquettes>(
             octets,
             regle,
         }),
-        Ok(Err(e)) => Err(avec(refus_federee(&e))),
-        Err(motif) => Err(avec(Refus::new(
-            StatusCode::FORBIDDEN,
-            "refus_porte",
-            motif,
-        ))),
+        Err(r) => Err(avec(r)),
     }
 }
 
 /// `POST /v1/federee/{u}/publier`.
-async fn publier<S: SourceEtiquettes>(
-    State(etat): State<Arc<EtatPublicationHttp<S>>>,
+async fn publier<S: SourceEtiquettes, M: MagasinPublications>(
+    State(etat): State<Arc<EtatPublicationHttp<S, M>>>,
     Extension(auth): Extension<UtilisateurAuthentifie>,
     Chemin(u): Chemin<String>,
     corps: Bytes,
@@ -1138,10 +1626,16 @@ mod tests {
     use miyauth::http::service::entetes_signees;
     use sha2::{Digest, Sha256};
     use std::path::PathBuf;
+    use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
     use tower::ServiceExt;
 
     const TEXTE: &str = "Paris est la capitale de la France.";
     const INSTANCE: &str = "instance-essai";
+    const CHEMIN: &str = "/v1/federee/alice/publier";
+    /// Opérateur propriétaire de la base de l'état de publication dans le banc :
+    /// base non nationale, absente des `.bases` des utilisateurs (en production :
+    /// `cog-federee`, à déclarer côté KindMother).
+    const OPERATEUR_PUBLICATIONS: &str = "jayrdv";
 
     /// Clé HTTP de l'utilisateur (requêtes signées).
     fn alice_http() -> CleSignature {
@@ -1151,6 +1645,11 @@ mod tests {
     /// Clé d'étiquette de l'utilisateur (intentions KindMother).
     fn alice_etiquette() -> SigningKey {
         SigningKey::from_bytes(&[11; 32])
+    }
+
+    /// Clé d'étiquette d'un autre utilisateur (propriétaire de la même base).
+    fn bob_etiquette() -> SigningKey {
+        SigningKey::from_bytes(&[13; 32])
     }
 
     fn usage() -> String {
@@ -1164,37 +1663,80 @@ mod tests {
         encode_hex(&h.finalize())
     }
 
-    /// KindMother réel (serveur TCP), opérateur `jaykonta`, table `notes`.
-    struct Banc {
+    fn graine_aleatoire() -> [u8; 32] {
+        Sha256::digest(crate::garde_etranger::identifiant_aleatoire().as_bytes()).into()
+    }
+
+    /// KindMother réel (serveur TCP), opérateur `jaykonta`, table `notes` ;
+    /// état de publication dans la base `jayrdv`.
+    struct Banc<
+        S: SourceEtiquettes = EtiquettesKindMother,
+        M: MagasinPublications = PublicationsKindMother,
+    > {
         dir: PathBuf,
+        addr: String,
         cle_serveur: [u8; 32],
+        graine: [u8; 32],
         km: KindMotherClient,
-        etat: Arc<EtatPublicationHttp<EtiquettesKindMother>>,
+        etat: Arc<EtatPublicationHttp<S, M>>,
         app: Router,
     }
 
-    impl Drop for Banc {
+    impl<S: SourceEtiquettes, M: MagasinPublications> Drop for Banc<S, M> {
         fn drop(&mut self) {
             let _ = std::fs::remove_dir_all(&self.dir);
         }
     }
 
-    async fn banc_avec(gouvernance: GouvernanceMaia, identite: Option<CleSignature>) -> Banc {
+    fn cred(dir: &Path) -> PathBuf {
+        dir.join("credentials")
+    }
+
+    fn source(addr: &str, dir: &Path) -> EtiquettesKindMother {
+        EtiquettesKindMother::charger(addr, "jaykonta", Some(&cred(dir))).expect("source")
+    }
+
+    fn magasin(addr: &str, dir: &Path) -> PublicationsKindMother {
+        PublicationsKindMother::charger(addr, OPERATEUR_PUBLICATIONS, Some(&cred(dir)))
+            .expect("magasin")
+    }
+
+    fn etat_de<S: SourceEtiquettes, M: MagasinPublications>(
+        gouvernance: GouvernanceMaia,
+        actif: Option<(String, S, M, CleSignature)>,
+    ) -> (Arc<EtatPublicationHttp<S, M>>, Router) {
+        let etat = Arc::new(EtatPublicationHttp::new(
+            actif,
+            vec![alice_http().cle_publique()],
+            INSTANCE.to_string(),
+            Arc::new(gouvernance),
+            SecurityConfig::default(),
+        ));
+        let app = routeur(Arc::clone(&etat));
+        (etat, app)
+    }
+
+    async fn banc_complet<S: SourceEtiquettes, M: MagasinPublications>(
+        gouvernance: GouvernanceMaia,
+        avec_identite: bool,
+        f_source: impl FnOnce(EtiquettesKindMother) -> S,
+        f_magasin: impl FnOnce(PublicationsKindMother) -> M,
+    ) -> Banc<S, M> {
         let dir = std::env::temp_dir().join(format!(
             "maia-federee-{}",
             crate::garde_etranger::identifiant_aleatoire()
         ));
         let utilisateurs = dir.join("credentials").join("utilisateurs");
         std::fs::create_dir_all(&utilisateurs).expect("dossier");
-        std::fs::write(
-            utilisateurs.join("alice.pub"),
-            format!(
-                "{}\n",
-                encode_hex(alice_etiquette().verifying_key().as_bytes())
-            ),
-        )
-        .expect("clé");
+        for (nom, cle) in [("alice", alice_etiquette()), ("bob", bob_etiquette())] {
+            std::fs::write(
+                utilisateurs.join(format!("{nom}.pub")),
+                format!("{}\n", encode_hex(cle.verifying_key().as_bytes())),
+            )
+            .expect("clé");
+        }
         std::fs::write(utilisateurs.join("alice.bases"), "jaykonta\nmaia-alice\n").expect("bases");
+        std::fs::write(utilisateurs.join("bob.bases"), "jaykonta\n").expect("bases");
         std::fs::write(dir.join("maia-utilisateurs"), "alice\n").expect("maia");
         std::fs::write(dir.join("bases-nationales"), "jaykoa\n").expect("nationales");
         let server = kindmother_service::KindMotherServer::new(&dir)
@@ -1206,10 +1748,9 @@ mod tests {
             .expect("bind");
         let addr = listener.local_addr().expect("addr").to_string();
         tokio::spawn(server.serve_listener(listener));
-        let cred = dir.join("credentials");
         let km = KindMotherClient::connect(
             &addr,
-            &OperatorCredential::load_from_dir("jaykonta", &cred).expect("cred"),
+            &OperatorCredential::load_from_dir("jaykonta", cred(&dir)).expect("cred"),
             "jaykonta",
         )
         .await
@@ -1221,34 +1762,67 @@ mod tests {
         )])
         .await
         .expect("migration");
-        let source = EtiquettesKindMother::charger(&addr, "jaykonta", Some(&cred)).expect("source");
-        let actif = identite.map(|c| ("alice".to_string(), source, c));
-        let etat = Arc::new(EtatPublicationHttp::new(
-            actif,
-            vec![alice_http().cle_publique()],
-            INSTANCE.to_string(),
-            Arc::new(gouvernance),
-            SecurityConfig::default(),
-        ));
-        let app = routeur(Arc::clone(&etat));
+        let graine = graine_aleatoire();
+        let actif = avec_identite.then(|| {
+            (
+                "alice".to_string(),
+                f_source(source(&addr, &dir)),
+                f_magasin(magasin(&addr, &dir)),
+                CleSignature::depuis_graine(&graine),
+            )
+        });
+        let (etat, app) = etat_de(gouvernance, actif);
         Banc {
             dir,
+            addr,
             cle_serveur,
+            graine,
             km,
             etat,
             app,
         }
     }
 
-    async fn banc() -> Banc {
-        banc_avec(
-            crate::gouvernance::tests::gouvernance_de_base(),
-            Some(CleSignature::generer()),
-        )
-        .await
+    async fn banc_avec(gouvernance: GouvernanceMaia, avec_identite: bool) -> Banc {
+        banc_complet(gouvernance, avec_identite, |s| s, |m| m).await
     }
 
-    impl Banc {
+    async fn banc() -> Banc {
+        banc_avec(crate::gouvernance::tests::gouvernance_de_base(), true).await
+    }
+
+    /// Requête signée par la clé HTTP d'Alice (ou non signée).
+    async fn envoyer(
+        app: Router,
+        chemin: &str,
+        corps: &str,
+        signe: bool,
+    ) -> (StatusCode, serde_json::Value) {
+        let mut b = axum::http::Request::builder()
+            .method("POST")
+            .uri(chemin)
+            .header(header::CONTENT_TYPE, "application/json");
+        if signe {
+            for (n, v) in entetes_signees(&alice_http(), &usage(), "POST", chemin, corps.as_bytes())
+            {
+                b = b.header(n, v);
+            }
+        }
+        let mut r = b.body(Body::from(corps.to_string())).expect("requête");
+        r.extensions_mut()
+            .insert(ConnectInfo(SocketAddr::from(([127, 0, 0, 1], 40002))));
+        let rep = app.oneshot(r).await.expect("réponse");
+        let s = rep.status();
+        let o = axum::body::to_bytes(rep.into_body(), 1 << 20)
+            .await
+            .expect("corps");
+        (
+            s,
+            serde_json::from_slice(&o).unwrap_or(serde_json::Value::Null),
+        )
+    }
+
+    impl<S: SourceEtiquettes, M: MagasinPublications> Banc<S, M> {
         /// Nouvelle donnée (identifiant unique : plafonds d'attestation distincts par test).
         async fn donnee(&self, texte: &str) -> RefDonnee {
             let id = format!("n{}", crate::garde_etranger::identifiant_aleatoire());
@@ -1264,20 +1838,27 @@ mod tests {
             RefDonnee::new("jaykonta", "notes", "body").cle("id", id.as_str())
         }
 
-        async fn etiqueter(&self, d: &RefDonnee, action: ActionEtiquette, texte: &str, t: u64) {
+        async fn etiqueter_par(
+            &self,
+            utilisateur: &str,
+            cle: &SigningKey,
+            d: &RefDonnee,
+            action: ActionEtiquette,
+            texte: &str,
+            t: u64,
+        ) {
             let parametres = (action == ActionEtiquette::Poser).then(|| ParametresPublication {
                 type_fiche: TypePublication::Fait,
                 langue: "fr".into(),
                 licence: "CC-BY-4.0".into(),
                 audience: AudiencePublication::Membres,
             });
-            let cle = alice_etiquette();
             let mut i = IntentionEtiquette {
                 version: VERSION_INTENTION,
                 parametres,
                 action,
                 donnee: d.clone(),
-                utilisateur: "alice".into(),
+                utilisateur: utilisateur.into(),
                 empreinte_contenu: (action == ActionEtiquette::Poser).then(|| empreinte(texte)),
                 horodatage: t,
                 cle_publique: encode_hex(cle.verifying_key().as_bytes()),
@@ -1286,6 +1867,11 @@ mod tests {
             let m = i.message_signe(&self.cle_serveur).expect("message");
             i.signature = encode_hex(&cle.sign(&m).to_bytes());
             self.km.etiqueter(i).await.expect("étiquette");
+        }
+
+        async fn etiqueter(&self, d: &RefDonnee, action: ActionEtiquette, texte: &str, t: u64) {
+            self.etiqueter_par("alice", &alice_etiquette(), d, action, texte, t)
+                .await;
         }
 
         async fn poser(&self, d: &RefDonnee) {
@@ -1299,38 +1885,43 @@ mod tests {
             corps: &str,
             signe: bool,
         ) -> (StatusCode, serde_json::Value) {
-            let mut b = axum::http::Request::builder()
-                .method("POST")
-                .uri(chemin)
-                .header(header::CONTENT_TYPE, "application/json");
-            if signe {
-                for (n, v) in
-                    entetes_signees(&alice_http(), &usage(), "POST", chemin, corps.as_bytes())
-                {
-                    b = b.header(n, v);
-                }
-            }
-            let mut r = b.body(Body::from(corps.to_string())).expect("requête");
-            r.extensions_mut()
-                .insert(ConnectInfo(SocketAddr::from(([127, 0, 0, 1], 40002))));
-            let rep = self.app.clone().oneshot(r).await.expect("réponse");
-            let s = rep.status();
-            let o = axum::body::to_bytes(rep.into_body(), 1 << 20)
-                .await
-                .expect("corps");
-            (
-                s,
-                serde_json::from_slice(&o).unwrap_or(serde_json::Value::Null),
-            )
+            envoyer(self.app.clone(), chemin, corps, signe).await
         }
 
         async fn proposer(&self, p: serde_json::Value) -> (StatusCode, serde_json::Value) {
-            self.appel("/v1/federee/alice/publier", &p.to_string(), true)
-                .await
+            self.appel(CHEMIN, &p.to_string(), true).await
         }
 
         fn dernier_motif(&self) -> &'static str {
             self.etat.journal().last().map_or("", |e| e.motif)
+        }
+
+        /// « Redémarrage » : nouvel état (mémoire vide), même KindMother, même
+        /// clé d'identité du COG.
+        fn redemarrer(
+            &self,
+            gouvernance: GouvernanceMaia,
+        ) -> (
+            Arc<EtatPublicationHttp<EtiquettesKindMother, PublicationsKindMother>>,
+            Router,
+        ) {
+            etat_de(
+                gouvernance,
+                Some((
+                    "alice".to_string(),
+                    source(&self.addr, &self.dir),
+                    magasin(&self.addr, &self.dir),
+                    CleSignature::depuis_graine(&self.graine),
+                )),
+            )
+        }
+
+        /// Versions enregistrées dans KindMother (lecture directe de la base).
+        async fn lignes(&self) -> Vec<PublicationDurable> {
+            magasin(&self.addr, &self.dir)
+                .charger()
+                .await
+                .expect("lignes")
         }
     }
 
@@ -1380,7 +1971,7 @@ mod tests {
             hex::encode(f.empreinte()),
             v["publiee"]["empreinte"].as_str().expect("e")
         );
-        assert_eq!(b.etat.derniere_version(&id), 1);
+        assert_eq!(b.etat.derniere_version(&id).await, 1);
         let j = b.etat.journal();
         assert_eq!(
             (j[0].verdict, j[0].fiche.as_deref()),
@@ -1398,7 +1989,7 @@ mod tests {
             (s, v["reason"].as_str()),
             (StatusCode::CONFLICT, Some("version_deja_publiee"))
         );
-        assert_eq!(b.etat.derniere_version(&id), 1);
+        assert_eq!(b.etat.derniere_version(&id).await, 1);
         assert_eq!(b.dernier_motif(), "version_deja_publiee");
         // Version suivante (annoncée juste, avec l'id juste) : publiée.
         let p = avec(
@@ -1424,6 +2015,7 @@ mod tests {
                         .attester(
                             &Lecteur(&b.etat.actif.as_ref().expect("actif").source),
                             &d,
+                            "alice",
                             &octets,
                             0,
                             maintenant_unix()
@@ -1440,6 +2032,7 @@ mod tests {
             .attester(
                 &Lecteur(&b.etat.actif.as_ref().expect("actif").source),
                 &d,
+                "alice",
                 &octets,
                 0,
                 maintenant_unix(),
@@ -1514,7 +2107,11 @@ mod tests {
             );
         }
         for x in [&d, &d2, &d3] {
-            assert_eq!(b.etat.derniere_version(&id_attendu(x)), 0, "rien de publié");
+            assert_eq!(
+                b.etat.derniere_version(&id_attendu(x)).await,
+                0,
+                "rien de publié"
+            );
         }
         let j = b.etat.journal();
         assert_eq!(j.len(), 5);
@@ -1565,7 +2162,7 @@ mod tests {
             (StatusCode::BAD_REQUEST, Some("corps_invalide"))
         );
         assert_eq!(
-            b.etat.derniere_version(&id_attendu(&d)),
+            b.etat.derniere_version(&id_attendu(&d)).await,
             0,
             "rien de publié"
         );
@@ -1608,7 +2205,7 @@ mod tests {
                 "{v}"
             );
         }
-        assert_eq!(b.etat.derniere_version(&id_attendu(&d)), 0);
+        assert_eq!(b.etat.derniere_version(&id_attendu(&d)).await, 0);
         // Donnée nationale déclarée côté KindMother : refus même si l'état la dit posée.
         let mut e = EtatEtiquette {
             sensibilite: Sensibilite::Nationale,
@@ -1664,7 +2261,7 @@ mod tests {
             crate::tamr::tests::gouvernance(crate::tamr::tests::POLITIQUE_SANS_TAMR),
             GouvernanceMaia::indisponible("essai"),
         ] {
-            let b = banc_avec(g, Some(CleSignature::generer())).await;
+            let b = banc_avec(g, true).await;
             let d = b.donnee(TEXTE).await;
             b.poser(&d).await;
             let (s, v) = b.proposer(proposition(&d)).await;
@@ -1674,7 +2271,7 @@ mod tests {
                 "{v}"
             );
             assert_eq!(
-                b.etat.derniere_version(&id_attendu(&d)),
+                b.etat.derniere_version(&id_attendu(&d)).await,
                 0,
                 "rien de publié"
             );
@@ -1728,14 +2325,412 @@ mod tests {
                 Some("debit_utilisateur_depasse")
             )
         );
-        assert_eq!(b.etat.derniere_version(&id_attendu(&d)), 0);
+        assert_eq!(b.etat.derniere_version(&id_attendu(&d)).await, 0);
 
         // Sans clé d'identité du COG : désactivée.
-        let off = banc_avec(crate::gouvernance::tests::gouvernance_de_base(), None).await;
+        let off = banc_avec(crate::gouvernance::tests::gouvernance_de_base(), false).await;
         assert!(!off.etat.est_active());
         assert_eq!(
             off.appel(chemin, &corps, true).await.0,
             StatusCode::SERVICE_UNAVAILABLE
         );
+    }
+
+    // ── A-017 : persistance, monotonie, plafond après la porte, propriétaire ──
+
+    /// État de publication enregistré : `n` versions, contiguës, octets vérifiables.
+    async fn verifier_lignes<S: SourceEtiquettes, M: MagasinPublications>(
+        b: &Banc<S, M>,
+        id: &str,
+        n: u64,
+    ) {
+        let l: Vec<_> = b
+            .lignes()
+            .await
+            .into_iter()
+            .filter(|l| l.fiche == id)
+            .collect();
+        assert_eq!(
+            l.iter().map(|l| l.version).collect::<Vec<_>>(),
+            (1..=n).collect::<Vec<_>>()
+        );
+        for x in &l {
+            let f = verifier_fiche(&x.octets, maintenant_unix()).expect("fiche");
+            assert_eq!(
+                (f.fiche().version, hex::encode(f.empreinte())),
+                (x.version, x.empreinte.clone())
+            );
+            assert_eq!(x.utilisateur, "alice");
+        }
+    }
+
+    #[tokio::test]
+    async fn redemarrage_recharge_versions_et_plafond() {
+        let b = banc().await;
+        let d = b.donnee(TEXTE).await;
+        b.poser(&d).await;
+        let id = id_attendu(&d);
+        for v in 1..=2_u64 {
+            let (s, r) = b.proposer(proposition(&d)).await;
+            assert_eq!(
+                (s, r["publiee"]["version"].as_u64()),
+                (StatusCode::OK, Some(v)),
+                "{r}"
+            );
+        }
+        verifier_lignes(&b, &id, 2).await;
+
+        // Redémarrage : mémoire vide, état relu de KindMother.
+        let (etat2, app2) = b.redemarrer(crate::gouvernance::tests::gouvernance_de_base());
+        assert!(etat2.precharger().await);
+        assert_eq!(etat2.derniere_version(&id).await, 2);
+        for deja in [1_u64, 2] {
+            let (s, r) = envoyer(
+                app2.clone(),
+                CHEMIN,
+                &avec(proposition(&d), "version", deja.into()).to_string(),
+                true,
+            )
+            .await;
+            assert_eq!(
+                (s, r["reason"].as_str()),
+                (StatusCode::CONFLICT, Some("version_deja_publiee")),
+                "{r}"
+            );
+        }
+        let (s, r) = envoyer(app2.clone(), CHEMIN, &proposition(&d).to_string(), true).await;
+        assert_eq!(
+            (s, r["publiee"]["version"].as_u64()),
+            (StatusCode::OK, Some(3)),
+            "{r}"
+        );
+        for v in 4..=maia_federee::MAX_ATTESTATIONS_PAR_PERIODE as u64 {
+            let (s, r) = envoyer(app2.clone(), CHEMIN, &proposition(&d).to_string(), true).await;
+            assert_eq!(
+                (s, r["publiee"]["version"].as_u64()),
+                (StatusCode::OK, Some(v)),
+                "{r}"
+            );
+        }
+        verifier_lignes(&b, &id, maia_federee::MAX_ATTESTATIONS_PAR_PERIODE as u64).await;
+
+        // Second redémarrage, sans préchargement : le plafond glissant est rechargé lui aussi.
+        let (etat3, app3) = b.redemarrer(crate::gouvernance::tests::gouvernance_de_base());
+        let (s, r) = envoyer(app3, CHEMIN, &proposition(&d).to_string(), true).await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (StatusCode::TOO_MANY_REQUESTS, Some("plafond_attestations")),
+            "{r}"
+        );
+        assert_eq!(
+            etat3.derniere_version(&id).await,
+            maia_federee::MAX_ATTESTATIONS_PAR_PERIODE as u64
+        );
+    }
+
+    #[tokio::test]
+    async fn kindmother_indisponible_503_jamais_version_1() {
+        let b = banc().await;
+        let d = b.donnee(TEXTE).await;
+        b.poser(&d).await;
+        assert_eq!(b.proposer(proposition(&d)).await.0, StatusCode::OK);
+        // État de publication sur une adresse morte (étiquettes lisibles).
+        let mort = {
+            let l = std::net::TcpListener::bind("127.0.0.1:0").expect("bind");
+            l.local_addr().expect("addr").to_string()
+        };
+        let (etat, app) = etat_de(
+            crate::gouvernance::tests::gouvernance_de_base(),
+            Some((
+                "alice".to_string(),
+                source(&b.addr, &b.dir),
+                PublicationsKindMother::charger(&mort, OPERATEUR_PUBLICATIONS, Some(&cred(&b.dir)))
+                    .expect("magasin"),
+                CleSignature::depuis_graine(&b.graine),
+            )),
+        );
+        assert!(!etat.precharger().await);
+        for _ in 0..2 {
+            let (s, r) = envoyer(app.clone(), CHEMIN, &proposition(&d).to_string(), true).await;
+            assert_eq!(
+                (s, r["reason"].as_str()),
+                (
+                    StatusCode::SERVICE_UNAVAILABLE,
+                    Some("kindmother_indisponible")
+                ),
+                "{r}"
+            );
+        }
+        assert_eq!(
+            etat.journal().last().map(|e| e.motif),
+            Some("kindmother_indisponible")
+        );
+        verifier_lignes(&b, &id_attendu(&d), 1).await;
+        // KindMother de retour : la version suivante, jamais la 1.
+        let (_, app) = b.redemarrer(crate::gouvernance::tests::gouvernance_de_base());
+        let (s, r) = envoyer(app, CHEMIN, &proposition(&d).to_string(), true).await;
+        assert_eq!(
+            (s, r["publiee"]["version"].as_u64()),
+            (StatusCode::OK, Some(2)),
+            "{r}"
+        );
+        // Base de l'état de publication nationale : refusée.
+        assert!(
+            PublicationsKindMother::charger(&b.addr, "maia-alice", Some(&cred(&b.dir))).is_err()
+        );
+    }
+
+    /// Magasin dont l'écriture échoue avant (rien d'écrit) ou après (écrit,
+    /// réponse perdue : issue ambiguë, comme un crash).
+    struct MagasinCapricieux {
+        inner: PublicationsKindMother,
+        echec_avant: AtomicBool,
+        echec_apres: AtomicBool,
+    }
+
+    impl MagasinPublications for MagasinCapricieux {
+        fn base(&self) -> &str {
+            self.inner.base()
+        }
+        async fn charger(&self) -> Result<Vec<PublicationDurable>, String> {
+            self.inner.charger().await
+        }
+        async fn enregistrer(&self, p: &PublicationDurable) -> Result<(), String> {
+            if self.echec_avant.swap(false, Ordering::SeqCst) {
+                return Err("transport".into());
+            }
+            self.inner.enregistrer(p).await?;
+            if self.echec_apres.swap(false, Ordering::SeqCst) {
+                return Err("réponse perdue".into());
+            }
+            Ok(())
+        }
+    }
+
+    #[tokio::test]
+    async fn ecriture_echouee_ou_ambigue_puis_rechargement() {
+        let b = banc_complet(
+            crate::gouvernance::tests::gouvernance_de_base(),
+            true,
+            |s| s,
+            |m| MagasinCapricieux {
+                inner: m,
+                echec_avant: AtomicBool::new(false),
+                echec_apres: AtomicBool::new(false),
+            },
+        )
+        .await;
+        let d = b.donnee(TEXTE).await;
+        b.poser(&d).await;
+        let id = id_attendu(&d);
+        let magasin = &b.etat.actif.as_ref().expect("actif").magasin;
+        // Échec avant l'écriture : rien de durable, rien de publié, la version 1 reste libre.
+        magasin.echec_avant.store(true, Ordering::SeqCst);
+        let (s, r) = b.proposer(proposition(&d)).await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Some("persistance_indisponible")
+            ),
+            "{r}"
+        );
+        assert_eq!(b.lignes().await, Vec::new());
+        let (s, r) = b.proposer(proposition(&d)).await;
+        assert_eq!(
+            (s, r["publiee"]["version"].as_u64()),
+            (StatusCode::OK, Some(1)),
+            "{r}"
+        );
+        // Écrite puis réponse perdue : l'état est relu, la version 2 est déjà prise.
+        magasin.echec_apres.store(true, Ordering::SeqCst);
+        let (s, r) = b.proposer(proposition(&d)).await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Some("persistance_indisponible")
+            ),
+            "{r}"
+        );
+        let (s, r) = b.proposer(avec(proposition(&d), "version", 2.into())).await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (StatusCode::CONFLICT, Some("version_deja_publiee")),
+            "{r}"
+        );
+        let (s, r) = b.proposer(proposition(&d)).await;
+        assert_eq!(
+            (s, r["publiee"]["version"].as_u64()),
+            (StatusCode::OK, Some(3)),
+            "{r}"
+        );
+        verifier_lignes(&b, &id, 3).await;
+        // Une version n'est enregistrée qu'une fois, jamais avec un autre contenu.
+        let mut double = b
+            .lignes()
+            .await
+            .into_iter()
+            .find(|l| l.fiche == id && l.version == 2)
+            .expect("v2");
+        double.octets.push(0);
+        double.empreinte = "00".repeat(32);
+        assert!(magasin.inner.enregistrer(&double).await.is_err());
+        verifier_lignes(&b, &id, 3).await;
+    }
+
+    #[tokio::test]
+    async fn refus_de_la_porte_ne_consomme_pas_d_attestation() {
+        let b = banc_avec(
+            crate::tamr::tests::gouvernance(crate::tamr::tests::POLITIQUE_SANS_TAMR),
+            true,
+        )
+        .await;
+        let d = b.donnee(TEXTE).await;
+        b.poser(&d).await;
+        for _ in 0..=maia_federee::MAX_ATTESTATIONS_PAR_PERIODE {
+            let (s, r) = b.proposer(proposition(&d)).await;
+            assert_eq!(
+                (s, r["reason"].as_str()),
+                (StatusCode::FORBIDDEN, Some("refus_porte")),
+                "{r}"
+            );
+        }
+        assert_eq!(b.lignes().await, Vec::new());
+        // Porte qui autorise : le plafond est entier.
+        let (_, app) = b.redemarrer(crate::gouvernance::tests::gouvernance_de_base());
+        for v in 1..=maia_federee::MAX_ATTESTATIONS_PAR_PERIODE as u64 {
+            let (s, r) = envoyer(app.clone(), CHEMIN, &proposition(&d).to_string(), true).await;
+            assert_eq!(
+                (s, r["publiee"]["version"].as_u64()),
+                (StatusCode::OK, Some(v)),
+                "{r}"
+            );
+        }
+        let (s, r) = envoyer(app, CHEMIN, &proposition(&d).to_string(), true).await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (StatusCode::TOO_MANY_REQUESTS, Some("plafond_attestations")),
+            "{r}"
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+    async fn concurrence_ni_version_dupliquee_ni_plafond_depasse() {
+        let b = banc().await;
+        let d = b.donnee(TEXTE).await;
+        b.poser(&d).await;
+        let corps = proposition(&d).to_string();
+        let taches: Vec<_> = (0..12)
+            .map(|_| {
+                let app = b.app.clone();
+                let corps = corps.clone();
+                tokio::spawn(async move { envoyer(app, CHEMIN, &corps, true).await })
+            })
+            .collect();
+        let mut versions = Vec::new();
+        let mut plafond = 0;
+        for t in taches {
+            let (s, r) = t.await.expect("tâche");
+            match s {
+                StatusCode::OK => versions.push(r["publiee"]["version"].as_u64().expect("v")),
+                StatusCode::TOO_MANY_REQUESTS => {
+                    assert_eq!(r["reason"].as_str(), Some("plafond_attestations"), "{r}");
+                    plafond += 1;
+                }
+                _ => panic!("{s} {r}"),
+            }
+        }
+        versions.sort_unstable();
+        let max = maia_federee::MAX_ATTESTATIONS_PAR_PERIODE as u64;
+        assert_eq!(versions, (1..=max).collect::<Vec<_>>());
+        assert_eq!(plafond, 12 - maia_federee::MAX_ATTESTATIONS_PAR_PERIODE);
+        verifier_lignes(&b, &id_attendu(&d), max).await;
+    }
+
+    #[tokio::test]
+    async fn donnee_etiquetee_par_un_autre_utilisateur_refusee() {
+        let b = banc().await;
+        let d = b.donnee(TEXTE).await;
+        // Bob (propriétaire de la base lui aussi) pose l'étiquette ; Alice propose.
+        b.etiqueter_par(
+            "bob",
+            &bob_etiquette(),
+            &d,
+            ActionEtiquette::Poser,
+            TEXTE,
+            maintenant_unix(),
+        )
+        .await;
+        let (s, v) = b.proposer(proposition(&d)).await;
+        assert_eq!(
+            (s, v["reason"].as_str()),
+            (StatusCode::FORBIDDEN, Some("non_publiable")),
+            "{v}"
+        );
+        assert_eq!(b.etat.derniere_version(&id_attendu(&d)).await, 0);
+        assert_eq!(b.lignes().await, Vec::new());
+        // Base de l'état de publication : jamais source d'une Fiche.
+        let mut r = d.clone();
+        r.base = OPERATEUR_PUBLICATIONS.to_uppercase();
+        let (s, v) = b.proposer(proposition(&r)).await;
+        assert_eq!(
+            (s, v["reason"].as_str()),
+            (StatusCode::FORBIDDEN, Some("base_reservee")),
+            "{v}"
+        );
+    }
+
+    /// Source dont le propriétaire relu change après la première lecture.
+    struct SourceVolage {
+        inner: EtiquettesKindMother,
+        lectures: AtomicUsize,
+    }
+
+    impl SourceEtiquettes for SourceVolage {
+        async fn lire(&self, donnee: &RefDonnee) -> Result<EtatEtiquette, String> {
+            let mut e = self.inner.lire(donnee).await?;
+            if self.lectures.fetch_add(1, Ordering::SeqCst) >= 1 {
+                e.utilisateur = Some("bob".into());
+            }
+            Ok(e)
+        }
+    }
+
+    #[tokio::test]
+    async fn proprietaire_change_entre_la_route_et_l_attestation() {
+        let b = banc_complet(
+            crate::gouvernance::tests::gouvernance_de_base(),
+            true,
+            |s| SourceVolage {
+                inner: s,
+                lectures: AtomicUsize::new(0),
+            },
+            |m| m,
+        )
+        .await;
+        let d = b.donnee(TEXTE).await;
+        b.poser(&d).await;
+        let (s, v) = b.proposer(proposition(&d)).await;
+        assert_eq!(
+            (s, v["reason"].as_str()),
+            (StatusCode::FORBIDDEN, Some("non_publiable")),
+            "{v}"
+        );
+        let j = b.etat.journal();
+        let e = j.last().expect("entrée");
+        // Refus à l'attestation (Fiche déjà scellée), non à la première lecture.
+        assert!(e.empreinte.is_some() && e.version == Some(1), "{e:?}");
+        assert_eq!(
+            b.etat
+                .actif
+                .as_ref()
+                .expect("actif")
+                .source
+                .lectures
+                .load(Ordering::SeqCst),
+            2
+        );
+        assert_eq!(b.lignes().await, Vec::new());
     }
 }

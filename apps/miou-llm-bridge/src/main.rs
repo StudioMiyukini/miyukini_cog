@@ -372,6 +372,11 @@ async fn main() {
         std::sync::Arc::clone(&gouvernance),
         cfg.security.clone(),
     ));
+    // État durable de publication (A-017) : rechargé de KindMother au démarrage ;
+    // indisponible ⇒ la route répond 503 et réessaie à chaque proposition.
+    if etat_federee.est_active() {
+        etat_federee.precharger().await;
+    }
 
     let state = ProxyState {
         client: http_client,
