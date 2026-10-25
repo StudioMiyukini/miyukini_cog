@@ -87,7 +87,11 @@ pub fn load_registry() -> ServiceRegistryData {
 
 /// Sauvegarde le registre sur disque.
 pub fn save_registry(registry: &ServiceRegistryData) -> Result<(), String> {
-    let path = registry_path();
+    save_registry_to(&registry_path(), registry)
+}
+
+/// Sauvegarde le registre dans un fichier explicite.
+pub fn save_registry_to(path: &std::path::Path, registry: &ServiceRegistryData) -> Result<(), String> {
     // Créer le répertoire parent si nécessaire
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)
@@ -95,7 +99,7 @@ pub fn save_registry(registry: &ServiceRegistryData) -> Result<(), String> {
     }
     let json = serde_json::to_string_pretty(registry)
         .map_err(|e| format!("Sérialisation du registre échouée: {e}"))?;
-    std::fs::write(&path, json).map_err(|e| format!("Écriture du registre échouée: {e}"))?;
+    std::fs::write(path, json).map_err(|e| format!("Écriture du registre échouée: {e}"))?;
     tracing::debug!("Registre sauvegardé: {} services", registry.services.len());
     Ok(())
 }

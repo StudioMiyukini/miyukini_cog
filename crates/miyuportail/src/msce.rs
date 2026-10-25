@@ -209,13 +209,40 @@ pub fn encoder_charge(d: &Declaration) -> Result<Vec<u8>, RefusDecodage> {
 
 /// Scelle une déclaration : trame MSCE signée par chaque clé (1 à 8, distinctes).
 pub fn sceller(d: &Declaration, cles: &[&SigningKey]) -> Result<Vec<u8>, RefusDecodage> {
-    if cles.is_empty() || cles.len() > MAX_SIGNATURES {
+    sceller_cosigne(d, cles, &[])
+}
+
+/// Cosignature produite hors du scelleur : `(clé publique Ed25519, signature
+/// des octets signés de la charge)`. Cas d'usage : l'**auteur** d'une
+/// déclaration entrante signe sur son propre appareil ; la façade ajoute la
+/// signature de sa clé de session sans jamais détenir la clé de l'auteur.
+pub type Cosignature = ([u8; 32], [u8; 64]);
+
+/// Scelle une déclaration avec des clés locales **et** des cosignatures
+/// externes (1 à 8 signataires au total, distincts). Chaque cosignature est
+/// vérifiée (`verify_strict`, clé faible refusée) **avant** assemblage : une
+/// cosignature fausse ne produit aucune trame.
+pub fn sceller_cosigne(
+    d: &Declaration,
+    cles: &[&SigningKey],
+    cosignatures: &[Cosignature],
+) -> Result<Vec<u8>, RefusDecodage> {
+    let total = cles.len() + cosignatures.len();
+    if cles.is_empty() || total > MAX_SIGNATURES {
         return Err(RefusDecodage::Signataires);
     }
     let charge = encoder_charge(d)?;
     let message = octets_signes(&charge);
     let mut entrees: Vec<(Kid, [u8; 64])> =
         cles.iter().map(|c| (kid(&c.verifying_key().to_bytes()), c.sign(&message).to_bytes())).collect();
+    for (cle, sig) in cosignatures {
+        let vk = VerifyingKey::from_bytes(cle).map_err(|_| RefusDecodage::Signataires)?;
+        if vk.is_weak() {
+            return Err(RefusDecodage::Signataires);
+        }
+        vk.verify_strict(&message, &Signature::from_bytes(sig)).map_err(|_| RefusDecodage::Signature)?;
+        entrees.push((kid(cle), *sig));
+    }
     entrees.sort_by_key(|e| e.0);
     if entrees.windows(2).any(|p| p[0].0 == p[1].0) {
         return Err(RefusDecodage::Signataires);

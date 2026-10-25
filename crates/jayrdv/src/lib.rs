@@ -12,12 +12,14 @@
 
 pub mod data;
 pub mod domain;
+pub mod hybride;
 
 pub use data::{
     Appointment, AppointmentStatus, CancelledBy, Client, DbError, Exception, JayRdvStore,
     MemoryJayRdvStore, Practitioner, PractitionerRole, Professional, ProfessionalSettings,
     Reminder, ReminderChannel, Resource, Schedule, ScheduleOwner, Service, Slot, SlotStatus,
 };
+pub use hybride::{MoteurJayRdv, RapportLot};
 pub use domain::{
     appointment_cancel, appointment_create, appointment_set_status, client_create,
     exception_create, practitioner_create, professional_create, reminder_create, resource_create,

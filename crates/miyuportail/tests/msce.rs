@@ -216,3 +216,33 @@ fn bornes_de_taille() {
 fn miyusceau_refuse_le_type_declaration() {
     assert!(miyusceau::Sceau::decoder(&trame_reference()).is_err());
 }
+
+// ---------------------------------------------------------------- cosignature (lot 5)
+
+#[test]
+fn cosignature_externe_identique_au_scellement_conjoint() {
+    use ed25519_dalek::Signer;
+    use miyuportail::msce::{encoder_charge, octets_signes, sceller_cosigne};
+    let s = id("jayoffice.docs");
+    let d = declaration(&s, Sens::Entrante, ENTRANT, 1, champs_simples());
+    // L'auteur signe sur son appareil ; la façade ajoute sa clé de session.
+    let sig = cle(9).sign(&octets_signes(&encoder_charge(&d).unwrap())).to_bytes();
+    let cosigne = sceller_cosigne(&d, &[&cle(7)], &[(cle(9).verifying_key().to_bytes(), sig)]).unwrap();
+    assert_eq!(cosigne, trame_reference(), "même trame canonique");
+    let ctx = Contexte { service: &s, sens: Sens::Entrante, traite: &traite(), ancres: &ancres() };
+    assert_eq!(decoder_trame(&cosigne, &ctx).unwrap().champs, champs_simples());
+    // Cosignature fausse (autre charge) : aucune trame produite.
+    let autre = declaration(&s, Sens::Entrante, ENTRANT, 2, champs_simples());
+    let fausse = cle(9).sign(&octets_signes(&encoder_charge(&autre).unwrap())).to_bytes();
+    assert_eq!(
+        sceller_cosigne(&d, &[&cle(7)], &[(cle(9).verifying_key().to_bytes(), fausse)]),
+        Err(RefusDecodage::Signature)
+    );
+    // Doublon (même clé locale et externe) et absence de clé locale : refus.
+    let propre = cle(7).sign(&octets_signes(&encoder_charge(&d).unwrap())).to_bytes();
+    assert_eq!(
+        sceller_cosigne(&d, &[&cle(7)], &[(cle(7).verifying_key().to_bytes(), propre)]),
+        Err(RefusDecodage::Signataires)
+    );
+    assert_eq!(sceller_cosigne(&d, &[], &[(cle(9).verifying_key().to_bytes(), sig)]), Err(RefusDecodage::Signataires));
+}

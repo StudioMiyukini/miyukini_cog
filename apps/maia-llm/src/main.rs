@@ -14,6 +14,7 @@
 
 mod api;
 mod auth;
+mod canal;
 mod config;
 mod engine;
 mod provenance;

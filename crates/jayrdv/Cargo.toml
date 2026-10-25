@@ -24,12 +24,20 @@ thiserror = "2"
 kindmother-client = { path = "../kindmother-client", optional = true }
 tokio = { version = "1", features = ["rt-multi-thread"], optional = true }
 serde_json = { version = "1", optional = true }
+# Moteur du service hybride H2 (lot 5) : relève les messages du traité via le Portail, sans protocole externe (INV-H1).
+miyuhybride = { path = "../miyuhybride" }
+jayrdv-traite = { path = "../jayrdv-traite" }
 
 [dev-dependencies]
 # Serveur KindMother éphémère en processus (tests du store KindMother).
 kindmother-service = { path = "../kindmother-service" }
 kindmother-client = { path = "../kindmother-client" }
 tempfile = "3"
+# Test de sortie du lot 5 : façade, Portail en processus, identités fédérées.
+jayrdv-facade = { path = "../jayrdv-facade" }
+miyuportail = { path = "../miyuportail" }
+miyauth = { path = "../miyauth", features = ["http"] }
+miyusceau = { path = "../miyusceau" }
 
 [features]
 # Défaut : persistance réelle via KindMother (full KM).

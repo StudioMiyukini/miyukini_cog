@@ -48,6 +48,9 @@ llama-cpp-2.workspace = true
 miyusceau = { path = "../../crates/miyusceau" }
 # Requêtes signées des appelants épinglés (lot 2 : plus de clé partagée)
 miyauth = { path = "../../crates/miyauth", features = ["http"] }
+# Canal officiel (lot 4) : installateur de la catégorie ModeleIa
+miyucanal = { path = "../../crates/miyucanal" }
+miyuregistre = { path = "../../crates/miyuregistre" }
 
 # Hash content-addressed (store)
 sha2 = "0.10"
@@ -66,6 +69,10 @@ rand = "0.8"
 libc = "0.2"
 # UID/GID effectifs sans `unsafe` (propriétaire et droits du modèle)
 rustix = { version = "1", default-features = false, features = ["std", "process"] }
+
+[dev-dependencies]
+# Banc d'essai du canal officiel (annonces 2 sur 2, dépôt simulé)
+miyucanal = { path = "../../crates/miyucanal", features = ["banc-essai"] }
 
 [lints]
 workspace = true

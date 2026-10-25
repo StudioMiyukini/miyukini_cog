@@ -52,6 +52,9 @@ pub enum OperationMarket {
     Installer,
     /// Mise à jour d'un service installé.
     MettreAJour,
+    /// Mise à jour des Cores remise par le canal officiel (lot 4 : annonce 2 sur 2,
+    /// quarantaine écoulée) ; décision distincte de la mise à jour Market.
+    MettreAJourCanal,
     /// Désinstallation d'un service.
     Desinstaller,
     /// Lancement du processus d'un service.
@@ -66,6 +69,7 @@ impl OperationMarket {
         match self {
             Self::Installer => "installer",
             Self::MettreAJour => "mettre_a_jour",
+            Self::MettreAJourCanal => "mettre_a_jour_canal",
             Self::Desinstaller => "desinstaller",
             Self::Lancer => "lancer",
             Self::InjecterSecrets => "injecter_secrets",
@@ -76,7 +80,7 @@ impl OperationMarket {
     pub const fn action(self) -> ActionType {
         match self {
             Self::Installer | Self::Lancer => ActionType::Creation,
-            Self::MettreAJour => ActionType::Modification,
+            Self::MettreAJour | Self::MettreAJourCanal => ActionType::Modification,
             Self::Desinstaller => ActionType::Deletion,
             Self::InjecterSecrets => ActionType::Read,
         }
@@ -85,7 +89,7 @@ impl OperationMarket {
     /// Sujet de l'intention (opérateur qui agit).
     pub const fn sujet(self) -> &'static str {
         match self {
-            Self::Installer | Self::MettreAJour | Self::Desinstaller => SUJET_MARKET,
+            Self::Installer | Self::MettreAJour | Self::MettreAJourCanal | Self::Desinstaller => SUJET_MARKET,
             Self::Lancer | Self::InjecterSecrets => SUJET_SERVICES,
         }
     }
@@ -325,6 +329,13 @@ mod tests {
             &signe(OperationMarket::InjecterSecrets, "miyucloud", Provenance::SigneeOfficielle)
         ));
         assert!(autorise(&g, &ActionMarket::nouvelle(OperationMarket::Desinstaller, "svc", "")));
+        // Canal officiel : éditeur officiel seulement, jamais de dérogation dev.
+        let canal = OperationMarket::MettreAJourCanal;
+        assert!(autorise(&g, &signe(canal, "svc", Provenance::SigneeOfficielle)));
+        assert!(autorise(&g, &signe(canal, "miyucloud", Provenance::SigneeOfficielle)));
+        assert!(!autorise(&g, &signe(canal, "svc", Provenance::SigneeTierce)));
+        assert!(!autorise(&g, &signe(canal, "svc", Provenance::NonSigneeDev)));
+        assert!(!autorise(&g, &ActionMarket::nouvelle(canal, "svc", "1.0.0")));
     }
 
     /// Même si un contrôle amont était contourné, StrongFather refuse seul.

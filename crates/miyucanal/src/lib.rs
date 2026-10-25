@@ -18,12 +18,16 @@
 //! - [`annonce`] : annonces 2 sur 2 {Origin, éditeur}, révocations ;
 //! - [`releveur`] : miroir vérifié du registre officiel, quarantaine de 48 h,
 //!   anti-retour, remise à l'[`Installateur`] ;
-//! - [`quarantaine`] : liste en attente persistée, scellée HMAC-SHA256 (A-006).
+//! - [`quarantaine`] : liste en attente persistée, scellée HMAC-SHA256 (A-006) ;
+//! - `banc` (fonctionnalité `banc-essai`, tests seulement) : Origin, éditeur et
+//!   dépôt simulés pour éprouver un [`Installateur`].
 //!
 //! Le canal n'installe rien : l'installation réelle reste le chemin gouverné
 //! existant (Central / StrongFather), branché via [`Installateur`].
 
 pub mod annonce;
+#[cfg(feature = "banc-essai")]
+pub mod banc;
 pub mod erreurs;
 pub mod quarantaine;
 pub mod releveur;

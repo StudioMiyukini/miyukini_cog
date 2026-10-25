@@ -1,0 +1,19 @@
+[package]
+name = "jayrdv-traite"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["jayrdv", "traite", "hybride"]
+categories.workspace = true
+description = "Traité JayRDV (service H2) : messages moteur ⇄ façade et contrat de référence, codecs générés des deux côtés (EX-42)"
+
+[dependencies]
+# Seule dépendance : le cadre des services hybrides (aucun accès KindMother, aucun protocole externe).
+miyuhybride = { path = "../miyuhybride" }
+
+[lints]
+workspace = true

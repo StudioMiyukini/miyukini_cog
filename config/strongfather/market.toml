@@ -10,9 +10,10 @@
 # remise de secrets REFUSÉS (fail-closed), jamais « tout autoriser ».
 #
 # Intention soumise (voir apps/central/src/service_manager/gouvernance.rs) :
-# - subject  : `central.market` (installer, mettre_a_jour, desinstaller)
+# - subject  : `central.market` (installer, mettre_a_jour, mettre_a_jour_canal, desinstaller)
 #              `central.services` (lancer, injecter_secrets)
-# - action   : installer = creation, mettre_a_jour = modification, desinstaller = deletion,
+# - action   : installer = creation, mettre_a_jour = modification,
+#              mettre_a_jour_canal = modification, desinstaller = deletion,
 #              lancer = creation, injecter_secrets = read
 # - caller   : profil connecté si connu, sinon `local` ; origin = `central`
 # - data     : operation, paquet, version, provenance (signee_officielle | signee_tierce |
@@ -55,6 +56,18 @@ effect = "authorize"
 rule = "data.operation in ['installer', 'mettre_a_jour'] && data.provenance == 'signee_officielle' && data.niveau_confiance == 'souverain'"
 [policy.target]
 actions = ["creation", "modification"]
+subjects = ["central.market"]
+
+# Canal officiel (lot 4, A-006) : mise à jour des Cores déjà vérifiée 2 sur 2 {Origin,
+# éditeur} et sortie de quarantaine ; le paquet .msp reste signé par un éditeur officiel
+# (défense en profondeur). Aucune dérogation de développement sur ce chemin.
+[[policy]]
+id = "market-canal-officiel"
+type = "permission"
+effect = "authorize"
+rule = "data.operation == 'mettre_a_jour_canal' && data.provenance == 'signee_officielle' && data.niveau_confiance == 'souverain'"
+[policy.target]
+actions = ["modification"]
 subjects = ["central.market"]
 
 # Décision du propriétaire (2026-10-24) : seuls les éditeurs officiels installent ;

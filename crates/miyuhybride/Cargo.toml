@@ -1,0 +1,36 @@
+[package]
+name = "miyuhybride"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Services hybrides — manifeste de service signé (classe H0–H3, contrat de ressources et de flux), patron moteur / façade / traité, façades jetables (EX-16, EX-40..43, EX-48)"
+
+[dependencies]
+miyuportail = { path = "../miyuportail" }
+miyusceau = { path = "../miyusceau" }
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
+sha2 = "0.10"
+thiserror = "2"
+# Génération des entrées Douane / BorderGuard (côté Cores uniquement, feature `douane`).
+borderguard = { path = "../borderguard", optional = true }
+miyudouane = { path = "../miyudouane", optional = true }
+
+[features]
+default = []
+# Dérivation des entrées Douane (flux d'arrêté, sandbox Franche) depuis le manifeste.
+# Réservée aux Cores : une façade n'en a pas besoin et ne l'active pas.
+douane = ["dep:borderguard", "dep:miyudouane"]
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+# Compatibilité du manifeste avec l'installeur du Market (tag 5 transporté).
+miyumarket = { path = "../miyumarket" }

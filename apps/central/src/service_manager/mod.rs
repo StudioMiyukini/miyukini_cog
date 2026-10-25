@@ -256,6 +256,20 @@ fn parse_version(v: &str) -> Option<semver::Version> {
     semver::Version::parse(&padded).ok()
 }
 
+/// Version entière du canal officiel (lot 4) d'une version semver de service :
+/// `majeure × 10¹² + mineure × 10⁶ + correctif` (mineure et correctif < 10⁶).
+///
+/// Convention de Central, non spécifiée par la doc gelée (à amender) : l'ordre
+/// est celui de semver pour les versions publiées ; une pré-version ou une
+/// métadonnée de build n'a **pas** de version de canal (`None`).
+pub fn version_canal(v: &str) -> Option<u64> {
+    let p = parse_version(v)?;
+    if !p.pre.is_empty() || !p.build.is_empty() || p.minor >= 1_000_000 || p.patch >= 1_000_000 {
+        return None;
+    }
+    p.major.checked_mul(1_000_000_000_000)?.checked_add(p.minor * 1_000_000 + p.patch)
+}
+
 /// Vrai si `available` est strictement plus récente que `installed` (semver).
 /// Fail-closed : une version illisible ne déclenche jamais de mise à jour.
 pub fn is_newer_version(available: &str, installed: &str) -> bool {
@@ -267,7 +281,18 @@ pub fn is_newer_version(available: &str, installed: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::is_newer_version;
+    use super::{is_newer_version, version_canal};
+
+    #[test]
+    fn version_canal_suit_semver() {
+        assert_eq!(version_canal("2.0.0"), Some(2_000_000_000_000));
+        assert_eq!(version_canal("v0.10.3"), Some(10_000_003));
+        assert!(version_canal("0.10.0") > version_canal("0.9.999"));
+        assert_eq!(version_canal("1.0.0-beta.1"), None);
+        assert_eq!(version_canal("1.0.0+build"), None);
+        assert_eq!(version_canal("1.1000000.0"), None);
+        assert_eq!(version_canal("n'importe quoi"), None);
+    }
 
     #[test]
     fn semver_0_10_plus_recent_que_0_9() {

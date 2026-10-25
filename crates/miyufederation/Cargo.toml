@@ -1,0 +1,26 @@
+[package]
+name = "miyufederation"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Fédération COG — candidature hashcash, statuts invité / membre, blacklist sur preuves signées et quorum de 6, note locale, anti-éclipse, sans Origin (lot 6, EX-30..33, EX-35, EX-37, EX-38)"
+
+# Aucune dépendance réseau : la crate décide, le transport (commérage) est ailleurs.
+[dependencies]
+miyusceau = { path = "../miyusceau" }
+miyuracine = { path = "../miyuracine" }
+miyuregistre = { path = "../miyuregistre" }
+miyauth = { path = "../miyauth" }
+sha2 = "0.10"
+thiserror = "2"
+
+[dev-dependencies]
+
+[lints]
+workspace = true

@@ -11,6 +11,7 @@
 
 mod app;
 mod audio;
+pub mod canal_officiel;
 pub mod cle_service;
 mod components;
 mod data;

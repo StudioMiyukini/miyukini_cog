@@ -15,6 +15,12 @@ description = "Registre Merkle local et fédéral (RFC 9162) — entrées typée
 miyusceau = { path = "../miyusceau" }
 sha2 = "0.10"
 thiserror = "2"
+# Adaptateur `SourceRevocation` (lot 2 §8.2) : facultatif, sans cycle (miyauth ne dépend pas du registre).
+miyauth = { path = "../miyauth", optional = true }
+
+[features]
+# `revocation::RevocationsRegistre` : révocations miyauth lues dans un miroir vérifié.
+miyauth = ["dep:miyauth"]
 
 [lints]
 workspace = true

@@ -61,6 +61,12 @@ miyusceau = { path = "../../crates/miyusceau" }
 miyauth = { path = "../../crates/miyauth", features = ["http"] }
 # Porte StrongFather obligatoire (K-11) : Market, lancement, secrets (ré-exporte strongfather)
 bondingbrother = { path = "../../crates/bondingbrother" }
+# Canal officiel (lot 4, A-006) : relevé, quarantaine, miroir du registre officiel,
+# refus remontés à WorrySentinel ; secret local aléatoire (clé de la quarantaine)
+miyucanal = { path = "../../crates/miyucanal" }
+miyuregistre = { path = "../../crates/miyuregistre" }
+worrysentinel = { path = "../../crates/worrysentinel" }
+rand_core = { version = "0.6", features = ["getrandom"] }
 
 # Alicia Home Assistante — capture audio locale + détection de wake word
 miyualicia-capture = { path = "../../crates/miyuvoicecapture" }
@@ -82,6 +88,10 @@ central-remote = { path = "../../crates/central-remote" }
 miyuki-ui-dioxus = { path = "../../crates/miyuki-ui-dioxus" }
 miyuki-ui-tokens = { path = "../../crates/miyuki-ui-tokens" }
 miyukini-service-ui = { path = "../../crates/miyukini-service-ui" }
+
+[dev-dependencies]
+# Banc d'essai du canal officiel (annonces 2 sur 2, dépôt simulé)
+miyucanal = { path = "../../crates/miyucanal", features = ["banc-essai"] }
 
 [lints.rust]
 unsafe_code = "forbid"

@@ -257,6 +257,44 @@ pub fn verifier_puis_installer(
     })?
 }
 
+/// Mise à jour des Cores remise par le canal officiel (lot 4, A-006).
+///
+/// Le canal a déjà vérifié l'annonce 2 sur 2, la quarantaine, l'inclusion et
+/// l'empreinte de l'artefact ; s'y ajoutent ici (défense en profondeur) :
+/// signature `.msp` d'un éditeur épinglé **sans dérogation de développement**,
+/// version du manifeste signé = version annoncée ([`super::version_canal`]),
+/// décision StrongFather `mettre_a_jour_canal` avant l'arrêt du service
+/// (`arreter`), puis le chemin unique [`verifier_puis_installer`] (même
+/// opération, nouvelle décision). Refus à une étape ⇒ aucun octet écrit.
+#[allow(clippy::too_many_arguments)]
+pub fn installer_depuis_canal(
+    octets: &[u8],
+    service_id: &str,
+    version_annoncee: u64,
+    ancres: &AncresDeConfiance,
+    maintenant_secs: u64,
+    gouvernance: &GouvernanceMarket,
+    registry: &mut ServiceRegistryData,
+    root: &std::path::Path,
+    arreter: impl FnOnce() -> Result<(), String>,
+) -> Result<String, String> {
+    let paquet = verifier_paquet_market(octets, service_id, None, ancres, maintenant_secs, false)?;
+    let PaquetAccepte::Signe(signe) = &paquet else {
+        return Err("canal officiel : paquet non signé refusé".to_string());
+    };
+    let version = signe.manifeste().version.clone();
+    if super::version_canal(&version) != Some(version_annoncee) {
+        return Err(format!(
+            "canal officiel : version du paquet « {version} » différente de la version annoncée {version_annoncee}"
+        ));
+    }
+    let operation = OperationMarket::MettreAJourCanal;
+    let action = paquet.action_market(operation, service_id, Some(&version));
+    gouvernance.executer_action_market(&action, |_jeton| arreter())??;
+    let contexte = ContexteVerification { ancres, maintenant_secs, dev_non_signe: false };
+    verifier_puis_installer(octets, service_id, Some(&version), contexte, gouvernance, operation, registry, root)
+}
+
 /// Écriture d'un paquet vérifié. N'est appelée que dans la fermeture autorisée de
 /// [`verifier_puis_installer`] (aucun autre chemin d'installation : K-11).
 /// `expected_id` : le manifeste du package doit porter exactement cet id (audit C3).

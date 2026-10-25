@@ -31,6 +31,8 @@ use miyukini_central::CentralMwsState;
 pub fn App() -> Element {
     // Initialiser le Service Manager (charge le registre des services installés)
     let service_manager = ServiceManager::init();
+    // Canal officiel (lot 4) : configuration et état vérifiés une fois ; désactivé par défaut.
+    let _ = crate::canal_officiel::demarrer(&service_manager);
 
     // Fournir le theme miyuki-ui-dioxus à tous les composants enfants.
     provide_theme(COG_THEME.clone());

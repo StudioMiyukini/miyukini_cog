@@ -5349,8 +5349,14 @@ name = "jayrdv"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "jayrdv-facade",
+ "jayrdv-traite",
  "kindmother-client",
  "kindmother-service",
+ "miyauth",
+ "miyuhybride",
+ "miyuportail",
+ "miyusceau",
  "serde",
  "serde_json",
  "tempfile",
@@ -5374,6 +5380,26 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "jayrdv-facade"
+version = "0.1.0"
+dependencies = [
+ "jayrdv-traite",
+ "miyauth",
+ "miyuhybride",
+ "miyusceau",
+ "serde",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
+name = "jayrdv-traite"
+version = "0.1.0"
+dependencies = [
+ "miyuhybride",
 ]
 
 [[package]]
@@ -6055,6 +6081,8 @@ dependencies = [
  "libc",
  "llama-cpp-2",
  "miyauth",
+ "miyucanal",
+ "miyuregistre",
  "miyusceau",
  "rand 0.8.5",
  "reqwest",
@@ -6875,6 +6903,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "miyufederation"
+version = "0.1.0"
+dependencies = [
+ "miyauth",
+ "miyuracine",
+ "miyuregistre",
+ "miyusceau",
+ "sha2",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "miyufeeds"
 version = "0.1.0"
 dependencies = [
@@ -6912,6 +6952,21 @@ version = "0.1.0"
 dependencies = [
  "miyukini-kernel",
  "serde",
+]
+
+[[package]]
+name = "miyuhybride"
+version = "0.1.0"
+dependencies = [
+ "borderguard",
+ "ed25519-dalek",
+ "miyudouane",
+ "miyumarket",
+ "miyuportail",
+ "miyusceau",
+ "rand_core 0.6.4",
+ "sha2",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -7040,14 +7095,17 @@ dependencies = [
  "miyauth",
  "miyualicia-capture",
  "miyualicia-wakeword",
+ "miyucanal",
  "miyuki-ui-dioxus",
  "miyuki-ui-tokens",
  "miyukini-central",
  "miyukini-connect",
  "miyukini-service-ui",
  "miyumarket",
+ "miyuregistre",
  "miyusceau",
  "miyuwebway_participant",
+ "rand_core 0.6.4",
  "reqwest",
  "rfd 0.15.4",
  "rodio",
@@ -7060,6 +7118,7 @@ dependencies = [
  "tracing-subscriber",
  "urlencoding",
  "uuid",
+ "worrysentinel",
  "zip 2.4.2",
 ]
 
@@ -7371,6 +7430,7 @@ dependencies = [
 name = "miyuregistre"
 version = "0.1.0"
 dependencies = [
+ "miyauth",
  "miyusceau",
  "sha2",
  "thiserror 2.0.18",

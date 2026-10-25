@@ -1,0 +1,26 @@
+[package]
+name = "jayrdv-facade"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["jayrdv", "facade", "franche"]
+categories.workspace = true
+description = "Façade JayRDV (Franche) : API de réservation pour appareil fédéré, visa + preuve de possession, traduction en messages du traité, DB secondaire jetable (EX-41, EX-43)"
+
+# Règle d'architecture (vérifiée par tests/architecture.rs) : aucune dépendance,
+# même transitive, vers le moteur (`jayrdv`), KindMother ou le Central.
+[dependencies]
+miyuhybride = { path = "../miyuhybride" }
+jayrdv-traite = { path = "../jayrdv-traite" }
+miyauth = { path = "../miyauth", features = ["http"] }
+miyusceau = { path = "../miyusceau" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+
+[lints]
+workspace = true

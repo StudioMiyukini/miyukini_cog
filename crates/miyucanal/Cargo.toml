@@ -19,5 +19,9 @@ sha2 = "0.10"
 thiserror = "2"
 zeroize = "1"
 
+[features]
+# Banc d'essai (Origin, éditeur, dépôt simulés) pour les tests des installateurs branchés sur le canal.
+banc-essai = []
+
 [lints]
 workspace = true

@@ -21,6 +21,11 @@
 //! | 2 | version | oui |
 //! | 3 | SHA-256 de l'archive ZIP | oui |
 //! | 4 | `binary_name` du manifeste | si présent dans le manifeste |
+//! | 5 | contrat de service (TLV imbriqué opaque, lot 5) | services hybrides (EX-16, EX-40) |
+//!
+//! Le champ 5 est **opaque** pour le Market : il est couvert par la signature
+//! de l'éditeur et décodé, strictement, par `miyuhybride` (classe H0–H3,
+//! ressources, traité, façade). Le Market ne l'interprète pas.
 //!
 //! L'enveloppe est opaque pour Origin (stockage et checksum inchangés) : aucune
 //! modification du serveur n'est requise pour distribuer un paquet signé.
@@ -53,6 +58,7 @@ const TAG_SERVICE_ID: u8 = 1;
 const TAG_VERSION: u8 = 2;
 const TAG_SHA256_ARCHIVE: u8 = 3;
 const TAG_NOM_BINAIRE: u8 = 4;
+const TAG_CONTRAT: u8 = 5;
 
 /// Titre signé « manifeste de paquet » (Sceau type 0x03).
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -65,6 +71,8 @@ pub struct ManifestePaquet {
     pub sha256_archive: [u8; 32],
     /// `binary_name` déclaré par le manifeste embarqué (None si absent).
     pub nom_binaire: Option<String>,
+    /// Contrat de service signé (tag 5, opaque ici ; décodé par `miyuhybride`).
+    pub contrat: Option<Vec<u8>>,
 }
 
 fn texte_valide(tag: u8, v: &str) -> Result<(), ErreurSceau> {
@@ -88,6 +96,12 @@ impl Titre for ManifestePaquet {
             texte_valide(TAG_NOM_BINAIRE, nom)?;
             ecrivain.texte(TAG_NOM_BINAIRE, nom)?;
         }
+        if let Some(contrat) = &self.contrat {
+            if contrat.is_empty() {
+                return Err(ErreurSceau::ValeurInvalide(TAG_CONTRAT));
+            }
+            ecrivain.octets(TAG_CONTRAT, contrat)?;
+        }
         Ok(())
     }
 
@@ -107,7 +121,12 @@ impl Titre for ManifestePaquet {
             }
             None => None,
         };
-        Ok(Self { service_id, version, sha256_archive, nom_binaire })
+        let contrat = match lecteur.optionnel(TAG_CONTRAT)? {
+            Some([]) => return Err(ErreurSceau::ValeurInvalide(TAG_CONTRAT)),
+            Some(octets) => Some(octets.to_vec()),
+            None => None,
+        };
+        Ok(Self { service_id, version, sha256_archive, nom_binaire, contrat })
     }
 }
 
@@ -236,6 +255,7 @@ pub fn signer_paquet(
         version: version.to_string(),
         sha256_archive: sha256(archive),
         nom_binaire: nom_binaire.map(str::to_string),
+        contrat: None,
     };
     let sceau = miyusceau::sceller(&titre, cle)?;
     let longueur = u32::try_from(sceau.len())
