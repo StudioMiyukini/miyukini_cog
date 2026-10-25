@@ -236,3 +236,7 @@
 - Compilations reproductibles des Cores et services officiels (EX-04)
 - Audit externe avant toute ouverture publique
 - Réduction des `unwrap` hors tests sur P0 et P1 à zéro (C-10)
+- **État (2026-10-25, A-011)**
+  - fait : C-10 sur 35 crates P0/P1 (`scripts/compter-unwrap.sh`, deny clippy) ; builds reproductibles, 5 binaires sur 5 identiques (`scripts/build-reproductible.sh`) ; 13 nouvelles cibles de fuzzing (MCCE, MMIA, titres fédéraux, MFPV, contrat, Fiche, requête, lecteur, mémoire), un bug de normalisation corrigé
+  - fait hors lot 8 : clé racine `MYRC` et durcissement (lot 2) ; quotas et révocations de la façade (lot 5) ; état fédéral `MFED` (lot 6) ; chemin TAMR, routes de la mémoire, outil `memoire_noter` (lot 7)
+  - reste : couverture ≥ 80 % mesurée ; C-10 hors P0/P1 (432 occurrences, surtout MiyuCloud et MAIA) ; audit externe ; guichet des visas (décision à prendre) ; authentification des routes mémoire par passeport et visa
