@@ -280,14 +280,14 @@ impl MemoryStore {
         for id in &ids {
             if faits.contains(*id) {
                 intents.push(
-                    TypedWriteIntent::delete(FACTS)
+                    TypedWriteIntent::forget(FACTS)
                         .key("id", id.as_str())
                         .purpose("alicia_memoire_oubli_reapplique"),
                 );
             }
             if versions.contains(*id) {
                 intents.push(
-                    TypedWriteIntent::delete(FACT_VERSIONS)
+                    TypedWriteIntent::forget(FACT_VERSIONS)
                         .key("fact_id", id.as_str())
                         .purpose("alicia_memoire_oubli_reapplique"),
                 );
@@ -478,13 +478,13 @@ impl MemoryStore {
         let mut intents = Vec::new();
         if actuel {
             intents.push(
-                TypedWriteIntent::delete(FACTS)
+                TypedWriteIntent::forget(FACTS)
                     .key("id", id_s.as_str())
                     .purpose("alicia_memoire_oubli_demande"),
             );
         }
         intents.push(
-            TypedWriteIntent::delete(FACT_VERSIONS)
+            TypedWriteIntent::forget(FACT_VERSIONS)
                 .key("fact_id", id_s.as_str())
                 .purpose("alicia_memoire_oubli_demande"),
         );

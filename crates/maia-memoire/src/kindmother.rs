@@ -531,7 +531,7 @@ fn intention(e: &Ecriture) -> Vec<TypedWriteIntent> {
             .purpose("memoire_retirer_candidat")],
         // Oubli : effacement de toutes les versions et pierre tombale dans le même lot.
         Ecriture::Oublier(t) => vec![
-            TypedWriteIntent::delete("versions")
+            TypedWriteIntent::forget("versions")
                 .key("id", t.id.as_str())
                 .purpose("memoire_oubli_demande"),
             TypedWriteIntent::insert("tombes")
