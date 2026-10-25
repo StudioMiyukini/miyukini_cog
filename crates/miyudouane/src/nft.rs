@@ -38,6 +38,18 @@
 //! (frontières 101..103, zones 110..112) et `<MOTIF>` l'un de
 //! [`MOTIFS_JOURNAL`]. Les Vigies lisent ces groupes (libnetfilter_log /
 //! socket NFLOG) ; chaque motif a sa gravité ([`crate::ips::Gravite`]).
+//!
+//! ## Journalisation bornée (anti-inondation du relais NFLOG)
+//!
+//! Journaliser chaque paquet rejeté laisserait une inondation saturer le
+//! tampon netlink du relais (`ENOBUFS`) ⇒ capteur muet ⇒ voie aveugle ⇒
+//! coupure de toutes les voies du groupe. Chaque rejet est donc écrit en trois
+//! règles ([`rejet`]) : journal limité **par flux** (ensembles dynamiques
+//! `journal_v4` / `journal_v6`, clé `saddr . daddr . l4proto`, une ligne par
+//! seconde, expiration 10 s, 65 536 flux) **et** par une limite **globale** de
+//! la table (objet `limit journal`, 50 lignes/s, rafale 100), puis rejet
+//! inconditionnel compté par le compteur nommé `rejets` (volume total rejeté,
+//! journalisé ou non). Le `drop` ne dépend jamais des limites.
 
 use std::collections::BTreeSet;
 use std::fmt::Write as _;
@@ -53,8 +65,71 @@ pub const PREFIXE_JOURNAL: &str = "MDOU";
 pub const MOTIFS_JOURNAL: [&str; 8] =
     ["NON-DECLARE", "SORTIE-COG", "ENTREE-COG", "INVALIDE", "DEBIT", "TAILLE", "LATERAL", "FERME"];
 
-fn journal(lieu: &str, chaine: &str, motif: &str, groupe: u16) -> String {
-    format!("counter log prefix \"{PREFIXE_JOURNAL}|{lieu}|{chaine}|{motif}|\" group {groupe} drop")
+/// Débit de journalisation par flux (clé `source . destination . protocole`) :
+/// une ligne par flux et par seconde au plus.
+pub const JOURNAL_PAR_FLUX: &str = "1/second";
+/// Durée de vie d'un flux dans les ensembles de journalisation (secondes).
+pub const JOURNAL_EXPIRATION_S: u32 = 10;
+/// Taille maximale des ensembles dynamiques de journalisation (par famille).
+pub const JOURNAL_TAILLE_ENSEMBLE: u32 = 65_536;
+/// Débit global des `log` d'une table (objet `limit journal`), paquets/s.
+pub const JOURNAL_DEBIT_GLOBAL: u32 = 50;
+/// Rafale admise par la limite globale (paquets).
+pub const JOURNAL_RAFALE_GLOBALE: u32 = 100;
+/// Nom du compteur nommé du volume total rejeté d'une table.
+pub const COMPTEUR_REJETS: &str = "rejets";
+
+/// Rejet journalisé, en trois règles (anti-inondation du relais NFLOG) :
+///
+/// 1. et 2. (une seule si `sel` porte déjà `ip` ou `ip6`)
+///    `<sel> update @journal_v4|v6 { saddr . daddr . l4proto limit rate
+///    1/second } limit name "journal" log prefix "MDOU|…|" group G` : au plus
+///    une ligne par flux et par seconde, et au plus [`JOURNAL_DEBIT_GLOBAL`]
+///    lignes/s pour toute la table (aucun verdict : la règle suivante s'applique) ;
+/// 3. `<sel> counter name "rejets" drop` : rejet **inconditionnel**, volume
+///    total compté à part (`nft list counter … rejets`).
+///
+/// Le sélecteur `sel` est répété : ce sont des correspondances sans état, sauf
+/// `limit rate over` (règle `DEBIT`) dont chaque copie voit le même trafic.
+pub(crate) fn rejet(sel: &str, lieu: &str, chaine: &str, motif: &str, groupe: u16) -> Vec<String> {
+    let sel = if sel.is_empty() { String::new() } else { format!("{sel} ") };
+    let log = format!("limit name \"journal\" log prefix \"{PREFIXE_JOURNAL}|{lieu}|{chaine}|{motif}|\" group {groupe}");
+    // Un sélecteur déjà lié à une famille n'est journalisé que dans celle-ci
+    // (`ip saddr … ip6 saddr` serait contradictoire).
+    let mots: Vec<&str> = sel.split_whitespace().collect();
+    let v4 = mots.contains(&"ip");
+    let v6 = mots.contains(&"ip6");
+    let mut regles = Vec::with_capacity(3);
+    if v4 || !v6 {
+        regles.push(format!(
+            "{sel}update @journal_v4 {{ ip saddr . ip daddr . meta l4proto limit rate {JOURNAL_PAR_FLUX} }} {log}"
+        ));
+    }
+    if v6 || !v4 {
+        regles.push(format!(
+            "{sel}update @journal_v6 {{ ip6 saddr . ip6 daddr . meta l4proto limit rate {JOURNAL_PAR_FLUX} }} {log}"
+        ));
+    }
+    regles.push(format!("{sel}counter name \"{COMPTEUR_REJETS}\" drop"));
+    regles
+}
+
+/// Objets de journalisation d'une table (à écrire juste après `table … {`) :
+/// ensembles dynamiques par flux, limite globale, compteur des rejets.
+pub(crate) fn objets_journal(texte: &mut String) {
+    for (famille, adresse) in [("v4", "ipv4_addr"), ("v6", "ipv6_addr")] {
+        let _ = writeln!(texte, "\tset journal_{famille} {{");
+        let _ = writeln!(texte, "\t\ttype {adresse} . {adresse} . inet_proto");
+        let _ = writeln!(texte, "\t\tsize {JOURNAL_TAILLE_ENSEMBLE}");
+        let _ = writeln!(texte, "\t\tflags dynamic,timeout");
+        let _ = writeln!(texte, "\t\ttimeout {JOURNAL_EXPIRATION_S}s");
+        let _ = writeln!(texte, "\t}}");
+    }
+    let _ = writeln!(texte, "\tlimit journal {{");
+    let _ = writeln!(texte, "\t\trate {JOURNAL_DEBIT_GLOBAL}/second burst {JOURNAL_RAFALE_GLOBALE} packets");
+    let _ = writeln!(texte, "\t}}");
+    let _ = writeln!(texte, "\tcounter {COMPTEUR_REJETS} {{");
+    let _ = writeln!(texte, "\t}}");
 }
 
 fn adresse(r: &Reseau) -> String {
@@ -75,7 +150,7 @@ fn ensemble(rs: &[&Reseau]) -> String {
 }
 
 /// Sélecteurs d'adresses par famille : `[(famille, "ip saddr … ip daddr …")]`.
-fn selecteurs_adresses(sources: &[Reseau], destinations: &[Reseau]) -> Vec<String> {
+pub(crate) fn selecteurs_adresses(sources: &[Reseau], destinations: &[Reseau]) -> Vec<String> {
     let mut sortie = Vec::new();
     for (v4, mot) in [(true, "ip"), (false, "ip6")] {
         let s: Vec<&Reseau> = sources.iter().filter(|r| r.est_v4() == v4).collect();
@@ -127,6 +202,13 @@ fn regle_nouvelle(r: &RegleCompilee, iif: Option<&str>, oif: Option<&str>, poser
         .collect()
 }
 
+/// `<iif|oif> "lo" accept` suivi des règles de rejet.
+fn avec_lo(sens: &str, rejets: Vec<String>) -> Vec<String> {
+    let mut v = vec![format!("{sens} \"lo\" accept")];
+    v.extend(rejets);
+    v
+}
+
 fn entete(texte: &mut String, titre: &str, lignes: &[String]) {
     let _ = writeln!(texte, "#!/usr/sbin/nft -f");
     let _ = writeln!(texte, "# Généré par miyudouane — ne pas modifier à la main.");
@@ -173,6 +255,7 @@ pub fn generer_frontiere(
     }
     entete(&mut texte, "Douane — règles de frontière (refus par défaut)", &infos);
     let _ = writeln!(texte, "table inet miyudouane {{");
+    objets_journal(&mut texte);
 
     // Limites par marque (une fois par flux actif, dans chaque chaîne).
     let mut marques: Vec<&RegleCompilee> = Vec::new();
@@ -190,19 +273,21 @@ pub fn generer_frontiere(
             Crochet::Sortie => lignes.push("oif \"lo\" accept".to_string()),
             Crochet::Transit => {}
         }
-        lignes.push(format!("ct state invalid {}", journal(lieu, nom, "INVALIDE", g)));
+        lignes.extend(rejet("ct state invalid", lieu, nom, "INVALIDE", g));
         for m in &marques {
-            lignes.push(format!(
-                "ct mark 0x{:08x} meta length > {} {}",
-                m.marque,
-                m.taille_max_paquet,
-                journal(lieu, nom, "TAILLE", g)
+            lignes.extend(rejet(
+                &format!("ct mark 0x{:08x} meta length > {}", m.marque, m.taille_max_paquet),
+                lieu,
+                nom,
+                "TAILLE",
+                g,
             ));
-            lignes.push(format!(
-                "ct mark 0x{:08x} limit rate over {} kbytes/second {}",
-                m.marque,
-                m.debit_max_kio_s,
-                journal(lieu, nom, "DEBIT", g)
+            lignes.extend(rejet(
+                &format!("ct mark 0x{:08x} limit rate over {} kbytes/second", m.marque, m.debit_max_kio_s),
+                lieu,
+                nom,
+                "DEBIT",
+                g,
             ));
         }
         lignes.push("ct state established,related counter accept".to_string());
@@ -211,10 +296,10 @@ pub fn generer_frontiere(
         }
         if let Some(cog) = cog {
             let mot = if cog.est_v4() { "ip" } else { "ip6" };
-            lignes.push(format!("{mot} saddr {cog} {}", journal(lieu, nom, "SORTIE-COG", g)));
-            lignes.push(format!("{mot} daddr {cog} {}", journal(lieu, nom, "ENTREE-COG", g)));
+            lignes.extend(rejet(&format!("{mot} saddr {cog}"), lieu, nom, "SORTIE-COG", g));
+            lignes.extend(rejet(&format!("{mot} daddr {cog}"), lieu, nom, "ENTREE-COG", g));
         }
-        lignes.push(journal(lieu, nom, "NON-DECLARE", g));
+        lignes.extend(rejet("", lieu, nom, "NON-DECLARE", g));
         let crochet_nft = match crochet {
             Crochet::Entree => "input",
             Crochet::Transit => "forward",
@@ -239,9 +324,10 @@ pub fn generer_fermeture(frontiere: Frontiere, def: &DefinitionFrontiere, motif:
         &[format!("frontiere={lieu} motif={motif_sur}")],
     );
     let _ = writeln!(texte, "table inet miyudouane {{");
-    chaine(&mut texte, "entree", "input", &["iif \"lo\" accept".into(), journal(lieu, "entree", "FERME", g)]);
-    chaine(&mut texte, "transit", "forward", &[journal(lieu, "transit", "FERME", g)]);
-    chaine(&mut texte, "sortie", "output", &["oif \"lo\" accept".into(), journal(lieu, "sortie", "FERME", g)]);
+    objets_journal(&mut texte);
+    chaine(&mut texte, "entree", "input", &avec_lo("iif", rejet("", lieu, "entree", "FERME", g)));
+    chaine(&mut texte, "transit", "forward", &rejet("", lieu, "transit", "FERME", g));
+    chaine(&mut texte, "sortie", "output", &avec_lo("oif", rejet("", lieu, "sortie", "FERME", g)));
     let _ = writeln!(texte, "}}");
     texte
 }
@@ -291,24 +377,26 @@ pub fn generer_zone(zone: Zone, frontieres: &[(Frontiere, Vec<RegleCompilee>)], 
         ],
     );
     let _ = writeln!(texte, "table bridge miyudouane_zone {{");
+    objets_journal(&mut texte);
     let mut lignes = vec![
         "ether type arp accept".to_string(),
-        format!("ct state invalid {}", journal(&lieu, "transit", "INVALIDE", g)),
-        "ct state established,related counter accept".to_string(),
     ];
+    lignes.extend(rejet("ct state invalid", &lieu, "transit", "INVALIDE", g));
+    lignes.push("ct state established,related counter accept".to_string());
     lignes.extend(declarees);
-    lignes.push(format!("iifname \"sv*\" oifname \"sv*\" {}", journal(&lieu, "transit", "LATERAL", g)));
+    lignes.extend(rejet("iifname \"sv*\" oifname \"sv*\"", &lieu, "transit", "LATERAL", g));
     if zone == Zone::Cog {
-        lignes.push(format!("ip saddr {} {}", defz.reseau, journal(&lieu, "transit", "SORTIE-COG", g)));
+        lignes.extend(rejet(&format!("ip saddr {}", defz.reseau), &lieu, "transit", "SORTIE-COG", g));
     }
-    lignes.push(journal(&lieu, "transit", "NON-DECLARE", g));
+    lignes.extend(rejet("", &lieu, "transit", "NON-DECLARE", g));
     chaine(&mut texte, "transit", "forward", &lignes);
     let _ = writeln!(texte, "}}");
     let _ = writeln!(texte);
     let _ = writeln!(texte, "table inet miyudouane_zone {{");
-    chaine(&mut texte, "entree", "input", &["iif \"lo\" accept".into(), journal(&lieu, "entree", "NON-DECLARE", g)]);
-    chaine(&mut texte, "transit", "forward", &[journal(&lieu, "transit", "NON-DECLARE", g)]);
-    chaine(&mut texte, "sortie", "output", &["oif \"lo\" accept".into(), journal(&lieu, "sortie", "SORTIE-COG", g)]);
+    objets_journal(&mut texte);
+    chaine(&mut texte, "entree", "input", &avec_lo("iif", rejet("", &lieu, "entree", "NON-DECLARE", g)));
+    chaine(&mut texte, "transit", "forward", &rejet("", &lieu, "transit", "NON-DECLARE", g));
+    chaine(&mut texte, "sortie", "output", &avec_lo("oif", rejet("", &lieu, "sortie", "SORTIE-COG", g)));
     let _ = writeln!(texte, "}}");
     Some(texte)
 }

@@ -20,6 +20,7 @@ use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
 use std::process::Command;
 
+use crate::hote::auditer_hote;
 use crate::nft::auditer;
 
 /// Échec de l'application.
@@ -87,6 +88,22 @@ pub fn appliquer(
             return Err(ErreurApplication::NetnsInvalide);
         }
     }
+    ecrire_controler_appliquer(texte, netns, fichier)
+}
+
+/// Table hôte `inet miyudouane_hote` ([`crate::hote`]) : audit propre à
+/// l'hôte ([`auditer_hote`] : aucune autre table, jamais `flush ruleset`),
+/// puis `nft -c -f` et `nft -f` **sur l'hôte** (pas d'espace de noms). Le
+/// fichier ne remplace que cette table, en une transaction.
+pub fn appliquer_hote(texte: &str, voies_exceptions: &BTreeSet<String>, fichier: &Path) -> Result<(), ErreurApplication> {
+    let ecarts = auditer_hote(texte, voies_exceptions);
+    if !ecarts.is_empty() {
+        return Err(ErreurApplication::Audit(ecarts));
+    }
+    ecrire_controler_appliquer(texte, None, fichier)
+}
+
+fn ecrire_controler_appliquer(texte: &str, netns: Option<&str>, fichier: &Path) -> Result<(), ErreurApplication> {
     let _ = fs::remove_file(fichier);
     let mut f = fs::OpenOptions::new()
         .write(true)

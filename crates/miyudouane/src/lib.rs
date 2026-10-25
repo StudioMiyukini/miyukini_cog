@@ -19,6 +19,8 @@
 //! - [`ips`] : IPS en ligne, événements [`ips::EvenementDouane`] vers les Vigies ;
 //! - [`zones`] : rendu Linux des zones (espaces de noms, veth, nftables,
 //!   unités systemd des sandboxes), texte seulement ;
+//! - [`hote`] : table hôte `inet miyudouane_hote` (zone COG sans sortie pour
+//!   les services COG lancés sur l'hôte), depuis une description validée ;
 //! - [`application`] : l'unique étape privilégiée (`nft -c -f` puis `nft -f`),
 //!   appelée par la CLI `miyudouane … --appliquer`, jamais en test.
 //!
@@ -57,6 +59,7 @@
 
 pub mod application;
 pub mod compilation;
+pub mod hote;
 pub mod instance;
 pub mod ips;
 pub mod nft;

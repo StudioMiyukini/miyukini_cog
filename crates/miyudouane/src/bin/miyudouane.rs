@@ -18,12 +18,21 @@
 //! miyudouane zones [--sandbox <zone>:<service>]…
 //! miyudouane mise-en-place [--sandbox <zone>:<service>]…
 //! miyudouane retrait [--sandbox <zone>:<service>]…
+//! miyudouane hote --description <fichier> [--arrete <portail>=<fichier>… --ancre <hex>]
+//!            [--maintenant <secs>] [--sandbox <zone>:<service>]… [--couper <voie>]…
+//!            [--appliquer [--fichier <chemin>]]
 //! ```
 //!
 //! - `regles` : règles d'une frontière ; `--couper` omet une voie (EX-49).
 //! - `zone` : règles du pont filtré d'une zone (segmentation par service),
 //!   compilées depuis les arrêtés de **toutes** les frontières qui touchent la
 //!   zone (chacun vérifié contre l'ancre) ; `--couper` omet une voie.
+//! - `hote` : table `inet miyudouane_hote` de l'hôte (services COG lancés sur
+//!   l'hôte) depuis une description validée (format : module
+//!   `miyudouane::hote`) ; exceptions de sortie seulement par voie d'un arrêté
+//!   signé de portail (`--arrete portail-interne=…`). Avec `--appliquer` :
+//!   `nft -c -f` puis `nft -f` sur l'hôte, seule cette table est remplacée
+//!   (défaut `--fichier` : `/etc/miyukini/douane/miyudouane-hote.nft`).
 //! - `zones` : script de mise en place + unités systemd ; `mise-en-place` et
 //!   `retrait` : le script seul (pour un banc d'essai).
 //!
@@ -53,6 +62,7 @@ use std::process::ExitCode;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use borderguard::{verifier_arrete, ArreteVerifie, Constitution, Frontiere, Zone};
+use miyudouane::hote::{self, DescriptionHote};
 use miyudouane::{application, compiler, nft, zones, InstanceDouane, PlanReseau};
 use miyusceau::{AncresDeConfiance, NiveauConfiance};
 
@@ -68,6 +78,7 @@ struct Options {
     sandboxes: Vec<(Zone, String)>,
     appliquer: bool,
     fichier: Option<PathBuf>,
+    description: Option<PathBuf>,
 }
 
 fn hex32(s: &str) -> Result<[u8; 32], String> {
@@ -88,7 +99,7 @@ fn zone(s: &str) -> Result<Zone, String> {
 fn lire_options() -> Result<Options, String> {
     let mut args = std::env::args().skip(1);
     let commande =
-        args.next().ok_or("commande attendue : regles | fermeture | zone | zones | mise-en-place | retrait")?;
+        args.next().ok_or("commande attendue : regles | fermeture | zone | zones | mise-en-place | retrait | hote")?;
     let mut o = Options {
         commande,
         frontiere: None,
@@ -101,6 +112,7 @@ fn lire_options() -> Result<Options, String> {
         sandboxes: Vec::new(),
         appliquer: false,
         fichier: None,
+        description: None,
     };
     while let Some(a) = args.next() {
         let mut valeur = || args.next().ok_or_else(|| format!("{a} : valeur attendue"));
@@ -125,6 +137,7 @@ fn lire_options() -> Result<Options, String> {
             }
             "--appliquer" => o.appliquer = true,
             "--fichier" => o.fichier = Some(PathBuf::from(valeur()?)),
+            "--description" => o.description = Some(PathBuf::from(valeur()?)),
             autre => return Err(format!("option inconnue « {autre} »")),
         }
     }
@@ -139,6 +152,54 @@ fn lire_arrete(chemin: &str, ancre: Option<&[u8; 32]>, maintenant: u64) -> Resul
         .ajouter(ancre.ok_or("--ancre attendu (clé d'usage « arrêtés », épinglée)")?, NiveauConfiance::Souverain)
         .map_err(|e| format!("ancre : {e:?}"))?;
     verifier_arrete(&octets, &ancres, &Constitution::reference(), maintenant).map_err(|e| format!("{chemin}: {e}"))
+}
+
+/// Lit une description d'hôte (taille bornée avant analyse).
+fn lire_description(chemin: &std::path::Path) -> Result<DescriptionHote, String> {
+    use std::io::Read as _;
+    let f = std::fs::File::open(chemin).map_err(|e| format!("{}: {e}", chemin.display()))?;
+    let mut texte = String::new();
+    f.take(hote::TAILLE_MAX_DESCRIPTION as u64 + 1)
+        .read_to_string(&mut texte)
+        .map_err(|e| format!("{}: {e}", chemin.display()))?;
+    DescriptionHote::analyser(&texte).map_err(|e| format!("{}: {e}", chemin.display()))
+}
+
+/// Commande `hote` : table de la zone COG sur l'hôte.
+fn commande_hote(o: Options, plan: &PlanReseau, maintenant: u64) -> Result<(), String> {
+    let chemin = o.description.as_deref().ok_or("--description <fichier> attendu")?;
+    let d = lire_description(chemin)?;
+    let mut arretes = Vec::new();
+    let mut voies = BTreeSet::new();
+    for spec in &o.arretes {
+        let (f, chemin) = spec.split_once('=').ok_or("--arrete : <frontière>=<fichier> attendu pour « hote »")?;
+        let f: Frontiere = f.parse().map_err(|()| format!("frontière inconnue « {f} »"))?;
+        let verifie = lire_arrete(chemin, o.ancre.as_ref(), maintenant)?;
+        if verifie.arrete().frontiere != f {
+            return Err(format!("{chemin} : arrêté de la frontière {}, pas {f}", verifie.arrete().frontiere));
+        }
+        voies.extend(verifie.arrete().voies.iter().map(|v| v.id.clone()));
+        arretes.push(verifie);
+    }
+    if let Some(v) = o.coupees.iter().find(|v| !voies.contains(*v)) {
+        return Err(format!("--couper : voie « {v} » absente des arrêtés"));
+    }
+    let exceptions = hote::exceptions_autorisees(&d, &arretes, plan, &o.coupees, maintenant)?;
+    let texte = hote::generer_hote(&d, &exceptions);
+    if o.appliquer {
+        let fichier = o
+            .fichier
+            .unwrap_or_else(|| PathBuf::from(format!("{}/miyudouane-hote.nft", zones::REPERTOIRE_REGLES)));
+        application::appliquer_hote(&texte, &d.exceptions, &fichier).map_err(|e| e.to_string())?;
+        eprintln!("appliqué : table inet {} ({})", hote::TABLE_HOTE, fichier.display());
+    } else {
+        let ecarts = hote::auditer_hote(&texte, &d.exceptions);
+        if !ecarts.is_empty() {
+            return Err(format!("audit : {}", ecarts.join(" ; ")));
+        }
+        print!("{texte}");
+    }
+    Ok(())
 }
 
 fn appliquer_ou_imprimer(
@@ -246,6 +307,7 @@ fn executer() -> Result<(), String> {
             let texte = nft::generer_zone(z, &par_frontiere, &plan).ok_or("génération de zone impossible")?;
             appliquer_ou_imprimer(&texte, &voies, o.appliquer, &defz.netns, o.fichier)
         }
+        "hote" => commande_hote(o, &plan, maintenant),
         autre => Err(format!("commande inconnue « {autre} »")),
     }
 }

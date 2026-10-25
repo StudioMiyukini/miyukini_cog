@@ -77,9 +77,12 @@ fn refus_par_defaut_et_sortie_cog() {
         assert!(!t.contains("policy accept"));
         assert_eq!(t.matches("policy drop;").count(), 3);
         // Chaque chaîne rejette explicitement toute sortie de la zone COG et toute entrée vers elle.
-        assert_eq!(t.matches("ip saddr 10.77.0.0/24 counter log prefix").count(), 3);
-        assert_eq!(t.matches("ip daddr 10.77.0.0/24 counter log prefix").count(), 3);
-        assert_eq!(t.matches("|NON-DECLARE|").count(), 3);
+        assert_eq!(t.matches("ip saddr 10.77.0.0/24 counter name \"rejets\" drop").count(), 3);
+        assert_eq!(t.matches("ip daddr 10.77.0.0/24 counter name \"rejets\" drop").count(), 3);
+        assert_eq!(t.matches("ip saddr 10.77.0.0/24 update @journal_v4").count(), 3);
+        assert_eq!(t.matches("ip daddr 10.77.0.0/24 update @journal_v4").count(), 3);
+        // NON-DECLARE : deux règles de journal (IPv4, IPv6) par chaîne.
+        assert_eq!(t.matches("|NON-DECLARE|").count(), 6);
         // Toute acceptation hors bouclage / établi est une connexion nouvelle d'une voie déclarée.
         for l in t.lines().filter(|l| l.contains(" accept")) {
             let l = l.trim();
@@ -98,6 +101,50 @@ fn refus_par_defaut_et_sortie_cog() {
     assert!(!transit.contains("ct state new"));
 }
 
+/// Journalisation bornée (anti-inondation du relais NFLOG) : chaque `log` est
+/// limité par flux et globalement et ne rejette rien ; chaque `drop` est
+/// inconditionnel (aucune limite de journal) et compté par `rejets`.
+#[test]
+fn journalisation_bornee() {
+    let p = plan();
+    let portail = compiler(&verifie(&arrete_portail(1)), &p).unwrap();
+    let local = compiler(&verifie(&arrete_local(1)), &p).unwrap();
+    let def = p.frontiere(Frontiere::PortailLocal).unwrap();
+    let textes = [
+        ruleset(&arrete_portail(1)),
+        ruleset(&arrete_externe(1)),
+        ruleset(&arrete_local(1)),
+        nft::generer_fermeture(Frontiere::PortailLocal, def, "essai"),
+        nft::generer_zone(Zone::Cog, &[(Frontiere::PortailInterne, portail), (Frontiere::PortailLocal, local)], &p)
+            .unwrap(),
+    ];
+    for t in &textes {
+        let tables = t.matches("\ntable ").count();
+        assert_eq!(t.matches("\tlimit journal {\n\t\trate 50/second burst 100 packets\n\t}").count(), tables, "{t}");
+        assert_eq!(t.matches("\tcounter rejets {\n\t}").count(), tables);
+        assert_eq!(t.matches("flags dynamic,timeout").count(), 2 * tables);
+        let mut journaux = 0;
+        for l in t.lines().map(str::trim) {
+            if l.contains(" log ") || l.starts_with("log ") {
+                journaux += 1;
+                assert!(l.contains("limit rate 1/second }") && l.contains("limit name \"journal\""), "{l}");
+                assert!(!l.contains("drop") && !l.contains("accept"), "{l}");
+            }
+            if l.ends_with(" drop") {
+                assert!(l.ends_with("counter name \"rejets\" drop") && !l.contains("journal"), "{l}");
+            }
+        }
+        // Chaque rejet est précédé d'au moins un journal de même sélecteur
+        // (deux : IPv4 et IPv6, sauf sélecteur déjà lié à une famille).
+        let rejets: Vec<&str> = t.lines().map(str::trim).filter(|l| l.ends_with("counter name \"rejets\" drop")).collect();
+        for r in &rejets {
+            let sel = r.trim_end_matches("counter name \"rejets\" drop");
+            assert!(t.lines().map(str::trim).any(|l| l.starts_with(&format!("{sel}update @journal_v"))), "{r}");
+        }
+        assert!(journaux >= rejets.len() && journaux <= 2 * rejets.len(), "{t}");
+    }
+}
+
 #[test]
 fn audit_detecte_les_ecarts() {
     let a = arrete_portail(1);
@@ -109,7 +156,7 @@ fn audit_detecte_les_ecarts() {
     let mut reduit = v.clone();
     reduit.remove("site");
     assert!(!nft::auditer(&t, &reduit).is_empty());
-    let sans_drop_final = t.replace("|NON-DECLARE|\" group 102 drop", "|NON-DECLARE|\" group 102 accept");
+    let sans_drop_final = t.replace("\t\tcounter name \"rejets\" drop", "\t\tcounter name \"rejets\" accept");
     assert!(!nft::auditer(&sans_drop_final, &v).is_empty());
 }
 
