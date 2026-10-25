@@ -189,7 +189,7 @@
 - **Sortie** : service H2 utilisable depuis un appareil fédéré sans route vers la zone COG
 - **Statut (2026-10-25)** — [A-007](../architecture/GEL-DOC-CONCEPTUELLE-v1.md) (doc v1.7) : **sortie atteinte au niveau bibliothèque**, en processus, sans réseau (`jayrdv/tests/sortie_lot5.rs` ; non commité)
   - **Fait** : `miyuhybride` (manifeste tag 5, règles H0–H3, guichets, jeton de réponse, codecs `message_traite!`, façade jetable, `Superviseur`, DB secondaire, dérivation Douane) ; `jayrdv-traite` (traité v1) ; `jayrdv-facade` (visa + PoP, portée `jayrdv:reserver`) ; moteur `jayrdv::hybride` ; `miyumarket` tag 5 ; `miyuportail::msce::sceller_cosigne`
-  - **Reste** : anti-rejeu **par auteur** (décision A-007 : `miyuportail`, `jayrdv-facade`) ; façade en sandbox Franche réelle (image signée, réseau, Douane appliquée) ; application des quotas de disque et de sessions ; guichet des visas ; rafraîchissement des révocations de la façade ; H3 ; MiyuCloud ; fuzzing du manifeste de service ; points « à décider ultérieurement » d'A-007
+  - **Reste** : ~~anti-rejeu par auteur~~ (fait, A-008) ; façade en sandbox Franche réelle (image signée, réseau, Douane appliquée) ; application des quotas de disque et de sessions ; guichet des visas ; rafraîchissement des révocations de la façade ; H3 ; MiyuCloud ; fuzzing du manifeste de service ; points « à décider ultérieurement » d'A-007
 
 ## 8. Lot 6 — Fédération
 
@@ -204,7 +204,7 @@
 - **Sortie** : trois COG de test atteignent le statut membre ; un COG fautif est révoqué
 - **Statut (2026-10-25)** — [A-007](../architecture/GEL-DOC-CONCEPTUELLE-v1.md) (doc v1.7) : **sortie atteinte au niveau bibliothèque**, sans Origin (`miyufederation/tests/sortie_lot6.rs` ; non commité)
   - **Fait** : candidature `0x06`/`0x43` + hashcash, confirmation `0x07`, statuts, quota, témoins anti-éclipse (≥ 3 membres), accusation `0x06`/`0x42` au quorum de 6 + preuve `MFPV`, révocation d'identité, note locale, carnet de pairs, fraîcheur de la vue
-  - **Reste** : **suspension immédiate + révocation après 72 h + « recours accepté »** (décision A-007 ; aujourd'hui révocation immédiate) ; aligner `miyuregistre::federal` (2 sur {COG, Origin}) sur ≥ 3 témoins membres ; transport du commérage ; persistance des statuts ; attestation TPM ; autres types de preuve ; fuzzing des titres fédéraux et de `MFPV`
+  - **Reste** : ~~suspension, révocation à 72 h, recours~~ et ~~registre fédéral à ≥ 3 témoins membres~~ (faits, A-008) ; transport du commérage ; persistance des statuts ; attestation TPM ; autres types de preuve ; fuzzing des titres fédéraux et de `MFPV`
 
 ## 9. Lot 7 — MAIA
 
