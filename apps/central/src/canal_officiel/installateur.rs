@@ -10,7 +10,7 @@
 //! |---|---|
 //! | `Cores` | paquet `.msp` par le chemin gouverné existant : [`installer_depuis_canal`] (signature éditeur officiel, opération StrongFather explicite `mettre_a_jour_canal`, arrêt du service, réinstallation) |
 //! | `Os` | **refus** : Central n'a pas d'installateur d'OS (l'annonce reste en attente, refus signalé) |
-//! | `ModeleIa` | délégué à un installateur de modèles branché ([`InstallateurCentral::avec_modeles`], ex. maia-llm) ; aucun ⇒ refus |
+//! | `ModeleIa` | délégué à l'installateur de maia-llm (artefact `MMIA`, [`super::modeles`]), branché par [`InstallateurCentral::avec_modeles`] si `modeles` est configuré ; aucun ⇒ refus |
 //!
 //! Version installée (`Cores`) : manifeste du registre des services, convertie
 //! par [`version_canal`] ; version illisible ⇒ `u64::MAX` (aucune

@@ -67,6 +67,10 @@ miyucanal = { path = "../../crates/miyucanal" }
 miyuregistre = { path = "../../crates/miyuregistre" }
 worrysentinel = { path = "../../crates/worrysentinel" }
 rand_core = { version = "0.6", features = ["getrandom"] }
+# Installateur de modèles IA délégué (source de maia-llm compilée dans Central,
+# `canal_officiel::modeles`) : mêmes dépendances que maia-llm
+hex = "0.4"
+rand = "0.8"
 
 # Alicia Home Assistante — capture audio locale + détection de wake word
 miyualicia-capture = { path = "../../crates/miyuvoicecapture" }
@@ -88,6 +92,11 @@ central-remote = { path = "../../crates/central-remote" }
 miyuki-ui-dioxus = { path = "../../crates/miyuki-ui-dioxus" }
 miyuki-ui-tokens = { path = "../../crates/miyuki-ui-tokens" }
 miyukini-service-ui = { path = "../../crates/miyukini-service-ui" }
+
+[target.'cfg(unix)'.dependencies]
+# Provenance des modèles (source maia-llm) : O_NOFOLLOW, UID/GID effectifs sans `unsafe`
+libc = "0.2"
+rustix = { version = "1", default-features = false, features = ["std", "process"] }
 
 [dev-dependencies]
 # Banc d'essai du canal officiel (annonces 2 sur 2, dépôt simulé)

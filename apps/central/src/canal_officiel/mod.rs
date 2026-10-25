@@ -19,12 +19,15 @@
 //!
 //! ```json
 //! { "actif": true, "registre": "<64 hex>", "origin": "<64 hex>",
-//!   "journal_origin": "<64 hex>", "editeur": "<64 hex>", "periode_secs": 3600 }
+//!   "journal_origin": "<64 hex>", "editeur": "<64 hex>", "periode_secs": 3600,
+//!   "modeles": { "dossier": "/chemin/absolu", "ancres": ["<64 hex>"] } }
 //! ```
 //!
 //! Fichier absent, `actif` faux ou contenu invalide ⇒ canal **désactivé**
 //! (journal explicite). Clés : Origin (signature), clé de journal d'Origin
 //! (têtes), éditeur hors ligne (annonces 2 sur 2), toutes distinctes.
+//! `modeles` (facultatif) branche l'installateur de modèles IA délégué à
+//! maia-llm ([`modeles`]) ; absent ⇒ modèles refusés.
 //!
 //! # Reprise (fail-closed, A-006)
 //!
@@ -44,6 +47,7 @@
 
 pub mod alertes;
 pub mod installateur;
+pub mod modeles;
 pub mod persistance;
 
 use std::path::{Path, PathBuf};
@@ -58,6 +62,7 @@ use worrysentinel::ThreatLevel;
 
 pub use alertes::{PuitsJournal, PuitsMemoire, PuitsSignaux, SignalCanal};
 pub use installateur::InstallateurCentral;
+pub use modeles::ConfigModeles;
 
 use crate::service_manager::ServiceManager;
 use persistance::{EtatCanal, FICHIER_ETAT, FICHIER_MIROIR, FICHIER_QUARANTAINE};
@@ -93,6 +98,9 @@ pub struct ConfigCanalCentral {
     /// Période des relevés (secondes, ≥ 300).
     #[serde(default = "periode_defaut")]
     pub periode_secs: u64,
+    /// Installateur de modèles IA délégué (absent ⇒ modèles refusés).
+    #[serde(default)]
+    pub modeles: Option<ConfigModeles>,
 }
 
 impl ConfigCanalCentral {
@@ -116,6 +124,15 @@ impl ConfigCanalCentral {
             &hex("editeur", &self.editeur)?,
         )
         .map_err(|e| e.to_string())
+    }
+
+    /// Installateur `installateur` avec, si configuré, l'installateur de
+    /// modèles délégué branché ; configuration `modeles` invalide ⇒ erreur.
+    pub fn brancher_modeles(&self, installateur: InstallateurCentral) -> Result<InstallateurCentral, String> {
+        match &self.modeles {
+            None => Ok(installateur),
+            Some(m) => Ok(installateur.avec_modeles(Box::new(m.installateur()?))),
+        }
     }
 
     /// Période effective des relevés.
@@ -302,7 +319,11 @@ fn ouvrir_depuis_configuration(sm: &ServiceManager) -> Option<Arc<Mutex<CanalCen
     };
     let ouvert = conf.config_canal().and_then(|config| {
         let dossier = miyukini_central::chemins::dossier_donnees().map_err(|e| e.to_string())?.join(DOSSIER_ETAT);
-        CanalCentral::ouvrir(config, &dossier, InstallateurCentral::depuis_service_manager(sm), Box::new(PuitsJournal))
+        let installateur = conf.brancher_modeles(InstallateurCentral::depuis_service_manager(sm))?;
+        if conf.modeles.is_none() {
+            tracing::info!("canal officiel : aucun installateur de modèles configuré (« modeles ») : modèles IA refusés");
+        }
+        CanalCentral::ouvrir(config, &dossier, installateur, Box::new(PuitsJournal))
     });
     match ouvert {
         Ok(canal) => {
@@ -557,6 +578,160 @@ mod tests {
         std::fs::write(dossier.join(FICHIER_ETAT), b"MCCE\x01tronque").unwrap();
         let (canal, _) = nouveau(config(), &PuitsMemoire::default());
         assert!(canal.unwrap_err().contains("illisible"));
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// Annonce scellée par `cles` (hors banc : signature unique, clé non épinglée).
+    fn annonce_scellee(version: u64, artefact: &[u8], cles: &[&CleSignature]) -> Vec<u8> {
+        use sha2::Digest as _;
+        let publication = miyuregistre::Publication {
+            categorie: Categorie::Cores,
+            composant: "svc".into(),
+            version,
+            empreinte: sha2::Sha256::digest(artefact).into(),
+            taille: artefact.len() as u64,
+        };
+        let entree = miyuregistre::EntreeRegistre { inscrite_a: T0, corps: miyuregistre::Corps::Publication(publication) };
+        miyusceau::sceller_multi(&entree, cles).unwrap()
+    }
+
+    #[test]
+    fn maj_cores_exige_deux_sur_deux_sur_les_cles_epinglees() {
+        let root = racine("2sur2");
+        let (mut inst, reg) = installateur(&root, gouvernance_base());
+        let v2 = version_canal("2.0.0").unwrap();
+        let v3 = version_canal("3.0.0").unwrap();
+        let mut banc = BancCanal::new(REGISTRE);
+        let mut releveur = Releveur::new(banc.config(), StockageMemoire::new()).unwrap();
+        let mut horloge = HorlogeConfiance::new();
+        let p3 = paquet("3.0.0");
+        banc.depot.deposer_artefact(p3.clone());
+        let intrus = CleSignature::generer();
+        let editeur = CleSignature::depuis_graine(&banc.editeur().graine());
+        // 1. Éditeur épinglé seul (une signature) ; 2. éditeur + clé non
+        // épinglée à la place d'Origin ; 3. paire 2 sur 2 entièrement étrangère.
+        let seule = banc.inscrire(&annonce_scellee(v3, &p3, &[&editeur]));
+        let mixte = banc.inscrire(&annonce_scellee(v3, &p3, &[&intrus, &editeur]));
+        let etrangere = banc.inscrire(&annonce_scellee(v3, &p3, &[&CleSignature::generer(), &intrus]));
+        // Annonce 2 sur 2 authentique d'une version inférieure : seule installée.
+        banc.publier(Categorie::Cores, "svc", v2, &paquet("2.0.0"), T0);
+        let puits = PuitsMemoire::default();
+        let ev = traverser(&mut banc, |b, t| {
+            let ev = releveur.cycle(&mut b.depot, &mut inst, &mut horloge, t).unwrap();
+            for e in &ev {
+                alertes::remonter(&puits, e);
+            }
+            ev
+        });
+        for index in [seule, mixte] {
+            assert!(
+                ev.iter().any(|e| matches!(e, Evenement::AnnonceRefusee { index: i, motif: Motif::Signature(_) } if *i == index)),
+                "annonce {index} : refus de signature attendu"
+            );
+        }
+        // Aucune signature épinglée : l'entrée n'est même pas une entrée du canal.
+        assert!(ev.iter().any(|e| matches!(e, Evenement::EntreeIgnoree { index } if *index == etrangere)));
+        assert!(!ev.iter().any(|e| matches!(e, Evenement::EnQuarantaine { version, .. } if *version == v3)));
+        assert_eq!(compte(&ev, |e| matches!(e, Evenement::Installee { version, .. } if *version == v3)), 0);
+        assert_eq!(compte(&ev, |e| matches!(e, Evenement::Installee { version, .. } if *version == v2)), 1);
+        assert_eq!(version_svc(&reg), "2.0.0");
+        assert_eq!(std::fs::read(root.join("svc/bin/svc")).unwrap(), b"binaire 2.0.0");
+        assert_eq!(releveur.en_attente().len(), 0, "aucune annonce en attente");
+        // Refus remontés à WorrySentinel.
+        assert!(puits.signaux().iter().filter(|s| s.niveau >= ThreatLevel::Medium && s.motif.contains("refusée")).count() >= 2);
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    fn cle_modeles() -> CleSignature {
+        CleSignature::depuis_graine(&[0x4b; 32])
+    }
+
+    fn config_modeles(dossier: &Path, ancres: &[[u8; 32]]) -> ConfigModeles {
+        let ancres = ancres.iter().map(|k| miyumarket::signature::hex_encoder(k)).collect::<Vec<_>>();
+        serde_json::from_value(serde_json::json!({ "dossier": dossier, "ancres": ancres })).unwrap()
+    }
+
+    /// Artefact `MMIA` : manifeste signé par `cle` + octets du modèle.
+    fn artefact_modele(nom: &str, modele: &[u8], cle: &CleSignature) -> Vec<u8> {
+        use sha2::Digest as _;
+        let m = crate::provenance::ManifesteModele {
+            nom_fichier: nom.into(),
+            sha256: sha2::Sha256::digest(modele).into(),
+            taille: modele.len() as u64,
+            licence: "Apache-2.0".into(),
+            date_coupure: "2025-06".into(),
+            emis_le: mural(),
+        };
+        modeles::encoder_artefact(&miyusceau::sceller(&m, cle).unwrap(), modele)
+    }
+
+    #[test]
+    fn modele_ia_installe_par_l_installateur_delegue_branche() {
+        let root = racine("modeles");
+        let dossier_modeles = root.join("models");
+        let (inst, _) = installateur(&root, gouvernance_base());
+        let conf = config_modeles(&dossier_modeles, &[cle_modeles().cle_publique()]);
+        let mut inst = inst.avec_modeles(Box::new(conf.installateur().unwrap()));
+        let mut banc = BancCanal::new(REGISTRE);
+        let mut releveur = Releveur::new(banc.config(), StockageMemoire::new()).unwrap();
+        let mut horloge = HorlogeConfiance::new();
+        let v1 = b"GGUF\x03 modele officiel v1".to_vec();
+        banc.publier(Categorie::ModeleIa, "qwen-mini", 1, &artefact_modele("qwen-mini.gguf", &v1, &cle_modeles()), T0);
+        // v2 : manifeste signé par une ancre de modèles non épinglée (annonce 2 sur 2 valide).
+        let etranger = CleSignature::depuis_graine(&[0x5c; 32]);
+        let v2 = b"GGUF\x03 modele v2 etranger".to_vec();
+        banc.publier(Categorie::ModeleIa, "autre", 2, &artefact_modele("autre.gguf", &v2, &etranger), T0);
+        let ev = traverser(&mut banc, |b, t| releveur.cycle(&mut b.depot, &mut inst, &mut horloge, t).unwrap());
+        assert_eq!(compte(&ev, |e| matches!(e, Evenement::Installee { composant, version: 1 } if composant == "qwen-mini")), 1);
+        assert!(ev.iter().any(|e| matches!(e,
+            Evenement::InstallationRefusee { composant, motif: Motif::Installateur(m), .. } if composant == "autre" && m.contains("manifeste"))));
+        assert!(!ev.iter().any(|e| matches!(e, Evenement::InstallationRefusee { motif: Motif::Installateur(m), .. } if m.contains(REFUS_MODELES))));
+        assert_eq!(std::fs::read(dossier_modeles.join("qwen-mini.gguf")).unwrap(), v1);
+        assert!(dossier_modeles.join("qwen-mini.gguf.sceau").is_file());
+        assert!(!dossier_modeles.join("autre.gguf").exists());
+        assert_eq!(inst.version_installee(Categorie::ModeleIa, "qwen-mini"), Some(1));
+        assert_eq!(inst.version_installee(Categorie::ModeleIa, "autre"), None);
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn configuration_des_modeles_absente_ou_invalide() {
+        let root = racine("conf-modeles");
+        let k = cle_modeles().cle_publique();
+        // Absente : aucun installateur branché, modèles refusés.
+        let banc = BancCanal::new(REGISTRE);
+        let (origin, journal, editeur) = banc.cles_publiques();
+        let hx = |k: [u8; 32]| miyumarket::signature::hex_encoder(&k);
+        let base = format!(
+            r#""actif": true, "registre": "{}", "origin": "{}", "journal_origin": "{}", "editeur": "{}""#,
+            hx(REGISTRE), hx(origin), hx(journal), hx(editeur)
+        );
+        let fichier = root.join(FICHIER_CONFIG);
+        let charger = |extra: &str| {
+            std::fs::write(&fichier, format!("{{{base}{extra}}}")).unwrap();
+            ConfigCanalCentral::charger(&fichier)
+        };
+        let sans = charger("").unwrap().unwrap();
+        let (inst, _) = installateur(&root.join("a"), gouvernance_base());
+        let inst = sans.brancher_modeles(inst).unwrap();
+        assert!(format!("{inst:?}").contains("modeles: false"));
+        assert_eq!(inst.version_installee(Categorie::ModeleIa, "m"), None);
+        // Valide : branché.
+        let ok = charger(&format!(r#", "modeles": {{"dossier": "{}", "ancres": ["{}"]}}"#, root.join("m").display(), hx(k)));
+        let (inst2, _) = installateur(&root.join("b"), gouvernance_base());
+        assert!(format!("{:?}", ok.unwrap().unwrap().brancher_modeles(inst2).unwrap()).contains("modeles: true"));
+        // Invalides : dossier relatif, aucune ancre, ancre mal formée ⇒ erreur (canal désactivé).
+        for extra in [
+            format!(r#", "modeles": {{"dossier": "models", "ancres": ["{}"]}}"#, hx(k)),
+            format!(r#", "modeles": {{"dossier": "{}", "ancres": []}}"#, root.display()),
+            format!(r#", "modeles": {{"dossier": "{}", "ancres": ["zz"]}}"#, root.display()),
+        ] {
+            let c = charger(&extra).unwrap().unwrap();
+            let (i, _) = installateur(&root.join(uuid::Uuid::new_v4().to_string()), gouvernance_base());
+            assert!(c.brancher_modeles(i).is_err(), "{extra}");
+        }
+        // Champ inconnu : configuration refusée.
+        assert!(charger(&format!(r#", "modeles": {{"dossier": "{}", "ancres": ["{}"], "x": 1}}"#, root.display(), hx(k))).is_err());
         let _ = std::fs::remove_dir_all(&root);
     }
 
