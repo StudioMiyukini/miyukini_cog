@@ -26,13 +26,13 @@ fuzz_target!(|donnees: &[u8]| {
     match donnees[0] % 3 {
         0 => {
             if let Ok(p) = PreuveInclusion::decoder(preuve) {
-                assert_eq!(p.encoder(), preuve);
+                assert_eq!(p.encoder().expect("preuve décodée ré-encodable"), preuve);
                 let _ = p.verifier(&a, &b);
             }
         }
         1 => {
             if let Ok(p) = PreuveCoherence::decoder(preuve) {
-                assert_eq!(p.encoder(), preuve);
+                assert_eq!(p.encoder().expect("preuve décodée ré-encodable"), preuve);
                 let _ = p.verifier(&a, &b);
             }
         }

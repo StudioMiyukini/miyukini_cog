@@ -143,7 +143,7 @@ fn merkle_toutes_preuves_jusqua_40_et_falsifications() {
         for i in 0..n {
             let p = PreuveInclusion::generer(&feuilles[..n], i).unwrap();
             p.verifier(&feuilles[i], &r).unwrap();
-            assert_eq!(PreuveInclusion::decoder(&p.encoder()).unwrap(), p);
+            assert_eq!(PreuveInclusion::decoder(&p.encoder().unwrap()).unwrap(), p);
             // Mauvaise feuille, mauvais index, mauvaise taille, chemin altéré : refus.
             assert!(p.verifier(&hacher_feuille(b"autre"), &r).is_err());
             let mut q = p.clone();
@@ -174,7 +174,7 @@ fn merkle_toutes_preuves_jusqua_40_et_falsifications() {
             let r1 = racine(&feuilles[..m]);
             let p = PreuveCoherence::generer(&feuilles[..n], m).unwrap();
             p.verifier(&r1, &r).unwrap();
-            assert_eq!(PreuveCoherence::decoder(&p.encoder()).unwrap(), p);
+            assert_eq!(PreuveCoherence::decoder(&p.encoder().unwrap()).unwrap(), p);
             if m < n {
                 // Histoire réécrite : ancienne racine différente.
                 let mut reecrite = feuilles[..n].to_vec();
@@ -192,7 +192,7 @@ fn merkle_toutes_preuves_jusqua_40_et_falsifications() {
 #[test]
 fn merkle_decodage_strict() {
     let p = PreuveInclusion { index: 1, taille: 2, chemin: vec![[3u8; 32]] };
-    let o = p.encoder();
+    let o = p.encoder().unwrap();
     assert_eq!(o.len(), 17 + 32);
     assert!(PreuveInclusion::decoder(&o[..o.len() - 1]).is_err());
     let mut plus = o.clone();
@@ -319,19 +319,53 @@ fn validite_et_politique_bornees() {
     for validite in [0, AGE_MAX_TETE_PLAFOND_SECS + 1, u64::MAX] {
         let mut t = tete(1, 3, T0);
         t.validite_max_secs = validite;
+        // Refus symétrique : à la construction, à l'encodage (rien n'est
+        // signé) et au décodage d'une charge forgée à la main.
+        let attendu = ErreurSceau::ValeurInvalide(6);
         assert_eq!(
-            verifier_tete(&sceller_tete(&t), &a, &PolitiqueTete::journal_cog(), &REG, T0).unwrap_err(),
-            ErreurRegistre::Sceau(ErreurSceau::ValeurInvalide(6))
+            TeteRegistre::nouvelle(t.registre, t.taille, t.racine, t.sequence, t.emise_a, t.validite_max_secs)
+                .unwrap_err(),
+            attendu
         );
+        assert_eq!(sceller(&t, &journal()).unwrap_err(), attendu);
+        assert_eq!(decoder_titre::<TeteRegistre>(&charge_tete_brute(&t)).unwrap_err(), attendu);
     }
     // Arbre vide : racine imposée.
     let mut t = tete(1, 0, T0);
     verifier_tete(&sceller_tete(&t), &a, &PolitiqueTete::journal_cog(), &REG, T0).unwrap();
     t.racine = [0; 32];
-    assert_eq!(
-        verifier_tete(&sceller_tete(&t), &a, &PolitiqueTete::journal_cog(), &REG, T0).unwrap_err(),
-        ErreurRegistre::Sceau(ErreurSceau::ValeurInvalide(3))
-    );
+    let attendu = ErreurSceau::ValeurInvalide(3);
+    assert_eq!(TeteRegistre::nouvelle(REG, 0, [0; 32], 1, T0, AGE_MAX_TETE_DEFAUT_SECS).unwrap_err(), attendu);
+    assert_eq!(sceller(&t, &journal()).unwrap_err(), attendu);
+    assert_eq!(sceller_multi(&t, &[&journal(), &editeur()]).unwrap_err(), attendu);
+    assert_eq!(decoder_titre::<TeteRegistre>(&charge_tete_brute(&t)).unwrap_err(), attendu);
+    // Cosigner une tête invalide forgée (charge re-signée à la main) : refusé.
+    let valide = Sceau::decoder(&sceller_tete(&tete(1, 0, T0))).unwrap();
+    let forge = Sceau { charge: charge_tete_brute(&t), ..valide }.encoder().unwrap();
+    assert_eq!(cosigner::<TeteRegistre>(&forge, &editeur()).unwrap_err(), attendu);
+    // Une tête valide construite par `nouvelle` est celle qu'on relit.
+    let n = TeteRegistre::nouvelle(REG, 0, racine_vide(), 1, T0, 1).unwrap();
+    let v = verifier_tete(&sceller_tete(&n), &a, &PolitiqueTete::journal_cog(), &REG, T0).unwrap();
+    assert_eq!(v.tete(), &n);
+}
+
+/// Charge TLV d'une tête écrite champ par champ, sans les contrôles de
+/// l'encodeur (forge de têtes invalides pour tester le décodeur).
+fn charge_tete_brute(t: &TeteRegistre) -> Vec<u8> {
+    let mut e = EcrivainTlv::new();
+    e.b32(1, &t.registre)
+        .unwrap()
+        .u64(2, t.taille)
+        .unwrap()
+        .b32(3, &t.racine)
+        .unwrap()
+        .u64(4, t.sequence)
+        .unwrap()
+        .u64(5, t.emise_a)
+        .unwrap()
+        .u64(6, t.validite_max_secs)
+        .unwrap();
+    e.finir()
 }
 
 #[test]

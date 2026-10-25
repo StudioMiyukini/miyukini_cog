@@ -94,7 +94,7 @@ fn sceller_charge_brute(cle: &CleSignature, type_sceau: TypeSceau, charge: Vec<u
         charge,
         signatures: vec![SignatureSceau { kid: cle.kid(), algorithme: Algorithme::Ed25519, octets }],
     }
-    .encoder()
+    .encoder_brut()
 }
 
 fn hex_sha256(octets: &[u8]) -> String {
@@ -191,7 +191,7 @@ fn kid_substitue_refuse() {
     let b = CleSignature::generer();
     let mut sceau = Sceau::decoder(&sceller(&essai(), &a).unwrap()).unwrap();
     sceau.signatures[0].kid = b.kid();
-    assert_eq!(verifier::<Essai>(&sceau.encoder(), &ancres_pour(&b), T0).unwrap_err(), ErreurSceau::SignatureInvalide);
+    assert_eq!(verifier::<Essai>(&sceau.encoder().unwrap(), &ancres_pour(&b), T0).unwrap_err(), ErreurSceau::SignatureInvalide);
 }
 
 #[test]
@@ -358,7 +358,7 @@ fn signature_non_canonique_refusee() {
         retenue = somme >> 8;
     }
     assert_eq!(
-        verifier::<Essai>(&sceau.encoder(), &ancres_pour(&cle), T0).unwrap_err(),
+        verifier::<Essai>(&sceau.encoder().unwrap(), &ancres_pour(&cle), T0).unwrap_err(),
         ErreurSceau::SignatureInvalide
     );
 }
@@ -441,7 +441,7 @@ fn meme_signataire_compte_une_fois() {
     // Forgé à la main : deux entrées du même kid (signatures valides) → refusé au décodage.
     let mut sceau = Sceau::decoder(&un).unwrap();
     sceau.signatures.push(sceau.signatures[0].clone());
-    let double = sceau.encoder();
+    let double = sceau.encoder_brut();
     assert_eq!(Sceau::decoder(&double).unwrap_err(), ErreurSceau::SignataireDuplique);
     assert_eq!(
         verifier_seuil::<Essai>(&double, &ancres_pour(&a), 2, T0).unwrap_err(),
@@ -454,7 +454,7 @@ fn signatures_non_triees_refusees() {
     let deux = sceller_multi(&essai(), &[&cle_fixe(), &cle_b()]).unwrap();
     let mut sceau = Sceau::decoder(&deux).unwrap();
     sceau.signatures.reverse();
-    assert_eq!(Sceau::decoder(&sceau.encoder()).unwrap_err(), ErreurSceau::SignaturesNonTriees);
+    assert_eq!(Sceau::decoder(&sceau.encoder_brut()).unwrap_err(), ErreurSceau::SignaturesNonTriees);
 }
 
 #[test]
@@ -466,7 +466,7 @@ fn signature_epinglee_invalide_refuse_tout_le_sceau() {
     sceau.signatures[1].octets[0] ^= 0x01;
     let ancres = ancres_de(&[(&a, NiveauConfiance::Souverain), (&b, NiveauConfiance::Souverain)]);
     assert_eq!(
-        verifier_seuil::<Essai>(&sceau.encoder(), &ancres, 1, T0).unwrap_err(),
+        verifier_seuil::<Essai>(&sceau.encoder().unwrap(), &ancres, 1, T0).unwrap_err(),
         ErreurSceau::SignatureInvalide
     );
 }
@@ -498,7 +498,7 @@ fn sceau_algorithme(alg: Algorithme, taille: usize) -> Vec<u8> {
         signatures: vec![SignatureSceau { kid: cle_fixe().kid(), algorithme: alg, octets: vec![0xAB; taille] }],
         ..base
     }
-    .encoder()
+    .encoder_brut()
 }
 
 #[test]
@@ -561,7 +561,7 @@ fn signature_reinterpretee_sous_autre_algorithme_refusee() {
     sceau.signatures[0].algorithme = Algorithme::MlDsa65;
     sceau.signatures[0].octets.resize(Algorithme::MlDsa65.taille_signature(), 0);
     assert_eq!(
-        verifier::<Essai>(&sceau.encoder(), &ancres, T0).unwrap_err(),
+        verifier::<Essai>(&sceau.encoder().unwrap(), &ancres, T0).unwrap_err(),
         ErreurSceau::AlgorithmeNonPrisEnCharge(0x02)
     );
 
@@ -572,7 +572,7 @@ fn signature_reinterpretee_sous_autre_algorithme_refusee() {
     let autre_contexte = signer_brut(&cle, &octets_signes_spec(0x02, TypeSceau::Passeport, &charge));
     let mut sceau = Sceau::decoder(&octets).unwrap();
     sceau.signatures[0].octets = autre_contexte;
-    assert_eq!(verifier::<Essai>(&sceau.encoder(), &ancres, T0).unwrap_err(), ErreurSceau::SignatureInvalide);
+    assert_eq!(verifier::<Essai>(&sceau.encoder().unwrap(), &ancres, T0).unwrap_err(), ErreurSceau::SignatureInvalide);
 
     // 5. Signature d'un Sceau v1.0 (ancienne étiquette) : ne vérifie pas non plus.
     let mut v1 = b"miyukini/sceau/v1\0".to_vec();
@@ -582,7 +582,7 @@ fn signature_reinterpretee_sous_autre_algorithme_refusee() {
     v1.extend_from_slice(&charge);
     let mut sceau = Sceau::decoder(&octets).unwrap();
     sceau.signatures[0].octets = signer_brut(&cle, &v1);
-    assert_eq!(verifier::<Essai>(&sceau.encoder(), &ancres, T0).unwrap_err(), ErreurSceau::SignatureInvalide);
+    assert_eq!(verifier::<Essai>(&sceau.encoder().unwrap(), &ancres, T0).unwrap_err(), ErreurSceau::SignatureInvalide);
 }
 
 #[test]

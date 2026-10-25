@@ -232,9 +232,41 @@ impl Sceau {
         Ok(Self { algorithme, type_sceau, charge, signatures })
     }
 
-    /// Encode en octets (aucun contrôle : outillage et tests ; les sceaux
-    /// produits par [`sceller`] et [`cosigner`] sont toujours canoniques).
-    pub fn encoder(&self) -> Vec<u8> {
+    /// Invariants du décodeur, contrôlés avant tout encodage : charge d'au
+    /// plus [`TAILLE_MAX_CHARGE`], 1 à [`MAX_SIGNATURES`] signatures, chacune
+    /// de l'algorithme de l'entête et de la longueur qu'il impose, `kid`
+    /// strictement croissants.
+    pub fn valider(&self) -> Result<(), ErreurSceau> {
+        if self.charge.len() > TAILLE_MAX_CHARGE {
+            return Err(ErreurSceau::ChargeTropGrande);
+        }
+        let nombre = self.signatures.len();
+        if nombre == 0 || nombre > MAX_SIGNATURES {
+            return Err(ErreurSceau::NombreSignaturesInvalide(u8::try_from(nombre).unwrap_or(u8::MAX)));
+        }
+        for s in &self.signatures {
+            if s.algorithme != self.algorithme {
+                return Err(ErreurSceau::AlgorithmeIncoherent);
+            }
+            if s.octets.len() != self.algorithme.taille_signature() {
+                return Err(ErreurSceau::TailleInvalide);
+            }
+        }
+        controler_ordre(&self.signatures)
+    }
+
+    /// Encode en octets après contrôle des invariants du décodeur
+    /// ([`Self::valider`]) : pour tout sceau accepté,
+    /// `Sceau::decoder(&s.encoder()?) == Ok(s)`.
+    pub fn encoder(&self) -> Result<Vec<u8>, ErreurSceau> {
+        self.valider()?;
+        Ok(self.encoder_brut())
+    }
+
+    /// Encode **sans aucun contrôle** (longueurs tronquées au-delà des bornes
+    /// du format). Réservé aux tests de refus et à l'outillage qui forge
+    /// volontairement des sceaux invalides : ne jamais l'utiliser pour émettre.
+    pub fn encoder_brut(&self) -> Vec<u8> {
         let taille_sigs: usize =
             self.signatures.iter().map(|s| TAILLE_ENTETE_SIGNATURE + s.octets.len()).sum();
         let mut sortie = Vec::with_capacity(TAILLE_ENTETE + self.charge.len() + 1 + taille_sigs);
@@ -290,14 +322,33 @@ impl Sceau {
     }
 }
 
-fn encoder_charge<T: Titre>(titre: &T) -> Result<Vec<u8>, ErreurSceau> {
+fn encoder_titre<T: Titre>(titre: &T) -> Result<Vec<u8>, ErreurSceau> {
     let mut ecrivain = EcrivainTlv::new();
     titre.encoder(&mut ecrivain)?;
-    let charge = ecrivain.finir();
+    Ok(ecrivain.finir())
+}
+
+/// Encode la charge d'un titre et contrôle l'aller-retour : la charge doit
+/// se décoder canoniquement en `T` ([`decoder_titre`], mêmes refus que chez
+/// le vérificateur) et ce titre relu doit se ré-encoder octet pour octet.
+/// Garantit, pour **tout** [`Titre`] (y compris ceux des autres crates), qu'on
+/// ne signe jamais ce que le décodeur refuse ou lit autrement.
+fn encoder_charge<T: Titre>(titre: &T) -> Result<Vec<u8>, ErreurSceau> {
+    let charge = encoder_titre(titre)?;
     if charge.len() > TAILLE_MAX_CHARGE {
         return Err(ErreurSceau::ChargeTropGrande);
     }
+    controler_aller_retour::<T>(&charge)?;
     Ok(charge)
+}
+
+/// `charge` se décode en `T` et ce titre se ré-encode à l'identique.
+fn controler_aller_retour<T: Titre>(charge: &[u8]) -> Result<(), ErreurSceau> {
+    let relu = decoder_titre::<T>(charge)?;
+    if encoder_titre(&relu)? != charge {
+        return Err(ErreurSceau::EncodageNonCanonique);
+    }
+    Ok(())
 }
 
 /// Scelle un titre avec une clé de signature (Ed25519, une signature).
@@ -320,23 +371,23 @@ pub fn sceller_multi<T: Titre>(titre: &T, cles: &[&CleSignature]) -> Result<Vec<
     for cle in cles {
         sceau.ajouter_signature(cle)?;
     }
-    Ok(sceau.encoder())
+    sceau.encoder()
 }
 
 /// Ajoute la signature de `cle` à un sceau existant (cosignature).
 ///
 /// Le sceau doit être strictement bien formé, du type `T`, et sa charge doit
-/// se décoder canoniquement en `T` (on ne cosigne pas ce qu'on ne sait pas
-/// lire). Les signatures existantes ne sont **pas** vérifiées ici : c'est le
-/// rôle du vérificateur. Un signataire déjà présent est refusé.
+/// se décoder canoniquement en `T` et se ré-encoder à l'identique (on ne
+/// cosigne pas ce qu'on ne sait pas lire). Les signatures existantes ne
+/// sont **pas** vérifiées ici : c'est le rôle du vérificateur. Un signataire déjà présent est refusé.
 pub fn cosigner<T: Titre>(octets: &[u8], cle: &CleSignature) -> Result<Vec<u8>, ErreurSceau> {
     let mut sceau = Sceau::decoder(octets)?;
     if sceau.type_sceau != T::TYPE {
         return Err(ErreurSceau::TypeInattendu { attendu: T::TYPE as u8, trouve: sceau.type_sceau as u8 });
     }
-    decoder_titre::<T>(&sceau.charge)?;
+    controler_aller_retour::<T>(&sceau.charge)?;
     sceau.ajouter_signature(cle)?;
-    Ok(sceau.encoder())
+    sceau.encoder()
 }
 
 /// Décode canoniquement une charge TLV en titre `T` (structure validée, tout

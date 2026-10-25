@@ -14,7 +14,7 @@ use miyusceau::Sceau;
 
 fuzz_target!(|octets: &[u8]| {
     if let Ok(sceau) = Sceau::decoder(octets) {
-        assert_eq!(sceau.encoder(), octets, "décodage non canonique");
+        assert_eq!(sceau.encoder().expect("sceau décodé ré-encodable"), octets, "décodage non canonique");
         let _ = sceau.octets_signes();
     }
 });

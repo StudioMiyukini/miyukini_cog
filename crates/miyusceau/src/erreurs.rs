@@ -70,6 +70,9 @@ pub enum ErreurSceau {
     PasEncoreValide,
     /// Titre expiré.
     Expire,
+    /// L'encodeur produirait des octets que le décodeur relit différemment
+    /// (titre non canonique) : refus à l'émission, rien n'est signé.
+    EncodageNonCanonique,
 }
 
 impl fmt::Display for ErreurSceau {
@@ -103,6 +106,7 @@ impl fmt::Display for ErreurSceau {
             }
             Self::PasEncoreValide => write!(f, "titre pas encore valide"),
             Self::Expire => write!(f, "titre expiré"),
+            Self::EncodageNonCanonique => write!(f, "encodage non canonique (aller-retour refusé)"),
         }
     }
 }

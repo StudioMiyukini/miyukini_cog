@@ -48,3 +48,10 @@ path = "fuzz_targets/preuves_merkle.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "aller_retour"
+path = "fuzz_targets/aller_retour.rs"
+test = false
+doc = false
+bench = false

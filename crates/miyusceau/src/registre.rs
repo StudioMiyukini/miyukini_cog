@@ -69,10 +69,48 @@ pub struct TeteRegistre {
     pub validite_max_secs: u64,
 }
 
+impl TeteRegistre {
+    /// Construit une tête en imposant les invariants du décodeur (voir
+    /// [`Self::valider`]) : toute tête ainsi construite s'encode et se relit
+    /// à l'identique.
+    pub fn nouvelle(
+        registre: [u8; 32],
+        taille: u64,
+        racine: Empreinte,
+        sequence: u64,
+        emise_a: u64,
+        validite_max_secs: u64,
+    ) -> Result<Self, ErreurSceau> {
+        let tete = Self { registre, taille, racine, sequence, emise_a, validite_max_secs };
+        tete.valider()?;
+        Ok(tete)
+    }
+
+    /// Invariants communs à la construction, à l'encodage et au décodage :
+    ///
+    /// - `validite_max_secs` dans `1..=`[`AGE_MAX_TETE_PLAFOND_SECS`]
+    ///   (sinon [`ErreurSceau::ValeurInvalide`] du tag 6) ;
+    /// - `taille = 0` ⇒ `racine = SHA-256("")` (sinon
+    ///   [`ErreurSceau::ValeurInvalide`] du tag 3).
+    pub fn valider(&self) -> Result<(), ErreurSceau> {
+        if self.validite_max_secs == 0 || self.validite_max_secs > AGE_MAX_TETE_PLAFOND_SECS {
+            return Err(ErreurSceau::ValeurInvalide(TAG_VALIDITE));
+        }
+        if self.taille == 0 && self.racine != racine_vide() {
+            return Err(ErreurSceau::ValeurInvalide(TAG_RACINE));
+        }
+        Ok(())
+    }
+}
+
 impl Titre for TeteRegistre {
     const TYPE: TypeSceau = TypeSceau::TeteRegistre;
 
     fn encoder(&self, e: &mut EcrivainTlv) -> Result<(), ErreurSceau> {
+        // Mêmes invariants qu'au décodage : on ne signe jamais une tête que
+        // les vérificateurs refuseraient (asymétrie = déni de service ou
+        // équivoque).
+        self.valider()?;
         e.b32(TAG_REGISTRE, &self.registre)?
             .u64(TAG_TAILLE, self.taille)?
             .b32(TAG_RACINE, &self.racine)?
@@ -91,12 +129,7 @@ impl Titre for TeteRegistre {
             emise_a: l.exiger_u64(TAG_EMISE_A)?,
             validite_max_secs: l.exiger_u64(TAG_VALIDITE)?,
         };
-        if tete.validite_max_secs == 0 || tete.validite_max_secs > AGE_MAX_TETE_PLAFOND_SECS {
-            return Err(ErreurSceau::ValeurInvalide(TAG_VALIDITE));
-        }
-        if tete.taille == 0 && tete.racine != racine_vide() {
-            return Err(ErreurSceau::ValeurInvalide(TAG_RACINE));
-        }
+        tete.valider()?;
         Ok(tete)
     }
 

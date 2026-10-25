@@ -129,7 +129,13 @@ fn decoder_preuve(octets: &[u8]) -> Result<(u64, u64, Vec<Empreinte>), ErreurReg
     Ok((a, b, chemin))
 }
 
-fn encoder_preuve(a: u64, b: u64, chemin: &[Empreinte]) -> Vec<u8> {
+/// Encodage commun, symétrique de [`decoder_preuve`] : un chemin de plus de
+/// [`MAX_CHEMIN`] empreintes (refusé au décodage, et tronqué par l'octet de
+/// longueur au-delà de 255) est refusé.
+fn encoder_preuve(a: u64, b: u64, chemin: &[Empreinte]) -> Result<Vec<u8>, ErreurRegistre> {
+    if chemin.len() > MAX_CHEMIN {
+        return Err(ErreurRegistre::PreuveInvalide);
+    }
     let mut sortie = Vec::with_capacity(17 + chemin.len() * 32);
     sortie.extend_from_slice(&a.to_be_bytes());
     sortie.extend_from_slice(&b.to_be_bytes());
@@ -137,7 +143,7 @@ fn encoder_preuve(a: u64, b: u64, chemin: &[Empreinte]) -> Vec<u8> {
     for e in chemin {
         sortie.extend_from_slice(e);
     }
-    sortie
+    Ok(sortie)
 }
 
 /// Preuve d'inclusion d'une feuille dans un arbre de taille donnée.
@@ -168,8 +174,9 @@ impl PreuveInclusion {
         Ok(Self { index, taille, chemin })
     }
 
-    /// Encodage binaire.
-    pub fn encoder(&self) -> Vec<u8> {
+    /// Encodage binaire (chemin d'au plus [`MAX_CHEMIN`] empreintes, sinon
+    /// [`ErreurRegistre::PreuveInvalide`]) : `decoder(&p.encoder()?) == Ok(p)`.
+    pub fn encoder(&self) -> Result<Vec<u8>, ErreurRegistre> {
         encoder_preuve(self.index, self.taille, &self.chemin)
     }
 
@@ -235,8 +242,9 @@ impl PreuveCoherence {
         Ok(Self { taille1, taille2, chemin })
     }
 
-    /// Encodage binaire.
-    pub fn encoder(&self) -> Vec<u8> {
+    /// Encodage binaire (chemin d'au plus [`MAX_CHEMIN`] empreintes, sinon
+    /// [`ErreurRegistre::PreuveInvalide`]) : `decoder(&p.encoder()?) == Ok(p)`.
+    pub fn encoder(&self) -> Result<Vec<u8>, ErreurRegistre> {
         encoder_preuve(self.taille1, self.taille2, &self.chemin)
     }
 

@@ -172,8 +172,8 @@ fn mutations_etat_et_preuves() {
     let feuilles: Vec<Empreinte> = (0u8..5).map(|i| hacher_feuille(&[i])).collect();
     let inclusion_ref = PreuveInclusion::generer(&feuilles, 3).unwrap();
     let coherence_ref = PreuveCoherence::generer(&feuilles, 3).unwrap();
-    let inclusion = inclusion_ref.encoder();
-    let coherence = coherence_ref.encoder();
+    let inclusion = inclusion_ref.encoder().unwrap();
+    let coherence = coherence_ref.encoder().unwrap();
     let r3 = racine(&feuilles[..3]);
     let r5 = racine(&feuilles);
 

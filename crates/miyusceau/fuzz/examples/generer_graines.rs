@@ -57,8 +57,8 @@ fn main() {
     tete.encoder(&mut e).expect("charge");
     ecrire("decoder_titres", "tete", &e.finir());
 
-    let inclusion = PreuveInclusion::generer(&feuilles, 5).expect("inclusion").encoder();
-    let coherence = PreuveCoherence::generer(&feuilles, 3).expect("cohérence").encoder();
+    let inclusion = PreuveInclusion::generer(&feuilles, 5).expect("inclusion").encoder().expect("inclusion encodable");
+    let coherence = PreuveCoherence::generer(&feuilles, 3).expect("cohérence").encoder().expect("cohérence encodable");
     let r = racine(&feuilles);
     let mut entree = vec![0u8];
     entree.extend_from_slice(&feuilles[5]);
@@ -74,4 +74,29 @@ fn main() {
     entree.extend_from_slice(&[0u8; 64]);
     entree.extend_from_slice(&(0u8..20).collect::<Vec<_>>());
     ecrire("preuves_merkle", "arbre", &entree);
+
+    // aller_retour : sélecteur | octets de construction.
+    let mut champs = tete.registre.to_vec();
+    champs.extend_from_slice(&tete.taille.to_be_bytes());
+    champs.extend_from_slice(&tete.racine);
+    champs.extend_from_slice(&tete.sequence.to_be_bytes());
+    champs.extend_from_slice(&tete.emise_a.to_be_bytes());
+    champs.extend_from_slice(&tete.validite_max_secs.to_be_bytes());
+    // 0x00 : tête valide ; 0x18 : arbre vide, racine vide (valide) ;
+    // 0x48 : arbre vide, racine non vide (refus symétrique, constat d'origine).
+    for (nom, selecteur) in [("tete", 0x00u8), ("tete_vide", 0x18), ("tete_vide_racine", 0x48)] {
+        let mut entree = vec![selecteur];
+        entree.extend_from_slice(&champs);
+        ecrire("aller_retour", nom, &entree);
+    }
+    // Sceau Ed25519, charge de 4 octets, 2 signatures triées (0x40).
+    let mut entree = vec![0x40, 0x00, 0x05, 0x00, 0x04, 1, 2, 3, 4, 2];
+    for k in [1u8, 2] {
+        entree.extend_from_slice(&[k; 32]);
+        entree.extend_from_slice(&[0xAB; 64]);
+    }
+    ecrire("aller_retour", "sceau", &entree);
+    let mut entree = vec![0x02];
+    entree.extend_from_slice(&inclusion);
+    ecrire("aller_retour", "preuve", &entree);
 }
