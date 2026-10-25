@@ -5622,6 +5622,8 @@ dependencies = [
 name = "kindmother-service"
 version = "0.9.0-beta.1"
 dependencies = [
+ "aes",
+ "cbc",
  "chrono",
  "ed25519-dalek",
  "kindmother",

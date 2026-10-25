@@ -21,6 +21,19 @@
 //!   chemin SQL brut **transitoire** ; les lectures passent par une connexion ouverte
 //!   en `SQLITE_OPEN_READ_ONLY` avec `PRAGMA query_only = ON`, une seule instruction
 //!   par requête.
+//! - **Effacement physique** (oubli, droit à l'effacement) : `PRAGMA secure_delete = ON`
+//!   sur **chaque** connexion ouverte par KindMother (bases opérateurs en lecture-écriture
+//!   et en lecture seule, journal d'audit), relu après réglage ; s'il n'est pas relu actif,
+//!   l'ouverture est refusée (fail-closed). SQLite met alors à zéro le contenu supprimé
+//!   (cellules, pages de débordement, pages libres) au lieu de le laisser dans les pages
+//!   libérées. En mode WAL, les anciennes images de page restent dans le `-wal` jusqu'au
+//!   point de contrôle : tout lot qui a **supprimé** des lignes (intention typée `Delete`,
+//!   ou instruction brute transitoire contenant `DELETE`) est suivi d'un
+//!   `PRAGMA wal_checkpoint(TRUNCATE)` — les pages remises à zéro sont recopiées dans le
+//!   fichier principal et le `-wal` est ramené à zéro octet. Les insertions et mises à
+//!   jour ordinaires ne déclenchent pas ce point de contrôle (coût évité) : un oubli doit
+//!   s'exprimer par une suppression (convention MAIA / Alicia : suppression + pierre
+//!   tombale dans le même lot).
 
 use rusqlite::types::Value;
 use rusqlite::{params_from_iter, Connection, OpenFlags, OptionalExtension, Statement};
@@ -97,6 +110,62 @@ fn plaintext_dev_permitted() -> bool {
         false
     }
 }
+
+/// Active l'effacement physique sur `conn` et le relit (fail-closed).
+///
+/// À appeler sur **chaque** connexion ouverte par KindMother, après la clé SQLCipher.
+/// Erreur si la valeur relue n'est pas `1` (ON) : la connexion ne doit pas être utilisée.
+pub(crate) fn enforce_secure_delete(conn: &Connection) -> Result<(), ServiceError> {
+    conn.pragma_update(None, "secure_delete", "ON")
+        .map_err(|e| ServiceError::Database(format!("Cannot enable secure_delete: {e}")))?;
+    let active: i64 = conn
+        .query_row("PRAGMA secure_delete", [], |r| r.get(0))
+        .map_err(|e| ServiceError::Database(format!("Cannot read back secure_delete: {e}")))?;
+    if active != 1 {
+        error!("secure_delete read back as {active} (expected 1): connection refused");
+        return Err(ServiceError::Database(format!(
+            "secure_delete not active (read back {active}): connection refused"
+        )));
+    }
+    Ok(())
+}
+
+/// Point de contrôle `TRUNCATE` après un effacement.
+///
+/// Recopie dans le fichier principal les pages remises à zéro par `secure_delete` et
+/// ramène le `-wal` à zéro octet (les anciennes images de page qu'il contenait
+/// disparaissent). Retourne `false` si le point de contrôle n'a pas pu être complet
+/// (lecteur actif au-delà de `busy_timeout`, erreur) : l'effacement logique reste acquis,
+/// le résidu sera éliminé au prochain effacement réussi.
+fn truncate_wal_after_erasure(conn: &Connection, database: &str) -> bool {
+    let result = conn.query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |r| {
+        Ok((r.get::<_, i64>(0)?, r.get::<_, i64>(1)?, r.get::<_, i64>(2)?))
+    });
+    match result {
+        Ok((0, _, _)) => true,
+        Ok((busy, log, done)) => {
+            error!(
+                "Database '{database}': WAL checkpoint after erasure incomplete \
+                 (busy={busy}, log={log}, checkpointed={done}): erased pages may remain in -wal"
+            );
+            false
+        }
+        Err(e) => {
+            error!("Database '{database}': WAL checkpoint after erasure failed: {e}");
+            false
+        }
+    }
+}
+
+/// Vrai si l'instruction brute peut supprimer des lignes (mot-clé `DELETE`, casse
+/// indifférente). Prudent : un faux positif ne coûte qu'un point de contrôle.
+fn raw_sql_may_delete(sql: &str) -> bool {
+    sql.split(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))
+        .any(|word| word.eq_ignore_ascii_case("delete"))
+}
+
+/// Mention ajoutée au détail d'audit quand le point de contrôle d'effacement a échoué.
+const WAL_RESIDUE_NOTE: &str = "; WAL checkpoint after erasure incomplete";
 
 /// Résultat de l'application d'un lot : (lignes, rowid) par intention, ou (indice, motif).
 type Applied = Result<Vec<(u64, Option<i64>)>, (usize, String)>;
@@ -309,6 +378,7 @@ impl EncryptedDatabase {
         .map_err(|e| ServiceError::Database(format!("Cannot open database read-only: {}", e)))?;
 
         self.apply_key(&conn, database, true)?;
+        enforce_secure_delete(&conn)?;
 
         conn.execute_batch(
             r#"
@@ -345,6 +415,7 @@ impl EncryptedDatabase {
         .map_err(|e| ServiceError::Database(format!("Cannot open database: {}", e)))?;
 
         self.apply_key(&conn, database, existed)?;
+        enforce_secure_delete(&conn)?;
 
         conn.execute_batch(
             r#"
@@ -472,6 +543,7 @@ impl EncryptedDatabase {
         intent: &str,
     ) -> Result<(u64, Option<i64>), ServiceError> {
         let params_hash = raw_params_hash(sql, &params);
+        let mut wal_clean = true;
         let result = async {
             let conn = self.get_connection(database).await?;
             let conn = conn.lock().await;
@@ -481,10 +553,15 @@ impl EncryptedDatabase {
                 stmt.execute(params_from_iter(params))
                     .map_err(|e| ServiceError::Database(format!("Execute failed: {}", e)))?
             };
-            Ok::<_, ServiceError>((rows_affected as u64, Some(conn.last_insert_rowid())))
+            let last_id = conn.last_insert_rowid();
+            if rows_affected > 0 && raw_sql_may_delete(sql) {
+                wal_clean = truncate_wal_after_erasure(&conn, database);
+            }
+            Ok::<_, ServiceError>((rows_affected as u64, Some(last_id)))
         }
         .await;
-        self.audit_raw_write(database, operator_id, "execute", intent, params_hash, &result.as_ref().map(|r| r.0))?;
+        let note = if wal_clean { "" } else { WAL_RESIDUE_NOTE };
+        self.audit_raw_write(database, operator_id, "execute", intent, params_hash, &result.as_ref().map(|r| (r.0, note)))?;
         result
     }
 
@@ -508,6 +585,7 @@ impl EncryptedDatabase {
         }
         let params_hash = sha256_hex(&canonical);
 
+        let mut wal_clean = true;
         let result = async {
             let conn = self.get_connection(database).await?;
             let mut conn = conn.lock().await;
@@ -515,6 +593,7 @@ impl EncryptedDatabase {
                 .transaction()
                 .map_err(|e| ServiceError::Database(format!("Cannot begin transaction: {}", e)))?;
             let mut results = Vec::new();
+            let mut erased = false;
             for (sql, params) in operations {
                 // L'autorisateur n'est actif que pendant l'opération de l'opérateur
                 // (BEGIN / COMMIT sont émis par le service). Rollback via drop de tx.
@@ -523,14 +602,19 @@ impl EncryptedDatabase {
                 let rows = stmt
                     .execute(params_from_iter(params))
                     .map_err(|e| ServiceError::Database(format!("Transaction failed: {}", e)))?;
+                erased |= rows > 0 && raw_sql_may_delete(&sql);
                 results.push(rows as u64);
             }
             tx.commit()
                 .map_err(|e| ServiceError::Database(format!("Cannot commit: {}", e)))?;
+            if erased {
+                wal_clean = truncate_wal_after_erasure(&conn, database);
+            }
             Ok::<_, ServiceError>(results)
         }
         .await;
-        let total = result.as_ref().map(|r| r.iter().sum::<u64>());
+        let note = if wal_clean { "" } else { WAL_RESIDUE_NOTE };
+        let total = result.as_ref().map(|r| (r.iter().sum::<u64>(), note));
         self.audit_raw_write(database, operator_id, "transaction", intent, params_hash, &total)?;
         result
     }
@@ -542,10 +626,10 @@ impl EncryptedDatabase {
         operation: &str,
         intent: &str,
         params_hash: String,
-        result: &Result<u64, &ServiceError>,
+        result: &Result<(u64, &str), &ServiceError>,
     ) -> Result<(), ServiceError> {
         let (verdict, detail) = match result {
-            Ok(rows) => ("appliquee", format!("{intent}: {rows} rows")),
+            Ok((rows, note)) => ("appliquee", format!("{intent}: {rows} rows{note}")),
             Err(e) => (refusal_or_failure(e), format!("{intent}: {e}")),
         };
         self.journal
@@ -662,6 +746,16 @@ impl EncryptedDatabase {
             tx.commit().map_err(|e| (0, format!("Cannot commit: {e}")))?;
             Ok(out)
         })();
+        // Effacement physique : un lot qui a supprimé des lignes est suivi d'un point de
+        // contrôle TRUNCATE (pages remises à zéro recopiées, `-wal` vidé). Les lots sans
+        // suppression effective n'en paient pas le coût.
+        let erased = applied.as_ref().is_ok_and(|results| {
+            intents
+                .iter()
+                .zip(results)
+                .any(|(i, (rows, _))| i.operation == kindmother::IntentOperation::Delete && *rows > 0)
+        });
+        let wal_clean = !erased || truncate_wal_after_erasure(&conn, database);
         drop(conn);
 
         // 4. Issue, journal terminal, archivage.
@@ -680,7 +774,8 @@ impl EncryptedDatabase {
                 }
             };
             let _ = lc.transition(state);
-            let detail = reason.clone().unwrap_or_else(|| format!("{rows} rows"));
+            let note = if wal_clean { "" } else { WAL_RESIDUE_NOTE };
+            let detail = reason.clone().unwrap_or_else(|| format!("{rows} rows{note}"));
             records.push(intent_record(intent, operator_id, database, state, detail));
             outcomes.push((lc, IntentOutcome {
                 intent_id: intent.intent_id.clone(),
@@ -1146,7 +1241,25 @@ fn base64_encode(data: &[u8]) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::EncryptedDatabase;
+    use super::{enforce_secure_delete, raw_sql_may_delete, EncryptedDatabase};
+
+    #[test]
+    fn secure_delete_force_et_relu_sur_une_connexion() {
+        let c = rusqlite::Connection::open_in_memory().expect("mem");
+        c.pragma_update(None, "secure_delete", "OFF").expect("off");
+        enforce_secure_delete(&c).expect("on");
+        let v: i64 = c.query_row("PRAGMA secure_delete", [], |r| r.get(0)).expect("read");
+        assert_eq!(v, 1);
+    }
+
+    #[test]
+    fn detection_suppression_sql_brut() {
+        assert!(raw_sql_may_delete("DELETE FROM t WHERE id = ?1"));
+        assert!(raw_sql_may_delete("  delete from t"));
+        assert!(raw_sql_may_delete("WITH x AS (SELECT 1) DELETE FROM t WHERE id IN x"));
+        assert!(!raw_sql_may_delete("INSERT INTO t (deleted_at) VALUES (?1)"));
+        assert!(!raw_sql_may_delete("UPDATE t SET n = n + 1"));
+    }
 
     #[test]
     fn nom_de_base_minuscules_chiffres_tiret_souligne_acceptes() {

@@ -343,6 +343,7 @@ pub fn verify_journal_file(path: &Path, pragma_key: Option<&str>) -> Result<i64,
         conn.pragma_update(None, "key", key)
             .map_err(|e| ServiceError::Encryption(format!("Cannot key audit journal: {e}")))?;
     }
+    crate::database::enforce_secure_delete(&conn)?;
     verify_chain_on(&conn).map(|(seq, _)| seq)
 }
 
@@ -358,6 +359,9 @@ fn open_journal(path: &Path, pragma_key: Option<&str>) -> Result<Connection, Ser
         conn.pragma_update(None, "key", key)
             .map_err(|e| ServiceError::Encryption(format!("Cannot key audit journal: {e}")))?;
     }
+    // Effacement physique sur toute connexion KindMother (le journal est en ajout seul,
+    // le réglage ne coûte rien ; il couvre les pages libérées par SQLite lui-même).
+    crate::database::enforce_secure_delete(&conn)?;
     conn.execute_batch(
         r"
         PRAGMA journal_mode = WAL;
@@ -581,6 +585,21 @@ mod tests {
         assert_eq!(j.verify().expect("verify"), 3);
         assert!(j.intent_used("b").expect("used"));
         assert!(!j.intent_used("z").expect("unused"));
+        let _ = std::fs::remove_dir_all(d);
+    }
+
+    #[test]
+    fn journal_ouvert_avec_secure_delete_actif() {
+        let d = dir("secdel");
+        let j = AuditJournal::open(&d, None).expect("open");
+        let actif: i64 = j
+            .lock()
+            .expect("lock")
+            .conn
+            .query_row("PRAGMA secure_delete", [], |r| r.get(0))
+            .expect("pragma");
+        assert_eq!(actif, 1);
+        drop(j);
         let _ = std::fs::remove_dir_all(d);
     }
 

@@ -55,6 +55,10 @@ zeroize = "1"
 
 [dev-dependencies]
 kindmother-client = { path = "../kindmother-client" }
+# Test d'effacement physique : déchiffrement des pages SQLCipher brutes (AES-256-CBC)
+# pour prouver qu'une valeur oubliée a disparu du fichier et du `-wal`.
+aes = "0.8"
+cbc = "0.1"
 
 [features]
 # Chiffrement par défaut (K-06) : sans cette feature, le service refuse de démarrer, sauf
