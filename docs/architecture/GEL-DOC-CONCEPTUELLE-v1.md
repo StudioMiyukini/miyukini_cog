@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.17 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.18 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -76,6 +76,7 @@
 | A-015 | 2026-10-25 | Éditeur du registre de révocation côté COG (dépôt et envois Origin) ; étiquette `publiable` de KindMother (EX-47) et règle de dérivation des Fiches ; relais NFLOG des Vigies (format de ligne, témoin) ; **à valider par le propriétaire** | 1.15 |
 | A-016 | 2026-10-25 | Table hôte de la Douane (description v2, flux de boucle locale par compte, aucun DNS), journalisation bornée, règle EX-12 des Vigies, relais (panne immédiate, ligne sans ports), étiquette `publiable` v2 (paramètres signés, propriété des bases), dérivation stricte des Fiches ; **à valider par le propriétaire** | 1.16 |
 | A-017 | 2026-10-25 | Route de publication des Fiches depuis MAIA : requête signée par l'utilisateur, champs structurels calculés par le serveur, porte des Cores, débits ; clé d'identité dans le pont (à trancher) ; **à valider par le propriétaire** | 1.17 |
+| A-018 | 2026-10-25 | État de publication persistant dans KindMother (base réservée `cog-federee`, une insertion par version, rechargement fail-closed), plafond décompté après ALLOW, contrôle du propriétaire de l'étiquette ; **à valider par le propriétaire** | 1.18 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -615,3 +616,22 @@
 - **Configuration** : `MAIA_FEDEREE_CLE_IDENTITE` (graine de 32 octets, même format que `identite_cog.key` de Central) ; `MAIA_FEDEREE_OPERATEUR` (opérateur KindMother en lecture sur les bases étiquetables, à enregistrer) ; sans clé ⇒ route désactivée (503)
 - **Limites connues** : Fiches publiées et plafond d'attestations **en mémoire** (perdus au redémarrage, versions repartent à 1) ; un refus de la porte consomme une attestation ; aucune route de republication ; **garde de la clé d'identité dans le pont** : alternative à trancher — la laisser à Central qui signerait pour le pont
 - **Impact** : EX-47, EX-57, EX-60 ; plan lot 7
+
+### A-018 — État de publication persistant, propriétaire de l'étiquette
+
+<!-- @id arch.gel.a018 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a018 -->
+
+- **Date** : 2026-10-25 · **version** 1.18 · complète A-017 : lève la limite « état en mémoire » et corrige un constat de revue (publication d'une donnée étiquetée par un autre utilisateur) ; **validation du propriétaire attendue**
+- **Persistance** : base KindMother **`cog-federee`** (opérateur propriétaire du même nom, par défaut ; `MAIA_FEDEREE_PUBLICATIONS_OPERATEUR` ; nom `maia-*` ou invalide refusé au démarrage) ; base **réservée** : jamais dans un fichier `.bases`, et une proposition dont `donnee.base` est cette base est refusée (`base_reservee`)
+  - Table `fiches_publiees`, clé primaire `(fiche, version)` : `fiche`, `version` ≥ 1, `donnee` (empreinte hex de la référence), `empreinte` (empreinte hex des octets signés), `utilisateur`, `publiee_a` (horodatage = attestation consommée), `octets` (base64)
+- **Ordre et garantie en cas d'arrêt brutal**
+  - Sous un verrou de publication unique : rechargement si nécessaire, calcul de la version, plafond **contrôlé sans être décompté**, scellement, attestation, contrôle sans effet (`ServiceRequete::controler`)
+  - Porte des Cores ; seulement sur ALLOW : **une insertion KindMother** (version, Fiche et attestation dans la même ligne), puis l'état en mémoire, puis la réponse
+  - Arrêt avant l'insertion ⇒ la version reste libre ; après ⇒ rechargement, version suivante exigée ; même version, autre contenu ⇒ refus par la clé primaire
+  - Démarrage : état rechargé, chaque Fiche revérifiée, versions contiguës, plafond reconstruit ; KindMother indisponible ou état incohérent ⇒ **503**, jamais de reprise à la version 1 (codes `kindmother_indisponible`, `etat_publication_incoherent`, `persistance_indisponible`) ; un changement de clé d'identité du COG bloque la route jusqu'à traitement manuel
+- **Plafond** : publications sur 24 h glissantes, **décomptées seulement après ALLOW** (un refus de la porte ne consomme rien) ; requêtes concurrentes sérialisées
+- **Propriétaire de l'étiquette** : la route exige que l'étiquette ait été posée par l'utilisateur authentifié, sinon 403 `non_publiable` (même code qu'une donnée non étiquetée : la route ne révèle pas qu'un autre l'a étiquetée) ; `PublieurOriginal::attester` revérifie le propriétaire à la relecture ; la propriété de la base reste contrôlée par KindMother à la pose (A-016)
+- Journal des décisions toujours en mémoire (1 024 entrées)
+- **Impact** : EX-47, EX-57 ; plan lot 7
