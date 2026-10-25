@@ -4,6 +4,51 @@ Miyukini Cloud uses **content-addressable deduplication** via SHA-256 hashing. U
 
 Deduplication is always enabled and non-fatal -- if dedup fails, file operations proceed normally with a warning log.
 
+> **État actuel (2026-10-25) — prime sur les sections historiques ci-dessous**
+> (index JSON, SHA-256, `remove_reference` qui supprime le blob : obsolètes).
+>
+> - **Index** : table PostgreSQL `storage.blobs` ; hachage BLAKE3 du contenu
+>   **clair** ; blobs sous `.blobs/<2 premiers hex>/<hash>.blob`.
+> - **Compteurs de références — règle unique** : toute modification de
+>   `storage.files.blob_hash` ajuste `storage.blobs.ref_count` **dans la même
+>   transaction** (création : `DedupService::referencer_blob` ; copie :
+>   `incrementer_reference`, échec fatal ; remplacement de contenu et
+>   reclassement CDR : nouvelle référence + `decrementer_reference` de
+>   l'ancienne ; suppression : déclencheur `trg_files_decrement_blob_ref` ;
+>   copie d'arborescence : `storage.copy_folder_tree`). Aucune compensation
+>   hors transaction. Le blob est placé sur disque *avant* la transaction
+>   (`preparer_blob`), sa présence revérifiée sous verrou de ligne.
+> - **Suppression des blobs** : uniquement par `garbage_collect` (lignes
+>   `ref_count = 0` **et** sans ligne `storage.files`, verrouillées
+>   `FOR UPDATE SKIP LOCKED`, fichier supprimé avant la validation).
+> - **Réconciliation** (`ReconciliationReferencesService`, horaire, supervisée,
+>   désactivable par `MIYUCLOUD_RECONCILIATION_REFERENCES=0`) : `ref_count`
+>   recalculé depuis `storage.files` par lots verrouillés (500 blobs, 100 lots
+>   au plus par passage, curseur conservé), chaque correction journalisée, puis
+>   ramasse-miettes. Les références prises sans ligne de fichier (dépôt direct
+>   `POST /api/dedup/upload`) sont ramenées à 0 et le blob libéré.
+>
+> **Chiffrement au repos** (`MIYUCLOUD_ENCRYPTION_ENABLED=true`,
+> `MIYUCLOUD_ENCRYPTION_KEY` = base64 de **exactement 32 octets**, sinon refus
+> de démarrer) — module `infrastructure/services/blob_cipher.rs` :
+>
+> ```text
+> format MIYUCENC v1
+> en-tête (16 o) : "MIYUCENC" (8) | 0x01 version (1) | préfixe de nonce aléatoire (7)
+> segments       : AES-256-GCM(clair ≤ 64 Kio) ‖ étiquette 16 o, l'un après l'autre (≥ 1)
+> nonce segment i: préfixe (7) ‖ i u32 gros-boutiste (4) ‖ drapeau dernier (1)
+> AAD            : l'en-tête complet
+> taille claire  : (taille − 16) − 16 × nombre de segments
+> ```
+>
+> Lecture par plage sans déchiffrer ce qui précède ; un blob ne commençant
+> pas par `MIYUCENC` est un blob **clair hérité**, relu tel quel (pas de
+> migration ; un contenu déjà présent en clair est réutilisé par la dédup).
+> Blob chiffré sans clé ou avec une autre clé : lecture **refusée**. Les
+> vignettes (`.thumbnails/`), caches de transcodage et fichiers temporaires
+> d'envoi restent en clair (dérivés / transitoires). **Perdre la clé rend les
+> blobs chiffrés illisibles.**
+
 ## Architecture
 
 ```
@@ -145,7 +190,7 @@ pub struct DedupService {
 | `store_bytes(content, content_type)` | Hash → check existing → increment ref or write new blob atomically |
 | `store_from_file(source_path, content_type)` | Hash file → dedup check → move file to blob store |
 | `add_reference(hash)` | Increments **ref_count** + updates stats |
-| `remove_reference(hash)` | Decrements **ref_count**. If 0, deletes blob file + removes from index |
+| `remove_reference(hash)` | Decrements **ref_count** (floor 0). Never deletes the blob: `garbage_collect` does |
 | `read_blob(hash)` | Reads blob file content |
 | `get_stats()` | Returns current dedup statistics |
 | `flush()` | Saves index to JSON atomically (write to `.json.tmp` then rename) |

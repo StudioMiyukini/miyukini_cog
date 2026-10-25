@@ -34,14 +34,28 @@ impl WopiTokenValidator {
     }
 
     /// Generate a WOPI access token for a file.
+    ///
+    /// Infaillible pour les appelants existants : si la signature ne pouvait
+    /// pas être calculée (cas inatteignable pour HMAC), le jeton rendu est
+    /// vide, donc refusé par [`Self::validate_token`] (fermé par défaut).
+    /// Préférer [`Self::try_generate_token`], qui rend l'erreur.
     pub fn generate_token(&self, file_id: &str, owner_id: &str) -> String {
+        self.try_generate_token(file_id, owner_id)
+            .unwrap_or_else(|e| {
+                tracing::error!("WOPI : signature du jeton impossible ({e}) ; jeton vide rendu");
+                String::new()
+            })
+    }
+
+    /// Comme [`Self::generate_token`], mais rend l'erreur de signature.
+    pub fn try_generate_token(&self, file_id: &str, owner_id: &str) -> Result<String, DavError> {
         let timestamp = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
             .as_secs();
         let payload = format!("{file_id}:{owner_id}:{timestamp}");
-        let sig = self.sign(&payload);
-        format!("{payload}:{sig}")
+        let sig = self.sign(&payload)?;
+        Ok(format!("{payload}:{sig}"))
     }
 
     /// Validate a WOPI access token. Returns (file_id, owner_id) on success.
@@ -62,7 +76,7 @@ impl WopiTokenValidator {
         let provided_sig = decode_hex(provided_sig)
             .ok_or_else(|| DavError::Forbidden("Invalid WOPI token signature".into()))?;
         let payload = format!("{file_id}:{owner_id}:{timestamp}");
-        self.mac(&payload)
+        self.mac(&payload)?
             .verify_slice(&provided_sig)
             .map_err(|_| DavError::Forbidden("Invalid WOPI token signature".into()))?;
 
@@ -78,37 +92,19 @@ impl WopiTokenValidator {
         Ok((file_id.to_string(), owner_id.to_string()))
     }
 
-    fn sign(&self, payload: &str) -> String {
-        hex::encode(self.mac(payload).finalize().into_bytes())
+    fn sign(&self, payload: &str) -> Result<String, DavError> {
+        Ok(hex::encode(self.mac(payload)?.finalize().into_bytes()))
     }
 
-    fn mac(&self, payload: &str) -> HmacSha256 {
-        // C-10 : construction infaillible à partir du bloc de clé RFC 2104
-        // (même tag que `new_from_slice`, sans `expect`).
-        let mut bloc = bloc_cle_rfc2104(&self.secret);
-        let mut mac = <HmacSha256 as Mac>::new(&bloc.into());
-        bloc.fill(0);
+    /// HMAC-SHA256 (RFC 2104, crate `hmac`) initialisé sur `payload`. C-10 :
+    /// l'erreur de `new_from_slice` (jamais atteinte : HMAC accepte toute
+    /// longueur de clé) est rendue, jamais de panique.
+    fn mac(&self, payload: &str) -> Result<HmacSha256, DavError> {
+        let mut mac = <HmacSha256 as Mac>::new_from_slice(&self.secret)
+            .map_err(|_| DavError::Forbidden("Invalid WOPI signing key".into()))?;
         mac.update(payload.as_bytes());
-        mac
+        Ok(mac)
     }
-}
-
-/// Bloc de clé HMAC-SHA256 selon RFC 2104 : une clé plus longue que le bloc
-/// (64 octets) est d'abord hachée, puis le résultat est complété par des zéros.
-fn bloc_cle_rfc2104(secret: &[u8]) -> [u8; 64] {
-    use sha2::Digest;
-    let mut bloc = [0u8; 64];
-    if secret.len() > bloc.len() {
-        let condense = Sha256::digest(secret);
-        for (dst, src) in bloc.iter_mut().zip(condense.iter()) {
-            *dst = *src;
-        }
-    } else {
-        for (dst, src) in bloc.iter_mut().zip(secret.iter()) {
-            *dst = *src;
-        }
-    }
-    bloc
 }
 
 /// Décode une chaîne hexadécimale (minuscules ou majuscules) ; `None` si invalide.
@@ -195,25 +191,38 @@ mod tests {
     }
 
     #[test]
+    fn test_try_generate_token_valide() {
+        let validator = WopiTokenValidator::new(b"test-secret-key");
+        let token = validator.try_generate_token("f", "u").unwrap();
+        assert!(validator.validate_token(&token).is_ok());
+        assert!(
+            validator.validate_token("").is_err(),
+            "jeton de repli refusé"
+        );
+    }
+
+    #[test]
     fn test_signature_is_rfc4231_hmac() {
         // RFC 4231 cas 2.
         let v = WopiTokenValidator::new(b"Jefe");
         assert_eq!(
-            v.sign("what do ya want for nothing?"),
+            v.sign("what do ya want for nothing?").unwrap(),
             "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843"
         );
     }
 
     #[test]
-    fn test_bloc_cle_equivaut_new_from_slice() {
-        // Clés courte, exacte (64) et longue (> bloc, hachée) : même tag.
+    fn test_cles_de_toutes_longueurs_compatibles() {
+        // Clés courte, exacte (64) et longue (> bloc, hachée par RFC 2104) :
+        // même tag que la référence `new_from_slice` (non-régression de
+        // l'ancien bloc de clé construit à la main).
         for longueur in [0usize, 4, 32, 64, 65, 131] {
             let secret: Vec<u8> = (0..longueur).map(|i| i as u8).collect();
             let v = WopiTokenValidator::new(&secret);
             let mut reference = <HmacSha256 as Mac>::new_from_slice(&secret).unwrap();
             reference.update(b"payload");
             assert_eq!(
-                v.sign("payload"),
+                v.sign("payload").unwrap(),
                 hex::encode(reference.finalize().into_bytes())
             );
         }

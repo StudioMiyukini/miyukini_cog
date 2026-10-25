@@ -687,7 +687,13 @@ impl FileHandler {
                         Self::content_disposition(&file_dto.name, &mime_servi, &disposition_params);
 
                     match retrieval
-                        .get_file_range_stream_owned(&id, auth_user.id, start, Some(end + 1))
+                        .get_file_range_stream_owned_avec_accord(
+                            &id,
+                            auth_user.id,
+                            start,
+                            Some(end + 1),
+                            accord,
+                        )
                         .await
                     {
                         Ok(stream) => {
@@ -742,10 +748,17 @@ impl FileHandler {
                 .is_some_and(|v| v == "true" || v == "1");
 
         // Use the ownership-scoped optimized download.
-        // Ownership was already verified by get_file_owned above,
-        // so we can safely use the preloaded variant.
+        // Ownership was already verified by get_file_owned above; the service
+        // re-checks the CDR state itself (EX-45), with the owner's consent.
         match retrieval
-            .get_file_optimized_preloaded(&id, file_dto.clone(), accept_webp, prefer_original)
+            .get_file_optimized_preloaded_avec_accord(
+                &id,
+                file_dto.clone(),
+                auth_user.id,
+                accept_webp,
+                prefer_original,
+                accord,
+            )
             .await
         {
             Ok((_file, content)) => match content {

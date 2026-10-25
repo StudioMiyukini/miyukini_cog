@@ -203,6 +203,21 @@ impl FileBlobReadRepository {
         Ok(EtatCdr::depuis_stockage(&etat))
     }
 
+    /// État CDR du fichier `file_id`, sans filtre de propriétaire (EX-45) :
+    /// garde des lectures de contenu non limitées au propriétaire (WebDAV
+    /// historique, archives). Fichier absent ⇒ `NotFound`.
+    pub async fn get_etat_cdr(&self, file_id: &str) -> Result<EtatCdr, DomainError> {
+        let etat = sqlx::query_scalar::<_, String>(
+            "SELECT etat_cdr FROM storage.files WHERE id = $1::uuid",
+        )
+        .bind(file_id)
+        .fetch_optional(self.pool.as_ref())
+        .await
+        .map_err(|e| DomainError::internal_error("FileBlobRead", format!("etat_cdr: {e}")))?
+        .ok_or_else(|| DomainError::not_found("File", file_id))?;
+        Ok(EtatCdr::depuis_stockage(&etat))
+    }
+
     /// Parmi `file_ids`, ceux qui ne sont **pas** désarmés (EX-45) :
     /// `quarantaine`, `inconnu` (antérieur au CDR, jamais servi avant
     /// reclassement) ou toute autre valeur — exclus des archives ZIP.

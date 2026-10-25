@@ -126,13 +126,26 @@ impl AppServiceFactory {
         }));
         tracing::info!("FileContentCache initialized: max 10MB/file, 512MB total, 10k entries");
 
+        // Chiffrement au repos des blobs (MIYUCLOUD_ENCRYPTION_*) : clé de
+        // 32 octets exactement, sinon refus de démarrer (fermé par défaut).
+        let blob_cipher = crate::infrastructure::services::blob_cipher::BlobCipher::from_config(
+            &self.config.encryption,
+        )
+        .map_err(|e| DomainError::internal_error("Encryption", e))?;
+        if blob_cipher.is_some() {
+            tracing::info!(
+                "Chiffrement au repos des blobs actif (AES-256-GCM, format MIYUCENC v1)"
+            );
+        }
+
         // Thumbnail service for thumbnail generation
         let thumbnail_service = Arc::new(
             crate::infrastructure::services::thumbnail_service::ThumbnailService::new(
                 &self.storage_path,
                 5000,              // max 5000 thumbnails in cache
                 100 * 1024 * 1024, // max 100MB cache
-            ),
+            )
+            .with_blob_cipher(blob_cipher.clone()),
         );
         // Initialize thumbnail directories
         thumbnail_service.initialize().await?;
@@ -162,7 +175,8 @@ impl AppServiceFactory {
                 &self.storage_path,
                 db_pool.clone(),
                 maintenance_pool.clone(),
-            ),
+            )
+            .with_cipher(blob_cipher),
         );
         dedup_service.initialize().await?;
 
@@ -273,26 +287,41 @@ impl AppServiceFactory {
             desarmement,
             self.storage_path.join(".uploads/reclassement-cdr"),
         );
-        tokio::spawn(async move {
-            let mut intervalle = tokio::time::interval(std::time::Duration::from_secs(15 * 60));
-            loop {
-                intervalle.tick().await;
-                match service.reclasser_tout().await {
-                    Ok(b) if b.examines > 0 => tracing::info!(
-                        "Reclassement CDR : {} examinés, {} désarmés, {} en quarantaine, {} concurrents, {} en erreur (restés « inconnu »)",
-                        b.examines,
-                        b.desarmes,
-                        b.quarantaines,
-                        b.concurrences,
-                        b.erreurs
-                    ),
-                    Ok(_) => tracing::debug!("Reclassement CDR : aucun fichier « inconnu »"),
-                    Err(e) => tracing::warn!(
-                        "Reclassement CDR interrompu (nouvel essai dans 15 min) : {e}"
-                    ),
-                }
-            }
-        });
+        // Supervisée : une panique est journalisée et la tâche relancée ;
+        // chaque passage journalise les fichiers « inconnu » restants.
+        crate::application::services::reclassement_cdr_service::superviser_reclassement(
+            Arc::new(service),
+            std::time::Duration::from_secs(15 * 60),
+            std::time::Duration::from_secs(60),
+        );
+    }
+
+    /// Lance la réconciliation des compteurs de références des blobs
+    /// (`storage.blobs.ref_count` recalculé depuis `storage.files`, par lots
+    /// verrouillés, au plus 100 × 500 blobs par passage horaire) suivie du
+    /// ramasse-miettes des blobs sans référence. Supervisée. Désactivable
+    /// par `MIYUCLOUD_RECONCILIATION_REFERENCES=0`.
+    fn lancer_reconciliation_references(&self, core: &CoreServices) {
+        use crate::application::services::reconciliation_references_service::{
+            ReconciliationReferencesService, superviser_reconciliation,
+        };
+
+        if std::env::var("MIYUCLOUD_RECONCILIATION_REFERENCES").is_ok_and(|v| v.trim() == "0") {
+            tracing::warn!(
+                "Réconciliation des références désactivée (MIYUCLOUD_RECONCILIATION_REFERENCES=0)"
+            );
+            return;
+        }
+        let service = Arc::new(ReconciliationReferencesService::new(
+            core.dedup_service.clone(),
+            500,
+            100,
+        ));
+        superviser_reconciliation(
+            service,
+            std::time::Duration::from_secs(60 * 60),
+            std::time::Duration::from_secs(60),
+        );
     }
 
     /// Initializes the application services
@@ -679,6 +708,8 @@ impl AppServiceFactory {
             &maintenance_pool,
             apps.desarmement_service.clone(),
         );
+        // 8c. Compteurs de références des blobs (fuites après arrêt brutal).
+        self.lancer_reconciliation_references(&core);
 
         // 9. Assemble final AppState
         let mut app_state = AppState {

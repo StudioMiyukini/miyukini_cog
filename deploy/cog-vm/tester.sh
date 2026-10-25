@@ -192,6 +192,24 @@ done
 controle "secrets (portail, MiyuCloud) en 0600" bash -c \
 	"test \"\$(stat -c %a $ETC/cog-web-portal.env)\" = 600 && test \"\$(stat -c %a $ETC/miyucloud.env)\" = 600"
 
+# B2 : bridge.toml de MAIA dans /etc/miyukini (root, lecture seule), présenté à MAIA par
+# un montage lié en lecture seule à l'endroit où il le lit.
+controle "bridge.toml : $ETC/bridge.toml, propriété root, 0444" bash -c \
+	"test \"\$(stat -c '%a %U' $ETC/bridge.toml)\" = '444 root'"
+controle "MAIA : bridge.toml lié en lecture seule (BindReadOnlyPaths)" bash -c \
+	"systemctl show -p BindReadOnlyPaths --value miyukini-maia | grep -qF '$ETC/bridge.toml:$VAR/maia/bridge.toml'"
+bridge_monte_ro() {
+	local pid
+	pid=$(systemctl show -p MainPID --value miyukini-maia)
+	[[ -n $pid && $pid != 0 ]] || return 1
+	sudo -n awk -v p="$VAR/maia/bridge.toml" '$5 == p && $6 ~ /^ro(,|$)/ { f = 1 } END { exit !f }' "/proc/$pid/mountinfo"
+}
+controle "MAIA : bridge.toml monté en lecture seule dans l'espace du service" bridge_monte_ro
+
+# B7 : binaires installés conformes au manifeste du paquet (lié au commit).
+controle "binaires installés conformes à /opt/miyukini/MANIFESTE" bash -c \
+	"cd /opt/miyukini && grep -v '^#' MANIFESTE | grep '  \\./bin/' | sha256sum --check --strict --quiet -"
+
 propriete_egale() { [[ "$(systemctl show -p "$2" --value "$1")" == "$3" ]]; }
 for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
 	controle "$u : NoNewPrivileges=yes" propriete_egale "$u" NoNewPrivileges yes

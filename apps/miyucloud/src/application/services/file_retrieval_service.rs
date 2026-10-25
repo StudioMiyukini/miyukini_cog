@@ -12,8 +12,8 @@ use std::sync::Arc;
 use crate::application::dtos::file_dto::FileDto;
 use crate::application::ports::file_ports::{FileRetrievalUseCase, OptimizedFileContent};
 use crate::application::ports::storage_ports::FileReadPort;
-use crate::common::errors::DomainError;
-use crate::domain::entities::etat_cdr::EtatCdr;
+use crate::common::errors::{DomainError, ErrorKind};
+use crate::domain::entities::etat_cdr::{EtatCdr, message_refus};
 use crate::infrastructure::repositories::pg::file_blob_read_repository::FileBlobReadRepository;
 use crate::infrastructure::services::file_content_cache::FileContentCache;
 use crate::infrastructure::services::image_transcode_service::{
@@ -73,6 +73,63 @@ impl FileRetrievalService {
         ids: &[String],
     ) -> Result<std::collections::HashSet<String>, DomainError> {
         self.file_read.ids_non_desarmes(ids).await
+    }
+
+    // ── EX-45 : garde CDR du contenu ─────────────────────────────
+
+    /// Garde CDR de **toute** lecture de contenu par ce service (EX-45) :
+    /// `inconnu` jamais servi ; `quarantaine` seulement sur accord explicite
+    /// du propriétaire (`accord`) ; `desarme` toujours. L'état est relu en
+    /// base à chaque appel (jamais pris d'un DTO ou d'un cache), limité au
+    /// propriétaire quand il est connu. Les méthodes du trait
+    /// [`FileRetrievalUseCase`] passent `accord = false` : aucun appelant
+    /// (WebDAV, ZIP, WOPI, futur) ne peut obtenir un contenu non désarmé
+    /// sans passer par les variantes `*_avec_accord`.
+    async fn exiger_contenu_servable(
+        &self,
+        id: &str,
+        proprietaire: Option<Uuid>,
+        accord: bool,
+    ) -> Result<(), DomainError> {
+        let etat = match proprietaire {
+            Some(p) => self.file_read.get_etat_cdr_owned(id, p).await?,
+            None => self.file_read.get_etat_cdr(id).await?,
+        };
+        controle_cdr_contenu(etat, accord)
+    }
+
+    /// Téléchargement optimisé (préchargé) **avec** l'accord explicite
+    /// éventuel du propriétaire `proprietaire` pour un fichier en
+    /// quarantaine (paramètre `accepter_non_desarme`).
+    pub async fn get_file_optimized_preloaded_avec_accord(
+        &self,
+        id: &str,
+        file_dto: FileDto,
+        proprietaire: Uuid,
+        accept_webp: bool,
+        prefer_original: bool,
+        accord: bool,
+    ) -> Result<(FileDto, OptimizedFileContent), DomainError> {
+        self.exiger_contenu_servable(id, Some(proprietaire), accord)
+            .await?;
+        self.optimized_inner(id, file_dto, accept_webp, prefer_original)
+            .await
+    }
+
+    /// Plage du contenu du fichier de `proprietaire`, **avec** son accord
+    /// explicite éventuel pour un fichier en quarantaine.
+    pub async fn get_file_range_stream_owned_avec_accord(
+        &self,
+        id: &str,
+        proprietaire: Uuid,
+        start: u64,
+        end: Option<u64>,
+        accord: bool,
+    ) -> Result<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>, DomainError> {
+        self.file_read.verify_file_owner(id, proprietaire).await?;
+        self.exiger_contenu_servable(id, Some(proprietaire), accord)
+            .await?;
+        self.file_read.get_file_range_stream(id, start, end).await
     }
 
     // ── private helpers ──────────────────────────────────────────
@@ -261,6 +318,7 @@ impl FileRetrievalUseCase for FileRetrievalService {
         &self,
         id: &str,
     ) -> Result<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>, DomainError> {
+        self.exiger_contenu_servable(id, None, false).await?;
         self.file_read.get_file_stream(id).await
     }
 
@@ -270,6 +328,8 @@ impl FileRetrievalUseCase for FileRetrievalService {
         caller_id: Uuid,
     ) -> Result<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>, DomainError> {
         self.file_read.verify_file_owner(id, caller_id).await?;
+        self.exiger_contenu_servable(id, Some(caller_id), false)
+            .await?;
         self.file_read.get_file_stream(id).await
     }
 
@@ -281,6 +341,7 @@ impl FileRetrievalUseCase for FileRetrievalService {
         prefer_original: bool,
     ) -> Result<(FileDto, OptimizedFileContent), DomainError> {
         let file = self.file_read.get_file(id).await?;
+        self.exiger_contenu_servable(id, None, false).await?;
         let dto = FileDto::from(file);
         self.optimized_inner(id, dto, accept_webp, prefer_original)
             .await
@@ -294,6 +355,8 @@ impl FileRetrievalUseCase for FileRetrievalService {
         prefer_original: bool,
     ) -> Result<(FileDto, OptimizedFileContent), DomainError> {
         let file = self.file_read.get_file_for_owner(id, caller_id).await?;
+        self.exiger_contenu_servable(id, Some(caller_id), false)
+            .await?;
         let dto = FileDto::from(file);
         self.optimized_inner(id, dto, accept_webp, prefer_original)
             .await
@@ -307,6 +370,7 @@ impl FileRetrievalUseCase for FileRetrievalService {
         accept_webp: bool,
         prefer_original: bool,
     ) -> Result<(FileDto, OptimizedFileContent), DomainError> {
+        self.exiger_contenu_servable(id, None, false).await?;
         self.optimized_inner(id, file_dto, accept_webp, prefer_original)
             .await
     }
@@ -318,6 +382,7 @@ impl FileRetrievalUseCase for FileRetrievalService {
         start: u64,
         end: Option<u64>,
     ) -> Result<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>, DomainError> {
+        self.exiger_contenu_servable(id, None, false).await?;
         self.file_read.get_file_range_stream(id, start, end).await
     }
 
@@ -328,8 +393,10 @@ impl FileRetrievalUseCase for FileRetrievalService {
         start: u64,
         end: Option<u64>,
     ) -> Result<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>, DomainError> {
-        // Verify ownership first, then delegate to the unscoped stream
+        // Verify ownership first, then the CDR state, then stream
         self.file_read.verify_file_owner(id, caller_id).await?;
+        self.exiger_contenu_servable(id, Some(caller_id), false)
+            .await?;
         self.file_read.get_file_range_stream(id, start, end).await
     }
 
@@ -367,5 +434,41 @@ impl FileRetrievalUseCase for FileRetrievalService {
             .list_files_batch_for_owner(folder_id, owner_id, offset, limit)
             .await?;
         Ok(files.into_iter().map(FileDto::from).collect())
+    }
+}
+
+/// Règle CDR d'une lecture de contenu (EX-45) : `desarme` servi ;
+/// `quarantaine` seulement avec `accord` ; `inconnu` jamais. Refus :
+/// [`ErrorKind::AccessDenied`] avec le message de refus de l'état.
+pub fn controle_cdr_contenu(etat: EtatCdr, accord: bool) -> Result<(), DomainError> {
+    if etat.autorise_telechargement(accord) {
+        Ok(())
+    } else {
+        Err(DomainError::new(
+            ErrorKind::AccessDenied,
+            "File",
+            message_refus(etat),
+        ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn garde_cdr_du_service_de_lecture() {
+        assert!(controle_cdr_contenu(EtatCdr::Desarme, false).is_ok());
+        assert!(controle_cdr_contenu(EtatCdr::Desarme, true).is_ok());
+        let q = controle_cdr_contenu(EtatCdr::Quarantaine, false).expect_err("quarantaine");
+        assert_eq!(q.kind, ErrorKind::AccessDenied);
+        assert!(
+            controle_cdr_contenu(EtatCdr::Quarantaine, true).is_ok(),
+            "accord"
+        );
+        for accord in [false, true] {
+            let e = controle_cdr_contenu(EtatCdr::Inconnu, accord).expect_err("inconnu");
+            assert_eq!(e.kind, ErrorKind::AccessDenied);
+        }
     }
 }

@@ -28,6 +28,7 @@ use crate::application::ports::thumbnail_ports::{
     ThumbnailPort, ThumbnailSize as PortThumbnailSize, ThumbnailStatsDto,
 };
 use crate::domain::errors::{DomainError, ErrorKind};
+use crate::infrastructure::services::blob_cipher::{self, BlobCipher};
 
 /// Thumbnail sizes supported by the system
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -96,6 +97,9 @@ pub struct ThumbnailService {
     /// Without this, 50 simultaneous uploads would decode 50 bitmaps
     /// (~96 MB each for 6000×4000) = 4.8 GB peak.
     decode_semaphore: Arc<Semaphore>,
+    /// Chiffreur des blobs : les originaux chiffrés au repos sont déchiffrés
+    /// en mémoire avant décodage (`None` : blobs chiffrés refusés).
+    blob_cipher: Option<Arc<BlobCipher>>,
 }
 
 impl ThumbnailService {
@@ -129,7 +133,15 @@ impl ThumbnailService {
             cache,
             max_cache_bytes: max_cache_bytes as u64,
             decode_semaphore: Arc::new(Semaphore::new(DEFAULT_MAX_CONCURRENT_DECODES)),
+            blob_cipher: None,
         }
+    }
+
+    /// Lit les originaux chiffrés au repos avec `cipher` (voir
+    /// [`crate::infrastructure::services::blob_cipher`]).
+    pub fn with_blob_cipher(mut self, cipher: Option<Arc<BlobCipher>>) -> Self {
+        self.blob_cipher = cipher;
+        self
     }
 
     /// Initialize the thumbnail directories
@@ -364,6 +376,7 @@ impl ThumbnailService {
     ) -> Result<Bytes, ThumbnailError> {
         let path = original_path.to_path_buf();
         let max_dim = size.max_dimension();
+        let chiffreur = self.blob_cipher.clone();
 
         // Acquire semaphore permit — bounds peak RAM from concurrent decodes
         let _permit = self
@@ -375,8 +388,8 @@ impl ThumbnailService {
         // Run image processing in blocking thread pool
         let result = tokio::task::spawn_blocking(move || -> Result<Vec<u8>, ThumbnailError> {
             // Single read: load file once into memory, then work from the buffer
-            let data =
-                std::fs::read(&path).map_err(|e| ThumbnailError::ImageError(e.to_string()))?;
+            let data = blob_cipher::lire_clair_sync(&path, chiffreur.as_deref())
+                .map_err(|e| ThumbnailError::ImageError(e.to_string()))?;
 
             // Safety check: read dimensions from in-memory buffer (no 2nd I/O)
             let (w, h) = image::ImageReader::new(std::io::Cursor::new(&data))
@@ -468,12 +481,13 @@ impl ThumbnailService {
             };
 
             let path = original_path.clone();
+            let chiffreur = self.blob_cipher.clone();
 
             // Single spawn_blocking: 1 read + 1 decode + 3 resize + 3 encode
             let results = tokio::task::spawn_blocking(move || {
                 // Single read: load file once into memory
-                let data =
-                    std::fs::read(&path).map_err(|e| ThumbnailError::ImageError(e.to_string()))?;
+                let data = blob_cipher::lire_clair_sync(&path, chiffreur.as_deref())
+                    .map_err(|e| ThumbnailError::ImageError(e.to_string()))?;
 
                 // Safety check: read dimensions from in-memory buffer (no 2nd I/O)
                 let (w, h) = image::ImageReader::new(std::io::Cursor::new(&data))

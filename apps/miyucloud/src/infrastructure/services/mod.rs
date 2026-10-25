@@ -1,10 +1,10 @@
 //! @id     miyucloud_infrastructure_services_mod
-//! @do     declarer_module_blob_encryption_service
+//! @do     declarer_module_blob_cipher
 //! @role   orchestration
 //! @layer  app
 //! @human  miyucloud — module « infrastructure services mod ».
 
-pub mod blob_encryption_service;
+pub mod blob_cipher;
 pub mod central_client_service;
 pub mod chunked_upload_service;
 pub mod compression_service;

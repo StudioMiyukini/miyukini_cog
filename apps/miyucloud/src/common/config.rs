@@ -764,13 +764,11 @@ impl AppConfig {
     /// Startup validation of security-critical settings. Fail-closed: the
     /// server must refuse to start on an inconsistent configuration (C-10).
     pub fn validate(&self) -> Result<(), String> {
-        if self.encryption.enabled && self.encryption.key_base64.is_empty() {
-            return Err(
-                "FATAL: MIYUCLOUD_ENCRYPTION_ENABLED=true but MIYUCLOUD_ENCRYPTION_KEY is not set. \
-                 Generate a key with: openssl rand -base64 32"
-                    .to_string(),
-            );
-        }
+        // Chiffrement au repos : clé décodée de exactement 32 octets et
+        // algorithme connu, sinon refus de démarrer (le chiffreur est construit
+        // à l'identique au câblage, voir `di.rs`).
+        crate::infrastructure::services::blob_cipher::BlobCipher::from_config(&self.encryption)
+            .map_err(|e| format!("FATAL: {e}"))?;
         Ok(())
     }
 
@@ -1023,7 +1021,7 @@ impl AppConfig {
 
         // Encryption at rest configuration
         if let Ok(v) = env::var("MIYUCLOUD_ENCRYPTION_ENABLED") {
-            config.encryption.enabled = v.parse::<bool>().unwrap_or(false);
+            config.encryption.enabled = chiffrement_demande(&v);
         }
         if let Ok(v) = env::var("MIYUCLOUD_ENCRYPTION_KEY") {
             config.encryption.key_base64 = v;
@@ -1210,4 +1208,51 @@ impl AppConfig {
 /// Gets a default global configuration
 pub fn default_config() -> AppConfig {
     AppConfig::default()
+}
+
+/// Interprète `MIYUCLOUD_ENCRYPTION_ENABLED`. Fermé par défaut : seule une
+/// valeur explicitement négative (`false`, `0`, `no`, `off`, vide) désactive
+/// le chiffrement ; toute autre valeur l'active (et exige donc une clé
+/// valide au démarrage) — jamais de désactivation silencieuse sur une faute
+/// de frappe.
+fn chiffrement_demande(valeur: &str) -> bool {
+    !matches!(
+        valeur.trim().to_ascii_lowercase().as_str(),
+        "" | "false" | "0" | "no" | "off" | "non"
+    )
+}
+
+#[cfg(test)]
+mod tests_chiffrement {
+    use super::*;
+
+    fn cle(n: usize) -> String {
+        base64::Engine::encode(&base64::engine::general_purpose::STANDARD, vec![0x5Au8; n])
+    }
+
+    #[test]
+    fn valeur_d_activation_fermee_par_defaut() {
+        for v in ["true", "TRUE", "1", "yes", "on", "oui", "Vrai"] {
+            assert!(chiffrement_demande(v), "{v}");
+        }
+        for v in ["false", "False", "0", "no", "off", "", "  "] {
+            assert!(!chiffrement_demande(v), "{v}");
+        }
+    }
+
+    #[test]
+    fn demarrage_refuse_sans_cle_de_longueur_exacte() {
+        let mut config = AppConfig::default();
+        assert!(config.validate().is_ok(), "désactivé par défaut");
+        config.encryption.enabled = true;
+        assert!(config.validate().is_err(), "clé absente");
+        config.encryption.key_base64 = cle(16);
+        assert!(config.validate().is_err(), "clé trop courte");
+        config.encryption.key_base64 = cle(48);
+        assert!(config.validate().is_err(), "clé trop longue");
+        config.encryption.key_base64 = "@@@".into();
+        assert!(config.validate().is_err(), "base64 invalide");
+        config.encryption.key_base64 = cle(32);
+        assert!(config.validate().is_ok(), "clé de 32 octets");
+    }
 }

@@ -46,6 +46,10 @@ pub enum TokenKitError {
     /// Checksum HMAC invalide → token forgé ou tronqué.
     #[error("checksum invalide : token forgé ou modifié")]
     InvalidChecksum,
+    /// Clé HMAC refusée par `new_from_slice` (jamais atteint : HMAC accepte
+    /// toute longueur de clé).
+    #[error("clé HMAC invalide")]
+    InvalidKey,
 }
 
 /// Génère un nouveau jeton applicatif. Renvoie le token brut (à afficher
@@ -54,14 +58,33 @@ pub enum TokenKitError {
 /// `signing_secret` est une `Key32` propre à JayCloud (typiquement dérivée
 /// via `crypto_kit::derive_key_hkdf` depuis la master KindMother avec le
 /// contexte `b"jaycloud_token_kit_v1"`).
+///
+/// Infaillible pour les appelants existants : si le checksum ne pouvait pas
+/// être calculé (cas inatteignable, voir [`TokenKitError::InvalidKey`]), le
+/// jeton porte un checksum nul que [`verify_integrity`] refuse (fermé par
+/// défaut). Préférer [`try_generate`], qui rend l'erreur.
 pub fn generate(signing_secret: &Key32) -> (String, String) {
     let mut random = [0u8; RANDOM_BYTES];
     rand::rngs::OsRng.fill_bytes(&mut random);
+    let checksum = hmac8(signing_secret, &random).unwrap_or_else(|e| {
+        tracing::error!("token_kit : checksum impossible ({e}) ; jeton inutilisable émis");
+        [0u8; CHECKSUM_BYTES]
+    });
+    assembler(&random, &checksum)
+}
 
-    let checksum = hmac8(signing_secret, &random);
+/// Comme [`generate`], mais rend l'erreur de calcul du checksum.
+pub fn try_generate(signing_secret: &Key32) -> Result<(String, String), TokenKitError> {
+    let mut random = [0u8; RANDOM_BYTES];
+    rand::rngs::OsRng.fill_bytes(&mut random);
+    let checksum = hmac8(signing_secret, &random)?;
+    Ok(assembler(&random, &checksum))
+}
 
-    let random_part = base32::encode(BASE32_ALPHABET, &random);
-    let checksum_part = base32::encode(BASE32_ALPHABET, &checksum);
+/// Jeton brut et son hachage à partir de l'aléa et du checksum.
+fn assembler(random: &[u8], checksum: &[u8]) -> (String, String) {
+    let random_part = base32::encode(BASE32_ALPHABET, random);
+    let checksum_part = base32::encode(BASE32_ALPHABET, checksum);
     let raw_token = format!("{TOKEN_PREFIX}{random_part}-{checksum_part}");
 
     let hash = hash_token(&raw_token);
@@ -120,7 +143,7 @@ pub fn verify_integrity(raw_token: &str, signing_secret: &Key32) -> Result<(), T
     }
 
     // Vérification constant-time des 8 premiers octets du tag (crate `hmac`).
-    hmac_sha256(signing_secret, &random)
+    hmac_sha256(signing_secret, &random)?
         .verify_truncated_left(&checksum_given)
         .map_err(|_| TokenKitError::InvalidChecksum)
 }
@@ -129,26 +152,20 @@ pub fn verify_integrity(raw_token: &str, signing_secret: &Key32) -> Result<(), T
 ///
 /// Sortie identique bit à bit à l'ancienne implémentation manuelle (clé de
 /// 32 octets < bloc de 64 octets) : les jetons déjà émis restent valides.
-fn hmac8(secret: &Key32, message: &[u8]) -> [u8; CHECKSUM_BYTES] {
-    let tag = hmac_sha256(secret, message).finalize().into_bytes();
+fn hmac8(secret: &Key32, message: &[u8]) -> Result<[u8; CHECKSUM_BYTES], TokenKitError> {
+    let tag = hmac_sha256(secret, message)?.finalize().into_bytes();
     let mut out = [0u8; CHECKSUM_BYTES];
     out.copy_from_slice(&tag[..CHECKSUM_BYTES]);
-    out
+    Ok(out)
 }
 
-/// Instancie un HMAC-SHA256 initialisé sur `message`.
-fn hmac_sha256(secret: &Key32, message: &[u8]) -> HmacSha256 {
-    // RFC 2104 : une clé plus courte que le bloc (64 octets) est complétée
-    // par des zéros. Construire le bloc nous-mêmes donne le même tag que
-    // `new_from_slice` tout en restant infaillible (C-10, aucun `expect`).
-    let mut bloc = [0u8; 64];
-    for (dst, src) in bloc.iter_mut().zip(secret.0.iter()) {
-        *dst = *src;
-    }
-    let mut mac = <HmacSha256 as Mac>::new(&bloc.into());
-    bloc.fill(0);
+/// Instancie un HMAC-SHA256 (`new_from_slice`, RFC 2104) initialisé sur
+/// `message`. L'erreur (clé refusée) n'est jamais atteinte pour HMAC.
+fn hmac_sha256(secret: &Key32, message: &[u8]) -> Result<HmacSha256, TokenKitError> {
+    let mut mac =
+        <HmacSha256 as Mac>::new_from_slice(&secret.0).map_err(|_| TokenKitError::InvalidKey)?;
     mac.update(message);
-    mac
+    Ok(mac)
 }
 
 #[cfg(test)]
@@ -268,7 +285,7 @@ mod tests {
             let secret = Key32::generate();
             let mut msg = [0u8; RANDOM_BYTES];
             rand::rngs::OsRng.fill_bytes(&mut msg);
-            assert_eq!(hmac8(&secret, &msg), legacy_hmac8(&secret, &msg));
+            assert_eq!(hmac8(&secret, &msg).unwrap(), legacy_hmac8(&secret, &msg));
         }
     }
 
@@ -283,6 +300,25 @@ mod tests {
             base32::encode(BASE32_ALPHABET, &legacy_hmac8(&secret, &random))
         );
         assert!(verify_integrity(&token, &secret).is_ok());
+    }
+
+    #[test]
+    fn try_generate_produit_un_jeton_valide() {
+        let secret = Key32::generate();
+        let (token, hash) = try_generate(&secret).unwrap();
+        assert!(verify_integrity(&token, &secret).is_ok());
+        assert!(verify_hash(&token, &hash));
+    }
+
+    #[test]
+    fn checksum_nul_refuse() {
+        // Le jeton de repli de `generate` (checksum nul) ne vérifie jamais.
+        let secret = Key32::generate();
+        let (token, _) = assembler(&[7u8; RANDOM_BYTES], &[0u8; CHECKSUM_BYTES]);
+        assert!(matches!(
+            verify_integrity(&token, &secret),
+            Err(TokenKitError::InvalidChecksum)
+        ));
     }
 
     #[test]

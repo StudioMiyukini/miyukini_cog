@@ -57,10 +57,10 @@ pub fn generate_csrf_token() -> String {
     let ts = now_secs();
     let ts_hex = format!("{ts:016x}");
     // Sans secret : jeton vide, que `validate_csrf_token` refuse (fail-closed).
-    let Some(mac) = compute_mac(&ts_hex) else {
+    let Some(mac) = mac_pour(&ts_hex) else {
         return String::new();
     };
-    format!("{ts_hex}.{mac}")
+    format!("{ts_hex}.{}", hex::encode(mac.finalize().into_bytes()))
 }
 
 /// Valide un token CSRF. Retourne `true` si le token est valide et dans la fenêtre de 10 min.
@@ -79,28 +79,22 @@ pub fn validate_csrf_token(token: &str) -> bool {
         return false;
     }
 
-    // Vérification HMAC (constant-time via hmac::Mac::verify_slice).
-    let Some(expected_mac) = compute_mac(ts_hex) else {
+    // Vérification HMAC en temps constant sur le MAC décodé
+    // (`hmac::Mac::verify_slice`) ; hexadécimal invalide ⇒ refus.
+    let Ok(fourni) = hex::decode(provided_mac) else {
         return false;
     };
-    constant_time_eq(provided_mac, &expected_mac)
+    let Some(mac) = mac_pour(ts_hex) else {
+        return false;
+    };
+    mac.verify_slice(&fourni).is_ok()
 }
 
-fn compute_mac(data: &str) -> Option<String> {
+/// HMAC-SHA256 du secret CSRF initialisé sur `data` (`None` sans secret).
+fn mac_pour(data: &str) -> Option<HmacSha256> {
     let mut mac = HmacSha256::new_from_slice(csrf_secret()?).ok()?;
     mac.update(data.as_bytes());
-    Some(hex::encode(mac.finalize().into_bytes()))
-}
-
-fn constant_time_eq(a: &str, b: &str) -> bool {
-    if a.len() != b.len() {
-        return false;
-    }
-    let result = a
-        .bytes()
-        .zip(b.bytes())
-        .fold(0u8, |acc, (x, y)| acc | (x ^ y));
-    result == 0
+    Some(mac)
 }
 
 #[cfg(test)]
@@ -124,6 +118,18 @@ mod tests {
                 "tampered token should be rejected"
             );
         }
+    }
+
+    #[test]
+    fn mac_tronque_ou_non_hexadecimal_refuse() {
+        let token = generate_csrf_token();
+        let (ts, mac) = token.split_once('.').unwrap();
+        let tronque = &mac[..mac.len() - 2];
+        assert!(!validate_csrf_token(&format!("{ts}.{tronque}")));
+        assert!(!validate_csrf_token(&format!("{ts}.{}", "zz".repeat(32))));
+        assert!(!validate_csrf_token(&format!("{ts}.")));
+        // Hexadécimal en majuscules : même MAC décodé, accepté.
+        assert!(validate_csrf_token(&format!("{ts}.{}", mac.to_uppercase())));
     }
 
     #[test]

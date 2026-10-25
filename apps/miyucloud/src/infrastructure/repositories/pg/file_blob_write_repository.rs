@@ -25,7 +25,7 @@ use crate::domain::entities::file::File;
 use crate::domain::services::path_service::StoragePath;
 
 use super::folder_db_repository::FolderDbRepository;
-use crate::infrastructure::services::dedup_service::DedupService;
+use crate::infrastructure::services::dedup_service::{BlobPrepare, DedupService};
 
 /// File write repository backed by PostgreSQL metadata + blob storage.
 pub struct FileBlobWriteRepository {
@@ -136,25 +136,57 @@ impl FileBlobWriteRepository {
         }
     }
 
-    /// Atomically swap the blob hash of a file.
-    ///
-    /// Uses a CTE to capture the old hash before updating so the old blob
-    /// reference can be decremented afterwards. Compensates on failure by
-    /// removing the new blob reference.
+    /// Remplace le blob d'un fichier, **en une transaction** : ligne mise à
+    /// jour, référence du nouveau blob prise, celle de l'ancien retirée.
+    /// Aucune compensation hors transaction : un échec annule tout (le blob
+    /// placé sur disque sans référence est repris par le ramasse-miettes).
     ///
     /// `modified_at`: if `Some`, sets `updated_at` to that Unix timestamp;
     /// if `None`, uses `NOW()` (server time). Returns the new hash on success.
+    #[allow(clippy::too_many_arguments)]
     async fn swap_blob_hash(
         &self,
         file_id: &str,
-        new_hash: &str,
+        prepare: &BlobPrepare,
+        content_type: Option<String>,
         new_size: i64,
         modified_at: Option<i64>,
         marque: &MarqueCdr,
         mime_type: Option<&str>,
     ) -> Result<String, DomainError> {
+        let resultat = self
+            .swap_blob_hash_tx(
+                file_id,
+                prepare,
+                content_type,
+                new_size,
+                modified_at,
+                marque,
+                mime_type,
+            )
+            .await;
+        // Source libérée quelle que soit l'issue.
+        self.dedup.liberer_source(prepare).await;
+        resultat
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    async fn swap_blob_hash_tx(
+        &self,
+        file_id: &str,
+        prepare: &BlobPrepare,
+        content_type: Option<String>,
+        new_size: i64,
+        modified_at: Option<i64>,
+        marque: &MarqueCdr,
+        mime_type: Option<&str>,
+    ) -> Result<String, DomainError> {
+        let erreur = |contexte: &str, e: sqlx::Error| {
+            DomainError::internal_error("FileBlobWrite", format!("{contexte}: {e}"))
+        };
+        let mut tx = self.pool.begin().await.map_err(|e| erreur("begin", e))?;
         // Atomic CTE: capture old hash then update in one round-trip, no TOCTOU.
-        let old_hash = match sqlx::query_scalar::<_, String>(
+        let old_hash = sqlx::query_scalar::<_, String>(
             r#"
             WITH old AS (
                 SELECT id, blob_hash FROM storage.files WHERE id = $3::uuid FOR UPDATE
@@ -169,52 +201,92 @@ impl FileBlobWriteRepository {
             RETURNING old.blob_hash
             "#,
         )
-        .bind(new_hash)
+        .bind(&prepare.hash)
         .bind(new_size)
         .bind(file_id)
         .bind(modified_at.map(|t| t as f64))
         .bind(marque.etat.as_str())
         .bind(&marque.rapport)
         .bind(mime_type)
-        .fetch_optional(self.pool.as_ref())
+        .fetch_optional(&mut *tx)
+        .await
+        .map_err(|e| erreur("update", e))?
+        .ok_or_else(|| DomainError::not_found("File", file_id))?;
+
+        if old_hash != prepare.hash {
+            self.dedup
+                .referencer_blob(&mut tx, prepare, content_type)
+                .await?;
+            DedupService::decrementer_reference(&mut tx, &old_hash).await?;
+        }
+        tx.commit().await.map_err(|e| erreur("commit", e))?;
+        Ok(prepare.hash.clone())
+    }
+
+    /// Ligne `storage.files` + référence du blob préparé, en une transaction.
+    #[allow(clippy::too_many_arguments)]
+    async fn inserer_fichier_tx(
+        &self,
+        prepare: &BlobPrepare,
+        name: &str,
+        folder_id: &Option<String>,
+        user_id: Uuid,
+        size: u64,
+        content_type: &str,
+        marque: &MarqueCdr,
+    ) -> Result<(String, i64, i64), DomainError> {
+        let mut tx = self
+            .pool
+            .begin()
+            .await
+            .map_err(|e| DomainError::internal_error("FileBlobWrite", format!("begin: {e}")))?;
+
+        let row = match sqlx::query_as::<_, (String, i64, i64)>(
+            r#"
+            INSERT INTO storage.files (name, folder_id, user_id, blob_hash, size, mime_type,
+                                       etat_cdr, cdr_rapport)
+            VALUES ($1, $2::uuid, $3, $4, $5, $6, $7, $8)
+            RETURNING id::text,
+                      EXTRACT(EPOCH FROM created_at)::bigint,
+                      EXTRACT(EPOCH FROM updated_at)::bigint
+            "#,
+        )
+        .bind(name)
+        .bind(folder_id)
+        .bind(user_id)
+        .bind(&prepare.hash)
+        .bind(size as i64)
+        .bind(content_type)
+        .bind(marque.etat.as_str())
+        .bind(&marque.rapport)
+        .fetch_one(&mut *tx)
         .await
         {
-            Ok(Some(old)) => old,
-            Ok(None) => {
-                // File not found — compensate: remove the new blob ref
-                if let Err(e) = self.dedup.remove_reference(new_hash).await {
-                    tracing::error!("Blob orphaned after missing file: {}", e);
-                }
-                return Err(DomainError::not_found("File", file_id));
-            }
+            Ok(row) => row,
             Err(e) => {
-                // UPDATE failed — compensate: remove the new blob ref
-                if let Err(rollback_err) = self.dedup.remove_reference(new_hash).await {
-                    tracing::error!(
-                        "Blob orphaned after failed UPDATE — hash: {}, err: {}",
-                        &new_hash[..12],
-                        rollback_err
-                    );
+                // Annulation implicite (tx abandonnée) : aucune référence prise.
+                if let sqlx::Error::Database(ref db_err) = e
+                    && db_err.code().as_deref() == Some("23505")
+                {
+                    return Err(DomainError::already_exists(
+                        "File",
+                        format!("'{name}' already exists in this folder"),
+                    ));
                 }
                 return Err(DomainError::internal_error(
                     "FileBlobWrite",
-                    format!("update: {e}"),
+                    format!("insert: {e}"),
                 ));
             }
         };
 
-        // Decrement old blob ref (only if hash changed, best-effort)
-        if old_hash != new_hash
-            && let Err(e) = self.dedup.remove_reference(&old_hash).await
-        {
-            tracing::warn!(
-                "Failed to decrement old blob ref {}: {}",
-                &old_hash[..12],
-                e
-            );
-        }
-
-        Ok(new_hash.to_string())
+        self.dedup
+            .referencer_blob(&mut tx, prepare, Some(content_type.to_string()))
+            .await?;
+        tx.commit()
+            .await
+            .map_err(|e| DomainError::internal_error("FileBlobWrite", format!("commit: {e}")))?;
+        Ok(row)
     }
 
     /// Range un fichier temporaire (déjà passé par l'entonnoir CDR) et crée sa
@@ -232,65 +304,35 @@ impl FileBlobWriteRepository {
     ) -> Result<File, DomainError> {
         let user_id = self.resolve_user_id(folder_id.as_deref()).await?;
 
-        // True streaming: pass pre-computed hash (or let dedup compute it).
-        // When hash is pre-computed, zero extra disk reads.
-        let dedup_result = self
+        // Blob placé sur disque hors transaction (pre-computed hash : aucune
+        // relecture), puis ligne + référence dans **une** transaction : pas
+        // de compensation hors transaction, pas de référence orpheline.
+        let prepare = self
             .dedup
-            .store_from_file(temp_path, Some(content_type.clone()), pre_computed_hash)
+            .preparer_blob(temp_path, pre_computed_hash)
             .await?;
-        let blob_hash = dedup_result.hash().to_string();
-
-        // Insert file metadata — if this fails, compensate by removing the blob ref
-        let row = match sqlx::query_as::<_, (String, i64, i64)>(
-            r#"
-            INSERT INTO storage.files (name, folder_id, user_id, blob_hash, size, mime_type,
-                                       etat_cdr, cdr_rapport)
-            VALUES ($1, $2::uuid, $3, $4, $5, $6, $7, $8)
-            RETURNING id::text,
-                      EXTRACT(EPOCH FROM created_at)::bigint,
-                      EXTRACT(EPOCH FROM updated_at)::bigint
-            "#,
-        )
-        .bind(&name)
-        .bind(&folder_id)
-        .bind(user_id)
-        .bind(&blob_hash)
-        .bind(size as i64)
-        .bind(&content_type)
-        .bind(marque.etat.as_str())
-        .bind(&marque.rapport)
-        .fetch_one(self.pool.as_ref())
-        .await
-        {
-            Ok(row) => row,
-            Err(e) => {
-                if let Err(rollback_err) = self.dedup.remove_reference(&blob_hash).await {
-                    tracing::error!(
-                        "Blob orphaned after failed INSERT — hash: {}, err: {}",
-                        &blob_hash[..12],
-                        rollback_err
-                    );
-                }
-                if let sqlx::Error::Database(ref db_err) = e
-                    && db_err.code().as_deref() == Some("23505")
-                {
-                    return Err(DomainError::already_exists(
-                        "File",
-                        format!("'{name}' already exists in this folder"),
-                    ));
-                }
-                return Err(DomainError::internal_error(
-                    "FileBlobWrite",
-                    format!("insert: {e}"),
-                ));
-            }
-        };
+        let blob_hash = prepare.hash.clone();
+        // La source est libérée quelle que soit l'issue (elle était
+        // consommée par le magasin de blobs avant cette révision).
+        let insertion = self
+            .inserer_fichier_tx(
+                &prepare,
+                &name,
+                &folder_id,
+                user_id,
+                size,
+                &content_type,
+                marque,
+            )
+            .await;
+        self.dedup.liberer_source(&prepare).await;
+        let row = insertion?;
 
         tracing::info!(
             "📡 STREAMING WRITE: {} ({} bytes, hash: {})",
             name,
             size,
-            &blob_hash[..12]
+            blob_hash.get(..12).unwrap_or(&blob_hash)
         );
 
         let folder_path = self.lookup_folder_path(folder_id.as_deref()).await?;
@@ -323,16 +365,16 @@ impl FileBlobWriteRepository {
         marque: &MarqueCdr,
     ) -> Result<String, DomainError> {
         // Streaming: pass pre-computed hash so dedup skips re-reading the file.
-        let dedup_result = self
+        let prepare = self
             .dedup
-            .store_from_file(temp_path, content_type.clone(), pre_computed_hash)
+            .preparer_blob(temp_path, pre_computed_hash)
             .await?;
-        let new_hash = dedup_result.hash().to_string();
 
         // Le type MIME suit le contenu stocké (reconstruction GIF → PNG…).
         self.swap_blob_hash(
             file_id,
-            &new_hash,
+            &prepare,
+            content_type.clone(),
             size as i64,
             modified_at,
             marque,
@@ -410,9 +452,17 @@ impl FileWritePort for FileBlobWriteRepository {
         file_id: &str,
         target_folder_id: Option<String>,
     ) -> Result<File, DomainError> {
-        // Atomic CTE: read source file → insert new row with same blob_hash → increment ref_count.
-        // Single round-trip; blob content is NOT copied (dedup makes this zero-copy).
+        // Une transaction : ligne source verrouillée en partage (un échange
+        // de blob concurrent attend), nouvelle ligne insérée, référence du
+        // blob incrémentée. Si le blob a été libéré entre temps, la copie
+        // échoue et rien n'est écrit (jamais de ligne vers un blob supprimé).
+        // Zero-copy : le contenu n'est pas dupliqué (dédup).
         let target_fid = target_folder_id.clone();
+        let mut tx = self
+            .pool
+            .begin()
+            .await
+            .map_err(|e| DomainError::internal_error("FileBlobWrite", format!("begin: {e}")))?;
 
         let row = sqlx::query_as::<
             _,
@@ -433,6 +483,7 @@ impl FileWritePort for FileBlobWriteRepository {
                        etat_cdr, cdr_rapport
                   FROM storage.files
                  WHERE id = $1::uuid AND NOT is_trashed
+                   FOR SHARE
             ),
             new_file AS (
                 -- EX-45 : la copie (même blob) conserve l'état CDR de la source.
@@ -457,7 +508,7 @@ impl FileWritePort for FileBlobWriteRepository {
         )
         .bind(file_id)
         .bind(&target_fid)
-        .fetch_optional(self.pool.as_ref())
+        .fetch_optional(&mut *tx)
         .await
         .map_err(|e| {
             if let sqlx::Error::Database(ref db_err) = e
@@ -474,19 +525,16 @@ impl FileWritePort for FileBlobWriteRepository {
 
         let blob_hash = &row.7;
 
-        // Increment blob reference count (best-effort; INSERT already succeeded)
-        if let Err(e) = self.dedup.add_reference(blob_hash).await {
-            tracing::warn!(
-                "Failed to increment blob ref for copy {}: {}",
-                &blob_hash[..12],
-                e
-            );
-        }
+        // Échec fatal (annulation de la transaction, donc de la ligne).
+        DedupService::incrementer_reference(&mut tx, blob_hash).await?;
+        tx.commit()
+            .await
+            .map_err(|e| DomainError::internal_error("FileBlobWrite", format!("commit: {e}")))?;
 
         tracing::info!(
             "📋 BLOB COPY: {} (hash: {}, zero-copy via dedup)",
             row.1,
-            &blob_hash[..12]
+            blob_hash.get(..12).unwrap_or(blob_hash)
         );
 
         let folder_path = self.lookup_folder_path(row.2.as_deref()).await?;

@@ -31,6 +31,8 @@ use crate::application::ports::file_ports::{FileRetrievalUseCase, FileUploadUseC
 use crate::application::services::wopi_lock_service::WopiLockService;
 use crate::application::services::wopi_token_service::WopiTokenService;
 use crate::infrastructure::services::wopi_discovery_service::WopiDiscoveryService;
+use crate::interfaces::errors::AppError;
+use crate::interfaces::upload_spool;
 
 /// Shared state for WOPI handlers.
 #[derive(Clone)]
@@ -95,12 +97,15 @@ async fn check_file_info(
         return status.into_response();
     }
 
-    // Fetch file metadata
+    // Métadonnées limitées au titulaire du jeton (anti-IDOR).
+    let Ok(appelant) = uuid::Uuid::parse_str(&claims.sub) else {
+        return StatusCode::UNAUTHORIZED.into_response();
+    };
     let file = match state
         .app_state
         .applications
         .file_retrieval_service
-        .get_file(&file_id)
+        .get_file_owned(&file_id, appelant)
         .await
     {
         Ok(f) => f,
@@ -159,11 +164,15 @@ async fn get_file(
         return status.into_response();
     }
 
+    // Contenu limité au titulaire du jeton (anti-IDOR), comme l'état CDR.
+    let Ok(appelant) = uuid::Uuid::parse_str(&claims.sub) else {
+        return StatusCode::UNAUTHORIZED.into_response();
+    };
     match state
         .app_state
         .applications
         .file_retrieval_service
-        .get_file_stream(&file_id)
+        .get_file_stream_owned(&file_id, appelant)
         .await
     {
         Ok(stream) => {
@@ -176,9 +185,13 @@ async fn get_file(
 
 /// POST /wopi/files/{file_id}/contents — PutFile
 ///
-/// **Streaming implementation**: the request body is spooled to a temp file
-/// with incremental BLAKE3 hashing.  Peak RAM usage is ~256 KB regardless
-/// of file size (previously buffered the entire body as `Bytes`).
+/// **Streaming** (M-04) : le corps est écrit en flux dans un fichier
+/// temporaire par [`upload_spool::spool_to_path`], avec hachage BLAKE3
+/// incrémental, sous le budget de l'envoi : taille maximale configurée et
+/// quota du titulaire du jeton (la taille du contenu remplacé est libérée),
+/// vérifiés sur `Content-Length` puis pendant l'écriture (413 / 507).
+/// Le fichier est lu et mis à jour **par identifiant**, limité au titulaire
+/// du jeton.
 async fn put_file(
     Path(file_id): Path<String>,
     Query(token_query): Query<WopiTokenQuery>,
@@ -186,10 +199,6 @@ async fn put_file(
     State(state): State<WopiState>,
     req: Request<Body>,
 ) -> Response {
-    use http_body_util::BodyStream;
-    use tokio::io::AsyncWriteExt;
-    use tokio_stream::StreamExt;
-
     let claims = match state
         .token_service
         .validate_for_file(&token_query.access_token, &file_id)
@@ -201,11 +210,14 @@ async fn put_file(
     if claims.file_id != file_id || !claims.can_write {
         return StatusCode::UNAUTHORIZED.into_response();
     }
+    let Ok(appelant) = uuid::Uuid::parse_str(&claims.sub) else {
+        return StatusCode::UNAUTHORIZED.into_response();
+    };
 
     // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé. Le jeton
     // (validé ci-dessus) confirme l'accès ; l'état est en outre lu limité au
     // titulaire du jeton (anti-IDOR).
-    if let Err(status) = exiger_desarme_jeton(&state, &file_id, &claims.sub).await {
+    if let Err(status) = exiger_desarme(&state, &file_id, appelant).await {
         return status.into_response();
     }
 
@@ -234,92 +246,67 @@ async fn put_file(
         }
     }
 
-    // Get file metadata for the path
+    // Métadonnées limitées au titulaire du jeton (anti-IDOR).
     let file = match state
         .app_state
         .applications
         .file_retrieval_service
-        .get_file(&file_id)
+        .get_file_owned(&file_id, appelant)
         .await
     {
         Ok(f) => f,
         Err(_) => return StatusCode::NOT_FOUND.into_response(),
     };
 
-    // ── Streaming spool: body → temp file + incremental BLAKE3 ──
-    let temp_file = match tempfile::NamedTempFile::new() {
+    // M-04 : taille maximale et quota, avant (Content-Length) puis pendant
+    // l'écriture ; le contenu remplacé libère sa taille.
+    let budget = match upload_spool::upload_budget_for(&state.app_state, appelant, file.size).await
+    {
+        Ok(b) => b,
+        Err(e) => return e.into_response(),
+    };
+    if let Err(e) = budget.check_declared(upload_spool::declared_length(&headers)) {
+        return AppError::from(e).into_response();
+    }
+
+    let temp = match tempfile::NamedTempFile::new() {
         Ok(f) => f,
         Err(e) => {
             tracing::error!("WOPI PutFile: failed to create temp file: {}", e);
             return StatusCode::INTERNAL_SERVER_ERROR.into_response();
         }
     };
-    let temp_path = temp_file.path().to_path_buf();
-
-    let mut file_out = match tokio::fs::File::create(&temp_path).await {
-        Ok(f) => f,
-        Err(e) => {
-            tracing::error!("WOPI PutFile: failed to open temp file: {}", e);
-            return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-        }
-    };
-
-    let content_type = file.mime_type.clone();
-    let mut hasher = blake3::Hasher::new();
-    let mut total_bytes: u64 = 0;
-    let mut stream = BodyStream::new(req.into_body());
-
-    while let Some(frame_result) = stream.next().await {
-        let frame = match frame_result {
-            Ok(f) => f,
+    let spooled =
+        match upload_spool::spool_to_path(req.into_body().into_data_stream(), temp.path(), &budget)
+            .await
+        {
+            Ok(s) => s,
             Err(e) => {
-                let _ = tokio::fs::remove_file(&temp_path).await;
-                tracing::error!("WOPI PutFile: body read error: {}", e);
-                return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+                tracing::warn!("WOPI PutFile refusé : {}", e);
+                return AppError::from(e).into_response();
             }
         };
-        if let Some(chunk) = frame.data_ref() {
-            total_bytes += chunk.len() as u64;
-            hasher.update(chunk);
-            if let Err(e) = file_out.write_all(chunk).await {
-                let _ = tokio::fs::remove_file(&temp_path).await;
-                tracing::error!("WOPI PutFile: temp write error: {}", e);
-                return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-            }
-        }
-    }
-    if let Err(e) = file_out.flush().await {
-        let _ = tokio::fs::remove_file(&temp_path).await;
-        tracing::error!("WOPI PutFile: flush error: {}", e);
-        return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-    }
-    drop(file_out);
-
-    let hash = hasher.finalize().to_hex().to_string();
 
     // ── Atomic store: temp file → dedup blob + DB metadata update ──
     let result = state
         .app_state
         .applications
         .file_upload_service
-        .update_file_streaming(
-            &file.path,
-            &temp_path,
-            total_bytes,
-            &content_type,
-            Some(hash),
+        .update_file_content_by_id(
+            &file_id,
+            temp.path(),
+            spooled.size,
+            &file.mime_type,
+            Some(spooled.hash),
             None,
         )
         .await;
-
-    // Clean up temp file (may already be moved by dedup, ignore error)
-    let _ = tokio::fs::remove_file(&temp_path).await;
 
     match result {
         Ok(_) => StatusCode::OK.into_response(),
         Err(e) => {
             tracing::error!("WOPI PutFile failed: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+            AppError::ecriture_fichier(e, "WOPI PutFile failed").into_response()
         }
     }
 }

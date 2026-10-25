@@ -61,3 +61,38 @@ async fn generate_thumbnail_nonexistent_path_returns_error() {
 
     assert!(result.is_err(), "should fail for nonexistent file");
 }
+
+/// Chiffrement au repos : la vignette d'un blob chiffré est produite avec la
+/// clé ; sans clé, la lecture est refusée (jamais de décodage du chiffré).
+#[tokio::test]
+async fn generate_thumbnail_from_encrypted_blob() {
+    use crate::infrastructure::services::blob_cipher::BlobCipher;
+
+    let tmp = tempfile::tempdir().expect("create temp dir");
+    let chiffreur = Arc::new(BlobCipher::from_key(&[0x11; 32]).expect("clé"));
+    let blob_path = tmp.path().join("enc.blob");
+    std::fs::write(
+        &blob_path,
+        chiffreur.chiffrer_octets(&tiny_png()).expect("chiffrement"),
+    )
+    .expect("write encrypted blob");
+
+    let sans_cle = Arc::new(ThumbnailService::new(tmp.path(), 100, 10 * 1024 * 1024));
+    sans_cle.initialize().await.expect("init");
+    assert!(
+        sans_cle
+            .get_thumbnail("enc-sans-cle", ThumbnailSize::Icon, &blob_path)
+            .await
+            .is_err(),
+        "blob chiffré sans clé : refus"
+    );
+
+    let svc = Arc::new(
+        ThumbnailService::new(tmp.path(), 100, 10 * 1024 * 1024).with_blob_cipher(Some(chiffreur)),
+    );
+    let thumb = svc
+        .get_thumbnail("enc-id", ThumbnailSize::Icon, &blob_path)
+        .await
+        .expect("vignette d'un blob chiffré");
+    assert!(thumb.len() > 2 && thumb[0] == 0xFF && thumb[1] == 0xD8);
+}

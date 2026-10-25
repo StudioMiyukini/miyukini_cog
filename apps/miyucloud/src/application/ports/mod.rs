@@ -12,7 +12,6 @@ pub mod carddav_ports;
 pub mod chunked_upload_ports;
 pub mod compression_ports;
 pub mod dedup_ports;
-pub mod encryption_ports;
 pub mod favorites_ports;
 pub mod file_ports;
 pub mod gdpr_ports;

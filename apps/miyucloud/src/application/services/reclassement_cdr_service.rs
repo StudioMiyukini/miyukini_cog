@@ -29,18 +29,22 @@
 //! blob reconstruit est libéré.
 //!
 //! Avec changement de contenu, l'ordre est : contenu remplacé (état toujours
-//! `inconnu`, donc non servi) → caches dérivés invalidés (hachage, contenu,
+//! `inconnu`, donc non servi ; ligne et références des deux blobs écrites
+//! dans une seule transaction) → caches dérivés invalidés (hachage, contenu,
 //! transcodages, vignettes) → état `desarme`. Une lecture qui voit `desarme`
 //! ne peut donc pas tomber sur un cache de l'ancien contenu.
 
 use std::future::Future;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicI64, Ordering};
+use std::time::Duration;
 
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::application::services::desarmement_service::DesarmementService;
+use crate::application::services::supervision::superviser_tache_periodique;
 use crate::common::errors::{DomainError, ErrorKind};
 use crate::domain::entities::etat_cdr::{EtatCdr, MarqueCdr};
 
@@ -61,8 +65,8 @@ pub struct FichierInconnu {
 /// Contenu reconstruit par le CDR, à substituer à l'ancien.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ContenuReclasse {
-    /// Hachage BLAKE3 du blob rangé (référence déjà ajoutée).
-    pub blob_hash: String,
+    /// Hachage BLAKE3 des octets reconstruits, s'il est déjà connu.
+    pub hachage: Option<String>,
     /// Taille des octets reconstruits.
     pub taille: u64,
     /// Type MIME réel de la reconstruction.
@@ -87,27 +91,23 @@ pub trait DepotReclassementCdr: Send + Sync + 'static {
         vers: &Path,
     ) -> impl Future<Output = Result<(), DomainError>> + Send;
 
-    /// Range `depuis` (consommé) dans le magasin de blobs, une référence
-    /// ajoutée ; rend le hachage.
-    fn ranger_blob(
-        &self,
-        depuis: &Path,
-        mime_type: &str,
-        hachage: Option<String>,
-    ) -> impl Future<Output = Result<String, DomainError>> + Send;
-
-    /// Retire une référence du blob `hash`.
-    fn retirer_reference(&self, hash: &str)
-    -> impl Future<Output = Result<(), DomainError>> + Send;
-
-    /// Remplace le contenu de `id` **si** la ligne est encore `inconnu` avec
-    /// `ancien_hash` ; l'état reste `inconnu`. Vrai si remplacé.
+    /// Remplace le contenu de `id` par les octets de `depuis` (consommé)
+    /// **si** la ligne est encore `inconnu` avec `ancien_hash` ; l'état reste
+    /// `inconnu`. **Atomique** : la ligne, la référence du nouveau blob et
+    /// le retrait de celle de l'ancien sont écrits dans une seule
+    /// transaction (aucune référence perdue ni fantôme, même sur arrêt
+    /// brutal). Rend le hachage du nouveau blob si remplacé, `None` si la
+    /// ligne a changé entre temps (rien n'est écrit).
     fn remplacer_contenu(
         &self,
         id: Uuid,
         ancien_hash: &str,
+        depuis: &Path,
         contenu: &ContenuReclasse,
-    ) -> impl Future<Output = Result<bool, DomainError>> + Send;
+    ) -> impl Future<Output = Result<Option<String>, DomainError>> + Send;
+
+    /// Nombre de fichiers encore `inconnu` (corbeille comprise).
+    fn compter_inconnus(&self) -> impl Future<Output = Result<u64, DomainError>> + Send;
 
     /// Invalide les données dérivées du contenu de `id` (caches, vignettes).
     fn invalider_derives(&self, id: Uuid) -> impl Future<Output = ()> + Send;
@@ -146,6 +146,9 @@ pub struct BilanReclassement {
     pub concurrences: u64,
     /// Erreurs techniques (fichier resté `inconnu`, non servi).
     pub erreurs: u64,
+    /// Fichiers encore `inconnu` (non servis) à la fin du passage ; `None`
+    /// si le décompte a échoué.
+    pub restants: Option<u64>,
 }
 
 /// Tâche de reclassement des fichiers hérités.
@@ -153,6 +156,8 @@ pub struct ReclassementCdrService<D: DepotReclassementCdr> {
     depot: Arc<D>,
     desarmement: Arc<DesarmementService>,
     repertoire_temp: PathBuf,
+    /// Fichiers `inconnu` restants au dernier passage (-1 : inconnu).
+    restants: AtomicI64,
 }
 
 impl<D: DepotReclassementCdr> ReclassementCdrService<D> {
@@ -168,7 +173,14 @@ impl<D: DepotReclassementCdr> ReclassementCdrService<D> {
             depot,
             desarmement,
             repertoire_temp,
+            restants: AtomicI64::new(-1),
         }
+    }
+
+    /// Métrique : fichiers `inconnu` (non servis) restants au dernier
+    /// passage terminé ; `None` avant le premier décompte réussi.
+    pub fn inconnus_restants(&self) -> Option<u64> {
+        u64::try_from(self.restants.load(Ordering::Relaxed)).ok()
     }
 
     /// Reclasse tous les fichiers `inconnu` présents (un passage). Les
@@ -215,6 +227,19 @@ impl<D: DepotReclassementCdr> ReclassementCdrService<D> {
                 break;
             }
         }
+        bilan.restants = match self.depot.compter_inconnus().await {
+            Ok(n) => {
+                self.restants
+                    .store(i64::try_from(n).unwrap_or(i64::MAX), Ordering::Relaxed);
+                Some(n)
+            }
+            Err(e) => {
+                tracing::warn!(
+                    "Reclassement CDR : décompte des fichiers « inconnu » impossible : {e}"
+                );
+                None
+            }
+        };
         Ok(bilan)
     }
 
@@ -246,31 +271,18 @@ impl<D: DepotReclassementCdr> ReclassementCdrService<D> {
                         .marquer(fichier, &fichier.blob_hash, &marque, EtatCdr::Desarme)
                         .await;
                 }
-                let hash = self
-                    .depot
-                    .ranger_blob(&temp, &issue.type_mime, nouveau)
-                    .await?;
                 let contenu = ContenuReclasse {
-                    blob_hash: hash.clone(),
+                    hachage: nouveau,
                     taille: issue.taille,
                     mime_type: issue.type_mime.clone(),
                 };
-                let remplace = match self
+                let Some(hash) = self
                     .depot
-                    .remplacer_contenu(fichier.id, &fichier.blob_hash, &contenu)
-                    .await
-                {
-                    Ok(r) => r,
-                    Err(e) => {
-                        self.liberer(&hash).await;
-                        return Err(e);
-                    }
-                };
-                if !remplace {
-                    self.liberer(&hash).await;
+                    .remplacer_contenu(fichier.id, &fichier.blob_hash, &temp, &contenu)
+                    .await?
+                else {
                     return Ok(IssueReclassement::Concurrence);
-                }
-                self.liberer(&fichier.blob_hash).await;
+                };
                 self.depot.invalider_derives(fichier.id).await;
                 self.marquer(fichier, &hash, &marque, EtatCdr::Desarme)
                     .await
@@ -322,18 +334,56 @@ impl<D: DepotReclassementCdr> ReclassementCdrService<D> {
         })
     }
 
-    async fn liberer(&self, hash: &str) {
-        if let Err(e) = self.depot.retirer_reference(hash).await {
-            tracing::warn!("Reclassement CDR : référence du blob {hash} non retirée : {e}");
-        }
-    }
-
     fn marque_reclassee(mut marque: MarqueCdr) -> MarqueCdr {
         if let Some(serde_json::Value::Object(o)) = marque.rapport.as_mut() {
             o.insert("reclassement".to_string(), serde_json::Value::Bool(true));
         }
         marque
     }
+}
+
+/// Journalise le bilan d'un passage, dont la métrique « fichiers `inconnu`
+/// restants » (non servis tant qu'ils ne sont pas reclassés).
+pub fn journaliser_bilan(b: &BilanReclassement) {
+    if b.examines > 0 {
+        tracing::info!(
+            "Reclassement CDR : {} examinés, {} désarmés, {} en quarantaine, {} concurrents, {} en erreur (restés « inconnu »)",
+            b.examines,
+            b.desarmes,
+            b.quarantaines,
+            b.concurrences,
+            b.erreurs
+        );
+    }
+    match b.restants {
+        Some(0) => tracing::debug!("Reclassement CDR : aucun fichier « inconnu » restant"),
+        Some(n) => tracing::warn!(
+            "Reclassement CDR : {n} fichier(s) « inconnu » restant(s) (non servis jusqu'au reclassement)"
+        ),
+        None => {}
+    }
+}
+
+/// Lance la tâche de reclassement **supervisée** : un passage immédiat puis
+/// toutes les `periode` ; si la tâche s'arrête (panique comprise), l'erreur
+/// est journalisée et la tâche relancée après `delai_relance` (voir
+/// [`superviser_tache_periodique`]).
+pub fn superviser_reclassement<D: DepotReclassementCdr>(
+    service: Arc<ReclassementCdrService<D>>,
+    periode: Duration,
+    delai_relance: Duration,
+) -> tokio::task::JoinHandle<()> {
+    superviser_tache_periodique("Reclassement CDR", periode, delai_relance, move || {
+        let service = service.clone();
+        async move {
+            match service.reclasser_tout().await {
+                Ok(b) => journaliser_bilan(&b),
+                Err(e) => tracing::warn!(
+                    "Reclassement CDR interrompu (nouvel essai au prochain passage) : {e}"
+                ),
+            }
+        }
+    })
 }
 
 #[cfg(test)]
@@ -360,6 +410,8 @@ mod tests {
         invalides: Mutex<Vec<Uuid>>,
         /// Simule une écriture concurrente juste avant `remplacer_contenu`.
         concurrence: Mutex<Option<Uuid>>,
+        /// Nombre de paniques simulées au début de `lister_inconnus`.
+        paniques: std::sync::atomic::AtomicI64,
     }
 
     impl DepotMemoire {
@@ -399,6 +451,13 @@ mod tests {
             apres: Option<Uuid>,
             limite: i64,
         ) -> Result<Vec<FichierInconnu>, DomainError> {
+            if self
+                .paniques
+                .fetch_sub(1, std::sync::atomic::Ordering::SeqCst)
+                > 0
+            {
+                panic!("panique simulée du dépôt");
+            }
             let lignes = self.lignes.lock().unwrap();
             let mut v: Vec<FichierInconnu> = lignes
                 .iter()
@@ -426,39 +485,18 @@ mod tests {
             Ok(())
         }
 
-        async fn ranger_blob(
-            &self,
-            depuis: &Path,
-            _mime_type: &str,
-            hachage: Option<String>,
-        ) -> Result<String, DomainError> {
-            let octets = std::fs::read(depuis).unwrap();
-            let hash = blake3::hash(&octets).to_hex().to_string();
-            if let Some(h) = hachage {
-                assert_eq!(h, hash, "hachage fourni = hachage des octets rangés");
-            }
-            self.blobs
-                .lock()
-                .unwrap()
-                .entry(hash.clone())
-                .or_insert((octets, 0))
-                .1 += 1;
-            Ok(hash)
-        }
-
-        async fn retirer_reference(&self, hash: &str) -> Result<(), DomainError> {
-            if let Some(b) = self.blobs.lock().unwrap().get_mut(hash) {
-                b.1 -= 1;
-            }
-            Ok(())
-        }
-
         async fn remplacer_contenu(
             &self,
             id: Uuid,
             ancien_hash: &str,
+            depuis: &Path,
             contenu: &ContenuReclasse,
-        ) -> Result<bool, DomainError> {
+        ) -> Result<Option<String>, DomainError> {
+            let octets = std::fs::read(depuis).unwrap();
+            let hash = blake3::hash(&octets).to_hex().to_string();
+            if let Some(h) = &contenu.hachage {
+                assert_eq!(*h, hash, "hachage fourni = hachage des octets rangés");
+            }
             let mut lignes = self.lignes.lock().unwrap();
             if self.concurrence.lock().unwrap().take() == Some(id)
                 && let Some(l) = lignes.get_mut(&id)
@@ -469,12 +507,29 @@ mod tests {
             }
             match lignes.get_mut(&id) {
                 Some(l) if l.etat == EtatCdr::Inconnu && l.blob == ancien_hash => {
-                    l.blob = contenu.blob_hash.clone();
+                    // Transaction unique : ligne + référence du nouveau blob
+                    // + retrait de celle de l'ancien.
+                    let mut blobs = self.blobs.lock().unwrap();
+                    blobs.entry(hash.clone()).or_insert((octets, 0)).1 += 1;
+                    if let Some(b) = blobs.get_mut(ancien_hash) {
+                        b.1 -= 1;
+                    }
+                    l.blob = hash.clone();
                     l.mime = contenu.mime_type.clone();
-                    Ok(true)
+                    Ok(Some(hash))
                 }
-                _ => Ok(false),
+                _ => Ok(None),
             }
+        }
+
+        async fn compter_inconnus(&self) -> Result<u64, DomainError> {
+            Ok(self
+                .lignes
+                .lock()
+                .unwrap()
+                .values()
+                .filter(|l| l.etat == EtatCdr::Inconnu)
+                .count() as u64)
         }
 
         async fn invalider_derives(&self, id: Uuid) {
@@ -647,7 +702,55 @@ mod tests {
         // Second passage : rien à faire.
         assert_eq!(
             svc.reclasser_tout().await.unwrap(),
-            BilanReclassement::default()
+            BilanReclassement {
+                restants: Some(0),
+                ..BilanReclassement::default()
+            }
         );
+        assert_eq!(svc.inconnus_restants(), Some(0));
+    }
+
+    #[tokio::test]
+    async fn restants_comptes_apres_un_passage() {
+        let depot = Arc::new(DepotMemoire::default());
+        let id = depot.ajouter(b"x", "text/plain");
+        let hash = depot.ligne(id).blob;
+        depot.blobs.lock().unwrap().remove(&hash); // illisible : reste inconnu
+        depot.ajouter(b"bonjour\n", "text/plain");
+        let (svc, _dir) = service(&depot);
+        assert_eq!(svc.inconnus_restants(), None, "avant tout passage");
+        let bilan = svc.reclasser_tout().await.unwrap();
+        assert_eq!(
+            (bilan.desarmes, bilan.erreurs, bilan.restants),
+            (1, 1, Some(1))
+        );
+        assert_eq!(svc.inconnus_restants(), Some(1));
+    }
+
+    /// La boucle de reclassement est supervisée : une panique est
+    /// journalisée et la tâche relancée, le travail finit par être fait.
+    #[tokio::test]
+    async fn supervision_relance_apres_panique() {
+        let depot = Arc::new(DepotMemoire::default());
+        let id = depot.ajouter(b"bonjour\n", "text/plain");
+        depot.paniques.store(2, std::sync::atomic::Ordering::SeqCst);
+        let (svc, _dir) = service(&depot);
+        let svc = Arc::new(svc);
+        let handle = superviser_reclassement(
+            svc.clone(),
+            Duration::from_secs(3600),
+            Duration::from_millis(10),
+        );
+        let debut = std::time::Instant::now();
+        while depot.ligne(id).etat == EtatCdr::Inconnu {
+            assert!(
+                debut.elapsed() < Duration::from_secs(10),
+                "la tâche n'a pas été relancée"
+            );
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+        assert_eq!(depot.ligne(id).etat, EtatCdr::Desarme);
+        assert!(!handle.is_finished(), "la supervision continue");
+        handle.abort();
     }
 }

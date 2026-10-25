@@ -29,6 +29,16 @@ use crate::infrastructure::services::file_content_cache::FileContentCache;
 use crate::infrastructure::services::image_transcode_service::ImageTranscodeService;
 use crate::infrastructure::services::thumbnail_service::ThumbnailService;
 
+/// Fichiers `inconnu` par identifiant croissant après un curseur. Prédicat
+/// `etat_cdr = 'inconnu'` **littéral**, identique à celui de l'index partiel
+/// `idx_files_etat_cdr_inconnu` (migration `20261025000002`).
+const SQL_LISTER_INCONNUS: &str = "SELECT id, blob_hash, mime_type FROM storage.files \
+     WHERE etat_cdr = 'inconnu' AND ($1::uuid IS NULL OR id > $1::uuid) \
+     ORDER BY id LIMIT $2";
+
+/// Décompte des fichiers `inconnu` (même prédicat littéral, même index).
+const SQL_COMPTER_INCONNUS: &str = "SELECT COUNT(*) FROM storage.files WHERE etat_cdr = 'inconnu'";
+
 /// Dépôt PostgreSQL du reclassement.
 pub struct CdrReclassementPgRepository {
     pool: Arc<PgPool>,
@@ -70,17 +80,15 @@ impl DepotReclassementCdr for CdrReclassementPgRepository {
         apres: Option<Uuid>,
         limite: i64,
     ) -> Result<Vec<FichierInconnu>, DomainError> {
-        let lignes = sqlx::query_as::<_, (Uuid, String, String)>(
-            "SELECT id, blob_hash, mime_type FROM storage.files \
-              WHERE etat_cdr = $1 AND ($2::uuid IS NULL OR id > $2::uuid) \
-              ORDER BY id LIMIT $3",
-        )
-        .bind(EtatCdr::Inconnu.as_str())
-        .bind(apres)
-        .bind(limite)
-        .fetch_all(self.pool.as_ref())
-        .await
-        .map_err(|e| Self::erreur("liste des fichiers inconnus", e))?;
+        // Littéral `'inconnu'` (et non un paramètre) : le planificateur ne
+        // retient l'index partiel `idx_files_etat_cdr_inconnu` (… WHERE
+        // etat_cdr = 'inconnu') que si le prédicat est connu à la préparation.
+        let lignes = sqlx::query_as::<_, (Uuid, String, String)>(SQL_LISTER_INCONNUS)
+            .bind(apres)
+            .bind(limite)
+            .fetch_all(self.pool.as_ref())
+            .await
+            .map_err(|e| Self::erreur("liste des fichiers inconnus", e))?;
         Ok(lignes
             .into_iter()
             .map(|(id, blob_hash, mime_type)| FichierInconnu {
@@ -96,52 +104,74 @@ impl DepotReclassementCdr for CdrReclassementPgRepository {
         if hash.len() < 2 || !hash.chars().all(|c| c.is_ascii_hexdigit()) {
             return Err(Self::erreur("hachage de blob invalide", hash));
         }
-        tokio::fs::copy(self.dedup.blob_path(hash), vers)
+        // Contenu clair (déchiffré si le blob est chiffré au repos).
+        self.dedup
+            .copier_blob_clair(hash, vers)
             .await
             .map_err(|e| Self::erreur("lecture du blob", e))?;
         Ok(())
-    }
-
-    async fn ranger_blob(
-        &self,
-        depuis: &Path,
-        mime_type: &str,
-        hachage: Option<String>,
-    ) -> Result<String, DomainError> {
-        let r = self
-            .dedup
-            .store_from_file(depuis, Some(mime_type.to_string()), hachage)
-            .await?;
-        Ok(r.hash().to_string())
-    }
-
-    async fn retirer_reference(&self, hash: &str) -> Result<(), DomainError> {
-        self.dedup.remove_reference(hash).await.map(|_| ())
     }
 
     async fn remplacer_contenu(
         &self,
         id: Uuid,
         ancien_hash: &str,
+        depuis: &Path,
         contenu: &ContenuReclasse,
-    ) -> Result<bool, DomainError> {
+    ) -> Result<Option<String>, DomainError> {
+        let taille = i64::try_from(contenu.taille).map_err(|e| Self::erreur("taille", e))?;
+        // Blob placé sur disque hors transaction, puis tout le reste en une
+        // transaction : ligne conditionnelle, référence du nouveau blob,
+        // retrait de celle de l'ancien.
+        let prepare = self
+            .dedup
+            .preparer_blob(depuis, contenu.hachage.clone())
+            .await?;
+        let mut tx = self
+            .pool
+            .begin()
+            .await
+            .map_err(|e| Self::erreur("transaction", e))?;
         // `updated_at` inchangé : le contenu est le même document, désarmé.
         let n = sqlx::query(
             "UPDATE storage.files \
                 SET blob_hash = $1, size = $2, mime_type = $3 \
               WHERE id = $4 AND etat_cdr = $5 AND blob_hash = $6",
         )
-        .bind(&contenu.blob_hash)
-        .bind(i64::try_from(contenu.taille).map_err(|e| Self::erreur("taille", e))?)
+        .bind(&prepare.hash)
+        .bind(taille)
         .bind(&contenu.mime_type)
         .bind(id)
         .bind(EtatCdr::Inconnu.as_str())
         .bind(ancien_hash)
-        .execute(self.pool.as_ref())
+        .execute(&mut *tx)
         .await
         .map_err(|e| Self::erreur("remplacement du contenu", e))?
         .rows_affected();
-        Ok(n == 1)
+        if n != 1 {
+            // Écriture concurrente : rien n'est écrit (annulation implicite).
+            return Ok(None);
+        }
+        if prepare.hash != ancien_hash {
+            self.dedup
+                .referencer_blob(&mut tx, &prepare, Some(contenu.mime_type.clone()))
+                .await?;
+            DedupService::decrementer_reference(&mut tx, ancien_hash).await?;
+        }
+        tx.commit()
+            .await
+            .map_err(|e| Self::erreur("validation du remplacement", e))?;
+        self.dedup.liberer_source(&prepare).await;
+        Ok(Some(prepare.hash))
+    }
+
+    async fn compter_inconnus(&self) -> Result<u64, DomainError> {
+        // Littéral : index partiel `idx_files_etat_cdr_inconnu` (voir plus haut).
+        let n: i64 = sqlx::query_scalar(SQL_COMPTER_INCONNUS)
+            .fetch_one(self.pool.as_ref())
+            .await
+            .map_err(|e| Self::erreur("décompte des fichiers inconnus", e))?;
+        Ok(u64::try_from(n).unwrap_or(0))
     }
 
     async fn invalider_derives(&self, id: Uuid) {
@@ -174,5 +204,23 @@ impl DepotReclassementCdr for CdrReclassementPgRepository {
         .map_err(|e| Self::erreur("marquage de l'état CDR", e))?
         .rows_affected();
         Ok(n == 1)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// L'index partiel n'est utilisable que si le prédicat de la requête est
+    /// le littéral de l'index (un paramètre `$1` le rend inutilisable).
+    #[test]
+    fn requetes_inconnu_utilisent_le_predicat_de_l_index_partiel() {
+        let migration = include_str!("../../../../migrations/20261025000002_cdr_reclassement.sql");
+        assert!(migration.contains("WHERE etat_cdr = 'inconnu'"));
+        for sql in [SQL_LISTER_INCONNUS, SQL_COMPTER_INCONNUS] {
+            assert!(sql.contains("etat_cdr = 'inconnu'"), "{sql}");
+            assert!(!sql.contains("etat_cdr = $"), "{sql}");
+        }
+        assert_eq!(EtatCdr::Inconnu.as_str(), "inconnu");
     }
 }

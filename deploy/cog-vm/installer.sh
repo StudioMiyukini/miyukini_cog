@@ -2,21 +2,31 @@
 # Installateur des services COG dans la VM jetable de test (idempotent).
 #
 # A exécuter DANS la VM, en root (sudo), depuis le paquet déposé par pousser.sh :
-#   sudo ./installer.sh --bundle <rép. paquet> [--avec-banc]
+#   sudo ./installer.sh --vm-jetable --bundle <rép. paquet> [--avec-banc] [--manifeste-sha256 <hex>]
 #
-# Ce script n'est PAS destiné à un hôte de production (voir README.md).
+# INTERDIT sur un hôte réel (production, serveur personnel, poste de travail) : VM
+# jetable cog-essai uniquement (voir README.md). Refus sans --vm-jetable et sur un
+# hôte non virtualisé (systemd-detect-virt --vm), comme le banc lot 3.
 # Il ne touche ni à /etc/miyukini/douane (banc d'intrusion), ni au réseau (pas de
 # ufw/nftables/règles), ni à docker.
 #
 # Effets :
 #   - utilisateurs système dédiés (un par service), pas de shell, pas de home ;
 #   - /opt/miyukini/bin (binaires), /opt/miyukini/share (statiques MiyuCloud) ;
-#   - /etc/miyukini (politiques StrongFather, bridge.toml, fichiers d'environnement) ;
+#   - paquet vérifié AVANT toute action : MANIFESTE (SHA-256 de chaque fichier, lié
+#     au commit) contrôlé, empreinte du manifeste comparée à celle affichée par
+#     pousser.sh (--manifeste-sha256) ; binaires installés revérifiés ensuite ;
+#   - /etc/miyukini (politiques StrongFather, bridge.toml, fichiers d'environnement),
+#     propriété root, lecture seule pour les services ; bridge.toml est présenté à
+#     MAIA par un montage lié en lecture seule (BindReadOnlyPaths) à l'endroit où il
+#     le lit ($MIYUKINI_DATA_DIR/bridge.toml) : MAIA ne peut ni le réécrire ni le
+#     remplacer ;
 #   - /var/lib/miyukini/<service> en 0700, propriété du service ;
 #   - secrets générés ici (0600, jamais commités) : jeton CSRF du portail, clé de
 #     chiffrement et mot de passe PostgreSQL de MiyuCloud. KindMother génère sa propre
 #     clé d'identité et sa clé de base au premier démarrage, dans son répertoire 0700 ;
-#   - PostgreSQL local (rôle + base `miyucloud`) pour MiyuCloud ;
+#   - PostgreSQL local (rôle + base `miyucloud`) pour MiyuCloud ; le mot de passe du
+#     rôle est posé avec la journalisation des requêtes coupée dans la session ;
 #   - unités systemd durcies, écoute sur 127.0.0.1 uniquement.
 #
 # Ré-exécuter ce script met à jour binaires, unités et configuration non secrète,
@@ -33,16 +43,22 @@ VAR=/var/lib/miyukini
 
 BUNDLE=""
 AVEC_BANC=0
+MANIFESTE_ATTENDU=""
+VM_JETABLE=0
 
 log() { printf '[installer] %s\n' "$*"; }
 die() { printf '[installer] ERREUR: %s\n' "$*" >&2; exit 1; }
 
 usage() {
 	cat <<'FIN'
-Usage : sudo installer.sh --bundle <répertoire> [--avec-banc]
+Usage : sudo installer.sh --vm-jetable --bundle <répertoire> [--avec-banc] [--manifeste-sha256 <hex>]
 
-  --bundle <rép>   paquet déposé par pousser.sh (bin/, config/, static/, banc/)
-  --avec-banc      installe aussi les outils du banc d'intrusion lot 3
+  --vm-jetable               obligatoire : confirme la VM jetable cog-essai (jamais un hôte réel)
+  --bundle <rép>             paquet déposé par pousser.sh (bin/, config/, static/, banc/, MANIFESTE)
+  --avec-banc                installe aussi les outils du banc d'intrusion lot 3
+  --manifeste-sha256 <hex>   empreinte du MANIFESTE affichée par pousser.sh (vérifiée)
+
+VM jetable uniquement : refus sans --vm-jetable et sur un hôte non virtualisé.
 FIN
 }
 
@@ -50,6 +66,8 @@ while (($#)); do
 	case $1 in
 		--bundle) BUNDLE=${2:?--bundle : valeur attendue}; shift ;;
 		--avec-banc) AVEC_BANC=1 ;;
+		--vm-jetable) VM_JETABLE=1 ;;
+		--manifeste-sha256) MANIFESTE_ATTENDU=${2:?--manifeste-sha256 : valeur attendue}; shift ;;
 		-h | --help) usage; exit 0 ;;
 		*) usage >&2; die "option inconnue : $1" ;;
 	esac
@@ -57,8 +75,38 @@ while (($#)); do
 done
 
 ((EUID == 0)) || die "root requis (sudo)"
+# Garde-fou B7 : jamais sur un hôte réel (voir README.md).
+((VM_JETABLE)) || die "refus : VM jetable cog-essai uniquement ; confirmez avec --vm-jetable (jamais sur un hôte réel)"
+if ! command -v systemd-detect-virt >/dev/null 2>&1 || ! systemd-detect-virt --vm -q; then
+	die "refus : hôte non virtualisé (systemd-detect-virt --vm) ; cet installateur ne s'exécute que dans la VM jetable"
+fi
 [[ -n $BUNDLE ]] || BUNDLE=$(cd "$(dirname "$0")" && pwd)
 BUNDLE=$(cd "$BUNDLE" && pwd)
+
+# ------------------------------------------------------------------ manifeste (B7)
+
+# Vérifie le paquet AVANT toute action : empreinte du manifeste (si fournie), puis
+# SHA-256 de chaque fichier, et aucun fichier hors manifeste.
+verifier_paquet() {
+	local manifeste=$BUNDLE/MANIFESTE empreinte listes presents
+	[[ -f $manifeste ]] || die "MANIFESTE absent du paquet (pousser.sh le génère)"
+	empreinte=$(sha256sum "$manifeste" | cut -d' ' -f1)
+	log "manifeste : sha256 $empreinte"
+	sed -n 's/^# /[installer]   /p' "$manifeste"
+	if [[ -n $MANIFESTE_ATTENDU ]]; then
+		[[ $empreinte == "$MANIFESTE_ATTENDU" ]] ||
+			die "empreinte du MANIFESTE différente de celle affichée par pousser.sh ($MANIFESTE_ATTENDU)"
+	else
+		log "ATTENTION : --manifeste-sha256 non fourni ; comparer l'empreinte ci-dessus à celle affichée par pousser.sh"
+	fi
+	(cd "$BUNDLE" && grep -v '^#' MANIFESTE | sha256sum --check --strict --quiet -) ||
+		die "paquet altéré : SHA-256 différent du MANIFESTE"
+	listes=$(grep -vc '^#' "$manifeste")
+	presents=$(cd "$BUNDLE" && find . -type f ! -path ./MANIFESTE | wc -l)
+	[[ $listes == "$presents" ]] || die "paquet : $presents fichier(s) présents, $listes au manifeste"
+	log "paquet conforme au manifeste ($listes fichiers)"
+}
+verifier_paquet
 
 BINAIRES=(kindmother-server maia miyucloud-server cog-web-portal miyudouane portail-sas)
 for b in "${BINAIRES[@]}"; do
@@ -131,8 +179,22 @@ politiques_et_statiques() {
 	chown -R root:root "$PARTAGE/miyucloud"
 	find "$PARTAGE/miyucloud" -type d -exec chmod 0755 {} +
 	find "$PARTAGE/miyucloud" -type f -exec chmod 0644 {} +
-	# bridge.toml : source de vérité = dépôt. Lecture seule pour MAIA.
-	install -o root -g root -m 0644 "$BUNDLE/config/bridge.toml" "$VAR/maia/bridge.toml"
+	# bridge.toml (B2) : source de vérité = dépôt ; installé dans /etc/miyukini,
+	# propriété root, lecture seule. MAIA le lit à $MIYUKINI_DATA_DIR/bridge.toml :
+	# ce chemin n'est qu'un point de montage (fichier vide root) recouvert, dans
+	# l'espace de noms du service, par un montage lié en lecture seule
+	# (BindReadOnlyPaths, voir unites). L'ancienne copie modifiable est retirée.
+	install -o root -g root -m 0444 "$BUNDLE/config/bridge.toml" "$ETC/bridge.toml"
+	rm -f "$VAR/maia/bridge.toml"
+	install -o root -g root -m 0444 /dev/null "$VAR/maia/bridge.toml"
+}
+
+# Revérifie les binaires installés contre le manifeste du paquet (conservé).
+verifier_binaires_installes() {
+	install -o root -g root -m 0644 "$BUNDLE/MANIFESTE" "$PREFIXE/MANIFESTE"
+	(cd "$PREFIXE" && grep -v '^#' MANIFESTE | grep '  \./bin/' | sha256sum --check --strict --quiet -) ||
+		die "binaires installés différents du MANIFESTE"
+	log "binaires installés conformes au manifeste ($PREFIXE/MANIFESTE)"
 }
 
 # ------------------------------------------------------------------ secrets et environnements
@@ -164,6 +226,8 @@ PORTAL_CSRF_SECRET=$jeton
 FIN
 
 	# MiyuCloud : mot de passe PostgreSQL et clé de chiffrement au repos (AES-256-GCM).
+	# Clé : base64 de exactement 32 octets (sinon le service refuse de démarrer),
+	# conservée d'une réinstallation à l'autre ; la perdre rend les blobs chiffrés illisibles.
 	pg_pw=$(valeur_env "$ETC/miyucloud.env" MIYUCLOUD_PG_PASSWORD)
 	[[ -n $pg_pw ]] || pg_pw=$(openssl rand -hex 24)
 	cle_chiffrement=$(valeur_env "$ETC/miyucloud.env" MIYUCLOUD_ENCRYPTION_KEY)
@@ -195,7 +259,12 @@ postgres() {
 		if runuser -u postgres -- psql -tAc 'SELECT 1' >/dev/null 2>&1; then break; fi
 		sleep 1
 	done
+	# B3 : le mot de passe ne doit apparaître dans aucun journal PostgreSQL
+	# (log_statement, requêtes lentes) : journalisation coupée dans CETTE session,
+	# avant l'ALTER ROLE. Il transite par l'entrée standard, jamais par argv.
 	runuser -u postgres -- psql -q -v ON_ERROR_STOP=1 <<FIN
+SET log_statement = 'none';
+SET log_min_duration_statement = -1;
 DO \$\$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'miyucloud') THEN
@@ -279,9 +348,12 @@ unites() {
 		"Environment=KINDMOTHER_DATA_DIR=$VAR/kindmother
 Environment=KINDMOTHER_LISTEN_ADDR=127.0.0.1:50051"
 
+	# bridge.toml (B2) : /etc/miyukini/bridge.toml (root, lecture seule) monté en
+	# lecture seule à l'endroit où MAIA le lit ; ni réécriture ni remplacement.
 	ecrire_unite miyukini-maia "MAIA — orchestrateur d'agents IA (COG)" \
 		miyukini-maia "$VAR/maia" "$BIN/maia" "$VAR/maia" "" "$ETC/maia.env" \
-		"Environment=MAIA_LLM_URL=http://127.0.0.1:11435"
+		"Environment=MAIA_LLM_URL=http://127.0.0.1:11435
+BindReadOnlyPaths=$ETC/bridge.toml:$VAR/maia/bridge.toml"
 
 	ecrire_unite miyukini-miyucloud "MiyuCloud — stockage et calendriers (COG)" \
 		miyukini-miyucloud "$PARTAGE/miyucloud" "$BIN/miyucloud-server" "$VAR/miyucloud" \
@@ -325,6 +397,7 @@ paquets
 utilisateurs
 repertoires
 binaires
+verifier_binaires_installes
 politiques_et_statiques
 environnements
 postgres

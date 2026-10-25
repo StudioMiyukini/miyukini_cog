@@ -29,8 +29,7 @@ fn json_error(status: StatusCode, message: &str) -> axum::response::Response {
         .status(status)
         .header(header::CONTENT_TYPE, "application/json")
         .body(Body::from(body))
-        .unwrap_or_default()
-        .into_response()
+        .ou_500()
 }
 
 /// Response for hash check endpoint
@@ -273,8 +272,7 @@ impl DedupHandler {
                             .status(status)
                             .header(header::CONTENT_TYPE, "application/json")
                             .body(Body::from(body))
-                            .unwrap_or_default()
-                            .into_response(),
+                            .ou_500(),
                         Err(_) => json_error(StatusCode::INTERNAL_SERVER_ERROR, "Upload failed"),
                     }
                 }
@@ -484,5 +482,32 @@ impl DedupHandler {
                 .header(header::CONTENT_TYPE, "application/json"),
             &response,
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn erreur_json_garde_son_statut() {
+        let r = json_error(StatusCode::BAD_REQUEST, "x");
+        assert_eq!(r.status(), StatusCode::BAD_REQUEST);
+        assert_eq!(
+            r.headers().get(header::CONTENT_TYPE).map(|v| v.as_bytes()),
+            Some(&b"application/json"[..])
+        );
+    }
+
+    /// Un échec de construction de réponse devient une 500, jamais une
+    /// réponse vide « 200 OK » (`unwrap_or_default`).
+    #[test]
+    fn echec_de_construction_donne_500_et_non_200_vide() {
+        let r = Response::builder()
+            .status(StatusCode::CREATED)
+            .header("en-tête\ninvalide", "x")
+            .body(Body::empty())
+            .ou_500();
+        assert_eq!(r.status(), StatusCode::INTERNAL_SERVER_ERROR);
     }
 }
