@@ -207,6 +207,25 @@ pub struct TypedWriteIntent {
     /// Empreinte opaque d'une décision StrongFather jointe (journalisée si présente).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub decision_digest: Option<String>,
+    /// **Effacement** (oubli, droit à l'effacement) : opération typée explicite.
+    ///
+    /// Permis sur `Delete` (forme normale, `TypedWriteIntent::forget`), ainsi que sur
+    /// `Update`/`Upsert` qui écrasent une valeur à oublier (caviardage) ; refusé sur
+    /// `Insert`. Un lot qui contient au moins une intention d'effacement est **toujours**
+    /// suivi par KindMother d'un point de contrôle `wal_checkpoint(TRUNCATE)` (même si
+    /// aucune ligne n'a été touchée) et chaque intention d'effacement appliquée laisse
+    /// une entrée d'audit `effacement` (empreinte de la clé, jamais la valeur).
+    ///
+    /// Format filaire : champ JSON `"erasure": true`, **absent** quand faux (les
+    /// intentions ordinaires gardent leur encodage et leur empreinte d'audit).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub erasure: bool,
+}
+
+// Signature imposée par `serde(skip_serializing_if)`.
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_false(v: &bool) -> bool {
+    !*v
 }
 
 impl TypedWriteIntent {
@@ -223,6 +242,7 @@ impl TypedWriteIntent {
             key: BTreeMap::new(),
             purpose: String::new(),
             decision_digest: None,
+            erasure: false,
         }
     }
 
@@ -239,6 +259,23 @@ impl TypedWriteIntent {
     /// Suppression dans `table`.
     pub fn delete(table: impl Into<String>) -> Self {
         Self::new(IntentOperation::Delete, table)
+    }
+
+    /// **Oubli** dans `table` : suppression typée explicite d'effacement (`Delete` +
+    /// `erasure`). KindMother garantit suppression, point de contrôle `TRUNCATE` du WAL
+    /// (pages remises à zéro par `secure_delete` recopiées, `-wal` vidé) et entrée
+    /// d'audit `effacement` sans la valeur. À utiliser par tout service d'oubli
+    /// (MAIA `maia-memoire`, Alicia `miyualicia-memory`) plutôt qu'un `delete` reconnu
+    /// par sa seule finalité textuelle.
+    pub fn forget(table: impl Into<String>) -> Self {
+        Self::new(IntentOperation::Delete, table).erasure()
+    }
+
+    /// Marque l'intention comme effacement (`Delete`, ou `Update`/`Upsert` qui écrase
+    /// une valeur à oublier).
+    pub fn erasure(mut self) -> Self {
+        self.erasure = true;
+        self
     }
 
     /// Insertion ou mise à jour dans `table`.
@@ -293,6 +330,11 @@ impl TypedWriteIntent {
                 value.canonical_bytes(&mut out);
             }
         }
+        // Ajouté seulement pour un effacement : l'empreinte des intentions ordinaires
+        // ne change pas.
+        if self.erasure {
+            out.push(b'e');
+        }
         out
     }
 
@@ -317,6 +359,9 @@ impl TypedWriteIntent {
             if digest.is_empty() || digest.len() > MAX_DECISION_DIGEST_LEN {
                 return Err("invalid decision digest length".to_string());
             }
+        }
+        if self.erasure && self.operation == IntentOperation::Insert {
+            return Err("erasure applies to delete, update or upsert, not insert".to_string());
         }
         match self.operation {
             IntentOperation::Insert => {
@@ -708,6 +753,31 @@ mod tests {
             .increment("n", 1_i64)
             .check_shape()
             .is_err());
+    }
+
+    #[test]
+    fn oubli_type_forme_et_encodage() {
+        let oubli = TypedWriteIntent::forget("t").key("id", "x");
+        assert_eq!(oubli.operation, IntentOperation::Delete);
+        assert!(oubli.erasure);
+        assert!(oubli.check_shape().is_ok());
+        assert!(TypedWriteIntent::forget("t").check_shape().is_err(), "clé exigée");
+        assert!(TypedWriteIntent::update("t").key("id", "x").value("v", "").erasure().check_shape().is_ok());
+        assert!(TypedWriteIntent::insert("t").value("a", 1_i64).erasure().check_shape().is_err());
+
+        let json = serde_json::to_string(&oubli).expect("json");
+        assert!(json.contains("\"erasure\":true"), "{json}");
+        let back: TypedWriteIntent = serde_json::from_str(&json).expect("back");
+        assert_eq!(back, oubli);
+        // Intention ordinaire : champ absent, empreinte inchangée.
+        let ordinaire = TypedWriteIntent::delete("t").key("id", "x");
+        assert!(!serde_json::to_string(&ordinaire).expect("json").contains("erasure"));
+        assert_ne!(ordinaire.canonical_params(), oubli.canonical_params());
+        let ancien: TypedWriteIntent = serde_json::from_str(
+            r#"{"intent_id":"i","operator_id":"o","database":"d","table":"t","operation":"Delete","key":{"id":{"type":"Text","value":"x"}}}"#,
+        )
+        .expect("ancien format");
+        assert!(!ancien.erasure);
     }
 
     #[test]

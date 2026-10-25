@@ -53,6 +53,10 @@ ed25519-dalek = { version = "2", features = ["rand_core", "zeroize"] }
 rand_core = { version = "0.6", features = ["getrandom"] }
 zeroize = "1"
 
+# Espace disque libre (statvfs, sans `unsafe`) avant le VACUUM de reprise A-020.
+[target.'cfg(unix)'.dependencies]
+rustix = { version = "1", default-features = false, features = ["std", "fs"] }
+
 [dev-dependencies]
 kindmother-client = { path = "../kindmother-client" }
 # Test d'effacement physique : déchiffrement des pages SQLCipher brutes (AES-256-CBC)

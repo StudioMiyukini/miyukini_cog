@@ -27,13 +27,31 @@
 //!   l'ouverture est refusée (fail-closed). SQLite met alors à zéro le contenu supprimé
 //!   (cellules, pages de débordement, pages libres) au lieu de le laisser dans les pages
 //!   libérées. En mode WAL, les anciennes images de page restent dans le `-wal` jusqu'au
-//!   point de contrôle : tout lot qui a **supprimé** des lignes (intention typée `Delete`,
-//!   ou instruction brute transitoire contenant `DELETE`) est suivi d'un
-//!   `PRAGMA wal_checkpoint(TRUNCATE)` — les pages remises à zéro sont recopiées dans le
-//!   fichier principal et le `-wal` est ramené à zéro octet. Les insertions et mises à
-//!   jour ordinaires ne déclenchent pas ce point de contrôle (coût évité) : un oubli doit
-//!   s'exprimer par une suppression (convention MAIA / Alicia : suppression + pierre
-//!   tombale dans le même lot).
+//!   point de contrôle, d'où un `PRAGMA wal_checkpoint(TRUNCATE)` (pages remises à zéro
+//!   recopiées dans le fichier principal, `-wal` ramené à zéro octet) :
+//!   - après tout lot typé contenant une intention d'**effacement** explicite
+//!     (`TypedWriteIntent::forget`, ou `.erasure()` sur `Update`/`Upsert` qui écrase une
+//!     valeur à oublier) — **toujours**, même sans ligne touchée — avec une entrée d'audit
+//!     `effacement` par intention (empreinte de la clé, jamais la valeur) ;
+//!   - après tout lot typé dont un `Delete` ordinaire a supprimé des lignes (A-020) ;
+//!   - sur le chemin SQL brut transitoire, après **toute** instruction ou transaction qui a
+//!     modifié des lignes, d'après le compteur de SQLite (`total_changes`, déclencheurs et
+//!     `REPLACE` compris) et non d'après le texte SQL ;
+//!   - après toute migration de schéma appliquée.
+//!
+//!   Les `Insert`/`Update`/`Upsert` typés ordinaires n'en déclenchent pas (coût évité) :
+//!   une mise à jour ordinaire n'est pas un oubli et ne promet pas la disparition de
+//!   l'ancienne valeur ; qui veut l'oublier le dit par `.erasure()`.
+//! - **Reprise des bases antérieures** (A-020) : les pages libérées avant l'activation de
+//!   `secure_delete` gardent leur contenu. À la première ouverture en lecture-écriture par
+//!   cette version, chaque base existante est réécrite par `VACUUM` (sous `secure_delete`)
+//!   puis `wal_checkpoint(TRUNCATE)`, après contrôle de l'espace disque libre (taille de
+//!   la base + `-wal` + marge) ; le marqueur `a020_secure_vacuum = 1` est alors posé dans
+//!   `_kindmother_meta` (une seule fois par base) et l'opération est journalisée
+//!   (`effacement` / `secure-vacuum`). Échec (VACUUM, point de contrôle incomplet,
+//!   espace insuffisant, audit) ⇒ base refusée à l'ouverture, marqueur non posé,
+//!   nouvelle tentative à l'ouverture suivante (fail-closed). Une base neuve reçoit le
+//!   marqueur sans VACUUM.
 
 use rusqlite::types::Value;
 use rusqlite::{params_from_iter, Connection, OpenFlags, OptionalExtension, Statement};
@@ -67,6 +85,21 @@ const APP_SCHEMA_VERSION_KEY: &str = "app_schema_version";
 
 /// Sous-répertoire des sauvegardes avant migration.
 const BACKUP_DIR: &str = "_backups";
+
+/// Clé de `_kindmother_meta` : VACUUM de reprise A-020 fait (pages libérées avant
+/// `secure_delete` réécrites). Valeur [`SECURE_VACUUM_DONE`].
+pub const SECURE_VACUUM_KEY: &str = "a020_secure_vacuum";
+
+/// Valeur du marqueur [`SECURE_VACUUM_KEY`].
+pub const SECURE_VACUUM_DONE: &str = "1";
+
+/// Marge d'espace libre exigée en plus de la taille de la base (et du `-wal`) pour le
+/// VACUUM de reprise : en mode WAL, VACUUM écrit toute la base dans le `-wal` avant le
+/// point de contrôle (la taille sur disque double temporairement).
+pub const VACUUM_SPACE_MARGIN: u64 = 4 * 1024 * 1024;
+
+/// Opérateur inscrit au journal pour les opérations internes de KindMother.
+const SYSTEM_OPERATOR: &str = "kindmother";
 
 /// Mode de stockage.
 enum StorageMode {
@@ -157,15 +190,72 @@ fn truncate_wal_after_erasure(conn: &Connection, database: &str) -> bool {
     }
 }
 
-/// Vrai si l'instruction brute peut supprimer des lignes (mot-clé `DELETE`, casse
-/// indifférente). Prudent : un faux positif ne coûte qu'un point de contrôle.
-fn raw_sql_may_delete(sql: &str) -> bool {
-    sql.split(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))
-        .any(|word| word.eq_ignore_ascii_case("delete"))
-}
-
 /// Mention ajoutée au détail d'audit quand le point de contrôle d'effacement a échoué.
 const WAL_RESIDUE_NOTE: &str = "; WAL checkpoint after erasure incomplete";
+
+/// Motif rendu à l'opérateur quand un effacement typé a été appliqué mais que le point de
+/// contrôle n'a pas pu être complet.
+const ERASURE_RESIDUE_REASON: &str = "erasure applied but WAL checkpoint incomplete: \
+     erased page images may remain in -wal until the next successful erasure";
+
+/// Espace nécessaire au VACUUM de reprise.
+pub fn vacuum_space_needed(db_len: u64, wal_len: u64) -> u64 {
+    db_len.saturating_add(wal_len).saturating_add(VACUUM_SPACE_MARGIN)
+}
+
+/// Refus propre si l'espace libre ne suffit pas au VACUUM de reprise.
+pub fn check_vacuum_space(database: &str, free: u64, needed: u64) -> Result<(), ServiceError> {
+    if free < needed {
+        error!(
+            "Database '{database}': A-020 VACUUM needs {needed} free bytes, only {free} \
+             available: database refused until space is freed"
+        );
+        return Err(ServiceError::QuotaExceeded(format!(
+            "database '{database}' refused: A-020 secure VACUUM needs {needed} free bytes \
+             in the data directory, {free} available — free disk space and reopen"
+        )));
+    }
+    Ok(())
+}
+
+/// Espace libre (octets) pour un utilisateur non privilégié sur le système de fichiers
+/// de `dir`.
+#[cfg(unix)]
+fn free_space(dir: &Path) -> Result<u64, ServiceError> {
+    rustix::fs::statvfs(dir)
+        .map(|s| s.f_bavail.saturating_mul(s.f_frsize))
+        .map_err(|e| ServiceError::Internal(format!("Cannot read free disk space: {e}")))
+}
+
+#[cfg(not(unix))]
+fn free_space(_dir: &Path) -> Result<u64, ServiceError> {
+    warn!("Free disk space not checked on this platform before the A-020 VACUUM");
+    Ok(u64::MAX)
+}
+
+fn file_len(path: &Path) -> u64 {
+    std::fs::metadata(path).map(|m| m.len()).unwrap_or(0)
+}
+
+fn wal_file(db_path: &Path) -> PathBuf {
+    PathBuf::from(format!("{}-wal", db_path.display()))
+}
+
+fn read_meta(conn: &Connection, key: &str) -> Result<Option<String>, ServiceError> {
+    conn.query_row("SELECT value FROM _kindmother_meta WHERE key = ?1", [key], |r| r.get(0))
+        .optional()
+        .map_err(|e| ServiceError::Database(format!("Cannot read metadata '{key}': {e}")))
+}
+
+fn write_meta(conn: &Connection, key: &str, value: &str) -> Result<(), ServiceError> {
+    conn.execute(
+        "INSERT INTO _kindmother_meta (key, value, updated_at) VALUES (?1, ?2, datetime('now'))
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
+        rusqlite::params![key, value],
+    )
+    .map(|_| ())
+    .map_err(|e| ServiceError::Database(format!("Cannot write metadata '{key}': {e}")))
+}
 
 /// Résultat de l'application d'un lot : (lignes, rowid) par intention, ou (indice, motif).
 type Applied = Result<Vec<(u64, Option<i64>)>, (usize, String)>;
@@ -428,6 +518,7 @@ impl EncryptedDatabase {
         .map_err(|e| ServiceError::Database(format!("Cannot configure database: {}", e)))?;
 
         self.ensure_system_tables(&conn)?;
+        self.ensure_secure_vacuum(&conn, database, existed)?;
 
         #[cfg(unix)]
         {
@@ -472,6 +563,76 @@ impl EncryptedDatabase {
         .map_err(|e| ServiceError::Database(format!("Cannot create system tables: {}", e)))?;
 
         Ok(())
+    }
+
+    /// Reprise A-020 : VACUUM unique d'une base antérieure (voir l'en-tête du module).
+    fn ensure_secure_vacuum(
+        &self,
+        conn: &Connection,
+        database: &str,
+        existed: bool,
+    ) -> Result<(), ServiceError> {
+        if read_meta(conn, SECURE_VACUUM_KEY)?.as_deref() == Some(SECURE_VACUUM_DONE) {
+            return Ok(());
+        }
+        if !existed {
+            // Base neuve : elle n'a jamais été écrite sans `secure_delete`.
+            return write_meta(conn, SECURE_VACUUM_KEY, SECURE_VACUUM_DONE);
+        }
+        let result = self.secure_vacuum(conn, database);
+        let (verdict, detail) = match &result {
+            Ok(detail) => ("appliquee", detail.clone()),
+            Err(e) => (refusal_or_failure(e), e.to_string()),
+        };
+        // Reprise non journalisée = reprise non faite (marqueur non posé).
+        self.journal.append(&AuditRecord {
+            kind: AuditKind::Effacement,
+            intent_id: None,
+            operator_id: SYSTEM_OPERATOR.to_string(),
+            database: database.to_string(),
+            operation: "secure-vacuum".to_string(),
+            table: None,
+            verdict: verdict.to_string(),
+            decision_digest: None,
+            params_hash: sha256_hex(SECURE_VACUUM_KEY.as_bytes()),
+            detail,
+        })?;
+        result?;
+        write_meta(conn, SECURE_VACUUM_KEY, SECURE_VACUUM_DONE)?;
+        // Le marqueur seul est dans le `-wal` : point de contrôle de confort.
+        let _ = truncate_wal_after_erasure(conn, database);
+        Ok(())
+    }
+
+    /// VACUUM sous `secure_delete` puis `wal_checkpoint(TRUNCATE)` complet, après contrôle
+    /// de l'espace libre. Retourne le détail d'audit.
+    fn secure_vacuum(&self, conn: &Connection, database: &str) -> Result<String, ServiceError> {
+        let db_path = self.database_path(database);
+        let before = file_len(&db_path);
+        let needed = vacuum_space_needed(before, file_len(&wal_file(&db_path)));
+        check_vacuum_space(database, free_space(&self.data_dir)?, needed)?;
+        warn!("Database '{database}': A-020 secure VACUUM of a pre-existing database ({before} bytes)");
+        let started = std::time::Instant::now();
+        conn.execute_batch("VACUUM").map_err(|e| {
+            error!("Database '{database}': A-020 VACUUM failed: {e}");
+            ServiceError::Database(format!(
+                "database '{database}' refused: A-020 secure VACUUM failed ({e}); \
+                 retried at next open"
+            ))
+        })?;
+        if !truncate_wal_after_erasure(conn, database) {
+            return Err(ServiceError::Database(format!(
+                "database '{database}' refused: WAL checkpoint after the A-020 VACUUM is \
+                 incomplete (active reader?); retried at next open"
+            )));
+        }
+        let detail = format!(
+            "a020 vacuum: {before} -> {} bytes in {} ms",
+            file_len(&db_path),
+            started.elapsed().as_millis()
+        );
+        info!("Database '{database}': {detail}");
+        Ok(detail)
     }
 
     // ------------------------------------------------------------------
@@ -547,6 +708,7 @@ impl EncryptedDatabase {
         let result = async {
             let conn = self.get_connection(database).await?;
             let conn = conn.lock().await;
+            let changes_before = conn.total_changes();
             let rows_affected = {
                 let _guard = AuthorizerGuard::install(&conn, policy);
                 let mut stmt = prepare_single(&conn, sql)?;
@@ -554,7 +716,9 @@ impl EncryptedDatabase {
                     .map_err(|e| ServiceError::Database(format!("Execute failed: {}", e)))?
             };
             let last_id = conn.last_insert_rowid();
-            if rows_affected > 0 && raw_sql_may_delete(sql) {
+            // Décision prise par SQLite (lignes modifiées, déclencheurs et REPLACE
+            // compris), jamais par le texte SQL.
+            if conn.total_changes() != changes_before {
                 wal_clean = truncate_wal_after_erasure(&conn, database);
             }
             Ok::<_, ServiceError>((rows_affected as u64, Some(last_id)))
@@ -589,11 +753,11 @@ impl EncryptedDatabase {
         let result = async {
             let conn = self.get_connection(database).await?;
             let mut conn = conn.lock().await;
+            let changes_before = conn.total_changes();
             let tx = conn
                 .transaction()
                 .map_err(|e| ServiceError::Database(format!("Cannot begin transaction: {}", e)))?;
             let mut results = Vec::new();
-            let mut erased = false;
             for (sql, params) in operations {
                 // L'autorisateur n'est actif que pendant l'opération de l'opérateur
                 // (BEGIN / COMMIT sont émis par le service). Rollback via drop de tx.
@@ -602,12 +766,11 @@ impl EncryptedDatabase {
                 let rows = stmt
                     .execute(params_from_iter(params))
                     .map_err(|e| ServiceError::Database(format!("Transaction failed: {}", e)))?;
-                erased |= rows > 0 && raw_sql_may_delete(&sql);
                 results.push(rows as u64);
             }
             tx.commit()
                 .map_err(|e| ServiceError::Database(format!("Cannot commit: {}", e)))?;
-            if erased {
+            if conn.total_changes() != changes_before {
                 wal_clean = truncate_wal_after_erasure(&conn, database);
             }
             Ok::<_, ServiceError>(results)
@@ -746,14 +909,14 @@ impl EncryptedDatabase {
             tx.commit().map_err(|e| (0, format!("Cannot commit: {e}")))?;
             Ok(out)
         })();
-        // Effacement physique : un lot qui a supprimé des lignes est suivi d'un point de
-        // contrôle TRUNCATE (pages remises à zéro recopiées, `-wal` vidé). Les lots sans
-        // suppression effective n'en paient pas le coût.
+        // Effacement physique : un lot contenant une intention d'effacement explicite
+        // (toujours), ou dont un `Delete` a supprimé des lignes, est suivi d'un point de
+        // contrôle TRUNCATE (pages remises à zéro recopiées, `-wal` vidé). Les autres lots
+        // n'en paient pas le coût.
         let erased = applied.as_ref().is_ok_and(|results| {
-            intents
-                .iter()
-                .zip(results)
-                .any(|(i, (rows, _))| i.operation == kindmother::IntentOperation::Delete && *rows > 0)
+            intents.iter().zip(results).any(|(i, (rows, _))| {
+                i.erasure || (i.operation == kindmother::IntentOperation::Delete && *rows > 0)
+            })
         });
         let wal_clean = !erased || truncate_wal_after_erasure(&conn, database);
         drop(conn);
@@ -761,9 +924,18 @@ impl EncryptedDatabase {
         // 4. Issue, journal terminal, archivage.
         let mut outcomes = Vec::with_capacity(intents.len());
         let mut records = Vec::with_capacity(intents.len());
+        let mut erasures = Vec::new();
         for (i, (intent, mut lc)) in intents.iter().zip(lifecycles).enumerate() {
             let (state, rows, last_id, reason) = match &applied {
-                Ok(results) => (IntentState::Appliquee, results[i].0, results[i].1, None),
+                Ok(results) => {
+                    let reason = if intent.erasure {
+                        erasures.push(erasure_record(intent, operator_id, database, results[i].0, wal_clean));
+                        (!wal_clean).then(|| ERASURE_RESIDUE_REASON.to_string())
+                    } else {
+                        None
+                    };
+                    (IntentState::Appliquee, results[i].0, results[i].1, reason)
+                }
                 Err((failed, msg)) => {
                     let reason = if *failed == i {
                         msg.clone()
@@ -775,7 +947,10 @@ impl EncryptedDatabase {
             };
             let _ = lc.transition(state);
             let note = if wal_clean { "" } else { WAL_RESIDUE_NOTE };
-            let detail = reason.clone().unwrap_or_else(|| format!("{rows} rows{note}"));
+            let detail = match (state, &reason) {
+                (IntentState::Appliquee, _) | (_, None) => format!("{rows} rows{note}"),
+                (_, Some(reason)) => reason.clone(),
+            };
             records.push(intent_record(intent, operator_id, database, state, detail));
             outcomes.push((lc, IntentOutcome {
                 intent_id: intent.intent_id.clone(),
@@ -786,6 +961,7 @@ impl EncryptedDatabase {
                 reason,
             }));
         }
+        records.extend(erasures);
         let archived = match self.journal.append_all(&records, false) {
             Ok(()) => true,
             Err(e) => {
@@ -1017,6 +1193,9 @@ impl EncryptedDatabase {
         .map_err(|e| ServiceError::Database(format!("Cannot record schema version: {e}")))?;
         tx.commit()
             .map_err(|e| ServiceError::Database(format!("Cannot commit migration: {e}")))?;
+        // Une migration peut écraser des valeurs (rattrapage) ou retirer des index : leurs
+        // anciennes images de page ne restent pas dans le `-wal`.
+        let _ = truncate_wal_after_erasure(&conn, database);
 
         Ok(MigrationReport {
             version_before: before,
@@ -1160,6 +1339,30 @@ fn intent_record(
     }
 }
 
+/// Entrée d'audit `effacement` d'une intention d'oubli appliquée : empreinte de la clé,
+/// nombre de lignes et état du point de contrôle — jamais la valeur.
+fn erasure_record(
+    intent: &TypedWriteIntent,
+    operator_id: &str,
+    database: &str,
+    rows: u64,
+    wal_clean: bool,
+) -> AuditRecord {
+    let checkpoint = if wal_clean { "ok" } else { "incomplete" };
+    AuditRecord {
+        kind: AuditKind::Effacement,
+        intent_id: Some(intent.intent_id.clone()),
+        operator_id: operator_id.to_string(),
+        database: database.to_string(),
+        operation: intent.operation.as_str().to_string(),
+        table: Some(intent.table.clone()),
+        verdict: if wal_clean { "effacee" } else { "residu_wal" }.to_string(),
+        decision_digest: intent.decision_digest.clone(),
+        params_hash: sha256_hex(&intent.canonical_params()),
+        detail: format!("{rows} rows; secure_delete=on; wal_checkpoint(truncate)={checkpoint}"),
+    }
+}
+
 /// Exécute une instruction préparée et convertit les lignes en JSON.
 fn collect_rows(stmt: &mut Statement<'_>, params: Vec<Value>) -> Result<Rows, ServiceError> {
     let column_names: Vec<String> = stmt.column_names().iter().map(|s| s.to_string()).collect();
@@ -1241,7 +1444,10 @@ fn base64_encode(data: &[u8]) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{enforce_secure_delete, raw_sql_may_delete, EncryptedDatabase};
+    use super::{
+        check_vacuum_space, enforce_secure_delete, vacuum_space_needed, EncryptedDatabase,
+        VACUUM_SPACE_MARGIN,
+    };
 
     #[test]
     fn secure_delete_force_et_relu_sur_une_connexion() {
@@ -1253,12 +1459,14 @@ mod tests {
     }
 
     #[test]
-    fn detection_suppression_sql_brut() {
-        assert!(raw_sql_may_delete("DELETE FROM t WHERE id = ?1"));
-        assert!(raw_sql_may_delete("  delete from t"));
-        assert!(raw_sql_may_delete("WITH x AS (SELECT 1) DELETE FROM t WHERE id IN x"));
-        assert!(!raw_sql_may_delete("INSERT INTO t (deleted_at) VALUES (?1)"));
-        assert!(!raw_sql_may_delete("UPDATE t SET n = n + 1"));
+    fn espace_disque_du_vacuum_de_reprise() {
+        let needed = vacuum_space_needed(10_000, 500);
+        assert_eq!(needed, 10_500 + VACUUM_SPACE_MARGIN);
+        assert!(check_vacuum_space("b", needed, needed).is_ok());
+        let err = check_vacuum_space("b", needed - 1, needed).expect_err("refus");
+        assert!(matches!(err, crate::errors::ServiceError::QuotaExceeded(_)), "{err}");
+        assert!(err.to_string().contains("free disk space"), "{err}");
+        assert_eq!(vacuum_space_needed(u64::MAX, 1), u64::MAX);
     }
 
     #[test]

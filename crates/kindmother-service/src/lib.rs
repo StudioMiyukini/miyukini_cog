@@ -81,7 +81,8 @@ pub use credentials::{
 pub use sql_guard::SqlPolicy;
 pub use database::{
     is_plaintext_sqlite, EncryptedDatabase, MigrationReport, ENV_DEV_PLAINTEXT,
-    SQLITE_PLAINTEXT_HEADER,
+    SQLITE_PLAINTEXT_HEADER, SECURE_VACUUM_DONE, SECURE_VACUUM_KEY, VACUUM_SPACE_MARGIN,
+    check_vacuum_space, vacuum_space_needed,
 };
 pub use errors::ServiceError;
 #[cfg(feature = "db-encryption")]

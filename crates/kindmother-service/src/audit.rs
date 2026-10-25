@@ -63,6 +63,9 @@ pub enum AuditKind {
     RawRead,
     /// Étiquette `publiable` : pose, retrait, lecture ou refus (EX-47).
     Etiquette,
+    /// Effacement physique (A-020) : intention d'oubli typée appliquée (empreinte de la
+    /// clé seulement, jamais la valeur), ou `VACUUM` de reprise d'une base antérieure.
+    Effacement,
 }
 
 impl AuditKind {
@@ -75,6 +78,7 @@ impl AuditKind {
             AuditKind::RawWrite => "raw-write",
             AuditKind::RawRead => "raw-read",
             AuditKind::Etiquette => "etiquette",
+            AuditKind::Effacement => "effacement",
         }
     }
 }
@@ -155,6 +159,7 @@ fn kind_from_str(s: &str) -> Option<AuditKind> {
         "raw-write" => AuditKind::RawWrite,
         "raw-read" => AuditKind::RawRead,
         "etiquette" => AuditKind::Etiquette,
+        "effacement" => AuditKind::Effacement,
         _ => return None,
     })
 }

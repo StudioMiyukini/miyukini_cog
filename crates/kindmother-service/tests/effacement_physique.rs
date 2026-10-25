@@ -318,6 +318,328 @@ async fn secure_delete_relu_actif_sur_chaque_connexion() {
 }
 
 // ----------------------------------------------------------------------------------
+// Reprise A-020 des bases antérieures : VACUUM unique, marqueur, fail-closed
+// ----------------------------------------------------------------------------------
+
+const ANCIENNE: &str = "ancienne";
+
+/// Base « d'avant A-020 » : `secure_delete = OFF`, témoin supprimé mais encore présent
+/// dans les pages déchiffrées. Retourne (fichier, clé, témoin supprimé, témoin gardé).
+fn base_anterieure(dir: &Path) -> (PathBuf, [u8; 32], String, String) {
+    std::fs::create_dir_all(dir).expect("dir");
+    let store = DatabaseKeyStore::open(dir).expect("store");
+    let (pragma, _) = store.pragma_key(ANCIENNE, false).expect("key");
+    let fichier = dir.join(format!("{ANCIENNE}.db"));
+    let conn = Connection::open(&fichier).expect("open");
+    conn.pragma_update(None, "key", pragma.as_str()).expect("key");
+    conn.execute_batch(
+        "PRAGMA secure_delete = OFF; PRAGMA journal_mode = WAL;
+         CREATE TABLE _kindmother_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL,
+             updated_at TEXT NOT NULL DEFAULT (datetime('now')));
+         INSERT INTO _kindmother_meta (key, value) VALUES ('schema_version', '1');
+         CREATE TABLE souvenirs (id TEXT PRIMARY KEY, texte TEXT NOT NULL);",
+    )
+    .expect("init");
+    let (court, _, garde) = temoins();
+    conn.execute("INSERT INTO souvenirs VALUES ('a', ?1), ('c', ?2)", [&court, &garde])
+        .expect("insert");
+    conn.execute("DELETE FROM souvenirs WHERE id = 'a'", []).expect("delete");
+    conn.query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |_| Ok(())).expect("ckpt");
+    drop(conn);
+    let cle = cle_depuis_pragma(pragma.as_str());
+    assert!(
+        temoin_present(&cle, &fichier, court.as_bytes()).0,
+        "contrôle : la base antérieure garde la valeur supprimée dans ses pages"
+    );
+    (fichier, cle, court, garde)
+}
+
+fn vacuums_journalises(db: &EncryptedDatabase) -> Vec<String> {
+    db.journal()
+        .entries()
+        .expect("entries")
+        .into_iter()
+        .filter(|e| {
+            e.record.kind == kindmother_service::audit::AuditKind::Effacement
+                && e.record.operation == "secure-vacuum"
+                && e.record.database == ANCIENNE
+        })
+        .map(|e| e.record.verdict)
+        .collect()
+}
+
+async fn marqueur(db: &EncryptedDatabase) -> Option<String> {
+    let conn = db.get_connection(ANCIENNE).await.expect("rw");
+    let conn = conn.lock().await;
+    conn.query_row(
+        "SELECT value FROM _kindmother_meta WHERE key = ?1",
+        [kindmother_service::SECURE_VACUUM_KEY],
+        |r| r.get(0),
+    )
+    .ok()
+}
+
+#[tokio::test]
+async fn reprise_base_anterieure_vacuum_unique_efface_les_pages_liberees() {
+    let dir = data_dir("reprise");
+    let (fichier, cle, court, garde) = base_anterieure(&dir);
+
+    // Premier démarrage de la nouvelle version : VACUUM de reprise à l'ouverture.
+    let db = EncryptedDatabase::new(&dir).expect("db");
+    assert_eq!(marqueur(&db).await.as_deref(), Some(kindmother_service::SECURE_VACUUM_DONE));
+    assert_eq!(temoin_present(&cle, &fichier, court.as_bytes()), (false, false));
+    assert!(temoin_present(&cle, &fichier, garde.as_bytes()).0, "donnée gardée intacte");
+    assert_eq!(vacuums_journalises(&db), vec!["appliquee".to_string()]);
+    let lignes = db
+        .select(ANCIENNE, OP, &kindmother::intent::TypedSelect::from("souvenirs"))
+        .await
+        .expect("select");
+    assert_eq!(lignes.len(), 1);
+    drop(db);
+
+    // Second démarrage : marqueur lu, pas de second VACUUM.
+    let db = EncryptedDatabase::new(&dir).expect("db");
+    assert_eq!(marqueur(&db).await.as_deref(), Some(kindmother_service::SECURE_VACUUM_DONE));
+    assert_eq!(vacuums_journalises(&db).len(), 1, "VACUUM refait au second démarrage");
+    drop(db);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[tokio::test]
+async fn base_neuve_marquee_sans_vacuum() {
+    let dir = data_dir("neuve");
+    let db = EncryptedDatabase::new(&dir).expect("db");
+    let conn = db.get_connection("neuve").await.expect("rw");
+    let v: String = conn
+        .lock()
+        .await
+        .query_row(
+            "SELECT value FROM _kindmother_meta WHERE key = ?1",
+            [kindmother_service::SECURE_VACUUM_KEY],
+            |r| r.get(0),
+        )
+        .expect("marqueur");
+    assert_eq!(v, kindmother_service::SECURE_VACUUM_DONE);
+    assert!(
+        db.journal().entries().expect("entries").iter().all(|e| e.record.operation != "secure-vacuum"),
+        "aucun VACUUM pour une base neuve"
+    );
+    drop(db);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+/// Un lecteur extérieur bloque le point de contrôle qui suit le VACUUM : la base est
+/// refusée (message explicite), le marqueur n'est pas posé, la reprise est refaite à
+/// l'ouverture suivante.
+#[tokio::test]
+async fn reprise_incomplete_base_refusee_puis_reprise() {
+    let dir = data_dir("reprise-ko");
+    let (fichier, cle, court, _) = base_anterieure(&dir);
+    let lecteur = Connection::open(&fichier).expect("open");
+    let store = DatabaseKeyStore::open(&dir).expect("store");
+    let (pragma, _) = store.pragma_key(ANCIENNE, true).expect("key");
+    lecteur.pragma_update(None, "key", pragma.as_str()).expect("key");
+    lecteur.execute_batch("BEGIN; SELECT count(*) FROM souvenirs;").expect("snapshot");
+
+    let db = EncryptedDatabase::new(&dir).expect("db");
+    let err = match db.get_connection(ANCIENNE).await {
+        Ok(_) => panic!("base ouverte malgré une reprise incomplète"),
+        Err(e) => e.to_string(),
+    };
+    assert!(err.contains("refused") && err.contains("A-020"), "{err}");
+    assert_eq!(vacuums_journalises(&db), vec!["echouee".to_string()]);
+
+    lecteur.execute_batch("COMMIT;").expect("fin");
+    drop(lecteur);
+    assert_eq!(marqueur(&db).await.as_deref(), Some(kindmother_service::SECURE_VACUUM_DONE));
+    assert_eq!(vacuums_journalises(&db), vec!["echouee".to_string(), "appliquee".to_string()]);
+    assert_eq!(temoin_present(&cle, &fichier, court.as_bytes()), (false, false));
+    drop(db);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+// ----------------------------------------------------------------------------------
+// Oubli typé explicite (`TypedWriteIntent::forget` / `.erasure()`)
+// ----------------------------------------------------------------------------------
+
+fn taille_wal(fichier: &Path) -> u64 {
+    std::fs::metadata(wal_path(fichier)).map(|m| m.len()).unwrap_or(0)
+}
+
+#[tokio::test]
+async fn oubli_type_point_de_controle_toujours_et_audit_effacement() {
+    let dir = data_dir("forget");
+    let db = ouvrir_avec_schema(&dir).await;
+    let (court, _, garde) = temoins();
+    inserer(&db, "a", &court).await;
+    inserer(&db, "c", &garde).await;
+    let fichier = db.database_path(DB);
+    let cle = cle_brute(&dir, DB);
+    assert!(taille_wal(&fichier) > 0, "insertions ordinaires : pas de point de contrôle");
+
+    let oubli = intention(TypedWriteIntent::forget("souvenirs").key("id", "a"));
+    let id_oubli = oubli.intent_id.clone();
+    let issues = db.submit_intents(DB, OP, vec![oubli], vec![]).await;
+    assert_eq!(issues[0].state, IntentState::Appliquee, "{:?}", issues[0].reason);
+    assert!(issues[0].archived && issues[0].reason.is_none());
+    assert_eq!(issues[0].rows_affected, 1);
+    assert_eq!(taille_wal(&fichier), 0);
+    assert_eq!(temoin_present(&cle, &fichier, court.as_bytes()), (false, false));
+
+    // Oubli d'une clé absente : point de contrôle quand même (garantie, pas heuristique).
+    inserer(&db, "d", "autre").await;
+    assert!(taille_wal(&fichier) > 0);
+    let issues = db
+        .submit_intents(DB, OP, vec![intention(TypedWriteIntent::forget("souvenirs").key("id", "absent"))], vec![])
+        .await;
+    assert_eq!(issues[0].state, IntentState::Appliquee);
+    assert_eq!(issues[0].rows_affected, 0);
+    assert_eq!(taille_wal(&fichier), 0, "un oubli typé est toujours suivi du point de contrôle");
+
+    // Journal : entrée `effacement` par oubli, sans la valeur.
+    let entrees = db.journal().entries().expect("entries");
+    let eff: Vec<_> = entrees
+        .iter()
+        .filter(|e| e.record.kind == kindmother_service::audit::AuditKind::Effacement)
+        .collect();
+    assert_eq!(eff.len(), 2);
+    let premiere = &eff[0].record;
+    assert_eq!(premiere.intent_id.as_deref(), Some(id_oubli.as_str()));
+    assert_eq!(premiere.operation, "delete");
+    assert_eq!(premiere.table.as_deref(), Some("souvenirs"));
+    assert_eq!(premiere.verdict, "effacee");
+    assert!(premiere.detail.starts_with("1 rows;"), "{}", premiere.detail);
+    assert!(entrees.iter().all(|e| !e.record.detail.contains(&court)));
+    let audit = dir.join(kindmother_service::audit::AUDIT_DIR).join(kindmother_service::audit::AUDIT_FILE);
+    let (f, w) = temoin_present(&cle_brute(&dir, "_journal"), &audit, court.as_bytes());
+    assert!(!f && !w, "le journal d'audit ne doit pas contenir la valeur");
+    drop(db);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[tokio::test]
+async fn ecrasement_type_destine_a_l_oubli_efface_l_ancienne_valeur() {
+    let dir = data_dir("erasure-update");
+    let db = ouvrir_avec_schema(&dir).await;
+    let (court, _, garde) = temoins();
+    inserer(&db, "a", &court).await;
+    inserer(&db, "c", &garde).await;
+    let fichier = db.database_path(DB);
+    let cle = cle_brute(&dir, DB);
+
+    // Mise à jour ordinaire : pas un oubli, pas de point de contrôle (comportement documenté).
+    let issues = db
+        .submit_intents(
+            DB,
+            OP,
+            vec![intention(TypedWriteIntent::update("souvenirs").key("id", "c").value("texte", garde.as_str()))],
+            vec![],
+        )
+        .await;
+    assert_eq!(issues[0].state, IntentState::Appliquee);
+    assert!(taille_wal(&fichier) > 0);
+
+    // Caviardage : `Update` + `.erasure()` écrase la valeur à oublier.
+    let issues = db
+        .submit_intents(
+            DB,
+            OP,
+            vec![intention(
+                TypedWriteIntent::update("souvenirs").key("id", "a").value("texte", "[oublie]").erasure(),
+            )],
+            vec![],
+        )
+        .await;
+    assert_eq!(issues[0].state, IntentState::Appliquee, "{:?}", issues[0].reason);
+    assert_eq!(taille_wal(&fichier), 0);
+    assert_eq!(temoin_present(&cle, &fichier, court.as_bytes()), (false, false));
+    assert!(temoin_present(&cle, &fichier, garde.as_bytes()).0);
+    drop(db);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+// ----------------------------------------------------------------------------------
+// Chemin SQL brut : décision par SQLite (`total_changes`), pas par le texte SQL
+// ----------------------------------------------------------------------------------
+
+async fn brut(db: &EncryptedDatabase, policy: SqlPolicy, sql: &str, params: &[&str]) -> Result<u64, String> {
+    db.execute(DB, OP, policy, sql, params.iter().map(|p| (*p).to_string()).collect(), "test")
+        .await
+        .map(|(rows, _)| rows)
+        .map_err(|e| e.to_string())
+}
+
+#[tokio::test]
+async fn sql_brut_insert_or_replace_et_update_ecrasants_effacent() {
+    let dir = data_dir("raw-overwrite");
+    let db = ouvrir_avec_schema(&dir).await;
+    let (court, _, garde) = temoins();
+    let (court2, _, _) = temoins();
+    inserer(&db, "a", &court).await;
+    inserer(&db, "b", &court2).await;
+    inserer(&db, "c", &garde).await;
+    let fichier = db.database_path(DB);
+    let cle = cle_brute(&dir, DB);
+
+    // `INSERT OR REPLACE` sans le mot DELETE : la ligne `a` est écrasée.
+    let rows = brut(&db, SqlPolicy::DATA_WRITE, "INSERT OR REPLACE INTO souvenirs (id, texte) VALUES (?1, ?2)", &["a", "remplace"])
+        .await
+        .expect("replace");
+    assert_eq!(rows, 1);
+    assert_eq!(taille_wal(&fichier), 0);
+    assert_eq!(temoin_present(&cle, &fichier, court.as_bytes()), (false, false));
+
+    // `UPDATE` qui écrase une valeur.
+    brut(&db, SqlPolicy::DATA_WRITE, "UPDATE souvenirs SET texte = ?1 WHERE id = ?2", &["ecrase", "b"])
+        .await
+        .expect("update");
+    assert_eq!(taille_wal(&fichier), 0);
+    assert_eq!(temoin_present(&cle, &fichier, court2.as_bytes()), (false, false));
+
+    // Transaction brute (upsert écrasant) : même décision par compteur SQLite.
+    let (court3, _, _) = temoins();
+    inserer(&db, "e", &court3).await;
+    db.transaction(
+        DB,
+        OP,
+        SqlPolicy::DATA_WRITE,
+        vec![(
+            "INSERT INTO souvenirs (id, texte) VALUES (?1, ?2) ON CONFLICT (id) DO UPDATE SET texte = excluded.texte".to_string(),
+            vec!["e".to_string(), "upsert".to_string()],
+        )],
+        "test",
+    )
+    .await
+    .expect("tx");
+    assert_eq!(taille_wal(&fichier), 0);
+    assert_eq!(temoin_present(&cle, &fichier, court3.as_bytes()), (false, false));
+    assert!(temoin_present(&cle, &fichier, garde.as_bytes()).0);
+    drop(db);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+/// `DROP TABLE` n'efface rien en douce : il est refusé par l'autorisateur sur toutes les
+/// politiques (règle non destructive C-41) ; la table et son contenu restent intacts.
+#[tokio::test]
+async fn sql_brut_drop_table_refuse() {
+    let dir = data_dir("raw-drop");
+    let db = ouvrir_avec_schema(&dir).await;
+    let (court, _, _) = temoins();
+    inserer(&db, "a", &court).await;
+    for policy in [SqlPolicy::DATA_WRITE, SqlPolicy::ADMIN_RAW] {
+        let err = brut(&db, policy, "DROP TABLE souvenirs", &[]).await.expect_err("drop refusé");
+        assert!(err.to_lowercase().contains("denied") || err.contains("not authorized"), "{err}");
+    }
+    let lignes = db
+        .select(DB, OP, &kindmother::intent::TypedSelect::from("souvenirs"))
+        .await
+        .expect("select");
+    assert_eq!(lignes.len(), 1);
+    drop(db);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+// ----------------------------------------------------------------------------------
 // Mesure (ordre de grandeur) : `cargo test -p kindmother-service --test
 // effacement_physique -- --ignored --nocapture mesure`
 // ----------------------------------------------------------------------------------
@@ -405,6 +727,42 @@ async fn mesure_cout_effacement() {
     let km_lot = t.elapsed();
     assert!(issues.iter().all(|i| i.state == IntentState::Appliquee));
 
+    // Chemin SQL brut : point de contrôle après toute écriture qui modifie des lignes.
+    let t = Instant::now();
+    for i in 0..N_MESURE {
+        brut(&db, SqlPolicy::DATA_WRITE, "INSERT INTO souvenirs (id, texte) VALUES (?1, ?2)", &[&format!("r{i}"), &texte])
+            .await
+            .expect("raw insert");
+    }
+    let km_brut_insert = t.elapsed();
+    drop(db);
+
+    // VACUUM de reprise A-020 d'une base antérieure d'environ 16 Mio.
+    let dir_v = data_dir("mesure-vacuum");
+    let (fichier, _, _, _) = base_anterieure(&dir_v);
+    {
+        let store = DatabaseKeyStore::open(&dir_v).expect("store");
+        let (pragma, _) = store.pragma_key(ANCIENNE, true).expect("key");
+        let conn = Connection::open(&fichier).expect("open");
+        conn.pragma_update(None, "key", pragma.as_str()).expect("key");
+        let bloc = "y".repeat(4000);
+        let tx = conn.unchecked_transaction().expect("tx");
+        for i in 0..4000 {
+            tx.execute("INSERT INTO souvenirs VALUES (?1, ?2)", [format!("v{i}"), bloc.clone()]).expect("ins");
+        }
+        tx.commit().expect("commit");
+        conn.execute("DELETE FROM souvenirs WHERE id LIKE 'v%' AND rowid % 2 = 0", []).expect("del");
+        conn.query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |_| Ok(())).expect("ckpt");
+    }
+    let taille = std::fs::metadata(&fichier).map(|m| m.len()).unwrap_or(0);
+    let t = Instant::now();
+    let db_v = EncryptedDatabase::new(&dir_v).expect("db");
+    db_v.get_connection(ANCIENNE).await.expect("reprise");
+    let km_vacuum = t.elapsed();
+    let apres = std::fs::metadata(&fichier).map(|m| m.len()).unwrap_or(0);
+    drop(db_v);
+    let _ = std::fs::remove_dir_all(dir_v);
+
     println!("--- coût d'effacement, {N_MESURE} suppressions d'une ligne (~300 o) ---");
     println!("brut, secure_delete OFF            : {:8.1} µs/suppression", par(off));
     println!("brut, secure_delete ON             : {:8.1} µs/suppression", par(on));
@@ -415,6 +773,10 @@ async fn mesure_cout_effacement() {
         "KindMother, 1 lot de {n_lot} suppressions : {:8.1} ms au total",
         km_lot.as_secs_f64() * 1e3
     );
-    drop(db);
+    println!("KindMother, INSERT brut (+ckpt)    : {:8.1} µs/appel", par(km_brut_insert));
+    println!(
+        "Reprise A-020 (ouverture + VACUUM) : {:8.1} ms pour {taille} -> {apres} octets",
+        km_vacuum.as_secs_f64() * 1e3
+    );
     let _ = std::fs::remove_dir_all(dir);
 }
