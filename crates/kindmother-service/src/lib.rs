@@ -67,6 +67,7 @@ pub mod audit;
 mod credentials;
 mod database;
 mod errors;
+pub mod etiquettes;
 mod protocol;
 mod server;
 mod sql_guard;

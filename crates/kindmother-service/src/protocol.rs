@@ -17,6 +17,7 @@
 //! Toute autre version de protocole (dont `kindmother-auth-v1`) est refusée. Les champs
 //! `operator_id` des requêtes suivantes doivent égaler l'identité authentifiée.
 
+use kindmother::etiquette::{EtatEtiquette, IntentionEtiquette, RefDonnee};
 use kindmother::intent::{IntentOutcome, SchemaMigration, TypedSelect, TypedWriteIntent};
 use serde::{Deserialize, Serialize};
 
@@ -64,6 +65,20 @@ pub enum Request {
         operator_id: String,
         database: String,
         migrations: Vec<SchemaMigration>,
+    },
+
+    /// Pose ou retire l'étiquette `publiable` (EX-47) : intention **signée par une clé
+    /// de l'utilisateur** (jamais par l'opérateur qui la relaie), refusée sur une donnée
+    /// `nationale`, journalisée dans l'audit chaîné.
+    Etiqueter {
+        operator_id: String,
+        intention: IntentionEtiquette,
+    },
+
+    /// Lecture typée de l'étiquette d'une donnée exacte (EX-47).
+    LireEtiquette {
+        operator_id: String,
+        donnee: RefDonnee,
     },
 
     /// Requête SELECT en SQL brut.
@@ -140,6 +155,13 @@ pub enum Response {
     IntentsResult {
         success: bool,
         outcomes: Vec<IntentOutcome>,
+        error: Option<String>,
+    },
+
+    /// État de l'étiquette `publiable` d'une donnée (après pose / retrait, ou lecture).
+    EtiquetteResult {
+        success: bool,
+        etat: Option<Box<EtatEtiquette>>,
         error: Option<String>,
     },
 

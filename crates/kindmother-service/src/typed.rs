@@ -38,7 +38,7 @@ pub(crate) struct TableSchema {
 }
 
 impl TableSchema {
-    fn has_column(&self, column: &str) -> bool {
+    pub(crate) fn has_column(&self, column: &str) -> bool {
         self.columns.iter().any(|c| c.eq_ignore_ascii_case(column))
     }
 }

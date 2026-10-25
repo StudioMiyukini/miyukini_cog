@@ -47,6 +47,9 @@ pub enum ErreurFederee {
     /// Donnée non étiquetée `publiable`.
     #[error("donnée non publiable")]
     NonPubliable,
+    /// Fiche non dérivée de la donnée étiquetée (règle de dérivation stricte, EX-47).
+    #[error("fiche non dérivée de la donnée étiquetée : {0}")]
+    NonDerivee(&'static str),
     /// Effet soumis à la validation explicite de l'utilisateur (EX-60).
     #[error("validation de l'utilisateur requise")]
     ValidationRequise,

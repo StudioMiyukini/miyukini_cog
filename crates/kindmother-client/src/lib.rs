@@ -84,6 +84,9 @@ pub use errors::ClientError;
 pub use protocol::{Operation, Request, Response};
 
 /// Intentions typées (ré-export de `kindmother::intent`).
+pub use kindmother::etiquette::{
+    ActionEtiquette, EtatEtiquette, IntentionEtiquette, RefDonnee, Sensibilite,
+};
 pub use kindmother::intent::{
     IntentOperation, IntentOutcome, IntentState, OrderBy, SchemaMigration, SqlValue, TypedSelect,
     TypedWriteIntent,

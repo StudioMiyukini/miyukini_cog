@@ -167,8 +167,8 @@ struct Publiee {
 /// par la seule couche qui connaît l'étiquette KindMother `publiable` posée
 /// par une action de l'utilisateur. Seul le premier appel de
 /// [`Self::instituer`] l'obtient. Sans elle, aucun [`Publiable`] ne peut être
-/// construit : tant que la couche d'étiquettes n'existe pas, aucune Fiche
-/// originale n'est publiable (fail-closed).
+/// construit ; avec elle, seulement par [`crate::PublieurOriginal::attester`],
+/// après lecture de l'étiquette de la donnée source et contrôle de dérivation.
 #[derive(Debug)]
 pub struct AutoriteEtiquettes {
     _prive: (),
@@ -185,28 +185,47 @@ impl AutoriteEtiquettes {
         }
         Some(Self { _prive: () })
     }
+
+    /// Autorité de test (hors du jeton unique du processus).
+    #[cfg(test)]
+    pub(crate) fn pour_essais() -> Self {
+        Self { _prive: () }
+    }
 }
 
-/// Capacité « publiable » (revue de sécurité du lot 7, F1) : atteste que la
-/// donnée de la Fiche **exacte** (empreinte de ses octets signés) a reçu
-/// l'étiquette `publiable` par une action de l'utilisateur. Construite
-/// uniquement par le détenteur de l'[`AutoriteEtiquettes`], qui ne l'accorde
-/// jamais à une donnée `etranger` ni à la mémoire de MAIA (`nationale`).
-/// Ni `Clone`, ni champ public : une capacité sert une seule publication.
+/// Durée de validité d'une capacité [`Publiable`] (secondes) : l'étiquette est
+/// relue juste avant chaque publication ; un retrait arrête toute nouvelle
+/// publication au plus tard après ce délai.
+pub const VALIDITE_PUBLIABLE_SECS: u64 = 60;
+
+/// Capacité « publiable » (revue de sécurité du lot 7, F1 ; EX-47) : atteste que
+/// la Fiche **exacte** (empreinte de ses octets signés) est dérivée d'une donnée
+/// que l'utilisateur a étiquetée `publiable` dans KindMother, étiquette lue à
+/// l'instant `atteste_a`. Construite uniquement par
+/// [`crate::PublieurOriginal::attester`] (détenteur de l'[`AutoriteEtiquettes`]),
+/// jamais pour une donnée `etranger` ni `nationale` (mémoire de MAIA).
+/// Ni `Clone`, ni champ public : une capacité sert une seule publication, dans
+/// les [`VALIDITE_PUBLIABLE_SECS`] secondes.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Publiable {
     cog: CogId,
     empreinte: [u8; 32],
+    atteste_a: u64,
 }
 
 impl Publiable {
-    /// Atteste que la Fiche `fiche` (originale : sans reprise) est publiable.
-    pub fn etiquetee(_autorite: &AutoriteEtiquettes, fiche: &FicheVerifiee) -> Result<Self, ErreurFederee> {
+    /// Capacité pour la Fiche `fiche` (originale : sans reprise), attestée à
+    /// `maintenant`. Réservée au module des étiquettes, après tous les contrôles.
+    pub(crate) fn attestee(
+        _autorite: &AutoriteEtiquettes,
+        fiche: &FicheVerifiee,
+        maintenant: u64,
+    ) -> Result<Self, ErreurFederee> {
         if fiche.est_reprise() {
             // Une donnée étrangère ne devient jamais « publiable » : republication sous TAMR.
             return Err(ErreurFederee::ValidationRequise);
         }
-        Ok(Self { cog: fiche.cog().clone(), empreinte: fiche.empreinte() })
+        Ok(Self { cog: fiche.cog().clone(), empreinte: fiche.empreinte(), atteste_a: maintenant })
     }
 }
 
@@ -274,7 +293,11 @@ impl ServiceRequete {
                 if fiche.est_reprise() {
                     return Err(ErreurFederee::ValidationRequise);
                 }
-                if capacite.cog != self.cog_local || capacite.empreinte != fiche.empreinte() {
+                if capacite.cog != self.cog_local
+                    || capacite.empreinte != fiche.empreinte()
+                    || maintenant < capacite.atteste_a
+                    || maintenant - capacite.atteste_a > VALIDITE_PUBLIABLE_SECS
+                {
                     return Err(ErreurFederee::NonPubliable);
                 }
             }
@@ -423,7 +446,7 @@ mod tests {
 
     fn originale(octets: &[u8]) -> Publication<'static> {
         let f = verifier_fiche(octets, T).unwrap();
-        Publication::Originale(Publiable::etiquetee(&autorite(), &f).unwrap())
+        Publication::Originale(Publiable::attestee(&autorite(), &f, T).unwrap())
     }
 
     fn cog_cle(cle: &CleSignature) -> CogId {
@@ -447,6 +470,8 @@ mod tests {
         // Capacité d'une autre Fiche : refus.
         let autre = sceller_fiche(&fiche(&cle, "geo.lyon", "Lyon.", &[]), &cle).unwrap();
         assert_eq!(s.publier(octets.clone(), originale(&autre), T), Err(ErreurFederee::NonPubliable));
+        // Capacité périmée (étiquette lue il y a plus de VALIDITE_PUBLIABLE_SECS) : refus.
+        assert_eq!(s.publier(octets.clone(), originale(&octets), T + VALIDITE_PUBLIABLE_SECS + 1), Err(ErreurFederee::NonPubliable));
         s.publier(octets.clone(), originale(&octets), T).unwrap();
         assert_eq!(s.publier(octets.clone(), originale(&octets), T), Err(ErreurFederee::VersionObsolete));
 
@@ -501,7 +526,7 @@ mod tests {
         assert_eq!(s.publier(octets.clone(), Publication::Reprise { sources, validation: &autre }, T), Err(ErreurFederee::ValidationRequise));
         // Le chemin ordinaire refuse une Fiche à reprises (pas de capacité possible).
         let v = verifier_fiche(&octets, T).unwrap();
-        assert_eq!(Publiable::etiquetee(&autorite(), &v), Err(ErreurFederee::ValidationRequise));
+        assert_eq!(Publiable::attestee(&autorite(), &v, T), Err(ErreurFederee::ValidationRequise));
         // Reprises absentes, licence changée, audience élargie : refus même validé.
         for f in [
             crate::fiche::Fiche { reprises: Vec::new(), ..base.clone() },

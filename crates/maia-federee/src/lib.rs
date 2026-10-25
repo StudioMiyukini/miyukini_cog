@@ -27,6 +27,9 @@
 //!   plafond d'extraits par source (EX-61)
 //! - [`consultation`] : double MAIA — le Planificateur ne voit **jamais** le
 //!   contenu étranger ; réponse sourcée rendue de façon déterministe (EX-59)
+//! - [`etiquettes`] : seul producteur de [`Publiable`] — lit l'étiquette
+//!   KindMother `publiable` de la donnée source exacte et vérifie que la Fiche
+//!   en est dérivée (règle stricte, EX-47)
 //! - [`marquage`] : `etranger` propagé ; aucune action, publication, mémoire
 //!   longue sans validation ; aucune Règle ni apprentissage (EX-60, EX-63)
 
@@ -34,6 +37,7 @@ pub mod base;
 pub mod consultation;
 pub mod corroboration;
 pub mod erreurs;
+pub mod etiquettes;
 pub mod fiche;
 pub mod lecteur;
 pub mod marquage;
@@ -45,10 +49,12 @@ pub use base::{BaseEtrangere, Qualite, VueFederale, MAX_FICHES_PAR_EMETTEUR};
 pub use consultation::{consulter, Consultation, Plan, Planificateur, ReponseSourcee};
 pub use corroboration::{corroborer, Affirmation, Etablissement, PolitiqueCorroboration, Source, K_DEFAUT, PLAFOND_DEFAUT};
 pub use erreurs::ErreurFederee;
+pub use etiquettes::{empreinte_contenu, verifier_derivation, EtiquetteLue, LecteurEtiquettes, PublieurOriginal};
 pub use fiche::{cog_de_cle, sceller_fiche, verifier_fiche, Audience, Fiche, FicheVerifiee, Relation, Reprise, TypeFiche, TYPE_FICHE};
 pub use lecteur::{extraire, Ancrage, ExtraitType, ModeleLecteur};
 pub use marquage::{autoriser, AutoriteConfirmation, Effet, Etranger, Provenance, ValidationUtilisateur};
 pub use plongement::PlongementLocal;
 pub use requete::{
     AutoriteEtiquettes, Publiable, Publication, RequeteTypee, ServiceRequete, PERIODE_QUOTA_SECS, QUOTA_REQUETES,
+    VALIDITE_PUBLIABLE_SECS,
 };

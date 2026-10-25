@@ -497,6 +497,7 @@ pub struct FicheVerifiee {
     fiche: Fiche,
     cog: CogId,
     empreinte: [u8; 32],
+    canonique: bool,
 }
 
 impl FicheVerifiee {
@@ -513,6 +514,14 @@ impl FicheVerifiee {
     /// Empreinte SHA-256 des octets signés (identité de la publication).
     pub fn empreinte(&self) -> [u8; 32] {
         self.empreinte
+    }
+
+    /// Vrai si les champs textuels **signés** sont déjà sous forme normalisée
+    /// (aucun invisible, contrôle bidi, homoglyphe ou balisage retiré par la
+    /// normalisation) : condition d'une publication originale (EX-47), pour qu'aucun
+    /// octet signé ne porte d'information hors du contenu étiqueté.
+    pub fn canonique(&self) -> bool {
+        self.canonique
     }
 
     /// Vrai si la Fiche republie des Fiches étrangères : citée, jamais comptée pour *k* (A-009).
@@ -558,7 +567,9 @@ pub fn verifier_fiche(octets: &[u8], maintenant: u64) -> Result<FicheVerifiee, E
         return Err(ErreurFederee::DateFuture);
     }
     let empreinte: [u8; 32] = Sha256::digest(sceau.octets_signes()).into();
-    Ok(FicheVerifiee { fiche: normaliser_fiche(fiche)?, cog, empreinte })
+    let normalisee = normaliser_fiche(fiche.clone())?;
+    let canonique = normalisee == fiche;
+    Ok(FicheVerifiee { fiche: normalisee, cog, empreinte, canonique })
 }
 
 #[cfg(test)]

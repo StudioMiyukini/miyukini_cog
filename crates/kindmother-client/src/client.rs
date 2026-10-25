@@ -18,6 +18,7 @@ use crate::credential::{
 };
 use crate::errors::ClientError;
 use crate::protocol::{Operation, Request, Response};
+use kindmother::etiquette::{EtatEtiquette, IntentionEtiquette, RefDonnee};
 use kindmother::intent::{
     IntentOutcome, IntentState, SchemaMigration, TypedSelect, TypedWriteIntent,
 };
@@ -219,6 +220,29 @@ impl KindMotherClient {
             Response::IntentsResult { outcomes, .. } => Ok(outcomes),
             _ => Err(ClientError::Service("Unexpected response type".to_string())),
         }
+    }
+
+    /// Relaie une intention d'étiquette `publiable` **signée par l'utilisateur** (EX-47).
+    ///
+    /// Le client ne signe rien : l'intention vient signée de l'appareil de
+    /// l'utilisateur ; le service la refuse si la signature n'est pas celle d'une
+    /// clé d'utilisateur épinglée, si la donnée est `nationale`, ou si l'empreinte
+    /// ne correspond pas au contenu courant. Retourne l'état après application.
+    pub async fn etiqueter(&self, intention: IntentionEtiquette) -> Result<EtatEtiquette, ClientError> {
+        let request = Request::Etiqueter {
+            operator_id: self.operator_id.clone(),
+            intention,
+        };
+        etat_of(self.send_request(request).await?)
+    }
+
+    /// Lit l'état de l'étiquette `publiable` d'une donnée exacte (EX-47).
+    pub async fn lire_etiquette(&self, donnee: RefDonnee) -> Result<EtatEtiquette, ClientError> {
+        let request = Request::LireEtiquette {
+            operator_id: self.operator_id.clone(),
+            donnee,
+        };
+        etat_of(self.send_request(request).await?)
     }
 
     /// Lecture typée sur la base par défaut.
@@ -590,4 +614,13 @@ pub struct DatabaseInfo {
     pub table_count: u32,
     /// Base chiffrée
     pub encrypted: bool,
+}
+
+/// État d'étiquette d'une réponse.
+fn etat_of(response: Response) -> Result<EtatEtiquette, ClientError> {
+    match response {
+        Response::EtiquetteResult { success: true, etat: Some(etat), .. } => Ok(*etat),
+        Response::EtiquetteResult { error, .. } => Err(ClientError::Service(error.unwrap_or_default())),
+        _ => Err(ClientError::Service("Unexpected response type".to_string())),
+    }
 }

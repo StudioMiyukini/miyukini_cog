@@ -22,6 +22,10 @@
 //!   refus, avec identifiant d'intention, opérateur, base, opération, table, verdict,
 //!   empreinte de décision StrongFather si jointe, empreinte SHA-256 des paramètres.
 //!   Les valeurs elles-mêmes ne sont jamais journalisées.
+//! - **Étiquettes `publiable`** (EX-47, `kind = etiquette`) : l'état d'une étiquette est
+//!   le dernier événement `posee` / `retiree` de la donnée (`params_hash` = empreinte de
+//!   la donnée) — dérivé du journal chaîné lui-même, sans table modifiable à part
+//!   (voir `crate::etiquettes`).
 
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -57,6 +61,8 @@ pub enum AuditKind {
     RawWrite,
     /// Lecture par SQL brut (chemin transitoire).
     RawRead,
+    /// Étiquette `publiable` : pose, retrait, lecture ou refus (EX-47).
+    Etiquette,
 }
 
 impl AuditKind {
@@ -68,6 +74,7 @@ impl AuditKind {
             AuditKind::Migration => "migration",
             AuditKind::RawWrite => "raw-write",
             AuditKind::RawRead => "raw-read",
+            AuditKind::Etiquette => "etiquette",
         }
     }
 }
@@ -147,6 +154,7 @@ fn kind_from_str(s: &str) -> Option<AuditKind> {
         "migration" => AuditKind::Migration,
         "raw-write" => AuditKind::RawWrite,
         "raw-read" => AuditKind::RawRead,
+        "etiquette" => AuditKind::Etiquette,
         _ => return None,
     })
 }
@@ -257,6 +265,51 @@ impl AuditJournal {
         Ok(())
     }
 
+    /// Dernier événement **effectif** (pose ou retrait) de l'étiquette de la donnée
+    /// d'empreinte `ref_hex` : `(seq, verdict, detail)`. L'état de l'étiquette est
+    /// dérivé du journal chaîné lui-même (aucun état modifiable à part, EX-47).
+    pub fn dernier_evenement_etiquette(
+        &self,
+        ref_hex: &str,
+    ) -> Result<Option<(i64, String, String)>, ServiceError> {
+        let inner = self.lock()?;
+        dernier_evenement_etiquette_on(&inner.conn, ref_hex)
+    }
+
+    /// Ajoute un événement d'étiquette (pose ou retrait) **atomiquement** avec ses
+    /// contrôles : identifiant d'intention jamais vu (anti-rejeu) et horodatage
+    /// signé strictement supérieur à celui du dernier événement de la donnée
+    /// (`horodatage_de` l'extrait du détail). Retourne le numéro de l'entrée.
+    pub fn append_etiquette(
+        &self,
+        record: &AuditRecord,
+        horodatage: u64,
+        horodatage_de: fn(&str) -> Option<u64>,
+    ) -> Result<i64, ServiceError> {
+        let mut inner = self.lock()?;
+        if let Some(id) = record.intent_id.as_deref() {
+            if intent_seen(&inner.conn, id)? {
+                return Err(ServiceError::PermissionDenied(
+                    "label intent already used (replay)".to_string(),
+                ));
+            }
+        } else {
+            return Err(ServiceError::Validation("label intent id required".to_string()));
+        }
+        if let Some((_, _, detail)) = dernier_evenement_etiquette_on(&inner.conn, &record.params_hash)? {
+            match horodatage_de(&detail) {
+                Some(precedent) if horodatage > precedent => {}
+                _ => {
+                    return Err(ServiceError::PermissionDenied(
+                        "label timestamp not after the last label event".to_string(),
+                    ))
+                }
+            }
+        }
+        append_locked(&mut inner, record)?;
+        Ok(inner.head_seq)
+    }
+
     /// Vrai si l'identifiant d'intention figure déjà au journal.
     pub fn intent_used(&self, intent_id: &str) -> Result<bool, ServiceError> {
         let inner = self.lock()?;
@@ -327,6 +380,7 @@ fn open_journal(path: &Path, pragma_key: Option<&str>) -> Result<Connection, Ser
             hash TEXT NOT NULL
         );
         CREATE INDEX IF NOT EXISTS journal_intent ON journal (intent_id);
+        CREATE INDEX IF NOT EXISTS journal_etiquette ON journal (kind, params_hash, seq);
         CREATE TRIGGER IF NOT EXISTS journal_append_only_update
             BEFORE UPDATE ON journal
             BEGIN SELECT RAISE(ABORT, 'audit journal is append-only'); END;
@@ -347,6 +401,26 @@ fn intent_seen(conn: &Connection, intent_id: &str) -> Result<bool, ServiceError>
     )
     .optional()
     .map(|r| r.is_some())
+    .map_err(|e| ServiceError::Internal(format!("Audit lookup failed: {e}")))
+}
+
+/// Verdicts effectifs d'un événement d'étiquette.
+pub const VERDICT_ETIQUETTE_POSEE: &str = "posee";
+/// Retrait de l'étiquette.
+pub const VERDICT_ETIQUETTE_RETIREE: &str = "retiree";
+
+fn dernier_evenement_etiquette_on(
+    conn: &Connection,
+    ref_hex: &str,
+) -> Result<Option<(i64, String, String)>, ServiceError> {
+    conn.query_row(
+        "SELECT seq, verdict, detail FROM journal
+          WHERE kind = 'etiquette' AND params_hash = ?1 AND verdict IN ('posee', 'retiree')
+          ORDER BY seq DESC LIMIT 1",
+        [ref_hex],
+        |r| Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?, r.get::<_, String>(2)?)),
+    )
+    .optional()
     .map_err(|e| ServiceError::Internal(format!("Audit lookup failed: {e}")))
 }
 

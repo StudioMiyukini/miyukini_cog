@@ -18,7 +18,8 @@ use std::cell::RefCell;
 use maia_federee::{
     autoriser, consulter, sceller_fiche, Audience, BaseEtrangere, Consultation, Effet, Etablissement, ErreurFederee,
     Fiche, ModeleLecteur, Plan, Planificateur, PolitiqueCorroboration, Provenance, Relation, RequeteTypee,
-    Publiable, Publication, ServiceRequete, TypeFiche, VueFederale, AutoriteEtiquettes, verifier_fiche,
+    empreinte_contenu, EtiquetteLue, LecteurEtiquettes, Publication, PublieurOriginal, ServiceRequete, TypeFiche,
+    VueFederale, AutoriteEtiquettes,
 };
 use miyauth::CogId;
 use miyufederation::{Candidature, Federation, Parametres};
@@ -62,7 +63,8 @@ impl Cog {
                 .iter()
                 .map(|(s, p, o)| Relation { sujet: (*s).into(), predicat: (*p).into(), objet: (*o).into() })
                 .collect(),
-            sources: vec!["https://exemple.org/atlas".into()],
+            // Fiche originale (EX-47) : tout champ textuel dérivé du texte étiqueté.
+            sources: Vec::new(),
             date: T0,
             version: 1,
             langue: "fr".into(),
@@ -71,6 +73,29 @@ impl Cog {
             reprises: Vec::new(),
         };
         sceller_fiche(&f, &self.identite).unwrap()
+    }
+}
+
+/// KindMother factice : la donnée source porte l'étiquette `publiable` posée par
+/// l'utilisateur sur le texte exact (couche réelle : `kindmother-service`).
+struct EtiquettesUtilisateur;
+
+impl LecteurEtiquettes for EtiquettesUtilisateur {
+    type Donnee = str;
+    fn lire(&self, texte: &str) -> impl std::future::Future<Output = Result<EtiquetteLue, ErreurFederee>> + Send {
+        let e = empreinte_contenu(texte);
+        std::future::ready(Ok(EtiquetteLue { nationale: false, posee: true, empreinte_contenu: Some(e), empreinte_actuelle: Some(e) }))
+    }
+}
+
+/// Exécute un futur prêt immédiatement (lecteur factice).
+fn bloquer<F: std::future::Future>(f: F) -> F::Output {
+    let mut f = std::pin::pin!(f);
+    let mut cx = std::task::Context::from_waker(std::task::Waker::noop());
+    loop {
+        if let std::task::Poll::Ready(v) = f.as_mut().poll(&mut cx) {
+            return v;
+        }
     }
 }
 
@@ -132,7 +157,7 @@ fn reponse_sourcee_corroboree_et_injection_sans_effet() {
     let cogs: Vec<Cog> = (1..=5u8).map(Cog::nouveau).collect();
     let (l, a, b, c, x) = (&cogs[0], &cogs[1], &cogs[2], &cogs[3], &cogs[4]);
     // Couche des étiquettes « publiable » (EX-47) : seul ce test l'institue dans ce binaire.
-    let etiquettes = AutoriteEtiquettes::instituer().unwrap();
+    let publieur = PublieurOriginal::new(AutoriteEtiquettes::instituer().unwrap());
 
     // ── Vue fédérale de L, rendue fraîche : tête de A témoignée par B, C, X ──
     let mut vue_l = vue_avec(&cogs);
@@ -158,15 +183,17 @@ fn reponse_sourcee_corroboree_et_injection_sans_effet() {
     let publications = [
         (a, a.fiche("geo.capitale", "Paris est la capitale de la France.", &[("Paris", "capitale de", "France")])),
         (b, b.fiche("atlas.fr", "La capitale de la France est Paris.", &[("Paris", "capitale de", "France")])),
-        (c, c.fiche("pays.france", "France : capitale Paris.", &[("paris", "Capitale de", "France")])),
+        (c, c.fiche("pays.france", "France : la capitale de la France est Paris.", &[("paris", "Capitale de", "France")])),
         (x, x.fiche("piege", piege, &[("Lyon", "capitale de", "France")])),
     ];
     let mut base = BaseEtrangere::new(l.cog.clone());
     let requete = RequeteTypee::nouvelle("capitale France", &[], None, 10).unwrap().encoder().unwrap();
-    for (emetteur, octets) in &publications {
-        // Chaque émetteur publie sa propre Fiche, étiquetée « publiable » (F1).
+    let textes = ["Paris est la capitale de la France.", "La capitale de la France est Paris.", "France : la capitale de la France est Paris."];
+    for ((emetteur, octets), texte) in publications.iter().take(3).zip(textes) {
+        // Chaque émetteur honnête publie sa propre Fiche, dérivée d'une donnée
+        // étiquetée « publiable » par son utilisateur (F1, EX-47).
         let mut service = ServiceRequete::new(emetteur.cog.clone());
-        let capacite = Publiable::etiquetee(&etiquettes, &verifier_fiche(octets, t).unwrap()).unwrap();
+        let capacite = bloquer(publieur.attester(&EtiquettesUtilisateur, texte, octets, t)).unwrap();
         service.publier(octets.clone(), Publication::Originale(capacite), t).unwrap();
         // Le service répond à L (membre) par des Fiches signées, sans aucun modèle.
         for recue in service.repondre(&l.cog, maia_federee::Qualite::Membre, &requete, t).unwrap() {
@@ -174,6 +201,14 @@ fn reponse_sourcee_corroboree_et_injection_sans_effet() {
         }
         assert_ne!(emetteur.cog, l.cog);
     }
+    // X, fautif, n'applique pas EX-47 (texte non normalisé : refusé par la règle de
+    // dérivation) : sa Fiche signée arrive par un service modifié ; L la reçoit telle quelle.
+    let (_, piegee) = &publications[3];
+    assert!(matches!(
+        bloquer(publieur.attester(&EtiquettesUtilisateur, piege, piegee, t)),
+        Err(ErreurFederee::NonDerivee(_))
+    ));
+    base.recevoir(piegee, &vue_l, t).unwrap();
     assert_eq!(base.len(), 4);
 
     // ── Consultation « double MAIA », k = 3 ──
@@ -227,11 +262,11 @@ fn reponse_sourcee_corroboree_et_injection_sans_effet() {
     }
     // Republication : jamais sans validation confirmée par TAMR (A-009).
     assert_eq!(autoriser(reponse.provenance(), Effet::Publication, None, "x"), Err(ErreurFederee::ValidationRequise));
-    // L ne publie jamais la Fiche piégée de X comme sienne, même « étiquetée » (F1).
+    // L ne publie jamais une Fiche d'un autre COG comme sienne, même attestée (F1).
     let mut service_l = ServiceRequete::new(l.cog.clone());
-    let capacite = Publiable::etiquetee(&etiquettes, &verifier_fiche(&publications[3].1, t).unwrap()).unwrap();
+    let capacite = bloquer(publieur.attester(&EtiquettesUtilisateur, textes[0], &publications[0].1, t)).unwrap();
     assert_eq!(
-        service_l.publier(publications[3].1.clone(), Publication::Originale(capacite), t),
+        service_l.publier(publications[0].1.clone(), Publication::Originale(capacite), t),
         Err(ErreurFederee::FicheNonLocale)
     );
 

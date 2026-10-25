@@ -47,6 +47,8 @@ use kindmother::intent::{
     IntentState, SchemaMigration, TypedSelect, TypedWriteIntent, MAX_INTENTS_PER_BATCH,
 };
 use crate::sql_guard::SqlPolicy;
+use crate::etiquettes::{lire_bases_nationales, ClesUtilisateurs, Etiquettes, DOSSIER_CLES_UTILISATEURS};
+use kindmother::etiquette::{IntentionEtiquette, RefDonnee};
 
 /// Bornes du serveur (C-13).
 #[derive(Debug, Clone, Copy)]
@@ -180,6 +182,8 @@ pub struct KindMotherServer {
     allow_non_loopback: bool,
     /// Opérateurs déjà avertis de l'usage du chemin SQL brut transitoire
     raw_path_warned: Mutex<std::collections::HashSet<String>>,
+    /// Étiquettes `publiable` (EX-47) : clés des utilisateurs, bases nationales
+    etiquettes: Arc<Etiquettes>,
 }
 
 impl KindMotherServer {
@@ -209,6 +213,23 @@ impl KindMotherServer {
             &operator_ids,
         )?);
 
+        // Étiquettes `publiable` (EX-47) : clés des utilisateurs déposées par l'administrateur,
+        // jamais une clé de service ; bases `nationale` (maia-* et déclarées).
+        let cles_utilisateurs = ClesUtilisateurs::charger(
+            &credentials.dir().join(DOSSIER_CLES_UTILISATEURS),
+            &credentials.service_public_keys(),
+        )?;
+        info!(
+            "Publiable labels: {} user key(s) ({})",
+            cles_utilisateurs.len(),
+            if cles_utilisateurs.is_empty() { "no label can be set" } else { "user-signed intents only" }
+        );
+        let etiquettes = Arc::new(Etiquettes::new(
+            cles_utilisateurs,
+            lire_bases_nationales(data_dir)?,
+            *credentials.server().public_key(),
+        ));
+
         info!(
             "KindMother server initialized ({} operators, credentials in {:?}, server key {})",
             operator_ids.len(),
@@ -223,6 +244,7 @@ impl KindMotherServer {
             limits: ServerLimits::default(),
             allow_non_loopback: false,
             raw_path_warned: Mutex::new(std::collections::HashSet::new()),
+            etiquettes,
         })
     }
 
@@ -510,6 +532,22 @@ impl KindMotherServer {
                 }
             },
 
+            Request::Etiqueter {
+                operator_id,
+                intention,
+            } => match check_identity(authenticated, &operator_id) {
+                Err(r) => r,
+                Ok(()) => self.handle_etiqueter(authenticated, &intention).await,
+            },
+
+            Request::LireEtiquette {
+                operator_id,
+                donnee,
+            } => match check_identity(authenticated, &operator_id) {
+                Err(r) => r,
+                Ok(()) => self.handle_lire_etiquette(authenticated, &donnee).await,
+            },
+
             Request::HealthCheck { database } => {
                 self.handle_health_check(authenticated, database.as_deref())
                     .await
@@ -563,6 +601,40 @@ impl KindMotherServer {
                 "Operator '{operator_id}' uses the TRANSITIONAL raw SQL path \
                  (Query/Execute/Transaction); migrate to typed intents (lot C, K-13)"
             );
+        }
+    }
+
+    /// Étiquette `publiable` (EX-47) : l'opérateur relais doit pouvoir lire la table ;
+    /// la signature de l'utilisateur, la sensibilité et le contenu sont vérifiés ensuite.
+    async fn handle_etiqueter(&self, operator_id: &str, intention: &IntentionEtiquette) -> Response {
+        let d = &intention.donnee;
+        if let Err(e) = self
+            .arbitration
+            .authorize_table(operator_id, &d.base, &d.table, AccessMode::Read)
+            .await
+        {
+            self.audit_refusal(AuditKind::Etiquette, operator_id, &d.base, intention.action.as_str(), Some(&d.table), &e);
+            return error_response(&e);
+        }
+        match self.etiquettes.etiqueter(&self.database, operator_id, intention).await {
+            Ok(etat) => Response::EtiquetteResult { success: true, etat: Some(Box::new(etat)), error: None },
+            Err(e) => error_response(&e),
+        }
+    }
+
+    /// Lecture typée de l'étiquette d'une donnée (droit de lecture sur la table requis).
+    async fn handle_lire_etiquette(&self, operator_id: &str, donnee: &RefDonnee) -> Response {
+        if let Err(e) = self
+            .arbitration
+            .authorize_table(operator_id, &donnee.base, &donnee.table, AccessMode::Read)
+            .await
+        {
+            self.audit_refusal(AuditKind::Etiquette, operator_id, &donnee.base, "publiable.lire", Some(&donnee.table), &e);
+            return error_response(&e);
+        }
+        match self.etiquettes.lire(&self.database, operator_id, donnee).await {
+            Ok(etat) => Response::EtiquetteResult { success: true, etat: Some(Box::new(etat)), error: None },
+            Err(e) => error_response(&e),
         }
     }
 

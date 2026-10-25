@@ -346,6 +346,16 @@ impl CredentialStore {
         &self.server
     }
 
+    /// Clés publiques des opérateurs et du serveur : aucune ne peut servir de clé
+    /// d'utilisateur (étiquette `publiable`, EX-47).
+    pub(crate) fn service_public_keys(&self) -> Vec<[u8; PUBLIC_KEY_LEN]> {
+        self.keys
+            .values()
+            .map(VerifyingKey::to_bytes)
+            .chain(std::iter::once(self.server.public))
+            .collect()
+    }
+
     /// Vérifie la signature d'un opérateur sur la transcription client.
     ///
     /// Toute erreur (opérateur inconnu, signature mal formée ou invalide) produit le

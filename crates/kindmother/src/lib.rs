@@ -81,6 +81,14 @@ pub mod api;
 /// Module des intentions typées
 pub mod intent;
 
+/// @id kindmother_module_etiquette
+/// @role infrastructure
+/// @layer core
+/// @do expose_etiquette_module
+//@human / @human Étiquette `publiable` (EX-47) : référence de donnée, intention signée par l'utilisateur, état lu.
+/// Module des étiquettes de sensibilité
+pub mod etiquette;
+
 /// @id kindmother_module_threat
 /// @role infrastructure
 /// @layer core
