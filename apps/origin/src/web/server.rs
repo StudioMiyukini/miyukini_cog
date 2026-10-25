@@ -6,7 +6,7 @@
 
 //! Serveur Web Origin — Implémentation HTTP.
 
-use super::{api, content::ContentManager, forum_auth, market, pages};
+use super::{api, content::ContentManager, forum_auth, market, pages, revocations};
 use crate::config::OriginConfig;
 use crate::garde_reseau::{analyser_adresse, connecter_cible_publique, AdresseAnalysee};
 use crate::relay::rate_limiter::{RateLimitResult, RateLimiter, RateLimiterConfig};
@@ -182,12 +182,42 @@ pub struct WebServer {
     market_store: Option<Arc<market::MarketStore>>,
     /// Rate limiter pour les connexions HTTP.
     rate_limiter: Arc<RateLimiter>,
+    /// Synchro des révocations des COG reconnus (indépendante du forum).
+    synchro_revocations: SynchroRevocations,
+}
+
+/// Route `POST /api/auth/revocations/sync` : suivi partagé (forum, admin) et
+/// limiteur de débit propre (par IP et par COG).
+#[derive(Clone)]
+pub struct SynchroRevocations {
+    /// Suivis des registres des COG reconnus.
+    pub suivi: Arc<revocations::RevocationsReconnues>,
+    /// Limiteur : `check_connection` par IP, `check_message` par COG ([`revocations::cle_debit`]).
+    pub limiteur: Arc<RateLimiter>,
+}
+
+impl SynchroRevocations {
+    /// Débit par fenêtre de 60 s : 120 envois par IP, 300 par COG (un registre
+    /// de 1 048 576 entrées = 256 morceaux + la tête).
+    pub fn new(suivi: Arc<revocations::RevocationsReconnues>) -> Self {
+        let limiteur = Arc::new(RateLimiter::new(RateLimiterConfig {
+            max_connections_per_ip: 120,
+            max_messages_per_session: 300,
+            max_failed_registrations: 10,
+            window_seconds: 60,
+            block_duration_seconds: 120,
+            require_pow_for_temp: false,
+            pow_difficulty: 0,
+        }));
+        Self { suivi, limiteur }
+    }
 }
 
 impl WebServer {
     /// Crée un nouveau serveur web.
     /// Si `relay_ref` est fourni, Phase 2 (inject HTTP via tunnel) est activée.
     /// Si `forum_auth_store` est fourni, les routes POST /api/auth/forum/validate et /sync sont activées.
+    /// `POST /api/auth/revocations/sync` est toujours servie (suivi `revocations`).
     #[must_use]
     pub fn new(
         config: Arc<OriginConfig>,
@@ -196,6 +226,7 @@ impl WebServer {
         relay_ref: Option<Arc<RelayServer>>,
         forum_auth_store: Option<Arc<forum_auth::ForumAuthStore>>,
         market_store: Option<Arc<market::MarketStore>>,
+        revocations: Arc<revocations::RevocationsReconnues>,
     ) -> Self {
         let rate_limiter = Arc::new(RateLimiter::new(RateLimiterConfig {
             max_connections_per_ip: 60,
@@ -217,6 +248,7 @@ impl WebServer {
             forum_auth_store,
             market_store,
             rate_limiter,
+            synchro_revocations: SynchroRevocations::new(revocations),
         }
     }
 
@@ -227,10 +259,12 @@ impl WebServer {
         info!("🌐 Web server listening on http://{}", bind_addr);
 
         let cleanup_limiter = Arc::clone(&self.rate_limiter);
+        let cleanup_revocations = Arc::clone(&self.synchro_revocations.limiteur);
         tokio::spawn(async move {
             loop {
                 tokio::time::sleep(tokio::time::Duration::from_secs(120)).await;
                 cleanup_limiter.cleanup().await;
+                cleanup_revocations.cleanup().await;
             }
         });
 
@@ -258,6 +292,7 @@ impl WebServer {
                     let relay_ref = self.relay_ref.clone();
                     let forum_auth_store = self.forum_auth_store.clone();
                     let market_store = self.market_store.clone();
+                    let synchro_revocations = self.synchro_revocations.clone();
 
                     tokio::spawn(async move {
                         if let Err(e) = handle_connection(
@@ -272,6 +307,7 @@ impl WebServer {
                             market_store,
                             addr.ip(),
                             rate_limiter,
+                            synchro_revocations,
                         )
                         .await
                         {
@@ -375,6 +411,43 @@ async fn read_body(
     Ok(body)
 }
 
+/// `POST /api/auth/revocations/sync` : débit par IP (avant lecture du corps), corps
+/// borné, débit par COG (après analyse, avant décodage), application hors de la
+/// boucle async (vérifications et racine Merkle).
+async fn route_revocations(
+    reader: &mut (impl AsyncReadExt + Unpin),
+    headers: &[String],
+    peer_ip: std::net::IpAddr,
+    synchro: &SynchroRevocations,
+) -> std::io::Result<RouteResponse> {
+    let maintenant = epoch_secs();
+    let ip = effective_client_ip(peer_ip, headers).unwrap_or(peer_ip);
+    if !synchro.limiteur.check_connection(ip).await.is_allowed() {
+        return Ok(revocations::refus(&synchro.suivi, 429, "rate_limited", maintenant));
+    }
+    let len = match content_length_checked(headers, revocations::TAILLE_MAX_CORPS_REVOCATIONS) {
+        Ok(n) => n,
+        Err(e) => {
+            synchro.suivi.noter_refus("body", maintenant);
+            return Ok(body_error_response(&e));
+        }
+    };
+    let body = read_body(reader, len).await?;
+    let requete = match revocations::analyser(&synchro.suivi, &body, maintenant) {
+        Ok(r) => r,
+        Err(refus) => return Ok(refus),
+    };
+    drop(body);
+    if !synchro.limiteur.check_message(&revocations::cle_debit(&requete.cog)).await.is_allowed() {
+        return Ok(revocations::refus(&synchro.suivi, 429, "rate_limited_cog", maintenant));
+    }
+    let suivi = Arc::clone(&synchro.suivi);
+    match tokio::task::spawn_blocking(move || revocations::traiter(&suivi, &requete, maintenant)).await {
+        Ok(resp) => Ok(resp),
+        Err(_) => Ok(revocations::refus(&synchro.suivi, 503, "unavailable", maintenant)),
+    }
+}
+
 /// Le pair est-il un proxy de confiance (nginx local) ? Seul le loopback l'est.
 fn is_trusted_proxy(ip: std::net::IpAddr) -> bool {
     ip.to_canonical().is_loopback()
@@ -408,6 +481,7 @@ async fn handle_connection(
     market_store: Option<Arc<market::MarketStore>>,
     peer_ip: std::net::IpAddr,
     rate_limiter: Arc<RateLimiter>,
+    synchro_revocations: SynchroRevocations,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let (reader, mut writer) = stream.split();
     let mut buf_reader = BufReader::new(reader);
@@ -460,6 +534,13 @@ async fn handle_connection(
                 return Ok(());
             }
         }
+    }
+
+    // Révocations des COG reconnus : indépendante du store du forum (l'admin en dépend aussi).
+    if method == "POST" && path.split_once('?').map_or(path, |(p, _)| p).trim_end_matches('/') == revocations::ROUTE_REVOCATIONS {
+        let resp = route_revocations(&mut buf_reader, &headers, peer_ip, &synchro_revocations).await?;
+        write_response(&mut writer, resp).await?;
+        return Ok(());
     }
 
     // Auth forum : POST /api/auth/* (passeport + visa + PoP, sync signée par COG).

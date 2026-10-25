@@ -23,7 +23,10 @@
 //! - [`federal`] : têtes des COG fédérés contresignées par ≥ 3 membres
 //!   témoins, Origin = un témoin au plus (A-007) ;
 //! - `revocation` (fonctionnalité `miyauth`) : `SourceRevocation` de miyauth
-//!   adossée à un miroir vérifié (lot 2 §8.2).
+//!   adossée à un miroir vérifié (lot 2 §8.2) ;
+//! - `suivi_revocations` (fonctionnalité `miyauth`) : suivi **unique** du
+//!   registre de révocation d'un COG (miroir + liste, fraîcheur ≤ 15 min
+//!   imposée), utilisé par Origin, MiyuCloud et les façades.
 //!
 //! Fail-closed : toute donnée non vérifiée, incohérente ou hors politique est
 //! un refus ; aucun état n'est modifié par une opération refusée.
@@ -49,14 +52,20 @@ pub mod journal;
 pub mod revocation;
 pub mod stockage;
 pub mod suivi;
+#[cfg(feature = "miyauth")]
+pub mod suivi_revocations;
 pub mod temps;
 
 pub use entree::{identite_sceau, Categorie, Cible, Corps, EntreeRegistre, Publication};
 pub use erreurs::{ErreurJournal, ErreurStockage, ErreurTemps};
 pub use federal::{verifier_temoins, RegistreFederal, TEMOINS_MIN};
 #[cfg(feature = "miyauth")]
-pub use revocation::{cible_serie, RevocationsRegistre};
+pub use revocation::{cible_serie, controler_fraicheur, RevocationsRegistre, FRAICHEUR_REVOCATIONS_SECS};
+#[cfg(feature = "miyauth")]
+pub use suivi_revocations::{
+    Application, RefusSuivi, SuiviRevocationsRegistre, MAX_ENTREES_SUIVI, MAX_OCTETS_SUIVI,
+};
 pub use journal::{controler_structure_entree, Journal};
 pub use stockage::{Stockage, StockageFichier, StockageMemoire, TAILLE_MAX_ENREGISTREMENT};
-pub use suivi::{MiroirRegistre, SuiviTetes, TetePreparee};
+pub use suivi::{MiroirRegistre, SuiviTetes, SynchroPreparee, TetePreparee};
 pub use temps::{HorlogeConfiance, TempsMedian, FENETRE_MTP};

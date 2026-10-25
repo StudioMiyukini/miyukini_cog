@@ -36,11 +36,12 @@
 //! seule une clé d'émission explicitement épinglée est acceptée.
 //!
 //! Révocation : liste de chaque COG reconnu tirée de son **registre vérifié**
-//! ([`crate::web::revocations`], `miyuregistre::RevocationsRegistre`) — tête signée par
+//! ([`crate::web::revocations`], `miyuregistre::SuiviRevocationsRegistre`) — tête signée par
 //! sa clé de journal (`registre`, `cle_journal` de `[[forum.cogs_reconnus]]`),
 //! fraîcheur **≤ 15 min** ; liste absente (registre non déclaré, jamais poussé) ou
 //! périmée ⇒ **refus** du passeport. Le COG pousse son registre par
-//! `POST /api/auth/revocations/sync` (`{cog_id, depuis, tete, entrees}`, base64 URL).
+//! `POST /api/auth/revocations/sync` (route servie par `web::server` indépendamment de
+//! ce store, voir [`crate::web::revocations`]).
 //! La borne de **15 minutes** des passeports acceptés est conservée (défense en
 //! profondeur). Les COG non reconnus sont refusés.
 //!
@@ -59,7 +60,7 @@
 
 use argon2::password_hash::{PasswordHash, PasswordVerifier};
 use miyauth::http::{
-    b64_decoder, b64_encoder, verifier_requete_passeport, verifier_requete_signee, verifier_requete_visa, EntetesSignees,
+    b64_encoder, verifier_requete_passeport, verifier_requete_signee, verifier_requete_visa, EntetesSignees,
     MagasinDefis, MagasinDefisMemoire, RefusHttp, RegistreNonces, RequeteHttp, ENTETE_HORODATAGE, ENTETE_NONCE,
     ENTETE_POP, ENTETE_SIGNATAIRE, ENTETE_SIGNATURE,
 };
@@ -77,7 +78,7 @@ use std::sync::{Arc, Mutex};
 use tracing::{debug, info, warn};
 
 use crate::config::ForumConfig;
-use crate::web::revocations::{RefusSynchro, RevocationsReconnues};
+use crate::web::revocations::RevocationsReconnues;
 
 // ---------------------------------------------------------------------------
 // Constantes
@@ -97,14 +98,11 @@ pub const DUREE_MAX_PASSEPORT_FORUM_SECS: u64 = 15 * 60;
 const PREFIXE_PORTEE_FORUM: &str = "forum:";
 /// Taille maximale du corps des routes `/api/auth/*` (contrôlée avant lecture).
 pub const TAILLE_MAX_CORPS_AUTH: usize = 4096;
-/// Taille maximale du corps de `/api/auth/revocations/sync` (tête + entrées, base64).
-pub const TAILLE_MAX_CORPS_REVOCATIONS: usize = 2 * 1024 * 1024;
 
 const ROUTE_DEFI: &str = "/api/auth/forum/defi";
 const ROUTE_LOGIN: &str = "/api/auth/forum/login";
 const ROUTE_SYNC: &str = "/api/auth/forum/sync";
 const ROUTE_SESSION: &str = "/api/auth/session/verify";
-const ROUTE_REVOCATIONS: &str = "/api/auth/revocations/sync";
 
 // ---------------------------------------------------------------------------
 // Types publics
@@ -299,8 +297,6 @@ pub struct ForumAuthStore {
     password_login: bool,
     /// Propriétaire désigné des profils hérités (`cog_id` vide) ; None = lecture seule.
     cog_heritage: Option<String>,
-    /// Révocations des COG reconnus (alimentées par `/api/auth/revocations/sync`).
-    revocations: Arc<RevocationsReconnues>,
 }
 
 impl ForumAuthStore {
@@ -312,7 +308,7 @@ impl ForumAuthStore {
         }
         let conn = rusqlite::Connection::open(path).map_err(|e| e.to_string())?;
         let hote = match parametres.cle_hote {
-            Some(cle) => Some(HoteForum::new(cle, &parametres.cogs_reconnus, Arc::clone(&parametres.revocations))?),
+            Some(cle) => Some(HoteForum::new(cle, &parametres.cogs_reconnus, parametres.revocations)?),
             None => None,
         };
         let sync_cles = parametres.sync_cles.iter().map(|k| (*k, cog_id_depuis_cle(k))).collect::<HashMap<_, _>>();
@@ -324,7 +320,6 @@ impl ForumAuthStore {
             sync_nonces: RegistreNonces::default(),
             password_login: parametres.password_login,
             cog_heritage: parametres.cog_heritage,
-            revocations: parametres.revocations,
         };
         if let Some(h) = &store.hote {
             info!("Forum : connexion par passeport activée (Origin cog_id {})", h.cog);
@@ -620,12 +615,8 @@ fn json_value(status: u16, v: &serde_json::Value) -> super::server::RouteRespons
 }
 
 /// Taille maximale du corps d'une route `/api/auth/*` (contrôlée avant lecture).
-pub fn taille_max_corps(path: &str) -> usize {
-    if chemin_sans_requete(path) == ROUTE_REVOCATIONS {
-        TAILLE_MAX_CORPS_REVOCATIONS
-    } else {
-        TAILLE_MAX_CORPS_AUTH
-    }
+pub fn taille_max_corps(_path: &str) -> usize {
+    TAILLE_MAX_CORPS_AUTH
 }
 
 /// Traite une requête API auth (POST, corps déjà lu et borné).
@@ -640,7 +631,6 @@ pub fn handle_api(path: &str, body: &[u8], headers: &[String], store: &ForumAuth
         ROUTE_LOGIN => route_login(store, path_clean, body, headers, maintenant),
         ROUTE_SESSION => route_session(store, path_clean, body, headers, maintenant),
         ROUTE_SYNC => route_sync(store, path_clean, body, headers, maintenant),
-        ROUTE_REVOCATIONS => route_revocations(&store.revocations, body, maintenant),
         "/api/auth/forum/validate" | "/api/auth/validate" => route_validate(store, body),
         // `/api/auth/security/info` : retiré du routage public (404).
         _ => json_response(404, r#"{"ok":false,"error":"not_found"}"#),
@@ -776,49 +766,6 @@ fn route_sync(store: &ForumAuthStore, chemin: &str, body: &[u8], headers: &[Stri
         Err(e) => {
             warn!("Sync forum refusée ({}) : {}", cog, e);
             json_response(400, r#"{"ok":false,"error":"sync_rejected"}"#)
-        }
-    }
-}
-
-/// Corps JSON de `POST /api/auth/revocations/sync` (poussé par un COG reconnu).
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct RevocationsSyncRequest {
-    /// COG dont le registre est poussé.
-    pub cog_id: String,
-    /// Taille du miroir d'Origin à laquelle les entrées font suite.
-    pub depuis: u64,
-    /// Tête de registre scellée (base64 URL).
-    pub tete: String,
-    /// Entrées `depuis..taille de la tête` (base64 URL).
-    pub entrees: Vec<String>,
-}
-
-pub(crate) fn route_revocations(revocations: &RevocationsReconnues, body: &[u8], maintenant: u64) -> super::server::RouteResponse {
-    let Ok(req) = serde_json::from_slice::<RevocationsSyncRequest>(body) else {
-        return json_response(400, r#"{"ok":false,"error":"invalid json"}"#);
-    };
-    let Some(cog) = CogId::new(req.cog_id.trim()) else {
-        return json_response(400, r#"{"ok":false,"error":"cog_id"}"#);
-    };
-    let tete = b64_decoder(&req.tete);
-    let entrees: Option<Vec<Vec<u8>>> = req.entrees.iter().map(|e| b64_decoder(e)).collect();
-    let (Some(tete), Some(entrees)) = (tete, entrees) else {
-        return json_response(400, r#"{"ok":false,"error":"base64"}"#);
-    };
-    match revocations.synchroniser(&cog, req.depuis, &tete, &entrees, maintenant) {
-        Ok(s) => json_value(
-            200,
-            &serde_json::json!({ "ok": true, "taille": s.taille, "a_jour_au": s.a_jour_au, "ajoutees": s.ajoutees }),
-        ),
-        Err(RefusSynchro::Position { taille }) => {
-            json_value(409, &serde_json::json!({ "ok": false, "error": "position", "taille": taille }))
-        }
-        Err(RefusSynchro::CogInconnu) => json_response(403, r#"{"ok":false,"error":"cog_inconnu"}"#),
-        Err(RefusSynchro::EtatIndisponible) => json_response(503, r#"{"ok":false,"error":"unavailable"}"#),
-        Err(e) => {
-            warn!("Révocations de {} refusées : {}", cog, e);
-            json_response(400, r#"{"ok":false,"error":"rejected"}"#)
         }
     }
 }
@@ -1011,7 +958,7 @@ mod tests {
                 "entrees": entrees.iter().map(|e| b64_encoder(e)).collect::<Vec<_>>(),
             })
             .to_string();
-            handle_api(ROUTE_REVOCATIONS, corps.as_bytes(), &[], &self.store)
+            crate::web::revocations::route_synchro(&self.revocations, corps.as_bytes(), epoch_secs())
         }
 
         fn session(&self, visa: &[u8], passeport: &[u8], pop: &str) -> RouteResponse {
@@ -1122,15 +1069,8 @@ mod tests {
         assert!(status_of(&m.login(&m.passeport(600, &m.cle_h))).starts_with("401"));
         assert_eq!(m.revocations.taille(&m.cog_h), Some(1));
 
-        // Corps invalides, COG inconnu.
-        assert!(status_of(&handle_api(ROUTE_REVOCATIONS, b"{}", &[], &m.store)).starts_with("400"));
-        let inconnu = serde_json::json!({"cog_id": autre.as_str(), "depuis": 0, "tete": "!!", "entrees": []}).to_string();
-        assert!(status_of(&handle_api(ROUTE_REVOCATIONS, inconnu.as_bytes(), &[], &m.store)).starts_with("400"));
-        let (tete, _) = m.registre.publier(1, epoch_secs());
-        let inconnu =
-            serde_json::json!({"cog_id": autre.as_str(), "depuis": 0, "tete": b64_encoder(&tete), "entrees": []}).to_string();
-        assert!(status_of(&handle_api(ROUTE_REVOCATIONS, inconnu.as_bytes(), &[], &m.store)).starts_with("403"));
-        assert_eq!(taille_max_corps(ROUTE_REVOCATIONS), TAILLE_MAX_CORPS_REVOCATIONS);
+        // La route de synchro n'est plus servie par le store du forum (indépendante).
+        assert!(status_of(&handle_api("/api/auth/revocations/sync", b"{}", &[], &m.store)).starts_with("404"));
         assert_eq!(taille_max_corps(ROUTE_LOGIN), TAILLE_MAX_CORPS_AUTH);
     }
 

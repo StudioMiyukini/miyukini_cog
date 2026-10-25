@@ -22,8 +22,8 @@
 //! # Fail-closed
 //!
 //! - aucune tête vue, autre COG émetteur ⇒ [`ErreurRevocation::ListeAbsente`] ;
-//! - tête plus ancienne que la fraîcheur maximale (15 min par défaut, durée
-//!   d'un visa) ⇒ [`ErreurRevocation::Perimee`] ;
+//! - tête plus ancienne que la fraîcheur maximale (15 min au plus, durée
+//!   d'un visa, [`FRAICHEUR_REVOCATIONS_SECS`]) ⇒ [`ErreurRevocation::Perimee`] ;
 //! - tête datée dans le futur au-delà de la tolérance ⇒ [`ErreurRevocation::HorlogeIncoherente`] ;
 //! - rafraîchissement sur une tête gelée (non fraîche selon la politique du
 //!   registre) ou un stockage illisible ⇒ erreur, liste inchangée (elle se
@@ -47,6 +47,49 @@ use crate::entree::{Cible, Corps, EntreeRegistre};
 use crate::erreurs::ErreurJournal;
 use crate::stockage::Stockage;
 use crate::suivi::MiroirRegistre;
+
+/// Fraîcheur maximale des révocations tirées d'un registre (A-007 : 15 min,
+/// durée d'un visa). Plafond **non configurable** : un réglage ne peut que la
+/// raccourcir ([`RevocationsRegistre::avec_fraicheur`]).
+pub const FRAICHEUR_REVOCATIONS_SECS: u64 = FRAICHEUR_MAX_DEFAUT_SECS;
+
+/// Contrôle de fraîcheur **unique** des révocations : liste à jour au
+/// `a_jour_au` (horodatage d'une tête vérifiée) utilisable à `maintenant` si
+/// elle n'est ni datée dans le futur (au-delà de la tolérance d'horloge) ni
+/// plus vieille que [`FRAICHEUR_REVOCATIONS_SECS`].
+pub fn controler_fraicheur(a_jour_au: u64, maintenant: u64) -> Result<(), ErreurRevocation> {
+    controler_fraicheur_max(a_jour_au, FRAICHEUR_REVOCATIONS_SECS, maintenant)
+}
+
+fn controler_fraicheur_max(a_jour_au: u64, fraicheur_max: u64, maintenant: u64) -> Result<(), ErreurRevocation> {
+    if a_jour_au > maintenant.saturating_add(TOLERANCE_HORLOGE_SECS) {
+        return Err(ErreurRevocation::HorlogeIncoherente);
+    }
+    if a_jour_au.saturating_add(fraicheur_max.min(FRAICHEUR_REVOCATIONS_SECS)) < maintenant {
+        return Err(ErreurRevocation::Perimee { a_jour_au, maintenant });
+    }
+    Ok(())
+}
+
+/// Révocations miyauth portées par `entrees` : sceau au `seuil` sur `ancres`
+/// vérifié avant tout décodage ; autre signataire ou autre nature : ignorée.
+pub(crate) fn revocations_des(
+    entrees: &[Vec<u8>],
+    ancres: &AncresDeConfiance,
+    seuil: usize,
+    maintenant: u64,
+) -> Vec<CibleRevocation> {
+    let mut nouvelles = Vec::new();
+    for octets in entrees {
+        let Ok(verifie) = verifier_seuil::<EntreeRegistre>(octets, ancres, seuil, maintenant) else {
+            continue;
+        };
+        if let Corps::Revocation { cible, .. } = verifie.into_titre().corps {
+            nouvelles.extend(vers_miyauth(&cible));
+        }
+    }
+    nouvelles
+}
 
 /// Cible d'entrée de registre pour une série miyauth (complétée de zéros).
 pub fn cible_serie(serie: &Serie) -> Cible {
@@ -89,7 +132,7 @@ impl RevocationsRegistre {
             cog,
             ancres,
             seuil: seuil.max(1),
-            fraicheur_max: FRAICHEUR_MAX_DEFAUT_SECS,
+            fraicheur_max: FRAICHEUR_REVOCATIONS_SECS,
             cibles: HashSet::new(),
             lues: 0,
             a_jour_au: None,
@@ -98,8 +141,30 @@ impl RevocationsRegistre {
 
     /// Fraîcheur maximale plus **courte** que 15 min ; une valeur plus longue est ramenée à 15 min.
     pub fn avec_fraicheur(mut self, secs: u64) -> Self {
-        self.fraicheur_max = secs.min(FRAICHEUR_MAX_DEFAUT_SECS);
+        self.fraicheur_max = secs.min(FRAICHEUR_REVOCATIONS_SECS);
         self
+    }
+
+    /// COG émetteur de la liste.
+    pub fn cog(&self) -> &CogId {
+        &self.cog
+    }
+
+    /// Vrai si `autre` concerne le même COG et que **toutes** ses révocations
+    /// sont aussi dans `self` (une révocation ne disparaît jamais).
+    pub fn inclut(&self, autre: &Self) -> bool {
+        self.cog == autre.cog && autre.cibles.is_subset(&self.cibles)
+    }
+
+    /// Ajoute les révocations des entrées `lues..lues_apres` déjà vérifiées
+    /// (miroir synchronisé sous une tête émise à `emise_a`). Rend le nombre
+    /// de cibles nouvelles.
+    pub(crate) fn integrer(&mut self, nouvelles: Vec<CibleRevocation>, lues_apres: u64, emise_a: u64) -> usize {
+        let avant = self.cibles.len();
+        self.cibles.extend(nouvelles);
+        self.lues = self.lues.max(lues_apres);
+        self.a_jour_au = Some(self.a_jour_au.map_or(emise_a, |a| a.max(emise_a)));
+        self.cibles.len() - avant
     }
 
     /// Nombre de cibles révoquées connues.
@@ -126,22 +191,12 @@ impl RevocationsRegistre {
         if taille < self.lues || miroir.taille() < taille {
             return Err(ErreurJournal::StockageIncoherent);
         }
-        let mut nouvelles = Vec::new();
+        let mut octets = Vec::new();
         for index in self.lues..taille {
-            let octets = miroir.entree(index)?;
-            // Signature vérifiée avant tout décodage ; autre signataire : ignorée.
-            let Ok(verifie) = verifier_seuil::<EntreeRegistre>(&octets, &self.ancres, self.seuil, maintenant) else {
-                continue;
-            };
-            if let Corps::Revocation { cible, .. } = verifie.into_titre().corps {
-                nouvelles.extend(vers_miyauth(&cible));
-            }
+            octets.push(miroir.entree(index)?);
         }
-        let avant = self.cibles.len();
-        self.cibles.extend(nouvelles);
-        self.lues = taille;
-        self.a_jour_au = Some(self.a_jour_au.map_or(emise_a, |a| a.max(emise_a)));
-        Ok(self.cibles.len() - avant)
+        let nouvelles = revocations_des(&octets, &self.ancres, self.seuil, maintenant);
+        Ok(self.integrer(nouvelles, taille, emise_a))
     }
 }
 
@@ -152,12 +207,7 @@ impl SourceRevocation for RevocationsRegistre {
             return Err(ErreurRevocation::ListeAbsente);
         }
         let a_jour_au = self.a_jour_au.ok_or(ErreurRevocation::ListeAbsente)?;
-        if a_jour_au > maintenant_secs.saturating_add(TOLERANCE_HORLOGE_SECS) {
-            return Err(ErreurRevocation::HorlogeIncoherente);
-        }
-        if a_jour_au.saturating_add(self.fraicheur_max) < maintenant_secs {
-            return Err(ErreurRevocation::Perimee { a_jour_au, maintenant: maintenant_secs });
-        }
+        controler_fraicheur_max(a_jour_au, self.fraicheur_max, maintenant_secs)?;
         Ok(self.cibles.contains(cible))
     }
 }

@@ -257,6 +257,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         relay_arc.clone(),
         forum_auth_store,
         market_store,
+        Arc::clone(&revocations_reconnues),
     );
 
     // Créer le serveur admin

@@ -24,11 +24,9 @@ use miyuhybride::{
 };
 use miyuportail::sas::{decoder_reponse, traiter_requete, ResultatTrame};
 use miyuportail::{DecodeurIsole, ErreurSas, IdService, PortailInterne, RefusParDefaut, RegistreMemoire, RequeteSas};
-use miyuregistre::{
-    Cible, Corps, EntreeRegistre, HorlogeConfiance, Journal, MiroirRegistre, RevocationsRegistre, StockageMemoire,
-    SuiviTetes,
-};
-use miyusceau::{empreinte_cle, sceller, AncresDeConfiance, CleSignature, NiveauConfiance, PolitiqueTete};
+use miyuhybride::FacadeJetable;
+use miyuregistre::{Cible, Corps, EntreeRegistre, Journal, StockageMemoire, SuiviRevocationsRegistre};
+use miyusceau::{empreinte_cle, sceller, AncresDeConfiance, CleSignature, NiveauConfiance};
 
 const T0: u64 = 1_800_000_000;
 
@@ -46,50 +44,38 @@ fn cog(c: char) -> CogId {
     CogId::new(&c.to_string().repeat(26)).unwrap()
 }
 
-/// Registre vérifié d'un COG (journal + miroir de la zone COG).
+/// Registre d'un COG (journal) et son suivi vérifié tenu par la zone COG.
 struct Registre {
     cle: CleSignature,
     journal: Journal<StockageMemoire>,
-    miroir: MiroirRegistre<StockageMemoire>,
-    horloge: HorlogeConfiance,
-    liste: RevocationsRegistre,
-    cog: CogId,
+    suivi: SuiviRevocationsRegistre,
 }
 
 impl Registre {
     fn new(cog: CogId, id: [u8; 32]) -> Self {
         let cle = CleSignature::generer();
-        let ancres = || {
-            let mut a = AncresDeConfiance::new();
-            a.ajouter(&cle.cle_publique(), NiveauConfiance::Souverain).unwrap();
-            a
-        };
-        let suivi = SuiviTetes::new(id, ancres(), PolitiqueTete::journal_cog());
         Self {
             journal: Journal::ouvrir(id, StockageMemoire::new(), StockageMemoire::new()).unwrap(),
-            miroir: MiroirRegistre::ouvrir(suivi, StockageMemoire::new()).unwrap(),
-            horloge: HorlogeConfiance::new(),
-            liste: RevocationsRegistre::new(cog.clone(), ancres(), 1),
-            cog,
+            suivi: SuiviRevocationsRegistre::new(cog, id, &cle.cle_publique()).unwrap(),
             cle,
         }
     }
 
-    /// Inscrit des révocations, émet une tête à `t`, synchronise le miroir.
+    /// Inscrit des révocations, émet une tête à `t`, l'applique au suivi.
     fn publier_tete(&mut self, cibles: &[Cible], t: u64) {
-        let m = self.miroir.taille();
+        let m = self.suivi.taille().unwrap();
         for c in cibles {
             let e = EntreeRegistre { inscrite_a: t, corps: Corps::Revocation { cible: *c, motif: "perte".into() } };
             self.journal.ajouter(&sceller(&e, &self.cle).unwrap()).unwrap();
         }
         let tete = self.journal.emettre_tete(&[&self.cle], t, 86_400).unwrap();
         let nouvelles = self.journal.entrees(m, u64::MAX).unwrap();
-        self.miroir.synchroniser(&tete, &nouvelles, &mut self.horloge, t).unwrap();
+        self.suivi.appliquer(&tete, m, &nouvelles, t).unwrap();
     }
 
-    /// Zone COG : rafraîchit la liste sur le miroir et la remet à la façade.
-    fn remettre(&mut self, revocations: &RevocationsFacade, t: u64) {
-        revocations.rafraichir(self.cog.clone(), &mut self.liste, &self.miroir, t).unwrap();
+    /// Zone COG : remet l'instantané du suivi à la façade.
+    fn remettre(&mut self, revocations: &RevocationsFacade, _t: u64) {
+        revocations.rafraichir(&self.suivi).unwrap();
     }
 }
 
@@ -272,6 +258,30 @@ fn quota_de_sessions_refuse_au_dela_et_libere_fin_et_inactivite() {
 }
 
 #[test]
+fn session_liberee_au_retrait_de_l_appareil() {
+    let m = monde(|c| c.ressources.sessions_max = 2);
+    let (_, a) = m.appareil(T0);
+    let (_, b) = m.appareil(T0);
+    let (mut f, _rev, _rh, _rr) = facade_rafraichie(&m, vec![a.cle_appareil(), b.cle_appareil()], T0);
+    assert_eq!(cache(&mut f, &a, T0 + 10).statut, 200);
+    assert_eq!(cache(&mut f, &b, T0 + 10).statut, 200);
+    assert_eq!(m.service.quotas().sessions().utilise(), 2);
+    // Les Cores retirent B (superviseur) : sa session est libérée aussitôt.
+    m.service.retirer_auteur(&b.cle_appareil()).unwrap();
+    f.auteur_retire(&b.cle_appareil());
+    assert_eq!((f.sessions_ouvertes(), m.service.quotas().sessions().utilise()), (1, 1));
+
+    // Retrait direct au service (sans notification) : libéré à la requête suivante.
+    let (_, c) = m.appareil(T0);
+    m.service.ajouter_auteur(c.cle_appareil()).unwrap();
+    assert_eq!(cache(&mut f, &c, T0 + 20).statut, 200);
+    assert_eq!(m.service.quotas().sessions().utilise(), 2);
+    m.service.retirer_auteur(&c.cle_appareil()).unwrap();
+    assert_eq!(cache(&mut f, &a, T0 + 30).statut, 200);
+    assert_eq!((f.sessions_ouvertes(), m.service.quotas().sessions().utilise()), (1, 1));
+}
+
+#[test]
 fn quota_de_taches_et_disque_comptes() {
     let m = monde(|c| c.ressources.taches_max = 1);
     let (_, a) = m.appareil(T0);
@@ -315,12 +325,15 @@ fn titre_revoque_refuse_apres_rafraichissement() {
     // Recul refusé : une liste plus ancienne (sans la révocation) n'est pas reprise.
     let mut vieux = Registre::new(m.reconnu.clone(), [4; 32]);
     vieux.publier_tete(&[], T0 + 30);
-    vieux.liste.rafraichir(&vieux.miroir, T0 + 30).unwrap();
-    assert_eq!(revocations.remettre(m.reconnu.clone(), vieux.liste.clone()), Err(RefusRemise::Recul));
-    assert_ne!(cache(&mut f, &a, T0 + 62).statut, 200);
+    assert_eq!(revocations.rafraichir(&vieux.suivi), Err(RefusRemise::Recul));
+    // Plus récente mais sans la révocation de A (autre journal) : refusée (inclusion exigée).
+    let mut sans = Registre::new(m.reconnu.clone(), [4; 32]);
+    sans.publier_tete(&[Cible::Cle([7; 32])], T0 + 90);
+    assert_eq!(revocations.rafraichir(&sans.suivi), Err(RefusRemise::Recul));
+    assert_ne!(cache(&mut f, &a, T0 + 91).statut, 200);
     // Liste jamais rafraîchie : refusée.
     let neuve = Registre::new(m.reconnu.clone(), [4; 32]);
-    assert_eq!(revocations.remettre(m.reconnu.clone(), neuve.liste), Err(RefusRemise::JamaisRafraichie));
+    assert_eq!(revocations.rafraichir(&neuve.suivi), Err(RefusRemise::JamaisRafraichie));
 }
 
 #[test]

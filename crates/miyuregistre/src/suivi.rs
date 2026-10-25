@@ -32,6 +32,8 @@ pub struct TetePreparee {
     etat: EtatRegistre,
     acceptation: Acceptation,
     emise_a: u64,
+    /// Tête acceptée au moment de la préparation (contrôle de concurrence).
+    precedente: Option<TeteRegistre>,
 }
 
 impl TetePreparee {
@@ -43,6 +45,32 @@ impl TetePreparee {
     /// Issue de l'acceptation.
     pub fn acceptation(&self) -> Acceptation {
         self.acceptation
+    }
+
+    /// Tête acceptée lors de la préparation (aucune : premier usage).
+    pub fn etat_precedent(&self) -> Option<&TeteRegistre> {
+        self.precedente.as_ref()
+    }
+}
+
+/// Synchronisation préparée (tous contrôles faits) d'un [`MiroirRegistre`].
+#[derive(Debug, Clone)]
+pub struct SynchroPreparee {
+    depuis: u64,
+    /// Feuilles complètes après synchronisation (`None` : inchangées).
+    feuilles: Option<Vec<Empreinte>>,
+    tete: TetePreparee,
+}
+
+impl SynchroPreparee {
+    /// Tête qui sera retenue.
+    pub fn tete(&self) -> &TeteRegistre {
+        self.tete.tete()
+    }
+
+    /// Taille du miroir au moment de la préparation.
+    pub fn depuis(&self) -> u64 {
+        self.depuis
     }
 }
 
@@ -108,6 +136,7 @@ impl SuiviTetes {
         let verifiee: TeteVerifiee = verifier_tete(sceau, &self.ancres, &self.politique, &self.registre, maintenant)?;
         let emise_a = verifiee.tete().emise_a;
         self.temps.controler(emise_a)?;
+        let precedente = self.etat.as_ref().map(|e| e.tete().clone());
         let (etat, acceptation) = match &self.etat {
             None => (EtatRegistre::initial(verifiee), Acceptation::Nouvelle),
             Some(e) => {
@@ -116,7 +145,7 @@ impl SuiviTetes {
                 (copie, a)
             }
         };
-        Ok(TetePreparee { etat, acceptation, emise_a })
+        Ok(TetePreparee { etat, acceptation, emise_a, precedente })
     }
 
     /// Applique une acceptation préparée : état, fenêtre MTP du registre et
@@ -221,6 +250,23 @@ impl<S: Stockage> MiroirRegistre<S> {
         horloge: &mut HorlogeConfiance,
         maintenant: u64,
     ) -> Result<std::ops::Range<u64>, ErreurJournal> {
+        let preparee = self.preparer_synchro(sceau_tete, entrees, maintenant)?;
+        self.appliquer_synchro(preparee, entrees, horloge)
+    }
+
+    /// Première phase de [`MiroirRegistre::synchroniser`] : **tous** les
+    /// contrôles (tête, nombre d'entrées, racine, monotonie, cohérence) sur
+    /// `&self`, sans rien modifier. Permet de vérifier sous un verrou de
+    /// lecture et de n'écrire que brièvement.
+    ///
+    /// Tête de même taille que le miroir : la racine est comparée à celle de
+    /// la tête acceptée, sans recalcul.
+    pub fn preparer_synchro(
+        &self,
+        sceau_tete: &[u8],
+        entrees: &[Vec<u8>],
+        maintenant: u64,
+    ) -> Result<SynchroPreparee, ErreurJournal> {
         let m = self.taille();
         // Vérification de la tête seule d'abord (signature avant tout calcul).
         let verifiee = verifier_tete(
@@ -240,17 +286,60 @@ impl<S: Stockage> MiroirRegistre<S> {
         if entrees.len() as u64 != attendues {
             return Err(ErreurJournal::EntreesIncoherentes { attendues, recues: entrees.len() as u64 });
         }
-        let mut feuilles = self.feuilles.clone();
-        feuilles.extend(entrees.iter().map(|e| hacher_feuille(e)));
-        if racine(&feuilles) != verifiee.tete().racine {
-            return Err(ErreurJournal::RacineDifferente);
-        }
-        let coherence = if m > 0 && n > m {
-            PreuveCoherence::generer(&feuilles, usize::try_from(m).map_err(|_| ErreurJournal::TailleHorsJournal)?)
+        let racine_signee = verifiee.tete().racine;
+        let (feuilles, coherence) = if n == m {
+            // Rien de neuf : la racine doit être celle déjà acceptée (ou l'arbre vide).
+            let actuelle = self.suivi.etat().map_or_else(|| racine(&self.feuilles), |e| e.tete().racine);
+            if actuelle != racine_signee {
+                return Err(ErreurJournal::RacineDifferente);
+            }
+            (None, None)
         } else {
-            None
+            let mut feuilles = self.feuilles.clone();
+            feuilles.extend(entrees.iter().map(|e| hacher_feuille(e)));
+            if racine(&feuilles) != racine_signee {
+                return Err(ErreurJournal::RacineDifferente);
+            }
+            let coherence = if m > 0 {
+                PreuveCoherence::generer(&feuilles, usize::try_from(m).map_err(|_| ErreurJournal::TailleHorsJournal)?)
+            } else {
+                None
+            };
+            (Some(feuilles), coherence)
         };
-        let preparee = self.suivi.preparer(sceau_tete, coherence.as_ref(), maintenant)?;
+        let tete = self.suivi.preparer(sceau_tete, coherence.as_ref(), maintenant)?;
+        Ok(SynchroPreparee { depuis: m, feuilles, tete })
+    }
+
+    /// Seconde phase : écrit les entrées préparées et applique la tête.
+    ///
+    /// `entrees` doit être exactement celles passées à
+    /// [`MiroirRegistre::preparer_synchro`] (chaque empreinte est recontrôlée)
+    /// et le miroir ne doit pas avoir changé depuis ; sinon refus, rien n'est
+    /// modifié.
+    pub fn appliquer_synchro(
+        &mut self,
+        preparee: SynchroPreparee,
+        entrees: &[Vec<u8>],
+        horloge: &mut HorlogeConfiance,
+    ) -> Result<std::ops::Range<u64>, ErreurJournal> {
+        let m = self.taille();
+        let n = preparee.tete.tete().taille;
+        let etat_inchange = match (self.suivi.etat(), preparee.tete.etat_precedent()) {
+            (None, None) => true,
+            (Some(e), Some(p)) => e.tete() == p,
+            _ => false,
+        };
+        if preparee.depuis != m || !etat_inchange || entrees.len() as u64 != n.saturating_sub(m) {
+            return Err(ErreurJournal::StockageIncoherent);
+        }
+        if let Some(feuilles) = &preparee.feuilles {
+            let debut = usize::try_from(m).map_err(|_| ErreurJournal::TailleHorsJournal)?;
+            let nouvelles = feuilles.get(debut..).ok_or(ErreurJournal::StockageIncoherent)?;
+            if nouvelles.len() != entrees.len() || nouvelles.iter().zip(entrees).any(|(f, e)| *f != hacher_feuille(e)) {
+                return Err(ErreurJournal::RacineDifferente);
+            }
+        }
         for (k, e) in entrees.iter().enumerate() {
             if let Err(err) = self.stockage.ajouter(e) {
                 let _ = self.stockage.tronquer(m);
@@ -258,8 +347,10 @@ impl<S: Stockage> MiroirRegistre<S> {
             }
             debug_assert_eq!(self.stockage.taille(), m + k as u64 + 1);
         }
-        self.feuilles = feuilles;
-        self.suivi.appliquer(preparee, horloge);
+        if let Some(feuilles) = preparee.feuilles {
+            self.feuilles = feuilles;
+        }
+        self.suivi.appliquer(preparee.tete, horloge);
         Ok(m..n)
     }
 

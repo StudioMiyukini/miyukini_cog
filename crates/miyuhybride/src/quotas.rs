@@ -16,8 +16,15 @@
 //!   adossée ([`crate::DbSecondaire::avec_quota`]) ;
 //! - **sessions** : sessions clientes simultanées servies par les façades du
 //!   service ([`SessionsClients`]) ; libérées à la fin explicite, après le
-//!   délai d'inactivité, ou à la destruction de la façade ;
-//! - **tâches** : traitements simultanés ([`JetonTache`]).
+//!   délai d'inactivité, au retrait de l'appareil
+//!   ([`crate::FacadeJetable::auteur_retire`], [`SessionsClients::retenir`])
+//!   ou à la destruction de la façade ;
+//! - **tâches** : traitements simultanés ([`JetonTache`]) **à l'échelle du
+//!   service**. Une façade ne traite qu'une requête à la fois (`&mut self`) :
+//!   le jeton qu'elle prend par requête ne borne aucun parallélisme interne,
+//!   il compte la façade comme occupée ; le quota borne donc le nombre de
+//!   façades (et de tâches de fond) du service actives **en même temps**
+//!   (quota inter-façades).
 //!
 //! # Sans course
 //!

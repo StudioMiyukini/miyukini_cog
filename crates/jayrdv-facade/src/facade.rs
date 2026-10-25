@@ -29,8 +29,10 @@
 //! - **quotas du contrat** : une session cliente par appareil (quota
 //!   `sessions` du service, libérée à la fin explicite `DELETE /v1/session`,
 //!   après 15 min d'inactivité, au retrait de l'appareil ou à la destruction
-//!   de la façade) ; une tâche par requête (quota `tâches`) ; DB secondaire
-//!   comptée sur le quota `disque` avant écriture ;
+//!   de la façade) ; quota `tâches` : une façade ne traite qu'une requête à
+//!   la fois, son jeton la compte occupée pendant la requête — le quota borne
+//!   les façades (et tâches) du service actives en même temps, il est
+//!   inter-façades ; DB secondaire comptée sur le quota `disque` avant écriture ;
 //! - DB secondaire : réponses publiées et cache des créneaux publiés, **jamais
 //!   autoritaire** (le moteur décide en zone COG à chaque réservation).
 //!
@@ -47,8 +49,8 @@ use miyauth::{
 };
 use miyuhybride::{
     declaration_entrante, DbSecondaire, ErreurHybride, ErreurPortail, EtatVoie, FacadeJetable, GuichetFranche,
-    LancementFacade, MessageTraite, QuotasService, RefusDecodage, RevocationsFacade, SessionsClients,
-    DELAI_INACTIVITE_DEFAUT_SECS, FRAICHEUR_REVOCATIONS_FACADE_SECS,
+    controler_fraicheur_revocations, LancementFacade, MessageTraite, QuotasService, RefusDecodage, RevocationsFacade,
+    SessionsClients, DELAI_INACTIVITE_DEFAUT_SECS,
 };
 
 use crate::api::{
@@ -93,9 +95,8 @@ impl SourceRevocation for InstantaneBorne<'_> {
     fn est_revoque(&self, emetteur: &CogId, cible: &CibleRevocation, maintenant_secs: u64)
         -> Result<bool, ErreurRevocation> {
         let a_jour_au = self.liste.liste(emetteur).ok_or(ErreurRevocation::ListeAbsente)?.a_jour_au();
-        if a_jour_au.saturating_add(FRAICHEUR_REVOCATIONS_FACADE_SECS) < maintenant_secs {
-            return Err(ErreurRevocation::Perimee { a_jour_au, maintenant: maintenant_secs });
-        }
+        // Contrôle de fraîcheur unique (miyuregistre) : 15 min au plus, quel que soit le réglage de la liste.
+        controler_fraicheur_revocations(a_jour_au, maintenant_secs)?;
         self.liste.est_revoque(emetteur, cible, maintenant_secs)
     }
 }
@@ -124,6 +125,11 @@ pub struct FacadeJayRdv {
 impl FacadeJetable for FacadeJayRdv {
     fn condamnee(&self) -> bool {
         self.condamnee
+    }
+
+    /// Appareil retiré par les Cores : sa session cliente est libérée aussitôt (quota rendu).
+    fn auteur_retire(&mut self, auteur: &[u8; 32]) {
+        self.sessions.retenir(|cle| cle != auteur);
     }
 }
 
@@ -223,7 +229,11 @@ impl FacadeJayRdv {
             return ReponseHttp::refus(413, "corps_trop_grand");
         }
         self.sessions.expirer(maintenant);
-        // Quota `tâches` : une par requête traitée, rendue à la fin (Drop).
+        // Appareils retirés par les Cores sans passer par le superviseur : sessions libérées.
+        let guichet = &self.guichet;
+        self.sessions.retenir(|cle| guichet.est_auteur(cle));
+        // Quota `tâches` (inter-façades) : la façade est comptée occupée pendant
+        // la requête ; rendu à la fin (Drop).
         let Ok(_tache) = self.quotas.lancer_tache() else {
             return ReponseHttp::refus(429, "quota_taches");
         };

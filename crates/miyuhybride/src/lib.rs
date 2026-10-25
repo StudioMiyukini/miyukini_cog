@@ -61,7 +61,9 @@ pub use quotas::{
     DELAI_INACTIVITE_DEFAUT_SECS,
 };
 #[cfg(feature = "revocations")]
-pub use revocations::{RefusRemise, RevocationsFacade, FRAICHEUR_REVOCATIONS_FACADE_SECS};
+pub use revocations::{
+    controler_fraicheur_revocations, RefusRemise, RevocationsFacade, FRAICHEUR_REVOCATIONS_FACADE_SECS,
+};
 pub use service::{FacadeJetable, LancementFacade, ServiceHybride, Superviseur};
 
 // Réexportations nécessaires à la macro et aux services.

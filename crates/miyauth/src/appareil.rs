@@ -30,11 +30,19 @@
 //!
 //! Le COG d'origine connaît la **clé principale** de l'appareil (celle de
 //! l'appairage). Pour émettre un passeport portant une clé de destination, il
-//! exige une [`DemandeLiaison`] : le message
+//! exige une [`DemandeLiaison`] : le message (format **v2**)
 //!
 //! ```text
-//! "miyukini/miyauth/liaison-appareil/v1" || 0x00 || cog d'origine (26) || destination (26) || clé de destination (32)
+//! "miyukini/miyauth/liaison-appareil/v2" || 0x00 || cog d'origine (26) || destination (26)
+//!     || clé de destination (32) || pas_apres (u64 gros-boutiste, 8)
 //! ```
+//!
+//! `pas_apres` est l'**échéance** de la demande, fixée par l'appareil : le COG
+//! d'origine la refuse si elle est passée ou si elle dépasse son horloge de
+//! plus de [`DUREE_MAX_LIAISON_SECS`] (5 min) + la tolérance d'horloge — une
+//! demande interceptée n'est donc rejouable que quelques minutes. Changement
+//! de format par rapport à la v1 (sans échéance, rejouable sans limite) : le
+//! domaine passe en `v2`, une signature v1 ne vérifie pas.
 //!
 //! signé par la clé **principale** (autorisation : seul l'appareil appairé lie une
 //! clé à son titulaire) **et** par la clé **de destination** (possession : on ne
@@ -48,9 +56,15 @@
 //!
 //! # Révocation
 //!
-//! Révoquer l'appareil chez son COG d'origine = révoquer sa clé principale **et**
-//! chaque clé de destination liée ([`LiaisonVerifiee::cible_revocation`]) : le COG
-//! d'origine conserve les liaisons qu'il a acceptées pour le faire en un geste.
+//! - **Fail-closed** : [`verifier_liaison`] et [`emettre_passeport_lie`]
+//!   exigent une [`SourceRevocation`] qui réponde `Ok(false)` pour la clé
+//!   principale (et, à l'émission, pour la clé de destination) ; révoquée ou
+//!   statut indisponible / périmé ⇒ refus. L'appelant ne peut plus l'oublier.
+//! - **Cascade** : révoquer l'appareil chez son COG d'origine = révoquer sa clé
+//!   principale **et** chaque clé de destination liée. Le COG d'origine retient
+//!   les liaisons acceptées dans un [`RegistreLiaisons`] ([`accepter_liaison`]
+//!   vérifie puis retient) ; [`RegistreLiaisons::revoquer_appareil`] rend toutes
+//!   les cibles à inscrire au registre, en un geste.
 //!
 //! Choix d'implémentation non fixés par la doc gelée (sel, info, encodage du
 //! message de liaison, double signature) : **à consigner par amendement**.
@@ -62,15 +76,25 @@ use rand_core::{OsRng, RngCore};
 use sha2::Sha256;
 use zeroize::Zeroize;
 
+use std::collections::{BTreeMap, BTreeSet};
+use std::sync::RwLock;
+
+use miyusceau::TOLERANCE_HORLOGE_SECS;
+
 use crate::pairwise::SecretTitulaire;
 use crate::passeport::{emettre_passeport, DemandePasseport, RefusIdentite};
-use crate::revocation::CibleRevocation;
+use crate::revocation::{CibleRevocation, ErreurRevocation, SourceRevocation};
 use crate::titres::{CogId, Portees};
 
 /// Sel de domaine de la dérivation des clés d'appareil par destination (versionné).
 pub const SEL_CLE_APPAREIL: &[u8] = b"miyukini/miyauth/cle-appareil/v1";
 /// Domaine de séparation du message de liaison (versionné).
-pub const DOMAINE_LIAISON: &[u8] = b"miyukini/miyauth/liaison-appareil/v1";
+pub const DOMAINE_LIAISON: &[u8] = b"miyukini/miyauth/liaison-appareil/v2";
+/// Durée de validité maximale d'une demande de liaison (5 min) : échéance
+/// `pas_apres` au plus `maintenant + DUREE_MAX_LIAISON_SECS` (+ tolérance d'horloge).
+pub const DUREE_MAX_LIAISON_SECS: u64 = 5 * 60;
+/// Nombre maximal de liaisons retenues par clé principale ([`RegistreLiaisonsMemoire`]).
+pub const MAX_LIAISONS_PAR_APPAREIL: usize = 4096;
 
 /// Graine d'appareil (32 octets), détenue par l'appareil seul. Effacée de la
 /// mémoire à la destruction ; jamais affichée.
@@ -122,17 +146,18 @@ pub fn cle_appareil_pour(graine: &GraineAppareil, destination: &CogId) -> Result
     Ok(cle)
 }
 
-/// Octets signés de la liaison :
-/// `DOMAINE_LIAISON || 0x00 || origine (26) || destination (26) || cle_destination (32)`.
+/// Octets signés de la liaison (v2) :
+/// `DOMAINE_LIAISON || 0x00 || origine (26) || destination (26) || cle_destination (32) || pas_apres (8, BE)`.
 ///
 /// `cog_id` de longueur fixe (26) : encodage non ambigu.
-pub fn message_liaison(origine: &CogId, destination: &CogId, cle_destination: &[u8; 32]) -> Vec<u8> {
-    let mut m = Vec::with_capacity(DOMAINE_LIAISON.len() + 1 + 2 * 26 + 32);
+pub fn message_liaison(origine: &CogId, destination: &CogId, cle_destination: &[u8; 32], pas_apres: u64) -> Vec<u8> {
+    let mut m = Vec::with_capacity(DOMAINE_LIAISON.len() + 1 + 2 * 26 + 32 + 8);
     m.extend_from_slice(DOMAINE_LIAISON);
     m.push(0x00);
     m.extend_from_slice(origine.as_str().as_bytes());
     m.extend_from_slice(destination.as_str().as_bytes());
     m.extend_from_slice(cle_destination);
+    m.extend_from_slice(&pas_apres.to_be_bytes());
     m
 }
 
@@ -144,6 +169,8 @@ pub struct DemandeLiaison {
     pub destination: CogId,
     /// Clé publique d'appareil pour cette destination.
     pub cle_destination: [u8; 32],
+    /// Échéance de la demande (secondes Unix), signée ; ≤ 5 min après son émission.
+    pub pas_apres: u64,
     /// Signature du message de liaison par la clé principale (autorisation).
     pub signature_principale: [u8; 64],
     /// Signature du même message par la clé de destination (possession).
@@ -155,22 +182,25 @@ fn signer(cle: &CleSignature, message: &[u8]) -> [u8; 64] {
 }
 
 /// Côté appareil : dérive la clé pour `destination` et produit la demande de
-/// liaison signée par `principale` (clé d'appairage) et par la clé dérivée.
+/// liaison signée par `principale` (clé d'appairage) et par la clé dérivée,
+/// valable jusqu'à `pas_apres` (au plus 5 min après l'envoi, sinon refusée).
 pub fn lier_cle_appareil(
     principale: &CleSignature,
     graine: &GraineAppareil,
     origine: &CogId,
     destination: &CogId,
+    pas_apres: u64,
 ) -> Result<DemandeLiaison, RefusIdentite> {
     let cle = cle_appareil_pour(graine, destination)?;
     let cle_destination = cle.cle_publique();
     if cle_destination == principale.cle_publique() {
         return Err(RefusIdentite::ParametreInvalide("cle_destination"));
     }
-    let message = message_liaison(origine, destination, &cle_destination);
+    let message = message_liaison(origine, destination, &cle_destination, pas_apres);
     Ok(DemandeLiaison {
         destination: destination.clone(),
         cle_destination,
+        pas_apres,
         signature_principale: signer(principale, &message),
         signature_destination: signer(&cle, &message),
     })
@@ -216,27 +246,54 @@ fn cle_valide(cle: &[u8; 32]) -> Option<VerifyingKey> {
     VerifyingKey::from_bytes(cle).ok().filter(|k| !k.is_weak())
 }
 
+/// Exige `Ok(false)` de `revocations` pour la clé `cle` émise sous `emetteur`
+/// (révoquée ⇒ [`RefusIdentite::Revoque`], doute ⇒ [`RefusIdentite::Revocation`]).
+fn exiger_non_revoquee(
+    revocations: &dyn SourceRevocation,
+    emetteur: &CogId,
+    cle: &[u8; 32],
+    maintenant: u64,
+) -> Result<(), RefusIdentite> {
+    let cible = CibleRevocation::appareil(cle);
+    match revocations.est_revoque(emetteur, &cible, maintenant) {
+        Ok(false) => Ok(()),
+        Ok(true) => Err(RefusIdentite::Revoque(cible)),
+        Err(e) => Err(RefusIdentite::Revocation(e)),
+    }
+}
+
 /// Côté COG d'origine : vérifie une demande de liaison émise par l'appareil dont
-/// la clé principale (appairée, non révoquée — à contrôler par l'appelant) est
-/// `cle_principale`.
+/// la clé principale (appairée) est `cle_principale`, à l'instant `maintenant`
+/// (horloge de confiance du COG).
+///
+/// Refus : échéance passée ou à plus de 5 min (+ tolérance), signature
+/// invalide, clé corrélante, clé principale révoquée **ou statut de
+/// révocation indisponible / périmé** (fail-closed).
 pub fn verifier_liaison(
     origine: &CogId,
     cle_principale: &[u8; 32],
     demande: &DemandeLiaison,
+    revocations: &dyn SourceRevocation,
+    maintenant: u64,
 ) -> Result<LiaisonVerifiee, RefusIdentite> {
+    let limite = maintenant.saturating_add(DUREE_MAX_LIAISON_SECS).saturating_add(TOLERANCE_HORLOGE_SECS);
+    if demande.pas_apres < maintenant || demande.pas_apres > limite {
+        return Err(RefusIdentite::ParametreInvalide("pas_apres"));
+    }
     let principale = cle_valide(cle_principale).ok_or(RefusIdentite::PossessionInvalide)?;
     let destination = cle_valide(&demande.cle_destination).ok_or(RefusIdentite::ParametreInvalide("cle_destination"))?;
     if &demande.cle_destination == cle_principale {
         // Même clé partout : corrélation avec le COG d'origine et les autres COG visités.
         return Err(RefusIdentite::ParametreInvalide("cle_destination"));
     }
-    let message = message_liaison(origine, &demande.destination, &demande.cle_destination);
+    let message = message_liaison(origine, &demande.destination, &demande.cle_destination, demande.pas_apres);
     principale
         .verify_strict(&message, &Signature::from_bytes(&demande.signature_principale))
         .map_err(|_| RefusIdentite::PossessionInvalide)?;
     destination
         .verify_strict(&message, &Signature::from_bytes(&demande.signature_destination))
         .map_err(|_| RefusIdentite::PossessionInvalide)?;
+    exiger_non_revoquee(revocations, origine, cle_principale, maintenant)?;
     Ok(LiaisonVerifiee {
         origine: origine.clone(),
         destination: demande.destination.clone(),
@@ -247,6 +304,11 @@ pub fn verifier_liaison(
 
 /// Émet un passeport pour la destination d'une liaison vérifiée : `cle_appareil`
 /// = clé de destination (jamais la clé principale).
+///
+/// La révocation est **recontrôlée à l'émission** (une liaison peut avoir été
+/// vérifiée plus tôt) : clé principale et clé de destination doivent être
+/// `Ok(false)` dans `revocations` à `maintenant`, sinon refus.
+#[allow(clippy::too_many_arguments)]
 pub fn emettre_passeport_lie(
     emetteur: &CogId,
     cle_emission: &CleSignature,
@@ -255,10 +317,14 @@ pub fn emettre_passeport_lie(
     portees: Portees,
     pas_avant: u64,
     pas_apres: u64,
+    revocations: &dyn SourceRevocation,
+    maintenant: u64,
 ) -> Result<Vec<u8>, RefusIdentite> {
     if &liaison.origine != emetteur {
         return Err(RefusIdentite::EmetteurIncoherent);
     }
+    exiger_non_revoquee(revocations, emetteur, &liaison.cle_principale, maintenant)?;
+    exiger_non_revoquee(revocations, emetteur, &liaison.cle_destination, maintenant)?;
     emettre_passeport(
         emetteur,
         cle_emission,
@@ -273,9 +339,78 @@ pub fn emettre_passeport_lie(
     )
 }
 
+/// Persistance des liaisons acceptées par le COG d'origine (cascade de
+/// révocation). Une implémentation durable (base du COG) doit rendre
+/// [`RegistreLiaisons::retenir`] **durable avant** l'émission du passeport.
+pub trait RegistreLiaisons {
+    /// Retient une liaison acceptée (idempotent). Erreur ⇒ l'émission doit être refusée.
+    fn retenir(&self, liaison: &LiaisonVerifiee) -> Result<(), ErreurRevocation>;
+
+    /// Clés de destination liées à `principale` (toutes celles jamais retenues).
+    fn cles_liees(&self, principale: &[u8; 32]) -> Result<Vec<[u8; 32]>, ErreurRevocation>;
+
+    /// Révocation de l'appareil **en un geste** : cibles de la clé principale
+    /// et de chaque clé de destination liée, à inscrire au registre du COG.
+    /// Erreur (persistance illisible) : aucune liste partielle n'est rendue.
+    fn revoquer_appareil(&self, principale: &[u8; 32]) -> Result<Vec<CibleRevocation>, ErreurRevocation> {
+        let mut cibles = vec![CibleRevocation::appareil(principale)];
+        cibles.extend(self.cles_liees(principale)?.iter().map(CibleRevocation::appareil));
+        Ok(cibles)
+    }
+}
+
+/// [`RegistreLiaisons`] en mémoire (tests, COG sans persistance) ; au plus
+/// [`MAX_LIAISONS_PAR_APPAREIL`] clés de destination par clé principale.
+#[derive(Debug, Default)]
+pub struct RegistreLiaisonsMemoire {
+    liaisons: RwLock<BTreeMap<[u8; 32], BTreeSet<[u8; 32]>>>,
+}
+
+impl RegistreLiaisonsMemoire {
+    /// Registre vide.
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl RegistreLiaisons for RegistreLiaisonsMemoire {
+    fn retenir(&self, liaison: &LiaisonVerifiee) -> Result<(), ErreurRevocation> {
+        let mut l = self.liaisons.write().map_err(|_| ErreurRevocation::Indisponible("verrou".into()))?;
+        let cles = l.entry(liaison.cle_principale).or_default();
+        if !cles.contains(&liaison.cle_destination) && cles.len() >= MAX_LIAISONS_PAR_APPAREIL {
+            return Err(ErreurRevocation::Indisponible("trop de liaisons pour cet appareil".into()));
+        }
+        cles.insert(liaison.cle_destination);
+        Ok(())
+    }
+
+    fn cles_liees(&self, principale: &[u8; 32]) -> Result<Vec<[u8; 32]>, ErreurRevocation> {
+        let l = self.liaisons.read().map_err(|_| ErreurRevocation::Indisponible("verrou".into()))?;
+        Ok(l.get(principale).map(|c| c.iter().copied().collect()).unwrap_or_default())
+    }
+}
+
+/// Côté COG d'origine : [`verifier_liaison`] puis [`RegistreLiaisons::retenir`]
+/// (la liaison n'est rendue que si elle est retenue : cascade garantie).
+pub fn accepter_liaison(
+    registre: &dyn RegistreLiaisons,
+    origine: &CogId,
+    cle_principale: &[u8; 32],
+    demande: &DemandeLiaison,
+    revocations: &dyn SourceRevocation,
+    maintenant: u64,
+) -> Result<LiaisonVerifiee, RefusIdentite> {
+    let liaison = verifier_liaison(origine, cle_principale, demande, revocations, maintenant)?;
+    registre.retenir(&liaison).map_err(RefusIdentite::Revocation)?;
+    Ok(liaison)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::revocation::ListeRevocation;
+
+    const T0: u64 = 1_800_000_000;
 
     fn cog(c: char) -> CogId {
         CogId::new(&c.to_string().repeat(26)).unwrap()
@@ -296,8 +431,114 @@ mod tests {
 
     #[test]
     fn message_liaison_encodage_fixe() {
-        let m = message_liaison(&cog('a'), &cog('b'), &[9; 32]);
-        assert_eq!(m.len(), DOMAINE_LIAISON.len() + 1 + 52 + 32);
+        let m = message_liaison(&cog('a'), &cog('b'), &[9; 32], 0x0102_0304_0506_0708);
+        assert_eq!(m.len(), DOMAINE_LIAISON.len() + 1 + 52 + 32 + 8);
         assert_eq!(m[DOMAINE_LIAISON.len()], 0);
+        assert_eq!(&m[m.len() - 8..], &[1, 2, 3, 4, 5, 6, 7, 8]);
+        assert!(DOMAINE_LIAISON.ends_with(b"/v2"));
+    }
+
+    /// Liste de `h` à jour à `T0`.
+    fn liste(h: &CogId) -> ListeRevocation {
+        ListeRevocation::new(h.clone(), T0, 900)
+    }
+
+    #[test]
+    fn echeance_bornee_et_rejeu_limite() {
+        let (h, a) = (cog('h'), cog('a'));
+        let principale = CleSignature::generer();
+        let graine = GraineAppareil::generer();
+        let revocations = liste(&h);
+        let ok = lier_cle_appareil(&principale, &graine, &h, &a, T0 + 60).unwrap();
+        assert!(verifier_liaison(&h, &principale.cle_publique(), &ok, &revocations, T0).is_ok());
+        // Rejouée après l'échéance : refus.
+        assert_eq!(
+            verifier_liaison(&h, &principale.cle_publique(), &ok, &revocations, T0 + 61).err(),
+            Some(RefusIdentite::ParametreInvalide("pas_apres"))
+        );
+        // Échéance trop lointaine (> 5 min + tolérance) : refus.
+        let loin = lier_cle_appareil(&principale, &graine, &h, &a, T0 + DUREE_MAX_LIAISON_SECS + TOLERANCE_HORLOGE_SECS + 1)
+            .unwrap();
+        assert_eq!(
+            verifier_liaison(&h, &principale.cle_publique(), &loin, &revocations, T0).err(),
+            Some(RefusIdentite::ParametreInvalide("pas_apres"))
+        );
+        // Échéance modifiée après signature : signature invalide.
+        let mut altere = ok.clone();
+        altere.pas_apres = T0 + 120;
+        assert_eq!(
+            verifier_liaison(&h, &principale.cle_publique(), &altere, &revocations, T0).err(),
+            Some(RefusIdentite::PossessionInvalide)
+        );
+    }
+
+    #[test]
+    fn cle_principale_revoquee_ou_statut_inconnu_refuse() {
+        let (h, a) = (cog('h'), cog('a'));
+        let principale = CleSignature::generer();
+        let graine = GraineAppareil::generer();
+        let demande = lier_cle_appareil(&principale, &graine, &h, &a, T0 + 60).unwrap();
+        let mut revocations = liste(&h);
+        let liaison = verifier_liaison(&h, &principale.cle_publique(), &demande, &revocations, T0).unwrap();
+        // Statut indisponible (liste d'un autre COG) ou périmé : refus.
+        let autre = liste(&cog('z'));
+        assert!(matches!(
+            verifier_liaison(&h, &principale.cle_publique(), &demande, &autre, T0),
+            Err(RefusIdentite::Revocation(ErreurRevocation::ListeAbsente))
+        ));
+        assert!(matches!(
+            verifier_liaison(&h, &principale.cle_publique(), &demande, &revocations, T0 + 1_000),
+            Err(RefusIdentite::ParametreInvalide("pas_apres"))
+        ));
+        let secret = SecretTitulaire::generer();
+        let cle_h = CleSignature::generer();
+        let emettre = |r: &dyn SourceRevocation, t: u64| {
+            emettre_passeport_lie(&h, &cle_h, &secret, &liaison, Portees::new(["x:y"]).unwrap(), t, t + 60, r, t)
+        };
+        assert!(emettre(&revocations, T0).is_ok());
+        assert!(matches!(emettre(&revocations, T0 + 1_000), Err(RefusIdentite::Revocation(ErreurRevocation::Perimee { .. }))));
+        // Clé principale révoquée : liaison et émission refusées.
+        let cible = CibleRevocation::appareil(&principale.cle_publique());
+        revocations.revoquer(cible);
+        assert_eq!(
+            verifier_liaison(&h, &principale.cle_publique(), &demande, &revocations, T0).err(),
+            Some(RefusIdentite::Revoque(cible))
+        );
+        assert_eq!(emettre(&revocations, T0).err(), Some(RefusIdentite::Revoque(cible)));
+        // Clé de destination révoquée seule : émission refusée.
+        let mut r2 = liste(&h);
+        r2.revoquer(liaison.cible_revocation());
+        assert_eq!(emettre(&r2, T0).err(), Some(RefusIdentite::Revoque(liaison.cible_revocation())));
+    }
+
+    #[test]
+    fn cascade_de_revocation_en_un_geste() {
+        let h = cog('h');
+        let principale = CleSignature::generer();
+        let graine = GraineAppareil::generer();
+        let revocations = liste(&h);
+        let registre = RegistreLiaisonsMemoire::new();
+        let mut attendues = vec![CibleRevocation::appareil(&principale.cle_publique())];
+        for d in ['a', 'b', 'c'] {
+            let demande = lier_cle_appareil(&principale, &graine, &h, &cog(d), T0 + 60).unwrap();
+            let l = accepter_liaison(&registre, &h, &principale.cle_publique(), &demande, &revocations, T0).unwrap();
+            // Rejeu de la même demande dans sa fenêtre : idempotent.
+            accepter_liaison(&registre, &h, &principale.cle_publique(), &demande, &revocations, T0).unwrap();
+            attendues.push(l.cible_revocation());
+        }
+        let mut cibles = registre.revoquer_appareil(&principale.cle_publique()).unwrap();
+        let tri = |v: &mut Vec<CibleRevocation>| v.sort_by_key(|c| format!("{c:?}"));
+        tri(&mut cibles);
+        tri(&mut attendues);
+        assert_eq!(cibles, attendues);
+        // Appareil inconnu : seule sa clé principale.
+        assert_eq!(registre.revoquer_appareil(&[5; 32]).unwrap(), vec![CibleRevocation::appareil(&[5; 32])]);
+        // Une liaison refusée (révoquée) n'est pas retenue.
+        let autre = CleSignature::generer();
+        let mut r = liste(&h);
+        r.revoquer(CibleRevocation::appareil(&autre.cle_publique()));
+        let d = lier_cle_appareil(&autre, &graine, &h, &cog('a'), T0 + 60).unwrap();
+        assert!(accepter_liaison(&registre, &h, &autre.cle_publique(), &d, &r, T0).is_err());
+        assert_eq!(registre.cles_liees(&autre.cle_publique()).unwrap(), Vec::<[u8; 32]>::new());
     }
 }

@@ -236,6 +236,12 @@ pub trait FacadeJetable {
     /// Vrai si la façade a constaté une coupure, une désactivation ou une
     /// fin de session : elle refuse tout et attend sa destruction.
     fn condamnee(&self) -> bool;
+
+    /// Appareil `auteur` retiré de la session par les Cores
+    /// ([`Superviseur::retirer_auteur`]) : la façade libère ce qui lui est
+    /// attaché (session cliente et son quota, via
+    /// [`crate::SessionsClients::retenir`]). Par défaut : rien.
+    fn auteur_retire(&mut self, _auteur: &[u8; 32]) {}
 }
 
 /// Supervision des façades d'un service (Cores) : lance, détruit, reconstruit.
@@ -302,8 +308,9 @@ impl<F: FacadeJetable> Superviseur<F> {
         if self.auteurs.len() <= 1 {
             return Err(ErreurPortail::TransitionRefusee.into());
         }
-        if self.facade.is_some() {
+        if let Some(facade) = self.facade.as_mut() {
             self.service.retirer_auteur(auteur)?;
+            facade.auteur_retire(auteur);
         }
         self.auteurs.retain(|a| a != auteur);
         Ok(())

@@ -8,12 +8,13 @@
 //!
 //! # Source
 //!
-//! [`miyuregistre::RevocationsRegistre`] (fonctionnalité `miyauth`), adossée à
-//! un **miroir vérifié** du registre du COG d'origine
-//! ([`miyuregistre::MiroirRegistre`]) : tête signée par la **clé de journal
-//! épinglée** du COG (seuil 1, politique `journal_cog`), racine recalculée sur
-//! la copie intégrale des entrées, monotonie et cohérence. Seules les entrées
-//! `Revocation` scellées par cette clé comptent (A-007).
+//! [`miyuregistre::SuiviRevocationsRegistre`] (fonctionnalité `miyauth`), le
+//! suivi **unique** partagé avec Origin et les façades : miroir vérifié du
+//! registre du COG d'origine, tête signée par la **clé de journal épinglée**
+//! (ancre unique, seuil 1, politique `journal_cog`), racine recalculée sur la
+//! copie intégrale des entrées, monotonie et cohérence, `RwLock`, fraîcheur
+//! ≤ 15 min imposée par le type. Seules les entrées `Revocation` scellées par
+//! cette clé comptent (A-007).
 //!
 //! # Relevé (choix non fixé par la doc gelée)
 //!
@@ -25,7 +26,10 @@
 //!
 //! Le dépôt n'est **pas de confiance** : tout est revérifié ; MiyuCloud copie
 //! le journal dans un fichier privé avant de l'ouvrir (jamais d'écriture dans
-//! le dépôt). Le relevé est refait toutes les [`INTERVALLE_RELEVE_SECS`].
+//! le dépôt) ; la copie et la lecture de la tête sont **bornées**
+//! ([`TAILLE_MAX_JOURNAL`], [`TAILLE_MAX_TETE`]) quelle que soit la taille
+//! annoncée (fichier qui grossit entre le contrôle et la lecture : refus).
+//! Le relevé est refait toutes les [`INTERVALLE_RELEVE_SECS`].
 //!
 //! # Fail-closed
 //!
@@ -39,16 +43,12 @@
 //!   fail-closed ; l'ancien comportement « le COG contrôle à l'émission »
 //!   n'existe plus).
 
+use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
-use miyauth::revocation::FRAICHEUR_MAX_DEFAUT_SECS;
 use miyauth::{CibleRevocation, CogId, ErreurRevocation, SourceRevocation};
-use miyuregistre::{
-    HorlogeConfiance, MiroirRegistre, RevocationsRegistre, Stockage, StockageFichier,
-    StockageMemoire, SuiviTetes,
-};
-use miyusceau::{AncresDeConfiance, NiveauConfiance, PolitiqueTete, verifier_tete};
+use miyuregistre::{RefusSuivi, Stockage, StockageFichier, SuiviRevocationsRegistre};
 
 use super::miyu_auth_service::analyser_cle_publique;
 
@@ -62,8 +62,9 @@ pub const TAILLE_MAX_TETE: u64 = 1 << 20;
 pub const TAILLE_MAX_JOURNAL: u64 = 256 << 20;
 /// Période du relevé du dépôt (bien inférieure à la fraîcheur de 15 min).
 pub const INTERVALLE_RELEVE_SECS: u64 = 60;
-/// Fraîcheur maximale des révocations (A-007 : 15 min).
-pub const FRAICHEUR_REVOCATIONS_SECS: u64 = FRAICHEUR_MAX_DEFAUT_SECS;
+/// Fraîcheur maximale des révocations (A-007 : 15 min, imposée par
+/// [`SuiviRevocationsRegistre`]).
+pub const FRAICHEUR_REVOCATIONS_SECS: u64 = miyuregistre::FRAICHEUR_REVOCATIONS_SECS;
 
 /// Relevé refusé (rien n'est modifié).
 #[derive(Debug, thiserror::Error)]
@@ -145,20 +146,9 @@ impl ConfigRevocations {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 #[derive(Debug)]
-struct Etat {
-    miroir: MiroirRegistre<StockageMemoire>,
-    liste: RevocationsRegistre,
-    horloge: HorlogeConfiance,
-}
-
-#[derive(Debug)]
 struct Interieur {
-    cog: CogId,
-    registre: [u8; 32],
-    ancres: AncresDeConfiance,
-    politique: PolitiqueTete,
+    suivi: SuiviRevocationsRegistre,
     depot: Option<PathBuf>,
-    etat: RwLock<Etat>,
 }
 
 /// Révocations du COG d'origine vues de MiyuCloud ; clonable (la tâche de
@@ -191,29 +181,10 @@ impl RevocationsMiyuCloud {
         cle_journal: &[u8; 32],
         depot: Option<PathBuf>,
     ) -> Result<Self, String> {
-        let mut ancres = AncresDeConfiance::new();
-        ancres
-            .ajouter(cle_journal, NiveauConfiance::Souverain)
+        let suivi = SuiviRevocationsRegistre::new(cog, registre, cle_journal)
             .map_err(|e| format!("MIYUCLOUD_MIYU_CLE_JOURNAL : {e}"))?;
-        let politique = PolitiqueTete::journal_cog();
-        let suivi = SuiviTetes::new(registre, ancres.clone(), politique);
-        let miroir = MiroirRegistre::ouvrir(suivi, StockageMemoire::new())
-            .map_err(|e| format!("miroir du registre : {e}"))?;
-        let liste = RevocationsRegistre::new(cog.clone(), ancres.clone(), 1)
-            .avec_fraicheur(FRAICHEUR_REVOCATIONS_SECS);
         Ok(Self {
-            interieur: Some(Arc::new(Interieur {
-                cog,
-                registre,
-                ancres,
-                politique,
-                depot,
-                etat: RwLock::new(Etat {
-                    miroir,
-                    liste,
-                    horloge: HorlogeConfiance::new(),
-                }),
-            })),
+            interieur: Some(Arc::new(Interieur { suivi, depot })),
         })
     }
 
@@ -224,13 +195,12 @@ impl RevocationsMiyuCloud {
 
     /// Horodatage (tête vérifiée) de la liste détenue.
     pub fn a_jour_au(&self) -> Option<u64> {
-        let i = self.interieur.as_ref()?;
-        i.etat.read().ok()?.liste.a_jour_au()
+        self.interieur.as_ref()?.suivi.a_jour_au()
     }
 
     /// Applique un relevé : tête signée `tete` et entrées du registre à partir
-    /// de l'index `depuis` (`entrees[k]` = entrée `depuis + k`). Rend le
-    /// nombre de révocations ajoutées. Refus : rien n'est modifié.
+    /// de l'index `depuis` (`entrees[k]` = entrée `depuis + k`, chevauchement
+    /// toléré). Rend le nombre de révocations ajoutées. Refus : rien n'est modifié.
     pub fn appliquer_releve(
         &self,
         tete: &[u8],
@@ -239,33 +209,11 @@ impl RevocationsMiyuCloud {
         maintenant: u64,
     ) -> Result<usize, ErreurReleve> {
         let i = self.interieur.as_ref().ok_or(ErreurReleve::NonConfiguree)?;
-        // Signature de la tête vérifiée avant tout (taille annoncée).
-        let n = verifier_tete(tete, &i.ancres, &i.politique, &i.registre, maintenant)
-            .map_err(|e| ErreurReleve::Registre(e.to_string()))?
-            .tete()
-            .taille;
-        let mut etat = i.etat.write().map_err(|_| ErreurReleve::Etat)?;
-        let m = etat.miroir.taille();
-        let fin = depuis.saturating_add(entrees.len() as u64);
-        if depuis > m || fin < n {
-            return Err(ErreurReleve::Registre(format!(
-                "entrées {depuis}..{fin} ne couvrent pas {m}..{n}"
-            )));
+        match i.suivi.appliquer(tete, depuis, entrees, maintenant) {
+            Ok(a) => Ok(a.ajoutees),
+            Err(RefusSuivi::EtatIndisponible) => Err(ErreurReleve::Etat),
+            Err(e) => Err(ErreurReleve::Registre(e.to_string())),
         }
-        let debut = usize::try_from(m.saturating_sub(depuis)).map_err(|_| ErreurReleve::Etat)?;
-        let stop = usize::try_from(n.saturating_sub(depuis)).map_err(|_| ErreurReleve::Etat)?;
-        let nouvelles = entrees.get(debut..stop.max(debut)).unwrap_or(&[]);
-        let Etat {
-            miroir,
-            liste,
-            horloge,
-        } = &mut *etat;
-        miroir
-            .synchroniser(tete, nouvelles, horloge, maintenant)
-            .map_err(|e| ErreurReleve::Registre(e.to_string()))?;
-        liste
-            .rafraichir(miroir, maintenant)
-            .map_err(|e| ErreurReleve::Registre(e.to_string()))
     }
 
     /// Relève le dépôt configuré (fichiers [`FICHIER_TETE`] et
@@ -274,12 +222,7 @@ impl RevocationsMiyuCloud {
     pub async fn relever_depot(&self, maintenant: u64) -> Result<usize, ErreurReleve> {
         let i = self.interieur.as_ref().ok_or(ErreurReleve::NonConfiguree)?;
         let depot = i.depot.clone().ok_or(ErreurReleve::NonConfiguree)?;
-        let depuis = i
-            .etat
-            .read()
-            .map_err(|_| ErreurReleve::Etat)?
-            .miroir
-            .taille();
+        let depuis = i.suivi.taille().ok_or(ErreurReleve::Etat)?;
         let (tete, entrees) = tokio::task::spawn_blocking(move || lire_depot(&depot, depuis))
             .await
             .map_err(|e| ErreurReleve::Depot(format!("tâche de lecture : {e}")))??;
@@ -323,33 +266,38 @@ fn nettoyer(v: Option<&str>) -> Option<&str> {
     v.map(str::trim).filter(|s| !s.is_empty())
 }
 
-/// Lit la tête et les entrées `depuis..` du dépôt (bornes de taille).
+/// Lit au plus `max` octets de `chemin` ; refus si le fichier en contient
+/// davantage (même s'il a grossi depuis un contrôle de taille).
+fn lire_borne(chemin: &Path, max: u64, sortie: &mut impl std::io::Write) -> Result<u64, ErreurReleve> {
+    let nom = chemin.file_name().map_or_else(String::new, |n| n.to_string_lossy().into_owned());
+    let fichier = std::fs::File::open(chemin)
+        .map_err(|e| ErreurReleve::Depot(format!("{nom} : {e}")))?;
+    let copies = std::io::copy(&mut fichier.take(max.saturating_add(1)), sortie)
+        .map_err(|e| ErreurReleve::Depot(format!("{nom} : {e}")))?;
+    if copies > max {
+        return Err(ErreurReleve::Depot(format!(
+            "{nom} : taille au-delà de {max} octets"
+        )));
+    }
+    Ok(copies)
+}
+
+/// Lit la tête et les entrées `depuis..` du dépôt (lectures bornées).
 fn lire_depot(depot: &Path, depuis: u64) -> Result<(Vec<u8>, Vec<Vec<u8>>), ErreurReleve> {
     let err = |quoi: &str, e: &dyn std::fmt::Display| ErreurReleve::Depot(format!("{quoi} : {e}"));
-    let chemin_tete = depot.join(FICHIER_TETE);
-    let taille_tete = std::fs::metadata(&chemin_tete)
-        .map_err(|e| err(FICHIER_TETE, &e))?
-        .len();
-    if taille_tete == 0 || taille_tete > TAILLE_MAX_TETE {
-        return Err(ErreurReleve::Depot(format!(
-            "{FICHIER_TETE} : taille {taille_tete} refusée"
-        )));
+    let mut tete = Vec::new();
+    let taille_tete = lire_borne(&depot.join(FICHIER_TETE), TAILLE_MAX_TETE, &mut tete)?;
+    if taille_tete == 0 {
+        return Err(ErreurReleve::Depot(format!("{FICHIER_TETE} : vide")));
     }
-    let tete = std::fs::read(&chemin_tete).map_err(|e| err(FICHIER_TETE, &e))?;
-
-    let chemin_journal = depot.join(FICHIER_ENTREES);
-    let taille_journal = std::fs::metadata(&chemin_journal)
-        .map_err(|e| err(FICHIER_ENTREES, &e))?
-        .len();
-    if taille_journal > TAILLE_MAX_JOURNAL {
-        return Err(ErreurReleve::Depot(format!(
-            "{FICHIER_ENTREES} : taille {taille_journal} au-delà de {TAILLE_MAX_JOURNAL}"
-        )));
-    }
-    // Copie privée : `StockageFichier::ouvrir` peut réparer une fin tronquée,
-    // jamais sur le dépôt.
-    let copie = tempfile::NamedTempFile::new().map_err(|e| err("copie du journal", &e))?;
-    std::fs::copy(&chemin_journal, copie.path()).map_err(|e| err("copie du journal", &e))?;
+    // Copie privée **bornée** : `StockageFichier::ouvrir` peut réparer une fin
+    // tronquée, jamais sur le dépôt ; au-delà de TAILLE_MAX_JOURNAL, refus.
+    let mut copie = tempfile::NamedTempFile::new().map_err(|e| err("copie du journal", &e))?;
+    lire_borne(&depot.join(FICHIER_ENTREES), TAILLE_MAX_JOURNAL, copie.as_file_mut())?;
+    copie
+        .as_file_mut()
+        .sync_all()
+        .map_err(|e| err("copie du journal", &e))?;
     let stockage = StockageFichier::ouvrir(copie.path()).map_err(|e| err(FICHIER_ENTREES, &e))?;
     let entrees = (depuis..stockage.taille())
         .map(|k| stockage.lire(k))
@@ -365,29 +313,12 @@ impl SourceRevocation for RevocationsMiyuCloud {
         cible: &CibleRevocation,
         maintenant_secs: u64,
     ) -> Result<bool, ErreurRevocation> {
-        let i = self
-            .interieur
+        // Émetteur, fraîcheur (≤ 15 min, tête vérifiée) et verrou : contrôlés par le suivi.
+        self.interieur
             .as_ref()
-            .ok_or(ErreurRevocation::ListeAbsente)?;
-        if emetteur != &i.cog {
-            return Err(ErreurRevocation::ListeAbsente);
-        }
-        let etat = i
-            .etat
-            .read()
-            .map_err(|_| ErreurRevocation::Indisponible("verrou".into()))?;
-        // Borne propre à MiyuCloud (A-007), indépendante du réglage de la liste.
-        let a_jour_au = etat
-            .liste
-            .a_jour_au()
-            .ok_or(ErreurRevocation::ListeAbsente)?;
-        if a_jour_au.saturating_add(FRAICHEUR_REVOCATIONS_SECS) < maintenant_secs {
-            return Err(ErreurRevocation::Perimee {
-                a_jour_au,
-                maintenant: maintenant_secs,
-            });
-        }
-        etat.liste.est_revoque(emetteur, cible, maintenant_secs)
+            .ok_or(ErreurRevocation::ListeAbsente)?
+            .suivi
+            .est_revoque(emetteur, cible, maintenant_secs)
     }
 }
 
@@ -399,7 +330,7 @@ impl SourceRevocation for RevocationsMiyuCloud {
 #[cfg(test)]
 pub(crate) mod banc {
     use super::*;
-    use miyuregistre::{Cible, Corps, EntreeRegistre, Journal};
+    use miyuregistre::{Cible, Corps, EntreeRegistre, Journal, StockageMemoire};
     use miyusceau::{CleSignature, sceller};
 
     pub(crate) const REGISTRE: [u8; 32] = [0x4d; 32];
@@ -621,6 +552,18 @@ mod tests {
             std::fs::read(dir.path().join(FICHIER_ENTREES)).unwrap(),
             avant
         );
+
+        // Journal au-delà de la borne : copie bornée, refus (aucune lecture au-delà).
+        let mut tampon = Vec::new();
+        let petit = dir.path().join("petit");
+        std::fs::write(&petit, [7u8; 10]).unwrap();
+        assert_eq!(lire_borne(&petit, 10, &mut tampon).unwrap(), 10);
+        tampon.clear();
+        assert!(matches!(
+            lire_borne(&petit, 9, &mut tampon),
+            Err(ErreurReleve::Depot(_))
+        ));
+        assert_eq!(tampon.len(), 10, "au plus max + 1 octets lus");
 
         // Dépôt vidé : relevé refusé, la liste se périme ensuite.
         std::fs::remove_file(dir.path().join(FICHIER_TETE)).unwrap();

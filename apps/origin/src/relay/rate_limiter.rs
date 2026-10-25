@@ -153,7 +153,8 @@ impl RateLimiter {
 
         // Vérifier la limite
         if entry.connections >= self.config.max_connections_per_ip {
-            warn!(
+            // Pas de `warn!` par requête refusée (inondation du journal) : les appelants agrègent.
+            debug!(
                 "IP {} exceeded connection limit ({}/{})",
                 ip, entry.connections, self.config.max_connections_per_ip
             );

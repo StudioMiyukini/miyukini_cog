@@ -73,8 +73,8 @@ impl Monde {
     /// Passeport émis par `h` pour la destination `i`, avec la clé dérivée pour elle.
     fn passeport(&self, i: usize) -> Vec<u8> {
         let d = &self.destinations[i].0;
-        let demande = lier_cle_appareil(&self.principale, &self.graine, &self.h, d).unwrap();
-        let liaison = verifier_liaison(&self.h, &self.principale.cle_publique(), &demande).unwrap();
+        let demande = lier_cle_appareil(&self.principale, &self.graine, &self.h, d, T0 + 60).unwrap();
+        let liaison = verifier_liaison(&self.h, &self.principale.cle_publique(), &demande, &self.revocations, T0).unwrap();
         emettre_passeport_lie(
             &self.h,
             &self.cle_h,
@@ -83,6 +83,8 @@ impl Monde {
             Portees::new(["jaykoa:read"]).unwrap(),
             T0 - 60,
             T0 + 3600,
+            &self.revocations,
+            T0,
         )
         .unwrap()
     }
@@ -167,41 +169,42 @@ fn mauth_cad_003_liaison_refusee() {
     let m = Monde::new();
     let (a, b) = (&m.destinations[0].0, &m.destinations[1].0);
     let cle_principale = m.principale.cle_publique();
-    let bonne = lier_cle_appareil(&m.principale, &m.graine, &m.h, a).unwrap();
-    assert!(verifier_liaison(&m.h, &cle_principale, &bonne).is_ok());
+    let bonne = lier_cle_appareil(&m.principale, &m.graine, &m.h, a, T0 + 60).unwrap();
+    assert!(verifier_liaison(&m.h, &cle_principale, &bonne, &m.revocations, T0).is_ok());
 
     // Destination modifiée après signature.
     let mut d = bonne.clone();
     d.destination = b.clone();
-    assert_eq!(verifier_liaison(&m.h, &cle_principale, &d).err(), Some(RefusIdentite::PossessionInvalide));
+    assert_eq!(verifier_liaison(&m.h, &cle_principale, &d, &m.revocations, T0).err(), Some(RefusIdentite::PossessionInvalide));
     // Clé de destination substituée (celle d'autrui) : signature de possession invalide.
     let mut d = bonne.clone();
     d.cle_destination = CleSignature::generer().cle_publique();
-    assert_eq!(verifier_liaison(&m.h, &cle_principale, &d).err(), Some(RefusIdentite::PossessionInvalide));
+    assert_eq!(verifier_liaison(&m.h, &cle_principale, &d, &m.revocations, T0).err(), Some(RefusIdentite::PossessionInvalide));
     // Non autorisée par la clé principale appairée (autre appareil).
     let intrus = CleSignature::generer();
-    let d = lier_cle_appareil(&intrus, &m.graine, &m.h, a).unwrap();
-    assert_eq!(verifier_liaison(&m.h, &cle_principale, &d).err(), Some(RefusIdentite::PossessionInvalide));
+    let d = lier_cle_appareil(&intrus, &m.graine, &m.h, a, T0 + 60).unwrap();
+    assert_eq!(verifier_liaison(&m.h, &cle_principale, &d, &m.revocations, T0).err(), Some(RefusIdentite::PossessionInvalide));
     // Liaison faite pour un autre COG d'origine.
-    let d = lier_cle_appareil(&m.principale, &m.graine, &cog('x'), a).unwrap();
-    assert_eq!(verifier_liaison(&m.h, &cle_principale, &d).err(), Some(RefusIdentite::PossessionInvalide));
+    let d = lier_cle_appareil(&m.principale, &m.graine, &cog('x'), a, T0 + 60).unwrap();
+    assert_eq!(verifier_liaison(&m.h, &cle_principale, &d, &m.revocations, T0).err(), Some(RefusIdentite::PossessionInvalide));
 
     // Clé de destination = clé principale (corrélante), même correctement signée.
-    let msg = message_liaison(&m.h, a, &cle_principale);
+    let msg = message_liaison(&m.h, a, &cle_principale, T0 + 60);
     let sig = SigningKey::from_bytes(&m.principale.graine()).sign(&msg).to_bytes();
     let correlante = miyauth::DemandeLiaison {
         destination: a.clone(),
         cle_destination: cle_principale,
+        pas_apres: T0 + 60,
         signature_principale: sig,
         signature_destination: sig,
     };
     assert_eq!(
-        verifier_liaison(&m.h, &cle_principale, &correlante).err(),
+        verifier_liaison(&m.h, &cle_principale, &correlante, &m.revocations, T0).err(),
         Some(RefusIdentite::ParametreInvalide("cle_destination"))
     );
 
     // Liaison vérifiée par `h`, émission par un autre COG : refus.
-    let liaison = verifier_liaison(&m.h, &cle_principale, &bonne).unwrap();
+    let liaison = verifier_liaison(&m.h, &cle_principale, &bonne, &m.revocations, T0).unwrap();
     let autre = CleSignature::generer();
     let r = emettre_passeport_lie(
         &cog('x'),
@@ -211,6 +214,8 @@ fn mauth_cad_003_liaison_refusee() {
         Portees::new(["jaykoa:read"]).unwrap(),
         T0,
         T0 + 60,
+        &m.revocations,
+        T0,
     );
     assert_eq!(r.err(), Some(RefusIdentite::EmetteurIncoherent));
 }
@@ -228,8 +233,8 @@ fn mauth_cad_004_revocation_par_cle_de_destination() {
         .destinations
         .iter()
         .map(|(d, _, _)| {
-            let demande = lier_cle_appareil(&m.principale, &m.graine, &m.h, d).unwrap();
-            verifier_liaison(&m.h, &m.principale.cle_publique(), &demande).unwrap()
+            let demande = lier_cle_appareil(&m.principale, &m.graine, &m.h, d, T0 + 60).unwrap();
+            verifier_liaison(&m.h, &m.principale.cle_publique(), &demande, &m.revocations, T0).unwrap()
         })
         .collect();
     let h = m.h.clone();

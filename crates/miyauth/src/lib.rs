@@ -46,8 +46,9 @@ pub use admin_cell::{
     MiyauthTestManifest, TOOLKIT_ID,
 };
 pub use appareil::{
-    cle_appareil_pour, emettre_passeport_lie, lier_cle_appareil, message_liaison, verifier_liaison, DemandeLiaison,
-    GraineAppareil, LiaisonVerifiee,
+    accepter_liaison, cle_appareil_pour, emettre_passeport_lie, lier_cle_appareil, message_liaison, verifier_liaison,
+    DemandeLiaison, GraineAppareil, LiaisonVerifiee, RegistreLiaisons, RegistreLiaisonsMemoire,
+    DUREE_MAX_LIAISON_SECS,
 };
 pub use attest::attest as identity_attest;
 pub use context::GovernedContext;
