@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.18 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.19 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -77,6 +77,7 @@
 | A-016 | 2026-10-25 | Table hôte de la Douane (description v2, flux de boucle locale par compte, aucun DNS), journalisation bornée, règle EX-12 des Vigies, relais (panne immédiate, ligne sans ports), étiquette `publiable` v2 (paramètres signés, propriété des bases), dérivation stricte des Fiches ; **à valider par le propriétaire** | 1.16 |
 | A-017 | 2026-10-25 | Route de publication des Fiches depuis MAIA : requête signée par l'utilisateur, champs structurels calculés par le serveur, porte des Cores, débits ; clé d'identité dans le pont (à trancher) ; **à valider par le propriétaire** | 1.17 |
 | A-018 | 2026-10-25 | État de publication persistant dans KindMother (base réservée `cog-federee`, une insertion par version, rechargement fail-closed), plafond décompté après ALLOW, contrôle du propriétaire de l'étiquette ; **à valider par le propriétaire** | 1.18 |
+| A-019 | 2026-10-25 | État fédéral persistant (`MFED` v3 avec carnet de pairs, support KindMother `miyufederation`, rechargement revérifié, 72 h à travers les arrêts), fuzzing ; mémoire d'Alicia dans KindMother (`maia-_alicia`, `nationale`), import unique ; **à valider par le propriétaire** | 1.19 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -635,3 +636,26 @@
 - **Propriétaire de l'étiquette** : la route exige que l'étiquette ait été posée par l'utilisateur authentifié, sinon 403 `non_publiable` (même code qu'une donnée non étiquetée : la route ne révèle pas qu'un autre l'a étiquetée) ; `PublieurOriginal::attester` revérifie le propriétaire à la relecture ; la propriété de la base reste contrôlée par KindMother à la pose (A-016)
 - Journal des décisions toujours en mémoire (1 024 entrées)
 - **Impact** : EX-47, EX-57 ; plan lot 7
+
+### A-019 — État fédéral persistant (`MFED` v3), mémoire d'Alicia dans KindMother
+
+<!-- @id arch.gel.a019 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a019 -->
+
+- **Date** : 2026-10-25 · **version** 1.19 · consignation de l'implémenté (restes des lots 6 et 7) ; **validation du propriétaire attendue**
+- **État fédéral persistant** (`crates/miyufederation`)
+  - L'état scellé `MFED` (HMAC du secret local, titres signés) est stocké tel quel, en octets opaques, derrière un trait `SupportEtat` : fichier (`etat.mfed`, existant), mémoire (tests), **KindMother** (fonctionnalité `kindmother`, facultative ; la crate reste sans réseau par défaut)
+  - **`MFED` v3** : champ final « carnet de pairs », `compte ≤ 4 096 × (cog_id | bloc réseau 1..64 | premier_contact u64)`, identifiants strictement croissants ; v2 lue (carnet vide) puis réécrite en v3 ; v1 refusée. Carnet plein : un nouveau venu n'évince qu'un pair inéligible, jamais un pair éligible
+  - Base KindMother **`miyufederation`** (opérateur propriétaire du même nom, non `nationale`, chiffrée exigée ; `maia-*` et `cog-federee` refusés) ; tables `etat_courant(cle='courant', generation, morceaux, taille, empreinte)` et `etat_morceaux(generation, rang, octets hex ≤ 256 Kio)` ; nouvelle génération écrite, puis **bascule du pointeur** gardée par `generation = ancienne` (≤ 4 morceaux en une transaction, au-delà en lots, bascule en dernier) ; morceaux périmés purgés
+  - **Rechargement** unique pour tous les supports : titres revérifiés et statuts recalculés, jamais lus tels quels ; HMAC ; l'état doit prolonger le registre local (révocations réappliquées) ; heure en recul, état altéré, tronqué ou absent alors qu'attendu ⇒ refus, aucune vue rendue ; la vue vide est écrite dès le premier usage pour qu'une disparition soit détectée
+  - **Transitions** : appliquées sur une copie, scellées, écrites, puis seulement rendues visibles ; échec d'écriture ⇒ instance **hors service** jusqu'au rechargement
+  - **72 h** : le début de suspension est dans les pièces revérifiées, l'échéance recalculée avec l'horloge de confiance ; une suspension échue pendant l'arrêt devient une révocation datée de l'échéance, produite une seule fois, gardée à publier jusqu'à l'accusé d'inscription au registre
+  - Fuzzing : cibles `titres`, `preuve`, `etat`, `vue` (15 min chacune, aucune panique ; aucun défaut de bibliothèque) ; écart signalé : `miyusceau` encode une tête (taille 0, racine non vide) qu'il refuse au décodage
+- **Mémoire d'Alicia** (`crates/miyualicia-memory`) : plus de rusqlite, exception CI retirée
+  - Base KindMother **`maia-_alicia`**, classée **`nationale`** (données personnelles du foyer ; mémoire commune MAIA / Alicia, Mémoire MAIA §10–§11) ; le segment `_alicia` est volontairement invalide comme identifiant d'utilisateur MAIA : aucune base `maia-<utilisateur>` ne peut se confondre avec elle
+  - Ouverture refusée sans migrations appliquées, sans classement `nationale` relu chez KindMother, ou base non chiffrée ; KindMother injoignable ⇒ erreur explicite, aucun repli sur un fichier local
+  - Recherche plein texte faite par le store (tous les mots exigés, `mot*` = préfixe, casse et accents ignorés) ; plus de syntaxe FTS5
+  - Import unique de l'ancienne base SQLite (moteur `kindmother-heritage`, fonctionnalité `import-heritage`, au démarrage ou par `alicia-memoire-import`) : vérification ligne à ligne, empreinte du fichier avant et après, marqueur `<base>.importe-kindmother`, idempotent ; l'ancien fichier n'est jamais modifié ni supprimé ; sans la fonctionnalité, une ancienne base non importée fait refuser l'ouverture
+  - **Limite** : KindMother n'efface pas physiquement les pages libérées (`secure_delete` absent) ; un oubli laisse des pages chiffrées résiduelles, à traiter dans KindMother pour toutes les bases
+- **Impact** : EX-30, EX-35, EX-37, EX-50..56 ; plan lots 6, 7

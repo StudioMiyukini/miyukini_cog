@@ -204,7 +204,7 @@
 - **Sortie** : trois COG de test atteignent le statut membre ; un COG fautif est révoqué
 - **Statut (2026-10-25)** — [A-007](../architecture/GEL-DOC-CONCEPTUELLE-v1.md) (doc v1.7) : **sortie atteinte au niveau bibliothèque**, sans Origin (`miyufederation/tests/sortie_lot6.rs` ; non commité)
   - **Fait** : candidature `0x06`/`0x43` + hashcash, confirmation `0x07`, statuts, quota, témoins anti-éclipse (≥ 3 membres), accusation `0x06`/`0x42` au quorum de 6 + preuve `MFPV`, révocation d'identité, note locale, carnet de pairs, fraîcheur de la vue
-  - **Reste** : ~~suspension, révocation à 72 h, recours~~ et ~~registre fédéral à ≥ 3 témoins membres~~ (faits, A-008) ; transport du commérage ; persistance des statuts ; attestation TPM ; autres types de preuve ; fuzzing des titres fédéraux et de `MFPV`
+  - **Reste** : ~~suspension, révocation à 72 h, recours~~ et ~~registre fédéral à ≥ 3 témoins membres~~ (faits, A-008) ; transport du commérage ; ~~persistance des statuts~~ (faite, A-019) ; attestation TPM ; autres types de preuve ; ~~fuzzing des titres fédéraux et de `MFPV`~~ (fait, A-019 : 4 cibles, aucun défaut)
 
 ## 9. Lot 7 — MAIA
 
@@ -225,7 +225,9 @@
   - ~~étiquette `publiable` (EX-47)~~ (faite, A-015 ; route de publication du pont à écrire)
   - transport des requêtes et Fiches entre COG (Portail, voie fédérée)
   - chemin de confirmation TAMR branché sur la republication et les branches sensibles
-  - mémoire d'Alicia (`miyualicia-memory`) encore sur rusqlite
+  - ~~mémoire d'Alicia (`miyualicia-memory`) encore sur rusqlite~~ (faite, A-019 : KindMother, base `maia-_alicia`)
+  - ~~route de publication des Fiches~~ (faite, A-017, A-018)
+  - effacement physique des pages libérées dans KindMother (`secure_delete`) pour que l'oubli efface réellement, toutes bases
 
 ## 10. Lot 8 — Durcissement continu
 
