@@ -67,12 +67,12 @@ impl FileRetrievalService {
         self.file_read.get_etat_cdr_owned(id, owner_id).await
     }
 
-    /// Identifiants en quarantaine CDR parmi `ids` (exclus des archives ZIP).
-    pub async fn ids_en_quarantaine(
+    /// Identifiants non désarmés (quarantaine ou inconnu) parmi `ids` (exclus des archives ZIP).
+    pub async fn ids_non_desarmes(
         &self,
         ids: &[String],
     ) -> Result<std::collections::HashSet<String>, DomainError> {
-        self.file_read.ids_en_quarantaine(ids).await
+        self.file_read.ids_non_desarmes(ids).await
     }
 
     // ── private helpers ──────────────────────────────────────────

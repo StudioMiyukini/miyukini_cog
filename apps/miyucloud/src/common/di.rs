@@ -240,6 +240,61 @@ impl AppServiceFactory {
         }
     }
 
+    /// Lance la tâche de reclassement CDR des fichiers hérités `inconnu`
+    /// (premier passage au démarrage, puis toutes les 15 min). Désactivable
+    /// par `MIYUCLOUD_CDR_RECLASSEMENT=0` : les fichiers `inconnu` restent
+    /// alors **non servis** (fermé par défaut), jamais l'inverse.
+    fn lancer_reclassement_cdr(
+        &self,
+        core: &CoreServices,
+        repos: &RepositoryServices,
+        maintenance_pool: &Arc<PgPool>,
+        desarmement: Arc<DesarmementService>,
+    ) {
+        use crate::application::services::reclassement_cdr_service::ReclassementCdrService;
+        use crate::infrastructure::repositories::pg::cdr_reclassement_pg_repository::CdrReclassementPgRepository;
+
+        if std::env::var("MIYUCLOUD_CDR_RECLASSEMENT").is_ok_and(|v| v.trim() == "0") {
+            tracing::warn!(
+                "Reclassement CDR désactivé (MIYUCLOUD_CDR_RECLASSEMENT=0) : les fichiers « inconnu » ne sont pas servis"
+            );
+            return;
+        }
+        let depot = Arc::new(CdrReclassementPgRepository::new(
+            maintenance_pool.clone(),
+            core.dedup_service.clone(),
+            repos.file_read_repository.clone(),
+            core.file_content_cache.clone(),
+            core.image_transcode_service.clone(),
+            core.thumbnail_service.clone(),
+        ));
+        let service = ReclassementCdrService::new(
+            depot,
+            desarmement,
+            self.storage_path.join(".uploads/reclassement-cdr"),
+        );
+        tokio::spawn(async move {
+            let mut intervalle = tokio::time::interval(std::time::Duration::from_secs(15 * 60));
+            loop {
+                intervalle.tick().await;
+                match service.reclasser_tout().await {
+                    Ok(b) if b.examines > 0 => tracing::info!(
+                        "Reclassement CDR : {} examinés, {} désarmés, {} en quarantaine, {} concurrents, {} en erreur (restés « inconnu »)",
+                        b.examines,
+                        b.desarmes,
+                        b.quarantaines,
+                        b.concurrences,
+                        b.erreurs
+                    ),
+                    Ok(_) => tracing::debug!("Reclassement CDR : aucun fichier « inconnu »"),
+                    Err(e) => tracing::warn!(
+                        "Reclassement CDR interrompu (nouvel essai dans 15 min) : {e}"
+                    ),
+                }
+            }
+        });
+    }
+
     /// Initializes the application services
     pub fn create_application_services(
         &self,
@@ -616,6 +671,15 @@ impl AppServiceFactory {
         let mut core = core;
         core.zip_service = Some(zip_service);
 
+        // 8b. Plan §5 / EX-45 : reclassement des fichiers hérités `inconnu`
+        //     (antérieurs au CDR, jamais servis dans cet état).
+        self.lancer_reclassement_cdr(
+            &core,
+            &repos,
+            &maintenance_pool,
+            apps.desarmement_service.clone(),
+        );
+
         // 9. Assemble final AppState
         let mut app_state = AppState {
             core,
@@ -790,8 +854,47 @@ impl AppServiceFactory {
                         "MiyuVisa désactivé (MIYUCLOUD_MIYU_COG_ID / MIYUCLOUD_MIYU_CLE_EMISSION absents)"
                     ),
                 }
-                let svc = MiyuAuthService::new(miyu_store.clone(), ancre)
+                // Lot 2 §8.2 / A-007 : révocations du registre du COG d'origine
+                // (fraîcheur ≤ 15 min). Configuration partielle ou sans ancre :
+                // refus de démarrer ; ancre sans source : tout visa refusé.
+                use crate::infrastructure::services::miyu_revocations::{
+                    ConfigRevocations, RevocationsMiyuCloud,
+                };
+                let config_rev = ConfigRevocations::depuis_env()
                     .map_err(|e| DomainError::internal_error("MiyuAuth", e))?;
+                let revocations = match (&ancre, &config_rev) {
+                    (Some(a), Some(c)) => {
+                        let r = RevocationsMiyuCloud::new(a.cog_id.clone(), c)
+                            .map_err(|e| DomainError::internal_error("MiyuAuth", e))?;
+                        tracing::info!(
+                            "Révocations miyauth : registre du COG d'origine relevé depuis {}",
+                            c.depot.display()
+                        );
+                        r.clone().lancer_releve(
+                            crate::infrastructure::services::miyu_auth_service::maintenant,
+                        );
+                        r
+                    }
+                    (Some(_), None) => {
+                        tracing::warn!(
+                            "MiyuVisa : aucune source de révocation (MIYUCLOUD_MIYU_REGISTRE / \
+                             MIYUCLOUD_MIYU_CLE_JOURNAL / MIYUCLOUD_MIYU_REVOCATIONS_DEPOT) — \
+                             tout visa sera refusé (fail-closed)"
+                        );
+                        RevocationsMiyuCloud::absentes()
+                    }
+                    (None, Some(_)) => {
+                        return Err(DomainError::internal_error(
+                            "MiyuAuth",
+                            "source de révocation configurée sans COG d'origine épinglé \
+                             (MIYUCLOUD_MIYU_COG_ID / MIYUCLOUD_MIYU_CLE_EMISSION)",
+                        ));
+                    }
+                    (None, None) => RevocationsMiyuCloud::absentes(),
+                };
+                let svc = MiyuAuthService::new(miyu_store.clone(), ancre)
+                    .map_err(|e| DomainError::internal_error("MiyuAuth", e))?
+                    .avec_revocations(revocations);
                 app_state.miyu_auth = Some(Arc::new(svc));
             }
 

@@ -17,6 +17,7 @@ pub mod file_system_i18n_service;
 pub mod image_transcode_service;
 pub mod login_lockout_service;
 pub mod miyu_auth_service;
+pub mod miyu_revocations;
 pub mod mws_tunnel_service;
 pub mod nextcloud_chunked_upload_service;
 pub mod oidc_service;

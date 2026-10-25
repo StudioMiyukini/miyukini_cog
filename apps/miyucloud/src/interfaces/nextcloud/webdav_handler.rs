@@ -316,7 +316,7 @@ async fn handle_get(
             _ => AppError::internal_error(format!("Failed to read file: {}", e)),
         })?;
     if !etat.autorise_lecture_dav() {
-        return Err(AppError::non_desarme_dav());
+        return Err(AppError::non_desarme_dav(etat));
     }
 
     let stream = file_service

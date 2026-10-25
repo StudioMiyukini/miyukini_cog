@@ -445,6 +445,22 @@ impl DedupService {
         .unwrap_or(false)
     }
 
+    /// Returns `true` if `user_id` owns at least one (non-trashed) file that
+    /// references `hash` **and is disarmed** (EX-45). Used before serving blob
+    /// bytes: a blob reachable only through quarantined or `inconnu` files
+    /// (pre-CDR, not yet reclassified) is never served by hash.
+    pub async fn user_owns_desarmed_blob_reference(&self, hash: &str, user_id: &str) -> bool {
+        sqlx::query_scalar::<_, bool>(
+            "SELECT EXISTS(SELECT 1 FROM storage.files WHERE blob_hash = $1 AND user_id = $2 \
+               AND NOT is_trashed AND etat_cdr = 'desarme')",
+        )
+        .bind(hash)
+        .bind(user_id)
+        .fetch_one(self.pool.as_ref())
+        .await
+        .unwrap_or(false)
+    }
+
     /// Get metadata for a blob from PostgreSQL.
     pub async fn get_blob_metadata(&self, hash: &str) -> Option<BlobMetadataDto> {
         let row = sqlx::query_as::<_, (String, i64, i32, Option<String>)>(

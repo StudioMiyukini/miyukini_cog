@@ -106,6 +106,12 @@ impl FileBlobReadRepository {
         }
     }
 
+    /// Oublie le hachage mis en cache pour `file_id` (contenu remplacé hors
+    /// des chemins d'écriture ordinaires, ex. reclassement CDR).
+    pub fn oublier_hachage(&self, file_id: &str) {
+        self.hash_cache.invalidate(file_id);
+    }
+
     /// Build a `StoragePath` from the materialized folder path + file name.
     fn make_file_path(folder_path: Option<&str>, file_name: &str) -> StoragePath {
         match folder_path {
@@ -197,8 +203,10 @@ impl FileBlobReadRepository {
         Ok(EtatCdr::depuis_stockage(&etat))
     }
 
-    /// Parmi `file_ids`, ceux dont l'état CDR est `quarantaine` (EX-45).
-    pub async fn ids_en_quarantaine(
+    /// Parmi `file_ids`, ceux qui ne sont **pas** désarmés (EX-45) :
+    /// `quarantaine`, `inconnu` (antérieur au CDR, jamais servi avant
+    /// reclassement) ou toute autre valeur — exclus des archives ZIP.
+    pub async fn ids_non_desarmes(
         &self,
         file_ids: &[String],
     ) -> Result<std::collections::HashSet<String>, DomainError> {
@@ -211,13 +219,13 @@ impl FileBlobReadRepository {
             .collect();
         let rows = sqlx::query_scalar::<_, String>(
             "SELECT id::text FROM storage.files \
-              WHERE id = ANY($1::uuid[]) AND etat_cdr = 'quarantaine'",
+              WHERE id = ANY($1::uuid[]) AND etat_cdr IS DISTINCT FROM 'desarme'",
         )
         .bind(&ids)
         .fetch_all(self.pool.as_ref())
         .await
         .map_err(|e| {
-            DomainError::internal_error("FileBlobRead", format!("ids_en_quarantaine: {e}"))
+            DomainError::internal_error("FileBlobRead", format!("ids_non_desarmes: {e}"))
         })?;
         Ok(rows.into_iter().collect())
     }

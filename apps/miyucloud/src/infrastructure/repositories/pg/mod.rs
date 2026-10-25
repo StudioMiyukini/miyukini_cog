@@ -7,6 +7,7 @@
 mod address_book_pg_repository;
 mod app_password_pg_repository;
 pub mod audit_pg_repository;
+pub mod cdr_reclassement_pg_repository;
 mod calendar_event_pg_repository;
 mod calendar_pg_repository;
 mod contact_group_pg_repository;

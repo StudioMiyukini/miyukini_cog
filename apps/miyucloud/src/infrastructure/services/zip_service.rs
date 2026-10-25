@@ -125,20 +125,21 @@ impl ZipService {
             files_by_folder.entry(fid).or_default().push(file);
         }
 
-        // EX-45 : les fichiers en quarantaine CDR ne sortent jamais dans une
-        // archive (l'accord explicite se donne fichier par fichier).
+        // EX-45 : les fichiers non désarmés (quarantaine, ou inconnu non
+        // reclassé) ne sortent jamais dans une archive (l'accord explicite se
+        // donne fichier par fichier ; un fichier inconnu n'est jamais servi).
         let ids: Vec<String> = files_by_folder
             .values()
             .flat_map(|v| v.iter().map(|f| f.id.clone()))
             .collect();
         let en_quarantaine = self
             .file_service
-            .ids_en_quarantaine(&ids)
+            .ids_non_desarmes(&ids)
             .await
             .map_err(|e| ZipError::FolderContentsError(format!("etat CDR: {}", e)))?;
         if !en_quarantaine.is_empty() {
             warn!(
-                "ZIP: {} fichier(s) en quarantaine CDR exclus de l'archive",
+                "ZIP: {} fichier(s) non désarmé(s) (quarantaine ou inconnu) exclus de l'archive",
                 en_quarantaine.len()
             );
             for files in files_by_folder.values_mut() {

@@ -20,10 +20,12 @@
 //!   (`MIYUCLOUD_MIYU_COG_ID` + `MIYUCLOUD_MIYU_CLE_EMISSION`), niveau souverain :
 //!   passeport **et** visa doivent être scellés par ce COG. Aucune clé épinglée ⇒
 //!   schéma désactivé (refus).
-//! - Révocation : aucune liste distribuée à MiyuCloud. Le COG d'origine contrôle
-//!   ses révocations à l'émission de chaque visa (≤ 15 min) : un appareil révoqué
-//!   perd l'accès en moins de 15 min. Côté MiyuCloud, retirer la liaison coupe
-//!   l'accès immédiatement.
+//! - Révocation : liste tirée du **registre vérifié** du COG d'origine
+//!   ([`super::miyu_revocations`], `miyuregistre::RevocationsRegistre`) :
+//!   passeport, visa, clé d'appareil et clé d'émission sont contrôlés à chaque
+//!   requête ; fraîcheur **≤ 15 min** (A-007) ; liste absente ou périmée ⇒
+//!   **refus**. Sans source configurée, tout visa est refusé (fail-closed).
+//!   Côté MiyuCloud, retirer la liaison coupe aussi l'accès immédiatement.
 //! - Compte : l'identité prouvée (COG, sujet par paire) n'ouvre un compte que
 //!   s'il a été **lié explicitement** par l'utilisateur connecté
 //!   (`POST /api/auth/miyu/liaisons`). Jamais de création implicite.
@@ -46,13 +48,11 @@ use miyauth::http::{
     RequeteHttp, analyser_autorisation_visa, analyser_pop, verifier_requete_signee,
     verifier_requete_visa,
 };
-use miyauth::{
-    AnnuaireEmetteurs, CibleRevocation, CogId, ErreurRevocation, PolitiqueIdentite,
-    SourceRevocation,
-};
+use miyauth::{AnnuaireEmetteurs, CogId, PolitiqueIdentite};
 use miyusceau::NiveauConfiance;
 use uuid::Uuid;
 
+use super::miyu_revocations::RevocationsMiyuCloud;
 use crate::common::errors::{DomainError, ErrorKind};
 
 /// Audience des visas acceptés par MiyuCloud.
@@ -263,30 +263,10 @@ impl From<RefusHttp> for RefusMiyu {
 // Service
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// Révocation vue de MiyuCloud (voir l'en-tête du module).
-#[derive(Debug)]
-struct RevocationsMiyuCloud {
-    cog_local: CogId,
-}
-
-impl SourceRevocation for RevocationsMiyuCloud {
-    fn est_revoque(
-        &self,
-        emetteur: &CogId,
-        _cible: &CibleRevocation,
-        _maintenant: u64,
-    ) -> Result<bool, ErreurRevocation> {
-        if emetteur == &self.cog_local {
-            // Révocations appliquées par le COG à l'émission du visa (≤ 15 min).
-            return Ok(false);
-        }
-        Err(ErreurRevocation::ListeAbsente)
-    }
-}
-
 struct HoteVisa {
     cog: CogId,
     annuaire: AnnuaireEmetteurs,
+    /// Révocations du registre du COG d'origine ([`RevocationsMiyuCloud`]).
     revocations: RevocationsMiyuCloud,
 }
 
@@ -361,9 +341,8 @@ impl<S: MiyuIdentityStore> MiyuAuthService<S> {
                     )
                     .map_err(|e| format!("MIYUCLOUD_MIYU_CLE_EMISSION : {e}"))?;
                 Some(HoteVisa {
-                    revocations: RevocationsMiyuCloud {
-                        cog_local: a.cog_id.clone(),
-                    },
+                    // Fail-closed : sans source branchée, tout visa est refusé.
+                    revocations: RevocationsMiyuCloud::absentes(),
                     cog: a.cog_id,
                     annuaire,
                 })
@@ -375,6 +354,16 @@ impl<S: MiyuIdentityStore> MiyuAuthService<S> {
             defis: MagasinDefisMemoire::default(),
             nonces: RegistreNonces::default(),
         })
+    }
+
+    /// Branche la source de révocations (registre vérifié du COG d'origine).
+    /// Sans appel, tout visa est refusé (liste absente). Sans schéma visa :
+    /// sans effet.
+    pub fn avec_revocations(mut self, revocations: RevocationsMiyuCloud) -> Self {
+        if let Some(h) = self.hote.as_mut() {
+            h.revocations = revocations;
+        }
+        self
     }
 
     /// Stockage sous-jacent.
@@ -650,32 +639,61 @@ impl MiyuIdentityStore for MemoireIdentites {
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
+    use crate::infrastructure::services::miyu_revocations::FRAICHEUR_REVOCATIONS_SECS;
+    use crate::infrastructure::services::miyu_revocations::banc::RegistreCog;
     use miyauth::http::{
         b64_encoder, formater_autorisation_visa, formater_pop, liaison_requete, signer_pop,
         signer_requete,
     };
+    use miyauth::{CibleRevocation, ErreurRevocation, RefusIdentite};
     use miyauth::{
         DemandePasseport, DemandeVisa, Portees, SecretTitulaire, emettre_passeport, emettre_visa,
         prouver_possession, verifier_passeport,
     };
     use miyusceau::CleSignature;
 
-    /// COG d'origine, titulaire et appareil de test.
+    /// Révocations vues par le COG émetteur au moment d'émettre (test).
+    struct VueCogEmetteur;
+
+    impl miyauth::SourceRevocation for VueCogEmetteur {
+        fn est_revoque(
+            &self,
+            _emetteur: &CogId,
+            _cible: &CibleRevocation,
+            _maintenant: u64,
+        ) -> Result<bool, ErreurRevocation> {
+            Ok(false)
+        }
+    }
+
+    /// COG d'origine (avec son registre), titulaire et appareil de test.
     pub(crate) struct Monde {
         pub cle_cog: CleSignature,
         pub cog: CogId,
         pub secret: SecretTitulaire,
         pub appareil: CleSignature,
+        pub registre: RegistreCog,
+        pub revocations: RevocationsMiyuCloud,
         pub service: MiyuAuthService<MemoireIdentites>,
     }
 
     impl Monde {
+        /// Monde dont les révocations sont relevées (tête fraîche, aucune).
         pub(crate) fn new() -> Self {
+            let mut m = Self::sans_releve();
+            m.registre.relever(&m.revocations, maintenant());
+            m
+        }
+
+        /// Monde dont la source de révocations n'a encore rien relevé.
+        pub(crate) fn sans_releve() -> Self {
             let cle_cog = CleSignature::generer();
             let cog = CogId::new(&miyuwebway_participant::identite::cog_id_depuis_cle(
                 &cle_cog.cle_publique(),
             ))
             .unwrap();
+            let registre = RegistreCog::new();
+            let revocations = registre.source(&cog);
             let service = MiyuAuthService::new(
                 Arc::new(MemoireIdentites::default()),
                 Some(AncreCog {
@@ -683,12 +701,15 @@ pub(crate) mod tests {
                     cle_emission: cle_cog.cle_publique(),
                 }),
             )
-            .unwrap();
+            .unwrap()
+            .avec_revocations(revocations.clone());
             Self {
                 cle_cog,
                 cog,
                 secret: SecretTitulaire::generer(),
                 appareil: CleSignature::generer(),
+                registre,
+                revocations,
                 service,
             }
         }
@@ -705,28 +726,23 @@ pub(crate) mod tests {
                 pas_apres: t + 3600,
             };
             let passeport = emettre_passeport(&self.cog, cle, &demande).unwrap();
-            // Possession prouvée côté COG (défi quelconque) pour émettre le visa.
-            let hote = self.service.hote.as_ref().unwrap();
-            let pv = verifier_passeport(&passeport, &hote.politique(), t).unwrap_or_else(|_| {
-                // Passeport d'une clé non épinglée : on le vérifie avec un annuaire ad hoc.
-                let mut annuaire = AnnuaireEmetteurs::new();
-                annuaire
-                    .ajouter(
-                        self.cog.clone(),
-                        &cle.cle_publique(),
-                        NiveauConfiance::Souverain,
-                    )
-                    .unwrap();
-                let rev = RevocationsMiyuCloud {
-                    cog_local: self.cog.clone(),
-                };
-                let pol = PolitiqueIdentite {
-                    cog_local: self.cog.clone(),
-                    annuaire: &annuaire,
-                    revocations: &rev,
-                };
-                verifier_passeport(&passeport, &pol, t).unwrap()
-            });
+            // Possession prouvée côté COG (défi quelconque) pour émettre le visa :
+            // vue du COG émetteur (sa clé, ses révocations à l'émission), pas
+            // celle de MiyuCloud.
+            let mut annuaire = AnnuaireEmetteurs::new();
+            annuaire
+                .ajouter(
+                    self.cog.clone(),
+                    &cle.cle_publique(),
+                    NiveauConfiance::Souverain,
+                )
+                .unwrap();
+            let pol = PolitiqueIdentite {
+                cog_local: self.cog.clone(),
+                annuaire: &annuaire,
+                revocations: &VueCogEmetteur,
+            };
+            let pv = verifier_passeport(&passeport, &pol, t).unwrap();
             let defi = [7u8; 32];
             let liaison = [9u8; 32];
             let sig = signer_pop(&self.appareil, &defi, "cog", &liaison);
@@ -1104,5 +1120,118 @@ pub(crate) mod tests {
             t,
         ));
         assert!(matches!(r, Err(RefusMiyu::AppareilInconnu)));
+    }
+
+    /// Visa présenté avec en-têtes et défi frais : résultat de `verifier_visa`.
+    fn presenter(m: &Monde) -> Result<IdentiteVisa, RefusMiyu> {
+        let titres = m.titres();
+        let (a, p) = m.entetes_visa(&titres, "GET", "/api/files", b"");
+        m.service.verifier_visa(
+            req("GET", "/api/files", b""),
+            Some(&a),
+            Some(&p),
+            maintenant(),
+        )
+    }
+
+    fn refus_revocation(r: &Result<IdentiteVisa, RefusMiyu>) -> Option<ErreurRevocation> {
+        match r {
+            Err(RefusMiyu::Http(RefusHttp::Identite(RefusIdentite::Revocation(e)))) => {
+                Some(e.clone())
+            }
+            _ => None,
+        }
+    }
+
+    #[test]
+    fn visa_accepted_with_fresh_revocation_list() {
+        let m = Monde::new();
+        assert!(presenter(&m).is_ok());
+    }
+
+    #[test]
+    fn revoked_device_key_in_registry_is_refused() {
+        let mut m = Monde::new();
+        assert!(presenter(&m).is_ok());
+        let t = maintenant();
+        let CibleRevocation::Cle(kid) = CibleRevocation::appareil(&m.appareil.cle_publique())
+        else {
+            unreachable!()
+        };
+        m.registre.revoquer_cle(kid, None, t);
+        m.registre.relever(&m.revocations, t);
+        let r = presenter(&m);
+        assert!(
+            matches!(
+                r,
+                Err(RefusMiyu::Http(RefusHttp::Identite(
+                    RefusIdentite::Revoque(_)
+                )))
+            ),
+            "appareil révoqué au registre : refus ({r:?})"
+        );
+    }
+
+    #[test]
+    fn revocation_list_absent_or_stale_is_refused() {
+        // Jamais relevée : liste absente ⇒ refus.
+        let m = Monde::sans_releve();
+        let r = presenter(&m);
+        assert_eq!(
+            refus_revocation(&r),
+            Some(ErreurRevocation::ListeAbsente),
+            "{r:?}"
+        );
+
+        // Tête vieille de 15 min + 1 s : périmée ⇒ refus.
+        let mut m = Monde::sans_releve();
+        let t = maintenant();
+        let (tete, entrees) = m.registre.publier(t - FRAICHEUR_REVOCATIONS_SECS - 1);
+        m.revocations
+            .appliquer_releve(&tete, 0, &entrees, t)
+            .unwrap();
+        let r = presenter(&m);
+        assert!(
+            matches!(refus_revocation(&r), Some(ErreurRevocation::Perimee { .. })),
+            "{r:?}"
+        );
+    }
+
+    #[test]
+    fn visa_refused_without_configured_revocation_source() {
+        let m = Monde::new();
+        let service = MiyuAuthService::new(
+            Arc::new(MemoireIdentites::default()),
+            Some(AncreCog {
+                cog_id: m.cog.clone(),
+                cle_emission: m.cle_cog.cle_publique(),
+            }),
+        )
+        .unwrap();
+        let titres = m.titres();
+        let d = service.emettre_defi(maintenant()).unwrap();
+        let liaison = liaison_requete("GET", "/api/files", b"");
+        let sig = signer_pop(&m.appareil, &d.defi, AUDIENCE_MIYUCLOUD, &liaison);
+        let (a, p) = (
+            formater_autorisation_visa(&titres.0, &titres.1),
+            formater_pop(&d.id, &sig),
+        );
+        let r = service.verifier_visa(
+            req("GET", "/api/files", b""),
+            Some(&a),
+            Some(&p),
+            maintenant(),
+        );
+        assert_eq!(
+            refus_revocation(&r),
+            Some(ErreurRevocation::ListeAbsente),
+            "{r:?}"
+        );
+        // Le précontrôle (avant lecture du corps) refuse aussi.
+        assert!(
+            service
+                .precontroler_visa(Some(&a), Some(&p), maintenant())
+                .is_err()
+        );
     }
 }

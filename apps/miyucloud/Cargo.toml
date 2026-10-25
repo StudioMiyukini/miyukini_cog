@@ -59,6 +59,8 @@ miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
 # Lot 2 : visa + preuve de possession, requêtes signées (aucun secret partagé).
 miyauth = { path = "../../crates/miyauth", features = ["http"] }
 miyusceau = { path = "../../crates/miyusceau" }
+# Lot 2 §8.2 / A-007 : révocations miyauth lues dans le registre vérifié du COG d'origine.
+miyuregistre = { path = "../../crates/miyuregistre", features = ["miyauth"] }
 # EX-45 / A-004 : tout fichier entrant passe par le CDR (désarmement et reconstruction).
 miyucdr = { path = "../../crates/miyucdr" }
 axum-server = { version = "0.7", features = ["tls-rustls"] }

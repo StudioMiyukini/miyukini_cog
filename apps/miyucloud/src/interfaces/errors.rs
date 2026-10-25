@@ -123,15 +123,24 @@ impl AppError {
         }
     }
 
-    /// Refus de lecture WebDAV d'un fichier en quarantaine CDR (EX-45) : un
-    /// client DAV ne peut pas exprimer l'accord explicite exigé.
-    pub fn non_desarme_dav() -> Self {
-        Self::new(
-            StatusCode::FORBIDDEN,
-            "Fichier non désarmé (quarantaine CDR) : lecture WebDAV refusée. Télécharger \
-             depuis l'interface web après accord explicite (accepter_non_desarme=1).",
-            "NonDesarme",
-        )
+    /// Refus de lecture WebDAV d'un fichier non désarmé (EX-45) : quarantaine
+    /// (un client DAV ne peut pas exprimer l'accord explicite exigé) ou
+    /// fichier `inconnu` antérieur au CDR, jamais servi avant reclassement.
+    pub fn non_desarme_dav(etat: crate::domain::entities::etat_cdr::EtatCdr) -> Self {
+        if etat.attend_reclassement() {
+            Self::new(
+                StatusCode::FORBIDDEN,
+                crate::domain::entities::etat_cdr::MESSAGE_NON_RECLASSE,
+                "NonReclasse",
+            )
+        } else {
+            Self::new(
+                StatusCode::FORBIDDEN,
+                "Fichier non désarmé (quarantaine CDR) : lecture WebDAV refusée. Télécharger \
+                 depuis l'interface web après accord explicite (accepter_non_desarme=1).",
+                "NonDesarme",
+            )
+        }
     }
 
     /// Create a 413 Payload Too Large error.

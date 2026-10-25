@@ -1,38 +1,66 @@
+# MiyuCloud — unité systemd de référence, alignée sur deploy/cog-vm/installer.sh
+# (disposition et durcissement validés en VM). Voir deploy/miyucloud/README.md.
+#
+# Installer sous le nom /etc/systemd/system/miyukini-miyucloud.service.
+# Disposition :
+#   binaire        /opt/miyukini/bin/miyucloud-server            (root:root 0755)
+#   statiques      /opt/miyukini/share/miyucloud/{static,static-dist} (root:root, lecture seule)
+#   données        /var/lib/miyukini/miyucloud                    (miyukini-miyucloud, 0700)
+#   stockage       /var/lib/miyukini/miyucloud/storage            (miyukini-miyucloud, 0700)
+#   secrets        /etc/miyukini/miyucloud.env                    (root:root 0600, généré à
+#                  l'installation, jamais commité)
+# Aucun secret dans ce fichier.
+
 [Unit]
-Description=MiyuCloud Server
-After=network-online.target
+Description=MiyuCloud — stockage et calendriers (COG)
+After=network-online.target postgresql.service
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=miyucloud
-Group=miyucloud
-WorkingDirectory=/opt/miyucloud/current
-EnvironmentFile=/etc/miyucloud/miyucloud.env
-ExecStart=/opt/miyucloud/current/miyucloud-server
+User=miyukini-miyucloud
+Group=miyukini-miyucloud
+WorkingDirectory=/opt/miyukini/share/miyucloud
+EnvironmentFile=-/etc/miyukini/miyucloud.env
+Environment=MIYUCLOUD_STORAGE_PATH=/var/lib/miyukini/miyucloud/storage
+Environment=MIYUCLOUD_STATIC_PATH=/opt/miyukini/share/miyucloud/static
+Environment=MIYUCLOUD_SERVER_HOST=127.0.0.1
+Environment=MIYUCLOUD_SERVER_PORT=8086
+Environment=MIYUCLOUD_BASE_URL=http://127.0.0.1:8086
+Environment=MIYUCLOUD_ENCRYPTION_ENABLED=true
+Environment=MIYUCLOUD_OIDC_ENABLED=false
+Environment=MIYUCLOUD_WOPI_ENABLED=false
+Environment=MIYUCLOUD_COOKIE_SECURE=true
+Environment=RUST_LOG=info
+ExecStart=/opt/miyukini/bin/miyucloud-server
 Restart=on-failure
 RestartSec=3
 TimeoutStartSec=30
 TimeoutStopSec=30
-LimitNOFILE=65535
-
-# Hardening
 NoNewPrivileges=true
 PrivateTmp=true
 PrivateDevices=true
 ProtectSystem=strict
 ProtectHome=true
 ProtectKernelTunables=true
+ProtectKernelModules=true
 ProtectKernelLogs=true
 ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
 LockPersonality=true
-MemoryDenyWriteExecute=true
-RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictRealtime=true
+RestrictSUIDSGID=true
 RestrictNamespaces=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 SystemCallArchitectures=native
 SystemCallFilter=@system-service
-ReadWritePaths=/var/lib/miyucloud /var/log/miyucloud
+CapabilityBoundingSet=
+AmbientCapabilities=
+MemoryDenyWriteExecute=true
 UMask=0077
+LimitNOFILE=65535
+ReadWritePaths=/var/lib/miyukini/miyucloud
 
 [Install]
 WantedBy=multi-user.target

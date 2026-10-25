@@ -1,3 +1,6 @@
+# MiyuCloud derrière Caddy (TLS ACME). Amont : 127.0.0.1:8086, comme l'unité
+# miyucloud.service et deploy/cog-vm/installer.sh. Domaine et courriel = exemples.
+
 {
     email admin@example.com
 }
@@ -7,10 +10,10 @@ miyucloud.example.com {
 
     @health path /health
     handle @health {
-        reverse_proxy 127.0.0.1:11442
+        reverse_proxy 127.0.0.1:8086
     }
 
-    reverse_proxy 127.0.0.1:11442
+    reverse_proxy 127.0.0.1:8086
 
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"

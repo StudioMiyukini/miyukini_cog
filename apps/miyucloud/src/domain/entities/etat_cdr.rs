@@ -12,8 +12,11 @@
 //!   archive, bureautique…) ou trop volumineux pour lui — octets d'origine
 //!   stockés à part, marqués « non désarmé », jamais ouverts par COG ;
 //! - **inconnu** : fichier antérieur au CDR (valeur par défaut de la
-//!   migration) ou écrit par un chemin qui ne déclare pas d'état — traité
-//!   comme non désarmé pour tout traitement de contenu (fermé par défaut).
+//!   migration) ou écrit par un chemin qui ne déclare pas d'état — **jamais
+//!   servi** (ni téléchargement, même avec accord, ni WebDAV, ni archive, ni
+//!   lien public, ni vignette) tant que la tâche de reclassement
+//!   (`ReclassementCdrService`) ne l'a pas repassé par le CDR : désarmable ⇒
+//!   `desarme`, non désarmable ⇒ `quarantaine` (décision du propriétaire).
 //!
 //! Les règles d'usage sont centralisées ici pour que chaque point de lecture
 //! (vignettes, aperçus, WOPI, liens publics, téléchargements, WebDAV) applique
@@ -76,24 +79,41 @@ impl EtatCdr {
     /// Le téléchargement par le propriétaire exige-t-il une action explicite
     /// (`?accepter_non_desarme=1`) ?
     ///
-    /// Oui pour la quarantaine. Les fichiers `Inconnu` (antérieurs au CDR)
-    /// restent téléchargeables par leur propriétaire sans drapeau, pour ne pas
-    /// couper les clients de synchronisation sur les données existantes ; ils
-    /// ne sont en revanche jamais ouverts par COG (voir
-    /// [`Self::autorise_traitement_contenu`]).
+    /// Oui pour la quarantaine seulement. Un fichier `Inconnu` n'est pas
+    /// téléchargeable du tout, accord ou non (voir
+    /// [`Self::attend_reclassement`]).
     pub fn exige_accord_telechargement(self) -> bool {
         self == Self::Quarantaine
     }
 
-    /// Téléchargement autorisé compte tenu de l'accord explicite éventuel.
+    /// Vrai pour un fichier antérieur au CDR (ou d'origine non déclarée) qui
+    /// n'a pas encore été repassé par le CDR : **jamais servi** tant qu'il est
+    /// dans cet état (fermé par défaut, plan §5 « reclassement »).
+    pub fn attend_reclassement(self) -> bool {
+        self == Self::Inconnu
+    }
+
+    /// Téléchargement autorisé compte tenu de l'accord explicite éventuel :
+    /// désarmé ⇒ oui ; quarantaine ⇒ seulement avec accord ; inconnu ⇒ jamais.
     pub fn autorise_telechargement(self, accord_explicite: bool) -> bool {
-        !self.exige_accord_telechargement() || accord_explicite
+        match self {
+            Self::Desarme => true,
+            Self::Quarantaine => accord_explicite,
+            Self::Inconnu => false,
+        }
     }
 
     /// Lecture WebDAV (`GET`) : un client DAV ne peut pas exprimer l'accord
-    /// explicite, la quarantaine y est donc refusée (403).
+    /// explicite ; seuls les fichiers désarmés y sont servis (sinon 403).
     pub fn autorise_lecture_dav(self) -> bool {
         self.autorise_telechargement(false)
+    }
+
+    /// Un fichier peut-il entrer dans une archive ZIP (dossier, lot) ?
+    /// Seulement s'il est désarmé : l'accord explicite se donne fichier par
+    /// fichier, et un fichier `Inconnu` n'est jamais servi.
+    pub fn autorise_archive(self) -> bool {
+        self.est_desarme()
     }
 }
 
@@ -135,6 +155,21 @@ pub const MESSAGE_QUARANTAINE: &str = "Fichier non désarmé (quarantaine CDR) :
      charge par le désarmement ou trop volumineux. Téléchargement possible uniquement après \
      accord explicite (paramètre accepter_non_desarme=1) ; jamais ouvert ni prévisualisé par COG.";
 
+/// Message renvoyé quand un fichier `inconnu` (antérieur au CDR, pas encore
+/// reclassé) est demandé : il n'est jamais servi, accord ou non.
+pub const MESSAGE_NON_RECLASSE: &str = "Fichier antérieur au désarmement (CDR), en attente de \
+     reclassement : il n'est pas servi tant qu'il n'a pas été repassé par le CDR (désarmé ou mis \
+     en quarantaine). Réessayer après le reclassement.";
+
+/// Message d'un refus de lecture pour un fichier non désarmé, selon son état.
+pub fn message_refus(etat: EtatCdr) -> &'static str {
+    if etat.attend_reclassement() {
+        MESSAGE_NON_RECLASSE
+    } else {
+        MESSAGE_QUARANTAINE
+    }
+}
+
 /// Interprète la valeur du paramètre d'accord (`1` ou `true`).
 pub fn accord_explicite(valeur: Option<&str>) -> bool {
     matches!(valeur, Some("1") | Some("true"))
@@ -169,8 +204,26 @@ mod tests {
         assert!(EtatCdr::Quarantaine.autorise_telechargement(true));
         assert!(!EtatCdr::Quarantaine.autorise_lecture_dav());
         assert!(EtatCdr::Desarme.autorise_telechargement(false));
-        assert!(EtatCdr::Inconnu.autorise_telechargement(false));
-        assert!(EtatCdr::Inconnu.autorise_lecture_dav());
+        assert!(EtatCdr::Desarme.autorise_lecture_dav());
+        assert!(EtatCdr::Desarme.autorise_archive());
+    }
+
+    #[test]
+    fn inconnu_jamais_servi() {
+        let e = EtatCdr::Inconnu;
+        assert!(e.attend_reclassement());
+        // Ni téléchargement (même avec accord), ni WebDAV, ni archive, ni
+        // lien public, ni traitement de contenu.
+        assert!(!e.autorise_telechargement(false));
+        assert!(!e.autorise_telechargement(true));
+        assert!(!e.autorise_lecture_dav());
+        assert!(!e.autorise_archive());
+        assert!(!e.autorise_lien_public());
+        assert!(!e.autorise_traitement_contenu());
+        assert_eq!(message_refus(e), MESSAGE_NON_RECLASSE);
+        assert_eq!(message_refus(EtatCdr::Quarantaine), MESSAGE_QUARANTAINE);
+        assert!(!EtatCdr::Quarantaine.autorise_archive());
+        assert!(!EtatCdr::Quarantaine.attend_reclassement());
     }
 
     #[test]

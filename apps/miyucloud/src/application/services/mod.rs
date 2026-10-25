@@ -22,6 +22,7 @@ pub mod gdpr_service;
 pub mod i18n_application_service;
 pub mod nextcloud_file_id_service;
 pub mod nextcloud_login_flow_service;
+pub mod reclassement_cdr_service;
 pub mod recent_service;
 pub mod search_service;
 pub mod share_service;

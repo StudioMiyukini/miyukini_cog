@@ -733,7 +733,7 @@ async fn handle_get(
         f
     };
 
-    // EX-45 : quarantaine CDR → 403 (un client DAV ne peut pas exprimer
+    // EX-45 : quarantaine ou inconnu (non reclassé) → 403 (un client DAV ne peut pas exprimer
     // l'accord explicite exigé). Propriété déjà confirmée ci-dessus, et l'état
     // n'est lu que pour le propriétaire (anti-IDOR) : sinon même 404.
     let etat = file_retrieval_service
@@ -744,7 +744,7 @@ async fn handle_get(
             _ => AppError::internal_error(format!("Failed to stream file: {}", e)),
         })?;
     if !etat.autorise_lecture_dav() {
-        return Err(AppError::non_desarme_dav());
+        return Err(AppError::non_desarme_dav(etat));
     }
 
     // Stream file content — constant ~64 KB memory regardless of file size

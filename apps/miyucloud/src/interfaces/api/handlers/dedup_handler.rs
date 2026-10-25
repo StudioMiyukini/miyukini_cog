@@ -366,9 +366,11 @@ impl DedupHandler {
                 .into_response();
         }
 
-        // Verify the user owns at least one file referencing this blob
+        // Verify the user owns at least one file referencing this blob, and
+        // (EX-45) that this file is disarmed: quarantined or `inconnu` content
+        // is never served by hash — same 404 (no oracle).
         if !dedup
-            .user_owns_blob_reference(&hash, &auth_user.id.to_string())
+            .user_owns_desarmed_blob_reference(&hash, &auth_user.id.to_string())
             .await
         {
             return Response::builder()

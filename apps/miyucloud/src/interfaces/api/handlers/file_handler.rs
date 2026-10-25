@@ -26,7 +26,7 @@ use crate::application::services::file_retrieval_service::FileRetrievalService;
 use crate::common::di::AppState;
 use crate::common::errors::{DomainError, ErrorKind};
 use crate::domain::entities::etat_cdr::{
-    ENTETE_ETAT_CDR, EtatCdr, MESSAGE_QUARANTAINE, PARAM_ACCORD_NON_DESARME, accord_explicite,
+    ENTETE_ETAT_CDR, EtatCdr, PARAM_ACCORD_NON_DESARME, accord_explicite, message_refus,
 };
 use crate::interfaces::errors::{AppError, ReponseOu500, reponse_json};
 use crate::interfaces::middleware::auth::AuthUser;
@@ -637,10 +637,11 @@ impl FileHandler {
                 .into_response();
         }
 
-        // ── EX-45 : quarantaine → accord explicite obligatoire ───────
+        // ── EX-45 : quarantaine → accord explicite obligatoire ; inconnu
+        //    (antérieur au CDR, non reclassé) → jamais servi ───────────
         let accord = accord_explicite(params.get(PARAM_ACCORD_NON_DESARME).map(String::as_str));
-        if !etat.autorise_telechargement(accord) {
-            return Self::refus_non_desarme(etat);
+        if let Some(refus) = Self::porte_telechargement(etat, accord) {
+            return refus;
         }
         // Non désarmé : servi en pièce jointe opaque, jamais transcodé ni
         // affiché en ligne (aucun composant COG n'ouvre le contenu).
@@ -1148,18 +1149,35 @@ impl FileHandler {
             .ou_500()
     }
 
-    /// Refus de téléchargement d'un fichier en quarantaine sans accord (EX-45).
+    /// Porte du téléchargement (EX-45) : `None` ⇒ servir ; `Some(r)` ⇒
+    /// répondre `r`. Désarmé : servi ; quarantaine : servi seulement avec
+    /// l'accord explicite ; inconnu : **jamais servi**, accord ou non.
+    fn porte_telechargement(etat: EtatCdr, accord: bool) -> Option<Response<Body>> {
+        if etat.autorise_telechargement(accord) {
+            None
+        } else {
+            Some(Self::refus_non_desarme(etat))
+        }
+    }
+
+    /// Refus de téléchargement d'un fichier non désarmé (EX-45) : quarantaine
+    /// sans accord, ou fichier `inconnu` en attente de reclassement.
     fn refus_non_desarme(etat: EtatCdr) -> Response<Body> {
-        let mut resp = (
-            StatusCode::FORBIDDEN,
-            Json(serde_json::json!({
-                "error": MESSAGE_QUARANTAINE,
+        let corps = if etat.attend_reclassement() {
+            serde_json::json!({
+                "error": message_refus(etat),
+                "error_type": "NonReclasse",
+                "etat_cdr": etat.as_str(),
+            })
+        } else {
+            serde_json::json!({
+                "error": message_refus(etat),
                 "error_type": "NonDesarme",
                 "etat_cdr": etat.as_str(),
                 "parametre_accord": PARAM_ACCORD_NON_DESARME,
-            })),
-        )
-            .into_response();
+            })
+        };
+        let mut resp = (StatusCode::FORBIDDEN, Json(corps)).into_response();
         if let Ok(v) = header::HeaderValue::from_str(etat.as_str()) {
             resp.headers_mut().insert(ENTETE_ETAT_CDR, v);
         }
@@ -1355,6 +1373,31 @@ mod tests_cdr {
         let resp = FileHandler::refus_non_desarme(etat);
         assert_eq!(resp.status(), StatusCode::FORBIDDEN);
         assert_eq!(resp.headers().get(ENTETE_ETAT_CDR).unwrap(), "quarantaine");
+    }
+
+    /// Plan §5 : un fichier `inconnu` (antérieur au CDR) n'est jamais servi
+    /// par le téléchargement, même avec l'accord explicite.
+    #[tokio::test]
+    async fn telechargement_inconnu_jamais_servi() {
+        let alice = Uuid::new_v4();
+        let source = source_alice(alice, EtatCdr::Inconnu);
+        let etat = FileHandler::etat_cdr_apres_acces(&source, ID_ALICE, alice)
+            .await
+            .unwrap();
+        for accord in [false, true] {
+            let resp = FileHandler::porte_telechargement(etat, accord)
+                .expect("un fichier inconnu ne doit jamais être servi");
+            let (statut, entetes, corps) = decomposer(resp).await;
+            assert_eq!(statut, StatusCode::FORBIDDEN);
+            assert_eq!(entetes.get(ENTETE_ETAT_CDR).unwrap(), "inconnu");
+            let v: serde_json::Value = serde_json::from_slice(&corps).unwrap();
+            assert_eq!(v["error_type"], "NonReclasse");
+            assert!(v.get("parametre_accord").is_none());
+        }
+        // Témoins : désarmé servi ; quarantaine servie avec accord seulement.
+        assert!(FileHandler::porte_telechargement(EtatCdr::Desarme, false).is_none());
+        assert!(FileHandler::porte_telechargement(EtatCdr::Quarantaine, false).is_some());
+        assert!(FileHandler::porte_telechargement(EtatCdr::Quarantaine, true).is_none());
     }
 
     #[test]
