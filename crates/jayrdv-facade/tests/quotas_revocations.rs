@@ -362,3 +362,15 @@ fn instantane_du_lancement_borne_a_15_minutes() {
     let r = cache(&mut f, &a, T0 + 101);
     assert_eq!((r.statut == 200, motif(&r).as_str()), (false, "identite"));
 }
+
+#[test]
+fn instantane_ancien_refuse_meme_a_la_premiere_requete() {
+    let m = monde(|_| {});
+    // Instantané daté de T0 − 2 000 : la façade ne s'ouvre qu'à T0 ; la borne
+    // suit la tête de la liste, pas l'heure d'ouverture.
+    let (_, a) = m.appareil(T0 - 100);
+    let mut f = FacadeJayRdv::new(m.lancement(vec![a.cle_appareil()]), m.configuration(T0 - 2_000));
+    defi(&mut f, T0);
+    let r = cache(&mut f, &a, T0 + 1);
+    assert_eq!((r.statut == 200, motif(&r).as_str()), (false, "identite"));
+}

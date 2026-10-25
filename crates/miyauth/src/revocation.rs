@@ -122,6 +122,11 @@ impl ListeRevocation {
         &self.cog
     }
 
+    /// Horodatage de la dernière tête vérifiée.
+    pub fn a_jour_au(&self) -> u64 {
+        self.a_jour_au
+    }
+
     /// Nombre de cibles révoquées.
     pub fn len(&self) -> usize {
         self.cibles.len()
@@ -169,6 +174,11 @@ impl RevocationsFederees {
     /// Ajoute ou remplace la liste d'un COG.
     pub fn inserer(&mut self, liste: ListeRevocation) {
         self.listes.insert(liste.cog.clone(), liste);
+    }
+
+    /// Liste d'un COG.
+    pub fn liste(&self, cog: &CogId) -> Option<&ListeRevocation> {
+        self.listes.get(cog)
     }
 
     /// Accès mutable à la liste d'un COG (révocation locale).

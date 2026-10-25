@@ -78,24 +78,23 @@ pub struct ConfigurationFacade {
     /// Instantané des révocations, remis à chaque lancement : utilisé
     /// seulement sans poignée de rafraîchissement
     /// ([`FacadeJayRdv::avec_revocations`]), et 15 min au plus après
-    /// l'ouverture de la façade (puis tout titre est refusé).
+    /// la tête vérifiée de chaque liste (puis tout titre de cet émetteur est refusé).
     pub revocations: RevocationsFederees,
 }
 
-/// Instantané borné : refuse tout au-delà de `valable_jusqu_a`.
+/// Instantané borné : la liste de l'émetteur n'est valable que 15 min après
+/// **sa propre** tête vérifiée (`a_jour_au`), quelle que soit sa fraîcheur
+/// déclarée et quelle que soit l'heure d'ouverture de la façade.
 struct InstantaneBorne<'a> {
     liste: &'a RevocationsFederees,
-    valable_jusqu_a: u64,
 }
 
 impl SourceRevocation for InstantaneBorne<'_> {
     fn est_revoque(&self, emetteur: &CogId, cible: &CibleRevocation, maintenant_secs: u64)
         -> Result<bool, ErreurRevocation> {
-        if maintenant_secs > self.valable_jusqu_a {
-            return Err(ErreurRevocation::Perimee {
-                a_jour_au: self.valable_jusqu_a.saturating_sub(FRAICHEUR_REVOCATIONS_FACADE_SECS),
-                maintenant: maintenant_secs,
-            });
+        let a_jour_au = self.liste.liste(emetteur).ok_or(ErreurRevocation::ListeAbsente)?.a_jour_au();
+        if a_jour_au.saturating_add(FRAICHEUR_REVOCATIONS_FACADE_SECS) < maintenant_secs {
+            return Err(ErreurRevocation::Perimee { a_jour_au, maintenant: maintenant_secs });
         }
         self.liste.est_revoque(emetteur, cible, maintenant_secs)
     }
@@ -279,10 +278,7 @@ impl FacadeJayRdv {
             pop: r.entete("x-miyu-pop"),
             liaison: None,
         };
-        let instantane = InstantaneBorne {
-            liste: &self.config.revocations,
-            valable_jusqu_a: self.ouverte_le.unwrap_or(0).saturating_add(FRAICHEUR_REVOCATIONS_FACADE_SECS),
-        };
+        let instantane = InstantaneBorne { liste: &self.config.revocations };
         let revocations: &dyn SourceRevocation = match &self.revocations {
             Some(r) => r,
             None => &instantane,
