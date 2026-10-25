@@ -14,7 +14,10 @@
 //! remplacée), puis contrôle de l'étiquette et du chiffrement — refus sinon.
 
 use std::collections::HashMap;
+use std::future::Future;
 use std::path::Path;
+use std::sync::Arc;
+use std::time::Duration;
 
 use chrono::{DateTime, Utc};
 use kindmother_client::{
@@ -22,6 +25,8 @@ use kindmother_client::{
     TypedWriteIntent,
 };
 use serde_json::Value;
+use tokio::sync::Mutex;
+use tracing::{error, info, warn};
 use uuid::Uuid;
 
 use crate::entrepot::{Contenu, Ecriture, Entrepot};
@@ -81,10 +86,84 @@ fn err_client(e: &ClientError) -> ErreurMemoire {
     ErreurMemoire::Entrepot(e.to_string())
 }
 
+/// Erreur d'écriture : contrainte violée = conflit, sinon erreur d'entrepôt.
+fn err_ecriture(e: ClientError) -> ErreurMemoire {
+    match e {
+        ClientError::Service(m) if m.contains("UNIQUE") || m.contains("constraint") => ErreurMemoire::Conflit(m),
+        autre => err_client(&autre),
+    }
+}
+
+/// Erreur de transport : la connexion est perdue (fermée, rompue, réinitialisée, fin
+/// de flux) ; une nouvelle poignée de main peut la rétablir. Jamais une erreur
+/// d'authentification ni un refus du service.
+fn est_transport(e: &ClientError) -> bool {
+    matches!(e, ClientError::Transport(_) | ClientError::NotConnected | ClientError::Timeout(_))
+}
+
+/// Refus d'un rejeu par KindMother : l'identifiant d'intention figure déjà au journal,
+/// donc la première soumission lui est parvenue.
+fn est_deja_journalisee(e: &ClientError) -> bool {
+    e.to_string().contains("intent id already used")
+}
+
+/// Attentes avant chaque tentative de reconnexion d'un même appel (backoff borné :
+/// 3 poignées de main au plus, ~0,65 s d'attente cumulée, puis erreur explicite).
+const ATTENTES_RECONNEXION: [Duration; 3] =
+    [Duration::ZERO, Duration::from_millis(150), Duration::from_millis(500)];
+
+/// État de la connexion partagée.
+struct Connexion {
+    /// Connexion courante ; `None` après une erreur de transport (rouverte à l'appel suivant).
+    client: Option<Arc<KindMotherClient>>,
+    /// Authentification refusée lors d'une reconnexion : verrou définitif, aucune
+    /// nouvelle poignée de main jusqu'à une nouvelle [`EntrepotKindMother::connecter`].
+    auth_refusee: Option<String>,
+}
+
+/// Issue d'un lot d'écritures relue dans la base après une coupure.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum IssueLot {
+    Appliquee,
+    NonAppliquee,
+    /// Ni tout ni rien : impossible pour un lot atomique, refusé.
+    Incoherente,
+}
+
+/// Ce qu'il faut relire pour savoir si un lot interrompu a été appliqué.
+enum Verification<'a> {
+    Lot(&'a [Ecriture]),
+    Etiquette,
+}
+
 /// Entrepôt KindMother d'un utilisateur.
+///
+/// # Reprise après coupure
+///
+/// La connexion à KindMother peut tomber (redémarrage du service, réseau). Sur une
+/// erreur de **transport** (connexion fermée, *broken pipe*, *reset*, fin de flux),
+/// l'entrepôt abandonne la connexion et en rouvre une — nouvelle poignée de main
+/// authentifiée avec le même justificatif — en 3 tentatives au plus par appel
+/// (backoff borné) ; au-delà, erreur explicite, et l'appel suivant réessaie.
+///
+/// - **Lectures et migrations** (idempotentes) : rejouées une fois sur la connexion rouverte.
+/// - **Écritures** : jamais rejouées à l'aveugle. Les identifiants d'intention sont
+///   fixés avant l'envoi ; après la coupure, l'état est **relu** :
+///   lot présent → succès (pas de doublon) ; lot absent → rejoué **une** fois avec les
+///   **mêmes** identifiants, que KindMother refuse s'il a déjà journalisé la première
+///   soumission (non-réutilisation des identifiants : aucun double effet possible,
+///   même si l'original était encore en vol) ; état incohérent, relecture impossible
+///   ou rejeu refusé sans lot présent → erreur explicite « issue inconnue ».
+/// - **Authentification refusée** à la reconnexion : jamais réessayée ; l'entrepôt se
+///   verrouille (toutes les opérations échouent) jusqu'à une nouvelle connexion explicite.
+///
+/// Le justificatif de l'opérateur reste en mémoire pour la durée de vie de l'entrepôt
+/// (nécessaire à la reconnexion ; effacé à la destruction, `ZeroizeOnDrop`).
 pub struct EntrepotKindMother {
-    client: KindMotherClient,
+    adresse: String,
+    justificatif: OperatorCredential,
     base: String,
+    connexion: Mutex<Connexion>,
 }
 
 impl EntrepotKindMother {
@@ -96,15 +175,20 @@ impl EntrepotKindMother {
         credentials: Option<&Path>,
     ) -> Result<Self, ErreurMemoire> {
         let base = nom_base(utilisateur)?;
-        let cred = match credentials {
+        let justificatif = match credentials {
             Some(dir) => OperatorCredential::load_from_dir(&base, dir),
             None => OperatorCredential::load(&base),
         }
         .map_err(|e| err_client(&e))?;
-        let client = KindMotherClient::connect(adresse, &cred, &base)
+        let client = KindMotherClient::connect(adresse, &justificatif, &base)
             .await
             .map_err(|e| err_client(&e))?;
-        Ok(Self { client, base })
+        Ok(Self {
+            adresse: adresse.to_string(),
+            justificatif,
+            base,
+            connexion: Mutex::new(Connexion { client: Some(Arc::new(client)), auth_refusee: None }),
+        })
     }
 
     /// Nom de la base.
@@ -112,11 +196,196 @@ impl EntrepotKindMother {
         &self.base
     }
 
+    /// Connexion courante, rouverte au besoin (backoff borné). Une authentification
+    /// refusée verrouille l'entrepôt : aucune poignée de main n'est retentée.
+    async fn client(&self) -> Result<Arc<KindMotherClient>, ErreurMemoire> {
+        let mut cx = self.connexion.lock().await;
+        if let Some(motif) = &cx.auth_refusee {
+            return Err(ErreurMemoire::Entrepot(format!(
+                "authentification KindMother refusée à la reconnexion ({motif}) : \
+                 reconnexion suspendue, nouvelle connexion explicite requise"
+            )));
+        }
+        if let Some(c) = &cx.client {
+            return Ok(Arc::clone(c));
+        }
+        let mut derniere = String::new();
+        for attente in ATTENTES_RECONNEXION {
+            if !attente.is_zero() {
+                tokio::time::sleep(attente).await;
+            }
+            match KindMotherClient::connect(&self.adresse, &self.justificatif, &self.base).await {
+                Ok(c) => {
+                    info!(base = %self.base, "connexion KindMother rétablie");
+                    let c = Arc::new(c);
+                    cx.client = Some(Arc::clone(&c));
+                    return Ok(c);
+                }
+                Err(ClientError::Authentication(motif)) => {
+                    error!(base = %self.base, %motif, "authentification KindMother refusée à la reconnexion : entrepôt verrouillé");
+                    cx.auth_refusee = Some(motif.clone());
+                    return Err(ErreurMemoire::Entrepot(format!(
+                        "authentification KindMother refusée à la reconnexion : {motif}"
+                    )));
+                }
+                Err(e) => {
+                    warn!(base = %self.base, erreur = %e, "reconnexion à KindMother impossible");
+                    derniere = e.to_string();
+                }
+            }
+        }
+        Err(ErreurMemoire::Entrepot(format!(
+            "KindMother injoignable ({} tentatives de reconnexion) : {derniere}",
+            ATTENTES_RECONNEXION.len()
+        )))
+    }
+
+    /// Abandonne la connexion `c` après une erreur de transport (sauf si une autre
+    /// tâche l'a déjà remplacée).
+    async fn abandonner(&self, c: &Arc<KindMotherClient>, cause: &ClientError) {
+        let mut cx = self.connexion.lock().await;
+        if cx.client.as_ref().is_some_and(|x| Arc::ptr_eq(x, c)) {
+            warn!(base = %self.base, %cause, "connexion KindMother perdue : elle sera rouverte");
+            cx.client = None;
+        }
+    }
+
+    /// Opération **idempotente** (lecture, migrations versionnées) : sur erreur de
+    /// transport, reconnexion puis **un** rejeu.
+    async fn idempotente<T, F, Fut>(&self, op: F) -> Result<T, ErreurMemoire>
+    where
+        F: Fn(Arc<KindMotherClient>) -> Fut,
+        Fut: Future<Output = Result<T, ClientError>>,
+    {
+        let c = self.client().await?;
+        match op(Arc::clone(&c)).await {
+            Err(e) if est_transport(&e) => {
+                self.abandonner(&c, &e).await;
+                let c = self.client().await?;
+                match op(Arc::clone(&c)).await {
+                    Err(e) if est_transport(&e) => {
+                        self.abandonner(&c, &e).await;
+                        Err(err_client(&e))
+                    }
+                    r => r.map_err(|e| err_client(&e)),
+                }
+            }
+            r => r.map_err(|e| err_client(&e)),
+        }
+    }
+
     async fn lignes(&self, table: &str) -> Result<Vec<HashMap<String, Value>>, ErreurMemoire> {
-        self.client
-            .select(TypedSelect::from(table))
+        self.idempotente(|c| async move { c.select(TypedSelect::from(table)).await })
             .await
-            .map_err(|e| err_client(&e))
+    }
+
+    /// Soumet un lot atomique d'intentions ; après une coupure, relit l'état au lieu
+    /// de rejouer à l'aveugle (voir la documentation du type).
+    async fn ecrire(
+        &self,
+        mut intentions: Vec<TypedWriteIntent>,
+        verification: Verification<'_>,
+    ) -> Result<(), ErreurMemoire> {
+        // Identifiants fixés avant l'envoi : un rejeu porte les mêmes (anti-doublon côté KindMother).
+        for i in &mut intentions {
+            if i.intent_id.is_empty() {
+                i.intent_id = Uuid::new_v4().to_string();
+            }
+        }
+        let c = self.client().await?;
+        let cause = match c.submit_batch(intentions.clone()).await {
+            Ok(_) => return Ok(()),
+            Err(e) if est_transport(&e) => e,
+            Err(e) => return Err(err_ecriture(e)),
+        };
+        self.abandonner(&c, &cause).await;
+        let inconnue = |detail: String| {
+            ErreurMemoire::Entrepot(format!(
+                "écriture interrompue ({cause}) : issue inconnue, non rejouée ({detail})"
+            ))
+        };
+        let c = self.client().await.map_err(|e| inconnue(e.to_string()))?;
+        match self.issue(&c, &verification).await.map_err(|e| inconnue(e.to_string()))? {
+            IssueLot::Appliquee => {
+                info!(base = %self.base, "écriture interrompue déjà appliquée : non rejouée");
+                Ok(())
+            }
+            IssueLot::Incoherente => Err(inconnue("état relu incohérent".to_string())),
+            IssueLot::NonAppliquee => match c.submit_batch(intentions).await {
+                Ok(_) => {
+                    info!(base = %self.base, "écriture interrompue non appliquée : rejouée une fois");
+                    Ok(())
+                }
+                // La première soumission avait atteint le journal : l'état fait foi.
+                Err(e) if est_deja_journalisee(&e) => {
+                    match self.issue(&c, &verification).await.map_err(|e| inconnue(e.to_string()))? {
+                        IssueLot::Appliquee => Ok(()),
+                        _ => Err(inconnue("première soumission journalisée mais non appliquée".to_string())),
+                    }
+                }
+                Err(e) if est_transport(&e) => {
+                    self.abandonner(&c, &e).await;
+                    Err(inconnue(format!("rejeu interrompu : {e}")))
+                }
+                Err(e) => Err(err_ecriture(e)),
+            },
+        }
+    }
+
+    /// Relit la base pour savoir si un lot a été appliqué (lot atomique : tout ou rien).
+    async fn issue(
+        &self,
+        c: &KindMotherClient,
+        verification: &Verification<'_>,
+    ) -> Result<IssueLot, ClientError> {
+        let lire = |table: &'static str, cle: &'static str, valeur: String| {
+            c.select(TypedSelect::from(table).filter(cle, valeur))
+        };
+        let mut presences = Vec::new();
+        match verification {
+            Verification::Etiquette => {
+                let lignes = lire("meta", "cle", "etiquette".to_string()).await?;
+                presences.push(
+                    lignes
+                        .iter()
+                        .any(|l| l.get("valeur").and_then(Value::as_str) == Some(ETIQUETTE.as_str())),
+                );
+            }
+            Verification::Lot(lot) => {
+                for e in *lot {
+                    presences.push(match e {
+                        Ecriture::AjouterVersion(n) => lire("versions", "id", n.id.as_str().to_string())
+                            .await?
+                            .iter()
+                            .any(|l| {
+                                l.get("version").and_then(Value::as_i64) == Some(i64::from(n.version))
+                                    && l.get("enregistre_le").and_then(Value::as_str)
+                                        == Some(n.enregistre_le.to_rfc3339().as_str())
+                            }),
+                        Ecriture::AjouterCandidat(k) => {
+                            !lire("candidats", "id", k.id.to_string()).await?.is_empty()
+                        }
+                        Ecriture::RetirerCandidat(id) => {
+                            lire("candidats", "id", id.to_string()).await?.is_empty()
+                        }
+                        Ecriture::Oublier(t) => lire("tombes", "id", t.id.as_str().to_string())
+                            .await?
+                            .iter()
+                            .any(|l| {
+                                l.get("oublie_le").and_then(Value::as_str)
+                                    == Some(t.oublie_le.to_rfc3339().as_str())
+                            }),
+                    });
+                }
+            }
+        }
+        Ok(if presences.iter().all(|p| *p) {
+            IssueLot::Appliquee
+        } else if presences.iter().any(|p| *p) {
+            IssueLot::Incoherente
+        } else {
+            IssueLot::NonAppliquee
+        })
     }
 }
 
@@ -277,10 +546,9 @@ fn intention(e: &Ecriture) -> Vec<TypedWriteIntent> {
 
 impl Entrepot for EntrepotKindMother {
     async fn preparer(&self) -> Result<(), ErreurMemoire> {
-        self.client
-            .apply_migrations(migrations())
-            .await
-            .map_err(|e| err_client(&e))?;
+        // Migrations versionnées : idempotentes, rejouables après une coupure.
+        self.idempotente(|c| async move { c.apply_migrations(migrations()).await })
+            .await?;
         // Étiquette posée à la création, jamais remplacée ; toute autre valeur : refus.
         let meta = self.lignes("meta").await?;
         let etiquette = meta
@@ -288,22 +556,23 @@ impl Entrepot for EntrepotKindMother {
             .find(|l| l.get("cle").and_then(Value::as_str) == Some("etiquette"));
         match etiquette {
             None => {
-                self.client
-                    .submit(
-                        TypedWriteIntent::insert("meta")
-                            .value("cle", "etiquette")
-                            .value("valeur", ETIQUETTE.as_str())
-                            .purpose("memoire_etiquette"),
-                    )
-                    .await
-                    .map_err(|e| err_client(&e))?;
+                self.ecrire(
+                    vec![TypedWriteIntent::insert("meta")
+                        .value("cle", "etiquette")
+                        .value("valeur", ETIQUETTE.as_str())
+                        .purpose("memoire_etiquette")],
+                    Verification::Etiquette,
+                )
+                .await?;
             }
             Some(l) => match l.get("valeur").and_then(Value::as_str) {
                 Some(v) if v == ETIQUETTE.as_str() => {}
                 autre => return Err(ErreurMemoire::EtiquetteInvalide(autre.unwrap_or_default().to_string())),
             },
         }
-        let info = self.client.database_info().await.map_err(|e| err_client(&e))?;
+        let info = self
+            .idempotente(|c| async move { c.database_info().await })
+            .await?;
         if !info.encrypted {
             return Err(ErreurMemoire::NonChiffree);
         }
@@ -328,13 +597,6 @@ impl Entrepot for EntrepotKindMother {
         }
         // Lot atomique côté KindMother. L'existence des candidats retirés est vérifiée par
         // la façade sur un état relu sous verrou d'écriture.
-        self.client
-            .submit_batch(intentions)
-            .await
-            .map_err(|e| match e {
-                ClientError::Service(m) if m.contains("UNIQUE") || m.contains("constraint") => ErreurMemoire::Conflit(m),
-                autre => err_client(&autre),
-            })?;
-        Ok(())
+        self.ecrire(intentions, Verification::Lot(&lot)).await
     }
 }
