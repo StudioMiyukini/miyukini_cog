@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.13 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.14 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -72,6 +72,7 @@
 | A-011 | 2026-10-25 | Lot 2 §5 · Zones §16 · Services hybrides §4.1 · Mémoire MAIA §9 : formats et choix consignés tels qu'implémentés — fichier de clé racine `MYRC`, durcissement du processus, état fédéral `MFED`, quotas et révocations de la façade, chemin TAMR et routes de la mémoire ; **à valider par le propriétaire** | 1.11 |
 | A-012 | 2026-10-25 | Lot 2 §6, §8 · Services hybrides §3 · Zones §7 : choix consignés tels qu'implémentés — clé d'appareil par COG de destination, transport des registres de révocation vers Origin et MiyuCloud, fichiers MiyuCloud `inconnu`, Landlock du sas, installateur de modèles de Central ; **à valider par le propriétaire** | 1.12 |
 | A-013 | 2026-10-25 | Corrections de la revue de sécurité du 2026-10-25 : formats révisés (liaison d'appareil v2, synchro par morceaux, `MFED` v2, sas code 7), chiffrement des blobs MiyuCloud `MIYUCENC` v1, garde-fous MAIA (provenance `Inconnue`, compétence `memoire`, clé d'approbation TAMR distincte, publication par capacité) ; **à valider par le propriétaire** | 1.13 |
+| A-014 | 2026-10-25 | Synchro des révocations vers Origin : chaque envoi (morceau ou tête) signé par la clé de journal du COG, débit par COG après authentification, budget global ; **à valider par le propriétaire** | 1.14 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -520,3 +521,15 @@
   - Approbation TAMR signée par une clé **distincte** (`MAIA_TAMR_CLES_APPROBATION`, usage `maia/tamr-approbation/<instance>/<utilisateur>`) ; la description et l'empreinte couvrent la cible et sa version ; constructeurs TAMR scellés (jeton unique par processus) ; signatures des routes liées à l'instance (en-tête `x-maia-instance`) ; débit 60/min par IP
   - Publication fédérée par **capacité** : seule une Fiche du COG local est publiable ; Fiche originale publiable seulement via l'étiquette `publiable` de KindMother (EX-47, pas encore implémentée : aucune publication originale possible) ; `reprises` sans doublon et égales aux sources
 - **Impact** : EX-14, EX-36, EX-32..35, EX-44, EX-45, EX-50..56, EX-57, EX-60 ; NC-ANSSI-25
+
+### A-014 — Enveloppe signée de la synchro des révocations
+
+<!-- @id arch.gel.a014 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a014 -->
+
+- **Date** : 2026-10-25 · **version** 1.14 · complète A-013 après une revue de sécurité : la synchro par morceaux non authentifiée permettait à un tiers de purger l'attente d'un COG ou d'épuiser son débit (déni de la fraîcheur des révocations) ; **validation du propriétaire attendue**
+- **Enveloppe** : corps `{cog_id, depuis, tete?, entrees, echeance, signature}` ; signature Ed25519 (`verify_strict`) par la **clé de journal épinglée** du COG sur `"miyukini/origin/revocations/morceau/v1" || 0x00 || len(cog_id) u16 || cog_id || depuis u64 || nombre d'entrées u64 || SHA-256(entrées préfixées de leur longueur u32) || tête présente u8 || SHA-256(tête) ou 32 × 0 || echeance u64` ; exigée sur **chaque** envoi, tête comprise ; `maintenant ≤ echeance ≤ maintenant + 15 min + 120 s`
+- **Comportement** : signature vérifiée avant toute lecture ou modification d'état ; non authentifié ⇒ 401 **sans purge** ; mauvaise position authentifiée ⇒ 409 sans purge ; purge seulement sur tête authentifiée refusée, bornes du COG dépassées ou attente de plus de 15 min ; enveloppe rejouée sans effet (mémorisée jusqu'à son échéance, ≤ 8 192 par COG)
+- **Débit et budget** : limite par IP avant analyse, limite par COG **après** authentification ; budget global de l'attente 2 097 152 entrées et 512 Mio, en plus des bornes par COG
+- **Impact** : EX-35, EX-36 ; client côté COG à écrire (format fixé ici)
