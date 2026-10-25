@@ -114,3 +114,7 @@ Origin_VPS_SSH_and_IP
 # Journaux des hooks de revue (outillage local)
 receipts/
 review-receipts/
+
+# Couverture (cargo-llvm-cov)
+*.profraw
+__pycache__/
