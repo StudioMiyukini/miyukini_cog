@@ -31,14 +31,28 @@
 //! # Écriture atomique
 //!
 //! Nouvelle génération `g + 1` : suppression des restes de `g + 1` (écriture
-//! interrompue) et de `g − 1` (génération périmée), insertion des morceaux de
-//! `g + 1`, puis **bascule du pointeur** (`Update` gardé par
-//! `generation = g`, ou `Insert` au premier état) : un lot KindMother
-//! (transaction) quand l'état tient en ≤ 4 morceaux (≤ 1 Mio), sinon des lots
-//! de morceaux puis un lot final de bascule. Tant que le pointeur n'a pas
-//! basculé, la lecture rend l'état `g` intact. Bascule sans effet (pointeur
-//! déplacé par un autre écrivain) ⇒ refus. Un seul écrivain par base
-//! (l'opérateur `miyufederation` est propre au processus de fédération).
+//! interrompue) et de `g − 1` (purge interrompue d'une écriture antérieure),
+//! insertion des morceaux de `g + 1`, puis **bascule du pointeur** (`Update`
+//! gardé par `generation = g`, ou `Insert` au premier état) : un lot
+//! KindMother (transaction) quand l'état tient en ≤ 4 morceaux (≤ 1 Mio),
+//! sinon des lots de morceaux puis un lot final de bascule. Tant que le
+//! pointeur n'a pas basculé, la lecture rend l'état `g` intact. Bascule sans
+//! effet (pointeur déplacé par un autre écrivain) ⇒ refus, rien n'est purgé.
+//! **Aussitôt la bascule réussie**, les morceaux de `g` sont supprimés (lot
+//! suivant : une suppression ne peut pas être conditionnée à la bascule dans
+//! le même lot, et une bascule sans effet ne doit jamais purger l'état
+//! courant) ; une interruption entre les deux laisse `g` jusqu'à l'écriture
+//! suivante, qui le purge. Un seul écrivain par base (l'opérateur
+//! `miyufederation` est propre au processus de fédération).
+//!
+//! # Retour arrière
+//!
+//! KindMother n'est pas une source de confiance : un acteur capable d'écrire
+//! dans la base pourrait y restaurer un ancien pointeur et ses morceaux
+//! (copiés avant leur purge). L'état restauré est authentique (HMAC) mais
+//! **périmé** : la vue persistante le refuse par sa génération scellée,
+//! confrontée au compteur de fraîcheur tenu hors de KindMother
+//! ([`crate::fraicheur`]).
 //!
 //! # Lecture
 //!
@@ -296,6 +310,14 @@ impl SupportKindMother {
             return Err(ErreurEtat::Support(
                 "KindMother : pointeur de l'état déplacé par un autre écrivain".to_string(),
             ));
+        }
+        // Bascule faite : la génération précédente n'est plus lisible, ses
+        // morceaux sont purgés sans attendre (voir module).
+        if ancienne >= 1 {
+            self.soumettre(vec![TypedWriteIntent::delete("etat_morceaux")
+                .key("generation", i64_de(ancienne)?)
+                .purpose("federation_etat_perime")])
+                .await?;
         }
         Ok(())
     }

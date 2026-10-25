@@ -134,6 +134,28 @@ pub enum ErreurEtat {
     /// inconnue : rien n'est réputé écrit.
     #[error("état fédéral : support de stockage : {0}")]
     Support(String),
+    /// État authentique **plus ancien** que le compteur de fraîcheur local
+    /// (retour arrière : ancien état restauré dans le support).
+    #[error("état fédéral périmé : génération {etat} pour {compteur} au compteur de fraîcheur local (retour arrière)")]
+    EtatPerime {
+        /// Génération scellée dans l'état lu.
+        etat: u64,
+        /// Génération du compteur de fraîcheur local.
+        compteur: u64,
+    },
+    /// Même génération que le compteur de fraîcheur, mais empreinte différente
+    /// (autre état authentique de même rang : écriture abandonnée restaurée).
+    #[error("état fédéral divergent : génération {0} d'empreinte différente du compteur de fraîcheur local")]
+    EtatDivergent(u64),
+    /// Compteur de fraîcheur local absent alors qu'un état existe : la
+    /// fraîcheur ne peut pas être établie ; rechargement refusé jusqu'au
+    /// réamorçage explicite ([`crate::FederationPersistante::reamorcer_compteur`]).
+    #[error("état fédéral : compteur de fraîcheur local absent (réamorçage explicite requis)")]
+    CompteurAbsent,
+    /// Compteur de fraîcheur local illisible, altéré, en recul, ou état en
+    /// avance de plus d'une génération sur lui.
+    #[error("état fédéral : compteur de fraîcheur local incohérent : {0}")]
+    CompteurIncoherent(&'static str),
 }
 
 /// Tête du registre local scellée dans l'état (`taille` entrées, racine Merkle).
@@ -210,6 +232,8 @@ fn revocation_federale(octets: &[u8]) -> Option<(Kid, u64)> {
 /// Vue reprise d'octets `MFED` et confrontée au registre local.
 pub(crate) struct Repris {
     pub(crate) federation: Federation,
+    /// Génération scellée (numéro d'écriture, `MFED` v4 ; 0 avant).
+    pub(crate) generation: u64,
     /// Révocations du registre postérieures à l'ancre, ré-appliquées.
     pub(crate) reappliquees: usize,
     /// La vue a changé (rattrapage, ré-application) ou le registre a avancé :
@@ -229,7 +253,8 @@ pub(crate) fn reprendre_avec_registre<R: RegistreLocal + ?Sized>(
     maintenant: u64,
     registre: &R,
 ) -> Result<Repris, ErreurEtat> {
-    let (mut federation, definitives, ancre) = Federation::reprendre(octets, cle, parametres, origin, maintenant)?;
+    let (mut federation, definitives, ancre, generation) =
+        Federation::reprendre_generation(octets, cle, parametres, origin, maintenant)?;
     if !registre.prolonge(&ancre) {
         return Err(ErreurEtat::RegistreIncoherent);
     }
@@ -246,7 +271,7 @@ pub(crate) fn reprendre_avec_registre<R: RegistreLocal + ?Sized>(
         || reappliquees > 0
         || AncreRegistre::de(registre) != ancre
         || octets.get(4) != Some(&crate::federation::VERSION_ECRITE);
-    Ok(Repris { federation, reappliquees, a_reecrire })
+    Ok(Repris { federation, generation, reappliquees, a_reecrire })
 }
 
 /// L'entrée `index` du registre local doit être la révocation fédérale de `kid`.
@@ -340,14 +365,14 @@ fn io(contexte: &str, e: &std::io::Error) -> ErreurEtat {
 }
 
 #[cfg(unix)]
-fn mode(meta: &std::fs::Metadata) -> u32 {
+pub(crate) fn mode(meta: &std::fs::Metadata) -> u32 {
     use std::os::unix::fs::PermissionsExt;
     meta.permissions().mode()
 }
 
 /// Propriétaire = uid effectif du processus.
 #[cfg(unix)]
-fn controler_proprietaire(meta: &std::fs::Metadata) -> Result<(), ErreurEtat> {
+pub(crate) fn controler_proprietaire(meta: &std::fs::Metadata) -> Result<(), ErreurEtat> {
     use std::os::unix::fs::MetadataExt;
     if meta.uid() == rustix::process::geteuid().as_raw() {
         Ok(())
@@ -359,12 +384,12 @@ fn controler_proprietaire(meta: &std::fs::Metadata) -> Result<(), ErreurEtat> {
 /// Ouvre (crée en `0600`) le fichier de verrou sans suivre de lien, contrôle
 /// qu'il est ordinaire et à nous, puis prend un `flock` exclusif non bloquant.
 #[cfg(unix)]
-fn verrouiller(dossier: &Path) -> Result<std::fs::File, ErreurEtat> {
+pub(crate) fn verrouiller(dossier: &Path, nom: &str) -> Result<std::fs::File, ErreurEtat> {
     use rustix::fs::{flock, FlockOperation, Mode, OFlags};
     use rustix::io::Errno;
 
     let fd = rustix::fs::open(
-        dossier.join(FICHIER_VERROU),
+        dossier.join(nom),
         OFlags::RDWR | OFlags::CREATE | OFlags::NOFOLLOW | OFlags::CLOEXEC | OFlags::NOCTTY,
         Mode::from_raw_mode(0o600),
     )
@@ -385,6 +410,119 @@ fn verrouiller(dossier: &Path) -> Result<std::fs::File, ErreurEtat> {
     }
 }
 
+/// Crée (en `0700`, sans fenêtre en droits ouverts) ou contrôle un dossier
+/// privé : lien symbolique ou non-dossier ⇒ refus ; propriétaire ≠ uid
+/// effectif ⇒ refus ; droits ramenés à `0700`.
+pub(crate) fn preparer_dossier(dossier: &Path) -> Result<(), ErreurEtat> {
+    match std::fs::symlink_metadata(dossier) {
+        Ok(meta) if !meta.file_type().is_dir() => return Err(ErreurEtat::LienSymbolique),
+        Ok(_) => {}
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            let mut createur = std::fs::DirBuilder::new();
+            createur.recursive(true);
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::DirBuilderExt;
+                createur.mode(0o700);
+            }
+            createur.create(dossier).map_err(|e| io("création du dossier", &e))?;
+        }
+        Err(e) => return Err(io("dossier", &e)),
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let meta = std::fs::symlink_metadata(dossier).map_err(|e| io("dossier", &e))?;
+        if !meta.file_type().is_dir() {
+            return Err(ErreurEtat::LienSymbolique);
+        }
+        controler_proprietaire(&meta)?;
+        if mode(&meta) & 0o077 != 0 {
+            std::fs::set_permissions(dossier, std::fs::Permissions::from_mode(0o700))
+                .map_err(|e| io("droits du dossier", &e))?;
+        }
+    }
+    Ok(())
+}
+
+/// Lit un fichier privé (absent ⇒ `None`) : lien symbolique ou fichier non
+/// régulier ⇒ refus ; droits ouverts ⇒ refus ; propriétaire ≠ uid effectif
+/// ⇒ refus ; fichier ouvert = fichier inspecté ; taille ≤ `max`, exacte.
+pub(crate) fn lire_prive(chemin: &Path, max: u64) -> Result<Option<Vec<u8>>, ErreurEtat> {
+    let meta = match std::fs::symlink_metadata(chemin) {
+        Ok(m) => m,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(e) => return Err(io("lecture", &e)),
+    };
+    if !meta.file_type().is_file() {
+        return Err(ErreurEtat::LienSymbolique);
+    }
+    #[cfg(unix)]
+    if mode(&meta) & 0o077 != 0 {
+        return Err(ErreurEtat::DroitsOuverts);
+    }
+    #[cfg(unix)]
+    controler_proprietaire(&meta)?;
+    if meta.len() > max {
+        return Err(ErreurEtat::TropGrand);
+    }
+    let fichier = std::fs::File::open(chemin).map_err(|e| io("lecture", &e))?;
+    // Le fichier ouvert doit être celui inspecté (lien substitué entre-temps).
+    let ouvert = fichier.metadata().map_err(|e| io("lecture", &e))?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        if ouvert.dev() != meta.dev() || ouvert.ino() != meta.ino() {
+            return Err(ErreurEtat::LienSymbolique);
+        }
+    }
+    if !ouvert.is_file() {
+        return Err(ErreurEtat::LienSymbolique);
+    }
+    let mut octets = Vec::with_capacity(meta.len() as usize);
+    fichier.take(max + 1).read_to_end(&mut octets).map_err(|e| io("lecture", &e))?;
+    if octets.len() as u64 != meta.len() {
+        return Err(ErreurEtat::Illisible("taille modifiée pendant la lecture"));
+    }
+    Ok(Some(octets))
+}
+
+/// Écrit atomiquement un fichier privé `0600` du dossier (temporaire créé
+/// exclusivement, `fsync`, renommage, `fsync` du dossier).
+pub(crate) fn ecrire_prive(dossier: &Path, nom: &str, octets: &[u8]) -> Result<(), ErreurEtat> {
+    let chemin = dossier.join(nom);
+    match std::fs::symlink_metadata(&chemin) {
+        Ok(m) if !m.file_type().is_file() => return Err(ErreurEtat::LienSymbolique),
+        Ok(_) => {}
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+        Err(e) => return Err(io("écriture", &e)),
+    }
+    let tmp = dossier.join(format!(".{nom}.tmp-{}", std::process::id()));
+    let _ = std::fs::remove_file(&tmp);
+    let resultat = (|| {
+        let mut options = std::fs::OpenOptions::new();
+        options.write(true).create_new(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.mode(0o600);
+        }
+        let mut f = options.open(&tmp)?;
+        f.write_all(octets)?;
+        f.sync_all()?;
+        drop(f);
+        std::fs::rename(&tmp, &chemin)?;
+        #[cfg(unix)]
+        std::fs::File::open(dossier)?.sync_all()?;
+        Ok::<(), std::io::Error>(())
+    })();
+    if let Err(e) = resultat {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(io("écriture", &e));
+    }
+    Ok(())
+}
+
 impl StockageFederal {
     /// Ouvre (crée en `0700` au besoin, sans fenêtre en droits ouverts) le
     /// dossier de l'état fédéral et prend son verrou exclusif.
@@ -392,39 +530,12 @@ impl StockageFederal {
     /// refus ; droits ramenés à `0700` ; déjà verrouillé ⇒
     /// [`ErreurEtat::Verrouille`].
     pub fn ouvrir(dossier: &Path, secret_local: &[u8; 32]) -> Result<Self, ErreurEtat> {
-        match std::fs::symlink_metadata(dossier) {
-            Ok(meta) if !meta.file_type().is_dir() => return Err(ErreurEtat::LienSymbolique),
-            Ok(_) => {}
-            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-                let mut createur = std::fs::DirBuilder::new();
-                createur.recursive(true);
-                #[cfg(unix)]
-                {
-                    use std::os::unix::fs::DirBuilderExt;
-                    createur.mode(0o700);
-                }
-                createur.create(dossier).map_err(|e| io("création du dossier", &e))?;
-            }
-            Err(e) => return Err(io("dossier", &e)),
-        }
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            let meta = std::fs::symlink_metadata(dossier).map_err(|e| io("dossier", &e))?;
-            if !meta.file_type().is_dir() {
-                return Err(ErreurEtat::LienSymbolique);
-            }
-            controler_proprietaire(&meta)?;
-            if mode(&meta) & 0o077 != 0 {
-                std::fs::set_permissions(dossier, std::fs::Permissions::from_mode(0o700))
-                    .map_err(|e| io("droits du dossier", &e))?;
-            }
-        }
+        preparer_dossier(dossier)?;
         Ok(Self {
             dossier: dossier.to_path_buf(),
             cle: CleEtatFederal::deriver(secret_local),
             #[cfg(unix)]
-            _verrou: verrouiller(dossier)?,
+            _verrou: verrouiller(dossier, FICHIER_VERROU)?,
         })
     }
 
@@ -435,78 +546,12 @@ impl StockageFederal {
 
     /// Lit les octets de l'état (absent ⇒ `None`), voir module.
     pub fn lire(&self) -> Result<Option<Vec<u8>>, ErreurEtat> {
-        let chemin = self.chemin();
-        let meta = match std::fs::symlink_metadata(&chemin) {
-            Ok(m) => m,
-            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(None),
-            Err(e) => return Err(io("lecture", &e)),
-        };
-        if !meta.file_type().is_file() {
-            return Err(ErreurEtat::LienSymbolique);
-        }
-        #[cfg(unix)]
-        if mode(&meta) & 0o077 != 0 {
-            return Err(ErreurEtat::DroitsOuverts);
-        }
-        #[cfg(unix)]
-        controler_proprietaire(&meta)?;
-        if meta.len() > TAILLE_MAX_FICHIER {
-            return Err(ErreurEtat::TropGrand);
-        }
-        let fichier = std::fs::File::open(&chemin).map_err(|e| io("lecture", &e))?;
-        // Le fichier ouvert doit être celui inspecté (lien substitué entre-temps).
-        let ouvert = fichier.metadata().map_err(|e| io("lecture", &e))?;
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::MetadataExt;
-            if ouvert.dev() != meta.dev() || ouvert.ino() != meta.ino() {
-                return Err(ErreurEtat::LienSymbolique);
-            }
-        }
-        if !ouvert.is_file() {
-            return Err(ErreurEtat::LienSymbolique);
-        }
-        let mut octets = Vec::with_capacity(meta.len() as usize);
-        fichier.take(TAILLE_MAX_FICHIER + 1).read_to_end(&mut octets).map_err(|e| io("lecture", &e))?;
-        if octets.len() as u64 != meta.len() {
-            return Err(ErreurEtat::Illisible("taille modifiée pendant la lecture"));
-        }
-        Ok(Some(octets))
+        lire_prive(&self.chemin(), TAILLE_MAX_FICHIER)
     }
 
     /// Écrit atomiquement des octets d'état (fichier `0600`).
     pub fn ecrire(&self, octets: &[u8]) -> Result<(), ErreurEtat> {
-        let chemin = self.chemin();
-        match std::fs::symlink_metadata(&chemin) {
-            Ok(m) if !m.file_type().is_file() => return Err(ErreurEtat::LienSymbolique),
-            Ok(_) => {}
-            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
-            Err(e) => return Err(io("écriture", &e)),
-        }
-        let tmp = self.dossier.join(format!(".{FICHIER_ETAT}.tmp-{}", std::process::id()));
-        let _ = std::fs::remove_file(&tmp);
-        let resultat = (|| {
-            let mut options = std::fs::OpenOptions::new();
-            options.write(true).create_new(true);
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::OpenOptionsExt;
-                options.mode(0o600);
-            }
-            let mut f = options.open(&tmp)?;
-            f.write_all(octets)?;
-            f.sync_all()?;
-            drop(f);
-            std::fs::rename(&tmp, &chemin)?;
-            #[cfg(unix)]
-            std::fs::File::open(&self.dossier)?.sync_all()?;
-            Ok::<(), std::io::Error>(())
-        })();
-        if let Err(e) = resultat {
-            let _ = std::fs::remove_file(&tmp);
-            return Err(io("écriture", &e));
-        }
-        Ok(())
+        ecrire_prive(&self.dossier, FICHIER_ETAT, octets)
     }
 
     /// Scelle et écrit la vue (après chaque opération qui la modifie),

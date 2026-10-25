@@ -34,6 +34,8 @@
 //! - [`persistante`] : [`FederationPersistante`], chaque transition écrite
 //!   atomiquement avant d'être visible, rechargement revérifié, hors service
 //!   après un échec d'écriture
+//! - [`fraicheur`] : compteur de fraîcheur local (génération et empreinte du
+//!   dernier état écrit, hors du support) : retour arrière refusé
 //!
 //! **Sans Origin** (EX-30) : Origin n'est qu'un témoin facultatif.
 //! **Aucune destruction à distance** (EX-33) : seule sanction, la révocation
@@ -61,6 +63,7 @@ pub mod calcul;
 pub mod eclipse;
 pub mod erreurs;
 pub mod federation;
+pub mod fraicheur;
 pub mod note;
 pub mod persistance;
 pub mod persistante;
@@ -74,6 +77,7 @@ pub mod kindmother;
 
 pub use eclipse::{CarnetPairs, MAX_PAIRS_CARNET};
 pub use erreurs::ErreurFederation;
+pub use fraicheur::{CompteurFichier, CompteurFraicheur, CompteurMemoire, Fraicheur, FICHIER_COMPTEUR};
 pub use federation::{
     Federation, Parametres, RevocationFederale, RevocationsFederation, SuspensionFederale, MOTIF_REVOCATION_FEDERALE,
     PERIODE_QUOTA_SECS, QUOTA_CONFIRMATIONS, TAILLE_MAX_ETAT, TEMOINS_MIN,

@@ -7,10 +7,11 @@
 //! Entrée : `mode (1) | reste`.
 //!
 //! - 0 : enveloppe brute → `Federation::reprendre` (secret local fixe) ;
-//! - 1 : **corps** `MFED` v3 scellé par la cible (HMAC du secret local fixe
+//! - 1 : **corps** `MFED` v4 scellé par la cible (HMAC du secret local fixe
 //!   recalculé : le fuzzing atteint la revérification des titres et la
 //!   cohérence des statuts) ;
-//! - 2 : idem en version 0x02 (sans carnet) ;
+//! - 2 : idem en version 0x02 (sans carnet ni génération) ;
+//! - 3 : idem en version 0x03 (sans génération) ;
 //! - autre : pointeur et morceaux (`generation (8) | morceaux (1) | taille (3)
 //!   | empreinte (32) | morceaux hexadécimaux séparés par `,``) →
 //!   `support::assembler_morceaux`.
@@ -78,8 +79,9 @@ fuzz_target!(|octets: &[u8]| {
     let Some((&mode, reste)) = octets.split_first() else { return };
     match mode {
         0 => reprendre(reste),
-        1 => reprendre(&envelopper(0x03, reste)),
+        1 => reprendre(&envelopper(0x04, reste)),
         2 => reprendre(&envelopper(0x02, reste)),
+        3 => reprendre(&envelopper(0x03, reste)),
         _ => morceaux(reste),
     }
 });

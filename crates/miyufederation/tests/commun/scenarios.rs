@@ -13,8 +13,8 @@
 #![allow(clippy::many_single_char_names, clippy::assert_is_empty)]
 
 use miyufederation::{
-    CleEtatFederal, ErreurEtat, ErreurFederation, ErreurTransition, Federation, FederationPersistante, Observation,
-    Parametres, Preuve, Statut, SupportEtat,
+    BilanReprise, CleEtatFederal, CompteurFraicheur, ErreurEtat, ErreurFederation, ErreurTransition, Federation,
+    FederationPersistante, Observation, Parametres, Preuve, Statut, SupportEtat,
 };
 use miyuregistre::{Journal, StockageMemoire};
 use miyusceau::{cosigner, CleSignature, TeteRegistre};
@@ -44,14 +44,31 @@ pub fn journal_local() -> CleSignature {
     CleSignature::depuis_graine(&[0xee; 32])
 }
 
+/// Charge la vue depuis un support et son compteur de fraîcheur.
+pub async fn charger_avec<S: SupportEtat, K: CompteurFraicheur + 'static>(
+    (support, compteur): (S, K),
+    t: u64,
+    reg: &Registre,
+    etat_attendu: bool,
+) -> Result<(FederationPersistante<S>, BilanReprise), ErreurEtat> {
+    FederationPersistante::charger(support, compteur, &SECRET, parametres(), None, t, reg, etat_attendu).await
+}
+
 /// Recharge la vue (état attendu) : le « redémarrage ».
-pub async fn recharger<S: SupportEtat>(support: S, reg: &Registre, t: u64) -> FederationPersistante<S> {
-    FederationPersistante::charger(support, &SECRET, parametres(), None, t, reg, true).await.unwrap().0
+pub async fn recharger<S: SupportEtat, K: CompteurFraicheur + 'static>(
+    ouvert: (S, K),
+    reg: &Registre,
+    t: u64,
+) -> FederationPersistante<S> {
+    charger_avec(ouvert, t, reg, true).await.unwrap().0
 }
 
 /// Premier démarrage : aucun état, vue vide écrite aussitôt.
-pub async fn premier<S: SupportEtat>(support: S, reg: &Registre) -> FederationPersistante<S> {
-    let (p, bilan) = FederationPersistante::charger(support, &SECRET, parametres(), None, T0, reg, false).await.unwrap();
+pub async fn premier<S: SupportEtat, K: CompteurFraicheur + 'static>(
+    ouvert: (S, K),
+    reg: &Registre,
+) -> FederationPersistante<S> {
+    let (p, bilan) = charger_avec(ouvert, T0, reg, false).await.unwrap();
     assert!(bilan.premier_usage);
     p
 }
@@ -89,7 +106,7 @@ async fn avec_fondateurs<S: SupportEtat>(p: &mut FederationPersistante<S>, reg: 
 
 /// candidat → invité → membre, un redémarrage après chaque transition et
 /// pendant le passage à membre (arrêt de part et d'autre des 7 jours).
-pub async fn admission<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
+pub async fn admission<S: SupportEtat, K: CompteurFraicheur + 'static>(ouvrir: impl AsyncFn() -> (S, K)) {
     let reg = registre();
     let f = fondateurs(6);
     let a = CogTest::nouveau(30, T0);
@@ -154,7 +171,7 @@ pub async fn admission<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
 
 /// accusation → suspension → révocation à 72 h, redémarrages avant et
 /// après l'échéance ; file à publier jusqu'à l'accusé d'inscription.
-pub async fn sanction<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
+pub async fn sanction<S: SupportEtat, K: CompteurFraicheur + 'static>(ouvrir: impl AsyncFn() -> (S, K)) {
     let mut reg = registre();
     let f = fondateurs(8);
     let x = &f[7];
@@ -173,7 +190,7 @@ pub async fn sanction<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
     drop(p);
     // Juste avant l'échéance : toujours suspendu, aucune révocation.
     let (p, bilan) =
-        FederationPersistante::charger(ouvrir().await, &SECRET, parametres(), None, echeance - 1, &reg, true)
+        charger_avec(ouvrir().await, echeance - 1, &reg, true)
             .await
             .unwrap();
     assert!(bilan.revocations.is_empty());
@@ -181,7 +198,7 @@ pub async fn sanction<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
     drop(p);
     // Arrêt à cheval sur l'échéance : révocation datée de l'échéance, une fois.
     let (p, bilan) =
-        FederationPersistante::charger(ouvrir().await, &SECRET, parametres(), None, echeance + JOUR, &reg, true)
+        charger_avec(ouvrir().await, echeance + JOUR, &reg, true)
             .await
             .unwrap();
     assert_eq!(bilan.revocations.len(), 1);
@@ -191,7 +208,7 @@ pub async fn sanction<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
     drop(p);
     // Non acquittée : rendue encore à chaque reprise.
     let (mut p, bilan) =
-        FederationPersistante::charger(ouvrir().await, &SECRET, parametres(), None, echeance + JOUR + 1, &reg, true)
+        charger_avec(ouvrir().await, echeance + JOUR + 1, &reg, true)
             .await
             .unwrap();
     assert_eq!(bilan.revocations.len(), 1);
@@ -202,7 +219,7 @@ pub async fn sanction<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
     assert!(p.acquitter(&rev.kid, index, &reg).await.unwrap());
     drop(p);
     let (p, bilan) =
-        FederationPersistante::charger(ouvrir().await, &SECRET, parametres(), None, echeance + 2 * JOUR, &reg, true)
+        charger_avec(ouvrir().await, echeance + 2 * JOUR, &reg, true)
             .await
             .unwrap();
     assert!(bilan.revocations.is_empty());
@@ -223,7 +240,7 @@ pub async fn sanction<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
 
 /// accusation → suspension → recours accepté → statut rétabli ; redémarrages
 /// entre chaque étape ; l'accusation levée n'est jamais rejouable.
-pub async fn contestation<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
+pub async fn contestation<S: SupportEtat, K: CompteurFraicheur + 'static>(ouvrir: impl AsyncFn() -> (S, K)) {
     let reg = registre();
     let f = fondateurs(8);
     let y = &f[6];
@@ -253,7 +270,7 @@ pub async fn contestation<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
     drop(p);
     // Après l'échéance initiale : aucune révocation.
     let (p, bilan) =
-        FederationPersistante::charger(ouvrir().await, &SECRET, parametres(), None, echeance + JOUR, &reg, true)
+        charger_avec(ouvrir().await, echeance + JOUR, &reg, true)
             .await
             .unwrap();
     assert!(bilan.revocations.is_empty());
@@ -263,7 +280,7 @@ pub async fn contestation<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
 /// Vue fédérale (tête témoignée), témoignage, note locale et carnet de
 /// pairs survivent au redémarrage ; un témoignage contradictoire reste
 /// refusé après redémarrage.
-pub async fn vue_note_carnet<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
+pub async fn vue_note_carnet<S: SupportEtat, K: CompteurFraicheur + 'static>(ouvrir: impl AsyncFn() -> (S, K)) {
     let reg = registre();
     let f = fondateurs(5);
     let mut p = premier(ouvrir().await, &reg).await;
@@ -302,14 +319,14 @@ pub async fn vue_note_carnet<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
 }
 
 /// Heure en recul au rechargement : refus, aucune vue rendue.
-pub async fn horloge_en_recul<S: SupportEtat>(ouvrir: impl AsyncFn() -> S) {
+pub async fn horloge_en_recul<S: SupportEtat, K: CompteurFraicheur + 'static>(ouvrir: impl AsyncFn() -> (S, K)) {
     let reg = registre();
     let f = fondateurs(2);
     let mut p = premier(ouvrir().await, &reg).await;
     avec_fondateurs(&mut p, &reg, &f).await;
     p.actualiser(&reg, T0 + 500).await.unwrap();
     drop(p);
-    let r = FederationPersistante::charger(ouvrir().await, &SECRET, parametres(), None, T0 + 499, &reg, true).await;
+    let r = charger_avec(ouvrir().await, T0 + 499, &reg, true).await;
     assert!(matches!(r, Err(ErreurEtat::RetourHorloge)));
     // État attendu mais absent ailleurs : refus (fail-closed).
 }

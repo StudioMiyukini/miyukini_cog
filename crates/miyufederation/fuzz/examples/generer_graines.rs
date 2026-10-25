@@ -129,15 +129,17 @@ fn graines_etat() {
     let mut revoque = f.clone();
     revoque.actualiser(suspension.echeance()).expect("échéance");
     ecrire("etat", "revoque_corps", &avec_mode(&[1], corps(&revoque.sceller_etat(cle_etat(), &ANCRE).expect("scellé"))));
-    // Version 0x02 : corps v3 à carnet vide, sans le compte final du carnet.
+    // Versions 0x02 / 0x03 : corps v4 à carnet vide, sans la génération
+    // finale (0x03), ni le compte du carnet (0x02).
     let mut v2 = federation();
     v2.actualiser(t).expect("actualiser");
     let o = v2.sceller_etat(cle_etat(), &ANCRE).expect("scellé");
     let b = corps(&o);
-    ecrire("etat", "v2_corps", &avec_mode(&[2], &b[..b.len() - 4]));
+    ecrire("etat", "v2_corps", &avec_mode(&[2], &b[..b.len() - 12]));
+    ecrire("etat", "v3_corps", &avec_mode(&[3], &b[..b.len() - 8]));
     // Assemblage de morceaux (pointeur + morceaux hexadécimaux).
     let (p, m) = decouper(&suspendu, 3).expect("découpage");
-    let mut graine = vec![3u8];
+    let mut graine = vec![4u8];
     graine.extend_from_slice(&p.generation.to_be_bytes());
     graine.push(p.morceaux as u8);
     graine.extend_from_slice(&(p.taille as u32).to_be_bytes()[1..]);

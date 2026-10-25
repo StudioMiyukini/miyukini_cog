@@ -20,8 +20,8 @@
 //! # Enveloppe (big-endian, taille exacte)
 //!
 //! ```text
-//! "MFED" | version 0x03 | n (4, ≤ 64 Mio) | corps (n) | mac (32)
-//! mac = HMAC-SHA256(K, "MFED" | 0x03 | n | corps)
+//! "MFED" | version 0x04 | n (4, ≤ 64 Mio) | corps (n) | mac (32)
+//! mac = HMAC-SHA256(K, "MFED" | 0x04 | n | corps)
 //! K   = HMAC-SHA256(secret local du COG, "miyukini/miyufederation/etat/v1")
 //! ```
 //!
@@ -52,6 +52,7 @@
 //! | révocations à publier | `compte` × `kid (32)`, strictement croissants | HMAC ; chaque `kid` est une révocation ci-dessus (pièces revérifiées) |
 //! | révocations inscrites | `compte` × (`kid (32)` \| `inscrite_a (8)`), `kid` strictement croissants | HMAC ; ni suspendu ni révoqué avec pièces, `inscrite_a` ≤ `heure` ; dossier éventuel au statut révoqué |
 //! | carnet de pairs (v3) | `compte (≤ 4 096)` × (`bloc` `cog_id` (26) \| `bloc` réseau (1..=64) \| `premier_contact (8)`), `cog_id` strictement croissants | HMAC ; `cog_id` valide, réseau valide, `premier_contact` ≤ `heure` |
+//! | génération (v4) | `u64` : numéro d'écriture monotone de l'état (0 : hors vue persistante) | HMAC ; confrontée au **compteur de fraîcheur local** ([`crate::fraicheur`]) par [`crate::FederationPersistante::charger`] : plus ancienne, ou même génération d'empreinte différente ⇒ refus |
 //!
 //! Version `0x02` (A-013) : ajout de l'ancre du registre local, de la file
 //! des révocations à publier et des révocations constatées au registre.
@@ -60,6 +61,12 @@
 //! `0x02` est encore **lu** (carnet vide, comme avant) puis réécrit en
 //! `0x03` ; la version `0x01` est **refusée** ([`ErreurEtat::VersionInconnue`]) :
 //! l'accepter rouvrirait le rejeu d'un état ancien sans ancre.
+//! Version `0x04` (A-019, constat de revue, amendement à consigner) : ajout de
+//! la **génération** (numéro d'écriture monotone) sous le HMAC, liée au
+//! compteur de fraîcheur tenu hors du support (retour arrière d'un état
+//! authentique refusé). Un état `0x02`/`0x03` est lu avec la génération 0 ;
+//! la vue persistante le refuse tant que son compteur de fraîcheur n'a pas
+//! été réamorcé explicitement ([`crate::FederationPersistante::reamorcer_compteur`]).
 //!
 //! # Reprise (fail-closed)
 //!
@@ -106,8 +113,10 @@ use crate::titres::{Accusation, Candidature, Confirmation, Recours};
 /// Magie du format.
 pub(crate) const MAGIC: &[u8; 4] = b"MFED";
 /// Version du format écrite.
-pub(crate) const VERSION: u8 = 0x03;
-/// Version précédente, encore lue (sans carnet de pairs).
+pub(crate) const VERSION: u8 = 0x04;
+/// Version précédente, encore lue (sans génération : génération 0).
+pub(crate) const VERSION_SANS_GENERATION: u8 = 0x03;
+/// Version antérieure, encore lue (sans carnet de pairs ni génération).
 pub(crate) const VERSION_SANS_CARNET: u8 = 0x02;
 /// Entête : magie, version, longueur du corps.
 pub(crate) const TAILLE_ENTETE: usize = 4 + 1 + 4;
@@ -288,6 +297,7 @@ struct Corps<'a> {
     a_publier: Vec<Kid>,
     inscrites: Vec<(Kid, u64)>,
     carnet: Vec<(&'a [u8], &'a [u8], u64)>,
+    generation: u64,
 }
 
 fn lire_sanction<'a>(l: &mut Lecteur<'a>, depuis: u64) -> Result<SanctionBrute<'a>, ErreurEtat> {
@@ -367,6 +377,7 @@ fn lire_corps(octets: &[u8], version: u8) -> Result<Corps<'_>, ErreurEtat> {
             carnet.push((l.bloc_non_vide(TAILLE_MAX_COG_ID)?, l.bloc_non_vide(TAILLE_MAX_RESEAU)?, l.u64()?));
         }
     }
+    let generation = if version == VERSION { l.u64()? } else { 0 };
     if l.pos != octets.len() {
         return Err(illisible("octets en trop"));
     }
@@ -383,6 +394,7 @@ fn lire_corps(octets: &[u8], version: u8) -> Result<Corps<'_>, ErreurEtat> {
         a_publier,
         inscrites,
         carnet,
+        generation,
     })
 }
 
@@ -402,10 +414,23 @@ fn mac(cle: &CleEtatFederal, entete_et_corps: &[u8]) -> [u8; 32] {
 
 impl Federation {
     /// Scelle la vue fédérale locale au format `MFED` (voir [`etat`](self)),
-    /// ancrée sur la tête `ancre` du registre local. À écrire atomiquement
-    /// après chaque opération qui la modifie
-    /// ([`crate::persistance::StockageFederal::enregistrer`]).
+    /// ancrée sur la tête `ancre` du registre local, génération 0 (hors vue
+    /// persistante). À écrire atomiquement après chaque opération qui la
+    /// modifie ([`crate::persistance::StockageFederal::enregistrer`]).
     pub fn sceller_etat(&self, cle: &CleEtatFederal, ancre: &AncreRegistre) -> Result<Vec<u8>, ErreurEtat> {
+        self.sceller_etat_generation(cle, ancre, 0)
+    }
+
+    /// Comme [`Self::sceller_etat`], avec la **génération** (numéro
+    /// d'écriture monotone, sous le HMAC) : la vue persistante
+    /// ([`crate::FederationPersistante`]) la confronte au compteur de
+    /// fraîcheur local au chargement.
+    pub fn sceller_etat_generation(
+        &self,
+        cle: &CleEtatFederal,
+        ancre: &AncreRegistre,
+        generation: u64,
+    ) -> Result<Vec<u8>, ErreurEtat> {
         let mut e = Ecrivain(Vec::with_capacity(4096));
         e.u64(self.heure);
         match self.vue_a_jour_au {
@@ -484,6 +509,7 @@ impl Federation {
             e.bloc(reseau.as_bytes(), TAILLE_MAX_RESEAU)?;
             e.u64(premier);
         }
+        e.u64(generation);
         let corps = e.0;
         if corps.len() > TAILLE_MAX_ETAT {
             return Err(ErreurEtat::TropGrand);
@@ -517,11 +543,23 @@ impl Federation {
         origin: Option<[u8; 32]>,
         maintenant: u64,
     ) -> Result<(Self, Vec<RevocationFederale>, AncreRegistre), ErreurEtat> {
+        Self::reprendre_generation(octets, cle, parametres, origin, maintenant).map(|(f, d, a, _)| (f, d, a))
+    }
+
+    /// Comme [`Self::reprendre`], rend aussi la **génération** scellée
+    /// (0 pour un état `0x02`/`0x03` ou scellé hors vue persistante).
+    pub fn reprendre_generation(
+        octets: &[u8],
+        cle: &CleEtatFederal,
+        parametres: Parametres,
+        origin: Option<[u8; 32]>,
+        maintenant: u64,
+    ) -> Result<(Self, Vec<RevocationFederale>, AncreRegistre, u64), ErreurEtat> {
         if octets.len() < TAILLE_ENTETE + TAILLE_MAC || &octets[0..4] != MAGIC {
             return Err(illisible("magie"));
         }
         let version = octets[4];
-        if version != VERSION && version != VERSION_SANS_CARNET {
+        if version != VERSION && version != VERSION_SANS_GENERATION && version != VERSION_SANS_CARNET {
             return Err(ErreurEtat::VersionInconnue(version));
         }
         let n = u32::from_be_bytes([octets[5], octets[6], octets[7], octets[8]]) as usize;
@@ -539,7 +577,7 @@ impl Federation {
         let mut f = Self::new(parametres, origin);
         f.restaurer(&corps)?;
         let definitives = f.rattraper(maintenant)?;
-        Ok((f, definitives, corps.ancre))
+        Ok((f, definitives, corps.ancre, corps.generation))
     }
 
     // ── Restauration (revérification) ──────────────────────────────────────
@@ -1027,11 +1065,12 @@ mod tests {
         assert_eq!(g.choisir_pairs(5, T + 10), f.choisir_pairs(5, T + 10));
         assert_eq!(g.sceller_etat(&cle(), &ANCRE).unwrap(), o);
 
-        // État 0x02 (sans carnet) : lu, carnet vide, réécrit en 0x03.
+        // État 0x02 (sans carnet) : lu, carnet vide, réécrit en 0x04.
         let (f2, _) = exemple();
         let o3 = f2.sceller_etat(&cle(), &ANCRE).unwrap();
-        let fin = o3.len() - TAILLE_MAC;
-        assert_eq!(&o3[fin - 4..fin], &[0; 4], "carnet vide en fin de corps");
+        let fin = o3.len() - TAILLE_MAC - 8;
+        assert_eq!(&o3[fin..fin + 8], &[0; 8], "génération 0 en fin de corps");
+        assert_eq!(&o3[fin - 4..fin], &[0; 4], "carnet vide avant la génération");
         let corps = &o3[TAILLE_ENTETE..fin - 4];
         let mut v2 = MAGIC.to_vec();
         v2.push(VERSION_SANS_CARNET);
@@ -1051,6 +1090,36 @@ mod tests {
         let m = mac(&cle(), &v2_plus);
         v2_plus.extend_from_slice(&m);
         assert!(matches!(reprendre(&v2_plus, &f2, T + 10), Err(ErreurEtat::Illisible(_))));
+    }
+
+    #[test]
+    #[allow(clippy::many_single_char_names)]
+    fn generation_sous_le_hmac_et_version_3_lue() {
+        let (f, _) = exemple();
+        let o = f.sceller_etat_generation(&cle(), &ANCRE, 42).unwrap();
+        let (_, _, _, g) = Federation::reprendre_generation(&o, &cle(), *f.parametres(), None, T + 10).unwrap();
+        assert_eq!(g, 42);
+        // Génération changée sans le secret local : HMAC faux.
+        let mut x = o.clone();
+        let i = x.len() - TAILLE_MAC - 1;
+        x[i] ^= 1;
+        assert!(matches!(
+            Federation::reprendre_generation(&x, &cle(), *f.parametres(), None, T + 10),
+            Err(ErreurEtat::Altere)
+        ));
+        // État 0x03 (sans génération) : lu avec la génération 0.
+        let o0 = f.sceller_etat(&cle(), &ANCRE).unwrap();
+        let fin = o0.len() - TAILLE_MAC - 8;
+        let corps = &o0[TAILLE_ENTETE..fin];
+        let mut v3 = MAGIC.to_vec();
+        v3.push(VERSION_SANS_GENERATION);
+        v3.extend_from_slice(&(corps.len() as u32).to_be_bytes());
+        v3.extend_from_slice(corps);
+        let m = mac(&cle(), &v3);
+        v3.extend_from_slice(&m);
+        let (g3, _, _, n) = Federation::reprendre_generation(&v3, &cle(), *f.parametres(), None, T + 10).unwrap();
+        assert_eq!(n, 0);
+        assert_eq!(g3.sceller_etat(&cle(), &ANCRE).unwrap(), o0);
     }
 
     #[test]

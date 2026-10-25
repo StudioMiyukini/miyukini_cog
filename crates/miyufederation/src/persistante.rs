@@ -37,9 +37,19 @@
 //! - **Registre local** : chaque écriture ancre l'état sur la tête courante
 //!   du registre ; un registre qui ne prolonge plus l'ancre écrite (tronqué,
 //!   remplacé) ⇒ refus et hors service.
+//! - **Fraîcheur** ([`crate::fraicheur`]) : chaque écriture porte une
+//!   génération monotone (sous le HMAC) et avance un compteur tenu hors du
+//!   support ; au chargement, un état plus ancien que le compteur, ou de même
+//!   génération et d'empreinte différente, est refusé (retour arrière d'un
+//!   état authentique restauré dans le support) ; compteur perdu ⇒ refus
+//!   jusqu'au réamorçage explicite ([`FederationPersistante::reamorcer_compteur`]).
+//!   Ordre d'écriture : l'état, puis le compteur ; une interruption entre les
+//!   deux laisse l'instance hors service, et le rechargement accepte l'état
+//!   d'une génération d'avance (puis avance le compteur).
 
 use crate::erreurs::ErreurFederation;
 use crate::federation::{Federation, Parametres, RevocationFederale, SuspensionFederale};
+use crate::fraicheur::{CompteurFraicheur, Fraicheur};
 use crate::note::Observation;
 use crate::persistance::{
     controler_inscription, reprendre_avec_registre, AncreRegistre, CleEtatFederal, ErreurEtat, RegistreLocal,
@@ -84,6 +94,10 @@ pub struct BilanReprise {
 #[derive(Debug)]
 pub struct FederationPersistante<S: SupportEtat> {
     support: S,
+    /// Compteur de fraîcheur, hors du support.
+    compteur: Box<dyn CompteurFraicheur>,
+    /// Génération du dernier état écrit (ou relu).
+    generation: u64,
     cle: CleEtatFederal,
     federation: Federation,
     /// Octets du dernier état écrit (ou relu tel quel).
@@ -95,17 +109,24 @@ pub struct FederationPersistante<S: SupportEtat> {
 
 impl<S: SupportEtat> FederationPersistante<S> {
     /// Charge la vue depuis `support` (voir module) à l'heure de confiance
-    /// `maintenant`, contre le registre local `registre`.
+    /// `maintenant`, contre le registre local `registre` et le compteur de
+    /// fraîcheur `compteur` (tenu hors du support, [`crate::fraicheur`]).
     ///
-    /// - absent : `etat_attendu` ⇒ [`ErreurEtat::EtatAbsent`] ; sinon premier
-    ///   usage (vue vide, écrite aussitôt pour que l'absence soit ensuite une
-    ///   anomalie détectable) ;
-    /// - tout refus (illisible, altéré, titre refusé, incohérent, heure en
-    ///   recul, ancre incohérente) ⇒ `Err` ;
+    /// - absent : `etat_attendu`, ou compteur présent ⇒
+    ///   [`ErreurEtat::EtatAbsent`] ; sinon premier usage (vue vide, écrite
+    ///   aussitôt pour que l'absence soit ensuite une anomalie détectable) ;
+    /// - présent, compteur absent ⇒ [`ErreurEtat::CompteurAbsent`] (pas de
+    ///   reprise silencieuse : [`Self::reamorcer_compteur`]) ;
+    /// - plus ancien que le compteur ⇒ [`ErreurEtat::EtatPerime`] ; même
+    ///   génération, autre empreinte ⇒ [`ErreurEtat::EtatDivergent`] ;
+    /// - tout autre refus (illisible, altéré, titre refusé, incohérent, heure
+    ///   en recul, ancre incohérente) ⇒ `Err` ;
     /// - vue changée par la reprise (rattrapage, ré-application, registre
     ///   avancé, ancienne version du format) ⇒ réécrite avant de rendre la main.
+    #[allow(clippy::too_many_arguments)]
     pub async fn charger<R: RegistreLocal + Sync + ?Sized>(
         support: S,
+        compteur: impl CompteurFraicheur + 'static,
         secret_local: &[u8; 32],
         parametres: Parametres,
         origin: Option<[u8; 32]>,
@@ -115,23 +136,88 @@ impl<S: SupportEtat> FederationPersistante<S> {
     ) -> Result<(Self, BilanReprise), ErreurEtat> {
         let cle = CleEtatFederal::deriver(secret_local);
         let lu = support.lire().await?;
-        let (federation, reappliquees, premier_usage, reecrire, ecrit) = match lu {
-            None if etat_attendu => return Err(ErreurEtat::EtatAbsent),
-            None => (Federation::new(parametres, origin), 0, true, true, Vec::new()),
+        let frais = compteur.lire()?;
+        let (federation, generation, reappliquees, premier_usage, reecrire, ecrit) = match lu {
+            None if etat_attendu || frais.is_some() => return Err(ErreurEtat::EtatAbsent),
+            None => (Federation::new(parametres, origin), 0, 0, true, true, Vec::new()),
             Some(octets) => {
                 let r = reprendre_avec_registre(&octets, &cle, parametres, origin, maintenant, registre)?;
-                (r.federation, r.reappliquees, false, r.a_reecrire, octets)
+                let frais = frais.ok_or(ErreurEtat::CompteurAbsent)?;
+                let lue = Fraicheur::de_etat(r.generation, &octets);
+                match r.generation.checked_sub(frais.generation) {
+                    None => return Err(ErreurEtat::EtatPerime { etat: r.generation, compteur: frais.generation }),
+                    Some(0) if lue.empreinte != frais.empreinte => {
+                        return Err(ErreurEtat::EtatDivergent(r.generation));
+                    }
+                    Some(0) => {}
+                    // État écrit, compteur non avancé (interruption) : avancé
+                    // avant toute réécriture (jamais deux générations d'avance).
+                    Some(1) => compteur.ecrire(&lue)?,
+                    Some(_) => return Err(ErreurEtat::CompteurIncoherent("état en avance de plusieurs générations")),
+                }
+                (r.federation, r.generation, r.reappliquees, false, r.a_reecrire, octets)
             }
         };
         let ancre = AncreRegistre::de(registre);
-        let mut moi = Self { support, cle, federation, ecrit, ancre, hors_service: false };
+        let mut moi = Self {
+            support,
+            compteur: Box::new(compteur),
+            generation,
+            cle,
+            federation,
+            ecrit,
+            ancre,
+            hors_service: false,
+        };
         if reecrire {
-            let octets = moi.federation.sceller_etat(&moi.cle, &ancre)?;
-            moi.support.ecrire(&octets).await?;
-            moi.ecrit = octets;
+            let f = moi.federation.clone();
+            moi.persister(&f, ancre).await?;
         }
         let revocations = moi.federation.revocations_a_publier();
         Ok((moi, BilanReprise { revocations, reappliquees, premier_usage }))
+    }
+
+    /// **Intervention explicite** après la perte du compteur de fraîcheur
+    /// ([`ErreurEtat::CompteurAbsent`]) : l'état présent dans `support` est
+    /// revérifié entièrement (HMAC, titres, ancre du registre local) puis
+    /// **accepté comme le plus récent** : le compteur reçoit sa génération et
+    /// son empreinte. Rend la génération acceptée.
+    ///
+    /// Refusé si le compteur existe encore (réamorcer ne doit jamais servir à
+    /// accepter un retour arrière détecté) ou si aucun état n'existe. À
+    /// n'employer qu'après avoir établi que l'état du support n'a pas été
+    /// restauré (journal d'administration) ; l'appelant le signale.
+    pub async fn reamorcer_compteur<R: RegistreLocal + Sync + ?Sized>(
+        support: &S,
+        compteur: &dyn CompteurFraicheur,
+        secret_local: &[u8; 32],
+        parametres: Parametres,
+        origin: Option<[u8; 32]>,
+        maintenant: u64,
+        registre: &R,
+    ) -> Result<u64, ErreurEtat> {
+        if compteur.lire()?.is_some() {
+            return Err(ErreurEtat::CompteurIncoherent("compteur présent : réamorçage refusé"));
+        }
+        let octets = support.lire().await?.ok_or(ErreurEtat::EtatAbsent)?;
+        let cle = CleEtatFederal::deriver(secret_local);
+        let r = reprendre_avec_registre(&octets, &cle, parametres, origin, maintenant, registre)?;
+        compteur.ecrire(&Fraicheur::de_etat(r.generation, &octets))?;
+        Ok(r.generation)
+    }
+
+    /// Écrit `federation` à la génération suivante : l'état sur le support,
+    /// puis le compteur de fraîcheur. Échec ⇒ `Err` (l'appelant gère le
+    /// hors-service).
+    async fn persister(&mut self, federation: &Federation, ancre: AncreRegistre) -> Result<(), ErreurEtat> {
+        let generation = self.generation.checked_add(1).ok_or(ErreurEtat::TropGrand)?;
+        let octets = federation.sceller_etat_generation(&self.cle, &ancre, generation)?;
+        self.support.ecrire(&octets).await?;
+        self.compteur.ecrire(&Fraicheur::de_etat(generation, &octets))?;
+        self.generation = generation;
+        self.ecrit = octets;
+        self.ancre = ancre;
+        Ok(())
     }
 
     /// Vue courante (lecture seule : toute modification passe par
@@ -143,6 +229,11 @@ impl<S: SupportEtat> FederationPersistante<S> {
     /// Support de stockage.
     pub fn support(&self) -> &S {
         &self.support
+    }
+
+    /// Génération du dernier état écrit (ou relu).
+    pub fn generation(&self) -> u64 {
+        self.generation
     }
 
     /// Faux après un échec ou une interruption d'écriture (recharger).
@@ -168,14 +259,13 @@ impl<S: SupportEtat> FederationPersistante<S> {
         let mut suivante = self.federation.clone();
         let issue = op(&mut suivante);
         let ancre = AncreRegistre::de(registre);
-        let octets = suivante.sceller_etat(&self.cle, &ancre)?;
-        if octets != self.ecrit {
-            // Hors service tant que l'écriture n'a pas abouti (échec ou futur abandonné).
+        // Changement ⇔ scellé à la génération courante ≠ dernier état écrit.
+        if suivante.sceller_etat_generation(&self.cle, &ancre, self.generation)? != self.ecrit {
+            // Hors service tant que l'état et le compteur ne sont pas écrits
+            // (échec ou futur abandonné).
             self.hors_service = true;
-            self.support.ecrire(&octets).await?;
+            self.persister(&suivante, ancre).await?;
             self.hors_service = false;
-            self.ecrit = octets;
-            self.ancre = ancre;
         }
         self.federation = suivante;
         issue.map_err(ErreurTransition::from)
