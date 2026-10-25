@@ -439,12 +439,15 @@ async fn chat_with_agent(
     ));
 
     // Mémoire de l'utilisateur (EX-50..56) : appelant API signé et demande explicite seulement.
-    let bloc = match usage {
-        Some(axum::Extension(u)) if req.memoire && u.0 == crate::signature::USAGE_API => {
-            state.context_registry.bloc_memoire(&req.message).await
-        }
-        _ => None,
+    let avec_memoire = req.memoire
+        && matches!(usage, Some(axum::Extension(u)) if u.0 == crate::signature::USAGE_API);
+    let bloc = if avec_memoire {
+        state.context_registry.bloc_memoire(&req.message).await
+    } else {
+        None
     };
+    // Outil `memoire_noter` (A-009) : seulement si la mémoire est jointe à ce tour.
+    let carnet = if avec_memoire { state.context_registry.carnet_memoire() } else { None };
     let messages = vec![
         serde_json::json!({ "role": "system", "content": system_prompt }),
         serde_json::json!({ "role": "user", "content": crate::memoire::avec_memoire(bloc, &req.message) }),
@@ -453,11 +456,14 @@ async fn chat_with_agent(
     let model = req.model.unwrap_or_else(|| "default".into());
 
     // Tool calling : construire les tools si activé et si l'agent a des skills
-    let tools = if req.enable_tools {
+    let mut tools = if req.enable_tools {
         crate::tools::agent_tools(&agent)
     } else {
         Vec::new()
     };
+    if req.enable_tools && carnet.is_some() {
+        tools.push(crate::outil_memoire::definition_noter());
+    }
 
     if tools.is_empty() {
         // Pas de tools — flux classique via InferenceRouter
@@ -518,6 +524,7 @@ async fn chat_with_agent(
             &state.audit_log,
             &state.confirmations,
             &state.gouvernance,
+            carnet,
         )
         .await
         {

@@ -184,12 +184,50 @@ pub enum Notee {
 }
 
 /// Mode de validation d'un candidat.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Validation {
     /// Validation explicite de l'utilisateur.
     Utilisateur,
-    /// Validation de l'utilisateur confirmée par TAMR (branches sensibles).
-    UtilisateurEtTamr,
+    /// Validation de l'utilisateur confirmée par TAMR (branches sensibles),
+    /// liée au candidat **exact** approuvé ([`ConfirmationTamr`]).
+    UtilisateurEtTamr(ConfirmationTamr),
+}
+
+/// Confirmation TAMR (intervention `APPROVAL` tranchée par StrongFather) liée
+/// à **un** candidat exact : identifiant et contenu figés au moment de
+/// l'approbation. Toute différence avec le candidat stocké ⇒ refus
+/// ([`ErreurMemoire::TamrRequis`]).
+///
+/// À construire **uniquement** par le chemin TAMR de MAIA (module `tamr` du
+/// pont, après une décision StrongFather autorisée couvrant l'empreinte de ce
+/// candidat) ; la bibliothèque n'a pas de dépendance vers StrongFather et ne
+/// peut donc pas vérifier la décision elle-même.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ConfirmationTamr {
+    candidat: Box<Candidat>,
+    intervention: String,
+}
+
+impl ConfirmationTamr {
+    /// Confirmation pour `candidat` tel qu'approuvé, tracée par `intervention`.
+    pub fn nouvelle(candidat: Candidat, intervention: &str) -> Self {
+        Self { candidat: Box::new(candidat), intervention: intervention.to_string() }
+    }
+
+    /// Identifiant du candidat approuvé.
+    pub fn candidat(&self) -> Uuid {
+        self.candidat.id
+    }
+
+    /// Identifiant de l'intervention TAMR (journal).
+    pub fn intervention(&self) -> &str {
+        &self.intervention
+    }
+
+    /// Vrai si la confirmation couvre exactement `k` (identifiant et contenu).
+    pub fn couvre(&self, k: &Candidat) -> bool {
+        *self.candidat == *k
+    }
 }
 
 /// Mémoire d'un utilisateur.
@@ -552,16 +590,16 @@ impl<E: Entrepot> AccesUtilisateur<'_, E> {
 
     /// Valide un candidat : il entre en mémoire longue (EX-53).
     pub async fn valider(&self, candidat: Uuid, mode: Validation) -> Result<IdMemoire, ErreurMemoire> {
-        let mut ids = self.valider_tous(&[candidat], mode).await?;
+        let mut ids = self.valider_tous(&[candidat], &mode).await?;
         ids.pop().ok_or(ErreurMemoire::CandidatInconnu(candidat))
     }
 
     /// Validation en lot (§9), atomique : un refus et rien n'est validé.
     pub async fn valider_lot(&self, candidats: &[Uuid]) -> Result<Vec<IdMemoire>, ErreurMemoire> {
-        self.valider_tous(candidats, Validation::Utilisateur).await
+        self.valider_tous(candidats, &Validation::Utilisateur).await
     }
 
-    async fn valider_tous(&self, candidats: &[Uuid], mode: Validation) -> Result<Vec<IdMemoire>, ErreurMemoire> {
+    async fn valider_tous(&self, candidats: &[Uuid], mode: &Validation) -> Result<Vec<IdMemoire>, ErreurMemoire> {
         let m = self.m;
         let maintenant = m.maintenant();
         let _g = m.ecriture.lock().await;
@@ -579,8 +617,21 @@ impl<E: Entrepot> AccesUtilisateur<'_, E> {
             if k.type_unite == TypeUnite::Regle && k.provenance != Provenance::Utilisateur {
                 return Err(ErreurMemoire::RegleReserveeUtilisateur);
             }
-            if k.sensible && mode != Validation::UtilisateurEtTamr {
+            // Une confirmation TAMR ne vaut que pour le candidat exact approuvé.
+            let tamr = match mode {
+                Validation::Utilisateur => false,
+                Validation::UtilisateurEtTamr(conf) => {
+                    if candidats.len() != 1 || !conf.couvre(k) {
+                        return Err(ErreurMemoire::TamrRequis(k.branche.to_string()));
+                    }
+                    true
+                }
+            };
+            if k.sensible && !tamr {
                 return Err(ErreurMemoire::TamrRequis(k.branche.to_string()));
+            }
+            if let Validation::UtilisateurEtTamr(conf) = mode {
+                tracing::info!(target: "maia_memoire::audit", candidat = %k.id, intervention = conf.intervention(), "candidat validé sous TAMR");
             }
             let auteur = if k.provenance == Provenance::Utilisateur {
                 Auteur::Utilisateur

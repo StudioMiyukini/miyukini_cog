@@ -12,7 +12,7 @@ use std::sync::Arc;
 use chrono::{DateTime, Duration, TimeZone, Utc};
 use maia_memoire::entrepot::{Contenu, Ecriture};
 use maia_memoire::{
-    BorneOctets, Branche, EmpreinteSource, EntrepotMemoire, ErreurMemoire, IdMemoire, Issue,
+    BorneOctets, Branche, ConfirmationTamr, EmpreinteSource, EntrepotMemoire, ErreurMemoire, IdMemoire, Issue,
     MemoireMaia, Notee, Profil, Proposition, Provenance, Tokeniseur, TypeUnite, Validation, VueMaia,
     ETIQUETTE,
 };
@@ -347,7 +347,20 @@ async fn sensible_validation_tamr_requise() {
     let Issue::EnAttente(k) = issue else { panic!("TAMR attendu") };
     assert!(matches!(m.utilisateur().valider(k, Validation::Utilisateur).await, Err(ErreurMemoire::TamrRequis(_))));
     assert!(matches!(m.utilisateur().valider_lot(&[k]).await, Err(ErreurMemoire::TamrRequis(_))));
-    let id = m.utilisateur().valider(k, Validation::UtilisateurEtTamr).await.expect("tamr");
+    let candidat = m.utilisateur().candidats().await.expect("candidats").into_iter().find(|c| c.id == k).expect("candidat");
+    // Confirmation TAMR d'un autre candidat ou d'un contenu différent : refus, rien n'est écrit.
+    let mut modifie = candidat.clone();
+    modifie.texte = "Dort 9 h".into();
+    let autre = ConfirmationTamr::nouvelle(modifie, "tamr-1");
+    assert!(matches!(m.utilisateur().valider(k, Validation::UtilisateurEtTamr(autre)).await, Err(ErreurMemoire::TamrRequis(_))));
+    let mut ailleurs = candidat.clone();
+    ailleurs.id = uuid::Uuid::new_v4();
+    let ailleurs = ConfirmationTamr::nouvelle(ailleurs, "tamr-2");
+    assert!(matches!(m.utilisateur().valider(k, Validation::UtilisateurEtTamr(ailleurs)).await, Err(ErreurMemoire::TamrRequis(_))));
+    assert!(m.utilisateur().consulter().await.expect("c").is_empty(), "rien validé");
+    let conf = ConfirmationTamr::nouvelle(candidat, "tamr-3");
+    assert_eq!(conf.candidat(), k);
+    let id = m.utilisateur().valider(k, Validation::UtilisateurEtTamr(conf)).await.expect("tamr");
     assert_eq!(id.as_str(), "sante.sommeil.f1");
     let n = &m.utilisateur().consulter().await.expect("c")[0];
     assert_eq!(n.provenance, Provenance::Utilisateur);

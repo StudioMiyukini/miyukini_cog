@@ -217,6 +217,11 @@ impl ContextRegistry {
         }
     }
 
+    /// Carnet de l'outil `memoire_noter` ; `None` sans mémoire.
+    pub fn carnet_memoire(&self) -> Option<&dyn crate::outil_memoire::CarnetMaia> {
+        self.memoire.as_ref().map(crate::memoire::MemoireUtilisateur::carnet)
+    }
+
     /// Liste toutes les bases (résumés).
     pub fn list_bases(&self) -> Vec<ContextBaseSummary> {
         let bases = self.bases.read().unwrap();

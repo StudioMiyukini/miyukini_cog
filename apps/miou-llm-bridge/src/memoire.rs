@@ -13,8 +13,10 @@
 //! - `KINDMOTHER_ADDR` — service KindMother (défaut `127.0.0.1:50051`) ; justificatif
 //!   `maia-<utilisateur>` à l'emplacement standard de KindMother.
 //!
-//! Le chemin d'inférence ne détient qu'une [`VueMaia`] : lecture et proposition,
-//! jamais d'écriture en mémoire longue ni de Règle (EX-53, EX-54).
+//! Le chemin d'inférence ne détient qu'une [`VueMaia`] : lecture, notes
+//! ordinaires de MAIA (A-009, A-010) et propositions, jamais de Règle ni
+//! d'oubli (EX-53, EX-54). La mémoire complète ([`MemoireOuverte::proprietaire`])
+//! ne sert qu'aux routes HTTP authentifiées de l'utilisateur (EX-56).
 
 use std::sync::Arc;
 
@@ -39,6 +41,11 @@ impl std::fmt::Debug for MemoireUtilisateur {
 }
 
 impl MemoireUtilisateur {
+    /// Carnet de l'outil `memoire_noter` (noter / proposer seulement).
+    pub fn carnet(&self) -> &dyn crate::outil_memoire::CarnetMaia {
+        &self.vue
+    }
+
     /// Bloc `<memoire>` sous budget pour `requete` ; erreur : aucun bloc (journalisé).
     pub async fn bloc(&self, requete: &str) -> Option<String> {
         match self.vue.assembler(requete, self.budget).await {
@@ -54,25 +61,52 @@ impl MemoireUtilisateur {
     }
 }
 
+/// Mémoire ouverte : la vue MAIA (chemin d'inférence, outils) et, à part, la
+/// mémoire complète réservée aux routes HTTP de l'utilisateur ([`crate::routes_memoire`]).
+pub struct MemoireOuverte {
+    /// Vue MAIA (lecture, notes ordinaires, propositions).
+    pub vue: MemoireUtilisateur,
+    /// Mémoire complète : ne jamais la passer au chemin d'inférence ni à un outil.
+    pub proprietaire: Arc<MemoireMaia<EntrepotKindMother>>,
+    /// Utilisateur de l'instance (base `maia-<utilisateur>`).
+    pub utilisateur: String,
+}
+
 /// Ouvre la mémoire configurée par l'environnement ; `None` si non configurée ou refusée.
-pub async fn depuis_env() -> Option<MemoireUtilisateur> {
+pub async fn ouvrir_depuis_env() -> Option<MemoireOuverte> {
     let utilisateur = std::env::var(ENV_UTILISATEUR).ok().filter(|u| !u.trim().is_empty())?;
+    let utilisateur = utilisateur.trim().to_string();
+    let (vue, proprietaire) = ouvrir(&utilisateur).await?;
+    Some(MemoireOuverte { vue, proprietaire, utilisateur })
+}
+
+/// Ouvre la mémoire configurée par l'environnement (vue MAIA seule).
+#[allow(dead_code)]
+pub async fn depuis_env() -> Option<MemoireUtilisateur> {
+    ouvrir_depuis_env().await.map(|o| o.vue)
+}
+
+async fn ouvrir(utilisateur: &str) -> Option<(MemoireUtilisateur, Arc<MemoireMaia<EntrepotKindMother>>)> {
     let profil = std::env::var(ENV_PROFIL)
         .ok()
         .and_then(|p| Profil::depuis_str(&p))
         .unwrap_or(Profil::Petit);
     let adresse = std::env::var(ENV_KINDMOTHER).unwrap_or_else(|_| KINDMOTHER_DEFAUT.to_string());
     let ouverte = async {
-        let entrepot = EntrepotKindMother::connecter(&adresse, utilisateur.trim(), None).await?;
+        let entrepot = EntrepotKindMother::connecter(&adresse, utilisateur, None).await?;
         MemoireMaia::ouvrir(entrepot, Arc::new(BorneOctets)).await
     };
     match ouverte.await {
         Ok(m) => {
             tracing::info!(profil = ?profil, budget = profil.budget(), "mémoire MAIA ouverte (base KindMother de l'utilisateur)");
-            Some(MemoireUtilisateur {
-                vue: VueMaia::new(Arc::new(m)),
-                budget: profil.budget(),
-            })
+            let m = Arc::new(m);
+            Some((
+                MemoireUtilisateur {
+                    vue: VueMaia::new(Arc::clone(&m)),
+                    budget: profil.budget(),
+                },
+                m,
+            ))
         }
         Err(e) => {
             tracing::warn!("mémoire MAIA non ouverte : {e} — MAIA fonctionne sans mémoire");

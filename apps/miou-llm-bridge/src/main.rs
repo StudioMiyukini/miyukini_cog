@@ -33,13 +33,16 @@ mod inference;
 mod llm_api;
 mod memoire;
 mod mode;
+mod outil_memoire;
 mod model_manager;
 mod persona;
 mod proxy;
 mod recommend;
 mod security;
+mod routes_memoire;
 mod signature;
 mod skills;
+mod tamr;
 mod team_client;
 mod tools;
 mod voice;
@@ -128,7 +131,14 @@ async fn main() {
 
     // Initialisation des registres
     let agent_registry = AgentRegistry::new();
-    let context_registry = ContextRegistry::new().avec_memoire(memoire::depuis_env().await);
+    // Mémoire de l'utilisateur (lot 7) : vue MAIA pour l'inférence ; mémoire complète
+    // réservée aux routes HTTP authentifiées de l'utilisateur (EX-56).
+    let memoire_ouverte = memoire::ouvrir_depuis_env().await;
+    let (vue_memoire, acces_memoire) = match memoire_ouverte {
+        Some(o) => (Some(o.vue), Some((o.utilisateur, o.proprietaire))),
+        None => (None, None),
+    };
+    let context_registry = ContextRegistry::new().avec_memoire(vue_memoire);
     let rate_limiter = RateLimiter::new(RateLimitConfig::default());
     let audit_log = AuditLog::new(10_000);
     let security_audit = SecurityAuditLog::new(5_000);
@@ -311,6 +321,12 @@ async fn main() {
         gouvernance::chemin_politiques_maia(cfg.politiques_dir.as_deref()),
     ));
 
+    let etat_memoire = std::sync::Arc::new(routes_memoire::EtatMemoireHttp::depuis_env(
+        acces_memoire,
+        std::sync::Arc::clone(&gouvernance),
+        cfg.security.clone(),
+    ));
+
     let state = ProxyState {
         client: http_client,
         upstream_url: cfg.upstream_url,
@@ -333,7 +349,7 @@ async fn main() {
         gouvernance,
     };
 
-    let app = proxy_router(state);
+    let app = proxy_router(state).merge(routes_memoire::routeur(etat_memoire));
 
     let listener = tokio::net::TcpListener::bind(&cfg.bind_addr)
         .await

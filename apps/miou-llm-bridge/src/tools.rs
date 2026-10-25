@@ -261,6 +261,8 @@ pub struct GardeTour<'a> {
     executeur: &'a dyn ExecuteurOutils,
     gouvernance: &'a GouvernanceMaia,
     suspendues: Vec<ActionEnAttente>,
+    /// Mémoire de l'utilisateur (outil `memoire_noter`) ; `None` : outil indisponible.
+    memoire: Option<&'a dyn crate::outil_memoire::CarnetMaia>,
 }
 
 impl<'a> GardeTour<'a> {
@@ -282,7 +284,14 @@ impl<'a> GardeTour<'a> {
             executeur,
             gouvernance,
             suspendues: Vec::new(),
+            memoire: None,
         }
+    }
+
+    /// Attache la mémoire de l'utilisateur pour l'outil `memoire_noter`.
+    pub fn avec_memoire(mut self, memoire: Option<&'a dyn crate::outil_memoire::CarnetMaia>) -> Self {
+        self.memoire = memoire;
+        self
     }
 
     /// Vrai si le tour a ingéré du contenu étranger.
@@ -325,6 +334,12 @@ pub async fn execute_tool_call(
         blocked: false,
         confirmation_id: None,
     };
+
+    // Outil mémoire (lot 7, A-009) : hors registre des skills, porte StrongFather
+    // propre ; tour étranger ⇒ candidat seulement (jamais d'écriture directe).
+    if skill_id == crate::outil_memoire::NOM_OUTIL_NOTER {
+        return executer_noter(tool_call, agent, audit_log, garde, log_entry).await;
+    }
 
     // Vérification des permissions
     if let security::PermissionCheck::Denied(reason) =
@@ -468,6 +483,42 @@ pub async fn execute_tool_call(
     (msg, log_entry)
 }
 
+/// Appel de l'outil `memoire_noter` (voir [`crate::outil_memoire`]).
+async fn executer_noter(
+    tool_call: &ToolCall,
+    agent: &AgentDef,
+    audit_log: &AuditLog,
+    garde: &mut GardeTour<'_>,
+    mut log_entry: ToolCallLogEntry,
+) -> (serde_json::Value, ToolCallLogEntry) {
+    let Ok(params) =
+        serde_json::from_str::<HashMap<String, serde_json::Value>>(&tool_call.function.arguments)
+    else {
+        let msg = message_refus(
+            tool_call,
+            serde_json::json!({ "success": false, "error": "arguments JSON invalides" }),
+        );
+        return (msg, log_entry);
+    };
+    log_entry.arguments = serde_json::to_value(&params).unwrap_or(serde_json::Value::Null);
+    let etranger = garde.etat.contient_etranger();
+    let resultat =
+        crate::outil_memoire::executer(garde.gouvernance, garde.memoire, agent, &params, etranger).await;
+    let succes = resultat.get("success").and_then(serde_json::Value::as_bool) == Some(true);
+    audit_log.log(AuditEntry {
+        timestamp: security::epoch_now(),
+        agent_id: agent.id.clone(),
+        skill_id: tool_call.function.name.clone(),
+        action: if etranger { "memoire_candidat_tour_etranger" } else { "memoire_noter" }.into(),
+        details: tool_call.function.arguments.clone(),
+        success: succes,
+        client_id: "tool_calling".into(),
+    });
+    log_entry.result_success = succes;
+    log_entry.provenance = Some(Provenance::Locale);
+    (message_refus(tool_call, resultat), log_entry)
+}
+
 /// Ajoute l'avertissement « contenu étranger » au prompt système.
 fn injecter_avertissement(messages: &mut Vec<serde_json::Value>) {
     let premier_systeme = messages
@@ -563,10 +614,11 @@ pub async fn chat_with_tools(
     audit_log: &AuditLog,
     registre: &RegistreConfirmations,
     gouvernance: &GouvernanceMaia,
+    memoire: Option<&dyn crate::outil_memoire::CarnetMaia>,
 ) -> Result<ToolChatResult, ToolChatError> {
     let mut tool_calls_log = Vec::new();
     let executeur = ExecuteurRegistre;
-    let mut garde = GardeTour::new(registre, &executeur, gouvernance);
+    let mut garde = GardeTour::new(registre, &executeur, gouvernance).avec_memoire(memoire);
     // Le marquage étranger survit d'un tour à l'autre : l'historique reçu
     // (non fiable) contamine le tour s'il contient des résultats d'outils.
     garde.reprendre_historique(&messages);
@@ -756,6 +808,45 @@ mod tests {
             .and_then(|c| c.as_str())
             .unwrap_or_default()
             .to_string()
+    }
+
+    #[tokio::test]
+    async fn memoire_noter_dans_la_boucle_tour_etranger_candidat_seulement() {
+        use maia_memoire::{BorneOctets, EntrepotMemoire, MemoireMaia, VueMaia};
+        let agents = AgentRegistry::new();
+        let victor = agents.get_agent("victor").expect("victor built-in");
+        let audit = AuditLog::new(100);
+        let registre = RegistreConfirmations::new();
+        let exec = ExecuteurFactice::default();
+        let base = std::fs::read_to_string(crate::gouvernance::tests::chemin_politiques_de_base()).expect("base");
+        // La politique « maia-memoire-noter » fait partie des politiques de base (config/strongfather/maia.toml).
+        let gouv = crate::tamr::tests::gouvernance(&base);
+        assert!(gouv.est_operationnelle());
+        let m = std::sync::Arc::new(MemoireMaia::ouvrir(EntrepotMemoire::new(), std::sync::Arc::new(BorneOctets)).await.expect("m"));
+        let vue = VueMaia::new(std::sync::Arc::clone(&m));
+        let note = serde_json::json!({ "branche": "travail", "type": "fait", "texte": "Aime Rust", "importance": 3 });
+
+        // Tour sain : note ordinaire écrite directement.
+        let mut garde = GardeTour::new(&registre, &exec, &gouv).avec_memoire(Some(&vue));
+        let (msg, log) = execute_tool_call(&appel("1", "memoire_noter", note.clone()), &victor, &audit, &mut garde).await;
+        assert!(contenu(&msg).contains("\"ecrite\":\"travail.f1\""), "{}", contenu(&msg));
+        assert!(log.result_success);
+
+        // Tour contaminé par web_fetch : la même note n'est qu'un candidat.
+        let mut garde = GardeTour::new(&registre, &exec, &gouv).avec_memoire(Some(&vue));
+        execute_tool_call(&appel("2", "web_fetch", serde_json::json!({ "url": "https://exemple.org/" })), &victor, &audit, &mut garde).await;
+        assert!(garde.contient_etranger());
+        let (msg, log) = execute_tool_call(&appel("3", "memoire_noter", note), &victor, &audit, &mut garde).await;
+        assert!(contenu(&msg).contains("\"candidat\""), "{}", contenu(&msg));
+        assert!(!log.blocked);
+        assert_eq!(m.utilisateur().consulter().await.expect("c").len(), 1, "aucune écriture directe de plus");
+        assert_eq!(m.utilisateur().candidats().await.expect("k").len(), 1);
+        assert!(registre.lister().is_empty(), "aucune action suspendue exécutable");
+
+        // Sans mémoire attachée : refus.
+        let mut garde = GardeTour::new(&registre, &exec, &gouv);
+        let (msg, _) = execute_tool_call(&appel("4", "memoire_noter", serde_json::json!({})), &victor, &audit, &mut garde).await;
+        assert!(contenu(&msg).contains("\"success\":false"));
     }
 
     #[tokio::test]

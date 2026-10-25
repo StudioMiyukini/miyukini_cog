@@ -333,6 +333,7 @@ dependencies = [
  "blake2",
  "cpufeatures",
  "password-hash",
+ "zeroize",
 ]
 
 [[package]]
@@ -5389,6 +5390,8 @@ dependencies = [
  "jayrdv-traite",
  "miyauth",
  "miyuhybride",
+ "miyuportail",
+ "miyuregistre",
  "miyusceau",
  "serde",
  "serde_json",
@@ -6940,12 +6943,14 @@ dependencies = [
 name = "miyufederation"
 version = "0.1.0"
 dependencies = [
+ "hmac",
  "miyauth",
  "miyuracine",
  "miyuregistre",
  "miyusceau",
  "sha2",
  "thiserror 2.0.18",
+ "zeroize",
 ]
 
 [[package]]
@@ -6994,9 +6999,11 @@ version = "0.1.0"
 dependencies = [
  "borderguard",
  "ed25519-dalek",
+ "miyauth",
  "miyudouane",
  "miyumarket",
  "miyuportail",
+ "miyuregistre",
  "miyusceau",
  "rand_core 0.6.4",
  "sha2",
@@ -7451,10 +7458,13 @@ dependencies = [
 name = "miyuracine"
 version = "0.1.0"
 dependencies = [
+ "argon2",
+ "chacha20poly1305",
  "hmac",
  "miyusceau",
  "pbkdf2",
  "rand_core 0.6.4",
+ "rustix",
  "serde_json",
  "sha2",
  "zeroize",

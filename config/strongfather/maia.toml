@@ -166,3 +166,28 @@ condition = "data.operation == 'agent.modifier'"
 rule = "data.elevation_niveau == 'true' || data.competences_ajoutees > 0 || data.dispatch_ajoute == 'true'"
 [policy.target]
 origins = ["maia"]
+
+# ── Mémoire MAIA (A-009, A-010, A-011) ──
+# Intention « TAMR » (apps/miou-llm-bridge/src/tamr.rs) : approbation par l'utilisateur
+# propriétaire d'une action exacte (candidat sensible, republication) ; empreinte obligatoire.
+[[policy]]
+id = "maia-tamr-approbation"
+type = "permission"
+effect = "authorize"
+condition = "data.operation == 'tamr.approbation'"
+rule = "data.intervention == 'APPROVAL' && data.canal == 'utilisateur' && data.approbateur_est_proprietaire == 'true' && data.empreinte != ''"
+[policy.target]
+actions = ["modification", "creation"]
+origins = ["maia"]
+
+# Intention « memoire.noter » (apps/miou-llm-bridge/src/outil_memoire.rs) : note de MAIA ;
+# les restrictions (N2/N3, provenance, sensibles, quota) sont appliquées par maia-memoire.
+[[policy]]
+id = "maia-memoire-noter"
+type = "permission"
+effect = "authorize"
+condition = "data.operation == 'memoire.noter'"
+rule = "data.agent != ''"
+[policy.target]
+actions = ["modification"]
+origins = ["maia"]
