@@ -214,8 +214,17 @@
 
 - Mémoire N0–N4 sous budget de tokens, notes versionnées, oubli à la demande (EX-50 à EX-56)
 - Modèle local par profil matériel (Gemma 4 E4B sur le serveur actuel, après banc d'essai)
-- IA fédérée : Fiches (type à attribuer, ≠ 0x08), double MAIA, marquage `etranger`, corroboration (EX-57 à EX-63)
+- IA fédérée : Fiches (type `0x09`, A-009), double MAIA, marquage `etranger`, corroboration (EX-57 à EX-63)
 - **Sortie** : réponse sourcée sur une Fiche fédérée, injection de test sans effet
+- **État (2026-10-25, A-009)** : sortie atteinte au niveau bibliothèque (`maia-federee`, `maia-memoire`, pont `miou-llm-bridge`)
+  - Fiche `0x09`, *k* = 3, plafond 3, quotas 60/h ; republication d'une donnée étrangère sous TAMR, champ `reprises`, hors corroboration
+  - mémoire par utilisateur `maia-<utilisateur>` (KindMother chiffrée) ; MAIA écrit ses notes ordinaires (50 / 24 h), candidats pour `etranger`, sensibles et notes de l'utilisateur
+- **Reste**
+  - modèles réels (lecteur, planificateur, embeddings) après banc d'essai
+  - routes HTTP et interface de la mémoire (voir, corriger, exporter, oublier, valider)
+  - transport des requêtes et Fiches entre COG (Portail, voie fédérée)
+  - chemin de confirmation TAMR branché sur la republication et les branches sensibles
+  - mémoire d'Alicia (`miyualicia-memory`) encore sur rusqlite
 
 ## 10. Lot 8 — Durcissement continu
 

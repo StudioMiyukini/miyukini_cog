@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.8 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.9 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -67,6 +67,7 @@
 | A-006 | 2026-10-25 | Lot 2 §3, §4.1, §8, §8.1, §8.2, §9 · Zones §7, §15, §17 : choix d'implémentation du lot 4 (entrées de registre `0x04`, stockage `MRGJ`, Median-Time-Past, relevé `MCAN`, quarantaine, registre fédéral) ; têtes du registre officiel par une clé de journal d'Origin ; révocations à seuil 1 ; quarantaine persistée et scellée ; détail ci-dessous | 1.6 |
 | A-007 | 2026-10-25 | Zones §7, §10, §16, §17 · Services hybrides §1, §3.1, §4.1 · Lot 2 §4.1, §8.2, §8.3, §9, §10 · IA fédérée §2, §7 · Menaces EX-32, EX-34 : intégrations du lot 4, choix des lots 5 (services hybrides) et 6 (fédération) ; délai de contestation 72 h ; registre fédéral sans Origin (≥ 3 témoins membres, **remplace** une phrase d'A-006) ; anti-rejeu du Portail par auteur ; code des Fiches ≠ `0x08` ; détail ci-dessous | 1.7 |
 | A-008 | 2026-10-25 | Lot 2 §4.1, §10.1 · Services hybrides §3.1, §4.1 : nature `0x44` du recours accepté (encodage prévu par A-007) ; règles de suspension et de levée ; alignements consignés (recours, témoins membres, séquence par auteur) | 1.8 |
+| A-009 | 2026-10-25 | IA fédérée §2–§5, §7 · Mémoire MAIA §4, §9, §10, §12 · Lot 2 §4.1 : choix du lot 7 (Fiche `0x09`, *k* = 3, quotas, identifiants et budgets mémoire, une base `maia-<utilisateur>`) ; **deux décisions** : republication d'une donnée étrangère après validation TAMR, notes ordinaires écrites par MAIA | 1.9 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -364,3 +365,50 @@
   - **EX** : EX-32 et EX-34 implémentées ; EX-44 (multi-appareils) implémentée
   - **Plan** : lot 6 — décisions d'A-007 faites ; lot 5 — multi-appareils fait
   - **Code** : `miyufederation`, `miyuregistre::federal`, `miyuportail`, `miyuhybride`, `jayrdv-facade`
+
+### A-009 — Lot 7 : choix consignés, republication validée, notes écrites par MAIA
+
+<!-- @id arch.gel.a009 -->
+<!-- @role amendment -->
+<!-- @do record_lot7_choices -->
+
+- **Date / validation** : 2026-10-25, propriétaire du projet · **version** 1.9
+- **Motif**
+  - Lot 7 (`maia-federee`, `maia-memoire`, pont `miou-llm-bridge`) : formats et seuils que la doc gelée nomme sans les fixer (code des Fiches, *k*, N, quotas, budgets)
+  - **Deux décisions** du propriétaire qui changent la doc gelée :
+    - une donnée `etranger` peut être **republiée** après validation (IA fédérée §3 disait « jamais publiée ») ;
+    - MAIA **écrit elle-même** ses notes ordinaires (Mémoire §9 disait « déductions validées en lot »)
+- **Documents touchés**
+  - [IA fédérée](IA-FEDEREE.md) : bandeau, §2 (code, champ `reprises`), §3 (republication), §4 (*k*, N), §5 (quotas, republication), §7 EX-57, EX-60
+  - [Mémoire MAIA](MEMOIRE-MAIA.md) : bandeau, §4 (alphabet), §9 (écriture), §10 (`etranger` jamais en mémoire sans validation, aussi pour MAIA), §12 EX-53 ; budgets du §7 confirmés tels quels
+  - [Lot 2 — identité signée](../securite/ARCHITECTURE-lot2-identite-signee.md) : bandeau, §4.1 (type `0x09`)
+  - Hors gel, aligné : [plan](../implementation/PLAN-IMPLEMENTATION.md) §9
+- **Décision — Fiches** (consignation de l'implémenté, `crates/maia-federee`)
+  - **Type Sceau `0x09` « Fiche »**, signé par la **clé d'identité** du COG émetteur (seule clé que la vue fédérale lie au `cog_id`) ; la clé éditeur avec certificat viendra avec la validation de chaîne
+  - Charge TLV, tags croissants, **tout tag inconnu refusé** : 1 `id` (`[a-z0-9._-]{1,64}`), 2 `emetteur` (32 o = signataire), 3 `sujet` (une ligne, ≤ 200 car.), 4 `type` (1 fait, 2 définition, 3 procédure, 4 document, 5 tableau), 5 `texte` (≤ 8 000 car. après normalisation, refus sans troncature), 6 `relations` (≤ 32 triplets), 7 `sources` (≤ 16, texte inerte), 8 `date`, 9 `version` (≥ 1, strictement croissante), 10 `langue`, 11 `licence` (SPDX), 12 `audience` (1 membres, 2 invités, 3 COG nommés ≤ 64), **13 `reprises`** (optionnel, voir ci-dessous)
+  - **Normalisation** à la vérification, dans cet ordre : NFKC ; suppression des invisibles, contrôles bidi, C0/C1 et zones privées ; **balisage retiré** (`< > { } [ ] | * # ~` et accent grave) ; homoglyphes cyrilliques et grecs ramenés au latin ; sauts de mise en forme repliés ; une ligne pour `sujet`, relations et sources
+  - **Base étrangère** : au plus 1 000 Fiches par émetteur ; émetteur non admis par la vue fédérale refusé ; embeddings recalculés localement (dimension 256)
+  - **Corroboration** : *k* = **3** membres distincts par défaut (2 à 16), invité cité mais jamais compté, un COG = un ; plafond N = **3** extraits par COG et par réponse (1 à 10) ; indépendance limitée aux identités fédérales distinctes
+  - **Service de requête** : 60 requêtes par heure et par demandeur, 20 résultats au plus, sujet ≤ 120 car., ≤ 12 mots ; tri déterministe ; aucun modèle
+  - **MAIA-Lecteur** : ≤ 8 extraits par Fiche, termes ≤ 120 car., sortie ≤ 16 Kio ; extrait non ancré dans la Fiche écarté
+- **Décision — republication d'une donnée étrangère** (propriétaire)
+  - Autorisée **seulement** avec une validation explicite de l'utilisateur, **confirmée par TAMR**, liée à l'empreinte exacte de la Fiche à publier ; sans elle ⇒ refus
+  - La Fiche republiée porte le champ **`reprises`** (tag 13) : ≤ 16 références `cog_id` source, `id`, `version`, empreinte SHA-256 des octets signés ; vide refusé
+  - **Licence identique** à celle de chaque source ; **audience au plus aussi large** que celle de chaque source (nommés ⊂ membres ⊂ invités)
+  - Une Fiche avec `reprises` est **citée** mais **ne compte jamais** pour *k* (pas de blanchiment de corroboration)
+  - Inchangé : jamais de Règle ni d'apprentissage sur une donnée étrangère (EX-54, EX-63) ; la mémoire de MAIA n'est jamais publiable
+- **Décision — mémoire MAIA** (consignation de l'implémenté, `crates/maia-memoire`)
+  - **Identifiants** : alphabet `[a-z0-9_]`, segment commençant par une lettre, ≤ 32 car., ≤ 5 segments de branche ; numéro de note ≤ 6 chiffres, sans zéro initial
+  - **Budgets** par profil : petit 600, moyen 1 500, grand et Strata 4 000 jetons ; plafonds N0 200, N1 40 par domaine, N2 150, N3 60 ; au plus 3 notes par sujet ; confiance affichée si < 7
+  - **Stockage** : une base KindMother chiffrée **`maia-<utilisateur>`** par utilisateur (≤ 48 car.), étiquetée `nationale` ; utilisateurs autorisés listés dans `<données>/maia-utilisateurs` ; export `maia-memoire/v1`
+  - **Confiance** : utilisateur 9 ; déduction ≤ 6 ; `etranger` ≤ 4
+  - **Domaines sensibles** : `sante`, `finances`, `tiers` ⇒ validation TAMR
+- **Décision — notes écrites par MAIA** (propriétaire)
+  - MAIA **écrit directement** une note ordinaire si toutes les conditions tiennent : provenance `deduit` ; type ≠ Règle ; domaine non sensible ; nouvelle note, ou correction d'une note dont la version courante est d'auteur `maia`
+  - Sinon **candidat** à valider, comme avant : contenu `etranger` (EX-53), domaine sensible (TAMR), correction d'une note de l'utilisateur ou validée par lui
+  - Version d'auteur **`maia`**, confiance ≤ 6 ; au plus **50** écritures directes par 24 h glissantes, au-delà ⇒ candidat ; chaque écriture directe tracée (`maia_memoire::audit`)
+  - MAIA n'oublie et n'efface rien ; l'utilisateur voit, corrige, exporte et oublie ces notes comme les siennes (EX-56)
+- **Impact**
+  - **EX** : EX-53 précisée (seule la provenance `etranger` exige la validation) ; EX-57 type `0x09` ; EX-60 republication sous TAMR, marquée `reprises`, hors corroboration ; EX-50..56, 58, 59, 61..63 implémentées au niveau bibliothèque
+  - **Plan** : lot 7 — sortie atteinte au niveau bibliothèque ; restent les modèles réels, les routes et l'interface de la mémoire, le transport entre COG
+  - **Code** : `maia-federee`, `maia-memoire`, `miyusceau` (`TypeSceau::Fiche`), `miou-llm-bridge`, `kindmother-service`

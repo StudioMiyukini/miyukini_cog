@@ -1,6 +1,6 @@
 # IA fédérée — le web pour IA entre COG
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-007** (v1.7 : code de type des Fiches ≠ `0x08`). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-007** (v1.7 : code de type des Fiches ≠ `0x08`) · amendé **A-009** (v1.9 : Fiche `0x09`, `reprises`, *k* = 3, quotas, republication validée). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id arch.ia.federee -->
 <!-- @role architecture-specification -->
@@ -31,12 +31,14 @@
 <!-- @layer 6 -->
 <!-- @do define_fiche_format -->
 
-- Sceau v1, nouveau type ~~**`0x08 Fiche`**~~ **Fiche** (code à attribuer par l'amendement du lot 7, ≠ `0x08` déjà pris par la déclaration de voie ; amendé A-007), signée par le COG émetteur
+- Sceau v1, nouveau type ~~**`0x08 Fiche`**~~ **`0x09` Fiche** (A-009 ; `0x08` = déclaration de voie), signée par la clé d'identité du COG émetteur
 - Champs typés :
   - `sujet`, `type` (fait, définition, procédure, document, tableau)
   - `texte` (≤ ~2 000 tokens, texte brut)
   - `relations` sujet–prédicat–objet
   - `sources`, `date`, `version`, `langue`, `licence`, `audience`
+  - `reprises` (optionnel) : Fiches étrangères republiées, voir §5 (A-009)
+  - encodage, bornes et normalisation : [A-009](GEL-DOC-CONCEPTUELLE-v1.md)
 - **Aucun champ libre de consignes**
 - Normalisation à l'entrée :
   - suppression des caractères invisibles, contrôles bidi, sauts de mise en forme
@@ -58,7 +60,7 @@
 - **Marquage d'origine** : toute valeur issue d'une Fiche porte `etranger` à travers tous les traitements
   - ne déclenche aucune action
   - n'est argument d'aucun outil sensible sans TAMR
-  - n'est jamais publiée, jamais écrite en mémoire longue sans validation
+  - ~~n'est jamais publiée~~ n'est republiée qu'après validation de l'utilisateur confirmée par TAMR (§5, A-009) ; jamais écrite en mémoire longue sans validation
 - **Mode consultation** : répondre sur des connaissances fédérées se fait **sans outil** → pire cas : une mauvaise réponse
 - Contenu étranger délimité et annoncé non fiable dans le contexte (défense d'appoint)
 - **Réponse sourcée** : chaque affirmation cite la Fiche et le COG émetteur
@@ -71,9 +73,9 @@
 <!-- @do bound_data_poisoning -->
 
 - **Provenance signée** ; poids selon statut fédéral (membre > invité), note locale, blacklist
-- **Corroboration** : « établi » seulement si ≥ *k* COG indépendants concordent, sinon « source unique »
+- **Corroboration** : « établi » seulement si ≥ *k* COG indépendants concordent (*k* = 3 membres par défaut, A-009), sinon « source unique » ; une Fiche republiée (`reprises`) ne compte jamais
 - **Registre Merkle des publications** : aucune modification silencieuse, rétractations tracées
-- **Plafond par source** : au plus N extraits par COG et par réponse (anti-inondation)
+- **Plafond par source** : au plus N extraits par COG et par réponse (anti-inondation ; N = 3, A-009)
 - **Aucun apprentissage automatique** sur des données étrangères (ni fine-tuning, ni mémoire longue)
 - **WorrySentinel** analyse le contenu : motifs d'injection, publications massives, anomalies
 - Une Fiche piégée est **signée** → preuve pour la note locale et la blacklist fédérale
@@ -88,7 +90,8 @@
 - Seules les données étiquetées **`publiable`** par l'utilisateur
 - Audience par Fiche : membres, invités, COG nommés
 - Requêtes **typées**, sans texte libre envoyé à un LLM
-- Quotas par demandeur (anti-aspiration, anti-exfiltration)
+- Quotas par demandeur (anti-aspiration, anti-exfiltration ; 60 requêtes par heure, A-009)
+- **Republication** d'une donnée étrangère (A-009) : validation de l'utilisateur confirmée par TAMR, liée à la Fiche exacte ; champ `reprises` obligatoire ; licence identique, audience au plus aussi large que la source
 - Aucune donnée de la mémoire de MAIA (`nationale`) n'est publiable
 
 ## 6. Risque résiduel
@@ -106,10 +109,10 @@
 <!-- @role security-requirements -->
 <!-- @do derive_federated_ai_requirements -->
 
-- **EX-57** Fiches signées (type à attribuer, ≠ `0x08`, A-007), champs typés, aucun champ de consignes, normalisation à l'entrée
+- **EX-57** Fiches signées (type `0x09`, A-009), champs typés, aucun champ de consignes, normalisation à l'entrée
 - **EX-58** Aucune IA étrangère n'interroge MAIA : service de requête déterministe uniquement
 - **EX-59** Double MAIA : le planificateur ne voit jamais de contenu étranger
-- **EX-60** Marquage `etranger` propagé ; aucune action, publication ni mémoire longue sans validation
+- **EX-60** Marquage `etranger` propagé ; aucune action, publication ni mémoire longue sans validation ; republication sous TAMR, marquée `reprises`, hors corroboration (A-009)
 - **EX-61** Corroboration par *k* COG indépendants, plafond d'extraits par source
 - **EX-62** Embeddings toujours recalculés localement
 - **EX-63** Aucun apprentissage automatique sur des données étrangères

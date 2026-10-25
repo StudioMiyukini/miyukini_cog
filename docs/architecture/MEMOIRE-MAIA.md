@@ -1,6 +1,6 @@
 # Mémoire de MAIA — mémoire stratifiée
 
-> **Gelé v1.0 — 2026-10-24.** Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-009** (v1.9 : identifiants, budgets, base `maia-<utilisateur>`, notes ordinaires écrites par MAIA). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id arch.ia.memoire-maia -->
 <!-- @role architecture-specification -->
@@ -74,6 +74,7 @@
 - Préfixe = sous-arbre : `travail.cog` désigne tout le projet
 - Suffixe de type : `f` fait, `p` préférence, `r` règle, `e` épisode, `k` procédure, `n` entité, `s` résumé
 - Stables et courts : un modèle peut les citer et demander à les ouvrir
+- Alphabet `[a-z0-9_]`, segment commençant par une lettre, ≤ 32 car., ≤ 5 segments de branche ; numéro ≤ 6 chiffres (A-009)
 
 ## 5. Format compact en contexte
 
@@ -172,7 +173,7 @@ famille.lea.s1 …
 
 - **Écriture**
   - propos explicites de l'utilisateur → acceptés directement
-  - déductions → confiance réduite, validées en lot par l'utilisateur
+  - déductions → confiance réduite (≤ 6) ; ~~validées en lot par l'utilisateur~~ **notes ordinaires écrites par MAIA elle-même** (auteur `maia`, 50 au plus par 24 h, A-009) ; corrections d'une note de l'utilisateur → candidats validés en lot
   - types sensibles (santé, finances, tiers) → validation TAMR
   - **Règles** : uniquement sur demande explicite de l'utilisateur
 - **Versionnage** : jamais d'écrasement ; une correction crée une nouvelle version qui remplace l'ancienne ; historique dans le registre (KindMother)
@@ -194,7 +195,7 @@ famille.lea.s1 …
 - Mémoire en **zone COG**, étiquetée `nationale` : ne sort jamais, ni vers la Franche ni vers la Fédération
 - **Une mémoire par utilisateur**, clé de chiffrement propre ; aucun partage entre personnes du COG
 - **Provenance `etranger`** (Fiches fédérées, documents relayés) :
-  - jamais écrite en mémoire longue sans validation de l'utilisateur
+  - jamais écrite en mémoire longue sans validation de l'utilisateur (aussi pour les notes de MAIA, A-009)
   - ne peut jamais créer de **Règle**
 - Contenu mémoire rendu comme **données délimitées**, jamais comme consignes système
 - Les **Règles** n'existent que par décision explicite de l'utilisateur : une injection ne peut pas installer de consigne durable
@@ -221,7 +222,7 @@ famille.lea.s1 …
 - **EX-50** Contexte mémoire assemblé sous budget de tokens mesuré, N0 toujours présent
 - **EX-51** Identifiants hiérarchiques stables, ouverture de branche à la demande
 - **EX-52** Notes versionnées, aucune écriture destructive hors oubli demandé
-- **EX-53** Provenance obligatoire ; `etranger` jamais en mémoire longue sans validation
+- **EX-53** Provenance obligatoire ; `etranger` jamais en mémoire longue sans validation ; déductions ordinaires écrites par MAIA, tracées (A-009)
 - **EX-54** Règles créées uniquement par l'utilisateur
 - **EX-55** Une mémoire chiffrée par utilisateur, étiquetée `nationale`
 - **EX-56** Mémoire consultable, corrigeable, exportable et oubliable par l'utilisateur

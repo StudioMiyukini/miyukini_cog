@@ -1,6 +1,6 @@
 # Lot 2 — Identité signée : Passeports, Visas et paquets identifiables
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1) **A-003** (v1.3 : choix d'implémentation du lot 2) **A-004** (v1.4 : type `0x08`, natures de certificat, indice d'usage 4 des arrêtés) **A-006** (v1.6 : registre et canal officiel du lot 4, §3, §4.1, §8, §8.3, §9) · amendé **A-007** (v1.7 : natures `0x42` / `0x43`, usage fédéral de `0x07`, tag 5 du manifeste, série miyauth au registre, registre fédéral sans Origin, §4.1, §8.2, §8.3, §9, §10) · amendé **A-008** (v1.8 : nature `0x44`, recours accepté, §4.1, §10.1). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1) **A-003** (v1.3 : choix d'implémentation du lot 2) **A-004** (v1.4 : type `0x08`, natures de certificat, indice d'usage 4 des arrêtés) **A-006** (v1.6 : registre et canal officiel du lot 4, §3, §4.1, §8, §8.3, §9) · amendé **A-007** (v1.7 : natures `0x42` / `0x43`, usage fédéral de `0x07`, tag 5 du manifeste, série miyauth au registre, registre fédéral sans Origin, §4.1, §8.2, §8.3, §9, §10) · amendé **A-008** (v1.8 : nature `0x44`, recours accepté, §4.1, §10.1) · amendé **A-009** (v1.9 : type `0x09` Fiche, §4.1). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id securite.lot2.identite-signee -->
 <!-- @role architecture-specification -->
@@ -100,7 +100,7 @@ version     1 o   0x02 (Sceau v1.1 ; 0x01 = Sceau v1.0, abandonné, refusé)
 alg         1 o   algorithme de signature du sceau (table ci-dessous)
 type        1 o   0x01 passeport | 0x02 visa | 0x03 manifeste paquet | 0x04 entrée registre
                   0x05 tête registre | 0x06 certificat (émission, éditeur) | 0x07 reconnaissance
-                  0x08 déclaration de voie (A-004, Portail ; les Fiches du lot 7 auront un autre code, A-007)
+                  0x08 déclaration de voie (A-004, Portail) | 0x09 Fiche (A-009, IA fédérée)
                   0x04 : nature 1 publication · 2 révocation · 3 émission · 4 décret · 5 événement (A-006, §8.3)
 len         4 o   longueur de la charge utile (≤ 65 536)
 payload   len o   champs TLV canoniques (4.2)
