@@ -39,6 +39,11 @@
 //! préfixe complet en 4e position, clés `[A-Z0-9]+`, clé en double refusée,
 //! champs `IN`, `OUT`, `SRC`, `DST`, `LEN`, `PROTO` obligatoires (`IN` / `OUT`
 //! peuvent être vides selon le crochet), `DPT` obligatoire pour TCP / UDP.
+//! Exception : TCP / UDP sans en-tête de transport lisible (fragment non
+//! initial, troncature) est écrit `PROTO=6` / `PROTO=17` suivi du drapeau
+//! `FRAG` ou `TRONQUE`, sans `SPT` / `DPT` ; la ligne est acceptée (protocole
+//! TCP / UDP, port inconnu). `FRAG` / `TRONQUE` hors de ce cas, ou un numéro
+//! 6 / 17 sans eux, est mal formé.
 //!
 //! # Recoupements (ce que la Douane peut réellement produire)
 //!
@@ -57,6 +62,12 @@
 //!   `NON-DECLARE` d'une frontière (après les deux) ⇒ ni source ni
 //!   destination en zone COG ; aucune adresse de boucle locale (le bouclage
 //!   est accepté avant toute journalisation).
+//!
+//! Exception : une ligne du lieu `zone-cog` en chaîne `sortie` (crochet
+//! `output` de `inet miyudouane_zone` ou de `inet miyudouane_hote`, comptes de
+//! service COG de l'hôte) est émise **par** la zone COG : sa source est en
+//! zone COG quelle que soit son adresse (sur l'hôte, une adresse de l'hôte) ⇒
+//! `R-EX12-SORTIE` critique (EX-12).
 //!
 //! Zones : déduites des adresses par le [`PlanAdressage`]. Voie : attribuée
 //! seulement si l'interface d'**entrée** (`IN=`) d'un **pont de zone** est le
@@ -356,15 +367,24 @@ impl LecteurNftables {
         let ip_src: IpAddr = champs["SRC"].parse().map_err(|_| M("SRC invalide"))?;
         let ip_dst: IpAddr = champs["DST"].parse().map_err(|_| M("DST invalide"))?;
         let octets: u64 = champs["LEN"].parse().map_err(|_| M("LEN invalide"))?;
+        // TCP / UDP sans en-tête de transport lisible (fragment non initial,
+        // troncature) : le relais écrit le protocole en numéro (`PROTO=6` /
+        // `17`) suivi du marqueur `FRAG` ou `TRONQUE`, sans ports.
+        let sans_ports = jetons[4..].iter().any(|j| matches!(*j, "FRAG" | "TRONQUE"));
         let protocole = match champs["PROTO"] {
-            "TCP" => Protocole::Tcp,
-            "UDP" => Protocole::Udp,
+            "6" | "17" if !sans_ports => return Err(M("PROTO numérique TCP/UDP sans FRAG/TRONQUE")),
+            "TCP" | "6" => Protocole::Tcp,
+            "UDP" | "17" => Protocole::Udp,
             "ICMP" | "ICMPv6" => Protocole::Icmp,
             n => Protocole::Autre(n.parse().map_err(|_| M("PROTO invalide"))?),
         };
+        if sans_ports && !matches!(champs["PROTO"], "6" | "17") {
+            return Err(M("FRAG/TRONQUE hors TCP/UDP numérique"));
+        }
         let port_dst = match champs.get("DPT") {
+            Some(_) if sans_ports => return Err(M("DPT avec FRAG/TRONQUE")),
             Some(p) => Some(p.parse::<u16>().map_err(|_| M("DPT invalide"))?),
-            None if matches!(protocole, Protocole::Tcp | Protocole::Udp) => {
+            None if matches!(protocole, Protocole::Tcp | Protocole::Udp) && !sans_ports => {
                 return Err(M("DPT absent pour TCP/UDP"))
             }
             None => None,
@@ -430,7 +450,18 @@ impl LecteurNftables {
         if est_boucle_locale(ip_src) || est_boucle_locale(ip_dst) {
             return Err(I("boucle locale journalisée"));
         }
-        let zone_src = self.plan.zone_de(ip_src);
+        // Chaîne `sortie` du lieu `zone-cog` (crochet output : table
+        // `inet miyudouane_zone` de l'espace COG, table `inet miyudouane_hote`
+        // des comptes de service COG de l'hôte) : le paquet est émis **par la
+        // zone COG**, quelle que soit son adresse source (sur l'hôte, une
+        // adresse de l'hôte, classée « extérieur » par le plan). La source est
+        // donc en zone COG : sortie de zone ⇒ `R-EX12-SORTIE` (ou
+        // `R-A005-NON-DECLARE` vers la zone COG / le Portail), toujours critique.
+        let zone_src = if lieu == Lieu::ZoneCog && chaine == Chaine::Sortie {
+            Zone::Cog
+        } else {
+            self.plan.zone_de(ip_src)
+        };
         let zone_dst = self.plan.zone_de(ip_dst);
         let filtre_cog = !(lieu.est_zone() && chaine == Chaine::Sortie);
         match motif {
@@ -554,6 +585,36 @@ mod tests {
         l
     }
 
+    /// Non-régression EX-12 : ligne réelle de `miyudouane hote` (compte de
+    /// service COG sur l'hôte, source = adresse de l'hôte, chaîne `sortie`) et
+    /// de la chaîne `sortie` de `inet miyudouane_zone` : source en zone COG ⇒
+    /// `R-EX12-SORTIE` critique.
+    #[test]
+    fn sortie_zone_cog_hote_et_espace_cog_critique() {
+        use crate::regles::{JeuRegles, REGLE_SORTIE};
+        use crate::signal::Severite;
+        for l in [
+            // Hôte : adresse publique de l'hôte vers l'extérieur, IPv4 et IPv6.
+            "1729760000.123456 hote nflog-110: MDOU|zone-cog|sortie|SORTIE-COG| IN= OUT=eth0 SRC=192.0.2.10 DST=93.184.216.34 LEN=60 TTL=64 PROTO=TCP SPT=40000 DPT=443 SYN",
+            "1729760000.123457 hote nflog-110: MDOU|zone-cog|sortie|SORTIE-COG| IN= OUT=eth0 SRC=2001:db8::10 DST=2606:2800:220:1::1 LEN=80 TTL=64 PROTO=UDP SPT=40000 DPT=53",
+            // Espace COG (table inet miyudouane_zone), source dans la zone COG.
+            "1729760000.123458 hote nflog-110: MDOU|zone-cog|sortie|SORTIE-COG| IN= OUT=z-pi SRC=10.77.0.10 DST=1.1.1.1 LEN=60 TTL=64 PROTO=TCP SPT=40000 DPT=443 SYN",
+        ] {
+            let ResultatLigne::Evenement(e) = lecteur().analyser(l) else {
+                panic!("ligne refusée : {:?}", lecteur().analyser(l));
+            };
+            assert_eq!(e.zone_src, Zone::Cog, "{l}");
+            let d = JeuRegles::vide().evaluer(&e);
+            assert!(
+                d.iter().any(|d| d.regle.as_str() == REGLE_SORTIE && d.severite == Severite::Critique),
+                "{l} : {d:?}"
+            );
+        }
+        // Hors zone-cog/sortie : l'adresse décide toujours (pas de forçage).
+        let ResultatLigne::Evenement(e) = lecteur().analyser(LIGNE) else { panic!() };
+        assert_eq!(e.zone_src, Zone::Cog);
+    }
+
     #[test]
     fn ligne_valide() {
         let ResultatLigne::Evenement(e) = lecteur().analyser(LIGNE) else {
@@ -566,6 +627,26 @@ mod tests {
         assert_eq!(e.voie.as_ref().map(VoieId::as_str), Some("jayoffice"));
         assert_eq!(e.octets, 60);
         assert_eq!(e.port_dst, Some(443));
+    }
+
+    /// B1 : TCP / UDP sans ports (fragment non initial, troncature) ⇒ ligne
+    /// acceptée, protocole TCP / UDP, port inconnu ; marqueur incohérent ⇒
+    /// mal formée.
+    #[test]
+    fn sans_ports_frag_tronque() {
+        let base = "1729760000.123456 hote nflog-110: MDOU|zone-cog|transit|SORTIE-COG| IN=sv0 OUT=z-pi SRC=10.77.0.10 DST=93.184.216.34 LEN=1480 TTL=64";
+        for (suffixe, proto) in [(" PROTO=6 FRAG", Protocole::Tcp), (" PROTO=17 TRONQUE", Protocole::Udp)] {
+            let l = format!("{base}{suffixe}");
+            let ResultatLigne::Evenement(e) = lecteur().analyser(&l) else {
+                panic!("refusée : {l} → {:?}", lecteur().analyser(&l));
+            };
+            assert_eq!((e.protocole, e.port_dst), (Some(proto), None));
+            assert_eq!(e.zone_src, Zone::Cog);
+        }
+        for mauvais in [" PROTO=6", " PROTO=17", " PROTO=TCP FRAG", " PROTO=6 SPT=1 DPT=2 FRAG", " PROTO=1 TRONQUE"] {
+            let l = format!("{base}{mauvais}");
+            assert!(matches!(lecteur().analyser(&l), ResultatLigne::MalFormee(_)), "acceptée à tort : {l}");
+        }
     }
 
     #[test]

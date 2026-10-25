@@ -493,8 +493,10 @@ pub struct ParametresInstance {
 
 impl Default for ParametresInstance {
     fn default() -> Self {
-        // 128 octets : en-têtes IPv4 / IPv6 + TCP / UDP / ICMP, jamais le contenu applicatif.
-        Self { copie: 128, seuil_lot: 8, delai_lot_cs: 10 }
+        // 256 octets : en-têtes IPv4 (options comprises) / IPv6 avec une chaîne
+        // d'extensions usuelle + TCP / UDP / ICMP ; le contenu applicatif reste
+        // au mieux partiel (ce n'est pas le but de la copie).
+        Self { copie: 256, seuil_lot: 8, delai_lot_cs: 10 }
     }
 }
 
@@ -708,7 +710,7 @@ mod tests {
         let p = requete_parametres(2, 111, ParametresInstance::default());
         assert_eq!(u32::from_ne_bytes(p[0..4].try_into().unwrap()) as usize, p.len());
         assert_eq!(p.len() % 4, 0);
-        // MODE : nla_len 10, copy_range be32 = 128, mode 2.
-        assert_eq!(&p[20..30], &[10, 0, 2, 0, 0, 0, 0, 128, NFULNL_COPY_PACKET, 0]);
+        // MODE : nla_len 10, copy_range be32 = 256, mode 2.
+        assert_eq!(&p[20..30], &[10, 0, 2, 0, 0, 0, 1, 0, NFULNL_COPY_PACKET, 0]);
     }
 }

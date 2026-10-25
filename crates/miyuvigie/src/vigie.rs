@@ -117,7 +117,9 @@ impl Vigie {
     ///
     /// Source en erreur (muette, débordée, liaison perdue) ⇒ lot en échec, sans
     /// pouls ; entrées non converties par la source ⇒ comptées mal formées,
-    /// capteur dégradé.
+    /// capteur dégradé. Panne accompagnée de lignes ([`crate::ReleveJournal::echec`])
+    /// ⇒ lignes analysées (leurs signaux sont rendus) **et** lot en échec dans
+    /// la même relève.
     pub fn relever_journal(&mut self, source: &mut dyn SourceJournal, maintenant_ms: u64) -> LotVigie {
         if source.capteur() != &self.config.capteur {
             return self.lot_en_echec(maintenant_ms, "source rattachée à un autre capteur");
@@ -129,6 +131,11 @@ impl Vigie {
                     self.cumul.mal_formees += releve.mal_formees;
                     lot.compteurs.mal_formees += releve.mal_formees;
                     self.degrader(&mut lot, maintenant_ms);
+                }
+                // Panne de la même relève : lignes analysées (signaux gardés),
+                // puis lot en échec — jamais reportée à la relève suivante.
+                if let Some(motif) = releve.echec.as_deref() {
+                    self.echouer(&mut lot, maintenant_ms, motif);
                 }
                 lot
             }
@@ -347,6 +354,29 @@ impl Vigie {
         });
     }
 
+    /// Met en échec un lot déjà analysé : pas de pouls, signal
+    /// `capteur_degrade` ajouté aux signaux des lignes (gardés).
+    fn echouer(&self, lot: &mut LotVigie, maintenant_ms: u64, motif: &str) {
+        lot.pouls = None;
+        lot.etat = EtatCapteur::EnEchec;
+        lot.signaux.push(Signal {
+            id: format!(
+                "{}:echec-{maintenant_ms}:{REGLE_CAPTEUR_DEGRADE}",
+                self.config.capteur
+            ),
+            capteur: self.config.capteur.clone(),
+            horodatage_ms: maintenant_ms,
+            voie: None,
+            zone_src: self.config.zone,
+            zone_dst: self.config.zone,
+            severite: Severite::Moyenne,
+            categorie: Categorie::CapteurDegrade,
+            regle: regle(REGLE_CAPTEUR_DEGRADE),
+            preuves: Vec::new(),
+            detail: format!("source en échec pendant la relève : {motif}"),
+        });
+    }
+
     fn lot_en_echec(&self, maintenant_ms: u64, motif: &str) -> LotVigie {
         LotVigie {
             capteur: self.config.capteur.clone(),
@@ -377,4 +407,99 @@ impl Vigie {
 fn regle(id: &'static str) -> RegleId {
     // Identifiants constants valides par construction (vérifiés par test).
     RegleId::constante(id)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::evenement::{ErreurSource, ReleveJournal};
+
+    const LIGNE: &str = "1729760000.123456 hote nflog-111: MDOU|zone-franche|transit|NON-DECLARE| IN=sv0 OUT=sv1 SRC=10.77.1.10 DST=10.77.1.20 LEN=60 TTL=64 PROTO=TCP SPT=40000 DPT=9999 SYN";
+
+    struct Source(CapteurId, Option<ReleveJournal>);
+    impl SourceJournal for Source {
+        fn capteur(&self) -> &CapteurId {
+            &self.0
+        }
+        fn relever_lignes(&mut self) -> Result<ReleveJournal, ErreurSource> {
+            self.1.take().ok_or_else(|| ErreurSource("vide".into()))
+        }
+    }
+
+    fn vigie() -> Vigie {
+        let mut v = Vigie::new(ConfigVigie {
+            capteur: CapteurId::new("relais").unwrap(),
+            zone: Zone::Franche,
+            voies_couvertes: vec![VoieId::new("jayoffice").unwrap()],
+            plan: PlanAdressage::indicatif(),
+            regles: JeuRegles::vide(),
+            controle_sortie: ControleSortie::new(),
+            capacite_dedup: 64,
+            fenetre_rejeu_ms: 60_000,
+        });
+        v.declarer_interface_voie("sv0", VoieId::new("jayoffice").unwrap());
+        v
+    }
+
+    /// H1 : une panne accompagnée de lignes met le lot en échec dans la même
+    /// relève, après analyse des lignes (signaux critiques conservés).
+    #[test]
+    fn panne_avec_lignes_echec_dans_la_meme_releve() {
+        let mut v = vigie();
+        let releve = ReleveJournal {
+            lignes: vec![LIGNE.to_owned()],
+            mal_formees: 1,
+            echec: Some("2 paquet(s) NFLOG perdu(s)".into()),
+        };
+        let mut s = Source(CapteurId::new("relais").unwrap(), Some(releve));
+        let lot = v.relever_journal(&mut s, 1_729_760_001_000);
+        assert_eq!(lot.etat, EtatCapteur::EnEchec);
+        assert!(lot.pouls.is_none());
+        assert_eq!(lot.compteurs.acceptees, 1, "la ligne est analysée");
+        assert_eq!(lot.compteurs.mal_formees, 1);
+        assert!(lot.signaux.iter().any(|s| s.severite == Severite::Critique), "signal de la ligne gardé");
+        assert!(lot
+            .signaux
+            .iter()
+            .any(|s| s.categorie == Categorie::CapteurDegrade && s.detail.contains("perdu")));
+    }
+
+    /// EX-12, chaîne complète : ligne réelle de la table hôte
+    /// `inet miyudouane_hote` (compte de service COG, source = adresse de
+    /// l'hôte) ⇒ signal critique `R-EX12-SORTIE`.
+    #[test]
+    fn sortie_compte_cog_hote_signal_critique() {
+        let mut v = Vigie::new(ConfigVigie {
+            capteur: CapteurId::new("relais-hote").unwrap(),
+            zone: Zone::Cog,
+            voies_couvertes: Vec::new(),
+            plan: PlanAdressage::indicatif(),
+            regles: JeuRegles::vide(),
+            controle_sortie: ControleSortie::new(),
+            capacite_dedup: 64,
+            fenetre_rejeu_ms: 60_000,
+        });
+        let ligne = "1729760000.123456 hote nflog-110: MDOU|zone-cog|sortie|SORTIE-COG| IN= OUT=eth0 SRC=192.0.2.10 DST=93.184.216.34 LEN=60 TTL=64 PROTO=TCP SPT=40000 DPT=443 SYN";
+        let releve = ReleveJournal { lignes: vec![ligne.to_owned()], mal_formees: 0, echec: None };
+        let mut s = Source(CapteurId::new("relais-hote").unwrap(), Some(releve));
+        let lot = v.relever_journal(&mut s, 1_729_760_001_000);
+        assert_eq!(lot.compteurs.acceptees, 1, "{lot:?}");
+        assert!(
+            lot.signaux
+                .iter()
+                .any(|s| s.regle.as_str() == crate::regles::REGLE_SORTIE && s.severite == Severite::Critique),
+            "{:?}",
+            lot.signaux
+        );
+    }
+
+    #[test]
+    fn releve_sans_panne_nominale() {
+        let mut v = vigie();
+        let releve = ReleveJournal { lignes: vec![LIGNE.to_owned()], mal_formees: 0, echec: None };
+        let mut s = Source(CapteurId::new("relais").unwrap(), Some(releve));
+        let lot = v.relever_journal(&mut s, 1_729_760_001_000);
+        assert_eq!(lot.etat, EtatCapteur::Nominal);
+        assert!(lot.pouls.is_some());
+    }
 }

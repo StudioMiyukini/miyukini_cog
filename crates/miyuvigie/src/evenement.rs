@@ -142,6 +142,12 @@ pub struct ReleveJournal {
     /// Entrées reçues mais non converties : comptées comme mal formées par la
     /// Vigie (jamais bénignes, le capteur passe dégradé).
     pub mal_formees: u64,
+    /// Panne survenue **pendant cette relève** alors que des lignes ont été
+    /// lues (perte de paquets, débordement, capteur muet, socket) : la Vigie
+    /// analyse les lignes **puis** met le lot en échec, dans la même relève.
+    /// Une panne n'est jamais reportée à une relève ultérieure (sous flux
+    /// continu, elle ne serait jamais signalée).
+    pub echec: Option<String>,
 }
 
 /// Source de lignes de journal relevée par une Vigie (relais NFLOG).
@@ -149,6 +155,9 @@ pub struct ReleveJournal {
 /// Même contrat que [`SourceEvenements`] : `Ok` = source vivante (même sans
 /// ligne), `Err` = source muette, défaillante ou ayant perdu des entrées —
 /// aucun pouls, capteur en échec (voie aveugle côté WorrySentinel, A-004).
+/// Une panne accompagnée de lignes est rendue par `Ok` avec
+/// [`ReleveJournal::echec`] renseigné : même effet (lot en échec), lignes
+/// analysées d'abord.
 pub trait SourceJournal {
     /// Capteur que représente cette source.
     fn capteur(&self) -> &CapteurId;

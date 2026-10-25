@@ -13,6 +13,14 @@
 //! il faut `CAP_NET_ADMIN` dans l'espace réseau) ou un noyau sans
 //! `nfnetlink_log` font échouer l'ouverture.
 //!
+//! Tampon de réception : `SO_RCVBUFFORCE` (exige `CAP_NET_ADMIN`, ignore
+//! `net.core.rmem_max`), repli `SO_RCVBUF` (plafonné par `rmem_max`) ; la
+//! taille **effective** est relevée ([`SocketNflog::tampon_effectif`]) et doit
+//! être journalisée par l'appelant.
+//!
+//! Chaque datagramme est reçu par `recvfrom` : un émetteur autre que le noyau
+//! (`nl_pid` ≠ 0) est écarté ([`ErreurTransport::EmetteurNonNoyau`]).
+//!
 //! Les groupes NFLOG sont propres à l'**espace de noms réseau** : le relais
 //! d'une frontière ou d'un pont de zone tourne dans l'espace de cette
 //! frontière ou de ce pont (les index d'interfaces y sont aussi résolus).
@@ -29,8 +37,9 @@ use crate::relais::{ErreurTransport, Transport, TAMPON_RECEPTION};
 
 /// Délai d'attente d'un acquittement du noyau.
 pub const DELAI_ACQUITTEMENT: Duration = Duration::from_secs(2);
-/// Tampon de réception demandé (octets ; plafonné par `net.core.rmem_max`).
-pub const TAMPON_SOCKET: usize = 4 << 20;
+/// Tampon de réception demandé (octets) : `SO_RCVBUFFORCE`, à défaut
+/// `SO_RCVBUF` plafonné par `net.core.rmem_max`.
+pub const TAMPON_SOCKET: usize = 16 << 20;
 
 /// Échec d'ouverture de la socket NFLOG.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -49,6 +58,22 @@ impl std::error::Error for ErreurOuverture {}
 pub struct SocketNflog {
     fd: OwnedFd,
     groupes: Vec<u16>,
+    tampon: TamponReception,
+}
+
+/// Tampon de réception obtenu à l'ouverture.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TamponReception {
+    /// Taille effective rapportée par le noyau (`SO_RCVBUF` relu ; le noyau
+    /// double la valeur demandée pour sa comptabilité).
+    pub effectif: usize,
+    /// Vrai si `SO_RCVBUFFORCE` a réussi (sinon repli `SO_RCVBUF`).
+    pub force: bool,
+}
+
+/// Lit l'adresse d'origine d'un datagramme : `Some(pid)` netlink.
+fn pid_emetteur(adresse: Option<rustix::net::SocketAddrAny>) -> Option<u32> {
+    SocketAddrNetlink::try_from(adresse?).ok().map(|a| a.pid())
 }
 
 fn erreur(contexte: &str, e: Errno) -> ErreurOuverture {
@@ -66,11 +91,16 @@ impl SocketNflog {
         )
         .map_err(|e| erreur("socket", e))?;
         rustix::net::bind(&fd, &SocketAddrNetlink::new(0, 0)).map_err(|e| erreur("bind", e))?;
-        // Au mieux : plafonné par rmem_max ; un échec n'empêche pas l'écoute.
-        let _ = rustix::net::sockopt::set_socket_recv_buffer_size(&fd, TAMPON_SOCKET);
+        // SO_RCVBUFFORCE (CAP_NET_ADMIN, au-delà de rmem_max), repli SO_RCVBUF.
+        let force = rustix::net::sockopt::set_socket_recv_buffer_size_force(&fd, TAMPON_SOCKET).is_ok();
+        if !force {
+            rustix::net::sockopt::set_socket_recv_buffer_size(&fd, TAMPON_SOCKET).map_err(|e| erreur("SO_RCVBUF", e))?;
+        }
+        let effectif =
+            rustix::net::sockopt::socket_recv_buffer_size(&fd).map_err(|e| erreur("SO_RCVBUF (lecture)", e))?;
         rustix::net::sockopt::set_socket_timeout(&fd, rustix::net::sockopt::Timeout::Recv, Some(DELAI_ACQUITTEMENT))
             .map_err(|e| erreur("SO_RCVTIMEO", e))?;
-        let mut s = Self { fd, groupes: Vec::new() };
+        let mut s = Self { fd, groupes: Vec::new(), tampon: TamponReception { effectif, force } };
         let mut sequence = 1u32;
         for &g in groupes {
             s.requete(&requete_liaison(sequence, g), sequence)
@@ -89,6 +119,11 @@ impl SocketNflog {
         &self.groupes
     }
 
+    /// Tampon de réception effectif (à journaliser).
+    pub fn tampon_effectif(&self) -> TamponReception {
+        self.tampon
+    }
+
     /// Envoie une requête et attend son acquittement (les paquets reçus entre
     /// temps, antérieurs à la configuration, sont écartés).
     fn requete(&mut self, octets: &[u8], sequence: u32) -> Result<(), ErreurOuverture> {
@@ -97,9 +132,10 @@ impl SocketNflog {
         let limite = Instant::now() + DELAI_ACQUITTEMENT;
         let mut tampon = vec![0u8; TAMPON_RECEPTION];
         while Instant::now() < limite {
-            let (n, reel) = rustix::net::recv(&self.fd, &mut tampon[..], RecvFlags::TRUNC)
-                .map_err(|e| erreur("recv (acquittement)", e))?;
-            if reel > n {
+            let (n, reel, adresse) = rustix::net::recvfrom(&self.fd, &mut tampon[..], RecvFlags::TRUNC)
+                .map_err(|e| erreur("recvfrom (acquittement)", e))?;
+            if reel > n || pid_emetteur(adresse) != Some(0) {
+                // Tronqué, ou émis par un autre que le noyau : écarté.
                 continue;
             }
             let messages = decoder_datagramme(&tampon[..n]).map_err(|e| ErreurOuverture(e.to_string()))?;
@@ -122,9 +158,12 @@ impl SocketNflog {
 
 impl Transport for SocketNflog {
     fn recevoir(&mut self, tampon: &mut [u8]) -> Result<Option<usize>, ErreurTransport> {
-        match rustix::net::recv(&self.fd, tampon, RecvFlags::DONTWAIT | RecvFlags::TRUNC) {
-            Ok((n, reel)) if reel > n => Err(ErreurTransport::Tronque(reel)),
-            Ok((n, _)) => Ok(Some(n)),
+        match rustix::net::recvfrom(&self.fd, tampon, RecvFlags::DONTWAIT | RecvFlags::TRUNC) {
+            Ok((n, reel, adresse)) => match pid_emetteur(adresse) {
+                Some(0) if reel > n => Err(ErreurTransport::Tronque(reel)),
+                Some(0) => Ok(Some(n)),
+                pid => Err(ErreurTransport::EmetteurNonNoyau(pid.unwrap_or(u32::MAX))),
+            },
             Err(Errno::AGAIN | Errno::INTR) => Ok(None),
             Err(Errno::NOBUFS) => Err(ErreurTransport::Debordement),
             Err(e) => Err(ErreurTransport::Io(e.to_string())),

@@ -99,6 +99,10 @@ impl Banc {
         Self { relais, horloge, vigie, nanny, sentinelle: SentinelleVoies::default() }
     }
 
+    fn relais_alimenter(&mut self, file: Vec<Result<Vec<u8>, ErreurTransport>>) {
+        self.relais.transport_mut().file.extend(file);
+    }
+
     fn maintenant_ms(&self) -> u64 {
         self.horloge.load(Ordering::SeqCst) / 1000
     }
@@ -179,15 +183,49 @@ fn voie_inactive_silence_normal() {
 }
 
 #[test]
-fn trou_de_sequence_lignes_d_abord_puis_echec() {
+fn trou_de_sequence_lignes_et_echec_dans_la_meme_releve() {
     // Séquences 0 puis 3 : deux paquets perdus.
     let mut b = Banc::new(vec![Ok(trame(NON_DECLARE, 0)), Ok(trame(NON_DECLARE, 3))]);
-    let (lot, _) = b.tour();
-    assert_eq!(lot.compteurs.acceptees, 2, "les lignes lues sont rendues");
+    let (lot, coupures) = b.tour();
+    assert_eq!(lot.compteurs.acceptees, 2, "les lignes lues sont analysées");
     assert_eq!(b.relais.statistiques().pertes, 2);
+    assert_eq!(lot.etat, EtatCapteur::EnEchec, "perte signalée dans la même relève (H1)");
+    assert!(lot.pouls.is_none());
+    assert!(lot.signaux.iter().any(|s| s.severite == Severite::Critique), "signal de la ligne gardé");
+    assert!(lot.signaux.iter().any(|s| s.categorie == Categorie::CapteurDegrade && s.detail.contains("perdu")));
+    assert!(coupures.contains(&(voie(), Motif::IncidentCritique)) || coupures.contains(&(voie(), Motif::VoieAveugle)));
+}
+
+/// H1 (non-régression) : sous flux continu, chaque relève rend des lignes ;
+/// une panne ne doit jamais être reportée indéfiniment.
+#[test]
+fn panne_sous_flux_continu_jamais_reportee() {
+    // Relève 1 : séquences 0, 1. Puis débordement + séquence 5 (trou) ; ensuite flux normal.
+    let file = vec![
+        Ok(trame(NON_DECLARE, 0)),
+        Ok(trame(NON_DECLARE, 1)),
+        Err(ErreurTransport::Debordement),
+        Ok(trame(NON_DECLARE, 5)),
+    ];
+    let mut b = Banc::new(file);
     let (lot, _) = b.tour();
-    assert_eq!(lot.etat, EtatCapteur::EnEchec, "perte signalée à la relève suivante");
-    assert!(lot.signaux[0].detail.contains("perdu"));
+    assert_eq!(lot.etat, EtatCapteur::EnEchec);
+    assert_eq!(lot.compteurs.acceptees, 3);
+    assert!(lot.signaux.iter().any(|s| s.detail.contains("ENOBUFS")));
+    // Relève suivante, flux normal : pas d'échec résiduel.
+    b.relais_alimenter(vec![Ok(trame(NON_DECLARE, 6))]);
+    let (lot, _) = b.tour();
+    assert_eq!(lot.etat, EtatCapteur::Nominal, "aucune panne différée");
+}
+
+/// B2 : un datagramme d'un émetteur autre que le noyau est écarté et compté.
+#[test]
+fn emetteur_non_noyau_ecarte_et_compte() {
+    let mut b = Banc::new(vec![Err(ErreurTransport::EmetteurNonNoyau(4242)), Ok(trame(NON_DECLARE, 0))]);
+    let (lot, _) = b.tour();
+    assert_eq!(lot.etat, EtatCapteur::Degrade);
+    assert_eq!(lot.compteurs.acceptees, 1);
+    assert_eq!(b.relais.statistiques().datagrammes_refuses, 1);
 }
 
 #[test]

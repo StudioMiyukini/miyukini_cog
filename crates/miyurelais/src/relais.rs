@@ -9,8 +9,9 @@
 //!
 //! Une relève :
 //!
-//! 1. lit les datagrammes disponibles (au plus [`LIGNES_MAX_PAR_RELEVE`]
-//!    lignes) ;
+//! 1. **draine** la socket jusqu'à ce qu'elle soit vide, borné à
+//!    [`LECTURES_MAX_PAR_RELEVE`] datagrammes et [`LIGNES_MAX_PAR_RELEVE`]
+//!    lignes (au-delà, le reste attend la relève suivante) ;
 //! 2. décode chaque datagramme strictement ; datagramme refusé ⇒ compté
 //!    « mal formé » (la Vigie passe dégradée) ;
 //! 3. vérifie la **séquence** locale de chaque groupe (`NFULNL_CFG_F_SEQ`) :
@@ -18,11 +19,36 @@
 //! 4. convertit chaque paquet en ligne canonique (ou témoin de vie) ;
 //! 5. nourrit la veille du capteur muet.
 //!
-//! **Échecs** (la relève rend `Err` : lot en échec, voie aveugle coupée) :
-//! perte (trou de séquence, `ENOBUFS`, `NLMSG_OVERRUN`, datagramme tronqué),
-//! erreur de la socket, capteur muet. Si des lignes ont été lues dans la même
-//! relève, elles sont rendues d'abord et l'échec l'est à la relève suivante :
-//! un événement critique n'est jamais retenu derrière une panne.
+//! **Échecs** (lot en échec, voie aveugle coupée) : perte (trou de séquence,
+//! `ENOBUFS`, `NLMSG_OVERRUN`, datagramme tronqué), erreur de la socket,
+//! capteur muet. Sans ligne lue, la relève rend `Err`. Avec des lignes lues
+//! dans la même relève, elle rend `Ok` avec [`ReleveJournal::echec`]
+//! renseigné : la Vigie analyse les lignes (un événement critique n'est jamais
+//! retenu derrière une panne) **puis** met le lot en échec, dans la même
+//! relève. Une panne n'est jamais reportée à la relève suivante : sous flux
+//! continu, elle ne serait jamais signalée.
+//!
+//! # Attribution de la panne
+//!
+//! Une panne est imputée au **capteur entier** (toutes les voies couvertes
+//! deviennent aveugles), pas à une voie : `ENOBUFS` / `NLMSG_OVERRUN`
+//! concernent la file de la socket, commune à tous les groupes ; un trou de
+//! séquence est propre à un **groupe** NFLOG, c'est-à-dire à un lieu (pont de
+//! zone partagé par toutes les sandboxes de la zone), et le paquet perdu ne
+//! dit pas de quelle voie il venait. Imputer la perte à une voie précise
+//! serait une supposition ; le sens prudent est l'aveuglement du capteur.
+//!
+//! # Noms d'interfaces
+//!
+//! Les index d'interfaces (`NFULA_IFINDEX_*`) sont résolus en noms dès la
+//! réception du datagramme, avant toute autre étape. Limite : entre la mise
+//! en file par le noyau et cette résolution (au plus le délai de lot
+//! NFLOG + la période de relève), une interface supprimée puis recréée peut
+//! recevoir le même index sous un autre nom ; la ligne porterait alors le
+//! nom de la nouvelle interface. La Douane crée les ports `sv<n>` dans
+//! l'espace réseau du pont et ne les recrée qu'au redémarrage d'une sandbox ;
+//! un index non résolu (interface disparue) donne `if<index>`, qui
+//! n'attribue aucune voie.
 
 use std::collections::{BTreeMap, VecDeque};
 use std::fmt;
@@ -34,7 +60,9 @@ use crate::netlink::{decoder_datagramme, Message, PaquetNflog};
 use crate::veille::{EtatVeille, Veille};
 
 /// Lignes au plus par relève (le reste attend dans la socket).
-pub const LIGNES_MAX_PAR_RELEVE: usize = 4096;
+pub const LIGNES_MAX_PAR_RELEVE: usize = 32_768;
+/// Datagrammes lus au plus par relève (drainage borné de la socket).
+pub const LECTURES_MAX_PAR_RELEVE: usize = 32_768;
 /// Métadonnées de flux en attente au plus pour l'IPS (au-delà : comptées perdues).
 pub const META_FLUX_MAX: usize = 4096;
 /// Taille du tampon de réception (octets).
@@ -47,6 +75,8 @@ pub enum ErreurTransport {
     Debordement,
     /// Datagramme plus long que le tampon (taille réelle).
     Tronque(usize),
+    /// Datagramme émis par un autre que le noyau (`nl_pid` ≠ 0) : écarté.
+    EmetteurNonNoyau(u32),
     /// Autre erreur d'entrée / sortie.
     Io(String),
 }
@@ -56,6 +86,7 @@ impl fmt::Display for ErreurTransport {
         match self {
             Self::Debordement => f.write_str("ENOBUFS : file netlink débordée, paquets perdus"),
             Self::Tronque(n) => write!(f, "datagramme de {n} octets tronqué"),
+            Self::EmetteurNonNoyau(pid) => write!(f, "datagramme d'un émetteur autre que le noyau (pid {pid})"),
             Self::Io(e) => write!(f, "socket : {e}"),
         }
     }
@@ -126,7 +157,6 @@ pub struct Relais<T: Transport> {
     veille: Veille,
     dernier_us: u64,
     sequences: BTreeMap<u16, u32>,
-    echec_differe: Option<String>,
     stats: Statistiques,
     tampon: Vec<u8>,
     meta: Option<VecDeque<miyudouane::MetaFlux>>,
@@ -165,7 +195,6 @@ impl<T: Transport> Relais<T> {
             veille,
             dernier_us: 0,
             sequences: BTreeMap::new(),
-            echec_differe: None,
             stats: Statistiques::default(),
             tampon: vec![0; TAMPON_RECEPTION],
             meta: None,
@@ -213,6 +242,11 @@ impl<T: Transport> Relais<T> {
         &self.transport
     }
 
+    /// Transport, modifiable (essais : alimenter la file).
+    pub fn transport_mut(&mut self) -> &mut T {
+        &mut self.transport
+    }
+
     /// Métadonnées de flux accumulées depuis le dernier appel (IPS :
     /// `moteur.traiter(&mut relais.prendre_meta_flux().into_iter())`).
     pub fn prendre_meta_flux(&mut self) -> Vec<miyudouane::MetaFlux> {
@@ -241,6 +275,10 @@ impl<T: Transport> Relais<T> {
 
     /// Traite un paquet ; `Some(ligne)` à rendre.
     fn traiter(&mut self, p: &PaquetNflog, maintenant_us: u64, releve: &mut ReleveJournal, pertes: &mut u64) {
+        // Index résolus en noms d'abord (au plus près de la réception).
+        let (index_entree, index_sortie) = interfaces(p);
+        let entree = self.nom(index_entree);
+        let sortie = self.nom(index_sortie);
         self.stats.paquets += 1;
         self.veille.observer(maintenant_us / 1000);
         if !self.config.groupes.contains(&p.groupe) {
@@ -257,9 +295,6 @@ impl<T: Transport> Relais<T> {
             }
         }
         let horodatage_us = self.horodatage(p.horodatage_us, maintenant_us);
-        let (index_entree, index_sortie) = interfaces(p);
-        let entree = self.nom(index_entree);
-        let sortie = self.nom(index_sortie);
         let ctx = Contexte { hote: &self.config.hote, horodatage_us, entree: &entree, sortie: &sortie };
         match convertir(p, &ctx) {
             Ok(Conversion::Ligne(l)) => {
@@ -287,15 +322,21 @@ impl<T: Transport> Relais<T> {
     /// Relève : voir la documentation du module.
     pub fn relever(&mut self) -> Result<ReleveJournal, ErreurSource> {
         let mut releve = ReleveJournal::default();
-        let mut echec = self.echec_differe.take();
+        let mut echec: Option<String> = None;
         let mut pertes = 0u64;
         let mut tampon = std::mem::take(&mut self.tampon);
         let mut lectures = 0usize;
-        while releve.lignes.len() < LIGNES_MAX_PAR_RELEVE && lectures < LIGNES_MAX_PAR_RELEVE {
+        while releve.lignes.len() < LIGNES_MAX_PAR_RELEVE && lectures < LECTURES_MAX_PAR_RELEVE {
             lectures += 1;
             let n = match self.transport.recevoir(&mut tampon) {
                 Ok(None) => break,
                 Ok(Some(n)) => n,
+                Err(ErreurTransport::EmetteurNonNoyau(_)) => {
+                    // Injection possible : écarté, compté refusé (capteur dégradé).
+                    self.stats.datagrammes_refuses += 1;
+                    releve.mal_formees += 1;
+                    continue;
+                }
                 Err(e) => {
                     if matches!(e, ErreurTransport::Debordement | ErreurTransport::Tronque(_)) {
                         self.stats.debordements += 1;
@@ -347,8 +388,8 @@ impl<T: Transport> Relais<T> {
             None => Ok(releve),
             Some(e) if releve.lignes.is_empty() => Err(ErreurSource(e)),
             Some(e) => {
-                // Lignes d'abord, échec à la relève suivante.
-                self.echec_differe = Some(e);
+                // Lignes rendues ET échec porté par la même relève (H1).
+                releve.echec = Some(e);
                 Ok(releve)
             }
         }

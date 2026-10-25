@@ -7,9 +7,11 @@
 //! Résumé des en-têtes d'un paquet journalisé (charge utile NFLOG, tronquée
 //! au `copy_range`) : adresses, longueur annoncée, TTL, protocole, ports,
 //! drapeaux TCP. Lecture **bornée** : seules les tranches présentes sont lues ;
-//! un en-tête de transport absent (fragment non initial, troncature) laisse
-//! [`Transport::Absent`] — le relais refuse alors de produire une ligne TCP /
-//! UDP sans port (le lecteur des Vigies l'exige).
+//! un en-tête de transport absent (fragment non initial, troncature, chaîne
+//! d'extensions IPv6 trop longue) laisse [`Transport::Absent`] — le relais
+//! écrit alors une ligne **sans ports**, protocole en numéro décimal
+//! (`PROTO=6`), plutôt que de refuser le paquet : un refus dégraderait le
+//! capteur, et un émetteur pourrait le provoquer à volonté par fragmentation.
 
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
@@ -61,6 +63,9 @@ pub struct ResumeIp {
     pub protocole: u8,
     /// Transport résumé.
     pub transport: Transport,
+    /// Fragment non initial (IPv4 : décalage ≠ 0 ; IPv6 : en-tête de fragment
+    /// de décalage ≠ 0) : aucun en-tête de transport par construction.
+    pub fragment_non_initial: bool,
 }
 
 /// TCP.
@@ -121,6 +126,7 @@ pub fn resumer_ipv4(o: &[u8]) -> Option<ResumeIp> {
         ttl: o[8],
         protocole,
         transport,
+        fragment_non_initial: fragment != 0,
     })
 }
 
@@ -139,6 +145,7 @@ pub fn resumer_ipv6(o: &[u8]) -> Option<ResumeIp> {
     let (source, destination) = (adresse(8)?, adresse(24)?);
     let mut i = 40usize;
     let mut initial = true;
+    let mut fragment_non_initial = false;
     for _ in 0..EXTENSIONS_IPV6_MAX {
         match suivant {
             // Hop-by-hop, routage, options de destination : longueur en unités de 8 octets.
@@ -148,7 +155,7 @@ pub fn resumer_ipv6(o: &[u8]) -> Option<ResumeIp> {
                     break;
                 };
                 suivant = n;
-                i = i.checked_add((usize::from(l) + 1) * 8)?;
+                i = i.saturating_add((usize::from(l) + 1) * 8);
             }
             // Fragment : 8 octets ; décalage ≠ 0 ⇒ pas d'en-tête de transport.
             44 => {
@@ -159,9 +166,10 @@ pub fn resumer_ipv6(o: &[u8]) -> Option<ResumeIp> {
                 suivant = n;
                 if decalage & 0xfff8 != 0 {
                     initial = false;
+                    fragment_non_initial = true;
                     break;
                 }
-                i = i.checked_add(8)?;
+                i = i.saturating_add(8);
             }
             _ => break,
         }
@@ -178,6 +186,7 @@ pub fn resumer_ipv6(o: &[u8]) -> Option<ResumeIp> {
         ttl,
         protocole: suivant,
         transport,
+        fragment_non_initial,
     })
 }
 
@@ -240,5 +249,40 @@ pub(crate) mod tests {
         assert_eq!(r.transport, Transport::Udp { port_source: 5000, port_destination: 53 });
         // Extension annoncée mais tronquée.
         assert_eq!(resumer_ipv6(&p[..41]).unwrap().transport, Transport::Absent);
+    }
+
+    /// En-tête IPv6 + `n` options de destination (8 octets chacune) puis UDP.
+    pub(crate) fn ipv6_extensions(n: usize) -> Vec<u8> {
+        let mut p = vec![0x60, 0, 0, 0, 0, 0, if n == 0 { IPPROTO_UDP } else { 60 }, 64];
+        p.extend_from_slice(&[0xfd; 16]);
+        p.extend_from_slice(&[0xfe; 16]);
+        for k in 0..n {
+            let suivant = if k + 1 == n { IPPROTO_UDP } else { 60 };
+            p.extend_from_slice(&[suivant, 0, 0, 0, 0, 0, 0, 0]);
+        }
+        p.extend_from_slice(&[0x13, 0x88, 0x00, 0x35, 0, 8, 0, 0]);
+        let charge = (p.len() - 40) as u16;
+        p[4..6].copy_from_slice(&charge.to_be_bytes());
+        p
+    }
+
+    /// B1 : chaîne d'extensions trop longue ou fragment IPv6 non initial ⇒
+    /// résumé rendu (jamais `None`), transport absent.
+    #[test]
+    fn ipv6_chaine_longue_et_fragment() {
+        let r = resumer_ipv6(&ipv6_extensions(EXTENSIONS_IPV6_MAX + 3)).unwrap();
+        assert_eq!(r.transport, Transport::Absent);
+        assert_eq!(r.protocole, 60, "dernier en-tête parcouru");
+        assert!(!r.fragment_non_initial);
+        let r = resumer_ipv6(&ipv6_extensions(2)).unwrap();
+        assert_eq!(r.transport, Transport::Udp { port_source: 5000, port_destination: 53 });
+        // Fragment non initial : en-tête de fragment (44), décalage 8.
+        let mut p = vec![0x60, 0, 0, 0, 0, 16, 44, 64];
+        p.extend_from_slice(&[0xfd; 16]);
+        p.extend_from_slice(&[0xfe; 16]);
+        p.extend_from_slice(&[IPPROTO_TCP, 0, 0, 8, 0, 0, 0, 1]);
+        p.extend_from_slice(&[0; 8]);
+        let r = resumer_ipv6(&p).unwrap();
+        assert_eq!((r.protocole, r.transport, r.fragment_non_initial), (IPPROTO_TCP, Transport::Absent, true));
     }
 }

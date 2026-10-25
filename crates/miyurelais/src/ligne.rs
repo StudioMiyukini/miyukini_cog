@@ -10,7 +10,7 @@
 //! espace, sans espace final :
 //!
 //! ```text
-//! <sec>.<µs6> <hôte> nflog-<G>: <préfixe> IN=<if> OUT=<if> SRC=<ip> DST=<ip> LEN=<n> TTL=<n> PROTO=<p> [SPT=<n> DPT=<n>] [TYPE=<n> CODE=<n>] [<drapeaux TCP>] [MARK=0x<hex>]
+//! <sec>.<µs6> <hôte> nflog-<G>: <préfixe> IN=<if> OUT=<if> SRC=<ip> DST=<ip> LEN=<n> TTL=<n> PROTO=<p> [SPT=<n> DPT=<n>] [TYPE=<n> CODE=<n>] [<drapeaux TCP>] [FRAG|TRONQUE] [MARK=0x<hex>]
 //! ```
 //!
 //! | jeton | origine (attribut NFLOG) | règle |
@@ -21,8 +21,9 @@
 //! | `<préfixe>` | `NFULA_PREFIX` | octets `0x21..=0x7e` seulement (aucun espace) ; sinon paquet refusé |
 //! | `IN=` / `OUT=` | famille pont : `NFULA_IFINDEX_PHYSINDEV` / `_PHYSOUTDEV` (le **port** `sv<n>`, ce que `iifname` / `oifname` filtrent ; le noyau met le pont lui-même dans `_INDEV` / `_OUTDEV`), à défaut `_INDEV` / `_OUTDEV` ; autres familles : `NFULA_IFINDEX_INDEV` / `_OUTDEV` — nom résolu dans l'espace réseau du relais | vide si absent ; nom `[A-Za-z0-9._:-]{1,15}`, sinon `if<index>` |
 //! | `SRC` `DST` `LEN` `TTL` | en-tête IPv4 / IPv6 de `NFULA_PAYLOAD` | `LEN` = longueur annoncée par l'en-tête, pas la longueur copiée |
-//! | `PROTO` | idem | `TCP`, `UDP`, `ICMP`, `ICMPv6` ou numéro décimal |
-//! | `SPT` `DPT` | en-tête TCP / UDP | obligatoires pour TCP / UDP : sans eux (fragment, troncature), paquet refusé |
+//! | `PROTO` | idem | `TCP`, `UDP`, `ICMP`, `ICMPv6` ou numéro décimal ; TCP / UDP **sans en-tête de transport lisible** : numéro décimal (`6`, `17`) |
+//! | `SPT` `DPT` | en-tête TCP / UDP | présents dès que `PROTO=TCP` / `UDP` |
+//! | `FRAG` / `TRONQUE` | — | TCP / UDP sans ports : `FRAG` fragment non initial, `TRONQUE` en-tête de transport hors de la copie (troncature, chaîne d'extensions IPv6 longue) ; la ligne est **émise** (amendement à consigner : avant, paquet refusé ⇒ capteur dégradé, provocable à volonté) |
 //! | `TYPE` `CODE` | en-tête ICMP | si présents |
 //! | drapeaux | octet 13 TCP | `SYN` `ACK` `FIN` `RST` `PSH` `URG`, dans cet ordre |
 //! | `MARK` | `NFULA_MARK` | seulement si ≠ 0 |
@@ -71,8 +72,6 @@ pub enum RefusPaquet {
     Famille(u8),
     /// En-tête IP invalide ou tronqué.
     EnTeteIp,
-    /// TCP / UDP sans ports (fragment non initial, troncature).
-    SansPorts,
 }
 
 /// Paquet converti.
@@ -154,6 +153,10 @@ pub fn convertir(p: &PaquetNflog, ctx: &Contexte<'_>) -> Result<Conversion, Refu
     }
     let prefixe = std::str::from_utf8(prefixe).map_err(|_| RefusPaquet::PrefixeInvalide)?;
     let r = resumer(p)?;
+    // TCP / UDP sans ports : protocole en numéro (le lecteur des Vigies n'exige
+    // alors pas DPT), marqué FRAG / TRONQUE.
+    let sans_ports = matches!(r.transport, Transport::Absent) && matches!(r.protocole, IPPROTO_TCP | IPPROTO_UDP);
+    let protocole = if sans_ports { r.protocole.to_string() } else { nom_protocole(r.protocole) };
     let mut l = String::with_capacity(160);
     // Écritures dans une String : infaillibles.
     let _ = write!(
@@ -170,7 +173,7 @@ pub fn convertir(p: &PaquetNflog, ctx: &Contexte<'_>) -> Result<Conversion, Refu
         r.destination,
         r.longueur,
         r.ttl,
-        nom_protocole(r.protocole),
+        protocole,
     );
     match r.transport {
         Transport::Tcp { port_source, port_destination, drapeaux } => {
@@ -190,8 +193,8 @@ pub fn convertir(p: &PaquetNflog, ctx: &Contexte<'_>) -> Result<Conversion, Refu
         Transport::Icmp { type_, code } => {
             let _ = write!(l, " TYPE={type_} CODE={code}");
         }
-        Transport::Absent if matches!(r.protocole, IPPROTO_TCP | IPPROTO_UDP) => {
-            return Err(RefusPaquet::SansPorts);
+        Transport::Absent if sans_ports => {
+            l.push_str(if r.fragment_non_initial { " FRAG" } else { " TRONQUE" });
         }
         Transport::Absent => {}
     }
@@ -284,6 +287,31 @@ mod tests {
         assert_eq!(e.motif, Some(miyuvigie::MotifJournal::NonDeclare));
     }
 
+    /// B1 : TCP sans ports (fragment non initial, troncature, chaîne
+    /// d'extensions IPv6 longue) ⇒ ligne émise, lue par les Vigies (non mal
+    /// formée : le capteur ne se dégrade pas).
+    #[test]
+    fn sans_ports_ligne_emise_et_lue() {
+        let mut lecteur = LecteurNftables::new(PlanAdressage::indicatif());
+        lecteur.declarer_interface_voie("sv0", VoieId::new("jayoffice").unwrap());
+        let prefixe = "MDOU|zone-franche|transit|NON-DECLARE|";
+        let mut fragment = ipv4_tcp([10, 77, 1, 10], [10, 77, 1, 20], 9999, 0x02);
+        fragment[7] = 0x10;
+        let tronque = ipv4_tcp([10, 77, 1, 10], [10, 77, 1, 20], 9999, 0x02)[..22].to_vec();
+        for (charge, marque) in [(fragment, " FRAG"), (tronque, " TRONQUE")] {
+            let Ok(Conversion::Ligne(l)) = convertir(&paquet(prefixe, charge), &ctx()) else { panic!() };
+            assert!(l.ends_with(&format!("PROTO=6{marque}")), "{l}");
+            assert!(!l.contains("SPT="), "{l}");
+            let ResultatLigne::Evenement(e) = lecteur.analyser(&l) else { panic!("{:?}", lecteur.analyser(&l)) };
+            assert_eq!(e.port_dst, None);
+            assert_eq!(e.voie.as_ref().map(VoieId::as_str), Some("jayoffice"));
+        }
+        let mut v6 = paquet(prefixe, crate::ip::tests::ipv6_extensions(crate::ip::EXTENSIONS_IPV6_MAX + 2));
+        v6.famille = NFPROTO_IPV6;
+        let Ok(Conversion::Ligne(l)) = convertir(&v6, &ctx()) else { panic!() };
+        assert!(l.contains(" PROTO=60"), "{l}");
+    }
+
     #[test]
     fn ports_physiques_du_pont() {
         let mut p = paquet("x", Vec::new());
@@ -304,7 +332,7 @@ mod tests {
         let mut sans = paquet("x", charge.clone());
         sans.prefixe = None;
         assert_eq!(convertir(&sans, &ctx()), Err(RefusPaquet::SansPrefixe));
-        assert_eq!(convertir(&paquet("x", charge[..22].to_vec()), &ctx()), Err(RefusPaquet::SansPorts));
+        assert!(matches!(convertir(&paquet("x", charge[..22].to_vec()), &ctx()), Ok(Conversion::Ligne(_))));
         let mut arp = paquet("x", charge.clone());
         arp.famille = 3;
         assert_eq!(convertir(&arp, &ctx()), Err(RefusPaquet::Famille(3)));

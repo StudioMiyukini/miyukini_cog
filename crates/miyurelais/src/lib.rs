@@ -60,7 +60,7 @@ pub use ligne::{convertir, meta_flux, Contexte, Conversion, RefusPaquet, PREFIXE
 pub use netlink::{decoder_datagramme, decoder_paquet, ErreurTrame, Message, PaquetNflog, ParametresInstance, TrameEssai};
 pub use relais::{ConfigRelais, ErreurConfig, ErreurTransport, Relais, Statistiques, Transport, TransportEssai};
 #[cfg(target_os = "linux")]
-pub use socket::{ErreurOuverture, SocketNflog};
+pub use socket::{ErreurOuverture, SocketNflog, TamponReception};
 pub use veille::{EtatVeille, Veille};
 
 /// Pourquoi la source NFQUEUE (verdicts en ligne) n'est pas implémentée ici.
