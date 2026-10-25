@@ -151,15 +151,15 @@
     - MiyuCloud : CDR sur toute écriture, quarantaine (3d632a16)
   - **Reste** :
     - règles Vigies sur le motif de la Douane (LATERAL, NON-DECLARE intra-zone, COG → adresse du Portail hors port déclaré) : amendement à prévoir
-    - format de ligne du relais NFLOG à confirmer quand le relais existe
+    - ~~format de ligne du relais NFLOG~~ (consigné, A-015)
     - ~~reclassement des fichiers MiyuCloud `inconnu`~~ (fait, A-012) ; migration `20261025000002` à exécuter sur PostgreSQL
     - séparation des processus entrant / sortant (**spécification à écrire**, A-012) ; Portail en micro-VM ou espace réseau dédié
-    - source de paquets NFQUEUE / NFLOG pour l'IPS et les Vigies
+    - ~~source NFLOG pour l'IPS et les Vigies~~ (fait, `miyurelais`, A-015) ; NFQUEUE (verdicts en ligne) : décision d'architecture
     - mise en forme du débit (`tc`)
     - ~~cibles de fuzzing MSCE et sas~~ (faites, 6 cibles) ; ~~Landlock du sas~~ (fait, A-012)
     - registre Merkle réel (lot 4)
-    - profils Landlock / AppArmor
-    - application des scripts de déploiement (zones, nftables, systemd)
+    - ~~profils Landlock / AppArmor~~ (faits : Landlock du sas, AppArmor des 5 services en enforce)
+    - ~~application des scripts de déploiement~~ (VM : systemd durci, zone COG sans sortie ; règles par compte écrites par l'installateur, pas encore produites par la Douane)
     - ~~test d'intrusion~~ : banc 100/100 en VM jetable (a64d1583)
 
 ## 6. Lot 4 — Canal officiel et registre
@@ -222,6 +222,7 @@
 - **Reste**
   - modèles réels (lecteur, planificateur, embeddings) après banc d'essai
   - routes HTTP et interface de la mémoire (voir, corriger, exporter, oublier, valider)
+  - ~~étiquette `publiable` (EX-47)~~ (faite, A-015 ; route de publication du pont à écrire)
   - transport des requêtes et Fiches entre COG (Portail, voie fédérée)
   - chemin de confirmation TAMR branché sur la republication et les branches sensibles
   - mémoire d'Alicia (`miyualicia-memory`) encore sur rusqlite
