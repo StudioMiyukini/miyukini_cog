@@ -111,6 +111,11 @@ impl Racine {
         }
     }
 
+    /// Secret maître (usage interne au crate : fichier de clé chiffré).
+    pub(crate) fn secret(&self) -> &[u8; TAILLE_SECRET] {
+        &self.secret
+    }
+
     /// Partage la racine en 3 parts SLIP-39 dont 2 suffisent (un groupe).
     ///
     /// La phrase secrète (ASCII imprimable, éventuellement vide) chiffre le

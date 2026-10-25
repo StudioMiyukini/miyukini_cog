@@ -16,6 +16,10 @@
 //!   2 sur 3 ; une part seule, une part corrompue ou des parts mélangées sont refusées.
 //! - [`Racine::cle`] : clé Ed25519 par [`Usage`], dérivée en SLIP-10 durcie,
 //!   rendue comme [`miyusceau::CleSignature`].
+//! - [`fichier_cle`] : fichier de clé racine chiffré (Argon2id +
+//!   XChaCha20-Poly1305, format `MYRC` v1) pour le support amovible.
+//! - [`durcir_processus`] : core dumps désactivés, mémoire verrouillée
+//!   (`mlockall`), NC-ANSSI-25.
 //! - [`Passation`] : « l'ancienne racine se porte garante de la nouvelle »,
 //!   scellée par les deux clés d'identité ([`verifier_passation`]).
 //!
@@ -31,7 +35,9 @@
 #![forbid(unsafe_code)]
 
 mod chiffrement;
+pub mod durcissement;
 pub mod erreurs;
+pub mod fichier_cle;
 mod gf256;
 mod mots;
 pub mod passation;
@@ -42,7 +48,11 @@ pub mod slip10;
 pub mod slip39;
 pub mod usages;
 
+pub use durcissement::{durcir_processus, EtatDurcissement, PolitiqueVerrouillage};
 pub use erreurs::ErreurRacine;
+pub use fichier_cle::{
+    chiffrer_racine, dechiffrer_racine, ecrire_fichier_cle, lire_fichier_cle, ParametresArgon2,
+};
 pub use passation::{verifier_passation, Passation, NATURE_PASSATION};
 pub use racine::{
     cog_id_depuis_cle, PartsRacine, Racine, EXPOSANT_DEFAUT, NOMBRE_PARTS, SEUIL, TAILLE_SECRET,

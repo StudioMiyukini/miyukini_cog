@@ -64,6 +64,22 @@ pub enum ErreurRacine {
     PassationAncienneRacineInattendue,
     /// Erreur du format Sceau (scellement ou vérification).
     Sceau(miyusceau::ErreurSceau),
+    /// Fichier de clé illisible : taille, magie, version, paramètres, mot de
+    /// passe ou intégrité — volontairement indistincts (fail-closed).
+    FichierCleInvalide,
+    /// Fichier de clé refusé avant lecture (lien symbolique, droits, propriétaire,
+    /// destination existante) : métadonnées seulement.
+    FichierCleRefuse(&'static str),
+    /// Paramètres Argon2id hors bornes (m ≥ 256 Mio, t ≥ 3, 1 ≤ p ≤ 16…).
+    ParametresArgon2HorsBornes,
+    /// Mot de passe du fichier de clé trop court.
+    MotDePasseTropCourt,
+    /// Erreur d'entrée-sortie (catégorie seulement).
+    EntreeSortie(std::io::ErrorKind),
+    /// Durcissement du processus impossible (core dumps).
+    Durcissement(&'static str),
+    /// Mémoire non verrouillable (`mlockall` refusé ou `RLIMIT_MEMLOCK` insuffisant).
+    VerrouillageMemoire,
 }
 
 impl fmt::Display for ErreurRacine {
@@ -104,6 +120,19 @@ impl fmt::Display for ErreurRacine {
                 f.write_str("passation : ancienne racine différente de la racine attendue")
             }
             Self::Sceau(e) => write!(f, "sceau : {e}"),
+            Self::FichierCleInvalide => f.write_str(
+                "fichier de clé invalide : mot de passe incorrect, fichier altéré ou format inconnu",
+            ),
+            Self::FichierCleRefuse(m) => write!(f, "fichier de clé refusé : {m}"),
+            Self::ParametresArgon2HorsBornes => f.write_str(
+                "paramètres Argon2id hors bornes (256 Mio ≤ m ≤ 4 Gio, 3 ≤ t ≤ 64, 1 ≤ p ≤ 16)",
+            ),
+            Self::MotDePasseTropCourt => f.write_str("mot de passe trop court (12 octets au moins)"),
+            Self::EntreeSortie(k) => write!(f, "entrée-sortie : {k}"),
+            Self::Durcissement(m) => write!(f, "durcissement du processus impossible : {m}"),
+            Self::VerrouillageMemoire => f.write_str(
+                "mémoire non verrouillable (mlockall) : exécuter en root, accorder CAP_IPC_LOCK ou relever RLIMIT_MEMLOCK (ulimit -l)",
+            ),
         }
     }
 }

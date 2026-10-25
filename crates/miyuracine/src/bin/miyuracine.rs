@@ -9,7 +9,13 @@
 //! À exécuter sur un poste isolé (aucun code réseau dans ce crate). Le secret
 //! maître n'est jamais affiché ni écrit ; seules les parts SLIP-39 (fichiers
 //! `0600` ou sortie standard) et, sur demande explicite, la graine d'**un**
-//! usage (`--exporter-graine-usage`, fichier `0600` neuf) quittent la mémoire.
+//! usage (`--exporter-graine-usage`, fichier `0600` neuf) quittent la mémoire,
+//! ainsi que le fichier de clé chiffré (`exporter-cle`, format `MYRC` v1).
+//!
+//! Avant toute lecture de secret, le processus est durci
+//! ([`miyuracine::durcir_processus`]) : core dumps désactivés, mémoire
+//! verrouillée (`mlockall`) — refus si impossible, sauf `--sans-mlock`
+//! (dérogation explicite, avertissement sur la sortie d'erreur).
 
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, Read, Write};
@@ -17,14 +23,22 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use miyuracine::fichier_cle::{lire_parametres, MEMOIRE_ARGON2_MAX};
 use miyuracine::{
-    verifier_passation, PartsRacine, Passation, Racine, Usage, EXPOSANT_DEFAUT, NOMBRE_PARTS,
+    durcir_processus, ecrire_fichier_cle, lire_fichier_cle, verifier_passation, ParametresArgon2,
+    PartsRacine, Passation, PolitiqueVerrouillage, Racine, Usage, EXPOSANT_DEFAUT, NOMBRE_PARTS,
 };
 use sha2::{Digest, Sha256};
 use zeroize::Zeroizing;
 
 /// Option commune : fichier de phrase secrète.
 const PHRASE: &str = "--phrase-fichier";
+/// Option commune : fichier de clé chiffré (alternative aux deux parts).
+const CLE: &str = "--cle";
+/// Option commune : fichier du mot de passe du fichier de clé.
+const MDP: &str = "--mot-de-passe-fichier";
+/// Option globale : dérogation au verrouillage mémoire.
+const SANS_MLOCK: &str = "--sans-mlock";
 
 /// Taille maximale d'un fichier de part ou de phrase (octets).
 const TAILLE_MAX_FICHIER: u64 = 4096;
@@ -35,6 +49,8 @@ miyuracine — cérémonie hors ligne de la racine COG (SLIP-39 2 sur 3, SLIP-10
 À exécuter sur un poste isolé du réseau. Le secret maître n'est jamais affiché ni écrit.
 
 UTILISATION
+  miyuracine [--sans-mlock] <commande> [options]
+
   miyuracine generer   [--dossier <rép>] [--exposant <0-15>] [--phrase-fichier <f>]
       Génère une racine et ses 3 parts (2 suffisent). Avec --dossier : fichiers
       part-<i>-sur-3.txt créés en 0600 (refus s'ils existent) ; sinon sortie standard.
@@ -54,6 +70,21 @@ UTILISATION
                        [--exposant <0-15>] [--phrase-fichier <f>] [--nouvelle-phrase-fichier <f>]
       Passation : nouvelle racine + 3 nouvelles parts, et sceau « l'ancienne racine se
       porte garante de la nouvelle » signé par les deux identités (fichier neuf).
+
+  miyuracine exporter-cle --part <f> --part <f> --sortie <fichier> --mot-de-passe-fichier <f>
+                       [--phrase-fichier <f>] [--argon2-memoire-mio <256-4096>] [--argon2-iterations <3-64>]
+      Écrit la racine chiffrée (Argon2id + XChaCha20-Poly1305, format MYRC v1, 122 octets)
+      dans un fichier neuf en 0600 (écriture atomique), puis la relit pour vérification.
+      Défaut : 1024 Mio, 4 itérations. Mot de passe : 12 octets au moins.
+
+  Source de la racine : partout où deux --part sont demandées, on peut donner à la place
+  --cle <fichier> --mot-de-passe-fichier <f> (fichier 0600, propriétaire courant, pas de lien).
+
+DURCISSEMENT
+  Core dumps désactivés (RLIMIT_CORE = 0, PR_SET_DUMPABLE = 0) et mémoire verrouillée
+  (mlockall) avant toute lecture de secret. Si la mémoire ne peut être verrouillée
+  (RLIMIT_MEMLOCK insuffisant : root, CAP_IPC_LOCK ou « ulimit -l unlimited »), refus ;
+  --sans-mlock lève ce refus (avertissement, à éviter hors essais).
 
 USAGES
   identite (génération 0 uniquement), emission, journal, editeur, arretes
@@ -77,6 +108,10 @@ struct Options {
     generation: Option<u32>,
     sortie: Option<PathBuf>,
     passation: Option<PathBuf>,
+    cle: Option<PathBuf>,
+    mot_de_passe_fichier: Option<PathBuf>,
+    argon2_memoire_mio: Option<u32>,
+    argon2_iterations: Option<u32>,
 }
 
 fn erreur(message: impl Into<String>) -> String {
@@ -137,6 +172,22 @@ fn analyser(arguments: &[String], autorisees: &[&str]) -> Result<Options, String
             }
             "--sortie" => definir(&mut o.sortie, PathBuf::from(valeur), nom)?,
             "--passation" => definir(&mut o.passation, PathBuf::from(valeur), nom)?,
+            "--cle" => definir(&mut o.cle, PathBuf::from(valeur), nom)?,
+            "--mot-de-passe-fichier" => {
+                definir(&mut o.mot_de_passe_fichier, PathBuf::from(valeur), nom)?;
+            }
+            "--argon2-memoire-mio" => {
+                let m: u32 = valeur
+                    .parse()
+                    .map_err(|_| erreur("mémoire Argon2id invalide (Mio)"))?;
+                definir(&mut o.argon2_memoire_mio, m, nom)?;
+            }
+            "--argon2-iterations" => {
+                let t: u32 = valeur
+                    .parse()
+                    .map_err(|_| erreur("itérations Argon2id invalides"))?;
+                definir(&mut o.argon2_iterations, t, nom)?;
+            }
             _ => return Err(erreur(format!("option inconnue : {nom}"))),
         }
     }
@@ -274,9 +325,29 @@ fn afficher_identite(racine: &Racine) -> Result<(), String> {
 
 // ─── Commandes ─────────────────────────────────────────────────────────────
 
+fn lire_mot_de_passe(o: &Options) -> Result<Zeroizing<Vec<u8>>, String> {
+    let chemin = o
+        .mot_de_passe_fichier
+        .as_deref()
+        .ok_or_else(|| erreur("--mot-de-passe-fichier <f> est requis"))?;
+    lire_phrase(Some(chemin))
+}
+
 fn recuperer_racine(o: &Options) -> Result<Racine, String> {
+    if let Some(cle) = o.cle.as_deref() {
+        if !o.parts.is_empty() || o.phrase_fichier.is_some() {
+            return Err(erreur(
+                "--cle exclut --part et --phrase-fichier (la phrase SLIP-39 ne s'applique qu'aux parts)",
+            ));
+        }
+        let mot_de_passe = lire_mot_de_passe(o)?;
+        return lire_fichier_cle(cle, &mot_de_passe)
+            .map_err(|e| erreur(format!("{} : {e}", cle.display())));
+    }
     if o.parts.len() != 2 {
-        return Err(erreur("exactement deux --part sont requises"));
+        return Err(erreur(
+            "exactement deux --part sont requises (ou --cle et --mot-de-passe-fichier)",
+        ));
     }
     let phrase = lire_phrase(o.phrase_fichier.as_deref())?;
     let textes = o
@@ -424,42 +495,140 @@ fn rotation(o: &Options) -> Result<(), String> {
     Ok(())
 }
 
+fn parametres_argon2(o: &Options) -> Result<ParametresArgon2, String> {
+    let defaut = ParametresArgon2::DEFAUT;
+    let m_kio = match o.argon2_memoire_mio {
+        Some(mio) => mio
+            .checked_mul(1024)
+            .ok_or_else(|| erreur("mémoire Argon2id hors bornes"))?,
+        None => defaut.memoire_kio(),
+    };
+    ParametresArgon2::nouveaux(
+        m_kio,
+        o.argon2_iterations.unwrap_or(defaut.iterations()),
+        defaut.parallelisme(),
+    )
+    .map_err(|e| e.to_string())
+}
+
+fn exporter_cle(o: &Options) -> Result<(), String> {
+    let sortie = o
+        .sortie
+        .as_deref()
+        .ok_or_else(|| erreur("--sortie <fichier> est requis"))?;
+    let params = parametres_argon2(o)?;
+    if fs::symlink_metadata(sortie).is_ok() {
+        return Err(erreur(format!("{} existe déjà : refus", sortie.display())));
+    }
+    let racine = recuperer_racine(o)?;
+    let mot_de_passe = lire_mot_de_passe(o)?;
+    ecrire_fichier_cle(sortie, &racine, &mot_de_passe, params)
+        .map_err(|e| erreur(format!("{} : {e}", sortie.display())))?;
+    // Relecture complète avant d'annoncer le succès (fail-closed).
+    let relue = lire_fichier_cle(sortie, &mot_de_passe)
+        .map_err(|e| erreur(format!("relecture de {} : {e}", sortie.display())))?;
+    if relue.cle_publique_identite() != racine.cle_publique_identite() {
+        let _ = fs::remove_file(sortie);
+        return Err(erreur("relecture : racine différente, fichier supprimé"));
+    }
+    println!(
+        "fichier de clé écrit et vérifié : {} (0600, MYRC v1, Argon2id {} Mio, t = {}, p = {})",
+        sortie.display(),
+        params.memoire_kio() / 1024,
+        params.iterations(),
+        params.parallelisme()
+    );
+    afficher_identite(&racine)
+}
+
+/// Mémoire Argon2id que la commande pourra demander (budget de `mlockall`).
+fn budget_argon2(commande: &str, o: &Options) -> Result<u64, String> {
+    let lecture = match o.cle.as_deref() {
+        Some(cle) => lire_parametres(cle)
+            .map_err(|e| erreur(format!("{} : {e}", cle.display())))?
+            .memoire_octets(),
+        None => 0,
+    };
+    let ecriture = if commande == "exporter-cle" {
+        parametres_argon2(o)?.memoire_octets()
+    } else {
+        0
+    };
+    Ok(lecture.max(ecriture).min(MEMOIRE_ARGON2_MAX))
+}
+
+fn durcir(commande: &str, o: &Options, politique: PolitiqueVerrouillage) -> Result<(), String> {
+    let budget = budget_argon2(commande, o)?;
+    let etat = durcir_processus(politique, budget).map_err(|e| e.to_string())?;
+    if !etat.memoire_verrouillee {
+        eprintln!(
+            "AVERTISSEMENT : --sans-mlock — mémoire NON verrouillée, les secrets peuvent atteindre le swap. \
+             Core dumps désactivés. À éviter hors essais."
+        );
+    }
+    Ok(())
+}
+
 fn executer(arguments: &[String]) -> Result<(), String> {
+    let (politique, arguments) = match arguments.split_first() {
+        Some((premier, reste)) if premier == SANS_MLOCK => (PolitiqueVerrouillage::Avertir, reste),
+        _ => (PolitiqueVerrouillage::Exiger, arguments),
+    };
     let Some((commande, reste)) = arguments.split_first() else {
         return Err(erreur("commande manquante (voir « miyuracine aide »)"));
     };
-    match commande.as_str() {
-        "generer" => generer(&analyser(reste, &["--dossier", "--exposant", PHRASE])?),
-        "recuperer" => recuperer(&analyser(reste, &["--part", PHRASE])?),
-        "deriver" => deriver(&analyser(
-            reste,
-            &[
-                "--part",
-                PHRASE,
-                "--usage",
-                "--generation",
-                "--exporter-graine-usage",
-                "--sortie",
-            ],
-        )?),
-        "rotation" => rotation(&analyser(
-            reste,
-            &[
-                "--part",
-                PHRASE,
-                "--nouvelle-phrase-fichier",
-                "--dossier",
-                "--exposant",
-                "--passation",
-            ],
-        )?),
+    let autorisees: &[&str] = match commande.as_str() {
+        "generer" => &["--dossier", "--exposant", PHRASE],
+        "recuperer" => &["--part", PHRASE, CLE, MDP],
+        "deriver" => &[
+            "--part",
+            PHRASE,
+            CLE,
+            MDP,
+            "--usage",
+            "--generation",
+            "--exporter-graine-usage",
+            "--sortie",
+        ],
+        "rotation" => &[
+            "--part",
+            PHRASE,
+            CLE,
+            MDP,
+            "--nouvelle-phrase-fichier",
+            "--dossier",
+            "--exposant",
+            "--passation",
+        ],
+        "exporter-cle" => &[
+            "--part",
+            PHRASE,
+            CLE,
+            MDP,
+            "--sortie",
+            "--argon2-memoire-mio",
+            "--argon2-iterations",
+        ],
         "aide" | "--aide" | "-h" | "--help" => {
             print!("{AIDE}");
-            Ok(())
+            return Ok(());
         }
-        autre => Err(erreur(format!(
-            "commande inconnue : {autre} (voir « miyuracine aide »)"
-        ))),
+        autre => {
+            return Err(erreur(format!(
+                "commande inconnue : {autre} (voir « miyuracine aide »)"
+            )))
+        }
+    };
+    let o = analyser(reste, autorisees)?;
+    // Durcissement AVANT toute lecture de part, phrase ou mot de passe.
+    durcir(commande, &o, politique)?;
+    match commande.as_str() {
+        "generer" => generer(&o),
+        "recuperer" => recuperer(&o),
+        "deriver" => deriver(&o),
+        "rotation" => rotation(&o),
+        "exporter-cle" => exporter_cle(&o),
+        _ => unreachable!("commande filtrée ci-dessus"),
     }
 }
 
