@@ -9,9 +9,10 @@
 //!
 //! - Points de faute cumulés par pair (`kid` de son identité), décroissance
 //!   linéaire dans le temps ; banni localement à partir de [`SEUIL_BANNISSEMENT`]
-//! - **Jamais partagée comme autorité** : aucune sérialisation, aucun export ;
-//!   elle n'entre dans aucun titre signé et ne vaut ni confirmation ni
-//!   accusation (seules les preuves signées + quorum révoquent)
+//! - **Jamais partagée comme autorité** : aucun export ; elle n'entre dans
+//!   aucun titre signé et ne vaut ni confirmation ni accusation (seules les
+//!   preuves signées + quorum révoquent) ; seule sérialisation : l'état
+//!   fédéral **local** scellé par HMAC (`MFED`, [`crate::persistance`])
 //! - Barème et décroissance non fixés par la doc gelée : choix consignés pour
 //!   un amendement
 
@@ -105,6 +106,16 @@ impl NoteLocale {
     /// Vrai si `pair` est banni localement.
     pub fn est_banni(&self, pair: &Kid, maintenant: u64) -> bool {
         self.points(pair, maintenant) >= SEUIL_BANNISSEMENT
+    }
+
+    /// Fiches brutes `(pair, points, mise à jour)` pour l'état local scellé.
+    pub(crate) fn fiches(&self) -> Vec<(Kid, u32, u64)> {
+        self.fiches.iter().map(|(k, f)| (*k, f.points, f.maj)).collect()
+    }
+
+    /// Restaure une fiche lue d'un état local scellé (HMAC vérifié).
+    pub(crate) fn restaurer(&mut self, pair: Kid, points: u32, maj: u64) {
+        self.fiches.insert(pair, Fiche { points, maj });
     }
 }
 

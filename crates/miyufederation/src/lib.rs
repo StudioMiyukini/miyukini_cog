@@ -24,6 +24,10 @@
 //!   accepté par 6 membres (A-007) ; fraîcheur de la vue (EX-31..33, EX-35)
 //! - [`note`] : note locale des pairs, jamais partagée (EX-37)
 //! - [`eclipse`] : carnet de pairs diversifiés, anciens conservés (EX-37)
+//! - [`persistance`] : état fédéral local `MFED` (statuts, confirmations,
+//!   suspensions, levées, révocations, note locale), titres signés
+//!   revérifiés au chargement, reste scellé par HMAC du secret local ;
+//!   reprise fail-closed (à consigner par amendement)
 //!
 //! **Sans Origin** (EX-30) : Origin n'est qu'un témoin facultatif.
 //! **Aucune destruction à distance** (EX-33) : seule sanction, la révocation
@@ -37,6 +41,7 @@ pub mod eclipse;
 pub mod erreurs;
 pub mod federation;
 pub mod note;
+pub mod persistance;
 pub mod preuve;
 pub mod statut;
 pub mod titres;
@@ -45,9 +50,10 @@ pub use eclipse::CarnetPairs;
 pub use erreurs::ErreurFederation;
 pub use federation::{
     Federation, Parametres, RevocationFederale, RevocationsFederation, SuspensionFederale, PERIODE_QUOTA_SECS,
-    QUOTA_CONFIRMATIONS, TEMOINS_MIN,
+    QUOTA_CONFIRMATIONS, TAILLE_MAX_ETAT, TEMOINS_MIN,
 };
 pub use note::{NoteLocale, Observation, SEUIL_BANNISSEMENT};
+pub use persistance::{CleEtatFederal, ErreurEtat, Reprise, StockageFederal, FICHIER_ETAT};
 pub use preuve::Preuve;
 pub use statut::{
     Sanction, Statut, CONFIRMATIONS_INVITE, CONFIRMATIONS_MEMBRE, DELAI_CONTESTATION_SECS, DUREE_CONFIRMATION_MAX_SECS,

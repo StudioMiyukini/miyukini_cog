@@ -298,10 +298,20 @@ fn aucune_destruction_a_distance() {
         "detrui", "destruct", "destroy", "wipe", "efface", "erase", "reinitialis", "reset", "kill", "purge",
         "supprimer_donnees", "autodestruction",
     ];
-    let dossier = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
+    let mut a_lire = vec![std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src")];
+    let mut fichiers = Vec::new();
+    while let Some(dossier) = a_lire.pop() {
+        for e in std::fs::read_dir(dossier).unwrap() {
+            let chemin = e.unwrap().path();
+            if chemin.is_dir() {
+                a_lire.push(chemin);
+            } else {
+                fichiers.push(chemin);
+            }
+        }
+    }
     let mut lus = 0;
-    for e in std::fs::read_dir(dossier).unwrap() {
-        let chemin = e.unwrap().path();
+    for chemin in fichiers {
         let texte = std::fs::read_to_string(&chemin).unwrap();
         lus += 1;
         for ligne in texte.lines() {

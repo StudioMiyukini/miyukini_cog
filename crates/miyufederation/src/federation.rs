@@ -65,6 +65,10 @@ use crate::statut::{
 };
 use crate::titres::{Accusation, Candidature, Confirmation, Recours};
 
+mod etat;
+
+pub use etat::TAILLE_MAX_ETAT;
+
 /// Nouveaux COG confirmés au plus par membre et par période (choix à amender :
 /// la doc dit « limité par membre et par mois » sans valeur).
 pub const QUOTA_CONFIRMATIONS: usize = 8;
@@ -204,13 +208,56 @@ impl SuspensionFederale {
     }
 }
 
+/// Pièces signées d'une sanction, conservées pour la persistance : elles
+/// sont **revérifiées** au chargement ([`etat`]).
+#[derive(Debug, Clone)]
+struct Pieces {
+    /// Octets de l'accusation reçue (sceau cosigné, quorum 6).
+    accusation: Vec<u8>,
+    /// Preuve de faute.
+    preuve: Preuve,
+}
+
 /// Suspension et statut à rétablir si un recours est accepté.
 #[derive(Debug, Clone)]
 struct EnSuspension {
     publique: SuspensionFederale,
     statut: Statut,
     membre: bool,
+    pieces: Pieces,
 }
+
+/// Révocation définitive : pièces et début de la suspension qui l'a précédée.
+#[derive(Debug, Clone)]
+struct PiecesRevocation {
+    pieces: Pieces,
+    depuis: u64,
+}
+
+/// Accusation levée par un recours accepté (rejeu refusé).
+#[derive(Debug, Clone)]
+struct Levee {
+    accuse: Kid,
+    pieces: Pieces,
+    /// Octets du recours accepté (sceau cosigné, quorum 6).
+    recours: Vec<u8>,
+    depuis: u64,
+    /// Heure locale de la levée.
+    instant: u64,
+}
+
+/// Confirmation reçue, conservée (fenêtre d'historique) pour la persistance.
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct TitreRecu {
+    recue_a: u64,
+    expire_a: u64,
+    octets: Vec<u8>,
+}
+
+/// Confirmations conservées au plus par couple (confirmé, confirmateur) ;
+/// au-delà, les plus anciennes sont oubliées (fail-closed : une reprise ne
+/// peut qu'y perdre de la couverture, jamais en gagner).
+const MAX_TITRES_PAR_CONFIRMATEUR: usize = 64;
 
 #[derive(Debug, Clone)]
 struct Dossier {
@@ -219,11 +266,17 @@ struct Dossier {
     journal: [u8; 32],
     registre: [u8; 32],
     fondateur: bool,
+    /// Heure locale d'inscription (vérification de la candidature).
+    inscrit_a: u64,
+    /// Candidature signée d'origine (revérifiée au chargement).
+    candidature: Vec<u8>,
     statut: Statut,
     /// Statut membre acquis (collant tant qu'il reste ≥ 2 confirmations).
     membre: bool,
     /// Intervalles de validité des confirmations, par membre confirmateur.
     confirmations: BTreeMap<Kid, Vec<(u64, u64)>>,
+    /// Confirmations signées d'origine, par membre confirmateur.
+    titres: BTreeMap<Kid, Vec<TitreRecu>>,
     /// Dernière tête témoignée acceptée (anti-éclipse).
     vue: Option<EtatRegistre>,
     /// Dernière tête que le COG local a contresignée comme témoin.
@@ -246,8 +299,10 @@ pub struct Federation {
     par_cog: BTreeMap<CogId, Kid>,
     revocations: BTreeMap<Kid, RevocationFederale>,
     suspensions: BTreeMap<Kid, EnSuspension>,
+    /// Pièces des révocations définitives.
+    pieces_revocations: BTreeMap<Kid, PiecesRevocation>,
     /// Accusations levées par un recours accepté (identités) : rejeu refusé.
-    levees: BTreeSet<[u8; 32]>,
+    levees: BTreeMap<[u8; 32], Levee>,
     quotas: BTreeMap<Kid, Vec<Quota>>,
     heure: u64,
     vue_a_jour_au: Option<u64>,
@@ -319,7 +374,8 @@ impl Federation {
             par_cog: BTreeMap::new(),
             revocations: BTreeMap::new(),
             suspensions: BTreeMap::new(),
-            levees: BTreeSet::new(),
+            pieces_revocations: BTreeMap::new(),
+            levees: BTreeMap::new(),
             quotas: BTreeMap::new(),
             heure: 0,
             vue_a_jour_au: None,
@@ -407,9 +463,12 @@ impl Federation {
                 journal: c.journal,
                 registre: c.registre,
                 fondateur,
+                inscrit_a: maintenant,
+                candidature: octets.to_vec(),
                 statut: if fondateur { Statut::Membre } else { Statut::Candidat },
                 membre: fondateur,
                 confirmations: BTreeMap::new(),
+                titres: BTreeMap::new(),
                 vue: None,
                 temoignage: None,
             },
@@ -466,13 +525,8 @@ impl Federation {
             }
             quota.push(Quota { confirme: kid_c, premiere: maintenant, derniere: maintenant });
         }
-        // Compte à partir de la réception : un antidatage n'achète pas d'historique.
-        let debut = c.emise_a.max(maintenant);
-        if debut <= c.expire_a {
-            if let Some(d) = self.dossiers.get_mut(&kid_c) {
-                let iv = d.confirmations.entry(kid_m).or_default();
-                fusionner(iv, (debut, c.expire_a), maintenant.saturating_sub(HISTORIQUE_SECS));
-            }
+        if let Some(d) = self.dossiers.get_mut(&kid_c) {
+            d.ajouter_confirmation(kid_m, &c, octets, maintenant);
         }
         Ok(())
     }
@@ -499,8 +553,9 @@ impl Federation {
             .collect();
         let mut definitives = Vec::with_capacity(echues.len());
         for kid in echues {
-            let Some(s) = self.suspensions.remove(&kid) else { continue };
-            let s = s.publique;
+            let Some(en) = self.suspensions.remove(&kid) else { continue };
+            let s = en.publique;
+            self.pieces_revocations.insert(kid, PiecesRevocation { pieces: en.pieces, depuis: s.depuis });
             let revocation = RevocationFederale {
                 racine: s.racine,
                 kid,
@@ -838,7 +893,7 @@ impl Federation {
         if let Some(s) = self.suspensions.get(&kid_accuse) {
             return Ok(s.publique.clone());
         }
-        if self.levees.contains(&identite_accusation) {
+        if self.levees.contains_key(&identite_accusation) {
             return Err(ErreurFederation::AccusationLevee);
         }
         let dossier = self.dossiers.get(&kid_accuse).ok_or(ErreurFederation::Inconnu)?;
@@ -878,7 +933,12 @@ impl Federation {
         };
         self.suspensions.insert(
             kid_accuse,
-            EnSuspension { publique: suspension.clone(), statut: dossier.statut, membre: dossier.membre },
+            EnSuspension {
+                publique: suspension.clone(),
+                statut: dossier.statut,
+                membre: dossier.membre,
+                pieces: Pieces { accusation: octets.to_vec(), preuve: preuve.clone() },
+            },
         );
         self.note.observer(&kid_accuse, Observation::PreuveCorroboree, maintenant);
         if let Some(d) = self.dossiers.get_mut(&kid_accuse) {
@@ -974,19 +1034,20 @@ impl Federation {
         let Some(levee) = self.suspensions.remove(&kid_accuse) else {
             return Err(ErreurFederation::AucuneSuspension);
         };
-        self.levees.insert(levee.publique.accusation);
+        self.levees.insert(
+            levee.publique.accusation,
+            Levee {
+                accuse: kid_accuse,
+                pieces: levee.pieces,
+                recours: octets.to_vec(),
+                depuis: levee.publique.depuis,
+                instant: maintenant,
+            },
+        );
         if let Some(d) = self.dossiers.get_mut(&kid_accuse) {
             d.statut = levee.statut;
             d.membre = levee.membre;
-            // Compteur des 7 jours repris de zéro : les intervalles de
-            // confirmation commencent au plus tôt à la levée.
-            for iv in d.confirmations.values_mut() {
-                iv.retain(|&(_, e)| e >= maintenant);
-                for (debut, _) in iv.iter_mut() {
-                    *debut = (*debut).max(maintenant);
-                }
-            }
-            d.confirmations.retain(|_, iv| !iv.is_empty());
+            d.relancer_compteur(maintenant);
         }
         self.recalculer(maintenant);
         Ok(levee.publique)
@@ -1014,6 +1075,45 @@ impl Federation {
 
     fn est_federe(&self, cog: &CogId) -> bool {
         self.par_cog.contains_key(cog)
+    }
+}
+
+impl Dossier {
+    /// Confirmation vérifiée reçue à `recue_a` : intervalle de validité compté
+    /// à partir de la réception (un antidatage n'achète pas d'historique) ;
+    /// le titre signé est conservé pour la persistance. Même chemin à la
+    /// réception et à la reprise d'un état persisté.
+    fn ajouter_confirmation(&mut self, confirmateur: Kid, c: &Confirmation, octets: &[u8], recue_a: u64) {
+        let debut = c.emise_a.max(recue_a);
+        if debut > c.expire_a {
+            return;
+        }
+        let oubli_avant = recue_a.saturating_sub(HISTORIQUE_SECS);
+        fusionner(self.confirmations.entry(confirmateur).or_default(), (debut, c.expire_a), oubli_avant);
+        let titres = self.titres.entry(confirmateur).or_default();
+        titres.retain(|t| t.expire_a >= oubli_avant);
+        if !titres.iter().any(|t| t.octets == octets) {
+            titres.push(TitreRecu { recue_a, expire_a: c.expire_a, octets: octets.to_vec() });
+            if titres.len() > MAX_TITRES_PAR_CONFIRMATEUR {
+                titres.remove(0);
+            }
+        }
+    }
+
+    /// Levée d'une suspension à `t` : compteur des 7 jours repris de zéro,
+    /// les intervalles de confirmation commencent au plus tôt à la levée.
+    fn relancer_compteur(&mut self, t: u64) {
+        for iv in self.confirmations.values_mut() {
+            iv.retain(|&(_, e)| e >= t);
+            for (debut, _) in iv.iter_mut() {
+                *debut = (*debut).max(t);
+            }
+        }
+        self.confirmations.retain(|_, iv| !iv.is_empty());
+        for titres in self.titres.values_mut() {
+            titres.retain(|x| x.expire_a >= t);
+        }
+        self.titres.retain(|_, v| !v.is_empty());
     }
 }
 
