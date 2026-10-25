@@ -83,6 +83,15 @@ pub enum ErreurFederation {
     /// Pair banni localement (note locale).
     #[error("pair banni localement")]
     Banni,
+    /// COG suspendu (accusation au quorum, délai de contestation en cours).
+    #[error("COG suspendu")]
+    Suspendu,
+    /// Aucune suspension en cours pour ce COG (recours sans objet).
+    #[error("aucune suspension en cours")]
+    AucuneSuspension,
+    /// Accusation déjà levée par un recours accepté (rejeu refusé).
+    #[error("accusation levée par un recours accepté")]
+    AccusationLevee,
 }
 
 impl From<ErreurRegistre> for ErreurFederation {

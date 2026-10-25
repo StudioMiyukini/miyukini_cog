@@ -20,7 +20,8 @@
 //! - [`journal`] : côté émetteur (ajout, têtes signées, preuves) ;
 //! - [`suivi`] : côté vérificateur (têtes + Median-Time-Past, miroir intégral vérifié) ;
 //! - [`temps`] : Median-Time-Past (11 têtes) et horloge de confiance monotone ;
-//! - [`federal`] : têtes des COG fédérés contresignées par Origin ;
+//! - [`federal`] : têtes des COG fédérés contresignées par ≥ 3 membres
+//!   témoins, Origin = un témoin au plus (A-007) ;
 //! - `revocation` (fonctionnalité `miyauth`) : `SourceRevocation` de miyauth
 //!   adossée à un miroir vérifié (lot 2 §8.2).
 //!
@@ -39,7 +40,7 @@ pub mod temps;
 
 pub use entree::{identite_sceau, Categorie, Cible, Corps, EntreeRegistre, Publication};
 pub use erreurs::{ErreurJournal, ErreurStockage, ErreurTemps};
-pub use federal::RegistreFederal;
+pub use federal::{verifier_temoins, RegistreFederal, TEMOINS_MIN};
 #[cfg(feature = "miyauth")]
 pub use revocation::{cible_serie, RevocationsRegistre};
 pub use journal::{controler_structure_entree, Journal};

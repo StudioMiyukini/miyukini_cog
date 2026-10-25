@@ -2,11 +2,13 @@
 //! @do     verifier_sortie_lot6
 //! @role   test
 //! @layer  toolkit
-//! @human  miyufederation — test de sortie du lot 6 : trois COG de test deviennent membres, un COG fautif est révoqué, sans Origin.
+//! @human  miyufederation — test de sortie du lot 6 : trois COG de test deviennent membres, un COG fautif est suspendu puis révoqué après 72 h, sans Origin.
 
 //! Sortie du lot 6 (PLAN-IMPLEMENTATION §8) : « trois COG de test atteignent
 //! le statut membre ; un COG fautif est révoqué ». Aucune clé d'Origin n'est
-//! configurée : chaque COG tient sa propre vue fédérale (EX-30).
+//! configurée : chaque COG tient sa propre vue fédérale (EX-30). Délai de
+//! contestation (A-007, EX-32) : suspension immédiate, révocation définitive
+//! après 72 h sans recours accepté.
 
 mod commun;
 
@@ -16,7 +18,8 @@ use miyauth::{
     ListeRevocation, PolitiqueIdentite, Portees, RefusIdentite, RevocationsFederees, SecretTitulaire,
 };
 use miyufederation::{
-    CarnetPairs, ErreurFederation, Federation, Preuve, RevocationsFederation, Sanction, Statut, QUORUM_BLACKLIST,
+    CarnetPairs, ErreurFederation, Federation, Preuve, RevocationsFederation, Sanction, Statut,
+    DELAI_CONTESTATION_SECS, QUORUM_BLACKLIST,
 };
 use miyuregistre::{Cible, Corps, EntreeRegistre};
 use miyusceau::{empreinte_cle, verifier, AncresDeConfiance, CleSignature, NiveauConfiance};
@@ -81,7 +84,7 @@ fn trois_cog_deviennent_membres_puis_un_fautif_est_revoque() {
         for x in &cogs[A..] {
             v.recevoir_candidature(&x.candidature, T0)?;
         }
-        v.actualiser(T0)
+        v.actualiser(T0).map(|_| ())
     });
     for v in &vues {
         assert_eq!(v.statut(&cogs[A].cog), Some(Statut::Candidat));
@@ -97,7 +100,7 @@ fn trois_cog_deviennent_membres_puis_un_fautif_est_revoque() {
                 diffuser(&mut vues, |v| v.recevoir_confirmation(&c, t));
             }
         }
-        diffuser(&mut vues, |v| v.actualiser(t));
+        diffuser(&mut vues, |v| v.actualiser(t).map(|_| ()));
         let attendu = if jour < 7 { Statut::Invite } else { Statut::Membre };
         for v in &vues {
             for x in &cogs[A..] {
@@ -166,54 +169,38 @@ fn trois_cog_deviennent_membres_puis_un_fautif_est_revoque() {
     // Le fautif ne peut pas cosigner sa propre accusation.
     assert!(vues[C].contresigner_accusation(&accusation, &preuve, &cogs[C].identite, t3).is_err());
 
-    let mut revocations = Vec::new();
+    let mut suspensions = Vec::new();
     for v in &mut vues {
-        revocations.push(v.recevoir_accusation(&accusation, &preuve, t3).unwrap());
+        suspensions.push(v.recevoir_accusation(&accusation, &preuve, t3).unwrap());
     }
-    let rev = &revocations[A];
-    assert_eq!(rev.cog, cogs[C].cog);
-    assert_eq!(rev.sanction, Sanction::RevocationIdentite);
+    let suspension = suspensions[A].clone();
+    assert_eq!(suspension.cog, cogs[C].cog);
+    assert_eq!(suspension.echeance(), t3 + DELAI_CONTESTATION_SECS);
     assert_eq!(QUORUM_BLACKLIST, 6);
     for v in &vues {
-        assert_eq!(v.statut(&cogs[C].cog), Some(Statut::Revoque));
+        // Suspension immédiate (A-007) : pas encore de révocation.
+        assert_eq!(
+            v.statut(&cogs[C].cog),
+            Some(Statut::Suspendu { depuis: t3, accusation: suspension.accusation })
+        );
+        assert_eq!(v.revocations().count(), 0);
         // Les autres restent membres.
         assert_eq!(v.statut(&cogs[A].cog), Some(Statut::Membre));
         assert_eq!(v.statut(&cogs[B].cog), Some(Statut::Membre));
     }
-    // Confirmateurs responsables : pénalisés, sans bannissement.
-    assert_eq!(vues[A].note().points(&cogs[0].identite.kid(), t3), 25);
-    assert!(!vues[A].note().est_banni(&cogs[0].identite.kid(), t3));
 
-    // ── Entrée de registre produite : Revocation { cible: Cle(kid) } ──
-    let entree = rev.sceller_entree(&cogs[A].journal).unwrap();
-    let mut ancres = AncresDeConfiance::new();
-    ancres.ajouter(&cogs[A].journal.cle_publique(), NiveauConfiance::Souverain).unwrap();
-    let lue = verifier::<EntreeRegistre>(&entree, &ancres, t3).unwrap().into_titre();
-    match lue.corps {
-        Corps::Revocation { cible: Cible::Cle(kid), motif } => {
-            assert_eq!(kid, empreinte_cle(&cogs[C].identite.cle_publique()));
-            assert!(motif.starts_with("blacklist federale "));
-        }
-        autre => panic!("révocation attendue : {autre:?}"),
-    }
-
-    // ── Les autres ne font plus confiance à C ──
+    // ── Pendant la suspension, les autres ne font plus confiance à C ──
     // Passeport émis par C : refusé chez A via la source de révocation.
     let t4 = t3 + 30;
     assert!(matches!(
         verifier_chez(&vues[A], &cogs[A], &cogs[C], &p, t4),
         Err(RefusIdentite::Revoque(CibleRevocation::Serie(_)))
     ));
-    assert!(matches!(vues[B].acces_federe(&cogs[C].cog, t4), Err(ErreurFederation::Revoque)));
+    assert!(matches!(vues[B].acces_federe(&cogs[C].cog, t4), Err(ErreurFederation::Suspendu)));
     let h3 = cogs[C].tete(2, 5, [0x11; 32], t4);
-    assert!(matches!(vues[B].recevoir_tete(&cogs[C].cog, &h3, None, t4), Err(ErreurFederation::Revoque)));
+    assert!(matches!(vues[B].recevoir_tete(&cogs[C].cog, &h3, None, t4), Err(ErreurFederation::Suspendu)));
     let c = cogs[C].confirmer(&cogs[A], t4);
-    assert!(matches!(vues[B].recevoir_confirmation(&c, t4), Err(ErreurFederation::Revoque)));
-    let c = cogs[0].confirmer(&cogs[C], t4);
-    assert!(matches!(vues[B].recevoir_confirmation(&c, t4), Err(ErreurFederation::Revoque)));
-    // Même racine : retour seulement par nouvelle identité.
-    let recandidature = CogTest::nouveau(7, t4).candidature;
-    assert!(matches!(vues[B].recevoir_candidature(&recandidature, t4), Err(ErreurFederation::Revoque)));
+    assert!(matches!(vues[B].recevoir_confirmation(&c, t4), Err(ErreurFederation::Suspendu)));
     let mut carnet = CarnetPairs::new();
     for (i, x) in cogs.iter().enumerate() {
         carnet.noter_contact(&x.cog, if i % 2 == 0 { "reseau-pair" } else { "reseau-impair" }, T0);
@@ -238,6 +225,67 @@ fn trois_cog_deviennent_membres_puis_un_fautif_est_revoque() {
     }
     vues[A].recevoir_tete(&cogs[B].cog, &hb, None, tard).unwrap();
     assert!(matches!(vues[A].acces_federe(&cogs[B].cog, tard), Ok(Statut::Membre)));
+
+    // ── 72 h sans recours accepté : révocation définitive ──
+    let t5 = suspension.echeance();
+    // Les fondateurs renouvellent leurs confirmations de A et B (24 h).
+    for f in &cogs[..4] {
+        for x in [&cogs[A], &cogs[B]] {
+            let c = f.confirmer(x, t5 - 60);
+            diffuser(&mut vues, |v| v.recevoir_confirmation(&c, t5 - 60));
+        }
+    }
+    let mut revocations = Vec::new();
+    for v in &mut vues {
+        assert_eq!(v.actualiser(t5 - 1).unwrap().len(), 0);
+        let mut d = v.actualiser(t5).unwrap();
+        assert_eq!(d.len(), 1);
+        revocations.push(d.remove(0));
+    }
+    let rev = &revocations[A];
+    assert_eq!(rev.cog, cogs[C].cog);
+    assert_eq!(rev.accusation, suspension.accusation);
+    assert_eq!(rev.sanction, Sanction::RevocationIdentite);
+    for v in &vues {
+        assert_eq!(v.statut(&cogs[C].cog), Some(Statut::Revoque));
+        assert_eq!(v.statut(&cogs[A].cog), Some(Statut::Membre));
+        assert_eq!(v.statut(&cogs[B].cog), Some(Statut::Membre));
+    }
+    // Confirmateurs responsables : pénalisés, sans bannissement.
+    assert_eq!(vues[A].note().points(&cogs[0].identite.kid(), t5), 25);
+    assert!(!vues[A].note().est_banni(&cogs[0].identite.kid(), t5));
+
+    // ── Entrée de registre produite : Revocation { cible: Cle(kid) } ──
+    let entree = rev.sceller_entree(&cogs[A].journal).unwrap();
+    let mut ancres = AncresDeConfiance::new();
+    ancres.ajouter(&cogs[A].journal.cle_publique(), NiveauConfiance::Souverain).unwrap();
+    let lue = verifier::<EntreeRegistre>(&entree, &ancres, t5).unwrap().into_titre();
+    match lue.corps {
+        Corps::Revocation { cible: Cible::Cle(kid), motif } => {
+            assert_eq!(kid, empreinte_cle(&cogs[C].identite.cle_publique()));
+            assert!(motif.starts_with("blacklist federale "));
+        }
+        autre => panic!("révocation attendue : {autre:?}"),
+    }
+
+    // ── Révoqué : refus définitif ──
+    let t6 = t5 + 30;
+    let p2 = passeport(&cogs[C], &cogs[A], t6);
+    assert!(matches!(
+        verifier_chez(&vues[A], &cogs[A], &cogs[C], &p2, t6),
+        Err(RefusIdentite::Revoque(CibleRevocation::Serie(_)))
+    ));
+    assert!(matches!(vues[B].acces_federe(&cogs[C].cog, t6), Err(ErreurFederation::Revoque)));
+    let h4 = cogs[C].tete(3, 5, [0x11; 32], t6);
+    assert!(matches!(vues[B].recevoir_tete(&cogs[C].cog, &h4, None, t6), Err(ErreurFederation::Revoque)));
+    let c = cogs[C].confirmer(&cogs[A], t6);
+    assert!(matches!(vues[B].recevoir_confirmation(&c, t6), Err(ErreurFederation::Revoque)));
+    let c = cogs[0].confirmer(&cogs[C], t6);
+    assert!(matches!(vues[B].recevoir_confirmation(&c, t6), Err(ErreurFederation::Revoque)));
+    // Même racine : retour seulement par nouvelle identité.
+    let recandidature = CogTest::nouveau(7, t6).candidature;
+    assert!(matches!(vues[B].recevoir_candidature(&recandidature, t6), Err(ErreurFederation::Revoque)));
+    assert!(matches!(vues[B].recevoir_accusation(&accusation, &preuve, t6), Err(ErreurFederation::Revoque)));
 }
 
 #[test]

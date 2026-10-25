@@ -2,7 +2,7 @@
 //! @do     definir_statuts_federaux
 //! @role   securite
 //! @layer  toolkit
-//! @human  miyufederation — module « statut » (candidat, invité, membre, révoqué ; seuils de la doc gelée).
+//! @human  miyufederation — module « statut » (candidat, invité, membre, suspendu, révoqué ; seuils de la doc gelée).
 
 //! Statuts fédéraux (zones §16) et seuils de la doc gelée.
 
@@ -14,6 +14,11 @@ pub const CONFIRMATIONS_MEMBRE: usize = 4;
 pub const DUREE_MEMBRE_SECS: u64 = 7 * 86_400;
 /// Quorum de membres indépendants d'une accusation (EX-32, zones §16).
 pub const QUORUM_BLACKLIST: usize = 6;
+/// Quorum de membres distincts (hors accusé) d'un « recours accepté » (EX-32, A-007).
+pub const QUORUM_RECOURS: usize = 6;
+/// Délai de contestation : suspension immédiate, révocation définitive après
+/// 72 h sans recours accepté (EX-32, décision du propriétaire A-007).
+pub const DELAI_CONTESTATION_SECS: u64 = 72 * 3_600;
 /// Durée de validité maximale d'une confirmation : renouvelée toutes les 24 h (zones §16).
 pub const DUREE_CONFIRMATION_MAX_SECS: u64 = 86_400;
 
@@ -26,6 +31,15 @@ pub enum Statut {
     Invite,
     /// ≥ 4 confirmations continues pendant 7 jours (ou fondateur) : accès complet, confirme et signale.
     Membre,
+    /// Accusation au quorum : **suspendu** (titres refusés partout) en
+    /// attente de la révocation définitive (72 h) ou d'un recours accepté
+    /// (EX-32, A-007).
+    Suspendu {
+        /// Heure locale de la suspension (réception de l'accusation au quorum).
+        depuis: u64,
+        /// Identité de l'accusation (SHA-256 de ses octets signés).
+        accusation: [u8; 32],
+    },
     /// Identité révoquée définitivement (blacklist) : tous les pairs refusent.
     Revoque,
 }

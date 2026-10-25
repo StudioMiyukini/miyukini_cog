@@ -2,7 +2,7 @@
 //! @do     encoder_titres_federaux
 //! @role   securite
 //! @layer  toolkit
-//! @human  miyufederation — module « titres » (candidature 0x06/0x43, confirmation 0x07, accusation 0x06/0x42).
+//! @human  miyufederation — module « titres » (candidature 0x06/0x43, confirmation 0x07, accusation 0x06/0x42, recours 0x06/0x44).
 
 //! Titres fédéraux au format Sceau v1.1.
 //!
@@ -47,6 +47,23 @@
 //! | 3 | `type_preuve` | `u64` : 1 = équivoque de têtes |
 //! | 4 | `empreinte_preuve` | SHA-256 de la preuve encodée ([`crate::preuve`]) (32 o) |
 //! | 5 | `emise_a` | secondes Unix |
+//!
+//! **Recours accepté** (contestation, EX-32, décision du propriétaire A-007) —
+//! certificat `0x06`, nature **`0x44`** (« D »), **un seul sceau cosigné**
+//! par les membres qui ont examiné la contre-preuve (quorum 6, au plus 8
+//! signatures, jamais l'accusé) ; lie l'accusation contestée et son empreinte
+//! de preuve. **Encodage choisi à l'implémentation, à consigner par un
+//! amendement futur** (A-007 : « fixé à l'implémentation, consigné par
+//! amendement » ; nature `0x44` à ajouter au lot 2 §4.1 et §10.1) :
+//!
+//! | Tag | Champ | Valeur |
+//! |---|---|---|
+//! | 1 | `nature` | 1 octet `0x44` |
+//! | 2 | `accuse` | clé publique d'identité du COG suspendu (32 o) |
+//! | 3 | `type_preuve` | `u64` : type de preuve de l'accusation (1 = équivoque) |
+//! | 4 | `empreinte_preuve` | même empreinte de preuve que l'accusation (32 o) |
+//! | 5 | `accusation` | identité de l'accusation contestée : SHA-256 de ses octets signés (32 o) |
+//! | 6 | `emise_a` | secondes Unix |
 
 use miyusceau::{
     cosigner, sceller, CleSignature, EcrivainTlv, ErreurSceau, LecteurTlv, Titre, TypeSceau, TOLERANCE_HORLOGE_SECS,
@@ -61,6 +78,9 @@ use crate::statut::DUREE_CONFIRMATION_MAX_SECS;
 pub const NATURE_CANDIDATURE: u8 = 0x43;
 /// Nature de certificat « accusation fédérale » (à amender, lot 2 §4.1).
 pub const NATURE_ACCUSATION: u8 = 0x42;
+/// Nature de certificat « recours accepté » (choisie à l'implémentation,
+/// **à consigner par un amendement futur**, lot 2 §4.1).
+pub const NATURE_RECOURS: u8 = 0x44;
 /// Validité d'une candidature (la preuve de calcul est liée à son jour).
 pub const VALIDITE_CANDIDATURE_SECS: u64 = 2 * 86_400;
 /// Niveau de reconnaissance « confirmation fédérale ».
@@ -301,6 +321,83 @@ impl Titre for Accusation {
     }
 }
 
+/// Recours accepté contre une accusation (contestation, EX-32) : un sceau
+/// unique cosigné par les membres (quorum 6, jamais l'accusé).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Recours {
+    /// Identité suspendue.
+    pub accuse: [u8; 32],
+    /// Type de preuve de l'accusation contestée.
+    pub type_preuve: u64,
+    /// Empreinte de preuve de l'accusation contestée.
+    pub empreinte_preuve: [u8; 32],
+    /// Identité de l'accusation contestée (SHA-256 de ses octets signés).
+    pub accusation: [u8; 32],
+    /// Horodatage.
+    pub emise_a: u64,
+}
+
+impl Recours {
+    /// Premier signataire (clé d'identité d'un membre, jamais l'accusé).
+    pub fn sceller(&self, identite: &CleSignature) -> Result<Vec<u8>, ErreurFederation> {
+        if identite.cle_publique() == self.accuse {
+            return Err(ErreurFederation::AutoConfirmation);
+        }
+        Ok(sceller(self, identite)?)
+    }
+
+    /// Ajoute la signature d'un membre (mêmes octets signés). Le contrôle du
+    /// signataire est fait par [`crate::Federation::contresigner_recours`].
+    pub fn cosigner(octets: &[u8], identite: &CleSignature) -> Result<Vec<u8>, ErreurFederation> {
+        let r = miyusceau::decoder_titre::<Self>(&miyusceau::Sceau::decoder(octets)?.charge)?;
+        if identite.cle_publique() == r.accuse {
+            return Err(ErreurFederation::AutoConfirmation);
+        }
+        Ok(cosigner::<Self>(octets, identite)?)
+    }
+}
+
+impl Titre for Recours {
+    const TYPE: TypeSceau = TypeSceau::Certificat;
+
+    fn encoder(&self, e: &mut EcrivainTlv) -> Result<(), ErreurSceau> {
+        if self.type_preuve != PREUVE_EQUIVOQUE {
+            return Err(ErreurSceau::ValeurInvalide(3));
+        }
+        e.octets(1, &[NATURE_RECOURS])?
+            .b32(2, &self.accuse)?
+            .u64(3, self.type_preuve)?
+            .b32(4, &self.empreinte_preuve)?
+            .b32(5, &self.accusation)?
+            .u64(6, self.emise_a)?;
+        Ok(())
+    }
+
+    fn decoder(l: &mut LecteurTlv<'_>) -> Result<Self, ErreurSceau> {
+        if l.exiger(1)? != [NATURE_RECOURS] {
+            return Err(ErreurSceau::ValeurInvalide(1));
+        }
+        let accuse = l.exiger_b32(2)?;
+        let type_preuve = l.exiger_u64(3)?;
+        if type_preuve != PREUVE_EQUIVOQUE {
+            return Err(ErreurSceau::ValeurInvalide(3));
+        }
+        Ok(Self {
+            accuse,
+            type_preuve,
+            empreinte_preuve: l.exiger_b32(4)?,
+            accusation: l.exiger_b32(5)?,
+            emise_a: l.exiger_u64(6)?,
+        })
+    }
+
+    /// Pas d'expiration (le délai de 72 h est contrôlé par la fédération) ;
+    /// datée dans le futur au-delà de la tolérance = refus.
+    fn fenetre_validite(&self) -> Option<(u64, u64)> {
+        Some((self.emise_a, u64::MAX - TOLERANCE_HORLOGE_SECS))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -314,7 +411,29 @@ mod tests {
         let sceau = Sceau::decoder(&octets).unwrap();
         assert_eq!(decoder_titre::<Candidature>(&sceau.charge).unwrap(), c);
         assert!(decoder_titre::<Accusation>(&sceau.charge).is_err());
+        assert!(decoder_titre::<Recours>(&sceau.charge).is_err());
         assert!(decoder_titre::<miyuracine::Passation>(&sceau.charge).is_err());
+    }
+
+    #[test]
+    fn recours_distinct_de_l_accusation() {
+        let membre = CleSignature::generer();
+        let accuse = CleSignature::generer();
+        let r = Recours {
+            accuse: accuse.cle_publique(),
+            type_preuve: PREUVE_EQUIVOQUE,
+            empreinte_preuve: [3; 32],
+            accusation: [4; 32],
+            emise_a: 1_800_000_000,
+        };
+        let octets = r.sceller(&membre).unwrap();
+        let sceau = Sceau::decoder(&octets).unwrap();
+        assert_eq!(decoder_titre::<Recours>(&sceau.charge).unwrap(), r);
+        assert!(decoder_titre::<Accusation>(&sceau.charge).is_err());
+        assert!(decoder_titre::<Candidature>(&sceau.charge).is_err());
+        // L'accusé ne signe jamais son recours.
+        assert!(r.sceller(&accuse).is_err());
+        assert!(Recours::cosigner(&octets, &accuse).is_err());
     }
 
     #[test]

@@ -14,11 +14,14 @@
 //! - [`calcul`] : preuve de calcul légère (hashcash SHA-256) liée à la racine
 //!   et au jour (EX-38)
 //! - [`titres`] : candidature (certificat `0x06`, nature `0x43`), confirmation
-//!   (reconnaissance `0x07`), accusation (certificat `0x06`, nature `0x42`)
+//!   (reconnaissance `0x07`), accusation (certificat `0x06`, nature `0x42`),
+//!   recours accepté (certificat `0x06`, nature `0x44`, à consigner par amendement)
 //! - [`preuve`] : preuve de faute signée par le mis en cause (équivoque de têtes)
 //! - [`federation`] : vue fédérale locale — statuts candidat → invité (≥ 2) →
-//!   membre (≥ 4 pendant 7 j) → révoqué ; témoins anti-éclipse ; accusation au
-//!   quorum de 6 ; révocation d'identité ; fraîcheur de la vue (EX-31..33, EX-35)
+//!   membre (≥ 4 pendant 7 j) → suspendu → révoqué ; témoins anti-éclipse
+//!   (≥ 3 membres, règle de `miyuregistre::federal`) ; accusation au quorum de
+//!   6 ⇒ suspension immédiate, révocation d'identité après 72 h sauf recours
+//!   accepté par 6 membres (A-007) ; fraîcheur de la vue (EX-31..33, EX-35)
 //! - [`note`] : note locale des pairs, jamais partagée (EX-37)
 //! - [`eclipse`] : carnet de pairs diversifiés, anciens conservés (EX-37)
 //!
@@ -41,13 +44,13 @@ pub mod titres;
 pub use eclipse::CarnetPairs;
 pub use erreurs::ErreurFederation;
 pub use federation::{
-    Federation, Parametres, RevocationFederale, RevocationsFederation, PERIODE_QUOTA_SECS, QUOTA_CONFIRMATIONS,
-    TEMOINS_MIN,
+    Federation, Parametres, RevocationFederale, RevocationsFederation, SuspensionFederale, PERIODE_QUOTA_SECS,
+    QUOTA_CONFIRMATIONS, TEMOINS_MIN,
 };
 pub use note::{NoteLocale, Observation, SEUIL_BANNISSEMENT};
 pub use preuve::Preuve;
 pub use statut::{
-    Sanction, Statut, CONFIRMATIONS_INVITE, CONFIRMATIONS_MEMBRE, DUREE_CONFIRMATION_MAX_SECS, DUREE_MEMBRE_SECS,
-    QUORUM_BLACKLIST,
+    Sanction, Statut, CONFIRMATIONS_INVITE, CONFIRMATIONS_MEMBRE, DELAI_CONTESTATION_SECS, DUREE_CONFIRMATION_MAX_SECS,
+    DUREE_MEMBRE_SECS, QUORUM_BLACKLIST, QUORUM_RECOURS,
 };
-pub use titres::{Accusation, Candidature, Confirmation, NATURE_ACCUSATION, NATURE_CANDIDATURE};
+pub use titres::{Accusation, Candidature, Confirmation, Recours, NATURE_ACCUSATION, NATURE_CANDIDATURE, NATURE_RECOURS};

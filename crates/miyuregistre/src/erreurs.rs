@@ -94,4 +94,13 @@ pub enum ErreurJournal {
     /// Aucune tête acceptée pour ce registre.
     #[error("aucune tête acceptée")]
     AucuneTete,
+    /// Témoins (contresignatures de membres distincts, Origin = un au plus)
+    /// insuffisants pour une tête fédérale (A-007, EX-34).
+    #[error("témoins insuffisants : {obtenu} sur {requis}")]
+    TemoinsInsuffisants {
+        /// Témoins exigés.
+        requis: usize,
+        /// Témoins valides comptés.
+        obtenu: usize,
+    },
 }

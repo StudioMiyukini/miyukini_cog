@@ -2,7 +2,7 @@
 //! @do     gouverner_admission_et_sanctions_federales
 //! @role   securite
 //! @layer  toolkit
-//! @human  miyufederation — module « federation » (vue fédérale locale : candidatures, confirmations, statuts, témoins, accusations, révocations).
+//! @human  miyufederation — module « federation » (vue fédérale locale : candidatures, confirmations, statuts, témoins, accusations, suspensions, recours, révocations).
 
 //! Vue fédérale **locale** d'un COG (zones §16, EX-30..33, EX-35, EX-37, EX-38).
 //!
@@ -25,12 +25,19 @@
 //!   sous 2 → invité ; fondateurs (graines de l'image) membres d'office
 //! - **Témoins (anti-éclipse)** : une tête de registre d'un COG n'est crue que
 //!   signée par sa clé de journal **et** contresignée par ≥ 3 membres distincts
-//!   (clés de journal ; Origin compte comme un témoin s'il est configuré) ;
+//!   (clés de journal ; Origin compte comme **un** témoin s'il est configuré) ;
+//!   règle unique `miyuregistre::verifier_temoins` (A-007, EX-34) ;
 //!   monotonie et équivoque par `miyusceau::EtatRegistre`
 //! - **Accusation** : un sceau, preuve signée par le mis en cause vérifiée
-//!   localement, **quorum de 6 membres** distincts ; issue = révocation
-//!   d'identité, entrée de registre `Revocation { cible: Cle(kid) }` ; preuve
-//!   fausse = note locale des signataires (faux signalement)
+//!   localement, **quorum de 6 membres** distincts ; issue (A-007, EX-32) :
+//!   **suspension immédiate** ([`Statut::Suspendu`], titres de l'accusé
+//!   refusés partout), puis **révocation définitive après 72 h**
+//!   ([`Federation::actualiser`], entrée de registre
+//!   `Revocation { cible: Cle(kid) }`) sauf **recours accepté** (6 membres
+//!   distincts hors accusé, même empreinte de preuve) ⇒ suspension levée,
+//!   statut précédent rétabli, compteur des 7 jours repris de zéro
+//!   (fail-closed) ; accusation levée = rejeu refusé ; preuve fausse = note
+//!   locale des signataires (faux signalement)
 //! - **Fraîcheur** : la vue fédérale (révocations) date de la dernière tête
 //!   témoignée acceptée ; au-delà de 15 min, accès fédéré refusé
 //!
@@ -41,7 +48,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use miyauth::revocation::FRAICHEUR_MAX_DEFAUT_SECS;
 use miyauth::{CibleRevocation, CogId, ErreurRevocation, SourceRevocation};
-use miyuregistre::{Cible, Corps, EntreeRegistre};
+use miyuregistre::{verifier_temoins, Cible, Corps, EntreeRegistre, ErreurJournal};
 use miyusceau::{
     decoder_titre, empreinte_cle, sceller, verifier, verifier_seuil, verifier_tete, Acceptation, AncresDeConfiance,
     CleSignature, ErreurSceau, EtatRegistre, Kid, NiveauConfiance, PolitiqueTete, PreuveCoherence, Sceau,
@@ -53,18 +60,19 @@ use crate::erreurs::ErreurFederation;
 use crate::note::{NoteLocale, Observation};
 use crate::preuve::Preuve;
 use crate::statut::{
-    Sanction, Statut, CONFIRMATIONS_INVITE, CONFIRMATIONS_MEMBRE, DUREE_MEMBRE_SECS, QUORUM_BLACKLIST,
+    Sanction, Statut, CONFIRMATIONS_INVITE, CONFIRMATIONS_MEMBRE, DELAI_CONTESTATION_SECS, DUREE_MEMBRE_SECS,
+    QUORUM_BLACKLIST, QUORUM_RECOURS,
 };
-use crate::titres::{Accusation, Candidature, Confirmation};
+use crate::titres::{Accusation, Candidature, Confirmation, Recours};
 
 /// Nouveaux COG confirmés au plus par membre et par période (choix à amender :
 /// la doc dit « limité par membre et par mois » sans valeur).
 pub const QUOTA_CONFIRMATIONS: usize = 8;
 /// Période du quota (30 jours).
 pub const PERIODE_QUOTA_SECS: u64 = 30 * 86_400;
-/// Témoins minimaux d'une tête (choix à amender : la doc prévoit Origin en
-/// témoin ; sans Origin, ≥ 3 membres distincts).
-pub const TEMOINS_MIN: usize = 3;
+/// Témoins minimaux d'une tête : ≥ 3 membres distincts, Origin = un témoin
+/// au plus (A-007, EX-34) ; même règle que `miyuregistre::federal`.
+pub const TEMOINS_MIN: usize = miyuregistre::TEMOINS_MIN;
 /// Historique de confirmations conservé (7 j + 1 j de marge).
 const HISTORIQUE_SECS: u64 = DUREE_MEMBRE_SECS + 86_400;
 
@@ -168,6 +176,42 @@ impl RevocationFederale {
     }
 }
 
+/// Suspension fédérale en cours (accusation au quorum, EX-32, A-007) :
+/// titres de l'accusé refusés, révocation définitive à [`Self::echeance`]
+/// sauf recours accepté.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SuspensionFederale {
+    /// Clé publique d'identité suspendue.
+    pub racine: [u8; 32],
+    /// `kid` de la clé d'identité.
+    pub kid: Kid,
+    /// `cog_id` suspendu.
+    pub cog: CogId,
+    /// Identité de l'accusation (SHA-256 de ses octets signés).
+    pub accusation: [u8; 32],
+    /// Type de preuve de l'accusation.
+    pub type_preuve: u64,
+    /// Empreinte de la preuve de l'accusation.
+    pub empreinte_preuve: [u8; 32],
+    /// Heure locale de la suspension.
+    pub depuis: u64,
+}
+
+impl SuspensionFederale {
+    /// Heure de la révocation définitive sans recours accepté (`depuis` + 72 h).
+    pub fn echeance(&self) -> u64 {
+        self.depuis.saturating_add(DELAI_CONTESTATION_SECS)
+    }
+}
+
+/// Suspension et statut à rétablir si un recours est accepté.
+#[derive(Debug, Clone)]
+struct EnSuspension {
+    publique: SuspensionFederale,
+    statut: Statut,
+    membre: bool,
+}
+
 #[derive(Debug, Clone)]
 struct Dossier {
     racine: [u8; 32],
@@ -201,6 +245,9 @@ pub struct Federation {
     dossiers: BTreeMap<Kid, Dossier>,
     par_cog: BTreeMap<CogId, Kid>,
     revocations: BTreeMap<Kid, RevocationFederale>,
+    suspensions: BTreeMap<Kid, EnSuspension>,
+    /// Accusations levées par un recours accepté (identités) : rejeu refusé.
+    levees: BTreeSet<[u8; 32]>,
     quotas: BTreeMap<Kid, Vec<Quota>>,
     heure: u64,
     vue_a_jour_au: Option<u64>,
@@ -271,6 +318,8 @@ impl Federation {
             dossiers: BTreeMap::new(),
             par_cog: BTreeMap::new(),
             revocations: BTreeMap::new(),
+            suspensions: BTreeMap::new(),
+            levees: BTreeSet::new(),
             quotas: BTreeMap::new(),
             heure: 0,
             vue_a_jour_au: None,
@@ -307,8 +356,12 @@ impl Federation {
         self.revocations.contains_key(kid)
     }
 
+    fn est_suspendu(&self, kid: &Kid) -> bool {
+        self.suspensions.contains_key(kid)
+    }
+
     fn est_membre(&self, kid: &Kid) -> bool {
-        !self.est_revoque(kid) && self.dossiers.get(kid).is_some_and(|d| d.statut == Statut::Membre)
+        !self.est_revoque(kid) && !self.est_suspendu(kid) && self.dossiers.get(kid).is_some_and(|d| d.statut == Statut::Membre)
     }
 
     // ── Candidatures ────────────────────────────────────────────────────────
@@ -384,6 +437,9 @@ impl Federation {
         if self.est_revoque(&kid_m) {
             return Err(ErreurFederation::Revoque);
         }
+        if self.est_suspendu(&kid_m) {
+            return Err(ErreurFederation::Suspendu);
+        }
         if !self.est_membre(&kid_m) {
             return Err(ErreurFederation::NonMembre);
         }
@@ -421,12 +477,53 @@ impl Federation {
         Ok(())
     }
 
-    /// Recalcule les statuts à `maintenant` (point fixe : seules les
-    /// confirmations de membres actuels comptent).
-    pub fn actualiser(&mut self, maintenant: u64) -> Result<(), ErreurFederation> {
+    /// Fait avancer la vue à `maintenant` (horloge fournie par l'appelant) :
+    /// les suspensions échues (72 h sans recours accepté) deviennent des
+    /// révocations définitives, renvoyées (entrée de registre :
+    /// [`RevocationFederale::entree`]) ; puis les statuts sont recalculés
+    /// (point fixe : seules les confirmations de membres actuels comptent).
+    pub fn actualiser(&mut self, maintenant: u64) -> Result<Vec<RevocationFederale>, ErreurFederation> {
         self.horloge(maintenant)?;
+        let definitives = self.echeances(maintenant);
         self.recalculer(maintenant);
-        Ok(())
+        Ok(definitives)
+    }
+
+    /// Suspensions échues à `maintenant` ⇒ révocations définitives.
+    fn echeances(&mut self, maintenant: u64) -> Vec<RevocationFederale> {
+        let echues: Vec<Kid> = self
+            .suspensions
+            .iter()
+            .filter(|(_, s)| maintenant >= s.publique.echeance())
+            .map(|(k, _)| *k)
+            .collect();
+        let mut definitives = Vec::with_capacity(echues.len());
+        for kid in echues {
+            let Some(s) = self.suspensions.remove(&kid) else { continue };
+            let s = s.publique;
+            let revocation = RevocationFederale {
+                racine: s.racine,
+                kid,
+                cog: s.cog,
+                accusation: s.accusation,
+                revoque_a: maintenant,
+                sanction: Sanction::RevocationIdentite,
+            };
+            self.revocations.insert(kid, revocation.clone());
+            if let Some(d) = self.dossiers.get_mut(&kid) {
+                d.statut = Statut::Revoque;
+                d.membre = false;
+                // Confirmateurs responsables : le COG confirmé est blacklisté.
+                for c in d.confirmations.keys() {
+                    self.note.observer(c, Observation::ConfirmateurResponsable, maintenant);
+                }
+            }
+            definitives.push(revocation);
+        }
+        if !definitives.is_empty() {
+            self.recalculer(maintenant);
+        }
+        definitives
     }
 
     fn recalculer(&mut self, maintenant: u64) {
@@ -441,6 +538,8 @@ impl Federation {
             for (kid, d) in &self.dossiers {
                 let (statut, membre) = if self.revocations.contains_key(kid) {
                     (Statut::Revoque, false)
+                } else if let Some(s) = self.suspensions.get(kid) {
+                    (Statut::Suspendu { depuis: s.publique.depuis, accusation: s.publique.accusation }, false)
                 } else if d.fondateur {
                     (Statut::Membre, true)
                 } else {
@@ -514,6 +613,9 @@ impl Federation {
         if self.est_revoque(kid) {
             return Err(ErreurFederation::Revoque);
         }
+        if self.est_suspendu(kid) {
+            return Err(ErreurFederation::Suspendu);
+        }
         self.controler_vue(maintenant).map_err(|_| ErreurFederation::VuePerimee)?;
         if self.note.est_banni(kid, maintenant) {
             return Err(ErreurFederation::Banni);
@@ -536,6 +638,9 @@ impl Federation {
         let kid = *self.par_cog.get(cog).ok_or(ErreurFederation::Inconnu)?;
         if self.est_revoque(&kid) {
             return Err(ErreurFederation::Revoque);
+        }
+        if self.est_suspendu(&kid) {
+            return Err(ErreurFederation::Suspendu);
         }
         if self.note.est_banni(&kid, maintenant) {
             return Err(ErreurFederation::Banni);
@@ -619,25 +724,22 @@ impl Federation {
                 return Err(e);
             }
         };
-        let mut temoins = AncresDeConfiance::new();
-        for (k, autre) in &self.dossiers {
-            if *k != kid && self.est_membre(k) && !self.note.est_banni(k, maintenant) {
-                temoins.ajouter(&autre.journal, NiveauConfiance::Reconnu)?;
-            }
-        }
-        if let Some(origin) = &self.origin {
-            temoins.ajouter(origin, NiveauConfiance::Reconnu)?;
-        }
+        // Témoins : clés de journal des membres actuels (ni le propriétaire,
+        // ni un banni local), Origin = un témoin au plus (règle partagée).
+        let journaux: Vec<[u8; 32]> = self
+            .dossiers
+            .iter()
+            .filter(|(k, _)| **k != kid && self.est_membre(k) && !self.note.est_banni(k, maintenant))
+            .map(|(_, autre)| autre.journal)
+            .collect();
         let requis = self.parametres.temoins_min;
-        match verifier_seuil::<TeteRegistre>(octets, &temoins, requis, maintenant) {
+        match verifier_temoins(octets, &d.journal, &journaux, self.origin.as_ref(), requis, maintenant) {
             Ok(_) => {}
-            Err(ErreurSceau::SignataireInconnu) => {
-                return Err(ErreurFederation::TemoinsInsuffisants { requis, obtenu: 0 });
-            }
-            Err(ErreurSceau::SeuilNonAtteint { obtenu, .. }) => {
+            Err(ErreurJournal::TemoinsInsuffisants { requis, obtenu }) => {
                 return Err(ErreurFederation::TemoinsInsuffisants { requis, obtenu });
             }
-            Err(e) => return Err(e.into()),
+            Err(ErreurJournal::Sceau(e)) => return Err(e.into()),
+            Err(_) => return Err(ErreurFederation::TemoinsInsuffisants { requis, obtenu: 0 }),
         }
         if let Some(d) = self.dossiers.get_mut(&kid) {
             d.vue = etat;
@@ -715,18 +817,29 @@ impl Federation {
     }
 
     /// Accusation reçue : preuve revérifiée, quorum de 6 membres distincts →
-    /// révocation définitive de l'identité (seule sanction).
+    /// **suspension immédiate** (EX-32, A-007) ; la révocation définitive
+    /// (seule sanction) suit après 72 h sans recours accepté
+    /// ([`Self::actualiser`]). Idempotent pendant la suspension.
     pub fn recevoir_accusation(
         &mut self,
         octets: &[u8],
         preuve: &Preuve,
         maintenant: u64,
-    ) -> Result<RevocationFederale, ErreurFederation> {
+    ) -> Result<SuspensionFederale, ErreurFederation> {
         self.horloge(maintenant)?;
-        let brute = decoder_titre::<Accusation>(&Sceau::decoder(octets)?.charge)?;
+        self.echeances(maintenant);
+        let sceau = Sceau::decoder(octets)?;
+        let brute = decoder_titre::<Accusation>(&sceau.charge)?;
+        let identite_accusation = sha2_256(&sceau.octets_signes());
         let kid_accuse = empreinte_cle(&brute.accuse);
-        if let Some(r) = self.revocations.get(&kid_accuse) {
-            return Ok(r.clone());
+        if self.est_revoque(&kid_accuse) {
+            return Err(ErreurFederation::Revoque);
+        }
+        if let Some(s) = self.suspensions.get(&kid_accuse) {
+            return Ok(s.publique.clone());
+        }
+        if self.levees.contains(&identite_accusation) {
+            return Err(ErreurFederation::AccusationLevee);
         }
         let dossier = self.dossiers.get(&kid_accuse).ok_or(ErreurFederation::Inconnu)?;
         let mut ancres = AncresDeConfiance::new();
@@ -754,26 +867,139 @@ impl Federation {
         if signataires.len() < QUORUM_BLACKLIST {
             return Err(ErreurFederation::QuorumNonAtteint { requis: QUORUM_BLACKLIST, obtenu: signataires.len() });
         }
-        let revocation = RevocationFederale {
+        let suspension = SuspensionFederale {
             racine: dossier.racine,
             kid: kid_accuse,
             cog: dossier.cog.clone(),
-            accusation: Sceau::decoder(octets).map(|s| sha2_256(&s.octets_signes()))?,
-            revoque_a: maintenant,
-            sanction: Sanction::RevocationIdentite,
+            accusation: identite_accusation,
+            type_preuve: a.type_preuve,
+            empreinte_preuve: a.empreinte_preuve,
+            depuis: maintenant,
         };
-        let confirmateurs: Vec<Kid> = dossier.confirmations.keys().copied().collect();
-        self.revocations.insert(kid_accuse, revocation.clone());
+        self.suspensions.insert(
+            kid_accuse,
+            EnSuspension { publique: suspension.clone(), statut: dossier.statut, membre: dossier.membre },
+        );
         self.note.observer(&kid_accuse, Observation::PreuveCorroboree, maintenant);
-        for c in &confirmateurs {
-            self.note.observer(c, Observation::ConfirmateurResponsable, maintenant);
-        }
         if let Some(d) = self.dossiers.get_mut(&kid_accuse) {
-            d.statut = Statut::Revoque;
+            d.statut = Statut::Suspendu { depuis: maintenant, accusation: identite_accusation };
             d.membre = false;
         }
         self.recalculer(maintenant);
-        Ok(revocation)
+        Ok(suspension)
+    }
+
+    // ── Recours (contestation, EX-32, A-007) ────────────────────────────────
+
+    /// Suspension en cours (non échue à `maintenant`) d'un COG.
+    fn suspension_ouverte(&self, kid: &Kid, maintenant: u64) -> Result<&SuspensionFederale, ErreurFederation> {
+        if self.est_revoque(kid) {
+            return Err(ErreurFederation::Revoque);
+        }
+        let s = &self.suspensions.get(kid).ok_or(ErreurFederation::AucuneSuspension)?.publique;
+        if maintenant >= s.echeance() {
+            // Délai écoulé : la révocation est acquise (appliquée à la prochaine actualisation).
+            return Err(ErreurFederation::Revoque);
+        }
+        Ok(s)
+    }
+
+    /// Un membre (jamais l'accusé) ouvre un recours contre la suspension en
+    /// cours d'un COG, après avoir examiné la contre-preuve.
+    pub fn ouvrir_recours(
+        &self,
+        accuse: &CogId,
+        identite: &CleSignature,
+        maintenant: u64,
+    ) -> Result<Vec<u8>, ErreurFederation> {
+        let kid = self.par_cog.get(accuse).ok_or(ErreurFederation::Inconnu)?;
+        let s = self.suspension_ouverte(kid, maintenant)?;
+        self.exiger_membre_signataire(identite, &s.racine)?;
+        Recours {
+            accuse: s.racine,
+            type_preuve: s.type_preuve,
+            empreinte_preuve: s.empreinte_preuve,
+            accusation: s.accusation,
+            emise_a: maintenant,
+        }
+        .sceller(identite)
+    }
+
+    /// Un membre (jamais l'accusé) cosigne un recours portant sur la
+    /// suspension en cours (même accusation, même empreinte de preuve).
+    pub fn contresigner_recours(
+        &self,
+        octets: &[u8],
+        identite: &CleSignature,
+        maintenant: u64,
+    ) -> Result<Vec<u8>, ErreurFederation> {
+        let r = decoder_titre::<Recours>(&Sceau::decoder(octets)?.charge)?;
+        let s = self.suspension_ouverte(&empreinte_cle(&r.accuse), maintenant)?;
+        if !recours_concorde(&r, s) {
+            return Err(ErreurFederation::PreuveNonConcordante);
+        }
+        self.exiger_membre_signataire(identite, &r.accuse)?;
+        Recours::cosigner(octets, identite)
+    }
+
+    /// Recours reçu : avant l'échéance de 72 h, signé par ≥ 6 membres
+    /// actuels distincts (l'accusé n'est jamais compté) sur la même
+    /// accusation et la même empreinte de preuve ⇒ suspension levée, statut
+    /// précédent rétabli ; compteur des 7 jours repris de zéro (fail-closed :
+    /// seules comptent les confirmations à partir de la levée). L'accusation
+    /// levée ne peut plus être rejouée.
+    pub fn recevoir_recours(&mut self, octets: &[u8], maintenant: u64) -> Result<SuspensionFederale, ErreurFederation> {
+        self.horloge(maintenant)?;
+        self.echeances(maintenant);
+        let brute = decoder_titre::<Recours>(&Sceau::decoder(octets)?.charge)?;
+        let kid_accuse = empreinte_cle(&brute.accuse);
+        let s = self.suspension_ouverte(&kid_accuse, maintenant)?;
+        if !recours_concorde(&brute, s) {
+            return Err(ErreurFederation::PreuveNonConcordante);
+        }
+        let mut ancres = AncresDeConfiance::new();
+        for (k, d) in &self.dossiers {
+            if *k != kid_accuse && self.est_membre(k) {
+                ancres.ajouter(&d.racine, NiveauConfiance::Reconnu)?;
+            }
+        }
+        let verifie = match verifier_seuil::<Recours>(octets, &ancres, 1, maintenant) {
+            Err(ErreurSceau::SignataireInconnu) => return Err(ErreurFederation::NonMembre),
+            autre => autre?,
+        };
+        let obtenu = verifie.signataires().len();
+        if obtenu < QUORUM_RECOURS {
+            return Err(ErreurFederation::QuorumNonAtteint { requis: QUORUM_RECOURS, obtenu });
+        }
+        let Some(levee) = self.suspensions.remove(&kid_accuse) else {
+            return Err(ErreurFederation::AucuneSuspension);
+        };
+        self.levees.insert(levee.publique.accusation);
+        if let Some(d) = self.dossiers.get_mut(&kid_accuse) {
+            d.statut = levee.statut;
+            d.membre = levee.membre;
+            // Compteur des 7 jours repris de zéro : les intervalles de
+            // confirmation commencent au plus tôt à la levée.
+            for iv in d.confirmations.values_mut() {
+                iv.retain(|&(_, e)| e >= maintenant);
+                for (debut, _) in iv.iter_mut() {
+                    *debut = (*debut).max(maintenant);
+                }
+            }
+            d.confirmations.retain(|_, iv| !iv.is_empty());
+        }
+        self.recalculer(maintenant);
+        Ok(levee.publique)
+    }
+
+    /// Suspensions en cours.
+    pub fn suspensions(&self) -> impl Iterator<Item = &SuspensionFederale> {
+        self.suspensions.values().map(|s| &s.publique)
+    }
+
+    /// Vrai si le `cog_id` est suspendu (délai de contestation en cours).
+    pub fn cog_suspendu(&self, cog: &CogId) -> bool {
+        self.par_cog.get(cog).is_some_and(|k| self.est_suspendu(k))
     }
 
     /// Révocations fédérales décidées.
@@ -791,6 +1017,13 @@ impl Federation {
     }
 }
 
+fn recours_concorde(r: &Recours, s: &SuspensionFederale) -> bool {
+    r.accuse == s.racine
+        && r.accusation == s.accusation
+        && r.empreinte_preuve == s.empreinte_preuve
+        && r.type_preuve == s.type_preuve
+}
+
 fn sha2_256(octets: &[u8]) -> [u8; 32] {
     use sha2::{Digest, Sha256};
     Sha256::digest(octets).into()
@@ -798,7 +1031,8 @@ fn sha2_256(octets: &[u8]) -> [u8; 32] {
 
 /// Source de révocation miyauth complétée par la vue fédérale (EX-35) :
 ///
-/// - émetteur fédéré révoqué ⇒ tout titre qu'il a émis est révoqué ;
+/// - émetteur fédéré révoqué **ou suspendu** (accusation au quorum, délai de
+///   contestation en cours, A-007) ⇒ tout titre qu'il a émis est refusé ;
 /// - émetteur fédéré et vue fédérale absente, périmée ou datée dans le futur
 ///   ⇒ erreur (refus) ;
 /// - sinon (et pour un émetteur hors fédération, dont le COG local) ⇒ la
@@ -825,7 +1059,7 @@ impl SourceRevocation for RevocationsFederation<'_> {
     fn est_revoque(&self, emetteur: &CogId, cible: &CibleRevocation, maintenant_secs: u64)
         -> Result<bool, ErreurRevocation> {
         if self.federation.est_federe(emetteur) {
-            if self.federation.cog_revoque(emetteur) {
+            if self.federation.cog_revoque(emetteur) || self.federation.cog_suspendu(emetteur) {
                 return Ok(true);
             }
             self.federation.controler_vue(maintenant_secs)?;
