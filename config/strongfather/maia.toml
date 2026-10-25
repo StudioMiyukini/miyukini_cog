@@ -199,6 +199,34 @@ rule = "data.agent != '' && data.competence_memoire == 'true'"
 actions = ["modification"]
 origins = ["maia"]
 
+# ── Publication fédérée (EX-47, A-016) ──
+# Intention « federee.publier » (apps/miou-llm-bridge/src/routes_federee.rs) : Fiche originale
+# déjà attestée par maia-federee (étiquette `publiable` relue, dérivation stricte, plafond) ;
+# requête signée par une clé de l'utilisateur (usage « maia/federee »). Champs : utilisateur,
+# canal, usage_signe, provenance, sensibilite, attestee, reprises (nombre), fiche, version,
+# empreinte, donnee, base, type, langue, licence, audience.
+[[policy]]
+id = "maia-federee-publier"
+type = "permission"
+effect = "authorize"
+condition = "data.operation == 'federee.publier'"
+rule = "data.canal == 'utilisateur_signe' && data.usage_signe == 'maia/federee' && data.attestee == 'true' && data.provenance == 'locale' && data.reprises == '0' && data.empreinte != '' && data.fiche != ''"
+[policy.target]
+actions = ["creation"]
+origins = ["maia"]
+
+# Jamais une donnée nationale (mémoire de MAIA) ni un contenu non local par ce chemin
+# (republication : TAMR seulement, A-009).
+[[policy]]
+id = "maia-federee-publier-non-locale"
+type = "permission"
+effect = "deny"
+priority = "critical"
+condition = "data.operation == 'federee.publier'"
+rule = "data.sensibilite != 'ordinaire' || data.provenance != 'locale' || data.reprises != '0'"
+[policy.target]
+origins = ["maia"]
+
 # F6 : un tour dont un résultat d'outil n'est pas « locale » (etranger / inconnue) ne
 # peut jamais mener à une écriture directe en mémoire (candidat seulement).
 [[policy]]

@@ -74,5 +74,14 @@ maia-federee = { path = "../../crates/maia-federee" }
 # Mémoire de l'utilisateur (lot 7, EX-50..56) : N0–N4 sous budget, base KindMother chiffrée
 maia-memoire = { path = "../../crates/maia-memoire" }
 
+# Publication des Fiches originales (EX-47, A-016) : lecture de l'étiquette `publiable`
+kindmother        = { path = "../../crates/kindmother" }
+kindmother-client = { path = "../../crates/kindmother-client" }
+
+[dev-dependencies]
+# Serveur KindMother réel pour les tests de la route de publication (étiquettes v2).
+kindmother-service = { path = "../../crates/kindmother-service" }
+ed25519-dalek = "2"
+
 [lints]
 workspace = true

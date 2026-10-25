@@ -51,6 +51,7 @@ mod outil_memoire;
 mod persona;
 mod proxy;
 mod recommend;
+mod routes_federee;
 mod routes_memoire;
 mod security;
 mod signature;
@@ -123,6 +124,10 @@ async fn main() {
     // prises ailleurs ⇒ toute approbation TAMR sera refusée.
     if !tamr::instituer_autorites() {
         tracing::error!("Autorités TAMR indisponibles : approbations refusées");
+    }
+    // Autorité des étiquettes (EX-47) : seul producteur de la capacité `Publiable`.
+    if !routes_federee::instituer_autorite() {
+        tracing::error!("Autorité des étiquettes indisponible : publications refusées");
     }
 
     // Timestamp de démarrage (pour uptime)
@@ -362,6 +367,11 @@ async fn main() {
         std::sync::Arc::clone(&gouvernance),
         cfg.security.clone(),
     ));
+    let etat_federee = std::sync::Arc::new(routes_federee::EtatPublicationHttp::depuis_env(
+        etat_memoire.instance().to_string(),
+        std::sync::Arc::clone(&gouvernance),
+        cfg.security.clone(),
+    ));
 
     let state = ProxyState {
         client: http_client,
@@ -385,7 +395,9 @@ async fn main() {
         gouvernance,
     };
 
-    let app = proxy_router(state).merge(routes_memoire::routeur(etat_memoire));
+    let app = proxy_router(state)
+        .merge(routes_memoire::routeur(etat_memoire))
+        .merge(routes_federee::routeur(etat_federee));
 
     let listener = tokio::net::TcpListener::bind(&cfg.bind_addr)
         .await

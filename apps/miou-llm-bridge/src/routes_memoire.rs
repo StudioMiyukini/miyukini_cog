@@ -114,7 +114,7 @@ pub struct EtatMemoireHttp<E: Entrepot> {
     securite: SecurityConfig,
 }
 
-fn analyser_env(nom: &str) -> Vec<[u8; 32]> {
+pub(crate) fn analyser_env(nom: &str) -> Vec<[u8; 32]> {
     let brut = std::env::var(nom).unwrap_or_default();
     let textes: Vec<&str> = brut
         .split(',')
