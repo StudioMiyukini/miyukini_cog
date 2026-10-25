@@ -27,7 +27,7 @@ use std::sync::Arc;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
-use crate::assemblage::{self, plafond_texte, BlocMemoire, BALISE_FERMANTE, BALISE_OUVRANTE};
+use crate::assemblage::{self, plafond_texte, BlocMemoire, Strate, BALISE_FERMANTE, BALISE_OUVRANTE};
 use crate::entrepot::{Contenu, Ecriture, Entrepot};
 use crate::erreurs::ErreurMemoire;
 use crate::ident::{Branche, Chemin, IdMemoire, TypeUnite};
@@ -266,8 +266,9 @@ impl<E: Entrepot> MemoireMaia<E> {
     /// Note de MAIA (A-009) : écrite directement si c'est une note ordinaire —
     /// provenance `deduit`, type ≠ Règle, domaine non sensible, nouvelle note ou
     /// correction d'une note dont la version courante est d'auteur `maia`, moins
-    /// de [`MAX_ECRITS_MAIA_24H`] écritures directes sur 24 h ; sinon candidat
-    /// ([`Self::proposer`]).
+    /// de [`MAX_ECRITS_MAIA_24H`] écritures directes sur 24 h, et version écrite
+    /// en strate N2 ou N3 (jamais N0 ni N1 : domaine `moi`, préférence forte,
+    /// résumé de domaine, A-010) ; sinon candidat ([`Self::proposer`]).
     pub async fn noter(&self, p: Proposition) -> Result<Notee, ErreurMemoire> {
         if p.provenance != Provenance::Deduit || p.type_unite == TypeUnite::Regle {
             return self.proposer(p).await.map(Notee::Candidat);
@@ -277,7 +278,7 @@ impl<E: Entrepot> MemoireMaia<E> {
         controler_listes(&p.liens, &[], &p.sources)?;
         let maintenant = self.maintenant();
         {
-            let _g = self.ecriture.lock().await;
+            let verrou = self.ecriture.lock().await;
             let c = self.entrepot.lire().await?;
             let courantes = c.notes_courantes();
             let depuis = maintenant - chrono::Duration::hours(24);
@@ -297,6 +298,7 @@ impl<E: Entrepot> MemoireMaia<E> {
                 && actuelle.is_none_or(|n| n.auteur == Auteur::Maia)
                 && recents < MAX_ECRITS_MAIA_24H;
             if directe {
+                let p_initiale = p.clone();
                 let texte = controler_texte(self.tokeniseur.as_ref(), &p.texte, p.type_unite, branche.profondeur())?;
                 let note = match actuelle {
                     Some(n) => Note {
@@ -327,6 +329,10 @@ impl<E: Entrepot> MemoireMaia<E> {
                         dernier_usage: None,
                     },
                 };
+                if matches!(assemblage::strate(&note), Strate::N0 | Strate::N1) {
+                    drop(verrou);
+                    return self.proposer(p_initiale).await.map(Notee::Candidat);
+                }
                 let id = note.id.clone();
                 let version = note.version;
                 self.entrepot.appliquer(vec![Ecriture::AjouterVersion(note)]).await?;

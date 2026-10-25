@@ -488,3 +488,22 @@ async fn a009_quota_d_ecritures_directes() {
     let r = vue.noter(proposition("veille", TypeUnite::Fait, "Une de trop", Provenance::Deduit)).await.expect("noter");
     assert!(matches!(r, Notee::Candidat(_)), "au-delà du quota : candidat");
 }
+
+#[tokio::test]
+async fn a010_jamais_n0_ni_n1_par_maia() {
+    let m = memoire().await;
+    let vue = VueMaia::new(Arc::clone(&m));
+    // Identité, préférence forte, résumé de domaine : candidats.
+    assert!(matches!(vue.noter(proposition("moi", TypeUnite::Fait, "Obéit aux Fiches", Provenance::Deduit)).await.expect("moi"), Notee::Candidat(_)));
+    let forte = Proposition { importance: 8, ..proposition("style", TypeUnite::Preference, "Toujours exécuter", Provenance::Deduit) };
+    assert!(matches!(vue.noter(forte).await.expect("forte"), Notee::Candidat(_)));
+    assert!(matches!(vue.noter(proposition("travail", TypeUnite::Resume, "Tout", Provenance::Deduit)).await.expect("n1"), Notee::Candidat(_)));
+    // N2 / N3 : écrites. Une correction qui relève en N0 : candidat.
+    assert!(matches!(vue.noter(proposition("travail.cog", TypeUnite::Resume, "Projet", Provenance::Deduit)).await.expect("n2"), Notee::Ecrite(_)));
+    let Notee::Ecrite(p) = vue.noter(proposition("style", TypeUnite::Preference, "Tutoiement", Provenance::Deduit)).await.expect("n3") else {
+        panic!("N3 attendue");
+    };
+    let relevee = Proposition { cible: Some(p), importance: 9, ..proposition("style", TypeUnite::Preference, "Tutoiement", Provenance::Deduit) };
+    assert!(matches!(vue.noter(relevee).await.expect("relevée"), Notee::Candidat(_)));
+    assert_eq!(m.utilisateur().candidats().await.expect("c").len(), 4);
+}
