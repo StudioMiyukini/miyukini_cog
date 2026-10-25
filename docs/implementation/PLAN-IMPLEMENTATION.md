@@ -172,6 +172,8 @@
 - Registre Merkle local et fédéral (RFC 9162), têtes signées, Median-Time-Past (EX-22, EX-34)
 - Mises à jour Cores, OS et modèles IA : 2 sur 2, quarantaine temporelle (EX-01, EX-02, EX-26)
 - **Sortie** : une mise à jour signée installée de bout en bout ; une mise à jour altérée refusée
+- **Statut (2026-10-25)** — [A-006](../architecture/GEL-DOC-CONCEPTUELLE-v1.md) (doc v1.6) : **sortie atteinte au niveau bibliothèque** (`miyuregistre`, `miyucanal`, 6b546458 ; test `sortie_lot4.rs`)
+  - **Reste** : `Installateur` dans Central (via `update_from_package`, porte StrongFather) et maia-llm ; transport du canal sur une voie réservée du Portail (règle des binaires vérifiés par empreinte face au CDR) ; adaptateur `SourceRevocation` (miyauth) alimenté par la tête vérifiée ; remontée des refus à WorrySentinel ; persistance de l'horloge et de l'état côté appelant ; installateur d'OS inexistant ; points « à décider ultérieurement » d'A-006
 
 ## 7. Lot 5 — Services hybrides
 
