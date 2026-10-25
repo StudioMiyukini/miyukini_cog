@@ -43,6 +43,8 @@ trap 'rm -rf "$W"' EXIT
 SUFFIXE=$(date +%s)$$
 N=0
 NOK=0
+# Début du scénario, pour le journal noyau (refus AppArmor pendant le passage).
+DEBUT_NOYAU=$(date '+%Y-%m-%d %H:%M:%S')
 
 ok() { N=$((N + 1)); printf 'ok %d - %s\n' "$N" "$1"; }
 nok() { N=$((N + 1)); NOK=$((NOK + 1)); printf 'not ok %d - %s%s\n' "$N" "$1" "${2:+ # $2}"; }
@@ -465,6 +467,12 @@ if ! sudo -n test -e "$DROPIN"; then
 	for _ in $(seq 1 60); do curl -s -o /dev/null "$MAIA/health" && break; sleep 1; done
 fi
 
+# MAIA ouvre KindMother une fois, au démarrage. Après une période d'inactivité, KindMother ferme
+# la connexion et l'entrepôt de MAIA ne se reconnecte pas (« Broken pipe », 503) : défaut de MAIA,
+# signalé. Le scénario redémarre MAIA pour partir d'une connexion neuve.
+sudo -n systemctl restart miyukini-maia
+for _ in $(seq 1 60); do curl -s -o /dev/null "$MAIA/health" && break; sleep 1; done
+
 # Identifiant d'instance (L2) : en-tête rendu par toute réponse des routes mémoire.
 req POST "$MAIA/v1/memoire/$UTIL/consulter" "$W/m-inst.out" >/dev/null
 INST=$(grep -i '^x-maia-instance:' "$W/m-inst.out.h" | tr -d '\r' | awk '{print $2}')
@@ -589,6 +597,11 @@ r=$(python3 -I "$TEST_PY" km "$KM" "$OPER" - "$PIN_KM")
 SEED_KM=$(sudo -n cat "$KMDIR/$OPER.key" | tr -d '\n')
 r=$(python3 -I "$TEST_PY" km "$KM" "$OPER" "$SEED_KM" "$PIN_KM")
 egalite "témoin positif : l'opérateur de la mémoire s'authentifie avec sa clé" Authenticated "$r"
+
+# ─────────────────────────────────────────────────────────────── 12. AppArmor : aucun refus COG
+echo "# 12. AppArmor : aucun refus des profils COG pendant le scénario"
+REFUS=$(sudo -n journalctl -k --since "$DEBUT_NOYAU" --no-pager 2>/dev/null | grep -c 'apparmor="DENIED".*profile="miyukini-')
+[[ ${REFUS:-0} -eq 0 ]] && ok "aucun refus AppArmor (profils miyukini-*) dans le journal noyau" || nok "refus AppArmor pendant le scénario" "$REFUS refus"
 
 echo "# bilan : $((N - NOK)) ok, $NOK not ok"
 echo "1..$N"

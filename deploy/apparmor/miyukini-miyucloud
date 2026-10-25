@@ -1,0 +1,33 @@
+# AppArmor — MiyuCloud (stockage et calendriers, 127.0.0.1:8086, PostgreSQL en loopback).
+# Données : /var/lib/miyukini/miyucloud (0700) ; statiques en lecture seule sous /opt/miyukini/share/miyucloud.
+#include <tunables/global>
+
+profile miyukini-miyucloud /opt/miyukini/bin/miyucloud-server flags=(enforce) {
+  #include <abstractions/base>
+
+  network inet stream,
+
+  /opt/miyukini/bin/miyucloud-server mr,
+  /opt/miyukini/share/miyucloud/ r,
+  /opt/miyukini/share/miyucloud/** r,
+  @{etc_ro}/ssl/openssl.cnf r,
+  @{PROC}/@{pid}/cgroup r,
+  /sys/fs/cgroup/**/cpu.max r,
+  # Résolution des comptes système (NSS), lecture seule.
+  @{etc_ro}/nsswitch.conf r,
+  @{etc_ro}/passwd r,
+  @{etc_ro}/group r,
+
+  /var/lib/miyukini/miyucloud/ r,
+  /var/lib/miyukini/miyucloud/** rwk,
+
+  # Fichiers temporaires (PrivateTmp de l'unité) : écriture et renommage dans /tmp seulement.
+  /tmp/ r,
+  owner /tmp/** rwk,
+
+  deny /var/lib/miyukini/kindmother/** rw,
+  deny /var/lib/miyukini/maia/** rw,
+  deny /var/lib/miyukini/cog-web-portal/** rw,
+  deny /opt/miyukini/** w,
+  deny /etc/miyukini/** w,
+}

@@ -1,0 +1,17 @@
+# AppArmor — sas de décodage (portail-sas). Lancé par lot par le Portail interne (pas de service).
+# Aucun réseau, aucun fichier hors bibliothèques, entrée et sortie standard seulement. Le sas se
+# confine lui-même (Landlock, seccomp, rlimits) ; ce profil est une seconde couche.
+#include <tunables/global>
+
+profile miyukini-portail-sas /opt/miyukini/bin/portail-sas flags=(enforce) {
+  #include <abstractions/base>
+
+  /opt/miyukini/bin/portail-sas mr,
+  # Le sas ferme ses descripteurs hérités en lisant /proc/self/fd (durcissement).
+  @{PROC}/@{pid}/fd/ r,
+
+  deny network,
+  deny /var/lib/miyukini/** rw,
+  deny /etc/miyukini/** rw,
+  deny /home/** rw,
+}

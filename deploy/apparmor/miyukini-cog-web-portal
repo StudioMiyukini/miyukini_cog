@@ -1,0 +1,23 @@
+# AppArmor — COG Web Portal (portail HTTP, 127.0.0.1:8090). Installé par deploy/cog-vm/installer.sh.
+# Données : /var/lib/miyukini/cog-web-portal (0700). Réseau : TCP (écoute loopback) ; aucun processus fils.
+#include <tunables/global>
+
+profile miyukini-cog-web-portal /opt/miyukini/bin/cog-web-portal flags=(enforce) {
+  #include <abstractions/base>
+
+  network inet stream,
+
+  /opt/miyukini/bin/cog-web-portal mr,
+  @{PROC}/@{pid}/cgroup r,
+  /sys/fs/cgroup/**/cpu.max r,
+
+  /var/lib/miyukini/cog-web-portal/ r,
+  /var/lib/miyukini/cog-web-portal/** rwk,
+
+  deny /var/lib/miyukini/kindmother/** rw,
+  deny /var/lib/miyukini/maia/** rw,
+  deny /var/lib/miyukini/miyucloud/** rw,
+  deny /etc/miyukini/** w,
+  deny /etc/** w,
+  deny /opt/miyukini/** w,
+}

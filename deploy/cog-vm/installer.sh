@@ -27,7 +27,13 @@
 #     clé d'identité et sa clé de base au premier démarrage, dans son répertoire 0700 ;
 #   - PostgreSQL local (rôle + base `miyucloud`) pour MiyuCloud ; le mot de passe du
 #     rôle est posé avec la journalisation des requêtes coupée dans la session ;
-#   - unités systemd durcies, écoute sur 127.0.0.1 uniquement.
+#   - unités systemd durcies, écoute sur 127.0.0.1 uniquement ;
+#   - profils AppArmor (deploy/apparmor/, copiés depuis le paquet), chargés en mode
+#     enforce, attachés aux unités par AppArmorProfile= ;
+#   - zone COG (Douane) : arrêtés d'essai générés par arretes_essai, vérifiés par
+#     miyudouane (regles, zone) ; table nftables propre « miyudouane_hote » (sortie
+#     refusée aux comptes COG hors boucle locale), chargée au démarrage par
+#     miyukini-douane-cog.service ; les services en dépendent.
 #
 # Ré-exécuter ce script met à jour binaires, unités et configuration non secrète,
 # et conserve les secrets existants.
@@ -122,7 +128,8 @@ paquets() {
 	log "paquets apt"
 	export DEBIAN_FRONTEND=noninteractive
 	apt-get update -qq
-	apt-get install -y -qq --no-install-recommends postgresql openssl ca-certificates python3
+	apt-get install -y -qq --no-install-recommends postgresql openssl ca-certificates python3 \
+		apparmor apparmor-utils nftables
 	if ((AVEC_BANC)); then
 		apt-get install -y -qq --no-install-recommends \
 			iproute2 nftables kmod procps socat netcat-openbsd tcpdump iputils-ping nmap
@@ -279,6 +286,115 @@ FIN
 	fi
 }
 
+# ------------------------------------------------------------------ AppArmor
+
+# Profils du paquet (deploy/apparmor/) : copiés dans /etc/apparmor.d et chargés.
+# Un profil qui ne se charge pas arrête l'installation (aucun service sans profil).
+apparmor_profils() {
+	log "AppArmor : profils"
+	local f nom
+	[[ -d $BUNDLE/apparmor ]] || die "apparmor/ absent du paquet (pousser.sh le copie depuis deploy/apparmor/)"
+	for f in "$BUNDLE"/apparmor/miyukini-*; do
+		nom=$(basename "$f")
+		install -o root -g root -m 0644 "$f" "/etc/apparmor.d/$nom"
+		apparmor_parser -r -W "/etc/apparmor.d/$nom" || die "profil AppArmor $nom refusé par apparmor_parser"
+		log "  profil $nom chargé"
+	done
+}
+
+# ------------------------------------------------------------------ Douane : zone COG
+
+DOUANE_VAR=$VAR/douane
+DOUANE_NFT=$ETC/douane-cog.nft
+DOUANE_UNITE=miyukini-douane-cog.service
+ATTENTE_UNITE=miyukini-attente-kindmother
+# Ports d'écoute des services COG (loopback seulement) : refus de toute entrée non locale.
+PORTS_COG="50051, 11435, 8086, 8090, 5432"
+
+# Arrêtés d'essai : générés par arretes_essai (clé jetable, jamais conservée), vérifiés par
+# miyudouane (signature, constitution, vigueur) ; la zone COG doit se compiler depuis eux.
+# Le texte nftables de la zone est un rendu pour espaces de noms (miyudouane zone) : il ne
+# s'applique pas à l'hôte. La table hôte ci-dessous est donc écrite ici, pour les seuls
+# comptes des services COG. Limite : miyudouane ne produit pas de règles par UID (voir README).
+douane_arretes() {
+	log "Douane : arrêtés d'essai et vérification"
+	local ex=$BUNDLE/banc/cible/examples/arretes_essai
+	local dm=$BIN/miyudouane
+	local maint ancre
+	# Plan des essais : mêmes sandboxes que le banc (tests/intrusion-lot3/scenario.sh) ; le
+	# Douane refuse un arrêté dont une voie n'a pas de sandbox dans le plan.
+	local sb=(--sandbox cog:voie-a --sandbox cog:voie-b --sandbox franche:voie-a
+		--sandbox franche:voie-b --sandbox cog:capteur --sandbox locale:capteur)
+	[[ -x $ex ]] || die "arretes_essai absent du paquet (banc/cible/examples)"
+	install -d -o root -g root -m 0700 "$DOUANE_VAR"
+	rm -rf "$DOUANE_VAR/arretes"
+	install -d -o root -g root -m 0700 "$DOUANE_VAR/arretes"
+	maint=$(date +%s)
+	"$ex" --sortie "$DOUANE_VAR/arretes" --maintenant "$maint" >/dev/null ||
+		die "arretes_essai : échec de génération"
+	ancre=$(tr -d '\n' <"$DOUANE_VAR/arretes/ancre.hex")
+	[[ $ancre =~ ^[0-9a-f]{64}$ ]] || die "ancre d'essai invalide"
+	local f
+	for f in externe portail-interne portail-local; do
+		"$dm" regles --frontiere "$f" --arrete "$DOUANE_VAR/arretes/$f.arrete" --ancre "$ancre" \
+			--maintenant "$maint" "${sb[@]}" >/dev/null || die "miyudouane regles : arrêté $f refusé"
+	done
+	"$dm" zone --zone cog --arrete "portail-interne=$DOUANE_VAR/arretes/portail-interne.arrete" \
+		--arrete "portail-local=$DOUANE_VAR/arretes/portail-local.arrete" \
+		--ancre "$ancre" --maintenant "$maint" "${sb[@]}" >/dev/null || die "miyudouane zone cog : compilation refusée"
+	log "  arrêtés externe, portail-interne, portail-local : signature et constitution vérifiées ; zone COG compilée"
+}
+
+# Table hôte « miyudouane_hote » : les comptes COG n'envoient rien hors boucle locale (aucune
+# route sortante, Franche isolée) ; les services COG n'acceptent d'entrée que par loopback.
+# Table propre : add + delete + table, aucun « flush ruleset » (autres tables intactes).
+douane_cog() {
+	log "Douane : zone COG (table nftables miyudouane_hote)"
+	local uids="" u
+	for u in "${UTILISATEURS[@]}"; do
+		uids+="${uids:+, }$(id -u "$u")"
+	done
+	cat >"$DOUANE_NFT.tmp" <<FIN
+# Généré par deploy/cog-vm/installer.sh (VM jetable) — Douane, zone COG.
+# Table propre à la Douane : miyudouane_hote. Aucune autre table n'est touchée.
+add table inet miyudouane_hote
+delete table inet miyudouane_hote
+table inet miyudouane_hote {
+	chain sortie_cog {
+		type filter hook output priority 0; policy accept;
+		meta skuid { $uids } oifname != "lo" counter drop comment "zone COG : aucune route sortante"
+	}
+	chain entree_cog {
+		type filter hook input priority 0; policy accept;
+		iifname != "lo" tcp dport { $PORTS_COG } counter drop comment "services COG : loopback seulement"
+	}
+}
+FIN
+	chmod 0644 "$DOUANE_NFT.tmp"
+	chown root:root "$DOUANE_NFT.tmp"
+	mv -f "$DOUANE_NFT.tmp" "$DOUANE_NFT"
+	nft -c -f "$DOUANE_NFT" || die "nft -c refuse $DOUANE_NFT"
+
+	cat >"/etc/systemd/system/$DOUANE_UNITE" <<FIN
+# Généré par deploy/cog-vm/installer.sh : ne pas éditer à la main.
+[Unit]
+Description=Douane — zone COG (table nftables miyudouane_hote)
+After=nftables.service
+Before=miyukini-kindmother.service miyukini-maia.service miyukini-miyucloud.service miyukini-cog-web-portal.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/nft -f $DOUANE_NFT
+ExecStop=/usr/sbin/nft delete table inet miyudouane_hote
+
+[Install]
+WantedBy=multi-user.target
+FIN
+	chmod 0644 "/etc/systemd/system/$DOUANE_UNITE"
+	nft -f "$DOUANE_NFT"
+}
+
 # ------------------------------------------------------------------ unités systemd
 
 # Durcissement commun. Chaque service ne reçoit que ce dont il a besoin.
@@ -306,19 +422,24 @@ MemoryDenyWriteExecute=true
 UMask=0077
 LimitNOFILE=65535'
 
-# ecrire_unite <nom> <description> <utilisateur> <répertoire> <commande> <chemins-rw> <après> <env-fichier> <env-lignes>
+# ecrire_unite <nom> <description> <utilisateur> <répertoire> <commande> <chemins-rw> <après> <env-fichier> <env-lignes> <profil-apparmor>
+# Toute unité dépend de la zone COG de la Douane (Requires= : pas de service sans zone).
 ecrire_unite() {
 	local nom=$1 description=$2 utilisateur=$3 repertoire=$4 commande=$5 rw=$6 apres=$7 fichier_env=$8 env_lignes=$9
+	local profil=${10:-}
 	local envfile=""
 	[[ -n $fichier_env ]] && envfile="EnvironmentFile=-$fichier_env"
 	local rwligne=""
 	[[ -n $rw ]] && rwligne="ReadWritePaths=$rw"
+	local profligne=""
+	[[ -n $profil ]] && profligne="AppArmorProfile=$profil"
 	cat >"/etc/systemd/system/$nom.service" <<FIN
 # Généré par deploy/cog-vm/installer.sh : ne pas éditer à la main.
 [Unit]
 Description=$description
-After=network-online.target $apres
+After=network-online.target $DOUANE_UNITE $apres
 Wants=network-online.target
+Requires=$DOUANE_UNITE
 
 [Service]
 Type=simple
@@ -327,6 +448,7 @@ Group=$utilisateur
 WorkingDirectory=$repertoire
 $envfile
 $env_lignes
+$profligne
 ExecStart=$commande
 Restart=on-failure
 RestartSec=3
@@ -346,17 +468,36 @@ unites() {
 	ecrire_unite miyukini-kindmother "KindMother — service libSQL isolé (COG)" \
 		miyukini-kindmother "$VAR/kindmother" "$BIN/kindmother-server" "$VAR/kindmother" "" "" \
 		"Environment=KINDMOTHER_DATA_DIR=$VAR/kindmother
-Environment=KINDMOTHER_LISTEN_ADDR=127.0.0.1:50051"
+Environment=KINDMOTHER_LISTEN_ADDR=127.0.0.1:50051" "miyukini-kindmother"
 
 	# bridge.toml (B2) : /etc/miyukini/bridge.toml (root, lecture seule) monté en
 	# lecture seule à l'endroit où MAIA le lit ; ni réécriture ni remplacement.
 	# MAIA ouvre la mémoire (KindMother) une seule fois, au démarrage, sans nouvel essai : elle
 	# démarre après KindMother et attend (borné, sans échec fatal) que son port écoute.
+	# Attente de KindMother : unité distincte, SANS profil AppArmor. Le profil de MAIA interdit
+	# toute exécution (bash, timeout) ; AppArmorProfile= s'appliquerait à chaque commande de l'unité.
+	cat >"/etc/systemd/system/$ATTENTE_UNITE.service" <<FIN
+# Généré par deploy/cog-vm/installer.sh : ne pas éditer à la main.
+[Unit]
+Description=Attente de KindMother (127.0.0.1:50051) avant MAIA
+After=miyukini-kindmother.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=miyukini-maia
+Group=miyukini-maia
+ExecStart=-/usr/bin/timeout 30 /bin/bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/50051) 2>/dev/null; do sleep 0.5; done'
+
+[Install]
+RequiredBy=miyukini-maia.service
+FIN
+	chmod 0644 "/etc/systemd/system/$ATTENTE_UNITE.service"
+
 	ecrire_unite miyukini-maia "MAIA — orchestrateur d'agents IA (COG)" \
-		miyukini-maia "$VAR/maia" "$BIN/maia" "$VAR/maia" "miyukini-kindmother.service" "$ETC/maia.env" \
+		miyukini-maia "$VAR/maia" "$BIN/maia" "$VAR/maia" "miyukini-kindmother.service $ATTENTE_UNITE.service" "$ETC/maia.env" \
 		"Environment=MAIA_LLM_URL=http://127.0.0.1:11435
-ExecStartPre=-/usr/bin/timeout 30 /bin/bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/50051) 2>/dev/null; do sleep 0.5; done'
-BindReadOnlyPaths=$ETC/bridge.toml:$VAR/maia/bridge.toml"
+BindReadOnlyPaths=$ETC/bridge.toml:$VAR/maia/bridge.toml" "miyukini-maia"
 
 	ecrire_unite miyukini-miyucloud "MiyuCloud — stockage et calendriers (COG)" \
 		miyukini-miyucloud "$PARTAGE/miyucloud" "$BIN/miyucloud-server" "$VAR/miyucloud" \
@@ -370,11 +511,11 @@ Environment=MIYUCLOUD_ENCRYPTION_ENABLED=true
 Environment=MIYUCLOUD_OIDC_ENABLED=false
 Environment=MIYUCLOUD_WOPI_ENABLED=false
 Environment=MIYUCLOUD_COOKIE_SECURE=true
-Environment=RUST_LOG=info"
+Environment=RUST_LOG=info" "miyukini-miyucloud"
 
 	ecrire_unite miyukini-cog-web-portal "COG Web Portal — portail HTTP (COG)" \
 		miyukini-portail "$VAR/cog-web-portal" "$BIN/cog-web-portal" "" "" "$ETC/cog-web-portal.env" \
-		"Environment=PORTAL_LISTEN=127.0.0.1:8090"
+		"Environment=PORTAL_LISTEN=127.0.0.1:8090" "miyukini-cog-web-portal"
 
 	systemctl daemon-reload
 }
@@ -382,14 +523,16 @@ Environment=RUST_LOG=info"
 demarrage() {
 	log "démarrage des services"
 	local u
+	systemctl enable "$DOUANE_UNITE" "$ATTENTE_UNITE.service" >/dev/null
+	systemctl restart "$DOUANE_UNITE"
 	for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
 		systemctl enable "$u.service" >/dev/null
 		systemctl restart "$u.service"
 	done
 	# Ne reste pas silencieux en cas d'échec : état affiché.
 	sleep 3
-	for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
-		printf '[installer] %-28s %s\n' "$u" "$(systemctl is-active "$u.service" || true)"
+	for u in "$DOUANE_UNITE" miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
+		printf '[installer] %-28s %s\n' "$u" "$(systemctl is-active "$u" || true)"
 	done
 }
 
@@ -404,6 +547,9 @@ verifier_binaires_installes
 politiques_et_statiques
 environnements
 postgres
+apparmor_profils
+douane_arretes
+douane_cog
 unites
 demarrage
 

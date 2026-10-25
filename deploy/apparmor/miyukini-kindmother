@@ -1,0 +1,24 @@
+# AppArmor — KindMother (service libSQL isolé, 127.0.0.1:50051). Installé par deploy/cog-vm/installer.sh.
+# Données : /var/lib/miyukini/kindmother (0700, propriété du service). Réseau : TCP uniquement (écoute loopback).
+#include <tunables/global>
+
+profile miyukini-kindmother /opt/miyukini/bin/kindmother-server flags=(enforce) {
+  #include <abstractions/base>
+
+  network inet stream,
+
+  /opt/miyukini/bin/kindmother-server mr,
+  @{etc_ro}/ssl/openssl.cnf r,
+  @{PROC}/@{pid}/cgroup r,
+  # Identifiant de machine (dérivation de la clé de chiffrement au repos) et limites du cgroup.
+  @{etc_ro}/machine-id r,
+  /sys/fs/cgroup/**/cpu.max r,
+
+  # Le service fixe lui-même les droits de son répertoire de données (0700) au démarrage.
+  /var/lib/miyukini/kindmother/ rw,
+  /var/lib/miyukini/kindmother/** rwk,
+  deny /var/lib/miyukini/maia/** rw,
+  deny /var/lib/miyukini/miyucloud/** rw,
+  deny /var/lib/miyukini/cog-web-portal/** rw,
+  deny /etc/miyukini/** w,
+}

@@ -58,7 +58,7 @@ code_http() { curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$@"; }
 
 # ------------------------------------------------------------------ services
 
-for u in postgresql miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
+for u in postgresql miyukini-douane-cog miyukini-attente-kindmother miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
 	controle "$u actif" systemctl is-active --quiet "$u"
 done
 
@@ -79,6 +79,27 @@ done
 
 controle "aucune écoute hors boucle locale (hors SSH et résolveur systemd)" \
 	bash -c '! ss -ltnH | awk "{ print \$4 }" | grep -vE "^(127\.|\[::1\]|\*:22\$|0\.0\.0\.0:22\$|\[::\]:22\$|0\.0\.0\.0:53\$)" | grep -q .'
+
+# ------------------------------------------------------------------ Douane : zone COG
+
+controle "Douane : unité de zone COG activée au démarrage" systemctl is-enabled --quiet miyukini-douane-cog
+controle "Douane : table nftables miyudouane_hote chargée, sortie des comptes COG refusée" \
+	bash -c "sudo -n nft list table inet miyudouane_hote | grep -q 'meta skuid .*oifname != \"lo\" counter packets [0-9]* bytes [0-9]* drop'"
+controle "Douane : table nftables de l'hôte chargée sans réécriture des autres tables (table inet miyudouane_hote seule)" \
+	bash -c "sudo -n nft list tables | grep -q 'table inet miyudouane_hote'"
+
+# Contrôle positif : le compte cog (non COG) atteint Internet ; sans cela l'isolement ne prouve rien.
+controle "contrôle : un compte non COG atteint Internet (NAT de la VM)" \
+	test "$(curl -s -m 10 -o /dev/null -w '%{http_code}' http://1.1.1.1/)" != 000
+
+for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-portail; do
+	controle "COG $u : sortie vers Internet impossible (1.1.1.1:80 injoignable)" \
+		test "$(sudo -n -u "$u" curl -s -m 5 -o /dev/null -w '%{http_code}' http://1.1.1.1/)" = 000
+done
+controle "COG miyukini-maia : boucle locale joignable (MAIA /health 200 depuis son compte)" \
+	test "$(sudo -n -u miyukini-maia curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:11435/health)" = 200
+controle "COG miyukini-maia : KindMother joignable en boucle locale depuis son compte" \
+	sudo -n -u miyukini-maia bash -c 'exec 3<>/dev/tcp/127.0.0.1/50051'
 
 # ------------------------------------------------------------------ KindMother
 
@@ -123,10 +144,14 @@ controle "clé d'identité KindMother 0600 dans un répertoire 0700" bash -c \
 	"test \"\$(sudo -n stat -c %a $VAR/kindmother/credentials/server.key)\" = 600 && \
 	 test \"\$(sudo -n stat -c %a $VAR/kindmother)\" = 700"
 
+# Les refus hors boucle locale se testent avec une COPIE du binaire, hors de son chemin : le profil
+# AppArmor s'attache au chemin /opt/miyukini/bin/<service>, la copie n'est pas confinée. Le test
+# porte sur le code de refus, pas sur le confinement (couvert par le contrôle « enforce » ci-dessus).
 refus_km() {
 	local d="$TMP/km-hors-boucle" rc
 	mkdir -p "$d"
-	KINDMOTHER_DATA_DIR="$d" KINDMOTHER_LISTEN_ADDR=0.0.0.0:19877 timeout 90 "$BIN/kindmother-server" \
+	install -m 0755 "$BIN/kindmother-server" "$TMP/kindmother-essai"
+	KINDMOTHER_DATA_DIR="$d" KINDMOTHER_LISTEN_ADDR=0.0.0.0:19877 timeout 90 "$TMP/kindmother-essai" \
 		>"$TMP/km.log" 2>&1
 	rc=$?
 	[[ $rc -ne 0 ]] && grep -q 'Refusing non-loopback' "$TMP/km.log"
@@ -155,14 +180,15 @@ else
 fi
 # MAIA n'ouvre la mémoire qu'une fois, au démarrage : elle doit démarrer après KindMother et
 # attendre que son port écoute (sinon, au redémarrage de la VM, la mémoire reste désactivée).
-controle "MAIA démarre après KindMother et attend son port (ordre au démarrage)" bash -c \
-	"systemctl show miyukini-maia -p After --value | grep -q 'miyukini-kindmother.service' && systemctl cat miyukini-maia | grep -q '127.0.0.1/50051'"
+controle "MAIA démarre après KindMother et après l'attente de son port (ordre au démarrage)" bash -c \
+	"systemctl show miyukini-maia -p After --value | grep -q 'miyukini-kindmother.service' && systemctl show miyukini-maia -p After --value | grep -q 'miyukini-attente-kindmother.service' && systemctl cat miyukini-attente-kindmother | grep -q '127.0.0.1/50051'"
 
 refus_maia() {
 	local d="$TMP/maia-hors-boucle" rc
 	mkdir -p "$d"
 	printf 'bind_addr = "0.0.0.0:19876"\n' >"$d/bridge.toml"
-	MIYUKINI_DATA_DIR="$d" timeout 30 "$BIN/maia" >"$TMP/maia.log" 2>&1
+	install -m 0755 "$BIN/maia" "$TMP/maia-essai"
+	MIYUKINI_DATA_DIR="$d" timeout 30 "$TMP/maia-essai" >"$TMP/maia.log" 2>&1
 	rc=$?
 	[[ $rc -ne 0 ]] && grep -q 'Refus de démarrer' "$TMP/maia.log"
 }
@@ -185,6 +211,20 @@ controle "portail : en-têtes CSP et anti-cadrage présents" bash -c \
 	"h=\$(curl -sI --max-time 10 http://127.0.0.1:8090/); echo \"\$h\" | grep -qi '^content-security-policy: default-src .self' && echo \"\$h\" | grep -qi '^x-frame-options: DENY'"
 controle "portail : chemin inconnu sans erreur serveur (< 500)" bash -c \
 	"c=\$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 http://127.0.0.1:8090/inconnu/page); test \"\$c\" -lt 500"
+
+# ------------------------------------------------------------------ AppArmor (enforce)
+
+# Les cinq profils sont chargés en mode enforce (aucun en complain).
+for p in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-sas; do
+	controle "AppArmor : profil $p chargé en enforce" \
+		sudo -n grep -q "^$p (enforce)\$" /sys/kernel/security/apparmor/profiles
+done
+controle "AppArmor : aucun profil miyukini-* en complain" \
+	bash -c "! sudo -n grep -q '^miyukini-.* (complain)\$' /sys/kernel/security/apparmor/profiles"
+for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
+	controle "$u : processus principal confiné par son profil (enforce)" bash -c \
+		"pid=\$(systemctl show -p MainPID --value $u) && sudo -n cat /proc/\$pid/attr/current | grep -qE '^$u(//&unconfined)? \\(enforce\\)\$'"
+done
 
 # ------------------------------------------------------------------ durcissement et permissions
 

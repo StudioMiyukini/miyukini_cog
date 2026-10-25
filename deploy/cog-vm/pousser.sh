@@ -50,7 +50,7 @@ done
 
 STAGE=$(mktemp -d "${TMPDIR:-/tmp}/cog-paquet.XXXXXX")
 trap 'rm -rf "$STAGE"' EXIT
-mkdir -p "$STAGE/bin" "$STAGE/config" "$STAGE/static" "$STAGE/banc/tests" "$STAGE/banc/cible/examples"
+mkdir -p "$STAGE/bin" "$STAGE/config" "$STAGE/static" "$STAGE/apparmor" "$STAGE/banc/tests" "$STAGE/banc/cible/examples"
 
 for b in "${BINAIRES[@]}"; do
 	cp "$REL/$b" "$STAGE/bin/$b"
@@ -60,6 +60,7 @@ cp -r "$RACINE/config/strongfather" "$STAGE/config/strongfather"
 cp -r "$RACINE/apps/miyucloud/static" "$STAGE/static/static"
 cp -r "$RACINE/apps/miyucloud/static-dist" "$STAGE/static/static-dist"
 cp "$ICI/installer.sh" "$ICI/tester.sh" "$STAGE/"
+cp "$RACINE"/deploy/apparmor/miyukini-* "$STAGE/apparmor/"
 cp -r "$RACINE/tests/intrusion-lot3" "$STAGE/banc/tests/intrusion-lot3"
 cp "$REL/miyudouane" "$STAGE/banc/cible/miyudouane"
 cp "$REL/examples/arretes_essai" "$STAGE/banc/cible/examples/arretes_essai"
