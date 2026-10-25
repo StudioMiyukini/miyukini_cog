@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.10 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.11 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -69,6 +69,7 @@
 | A-008 | 2026-10-25 | Lot 2 §4.1, §10.1 · Services hybrides §3.1, §4.1 : nature `0x44` du recours accepté (encodage prévu par A-007) ; règles de suspension et de levée ; alignements consignés (recours, témoins membres, séquence par auteur) | 1.8 |
 | A-009 | 2026-10-25 | IA fédérée §2–§5, §7 · Mémoire MAIA §4, §9, §10, §12 · Lot 2 §4.1 : choix du lot 7 (Fiche `0x09`, *k* = 3, quotas, identifiants et budgets mémoire, une base `maia-<utilisateur>`) ; **deux décisions** : republication d'une donnée étrangère après validation TAMR, notes ordinaires écrites par MAIA | 1.9 |
 | A-010 | 2026-10-25 | Mémoire MAIA §9 : « note ordinaire » écrite par MAIA = note des strates N2 / N3 seulement (jamais N0 ni N1) ; précision fail-closed d'A-009 | 1.10 |
+| A-011 | 2026-10-25 | Lot 2 §5 · Zones §16 · Services hybrides §4.1 · Mémoire MAIA §9 : formats et choix consignés tels qu'implémentés — fichier de clé racine `MYRC`, durcissement du processus, état fédéral `MFED`, quotas et révocations de la façade, chemin TAMR et routes de la mémoire ; **à valider par le propriétaire** | 1.11 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -428,3 +429,35 @@
   - Domaine `moi`, préférence d'importance ≥ 8, résumé de domaine (N1), Règle ⇒ **candidat** à valider, comme toute autre exception d'A-009
   - Une correction qui ferait passer une note de MAIA en N0 ou N1 (importance relevée) ⇒ candidat
 - **Impact** : EX-53, EX-54 renforcées ; code `maia-memoire::MemoireMaia::noter`
+
+### A-011 — Formats consignés : clé racine, état fédéral, façade, TAMR
+
+<!-- @id arch.gel.a011 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a011 -->
+
+- **Date** : 2026-10-25 · **version** 1.11 · consignation de l'implémenté (restes des lots 2, 5, 6, 7) ; **validation du propriétaire attendue** — tout point refusé sera retiré du code
+- **Documents touchés** : ce registre seulement ; les docs gelées renvoient ici pour le détail (Lot 2 §5 racine, Zones §16 fédération, Services hybrides §4.1, Mémoire MAIA §9)
+- **Clé racine sur support amovible** (`crates/miyuracine`, NC-ANSSI-25)
+  - Fichier **`MYRC` v1**, 122 octets exactement, gros-boutiste : magie `MYRC` (4) · version `0x0001` (2) · Argon2id `m` en Kio (4, 262 144..=4 194 304) · `t` (4, 3..=64) · `p` (4, 1..=16) · sel (32) · nonce XChaCha20 (24) · secret chiffré (32) · étiquette Poly1305 (16)
+  - Clé AEAD = Argon2id v0x13 (mot de passe ≥ 12 octets, sel) ; données associées = octets 0..74 ; défaut m = 1 Gio, t = 4, p = 4
+  - Toute erreur de contenu (taille, magie, version, bornes, mot de passe, altération) ⇒ **un seul refus** sans indice ; fichier ordinaire, `O_NOFOLLOW`, droits `0600`, propriétaire = uid effectif (support FAT/exFAT monté `uid=…,fmask=0177,dmask=0077`)
+  - Écriture : temporaire exclusif `0600`, `fsync`, `renameat2(RENAME_NOREPLACE)` (jamais d'écrasement), `fsync` du dossier, relecture avant succès
+  - **Durcissement** du processus avant toute lecture de secret : core dumps coupés (`RLIMIT_CORE` 0, `PR_SET_DUMPABLE` 0) ; `mlockall(MCL_CURRENT|MCL_FUTURE)` **exigé** par défaut (refus si impossible), `--sans-mlock` = avertissement explicite
+- **État fédéral local** (`crates/miyufederation`, lot 6)
+  - Fichier `<dossier>/etat.mfed` (dossier `0700`, fichier `0600`) : `"MFED" | 0x01 | n (4, ≤ 64 Mio) | corps | HMAC-SHA256 (32)` ; clé = HMAC-SHA256(secret local du COG, `miyukini/miyufederation/etat/v1`)
+  - Le corps conserve les **titres signés d'origine** (candidatures `0x43`, confirmations `0x07`, accusations `0x42` et preuves `MFPV`, recours `0x44`, têtes `MSRG`), **revérifiés** au chargement ; les statuts sont **recalculés**, jamais lus ; seuls le drapeau fondateur, les heures de réception, les quotas et la note locale reposent sur le seul HMAC
+  - Reprise : rejeu jusqu'à l'heure courante ; une suspension échue pendant l'arrêt devient révocation datée de l'échéance, produite une seule fois ; état illisible, altéré ou heure en recul ⇒ fédération désactivée ; fichier absent = premier usage
+  - Limites : suppression du fichier ⇒ perte des statuts locaux (les révocations restent au registre) ; un état authentique plus ancien peut être rejoué
+- **Façade des services hybrides** (`crates/miyuhybride`, `crates/jayrdv-facade`, lot 5 ; « à décider » d'A-007)
+  - Quotas **par service**, partagés par ses façades : sessions clientes simultanées (une par clé d'appareil), requêtes simultanées, disque de la DB secondaire (table + clé + valeur, réservé **avant** écriture) ; compteurs atomiques ; refus `429 quota_sessions` / `quota_taches`, disque plein `503 db_secondaire_pleine`
+  - Session libérée par `DELETE /v1/session`, inactivité de 15 min, retrait de l'appareil ou fin de la façade
+  - Révocations : listes `RevocationsRegistre` par COG émetteur, remises par la zone COG ; fraîcheur ≤ 15 min (tête vérifiée) ; absente, périmée, future ou en recul ⇒ refus ; instantané de lancement valable 15 min
+  - **Guichet des visas : non implémenté** — emplacement et détenteur de la clé d'émission à décider (INV-H2 : aucun secret durable en Franche)
+- **Chemin TAMR et mémoire** (`apps/miou-llm-bridge`, lot 7)
+  - Deux temps : demande (action figée, empreinte SHA-256 du domaine `maia/tamr/approbation/v1`, durée de vie 300 s, 32 demandes au plus) puis approbation de l'utilisateur propriétaire sur l'empreinte vue ; StrongFather tranche (`data.operation = 'tamr.approbation'`, `data.intervention = 'APPROVAL'`) ; refus, délai, autre empreinte ou autre utilisateur ⇒ rien n'est écrit ni publié
+  - Seule une approbation accordée produit `Validation::UtilisateurEtTamr` (liée au candidat exact) ou `ValidationUtilisateur::confirmee_par_tamr` (liée aux octets exacts)
+  - Routes `/v1/memoire/{utilisateur}/…` (consulter, historique, exporter, corriger, oublier, règles, candidats, approbations), POST / DELETE seulement, sans cookie ni CORS, **désactivées par défaut** ; authentification minimale par requête signée Ed25519 d'usage `maia/memoire` avec clés épinglées (`MAIA_MEMOIRE_CLES_UTILISATEUR`) — **provisoire**, à remplacer par passeport et visa miyauth
+  - Outil `memoire_noter` (StrongFather `memoire.noter`) : jamais de Règle ; **tour contenant du contenu étranger ⇒ provenance `etranger`, candidat seulement**
+  - Politiques ajoutées à `config/strongfather/maia.toml` : `maia-tamr-approbation`, `maia-memoire-noter`
+- **Impact** : EX-04 (builds reproductibles, hors gel) ; NC-ANSSI-25 ; EX-32..34 (persistance) ; EX-44, EX-56 ; plan lots 2, 5, 6, 7 mis à jour
