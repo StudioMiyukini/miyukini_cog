@@ -9,7 +9,7 @@
 //! Usage : `maia-llm serve [--bind 127.0.0.1:11435] [--models-dir ./models] [--config maia-llm.toml]`
 //!
 //! EX-26 : seuls les modèles accompagnés d'un manifeste signé `X.gguf.sceau`
-//! (ancres `model_trust_anchors`) sont chargés — voir le module `provenance`.
+//! (ancres `model_trust_anchors`) sont chargés — voir la crate `maia-modeles`.
 //! Outillage : `maia-llm cle-dev --sortie <f>` et `maia-llm sceller-modele …`.
 
 // C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
@@ -27,16 +27,15 @@
 
 mod api;
 mod auth;
-mod canal;
 mod config;
 mod engine;
-mod provenance;
 mod store;
 
 use std::sync::Arc;
 use std::time::SystemTime;
 
 use engine::LlmEngine;
+use maia_modeles as provenance;
 use store::ModelStore;
 use tower_http::trace::TraceLayer;
 
@@ -117,8 +116,7 @@ async fn main() {
             std::process::exit(1);
         }
     };
-    let politique =
-        provenance::PolitiqueModeles::new(ancres, provenance::derogation_demandee(&args));
+    let politique = provenance::PolitiqueModeles::new(ancres, derogation_du_binaire(&args));
 
     // Moteur + store
     let engine = match LlmEngine::new((*cfg).clone(), politique) {
@@ -183,6 +181,13 @@ async fn main() {
         tracing::error!("Erreur serveur : {e}");
         std::process::exit(1);
     }
+}
+
+/// Dérogation « modèles non signés » (EX-26) : décidée **ici**, avec le profil
+/// de compilation de ce binaire (`cfg!(debug_assertions)`), jamais par la
+/// bibliothèque `maia-modeles`. Ignorée (et journalisée) dans un binaire de release.
+fn derogation_du_binaire(args: &[String]) -> bool {
+    provenance::derogation_effective(provenance::derogation_demandee(args), cfg!(debug_assertions))
 }
 
 /// Parse les arguments CLI et charge la config TOML.
@@ -266,4 +271,15 @@ async fn shutdown_signal() {
         std::future::pending::<()>().await;
     }
     tracing::info!("Signal d'arrêt reçu — shutdown gracieux...");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn derogation_seulement_dans_un_binaire_de_debug() {
+        let args = vec!["maia-llm".to_string(), provenance::OPTION_DEROGATION.to_string()];
+        assert_eq!(derogation_du_binaire(&args), cfg!(debug_assertions));
+    }
 }

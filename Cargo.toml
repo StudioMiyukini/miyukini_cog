@@ -120,6 +120,7 @@ members = [
     "crates/miyualicia-skills",
     "crates/miyualicia-memory",
     "crates/maia-memoire",           # Mémoire MAIA N0–N4 (lot 7, EX-50..56)
+    "crates/maia-modeles",           # Provenance signée des modèles MAIA (manifeste, artefact MMIA, installateur du canal officiel ; EX-26)
     "crates/miyualicia-dispatcher",
     "crates/miyualicia-cores-gate",
     "crates/jaykoa-client",

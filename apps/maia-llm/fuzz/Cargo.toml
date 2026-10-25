@@ -1,7 +1,7 @@
 # Cibles de fuzzing de l'installateur de modèles du canal officiel de maia-llm (C-26) — cargo-fuzz, nightly.
 # Hors du workspace (table [workspace] propre) : les builds normaux l'ignorent.
-# `apps/maia-llm` est un binaire (llama.cpp) : les modules `canal.rs` et
-# `provenance.rs` sont inclus par chemin (`#[path]`), sans le moteur d'inférence.
+# Le code éprouvé est celui de la crate partagée `maia-modeles` (fonctionnalité
+# `canal`), sans le moteur d'inférence de maia-llm.
 # Lancement : cd apps/maia-llm/fuzz && cargo +nightly fuzz run artefact_mmia
 # Corpus initial : cargo run --example generer_graines (stable) → seeds/<cible>/.
 [package]
@@ -16,20 +16,9 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
-# Dépendances des modules inclus (mêmes versions que apps/maia-llm).
+maia-modeles = { path = "../../../crates/maia-modeles", features = ["canal"] }
 miyusceau = { path = "../../../crates/miyusceau" }
-miyucanal = { path = "../../../crates/miyucanal" }
-miyuregistre = { path = "../../../crates/miyuregistre" }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
 sha2 = "0.10"
-hex = "0.4"
-rand = "0.8"
-tracing = "0.1"
-
-[target.'cfg(unix)'.dependencies]
-libc = "0.2"
-rustix = { version = "1", default-features = false, features = ["std", "process"] }
 
 [workspace]
 members = ["."]

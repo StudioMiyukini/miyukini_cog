@@ -44,6 +44,7 @@ CRATES_SECURITE=(
   miyuhybride
   maia-federee
   maia-memoire
+  maia-modeles
   strongfather
   borderguard
   bondingbrother

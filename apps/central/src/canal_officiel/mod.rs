@@ -654,7 +654,7 @@ mod tests {
     /// Artefact `MMIA` : manifeste signé par `cle` + octets du modèle.
     fn artefact_modele(nom: &str, modele: &[u8], cle: &CleSignature) -> Vec<u8> {
         use sha2::Digest as _;
-        let m = crate::provenance::ManifesteModele {
+        let m = maia_modeles::ManifesteModele {
             nom_fichier: nom.into(),
             sha256: sha2::Sha256::digest(modele).into(),
             taille: modele.len() as u64,

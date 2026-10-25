@@ -29,7 +29,7 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
 
 use crate::config::MaiaLlmConfig;
-use crate::provenance::{Autorisation, PolitiqueModeles};
+use maia_modeles::{Autorisation, PolitiqueModeles};
 
 // ── Types publics ─────────────────────────────────────────────────
 

@@ -19,12 +19,6 @@ mod kindmother_launcher;
 pub mod llm_client;
 pub mod market_client;
 mod miou;
-/// Provenance signée des modèles GGUF : **source de maia-llm** (binaire sans
-/// bibliothèque), compilée ici pour l'installateur de modèles délégué du canal
-/// officiel ([`canal_officiel::modeles`]) ; analysée par les lints de maia-llm.
-#[path = "../../maia-llm/src/provenance.rs"]
-#[allow(dead_code, unused_imports, clippy::all, clippy::pedantic)]
-mod provenance;
 pub mod remote;
 mod screens;
 pub mod service_manager;

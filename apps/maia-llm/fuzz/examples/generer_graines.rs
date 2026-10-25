@@ -7,20 +7,12 @@
 //! `cargo run --example generer_graines` (stable) : écrit `seeds/<cible>/*`.
 //! Clé fixe identique à celle de la cible.
 
-#[path = "../../src/provenance.rs"]
-#[allow(dead_code)]
-mod provenance;
-
-#[path = "../../src/canal.rs"]
-#[allow(dead_code)]
-mod canal;
-
 use std::fs;
 use std::path::Path;
 
-use canal::encoder_artefact;
+use maia_modeles::canal::encoder_artefact;
+use maia_modeles::ManifesteModele;
 use miyusceau::{sceller, CleSignature};
-use provenance::ManifesteModele;
 use sha2::{Digest, Sha256};
 
 fn ecrire(cible: &str, nom: &str, octets: &[u8]) {

@@ -77,6 +77,7 @@ ZERO_EXIGE=(
   jaykoa-client
   jaymeteo-client
   maia-llm
+  maia-modeles
   miyualicia
   miyualicia-dispatcher
   miyucloud

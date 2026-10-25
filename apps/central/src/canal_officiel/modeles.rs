@@ -9,13 +9,13 @@
 //!
 //! # Délégation
 //!
-//! L'installateur est celui de **maia-llm** (`apps/maia-llm/src/canal.rs`,
-//! artefact `MMIA`, provenance `X.gguf.sceau`) : maia-llm est un binaire sans
-//! bibliothèque (et dépend de llama.cpp), sa source est donc compilée ici telle
-//! quelle (`#[path]`), sans copie ni divergence. Les vérifications sont
-//! celles de maia-llm : manifeste signé par une ancre des modèles, nom, taille,
-//! licence, SHA-256, écriture atomique, contrôle de chargement rejoué, version
-//! strictement supérieure (index `.canal-modeles.json`).
+//! L'installateur est celui de la crate partagée **`maia-modeles`**
+//! (fonctionnalité `canal`, artefact `MMIA`, provenance `X.gguf.sceau`), la
+//! même que maia-llm utilise au chargement : manifeste signé par une ancre des
+//! modèles, fichier **dérivé du composant** (`<composant>.gguf`), taille,
+//! licence, SHA-256, temporaire vérifié avant renommage, ancien couple restauré
+//! en cas d'échec, contrôle de chargement rejoué, version strictement
+//! supérieure (index `.canal-modeles.json`).
 //!
 //! # Configuration (champ `modeles` de `canal-officiel.json`, facultatif)
 //!
@@ -35,11 +35,7 @@ use std::path::PathBuf;
 
 use serde::Deserialize;
 
-#[path = "../../../maia-llm/src/canal.rs"]
-#[allow(dead_code, unused_imports, clippy::all, clippy::pedantic)]
-mod maia;
-
-pub use maia::{encoder_artefact, InstallateurModeles, FICHIER_INDEX};
+pub use maia_modeles::canal::{encoder_artefact, InstallateurModeles, FICHIER_INDEX};
 
 /// Configuration de l'installateur de modèles (voir module).
 #[derive(Debug, Clone, Deserialize)]
@@ -61,7 +57,7 @@ impl ConfigModeles {
         if self.ancres.is_empty() {
             return Err("modeles.ancres : au moins une ancre de modèles attendue".into());
         }
-        let ancres = crate::provenance::ancres_depuis_hex(&self.ancres).map_err(|e| format!("modeles.ancres : {e}"))?;
+        let ancres = maia_modeles::ancres_depuis_hex(&self.ancres).map_err(|e| format!("modeles.ancres : {e}"))?;
         Ok(InstallateurModeles::new(dossier, ancres))
     }
 }

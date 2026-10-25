@@ -1,0 +1,52 @@
+# @id: maia_modeles_crate_config
+# @do: declarer_crate_modeles_maia
+# @layer: toolkit
+# @human: Provenance signée des modèles IA de MAIA (manifeste Sceau, artefact MMIA,
+#         politique de chargement, installateur du canal officiel) — partagée par
+#         maia-llm, Central et le fuzzing (EX-26, C-53, C-72).
+
+[package]
+name = "maia-modeles"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Modèles IA de MAIA — manifeste signé (Sceau), vérification pure, artefact MMIA, politique de chargement, installateur du canal officiel (EX-26)"
+
+[features]
+default = []
+# Installateur de la catégorie ModeleIa du canal officiel (miyucanal / miyuregistre).
+# Activée par Central et maia-llm ; la vérification pure n'en dépend pas.
+canal = ["dep:miyucanal", "dep:miyuregistre", "dep:serde", "dep:serde_json"]
+
+[dependencies]
+# Manifestes Sceau v1.1 (ManifestePaquet, ancres épinglées)
+miyusceau = { path = "../miyusceau" }
+sha2 = "0.10"
+hex = "0.4"
+tracing = "0.1"
+# Canal officiel (feature `canal`)
+miyucanal = { path = "../miyucanal", optional = true }
+miyuregistre = { path = "../miyuregistre", optional = true }
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde_json = { version = "1.0", optional = true }
+
+[target.'cfg(unix)'.dependencies]
+# O_NOFOLLOW à l'ouverture du modèle vérifié (TOCTOU)
+libc = "0.2"
+# UID/GID effectifs sans `unsafe` (propriétaire et droits du modèle)
+rustix = { version = "1", default-features = false, features = ["std", "process"] }
+
+[dev-dependencies]
+rand = "0.8"
+# Banc d'essai du canal officiel (annonces 2 sur 2, dépôt simulé)
+miyucanal = { path = "../miyucanal", features = ["banc-essai"] }
+miyuregistre = { path = "../miyuregistre" }
+
+[lints]
+workspace = true
