@@ -35,7 +35,13 @@ impl DeviceCodePgRepository {
         let status = DeviceCodeStatus::parse(&status_str).unwrap_or(DeviceCodeStatus::Expired);
 
         Ok(DeviceCode::from_raw(
-            row.try_get("id").unwrap(),
+            row.try_get("id").map_err(|e| {
+                DomainError::new(
+                    ErrorKind::DatabaseError,
+                    "DeviceCode",
+                    format!("Failed to read id: {}", e),
+                )
+            })?,
             row.try_get("device_code").unwrap_or_default(),
             row.try_get("user_code").unwrap_or_default(),
             row.try_get("client_name").unwrap_or_default(),

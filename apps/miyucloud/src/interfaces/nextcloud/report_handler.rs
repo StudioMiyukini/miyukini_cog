@@ -26,7 +26,7 @@ use crate::application::ports::favorites_ports::FavoritesUseCase;
 use crate::application::ports::file_ports::FileRetrievalUseCase;
 use crate::application::ports::inbound::{FolderUseCase, SearchUseCase};
 use crate::common::di::AppState;
-use crate::interfaces::errors::AppError;
+use crate::interfaces::errors::{AppError, ReponseOu500};
 use crate::interfaces::middleware::auth::CurrentUser;
 use crate::interfaces::nextcloud::webdav_handler::{
     format_oc_id, nc_href, resolve_file_id, resolve_folder_id, write_file_response,
@@ -151,8 +151,7 @@ async fn handle_filter_files(
     Ok(Response::builder()
         .status(StatusCode::MULTI_STATUS)
         .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-        .body(Body::from(buf))
-        .unwrap())
+        .body(Body::from(buf))?)
 }
 
 // ──────────────────── Search (d:searchrequest) ────────────────────
@@ -248,8 +247,7 @@ async fn handle_search(
     Ok(Response::builder()
         .status(StatusCode::MULTI_STATUS)
         .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-        .body(Body::from(buf))
-        .unwrap())
+        .body(Body::from(buf))?)
 }
 
 // ──────────────────── DTO conversions ────────────────────
@@ -320,7 +318,7 @@ fn empty_multistatus() -> Response<Body> {
         .status(StatusCode::MULTI_STATUS)
         .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
         .body(Body::from(xml))
-        .unwrap()
+        .ou_500()
 }
 
 // ──────────────────── XML parsing helpers ────────────────────

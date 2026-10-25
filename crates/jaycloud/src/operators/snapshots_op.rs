@@ -30,7 +30,9 @@
 
 use std::collections::{BTreeMap, HashSet};
 use std::path::PathBuf;
-use std::sync::RwLock;
+// C-10 : un verrou empoisonné est levé sans panique ; les sections
+// critiques ne laissent pas d'état partiel (insertions/suppressions atomiques).
+use std::sync::{PoisonError, RwLock};
 
 use chrono::{DateTime, Datelike, NaiveDate, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
@@ -263,7 +265,7 @@ impl SnapshotsOp {
 
         self.snapshots
             .write()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .insert(snapshot_id, summary.clone());
 
         Ok(summary)
@@ -272,7 +274,7 @@ impl SnapshotsOp {
     /// Liste les snapshots, filtrés optionnellement par cible, triés par
     /// date décroissante (plus récent d'abord).
     pub fn list(&self, target_id: Option<&str>, limit: usize) -> Vec<SnapshotSummary> {
-        let snapshots = self.snapshots.read().unwrap();
+        let snapshots = self.snapshots.read().unwrap_or_else(PoisonError::into_inner);
         let mut out: Vec<_> = snapshots
             .values()
             .filter(|s| target_id.map_or(true, |t| s.target_id == t))
@@ -287,7 +289,7 @@ impl SnapshotsOp {
     pub fn get(&self, snapshot_id: &str) -> Result<SnapshotSummary, SnapshotsOpError> {
         self.snapshots
             .read()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .get(snapshot_id)
             .cloned()
             .ok_or_else(|| SnapshotsOpError::NotFound(snapshot_id.to_string()))
@@ -312,7 +314,7 @@ impl SnapshotsOp {
     ) -> Result<usize, SnapshotsOpError> {
         let all = self.list(Some(target_id), usize::MAX);
         let to_keep = compute_kept_snapshots(&all, policy)?;
-        let mut snapshots = self.snapshots.write().unwrap();
+        let mut snapshots = self.snapshots.write().unwrap_or_else(PoisonError::into_inner);
         let before = snapshots.len();
         snapshots.retain(|id, s| s.target_id != target_id || to_keep.contains(id));
         Ok(before - snapshots.len())
@@ -326,7 +328,7 @@ impl SnapshotsOp {
 
         // 1. Tous les manifests sont référencés.
         let snapshot_ids: Vec<_> = {
-            let snapshots = self.snapshots.read().unwrap();
+            let snapshots = self.snapshots.read().unwrap_or_else(PoisonError::into_inner);
             snapshots.keys().cloned().collect()
         };
         for id in &snapshot_ids {

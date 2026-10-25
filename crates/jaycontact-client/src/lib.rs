@@ -14,13 +14,27 @@
 
 #![doc(html_root_url = "https://docs.miyukini.com/jaycontact-client")]
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 // @id service.jaycontact.alicia_client
 // @role alicia_to_jaycontact_adapter
 // @layer 7
 // @do bridge_alicia_to_jaycontact
 // @human Adaptateur Alicia → JayContact : route les intents vers un backend pluggable.
 
-use std::sync::{Arc, RwLock};
+// C-10 : verrous du backend factice levés sans panique en cas d'empoisonnement.
+use std::sync::{Arc, PoisonError, RwLock};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -338,17 +352,17 @@ impl FakeJayContactBackend {
 
     /// Pose la liste initiale (utile en démo / dev).
     pub fn seed(&self, contacts: Vec<ContactSummary>) {
-        self.inner.write().unwrap().contacts = contacts;
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).contacts = contacts;
     }
 
     /// Force toutes les méthodes à renvoyer une erreur backend.
     pub fn force_failure(&self, message: impl Into<String>) {
-        self.inner.write().unwrap().fail_with = Some(message.into());
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).fail_with = Some(message.into());
     }
 
     /// Snapshot des contacts actuellement en mémoire (utile en test).
     pub fn snapshot(&self) -> Vec<ContactSummary> {
-        self.inner.read().unwrap().contacts.clone()
+        self.inner.read().unwrap_or_else(PoisonError::into_inner).contacts.clone()
     }
 }
 
@@ -360,7 +374,7 @@ impl JayContactBackend for FakeJayContactBackend {
         display_name: &str,
         kind: ContactKind,
     ) -> Result<ContactSummary, JayContactError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayContactError::Backend(msg.clone()));
         }
@@ -380,7 +394,7 @@ impl JayContactBackend for FakeJayContactBackend {
         kind: Option<ContactKind>,
         limit: usize,
     ) -> Result<Vec<ContactSummary>, JayContactError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayContactError::Backend(msg.clone()));
         }
@@ -397,7 +411,7 @@ impl JayContactBackend for FakeJayContactBackend {
         &self,
         query: &str,
     ) -> Result<Option<ContactSummary>, JayContactError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayContactError::Backend(msg.clone()));
         }
@@ -412,7 +426,7 @@ impl JayContactBackend for FakeJayContactBackend {
     }
 
     async fn remove_contact(&self, id: &str) -> Result<(), JayContactError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayContactError::Backend(msg.clone()));
         }

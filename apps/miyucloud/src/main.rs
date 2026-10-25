@@ -5,6 +5,18 @@
 //! @human  miyucloud — module « main ».
 
 #![allow(async_fn_in_trait)]
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
 
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
@@ -69,11 +81,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Load configuration from environment variables
     let config = common::config::AppConfig::from_env();
+    config.validate()?;
 
     // Ensure storage and locales directories exist
     let storage_path = config.storage_path.clone();
     if !storage_path.exists() {
-        std::fs::create_dir_all(&storage_path).expect("Failed to create storage directory");
+        std::fs::create_dir_all(&storage_path)
+            .map_err(|e| format!("Failed to create storage directory: {e}"))?;
     }
     // Locales are embedded in the binary via rust-embed — no filesystem path needed.
 
@@ -87,11 +101,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             Err(e) => {
                 // SECURITY: fail-closed. If auth is required but the database
                 // is unreachable, the server MUST NOT start in public mode.
-                panic!(
+                return Err(format!(
                     "FATAL: enable_auth=true but database connection failed: {}. \
                      Refusing to start without authentication.",
                     e
-                );
+                )
+                .into());
             }
         }
     } else {
@@ -101,14 +116,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Ensure locales directory exists for i18n
     let locales_path = PathBuf::from("./static/locales");
     if !locales_path.exists() {
-        std::fs::create_dir_all(&locales_path).expect("Failed to create locales directory");
+        std::fs::create_dir_all(&locales_path)
+            .map_err(|e| format!("Failed to create locales directory: {e}"))?;
     }
 
     // Build all services via the factory
     let factory = AppServiceFactory::with_config(storage_path, locales_path, config.clone());
 
-    let app_state = factory.build_app_state(db_pools).await
-        .expect("Failed to build application state. If running in Docker, ensure the storage volume is writable by the miyucloud user (UID 1001)");
+    let app_state = factory.build_app_state(db_pools).await.map_err(|e| {
+        format!(
+            "Failed to build application state: {e}. If running in Docker, ensure the storage \
+             volume is writable by the miyucloud user (UID 1001)"
+        )
+    })?;
 
     // Wrap in Arc so that Axum clones a single refcount per request
     // instead of deep-copying ~42 Arc fields + 16 String/PathBuf allocations.
@@ -543,12 +563,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     "*.miyukini-home.org".to_string(),
                 ];
                 let cert = rcgen::generate_simple_self_signed(subject_alt_names)
-                    .expect("Failed to generate self-signed certificate");
+                    .map_err(|e| format!("Failed to generate self-signed certificate: {e}"))?;
 
                 std::fs::write(cert_path, cert.cert.pem())
-                    .expect("Failed to write certificate file");
+                    .map_err(|e| format!("Failed to write certificate file: {e}"))?;
                 std::fs::write(key_path, cert.key_pair.serialize_pem())
-                    .expect("Failed to write private key file");
+                    .map_err(|e| format!("Failed to write private key file: {e}"))?;
 
                 tracing::info!(
                     "Self-signed certificate generated at {} and {}",
@@ -556,11 +576,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     config.tls.key_path
                 );
             } else {
-                panic!(
+                return Err(format!(
                     "FATAL: TLS enabled but certificate files not found: {} / {}. \
                      Set MIYUCLOUD_TLS_AUTO_GENERATE=true or provide certificate files.",
                     config.tls.cert_path, config.tls.key_path
-                );
+                )
+                .into());
             }
         }
 
@@ -569,7 +590,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             &config.tls.key_path,
         )
         .await
-        .expect("Failed to load TLS certificate");
+        .map_err(|e| format!("Failed to load TLS certificate: {e}"))?;
 
         tracing::info!("Starting Miyukini Cloud server on https://{}", tls_addr);
 

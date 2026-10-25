@@ -19,7 +19,9 @@
 //! `None` si lien public sans mot de passe.
 
 use std::collections::HashMap;
-use std::sync::RwLock;
+// C-10 : un verrou empoisonné est levé sans panique ; les sections
+// critiques ne laissent pas d'état partiel (insertions/suppressions atomiques).
+use std::sync::{PoisonError, RwLock};
 
 use argon2::password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 use argon2::Argon2;
@@ -128,7 +130,7 @@ impl ShareOp {
             expires_at,
             download_count: 0,
         };
-        self.links.write().unwrap().insert(token, link.clone());
+        self.links.write().unwrap_or_else(PoisonError::into_inner).insert(token, link.clone());
         Ok(link)
     }
 
@@ -140,7 +142,7 @@ impl ShareOp {
         password: Option<&str>,
         now_unix: i64,
     ) -> Result<SharedResource, ShareOpError> {
-        let mut links = self.links.write().unwrap();
+        let mut links = self.links.write().unwrap_or_else(PoisonError::into_inner);
         let link = links.get_mut(token).ok_or(ShareOpError::NotFound)?;
 
         if let Some(exp) = link.expires_at {
@@ -165,7 +167,7 @@ impl ShareOp {
     pub fn get(&self, token: &str) -> Result<ShareLink, ShareOpError> {
         self.links
             .read()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .get(token)
             .cloned()
             .ok_or(ShareOpError::NotFound)
@@ -173,7 +175,7 @@ impl ShareOp {
 
     /// Liste les liens créés par un owner.
     pub fn list_for_owner(&self, owner_user_id: &str) -> Vec<ShareLink> {
-        let links = self.links.read().unwrap();
+        let links = self.links.read().unwrap_or_else(PoisonError::into_inner);
         let mut out: Vec<_> = links
             .values()
             .filter(|l| l.owner_user_id == owner_user_id)
@@ -187,7 +189,7 @@ impl ShareOp {
     pub fn revoke(&self, token: &str) -> Result<(), ShareOpError> {
         self.links
             .write()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .remove(token)
             .map(|_| ())
             .ok_or(ShareOpError::NotFound)

@@ -72,81 +72,84 @@ fn normalize(text: &str) -> String {
 }
 
 // --- Patterns compiles en LazyLock ---
+//
+// C-10 : un motif invalide donne `None` (pas de panique) ; l'intention
+// correspondante n'est alors jamais reconnue (repli sûr : `Intent::Unknown`).
+// Le test `tous_les_motifs_compilent` garantit qu'aucun motif n'est perdu.
+
+fn capturer<'t>(re: Option<&regex::Regex>, text: &'t str) -> Option<regex::Captures<'t>> {
+    re.and_then(|re| re.captures(text))
+}
+
+fn correspond(re: Option<&regex::Regex>, text: &str) -> bool {
+    re.is_some_and(|re| re.is_match(text))
+}
 
 static ROUTINE_PATTERNS: LazyLock<Vec<(regex::Regex, &'static str)>> = LazyLock::new(|| {
-    vec![
-        (
-            regex::Regex::new(r"bonne\s*nuit").expect("pattern bonne nuit valide"),
-            "bonne nuit",
-        ),
-        (
-            regex::Regex::new(r"je\s*pars").expect("pattern je pars valide"),
-            "je pars",
-        ),
-        (
-            regex::Regex::new(r"mode\s*cinema").expect("pattern cinema valide"),
-            "cinema",
-        ),
-        (
-            regex::Regex::new(r"(?:routine\s+)?matin").expect("pattern matin valide"),
-            "matin",
-        ),
+    [
+        (r"bonne\s*nuit", "bonne nuit"),
+        (r"je\s*pars", "je pars"),
+        (r"mode\s*cinema", "cinema"),
+        (r"(?:routine\s+)?matin", "matin"),
     ]
+    .into_iter()
+    .filter_map(|(motif, nom)| regex::Regex::new(motif).ok().map(|re| (re, nom)))
+    .collect()
 });
 
-static LIGHT_ON: LazyLock<regex::Regex> = LazyLock::new(|| {
+static LIGHT_ON: LazyLock<Option<regex::Regex>> = LazyLock::new(|| {
     regex::Regex::new(
         r"(?i)(allume|active|mets|eclaire)\s+(?:la\s+)?(?:lumiere|lampe|lumieres|spot)(?:s)?(?:\s+d(?:u|e\s+la|e\s+l|es)\s+(?P<room>\S+))?"
-    ).expect("pattern lumiere on valide")
+    ).ok()
 });
 
-static LIGHT_OFF: LazyLock<regex::Regex> = LazyLock::new(|| {
+static LIGHT_OFF: LazyLock<Option<regex::Regex>> = LazyLock::new(|| {
     regex::Regex::new(
         r"(?i)(eteins?|coupe|desactive|ferme)\s+(?:la\s+|les\s+)?(?:lumiere|lampe|lumieres)(?:s)?(?:\s+d(?:u|e\s+la|e\s+l|es)\s+(?P<room>\S+))?"
-    ).expect("pattern lumiere off valide")
+    ).ok()
 });
 
-static LIGHT_BRIGHTNESS: LazyLock<regex::Regex> = LazyLock::new(|| {
+static LIGHT_BRIGHTNESS: LazyLock<Option<regex::Regex>> = LazyLock::new(|| {
     regex::Regex::new(
         r"(?i)(?:baisse|monte|mets|regle)\s+(?:la\s+)?(?:lumiere|lampe)\s+(?:a|au)\s+(?P<level>\d+)\s*(?:pourcent|%|pour\s+cent)?"
-    ).expect("pattern luminosite valide")
+    ).ok()
 });
 
-static THERMOSTAT: LazyLock<regex::Regex> = LazyLock::new(|| {
+static THERMOSTAT: LazyLock<Option<regex::Regex>> = LazyLock::new(|| {
     regex::Regex::new(
         r"(?i)(?:regle|mets|chauffe|monte|baisse)\s+(?:le\s+)?(?:thermostat|chauffage|temperature)\s+(?:a|au)\s+(?P<temp>\d+(?:\.\d+)?)\s*(?:degres?|°)?"
-    ).expect("pattern thermostat valide")
+    ).ok()
 });
 
-static SHUTTER_OPEN: LazyLock<regex::Regex> = LazyLock::new(|| {
+static SHUTTER_OPEN: LazyLock<Option<regex::Regex>> = LazyLock::new(|| {
     regex::Regex::new(r"(?i)(?:ouvre|leve|monte)\s+(?:les?\s+)?(?:volet|store|rideau|persienne)s?")
-        .expect("pattern volet open valide")
+        .ok()
 });
 
-static SHUTTER_CLOSE: LazyLock<regex::Regex> = LazyLock::new(|| {
+static SHUTTER_CLOSE: LazyLock<Option<regex::Regex>> = LazyLock::new(|| {
     regex::Regex::new(
         r"(?i)(?:ferme|baisse|descend)\s+(?:les?\s+)?(?:volet|store|rideau|persienne)s?",
     )
-    .expect("pattern volet close valide")
+    .ok()
 });
 
-static OUTLET_ON: LazyLock<regex::Regex> = LazyLock::new(|| {
+static OUTLET_ON: LazyLock<Option<regex::Regex>> = LazyLock::new(|| {
     regex::Regex::new(
         r"(?i)(?:allume|active|branche)\s+(?:la\s+)?(?:prise|multiprise)(?:\s+d(?:u|e\s+la|e\s+l|es)\s+(?P<room>\S+))?"
-    ).expect("pattern prise on valide")
+    ).ok()
 });
 
-static OUTLET_OFF: LazyLock<regex::Regex> = LazyLock::new(|| {
+static OUTLET_OFF: LazyLock<Option<regex::Regex>> = LazyLock::new(|| {
     regex::Regex::new(
         r"(?i)(?:eteins?|coupe|debranche|desactive)\s+(?:la\s+)?(?:prise|multiprise)(?:\s+d(?:u|e\s+la|e\s+l|es)\s+(?P<room>\S+))?"
-    ).expect("pattern prise off valide")
+    ).ok()
 });
 
-static LOCK_PATTERN: LazyLock<regex::Regex> = LazyLock::new(|| {
+static LOCK_PATTERN: LazyLock<Option<regex::Regex>> = LazyLock::new(|| {
     regex::Regex::new(
         r"(?i)(?P<action>verrouille|deverrouille|ouvre|ferme)\s+(?:la\s+)?(?:porte|serrure)",
     )
-    .expect("pattern serrure valide")
+    .ok()
 });
 
 // --- Fonctions de parsing ---
@@ -164,7 +167,7 @@ fn try_parse_routine(text: &str) -> Option<Intent> {
 
 fn try_parse_light(text: &str) -> Option<Intent> {
     // Brightness en premier (plus specifique)
-    if let Some(caps) = LIGHT_BRIGHTNESS.captures(text) {
+    if let Some(caps) = capturer(LIGHT_BRIGHTNESS.as_ref(), text) {
         let level: u8 = caps
             .name("level")
             .and_then(|m| m.as_str().parse().ok())
@@ -177,7 +180,7 @@ fn try_parse_light(text: &str) -> Option<Intent> {
         });
     }
 
-    if let Some(caps) = LIGHT_ON.captures(text) {
+    if let Some(caps) = capturer(LIGHT_ON.as_ref(), text) {
         let room = caps.name("room").and_then(|m| extract_room_id(m.as_str()));
         return Some(Intent::ControlDevice {
             device_type: "light".to_string(),
@@ -187,7 +190,7 @@ fn try_parse_light(text: &str) -> Option<Intent> {
         });
     }
 
-    if let Some(caps) = LIGHT_OFF.captures(text) {
+    if let Some(caps) = capturer(LIGHT_OFF.as_ref(), text) {
         let room = caps.name("room").and_then(|m| extract_room_id(m.as_str()));
         return Some(Intent::ControlDevice {
             device_type: "light".to_string(),
@@ -201,7 +204,7 @@ fn try_parse_light(text: &str) -> Option<Intent> {
 }
 
 fn try_parse_thermostat(text: &str) -> Option<Intent> {
-    let caps = THERMOSTAT.captures(text)?;
+    let caps = capturer(THERMOSTAT.as_ref(), text)?;
     let temp: f64 = caps
         .name("temp")
         .and_then(|m| m.as_str().parse().ok())
@@ -215,7 +218,7 @@ fn try_parse_thermostat(text: &str) -> Option<Intent> {
 }
 
 fn try_parse_shutter(text: &str) -> Option<Intent> {
-    if SHUTTER_OPEN.is_match(text) {
+    if correspond(SHUTTER_OPEN.as_ref(), text) {
         return Some(Intent::ControlDevice {
             device_type: "shutter".to_string(),
             room_id: None,
@@ -223,7 +226,7 @@ fn try_parse_shutter(text: &str) -> Option<Intent> {
             value: None,
         });
     }
-    if SHUTTER_CLOSE.is_match(text) {
+    if correspond(SHUTTER_CLOSE.as_ref(), text) {
         return Some(Intent::ControlDevice {
             device_type: "shutter".to_string(),
             room_id: None,
@@ -235,7 +238,7 @@ fn try_parse_shutter(text: &str) -> Option<Intent> {
 }
 
 fn try_parse_outlet(text: &str) -> Option<Intent> {
-    if let Some(caps) = OUTLET_ON.captures(text) {
+    if let Some(caps) = capturer(OUTLET_ON.as_ref(), text) {
         let room = caps.name("room").and_then(|m| extract_room_id(m.as_str()));
         return Some(Intent::ControlDevice {
             device_type: "outlet".to_string(),
@@ -244,7 +247,7 @@ fn try_parse_outlet(text: &str) -> Option<Intent> {
             value: None,
         });
     }
-    if let Some(caps) = OUTLET_OFF.captures(text) {
+    if let Some(caps) = capturer(OUTLET_OFF.as_ref(), text) {
         let room = caps.name("room").and_then(|m| extract_room_id(m.as_str()));
         return Some(Intent::ControlDevice {
             device_type: "outlet".to_string(),
@@ -257,7 +260,7 @@ fn try_parse_outlet(text: &str) -> Option<Intent> {
 }
 
 fn try_parse_lock(text: &str) -> Option<Intent> {
-    let caps = LOCK_PATTERN.captures(text)?;
+    let caps = capturer(LOCK_PATTERN.as_ref(), text)?;
     let raw_action = caps.name("action")?.as_str().to_lowercase();
     let action = match raw_action.as_str() {
         "verrouille" | "ferme" => "lock",
@@ -296,6 +299,25 @@ fn extract_room_id(text: &str) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn tous_les_motifs_compilent() {
+        assert_eq!(ROUTINE_PATTERNS.len(), 4);
+        for re in [
+            &*LIGHT_ON,
+            &*LIGHT_OFF,
+            &*LIGHT_BRIGHTNESS,
+            &*THERMOSTAT,
+            &*SHUTTER_OPEN,
+            &*SHUTTER_CLOSE,
+            &*OUTLET_ON,
+            &*OUTLET_OFF,
+            &*LOCK_PATTERN,
+        ] {
+            assert!(re.is_some());
+        }
+    }
+
     use super::*;
 
     // TC-NLU-06 : "allume la lumiere du salon" -> ControlDevice on

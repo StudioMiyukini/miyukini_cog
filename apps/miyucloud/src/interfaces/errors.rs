@@ -163,6 +163,39 @@ impl From<DomainError> for AppError {
     }
 }
 
+/// Échec de construction d'une réponse HTTP (en-tête invalide, etc.) :
+/// erreur interne, jamais une panique de handler (C-10).
+impl From<axum::http::Error> for AppError {
+    fn from(err: axum::http::Error) -> Self {
+        Self::internal_error(format!("construction de la réponse HTTP : {err}"))
+    }
+}
+
+/// Convertit le résultat d'un `Response::builder()` en réponse, en
+/// remplaçant un échec de construction par une 500 propre (C-10).
+pub trait ReponseOu500 {
+    fn ou_500(self) -> Response;
+}
+
+impl ReponseOu500 for Result<Response, axum::http::Error> {
+    fn ou_500(self) -> Response {
+        self.unwrap_or_else(|err| AppError::from(err).into_response())
+    }
+}
+
+/// Construit une réponse dont le corps est `valeur` sérialisée en JSON ;
+/// tout échec (sérialisation ou en-tête) devient une 500 propre (C-10).
+pub fn reponse_json<T: Serialize + ?Sized>(
+    builder: axum::http::response::Builder,
+    valeur: &T,
+) -> Response {
+    match serde_json::to_string(valeur) {
+        Ok(corps) => builder.body(axum::body::Body::from(corps)).ou_500(),
+        Err(err) => AppError::internal_error(format!("sérialisation JSON de la réponse : {err}"))
+            .into_response(),
+    }
+}
+
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let status = self.status_code;

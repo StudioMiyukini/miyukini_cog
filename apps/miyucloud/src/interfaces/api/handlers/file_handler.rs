@@ -28,7 +28,7 @@ use crate::common::errors::{DomainError, ErrorKind};
 use crate::domain::entities::etat_cdr::{
     ENTETE_ETAT_CDR, EtatCdr, MESSAGE_QUARANTAINE, PARAM_ACCORD_NON_DESARME, accord_explicite,
 };
-use crate::interfaces::errors::AppError;
+use crate::interfaces::errors::{AppError, ReponseOu500, reponse_json};
 use crate::interfaces::middleware::auth::AuthUser;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -403,7 +403,7 @@ impl FileHandler {
                 .header(header::ETAG, &etag)
                 .header(header::CACHE_CONTROL, "public, max-age=31536000, immutable")
                 .body(Body::empty())
-                .unwrap()
+                .ou_500()
                 .into_response();
         }
 
@@ -437,7 +437,7 @@ impl FileHandler {
                 .header(header::CACHE_CONTROL, "public, max-age=31536000, immutable")
                 .header(header::ETAG, &etag)
                 .body(Body::from(data))
-                .unwrap()
+                .ou_500()
                 .into_response();
         }
 
@@ -458,7 +458,7 @@ impl FileHandler {
                 .status(StatusCode::NO_CONTENT)
                 .header(header::CACHE_CONTROL, "no-store")
                 .body(Body::empty())
-                .unwrap()
+                .ou_500()
                 .into_response();
         }
 
@@ -487,7 +487,7 @@ impl FileHandler {
                 .header(header::CACHE_CONTROL, "public, max-age=31536000, immutable")
                 .header(header::ETAG, &etag)
                 .body(Body::from(data))
-                .unwrap()
+                .ou_500()
                 .into_response(),
             Err(err) => AppError::internal_error(format!("Thumbnail generation failed: {}", err))
                 .into_response(),
@@ -667,7 +667,7 @@ impl FileHandler {
                 .status(StatusCode::NOT_MODIFIED)
                 .header(header::ETAG, &etag)
                 .body(Body::empty())
-                .unwrap()
+                .ou_500()
                 .into_response();
         }
 
@@ -707,7 +707,7 @@ impl FileHandler {
                                     "private, max-age=3600, must-revalidate",
                                 )
                                 .body(Body::from_stream(Box::into_pin(stream)))
-                                .unwrap()
+                                .ou_500()
                                 .into_response();
                         }
                         Err(err) => {
@@ -721,7 +721,7 @@ impl FileHandler {
                     .status(StatusCode::RANGE_NOT_SATISFIABLE)
                     .header(header::CONTENT_RANGE, format!("bytes */{}", file_dto.size))
                     .body(Body::empty())
-                    .unwrap()
+                    .ou_500()
                     .into_response();
             }
         }
@@ -775,7 +775,7 @@ impl FileHandler {
                     )
                     .header(header::ACCEPT_RANGES, "bytes")
                     .body(Body::from(mmap_data))
-                    .unwrap()
+                    .ou_500()
                     .into_response(),
                 OptimizedFileContent::Stream(pinned_stream) => Response::builder()
                     .status(StatusCode::OK)
@@ -790,7 +790,7 @@ impl FileHandler {
                     )
                     .header(header::ACCEPT_RANGES, "bytes")
                     .body(Body::from_stream(pinned_stream))
-                    .unwrap()
+                    .ou_500()
                     .into_response(),
             },
             Err(err) => AppError::from(err).into_response(),
@@ -833,14 +833,16 @@ impl FileHandler {
                         .status(StatusCode::NOT_MODIFIED)
                         .header(header::ETAG, &etag)
                         .body(Body::empty())
-                        .unwrap()
+                        .ou_500()
                         .into_response();
                 }
 
                 tracing::info!("Found {} files", files.len());
                 let mut resp = (StatusCode::OK, Json(files)).into_response();
-                resp.headers_mut()
-                    .insert(header::ETAG, header::HeaderValue::from_str(&etag).unwrap());
+                // ETag facultatif : une valeur non représentable est omise.
+                if let Ok(valeur) = header::HeaderValue::from_str(&etag) {
+                    resp.headers_mut().insert(header::ETAG, valeur);
+                }
                 resp
             }
             Err(err) => AppError::from(err).into_response(),
@@ -1143,7 +1145,7 @@ impl FileHandler {
             .header(header::CACHE_CONTROL, "no-store")
             .header(ENTETE_ETAT_CDR, etat.as_str())
             .body(Body::empty())
-            .unwrap()
+            .ou_500()
     }
 
     /// Refus de téléchargement d'un fichier en quarantaine sans accord (EX-45).
@@ -1166,12 +1168,13 @@ impl FileHandler {
 
     /// Build a 201 Created JSON response.
     fn created_json_response(file: &crate::application::dtos::file_dto::FileDto) -> Response<Body> {
-        Response::builder()
-            .status(StatusCode::CREATED)
-            .header(header::CONTENT_TYPE, "application/json")
-            .header(header::CACHE_CONTROL, "no-cache, no-store, must-revalidate")
-            .body(Body::from(serde_json::to_string(file).unwrap()))
-            .unwrap()
+        reponse_json(
+            Response::builder()
+                .status(StatusCode::CREATED)
+                .header(header::CONTENT_TYPE, "application/json")
+                .header(header::CACHE_CONTROL, "no-cache, no-store, must-revalidate"),
+            file,
+        )
     }
 
     /// Build error response for DomainError.
@@ -1207,7 +1210,7 @@ impl FileHandler {
             .header(header::VARY, "Accept-Encoding")
             .header(header::CONTENT_LENGTH, content.len())
             .body(Body::from(content))
-            .unwrap()
+            .ou_500()
     }
 }
 

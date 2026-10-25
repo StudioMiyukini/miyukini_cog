@@ -8,6 +8,7 @@
 //!
 //! Maps Nextcloud preview requests to Miyukini Cloud's thumbnail service.
 
+use crate::interfaces::errors::ReponseOu500;
 use axum::{
     body::Body,
     extract::{Query, State},
@@ -56,7 +57,7 @@ pub async fn handle_preview(
             return Response::builder()
                 .status(StatusCode::BAD_REQUEST)
                 .body(Body::from("Invalid file ID"))
-                .unwrap();
+                .ou_500();
         }
     };
 
@@ -68,14 +69,14 @@ pub async fn handle_preview(
                 return Response::builder()
                     .status(StatusCode::NOT_FOUND)
                     .body(Body::from("File not found"))
-                    .unwrap();
+                    .ou_500();
             }
         },
         None => {
             return Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 .body(Body::from("Nextcloud integration not configured"))
-                .unwrap();
+                .ou_500();
         }
     };
 
@@ -91,7 +92,7 @@ pub async fn handle_preview(
             return Response::builder()
                 .status(StatusCode::NOT_FOUND)
                 .body(Body::from("File not found"))
-                .unwrap();
+                .ou_500();
         }
     };
 
@@ -101,7 +102,7 @@ pub async fn handle_preview(
         return Response::builder()
             .status(StatusCode::NOT_FOUND)
             .body(Body::from("File not found"))
-            .unwrap();
+            .ou_500();
     }
 
     // EX-45 : aucun aperçu pour un fichier non désarmé (quarantaine CDR ou
@@ -118,7 +119,7 @@ pub async fn handle_preview(
             return Response::builder()
                 .status(StatusCode::NOT_FOUND)
                 .body(Body::from("Preview not available for this file"))
-                .unwrap();
+                .ou_500();
         }
     }
 
@@ -146,7 +147,7 @@ pub async fn handle_preview(
         return Response::builder()
             .status(StatusCode::NOT_FOUND)
             .body(Body::from("Preview not available for this file type"))
-            .unwrap();
+            .ou_500();
     }
 
     // Get the physical blob path (content-addressable storage)
@@ -161,7 +162,7 @@ pub async fn handle_preview(
             return Response::builder()
                 .status(StatusCode::NOT_FOUND)
                 .body(Body::from("File blob not found"))
-                .unwrap();
+                .ou_500();
         }
     };
     let blob_path = state.core.dedup_service.blob_path(&blob_hash);
@@ -182,14 +183,14 @@ pub async fn handle_preview(
                 .header(header::CACHE_CONTROL, "public, max-age=31536000, immutable")
                 .header(header::ETAG, etag)
                 .body(Body::from(data))
-                .unwrap()
+                .ou_500()
         }
         Err(err) => {
             tracing::error!("Thumbnail generation failed for {}: {}", object_id, err);
             Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 .body(Body::from("Failed to generate thumbnail"))
-                .unwrap()
+                .ou_500()
         }
     }
 }

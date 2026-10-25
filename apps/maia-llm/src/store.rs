@@ -19,7 +19,9 @@ use serde::Serialize;
 use sha2::{Digest, Sha256};
 use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
+// C-10 : un mutex empoisonné est levé sans panique (l'état — modèle chargé,
+// cache de scan — reste utilisable ; chaque inférence recrée son contexte).
+use std::sync::{Arc, Mutex, PoisonError};
 use std::time::Instant;
 
 /// Métadonnées d'un modèle GGUF détecté localement.
@@ -73,7 +75,7 @@ impl ModelStore {
 
     /// Invalide le cache manuellement (ex: après ajout/suppression de modèle).
     pub fn invalidate_cache(&self) {
-        *self.cache.lock().unwrap() = None;
+        *self.cache.lock().unwrap_or_else(PoisonError::into_inner) = None;
     }
 
     /// Scanne le dossier et retourne tous les fichiers .gguf trouvés.
@@ -81,7 +83,7 @@ impl ModelStore {
     pub fn scan(&self) -> Vec<GgufModel> {
         // Vérifier le cache
         {
-            let cache = self.cache.lock().unwrap();
+            let cache = self.cache.lock().unwrap_or_else(PoisonError::into_inner);
             if let Some(ref cached) = *cache {
                 if cached.refreshed_at.elapsed().as_secs() < SCAN_CACHE_TTL_SECS {
                     return cached.models.clone();
@@ -93,7 +95,7 @@ impl ModelStore {
         let models = self.scan_fs();
 
         // Mettre en cache
-        *self.cache.lock().unwrap() = Some(ScanCache {
+        *self.cache.lock().unwrap_or_else(PoisonError::into_inner) = Some(ScanCache {
             models: models.clone(),
             refreshed_at: Instant::now(),
         });

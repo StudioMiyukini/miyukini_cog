@@ -40,7 +40,7 @@ use crate::application::dtos::calendar_dto::{
 use crate::application::ports::calendar_ports::CalendarUseCase;
 use crate::application::services::calendar_service::CalendarService;
 use crate::common::di::AppState;
-use crate::interfaces::errors::AppError;
+use crate::interfaces::errors::{AppError, ReponseOu500};
 use crate::interfaces::middleware::auth::{AuthUser, CurrentUser};
 
 const HEADER_DAV: HeaderName = HeaderName::from_static("dav");
@@ -74,7 +74,7 @@ async fn handle_well_known_caldav() -> Response<Body> {
         .status(StatusCode::MOVED_PERMANENTLY)
         .header(header::LOCATION, "/caldav/")
         .body(Body::empty())
-        .unwrap()
+        .ou_500()
 }
 
 async fn handle_caldav_methods_root(
@@ -172,8 +172,7 @@ async fn handle_options() -> Result<Response<Body>, AppError> {
             header::ALLOW,
             "OPTIONS, GET, PUT, DELETE, PROPFIND, PROPPATCH, REPORT, MKCALENDAR",
         )
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ─── PROPFIND ────────────────────────────────────────────────────────
@@ -235,8 +234,7 @@ async fn handle_propfind(
         Ok(Response::builder()
             .status(StatusCode::MULTI_STATUS)
             .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-            .body(Body::from(response_body))
-            .unwrap())
+            .body(Body::from(response_body))?)
     } else if path.starts_with("principals/") || path == "principals" {
         // Principal resource — return user principal properties
         let username = path.strip_prefix("principals/").unwrap_or(&user.username);
@@ -257,8 +255,7 @@ async fn handle_propfind(
         Ok(Response::builder()
             .status(StatusCode::MULTI_STATUS)
             .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-            .body(Body::from(response_body))
-            .unwrap())
+            .body(Body::from(response_body))?)
     } else {
         // Path could be:
         //   {username}                        — user calendar home (from calendar-home-set)
@@ -300,8 +297,7 @@ async fn handle_propfind(
                 Ok(Response::builder()
                     .status(StatusCode::MULTI_STATUS)
                     .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-                    .body(Body::from(response_body))
-                    .unwrap())
+                    .body(Body::from(response_body))?)
             } else {
                 // Not a calendar ID — treat as user calendar home (e.g. /caldav/{username}/)
                 // List all calendars for this user
@@ -326,8 +322,7 @@ async fn handle_propfind(
                 Ok(Response::builder()
                     .status(StatusCode::MULTI_STATUS)
                     .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-                    .body(Body::from(response_body))
-                    .unwrap())
+                    .body(Body::from(response_body))?)
             }
         } else {
             // Multi-segment path: {something}/{rest}
@@ -378,8 +373,7 @@ async fn handle_propfind(
                     return Ok(Response::builder()
                         .status(StatusCode::MULTI_STATUS)
                         .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-                        .body(Body::from(response_body))
-                        .unwrap());
+                        .body(Body::from(response_body))?);
                 } else {
                     // /caldav/{username}/{calendar_id}/{event}.ics
                     (sub_parts[0], sub_parts[1])
@@ -417,8 +411,7 @@ async fn handle_propfind(
             Ok(Response::builder()
                 .status(StatusCode::MULTI_STATUS)
                 .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-                .body(Body::from(response_body))
-                .unwrap())
+                .body(Body::from(response_body))?)
         }
     }
 }
@@ -494,8 +487,7 @@ async fn handle_report(
     Ok(Response::builder()
         .status(StatusCode::MULTI_STATUS)
         .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-        .body(Body::from(response_body))
-        .unwrap())
+        .body(Body::from(response_body))?)
 }
 
 // ─── MKCALENDAR ──────────────────────────────────────────────────────
@@ -538,8 +530,7 @@ async fn handle_mkcalendar(
 
     Ok(Response::builder()
         .status(StatusCode::CREATED)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ─── PUT (.ics) ──────────────────────────────────────────────────────
@@ -599,8 +590,7 @@ async fn handle_put(
         Ok(Response::builder()
             .status(StatusCode::NO_CONTENT)
             .header(header::ETAG, format!("\"{}\"", event.id))
-            .body(Body::empty())
-            .unwrap())
+            .body(Body::empty())?)
     } else {
         let create_dto = CreateEventICalDto {
             calendar_id: calendar_id.to_string(),
@@ -615,8 +605,7 @@ async fn handle_put(
         Ok(Response::builder()
             .status(StatusCode::CREATED)
             .header(header::ETAG, format!("\"{}\"", event.id))
-            .body(Body::empty())
-            .unwrap())
+            .body(Body::empty())?)
     }
 }
 
@@ -662,8 +651,7 @@ async fn handle_get(
             .status(StatusCode::OK)
             .header(header::CONTENT_TYPE, "text/calendar; charset=utf-8")
             .header(header::ETAG, format!("\"{}\"", calendar.id))
-            .body(Body::from(ical))
-            .unwrap())
+            .body(Body::from(ical))?)
     } else {
         // GET on individual event
         let event_file = parts[1];
@@ -685,8 +673,7 @@ async fn handle_get(
             .status(StatusCode::OK)
             .header(header::CONTENT_TYPE, "text/calendar; charset=utf-8")
             .header(header::ETAG, format!("\"{}\"", event.id))
-            .body(Body::from(ical))
-            .unwrap())
+            .body(Body::from(ical))?)
     }
 }
 
@@ -793,8 +780,7 @@ async fn handle_delete(
 
     Ok(Response::builder()
         .status(StatusCode::NO_CONTENT)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ─── PROPPATCH ───────────────────────────────────────────────────────
@@ -866,6 +852,5 @@ async fn handle_proppatch(
     Ok(Response::builder()
         .status(StatusCode::MULTI_STATUS)
         .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-        .body(Body::from(response_body))
-        .unwrap())
+        .body(Body::from(response_body))?)
 }

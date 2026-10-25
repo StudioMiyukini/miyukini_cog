@@ -16,6 +16,18 @@
 
 #![doc(html_root_url = "https://docs.miyukini.com/jaycloud")]
 #![allow(dead_code)]
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
 
 // @id service.jaycloud
 // @role backup_storage_service

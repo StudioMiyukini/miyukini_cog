@@ -18,7 +18,10 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::net::IpAddr;
-use std::sync::{Arc, RwLock};
+// C-10 : un verrou empoisonné (panique d'un autre fil pendant l'écriture)
+// est levé sans panique ; les sections critiques ne laissent pas d'état
+// partiel et l'état réel est conservé (pas de remise à zéro permissive).
+use std::sync::{Arc, PoisonError, RwLock};
 use std::time::{Duration, Instant};
 
 use crate::agents::{AgentDef, SecurityLevel};
@@ -69,7 +72,7 @@ impl RateLimiter {
     /// Vérifie si une requête est autorisée pour un identifiant donné.
     /// Retourne Ok(remaining) ou Err(retry_after_secs).
     pub fn check(&self, identifier: &str) -> Result<u32, u64> {
-        let mut states = self.states.write().unwrap();
+        let mut states = self.states.write().unwrap_or_else(PoisonError::into_inner);
         let now = Instant::now();
 
         let state = states
@@ -101,7 +104,7 @@ impl RateLimiter {
 
     /// Nettoie les entrées expirées (à appeler périodiquement).
     pub fn cleanup(&self) {
-        let mut states = self.states.write().unwrap();
+        let mut states = self.states.write().unwrap_or_else(PoisonError::into_inner);
         let now = Instant::now();
         states.retain(|_, state| now.duration_since(state.window_start) < self.config.window * 2);
     }
@@ -145,7 +148,7 @@ impl AuditLog {
 
     /// Enregistre une entrée d'audit.
     pub fn log(&self, entry: AuditEntry) {
-        let mut entries = self.entries.write().unwrap();
+        let mut entries = self.entries.write().unwrap_or_else(PoisonError::into_inner);
         entries.push(entry);
 
         // Rotation si trop d'entrées
@@ -157,14 +160,14 @@ impl AuditLog {
 
     /// Récupère les N dernières entrées.
     pub fn recent(&self, count: usize) -> Vec<AuditEntry> {
-        let entries = self.entries.read().unwrap();
+        let entries = self.entries.read().unwrap_or_else(PoisonError::into_inner);
         let start = entries.len().saturating_sub(count);
         entries[start..].to_vec()
     }
 
     /// Filtre par agent.
     pub fn by_agent(&self, agent_id: &str) -> Vec<AuditEntry> {
-        let entries = self.entries.read().unwrap();
+        let entries = self.entries.read().unwrap_or_else(PoisonError::into_inner);
         entries
             .iter()
             .filter(|e| e.agent_id == agent_id)
@@ -566,7 +569,7 @@ impl SecurityAuditLog {
             event.details,
         );
 
-        let mut events = self.events.write().unwrap();
+        let mut events = self.events.write().unwrap_or_else(PoisonError::into_inner);
         events.push(event);
 
         if events.len() > self.max_events {
@@ -576,13 +579,13 @@ impl SecurityAuditLog {
     }
 
     pub fn recent(&self, count: usize) -> Vec<SecurityEvent> {
-        let events = self.events.read().unwrap();
+        let events = self.events.read().unwrap_or_else(PoisonError::into_inner);
         let start = events.len().saturating_sub(count);
         events[start..].to_vec()
     }
 
     pub fn count_by_kind(&self, kind: &SecurityEventKind) -> usize {
-        let events = self.events.read().unwrap();
+        let events = self.events.read().unwrap_or_else(PoisonError::into_inner);
         let kind_str = serde_json::to_string(kind).unwrap_or_default();
         events
             .iter()
@@ -591,7 +594,7 @@ impl SecurityAuditLog {
     }
 
     pub fn blocked_ips(&self) -> Vec<String> {
-        let events = self.events.read().unwrap();
+        let events = self.events.read().unwrap_or_else(PoisonError::into_inner);
         let mut ips: Vec<String> = events
             .iter()
             .filter(|e| matches!(e.kind, SecurityEventKind::OriginBlocked))

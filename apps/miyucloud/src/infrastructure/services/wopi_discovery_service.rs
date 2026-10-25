@@ -44,20 +44,28 @@ pub struct WopiDiscoveryService {
 }
 
 impl WopiDiscoveryService {
-    pub fn new(discovery_url: String, cache_ttl_secs: u64) -> Self {
+    pub fn new(
+        discovery_url: String,
+        cache_ttl_secs: u64,
+    ) -> Result<Self, crate::domain::errors::DomainError> {
         let http_client = reqwest::Client::builder()
             .timeout(Duration::from_secs(10))
             .build()
-            .expect("Failed to build HTTP client for WOPI discovery");
+            .map_err(|e| {
+                crate::domain::errors::DomainError::internal_error(
+                    "WopiDiscovery",
+                    format!("Failed to build HTTP client: {e}"),
+                )
+            })?;
 
-        Self {
+        Ok(Self {
             discovery_url,
             actions: Arc::new(RwLock::new(HashMap::new())),
             last_fetched: Arc::new(RwLock::new(None)),
             cache_ttl: Duration::from_secs(cache_ttl_secs),
             http_client,
             refreshing: Arc::new(tokio::sync::Mutex::new(())),
-        }
+        })
     }
 
     /// Fetch and parse the discovery XML from the WOPI client.

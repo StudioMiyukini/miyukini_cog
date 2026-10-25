@@ -14,7 +14,7 @@ use serde::Serialize;
 
 use crate::application::ports::dedup_ports::DedupResultDto;
 use crate::common::di::AppState;
-use crate::interfaces::errors::AppError;
+use crate::interfaces::errors::{AppError, ReponseOu500, reponse_json};
 use crate::interfaces::middleware::auth::AuthUser;
 use crate::interfaces::upload_spool;
 use std::sync::Arc;
@@ -112,7 +112,7 @@ impl DedupHandler {
                 .body(Body::from(
                     r#"{"error": "Invalid hash format. Expected SHA-256 (64 hex characters)"}"#,
                 ))
-                .unwrap()
+                .ou_500()
                 .into_response();
         }
 
@@ -130,12 +130,12 @@ impl DedupHandler {
                 existing_size: size,
                 ref_count: None, // Never expose global ref_count
             };
-            Response::builder()
-                .status(StatusCode::OK)
-                .header(header::CONTENT_TYPE, "application/json")
-                .body(Body::from(serde_json::to_string(&response).unwrap()))
-                .unwrap()
-                .into_response()
+            reponse_json(
+                Response::builder()
+                    .status(StatusCode::OK)
+                    .header(header::CONTENT_TYPE, "application/json"),
+                &response,
+            )
         } else {
             let response = HashCheckResponse {
                 exists: false,
@@ -143,12 +143,12 @@ impl DedupHandler {
                 existing_size: None,
                 ref_count: None,
             };
-            Response::builder()
-                .status(StatusCode::OK)
-                .header(header::CONTENT_TYPE, "application/json")
-                .body(Body::from(serde_json::to_string(&response).unwrap()))
-                .unwrap()
-                .into_response()
+            reponse_json(
+                Response::builder()
+                    .status(StatusCode::OK)
+                    .header(header::CONTENT_TYPE, "application/json"),
+                &response,
+            )
         }
     }
 
@@ -310,7 +310,7 @@ impl DedupHandler {
                 .status(StatusCode::FORBIDDEN)
                 .header(header::CONTENT_TYPE, "application/json")
                 .body(Body::from(r#"{"error": "Admin role required"}"#))
-                .unwrap()
+                .ou_500()
                 .into_response();
         }
 
@@ -334,12 +334,12 @@ impl DedupHandler {
             savings_percentage: savings_pct,
         };
 
-        Response::builder()
-            .status(StatusCode::OK)
-            .header(header::CONTENT_TYPE, "application/json")
-            .body(Body::from(serde_json::to_string(&response).unwrap()))
-            .unwrap()
-            .into_response()
+        reponse_json(
+            Response::builder()
+                .status(StatusCode::OK)
+                .header(header::CONTENT_TYPE, "application/json"),
+            &response,
+        )
     }
 
     /// Retrieve content by hash (user-scoped).
@@ -362,7 +362,7 @@ impl DedupHandler {
                 .status(StatusCode::BAD_REQUEST)
                 .header(header::CONTENT_TYPE, "application/json")
                 .body(Body::from(r#"{"error": "Invalid hash format"}"#))
-                .unwrap()
+                .ou_500()
                 .into_response();
         }
 
@@ -375,7 +375,7 @@ impl DedupHandler {
                 .status(StatusCode::NOT_FOUND)
                 .header(header::CONTENT_TYPE, "application/json")
                 .body(Body::from(r#"{"error": "Blob not found"}"#))
-                .unwrap()
+                .ou_500()
                 .into_response();
         }
 
@@ -394,7 +394,7 @@ impl DedupHandler {
                     .status(StatusCode::NOT_FOUND)
                     .header(header::CONTENT_TYPE, "application/json")
                     .body(Body::from(r#"{"error": "Blob not found"}"#))
-                    .unwrap()
+                    .ou_500()
                     .into_response();
             }
         };
@@ -406,13 +406,13 @@ impl DedupHandler {
                 .header(header::CONTENT_LENGTH, size.to_string())
                 .header("X-Dedup-Hash", &hash)
                 .body(Body::from_stream(stream))
-                .unwrap()
+                .ou_500()
                 .into_response(),
             Err(_) => Response::builder()
                 .status(StatusCode::NOT_FOUND)
                 .header(header::CONTENT_TYPE, "application/json")
                 .body(Body::from(r#"{"error": "Blob not found"}"#))
-                .unwrap()
+                .ou_500()
                 .into_response(),
         }
     }
@@ -433,7 +433,7 @@ impl DedupHandler {
                 .status(StatusCode::FORBIDDEN)
                 .header(header::CONTENT_TYPE, "application/json")
                 .body(Body::from(r#"{"error": "Admin role required"}"#))
-                .unwrap()
+                .ou_500()
                 .into_response();
         }
 
@@ -452,7 +452,7 @@ impl DedupHandler {
                     .status(StatusCode::INTERNAL_SERVER_ERROR)
                     .header(header::CONTENT_TYPE, "application/json")
                     .body(Body::from(r#"{"error": "Verification failed"}"#))
-                    .unwrap()
+                    .ou_500()
                     .into_response();
             }
         }
@@ -476,11 +476,11 @@ impl DedupHandler {
             savings_percentage: savings_pct,
         };
 
-        Response::builder()
-            .status(StatusCode::OK)
-            .header(header::CONTENT_TYPE, "application/json")
-            .body(Body::from(serde_json::to_string(&response).unwrap()))
-            .unwrap()
-            .into_response()
+        reponse_json(
+            Response::builder()
+                .status(StatusCode::OK)
+                .header(header::CONTENT_TYPE, "application/json"),
+            &response,
+        )
     }
 }

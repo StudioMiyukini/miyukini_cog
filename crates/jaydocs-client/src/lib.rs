@@ -4,13 +4,27 @@
 
 #![doc(html_root_url = "https://docs.miyukini.com/jaydocs-client")]
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 // @id service.jaydocs.alicia_client
 // @role alicia_to_jaydocs_adapter
 // @layer 7
 // @do bridge_alicia_to_jaydocs
 // @human Adaptateur Alicia → JayDocs : route les intents vers un backend pluggable.
 
-use std::sync::{Arc, RwLock};
+// C-10 : verrous du backend factice levés sans panique en cas d'empoisonnement.
+use std::sync::{Arc, PoisonError, RwLock};
 
 use async_trait::async_trait;
 use chrono::Utc;
@@ -251,17 +265,17 @@ impl FakeJayDocsBackend {
 
     /// Force toutes les méthodes à renvoyer une erreur.
     pub fn force_failure(&self, message: impl Into<String>) {
-        self.inner.write().unwrap().fail_with = Some(message.into());
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).fail_with = Some(message.into());
     }
 
     /// Snapshot des documents.
     pub fn snapshot(&self) -> Vec<DocumentSummary> {
-        self.inner.read().unwrap().documents.clone()
+        self.inner.read().unwrap_or_else(PoisonError::into_inner).documents.clone()
     }
 
     /// Lit le contenu interne d'un document (pour vérifier append).
     pub fn content_of(&self, id: &str) -> Option<String> {
-        self.inner.read().unwrap().contents.get(id).cloned()
+        self.inner.read().unwrap_or_else(PoisonError::into_inner).contents.get(id).cloned()
     }
 }
 
@@ -272,7 +286,7 @@ impl JayDocsBackend for FakeJayDocsBackend {
         title: &str,
         content: Option<&str>,
     ) -> Result<DocumentSummary, JayDocsError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayDocsError::Backend(msg.clone()));
         }
@@ -297,7 +311,7 @@ impl JayDocsBackend for FakeJayDocsBackend {
         limit: usize,
         search: Option<&str>,
     ) -> Result<Vec<DocumentSummary>, JayDocsError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayDocsError::Backend(msg.clone()));
         }
@@ -322,7 +336,7 @@ impl JayDocsBackend for FakeJayDocsBackend {
         document_id: &str,
         content: &str,
     ) -> Result<DocumentSummary, JayDocsError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayDocsError::Backend(msg.clone()));
         }
@@ -341,7 +355,7 @@ impl JayDocsBackend for FakeJayDocsBackend {
             .documents
             .iter_mut()
             .find(|d| d.id == document_id)
-            .unwrap();
+            .ok_or_else(|| JayDocsError::DocumentNotFound(document_id.to_string()))?;
         doc.updated_at = now;
         Ok(doc.clone())
     }

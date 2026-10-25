@@ -14,7 +14,9 @@
 //! KindMother — seul le RwLock interne sera remplacé par des requêtes SQL.
 
 use std::collections::HashMap;
-use std::sync::RwLock;
+// C-10 : un verrou empoisonné est levé sans panique ; les sections
+// critiques ne laissent pas d'état partiel (insertions/suppressions atomiques).
+use std::sync::{PoisonError, RwLock};
 
 use crate::kits::crypto_kit::Key32;
 use crate::kits::token_kit::{self, TokenKitError};
@@ -104,14 +106,14 @@ impl AuthOp {
         };
         self.sessions
             .write()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .insert(session.id.clone(), session.clone());
         session
     }
 
     /// Vérifie une session par son ID cookie. `now_unix` doit être l'horloge courante.
     pub fn verify_session(&self, session_id: &str, now_unix: i64) -> Result<Session, AuthOpError> {
-        let sessions = self.sessions.read().unwrap();
+        let sessions = self.sessions.read().unwrap_or_else(PoisonError::into_inner);
         let s = sessions
             .get(session_id)
             .cloned()
@@ -124,7 +126,7 @@ impl AuthOp {
 
     /// Supprime une session (logout).
     pub fn delete_session(&self, session_id: &str) -> bool {
-        self.sessions.write().unwrap().remove(session_id).is_some()
+        self.sessions.write().unwrap_or_else(PoisonError::into_inner).remove(session_id).is_some()
     }
 
     // ─── App-passwords ─────────────────────────────────────────────────────
@@ -151,14 +153,14 @@ impl AuthOp {
         };
         self.app_passwords
             .write()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .insert(hash, record.clone());
         (raw_token, record)
     }
 
     /// Liste les app-passwords d'un utilisateur (révoqués inclus).
     pub fn list_app_passwords(&self, user_id: &str) -> Vec<AppPasswordRecord> {
-        let passwords = self.app_passwords.read().unwrap();
+        let passwords = self.app_passwords.read().unwrap_or_else(PoisonError::into_inner);
         let mut out: Vec<_> = passwords
             .values()
             .filter(|p| p.user_id == user_id)
@@ -175,7 +177,7 @@ impl AuthOp {
         name: &str,
         now_unix: i64,
     ) -> Result<(), AuthOpError> {
-        let mut passwords = self.app_passwords.write().unwrap();
+        let mut passwords = self.app_passwords.write().unwrap_or_else(PoisonError::into_inner);
         let found = passwords
             .values_mut()
             .find(|p| p.user_id == user_id && p.name == name && p.revoked_at.is_none());
@@ -202,7 +204,7 @@ impl AuthOp {
 
         // 2. Hash + lookup.
         let hash = token_kit::hash_token(raw_token);
-        let mut passwords = self.app_passwords.write().unwrap();
+        let mut passwords = self.app_passwords.write().unwrap_or_else(PoisonError::into_inner);
         let record = passwords
             .get_mut(&hash)
             .ok_or(AuthOpError::AuthDenied)?;

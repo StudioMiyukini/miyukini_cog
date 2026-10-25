@@ -9,6 +9,19 @@
 //! KindMother, le stockage fichiers, le chiffrement at-rest, l'authentification
 //! et les operations sur les fichiers/dossiers.
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

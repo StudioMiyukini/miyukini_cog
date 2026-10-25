@@ -305,8 +305,7 @@ async fn handle_options(_path: String) -> Result<Response<Body>, AppError> {
             header::ALLOW,
             "OPTIONS, GET, HEAD, PUT, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK",
         )
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 /**
@@ -350,8 +349,7 @@ async fn handle_propfind(
         return Ok(Response::builder()
             .status(StatusCode::FORBIDDEN)
             .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-            .body(Body::from(body))
-            .unwrap());
+            .body(Body::from(body))?);
     }
 
     // Normalize: anything other than "0" or "1" is treated as "0"
@@ -458,8 +456,7 @@ async fn handle_propfind(
                 return Ok(Response::builder()
                     .status(StatusCode::MULTI_STATUS)
                     .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-                    .body(Body::from(buf))
-                    .unwrap());
+                    .body(Body::from(buf))?);
             }
             Err(_) => {}
         }
@@ -500,8 +497,7 @@ async fn handle_propfind(
             return Ok(Response::builder()
                 .status(StatusCode::MULTI_STATUS)
                 .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-                .body(Body::from(buf))
-                .unwrap());
+                .body(Body::from(buf))?);
         }
     }
 
@@ -631,8 +627,7 @@ async fn build_streaming_propfind_response(
     Ok(Response::builder()
         .status(StatusCode::MULTI_STATUS)
         .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-        .body(Body::from_stream(stream))
-        .unwrap())
+        .body(Body::from_stream(stream))?)
 }
 
 /**
@@ -689,8 +684,7 @@ async fn handle_proppatch(
     Ok(Response::builder()
         .status(StatusCode::MULTI_STATUS)
         .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-        .body(Body::from(response_body))
-        .unwrap())
+        .body(Body::from(response_body))?)
 }
 
 /**
@@ -771,8 +765,7 @@ async fn handle_get(
                 .unwrap_or_else(Utc::now)
                 .to_rfc2822(),
         )
-        .body(Body::from_stream(Box::into_pin(stream)))
-        .unwrap())
+        .body(Body::from_stream(Box::into_pin(stream)))?)
 }
 
 /**
@@ -793,8 +786,7 @@ async fn handle_head(
             .status(StatusCode::OK)
             .header(header::CONTENT_TYPE, "httpd/unix-directory")
             .header(header::CONTENT_LENGTH, 0)
-            .body(Body::empty())
-            .unwrap());
+            .body(Body::empty())?);
     }
 
     // Single-query path resolution (user-scoped)
@@ -806,8 +798,7 @@ async fn handle_head(
                     .header(header::CONTENT_TYPE, "httpd/unix-directory")
                     .header(header::CONTENT_LENGTH, 0)
                     .header(header::ETAG, format!("\"{}\"", folder.id))
-                    .body(Body::empty())
-                    .unwrap());
+                    .body(Body::empty())?);
             }
             Ok(ResolvedResource::File(file)) => {
                 return Ok(Response::builder()
@@ -821,8 +812,7 @@ async fn handle_head(
                             .unwrap_or_else(Utc::now)
                             .to_rfc2822(),
                     )
-                    .body(Body::empty())
-                    .unwrap());
+                    .body(Body::empty())?);
             }
             Err(_) => return Err(AppError::not_found(format!("Resource not found: {}", path))),
         }
@@ -836,8 +826,7 @@ async fn handle_head(
             .header(header::CONTENT_TYPE, "httpd/unix-directory")
             .header(header::CONTENT_LENGTH, 0)
             .header(header::ETAG, format!("\"{}\"", folder.id))
-            .body(Body::empty())
-            .unwrap());
+            .body(Body::empty())?);
     }
 
     // Try as file — use metadata only, never load content for HEAD
@@ -858,8 +847,7 @@ async fn handle_head(
                 .unwrap_or_else(Utc::now)
                 .to_rfc2822(),
         )
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 /**
@@ -1028,8 +1016,7 @@ async fn handle_put(
     match result {
         Ok(_) => Ok(Response::builder()
             .status(StatusCode::NO_CONTENT)
-            .body(Body::empty())
-            .unwrap()),
+            .body(Body::empty())?),
         Err(e) => Err(AppError::ecriture_fichier(e, "Failed to put file")),
     }
 }
@@ -1127,8 +1114,7 @@ async fn handle_mkcol(
 
     Ok(Response::builder()
         .status(StatusCode::CREATED)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 /**
@@ -1205,8 +1191,7 @@ async fn handle_delete(
 
     Ok(Response::builder()
         .status(StatusCode::NO_CONTENT)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 /**
@@ -1347,8 +1332,7 @@ async fn handle_move(
 
     Ok(Response::builder()
         .status(StatusCode::CREATED)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 /**
@@ -1499,8 +1483,7 @@ async fn handle_copy(
 
     Ok(Response::builder()
         .status(StatusCode::NO_CONTENT)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 /**
@@ -1582,8 +1565,7 @@ async fn handle_lock(
             .status(StatusCode::OK)
             .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
             .header(HEADER_LOCK_TOKEN, format!("<{}>", entry.info.token))
-            .body(Body::from(response_body))
-            .unwrap())
+            .body(Body::from(response_body))?)
     } else if !body_bytes.is_empty() {
         // Parse lock request
         let (scope, type_, owner) = WebDavAdapter::parse_lockinfo(body_bytes.reader())
@@ -1618,8 +1600,7 @@ async fn handle_lock(
             .status(StatusCode::OK)
             .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
             .header(HEADER_LOCK_TOKEN, format!("<{}>", entry.info.token))
-            .body(Body::from(response_body))
-            .unwrap())
+            .body(Body::from(response_body))?)
     } else {
         Err(AppError::bad_request("Invalid LOCK request"))
     }
@@ -1669,6 +1650,5 @@ async fn handle_unlock(
 
     Ok(Response::builder()
         .status(StatusCode::NO_CONTENT)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }

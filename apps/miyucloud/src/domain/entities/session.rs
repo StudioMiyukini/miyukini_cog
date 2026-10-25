@@ -7,6 +7,8 @@
 use chrono::{DateTime, Duration, Utc};
 use uuid::Uuid;
 
+use crate::domain::errors::DomainError;
+
 #[derive(Debug, Clone)]
 pub struct Session {
     id: Uuid,
@@ -26,13 +28,17 @@ impl Session {
         ip_address: Option<String>,
         user_agent: Option<String>,
         expires_in_days: i64,
-    ) -> Self {
+    ) -> Result<Self, DomainError> {
+        // Refus fail-closed : jamais de session sans jeton de rafraîchissement (C-10).
         if refresh_token.is_empty() {
-            panic!("Session refresh_token cannot be empty");
+            return Err(DomainError::internal_error(
+                "Session",
+                "Session refresh_token cannot be empty",
+            ));
         }
 
         let now = Utc::now();
-        Self {
+        Ok(Self {
             id: Uuid::new_v4(),
             user_id,
             refresh_token,
@@ -41,7 +47,7 @@ impl Session {
             user_agent,
             created_at: now,
             revoked: false,
-        }
+        })
     }
 
     #[allow(clippy::too_many_arguments)]

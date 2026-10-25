@@ -20,7 +20,9 @@
 
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::RwLock;
+// C-10 : un verrou empoisonné est levé sans panique ; les sections
+// critiques ne laissent pas d'état partiel (insertions/suppressions atomiques).
+use std::sync::{PoisonError, RwLock};
 
 use crate::files::tree;
 use crate::kits::cas_kit::{self, BlobHash, CasConfig, CasKitError};
@@ -94,7 +96,7 @@ impl FilesOp {
             mtime,
             is_dir: false,
         };
-        self.entries.write().unwrap().insert(canonical, entry.clone());
+        self.entries.write().unwrap_or_else(PoisonError::into_inner).insert(canonical, entry.clone());
         Ok(entry)
     }
 
@@ -103,7 +105,7 @@ impl FilesOp {
         let canonical = tree::canonical_path(path)
             .map_err(|e| FilesOpError::InvalidPath(e.to_string()))?;
         let entry = {
-            let entries = self.entries.read().unwrap();
+            let entries = self.entries.read().unwrap_or_else(PoisonError::into_inner);
             entries
                 .get(&canonical)
                 .cloned()
@@ -121,7 +123,7 @@ impl FilesOp {
             .map_err(|e| FilesOpError::InvalidPath(e.to_string()))?;
         self.entries
             .read()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .get(&canonical)
             .cloned()
             .ok_or_else(|| FilesOpError::NotFound(canonical))
@@ -129,7 +131,7 @@ impl FilesOp {
 
     /// Liste les entrées (P3.a : flat ; sub-dirs en P3.b).
     pub fn list(&self) -> Vec<FileEntry> {
-        let entries = self.entries.read().unwrap();
+        let entries = self.entries.read().unwrap_or_else(PoisonError::into_inner);
         let mut out: Vec<_> = entries.values().cloned().collect();
         out.sort_by(|a, b| a.path.cmp(&b.path));
         out
@@ -139,7 +141,7 @@ impl FilesOp {
     pub fn delete(&self, path: &str) -> Result<(), FilesOpError> {
         let canonical = tree::canonical_path(path)
             .map_err(|e| FilesOpError::InvalidPath(e.to_string()))?;
-        let removed = self.entries.write().unwrap().remove(&canonical);
+        let removed = self.entries.write().unwrap_or_else(PoisonError::into_inner).remove(&canonical);
         if removed.is_none() {
             return Err(FilesOpError::NotFound(canonical));
         }

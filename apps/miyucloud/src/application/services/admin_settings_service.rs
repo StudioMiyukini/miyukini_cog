@@ -249,7 +249,7 @@ impl AdminSettingsService {
             && !eff.client_id.is_empty()
             && !eff.client_secret.is_empty()
         {
-            let svc = Arc::new(OidcService::new(eff.clone()));
+            let svc = Arc::new(OidcService::new(eff.clone())?);
             self.auth_app_service.reload_oidc(svc, eff);
             tracing::info!("OIDC service hot-reloaded with new configuration");
         } else if !eff.enabled {

@@ -53,8 +53,7 @@ pub async fn handle_nc_trashbin(
         }
         _ => Ok(Response::builder()
             .status(StatusCode::METHOD_NOT_ALLOWED)
-            .body(Body::empty())
-            .unwrap()),
+            .body(Body::empty())?),
     }
 }
 
@@ -65,8 +64,7 @@ fn handle_options() -> Result<Response<Body>, AppError> {
         .status(StatusCode::OK)
         .header(HEADER_DAV, "1, 2, 3")
         .header(header::ALLOW, "OPTIONS, PROPFIND, MOVE, DELETE")
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ──────────────────── PROPFIND (list trash) ────────────────────
@@ -96,8 +94,7 @@ async fn handle_propfind(
     Ok(Response::builder()
         .status(StatusCode::MULTI_STATUS)
         .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-        .body(Body::from(buf))
-        .unwrap())
+        .body(Body::from(buf))?)
 }
 
 // ──────────────────── MOVE (restore) ────────────────────
@@ -121,8 +118,7 @@ async fn handle_restore(
 
     Ok(Response::builder()
         .status(StatusCode::CREATED)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ──────────────────── DELETE (empty trash) ────────────────────
@@ -143,8 +139,7 @@ async fn handle_empty_trash(
 
     Ok(Response::builder()
         .status(StatusCode::NO_CONTENT)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ──────────────────── DELETE (single item) ────────────────────
@@ -170,8 +165,7 @@ async fn handle_delete_permanent(
 
     Ok(Response::builder()
         .status(StatusCode::NO_CONTENT)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ────────────── Helpers ──────────────

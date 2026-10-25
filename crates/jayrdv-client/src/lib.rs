@@ -14,13 +14,27 @@
 
 #![doc(html_root_url = "https://docs.miyukini.com/jayrdv-client")]
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 // @id service.jayrdv.alicia_client
 // @role alicia_to_jayrdv_adapter
 // @layer 7
 // @do bridge_alicia_to_jayrdv
 // @human Adaptateur Alicia → JayRDV : route les intents vers un backend pluggable.
 
-use std::sync::{Arc, RwLock};
+// C-10 : verrous du backend factice levés sans panique en cas d'empoisonnement.
+use std::sync::{Arc, PoisonError, RwLock};
 
 use async_trait::async_trait;
 use chrono::{DateTime, Duration, NaiveDate, Utc};
@@ -394,17 +408,17 @@ impl FakeJayRdvBackend {
 
     /// Force toutes les méthodes à renvoyer une erreur backend.
     pub fn force_failure(&self, message: impl Into<String>) {
-        self.inner.write().unwrap().fail_with = Some(message.into());
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).fail_with = Some(message.into());
     }
 
     /// Programme un créneau disponible (pour `list_available_slots`).
     pub fn add_available_slot(&self, slot: SlotSummary) {
-        self.inner.write().unwrap().available_slots.push(slot);
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).available_slots.push(slot);
     }
 
     /// Snapshot des rendez-vous actuellement en mémoire.
     pub fn snapshot_appointments(&self) -> Vec<AppointmentSummary> {
-        self.inner.read().unwrap().appointments.clone()
+        self.inner.read().unwrap_or_else(PoisonError::into_inner).appointments.clone()
     }
 }
 
@@ -417,7 +431,7 @@ impl JayRdvBackend for FakeJayRdvBackend {
         slot_start: DateTime<Utc>,
         client_note: Option<String>,
     ) -> Result<AppointmentSummary, JayRdvError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayRdvError::Backend(msg.clone()));
         }
@@ -444,7 +458,7 @@ impl JayRdvBackend for FakeJayRdvBackend {
         appointment_id: &str,
         _reason: Option<String>,
     ) -> Result<AppointmentSummary, JayRdvError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayRdvError::Backend(msg.clone()));
         }
@@ -462,7 +476,7 @@ impl JayRdvBackend for FakeJayRdvBackend {
         from: NaiveDate,
         to: NaiveDate,
     ) -> Result<Vec<AppointmentSummary>, JayRdvError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayRdvError::Backend(msg.clone()));
         }
@@ -491,7 +505,7 @@ impl JayRdvBackend for FakeJayRdvBackend {
         from: DateTime<Utc>,
         to: DateTime<Utc>,
     ) -> Result<Vec<SlotSummary>, JayRdvError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayRdvError::Backend(msg.clone()));
         }

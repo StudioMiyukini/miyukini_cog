@@ -808,7 +808,12 @@ pub async fn download_batch(
         )
         .header("Content-Length", file_size)
         .body(body)
-        .unwrap();
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to build ZIP response: {e}"),
+            )
+        })?;
 
     // Keep TempPath alive in response extensions so the file is only
     // deleted AFTER the body stream finishes sending.

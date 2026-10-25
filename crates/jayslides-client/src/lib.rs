@@ -4,13 +4,27 @@
 
 #![doc(html_root_url = "https://docs.miyukini.com/jayslides-client")]
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 // @id service.jayslides.alicia_client
 // @role alicia_to_jayslides_adapter
 // @layer 7
 // @do bridge_alicia_to_jayslides
 // @human Adaptateur Alicia → JaySlides : route les intents vers un backend pluggable.
 
-use std::sync::{Arc, RwLock};
+// C-10 : verrous du backend factice levés sans panique en cas d'empoisonnement.
+use std::sync::{Arc, PoisonError, RwLock};
 
 use async_trait::async_trait;
 use chrono::Utc;
@@ -258,19 +272,19 @@ impl FakeJaySlidesBackend {
 
     /// Force toutes les méthodes à renvoyer une erreur.
     pub fn force_failure(&self, message: impl Into<String>) {
-        self.inner.write().unwrap().fail_with = Some(message.into());
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).fail_with = Some(message.into());
     }
 
     /// Snapshot des présentations.
     pub fn snapshot(&self) -> Vec<PresentationSummary> {
-        self.inner.read().unwrap().presentations.clone()
+        self.inner.read().unwrap_or_else(PoisonError::into_inner).presentations.clone()
     }
 
     /// Slides d'une présentation.
     pub fn slides_of(&self, id: &str) -> Vec<SlideSummary> {
         self.inner
             .read()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .slides
             .get(id)
             .cloned()
@@ -284,7 +298,7 @@ impl JaySlidesBackend for FakeJaySlidesBackend {
         &self,
         title: &str,
     ) -> Result<PresentationSummary, JaySlidesError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JaySlidesError::Backend(msg.clone()));
         }
@@ -307,7 +321,7 @@ impl JaySlidesBackend for FakeJaySlidesBackend {
         &self,
         limit: usize,
     ) -> Result<Vec<PresentationSummary>, JaySlidesError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JaySlidesError::Backend(msg.clone()));
         }
@@ -323,7 +337,7 @@ impl JaySlidesBackend for FakeJaySlidesBackend {
         title: &str,
         content: Option<&str>,
     ) -> Result<(PresentationSummary, SlideSummary), JaySlidesError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JaySlidesError::Backend(msg.clone()));
         }
@@ -348,7 +362,7 @@ impl JaySlidesBackend for FakeJaySlidesBackend {
             .presentations
             .iter_mut()
             .find(|p| p.id == presentation_id)
-            .unwrap();
+            .ok_or_else(|| JaySlidesError::PresentationNotFound(presentation_id.to_string()))?;
         pres.slide_count += 1;
         pres.updated_at = now;
         Ok((pres.clone(), slide))

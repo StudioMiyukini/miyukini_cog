@@ -26,17 +26,23 @@ pub struct DdnsService {
 }
 
 impl DdnsService {
-    pub fn new(config: DdnsConfig) -> Self {
-        Self {
-            http_client: reqwest::Client::builder()
-                .timeout(Duration::from_secs(10))
-                .build()
-                .expect("Failed to build HTTP client"),
+    pub fn new(config: DdnsConfig) -> Result<Self, crate::domain::errors::DomainError> {
+        let http_client = reqwest::Client::builder()
+            .timeout(Duration::from_secs(10))
+            .build()
+            .map_err(|e| {
+                crate::domain::errors::DomainError::internal_error(
+                    "Ddns",
+                    format!("Failed to build HTTP client: {e}"),
+                )
+            })?;
+        Ok(Self {
+            http_client,
             config,
             current_ip: Arc::new(RwLock::new(None)),
             state: Arc::new(RwLock::new(ConnectionStatus::disabled("ddns"))),
             shutdown: Arc::new(RwLock::new(false)),
-        }
+        })
     }
 
     /// Start the periodic DDNS update background task.

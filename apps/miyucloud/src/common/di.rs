@@ -363,13 +363,19 @@ impl AppServiceFactory {
         let share_repository = Arc::new(SharePgRepository::new(db_pool.clone()));
 
         // Build a password hasher for share password verification
-        let password_hasher: Arc<Argon2PasswordHasher> = Arc::new(
-            crate::infrastructure::services::password_hasher::Argon2PasswordHasher::new(
+        let password_hasher: Arc<Argon2PasswordHasher> =
+            match crate::infrastructure::services::password_hasher::Argon2PasswordHasher::new(
                 self.config.auth.hash_memory_cost,
                 self.config.auth.hash_time_cost,
                 self.config.auth.hash_parallelism,
-            ),
-        );
+            ) {
+                Ok(hasher) => Arc::new(hasher),
+                Err(e) => {
+                    // Fail-closed : pas de service de partage sans vérification de mot de passe.
+                    tracing::error!("Share service disabled: {}", e);
+                    return None;
+                }
+            };
 
         let service = Arc::new(ShareService::new(
             Arc::new(self.config.clone()),
@@ -544,7 +550,7 @@ impl AppServiceFactory {
                         self.config.auth.hash_memory_cost,
                         self.config.auth.hash_time_cost,
                         self.config.auth.hash_parallelism,
-                    ),
+                    )?,
                 );
                 let user_repo: Arc<UserPgRepository> = Arc::new(
                     crate::infrastructure::repositories::pg::UserPgRepository::new(pool.clone()),
@@ -586,9 +592,12 @@ impl AppServiceFactory {
                 login_flow: Arc::new(NextcloudLoginFlowService::new(
                     std::time::Duration::from_secs(self.config.nextcloud.login_flow_ttl_secs),
                 )),
-                app_passwords: shared_app_pw_svc
-                    .clone()
-                    .expect("AppPasswordService must be available when NC is enabled"),
+                app_passwords: shared_app_pw_svc.clone().ok_or_else(|| {
+                    DomainError::internal_error(
+                        "NextcloudInit",
+                        "AppPasswordService must be available when NC is enabled",
+                    )
+                })?,
                 file_ids,
                 chunked_uploads,
             });
@@ -682,12 +691,12 @@ impl AppServiceFactory {
                 None
             };
             let ddns = if wc.ddns.enabled {
-                Some(Arc::new(DdnsService::new(wc.ddns.clone())))
+                Some(Arc::new(DdnsService::new(wc.ddns.clone())?))
             } else {
                 None
             };
             let central = if wc.central.enabled {
-                Some(Arc::new(CentralClientService::new(wc.central.clone())))
+                Some(Arc::new(CentralClientService::new(wc.central.clone())?))
             } else {
                 None
             };
@@ -727,7 +736,7 @@ impl AppServiceFactory {
                     let oidc_svc = Arc::new(
                         crate::infrastructure::services::oidc_service::OidcService::new(
                             eff.clone(),
-                        ),
+                        )?,
                     );
                     auth_svc.auth_application_service.reload_oidc(oidc_svc, eff);
                     tracing::info!("OIDC config loaded from admin settings (database)");
@@ -878,7 +887,7 @@ impl AppServiceFactory {
                 let wopi_discovery_service = Arc::new(WopiDiscoveryService::new(
                     discovery_url.clone(),
                     86400, // 24 hour cache TTL
-                ));
+                )?);
 
                 app_state.wopi_token_service = Some(wopi_token_service);
                 app_state.wopi_lock_service = Some(wopi_lock_service);

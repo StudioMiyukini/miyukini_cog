@@ -59,11 +59,14 @@ impl FolderDbRepository {
         Self { pool: None }
     }
 
-    /// Get the pool, panicking if stub.
-    fn pool(&self) -> &PgPool {
-        self.pool
-            .as_deref()
-            .expect("FolderDbRepository: pool not available (stub instance)")
+    /// Get the pool; a stub instance yields an error, never a panic (C-10).
+    fn pool(&self) -> Result<&PgPool, DomainError> {
+        self.pool.as_deref().ok_or_else(|| {
+            DomainError::internal_error(
+                "Folder",
+                "FolderDbRepository: pool not available (stub instance)",
+            )
+        })
     }
 
     // ── helpers ──────────────────────────────────────────────────
@@ -107,7 +110,7 @@ impl FolderRepository for FolderDbRepository {
         let user_id: Uuid = if let Some(ref pid) = parent_id {
             sqlx::query_scalar::<_, Uuid>("SELECT user_id FROM storage.folders WHERE id = $1::uuid")
                 .bind(pid)
-                .fetch_optional(self.pool())
+                .fetch_optional(self.pool()?)
                 .await
                 .map_err(|e| {
                     DomainError::internal_error("FolderDb", format!("parent lookup: {e}"))
@@ -133,7 +136,7 @@ impl FolderRepository for FolderDbRepository {
         .bind(&name)
         .bind(&parent_id)
         .bind(user_id)
-        .fetch_one(self.pool())
+        .fetch_one(self.pool()?)
         .await
         .map_err(|e| {
             if let sqlx::Error::Database(ref db_err) = e
@@ -161,7 +164,7 @@ impl FolderRepository for FolderDbRepository {
             "#,
         )
         .bind(id)
-        .fetch_optional(self.pool())
+        .fetch_optional(self.pool()?)
         .await
         .map_err(|e| DomainError::internal_error("FolderDb", format!("get: {e}")))?
         .ok_or_else(|| DomainError::not_found("Folder", id))?;
@@ -188,7 +191,7 @@ impl FolderRepository for FolderDbRepository {
             "#,
         )
         .bind(lookup)
-        .fetch_optional(self.pool())
+        .fetch_optional(self.pool()?)
         .await
         .map_err(|e| DomainError::internal_error("FolderDb", format!("path lookup: {e}")))?
         .ok_or_else(|| DomainError::not_found("Folder", lookup))?;
@@ -210,7 +213,7 @@ impl FolderRepository for FolderDbRepository {
                 "#,
             )
             .bind(pid)
-            .fetch_all(self.pool())
+            .fetch_all(self.pool()?)
             .await
         } else {
             sqlx::query_as(
@@ -223,7 +226,7 @@ impl FolderRepository for FolderDbRepository {
                  ORDER BY name
                 "#,
             )
-            .fetch_all(self.pool())
+            .fetch_all(self.pool()?)
             .await
         }
         .map_err(|e| DomainError::internal_error("FolderDb", format!("list: {e}")))?;
@@ -254,7 +257,7 @@ impl FolderRepository for FolderDbRepository {
             )
             .bind(pid)
             .bind(owner_id)
-            .fetch_all(self.pool())
+            .fetch_all(self.pool()?)
             .await
         } else {
             sqlx::query_as(
@@ -268,7 +271,7 @@ impl FolderRepository for FolderDbRepository {
                 "#,
             )
             .bind(owner_id)
-            .fetch_all(self.pool())
+            .fetch_all(self.pool()?)
             .await
         }
         .map_err(|e| DomainError::internal_error("FolderDb", format!("list_by_owner: {e}")))?;
@@ -307,7 +310,7 @@ impl FolderRepository for FolderDbRepository {
             .bind(pid)
             .bind(limit as i64)
             .bind(offset as i64)
-            .fetch_all(self.pool())
+            .fetch_all(self.pool()?)
             .await
         } else {
             sqlx::query_as(
@@ -324,7 +327,7 @@ impl FolderRepository for FolderDbRepository {
             )
             .bind(limit as i64)
             .bind(offset as i64)
-            .fetch_all(self.pool())
+            .fetch_all(self.pool()?)
             .await
         }
         .map_err(|e| DomainError::internal_error("FolderDb", format!("paginate: {e}")))?;
@@ -373,7 +376,7 @@ impl FolderRepository for FolderDbRepository {
             .bind(owner_id)
             .bind(limit as i64)
             .bind(offset as i64)
-            .fetch_all(self.pool())
+            .fetch_all(self.pool()?)
             .await
         } else {
             sqlx::query_as(
@@ -391,7 +394,7 @@ impl FolderRepository for FolderDbRepository {
             .bind(owner_id)
             .bind(limit as i64)
             .bind(offset as i64)
-            .fetch_all(self.pool())
+            .fetch_all(self.pool()?)
             .await
         }
         .map_err(|e| DomainError::internal_error("FolderDb", format!("paginate_by_owner: {e}")))?;
@@ -427,7 +430,7 @@ impl FolderRepository for FolderDbRepository {
         )
         .bind(&new_name)
         .bind(id)
-        .fetch_optional(self.pool())
+        .fetch_optional(self.pool()?)
         .await
         .map_err(|e| {
             if let sqlx::Error::Database(ref db_err) = e
@@ -462,7 +465,7 @@ impl FolderRepository for FolderDbRepository {
         )
         .bind(new_parent_id)
         .bind(id)
-        .fetch_optional(self.pool())
+        .fetch_optional(self.pool()?)
         .await
         .map_err(|e| DomainError::internal_error("FolderDb", format!("move: {e}")))?
         .ok_or_else(|| DomainError::not_found("Folder", id))?;
@@ -482,14 +485,14 @@ impl FolderRepository for FolderDbRepository {
               )",
         )
         .bind(id)
-        .execute(self.pool())
+        .execute(self.pool()?)
         .await
         .map_err(|e| DomainError::internal_error("FolderDb", format!("delete files: {e}")))?;
 
         // Then delete the folder (CASCADE will remove descendant folders)
         let result = sqlx::query("DELETE FROM storage.folders WHERE id = $1::uuid")
             .bind(id)
-            .execute(self.pool())
+            .execute(self.pool()?)
             .await
             .map_err(|e| DomainError::internal_error("FolderDb", format!("delete: {e}")))?;
 
@@ -507,7 +510,7 @@ impl FolderRepository for FolderDbRepository {
             "SELECT EXISTS(SELECT 1 FROM storage.folders WHERE path = $1 AND NOT is_trashed)",
         )
         .bind(lookup)
-        .fetch_one(self.pool())
+        .fetch_one(self.pool()?)
         .await
         .map_err(|e| DomainError::internal_error("FolderDb", format!("exists: {e}")))?;
 
@@ -518,7 +521,7 @@ impl FolderRepository for FolderDbRepository {
         let path: String =
             sqlx::query_scalar("SELECT path FROM storage.folders WHERE id = $1::uuid")
                 .bind(id)
-                .fetch_optional(self.pool())
+                .fetch_optional(self.pool()?)
                 .await
                 .map_err(|e| DomainError::internal_error("FolderDb", format!("get_path: {e}")))?
                 .ok_or_else(|| DomainError::not_found("Folder", id))?;
@@ -548,7 +551,7 @@ impl FolderRepository for FolderDbRepository {
             "#,
         )
         .bind(folder_id)
-        .fetch_one(self.pool())
+        .fetch_one(self.pool()?)
         .await
         .map_err(|e| DomainError::internal_error("FolderDb", format!("trash: {e}")))?;
 
@@ -586,7 +589,7 @@ impl FolderRepository for FolderDbRepository {
             "#,
         )
         .bind(folder_id)
-        .fetch_one(self.pool())
+        .fetch_one(self.pool()?)
         .await
         .map_err(|e| DomainError::internal_error("FolderDb", format!("restore: {e}")))?;
 
@@ -608,14 +611,14 @@ impl FolderRepository for FolderDbRepository {
               )",
         )
         .bind(folder_id)
-        .execute(self.pool())
+        .execute(self.pool()?)
         .await
         .map_err(|e| DomainError::internal_error("FolderDb", format!("perm delete files: {e}")))?;
 
         // Then permanently delete folder — CASCADE handles descendant folders
         let result = sqlx::query("DELETE FROM storage.folders WHERE id = $1::uuid")
             .bind(folder_id)
-            .execute(self.pool())
+            .execute(self.pool()?)
             .await
             .map_err(|e| DomainError::internal_error("FolderDb", format!("perm delete: {e}")))?;
 
@@ -639,7 +642,7 @@ impl FolderRepository for FolderDbRepository {
         )
         .bind(&name)
         .bind(user_id)
-        .fetch_optional(self.pool())
+        .fetch_optional(self.pool()?)
         .await
         .map_err(|e| DomainError::internal_error("FolderDb", format!("home folder: {e}")))?;
 
@@ -661,7 +664,7 @@ impl FolderRepository for FolderDbRepository {
                 )
                 .bind(&name)
                 .bind(user_id)
-                .fetch_one(self.pool())
+                .fetch_one(self.pool()?)
                 .await
                 .map_err(|e| DomainError::internal_error("FolderDb", format!("home fetch: {e}")))?;
                 Self::row_to_folder(
@@ -694,7 +697,7 @@ impl FolderRepository for FolderDbRepository {
 
         let rows: Vec<FolderRowOptUser> = sqlx::query_as(sql)
             .bind(folder_id)
-            .fetch_all(self.pool())
+            .fetch_all(self.pool()?)
             .await
             .map_err(|e| {
                 DomainError::internal_error("FolderDb", format!("subtree folders: {e}"))
@@ -760,12 +763,12 @@ impl FolderRepository for FolderDbRepository {
                 sqlx::query_as(&sql)
                     .bind(user_id)
                     .bind(pattern)
-                    .fetch_all(self.pool())
+                    .fetch_all(self.pool()?)
                     .await
             } else {
                 sqlx::query_as(&sql)
                     .bind(user_id)
-                    .fetch_all(self.pool())
+                    .fetch_all(self.pool()?)
                     .await
             }
             .map_err(|e| DomainError::internal_error("FolderDb", format!("search_folders: {e}")))?;
@@ -818,25 +821,25 @@ impl FolderRepository for FolderDbRepository {
                     .bind(pid)
                     .bind(user_id)
                     .bind(pattern)
-                    .fetch_all(self.pool())
+                    .fetch_all(self.pool()?)
                     .await
             } else {
                 sqlx::query_as(&sql)
                     .bind(pid)
                     .bind(user_id)
-                    .fetch_all(self.pool())
+                    .fetch_all(self.pool()?)
                     .await
             }
         } else if let Some(ref pattern) = name_pattern {
             sqlx::query_as(&sql)
                 .bind(user_id)
                 .bind(pattern)
-                .fetch_all(self.pool())
+                .fetch_all(self.pool()?)
                 .await
         } else {
             sqlx::query_as(&sql)
                 .bind(user_id)
-                .fetch_all(self.pool())
+                .fetch_all(self.pool()?)
                 .await
         }
         .map_err(|e| DomainError::internal_error("FolderDb", format!("search_folders: {e}")))?;
@@ -885,13 +888,13 @@ impl FolderRepository for FolderDbRepository {
                 .bind(user_id)
                 .bind(folder_id)
                 .bind(pattern)
-                .fetch_all(self.pool())
+                .fetch_all(self.pool()?)
                 .await
         } else {
             sqlx::query_as(&sql)
                 .bind(user_id)
                 .bind(folder_id)
-                .fetch_all(self.pool())
+                .fetch_all(self.pool()?)
                 .await
         }
         .map_err(|e| DomainError::internal_error("FolderDb", format!("descendant search: {e}")))?;
@@ -936,7 +939,7 @@ impl FolderRepository for FolderDbRepository {
             .bind(&pattern)
             .bind(query)
             .bind(limit_i64)
-            .fetch_all(self.pool())
+            .fetch_all(self.pool()?)
             .await
         } else {
             sqlx::query_as(
@@ -960,7 +963,7 @@ impl FolderRepository for FolderDbRepository {
             .bind(&pattern)
             .bind(query)
             .bind(limit_i64)
-            .fetch_all(self.pool())
+            .fetch_all(self.pool()?)
             .await
         }
         .map_err(|e| DomainError::internal_error("FolderDb", format!("suggest: {e}")))?;
@@ -980,7 +983,7 @@ impl FolderDbRepository {
     pub async fn get_folder_user_id(&self, folder_id: &str) -> Result<Uuid, DomainError> {
         sqlx::query_scalar::<_, Uuid>("SELECT user_id FROM storage.folders WHERE id = $1::uuid")
             .bind(folder_id)
-            .fetch_optional(self.pool())
+            .fetch_optional(self.pool()?)
             .await
             .map_err(|e| DomainError::internal_error("FolderDb", format!("user_id lookup: {e}")))?
             .ok_or_else(|| DomainError::not_found("Folder", folder_id))

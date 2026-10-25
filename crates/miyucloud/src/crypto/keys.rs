@@ -70,7 +70,7 @@ impl KeyManager {
     /// - En mode release : memory = 64 MB, iterations = 3, parallelism = 4
     /// - En mode debug : parametres reduits pour les tests (memory = 4 KB, iterations = 1, parallelism = 1)
     pub fn derive_master_key(passphrase: &str, salt: &[u8]) -> Result<[u8; 32], MiyucloudError> {
-        let params = argon2_params();
+        let params = argon2_params()?;
         let argon2 = Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, params);
         let mut key = [0u8; 32];
         argon2
@@ -130,15 +130,13 @@ impl KeyManager {
 /// Retourne les parametres Argon2id.
 /// En debug: reduits pour les tests.
 /// En release: parametres complets (64 MB, 3 iterations, 4 parallelisme).
-fn argon2_params() -> argon2::Params {
+/// Erreur propagée plutôt que panique (C-10).
+fn argon2_params() -> Result<argon2::Params, MiyucloudError> {
     #[cfg(debug_assertions)]
-    {
-        argon2::Params::new(4096, 1, 1, Some(32)).expect("valid argon2 params")
-    }
+    let params = argon2::Params::new(4096, 1, 1, Some(32));
     #[cfg(not(debug_assertions))]
-    {
-        argon2::Params::new(65536, 3, 4, Some(32)).expect("valid argon2 params")
-    }
+    let params = argon2::Params::new(65536, 3, 4, Some(32));
+    params.map_err(|e| MiyucloudError::Crypto(format!("Invalid Argon2 params: {e}")))
 }
 
 #[cfg(test)]

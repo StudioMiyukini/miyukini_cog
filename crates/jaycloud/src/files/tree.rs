@@ -46,10 +46,8 @@ pub fn canonical_path(input: &str) -> Result<String, TreeError> {
     if input.starts_with('/') || input.starts_with('\\') {
         return Err(TreeError::AbsolutePath(input.to_string()));
     }
-    if input.len() >= 2 {
-        let mut chars = input.chars();
-        let c0 = chars.next().unwrap();
-        let c1 = chars.next().unwrap();
+    let mut chars = input.chars();
+    if let (Some(c0), Some(c1)) = (chars.next(), chars.next()) {
         if c0.is_ascii_alphabetic() && c1 == ':' {
             return Err(TreeError::AbsolutePath(input.to_string()));
         }

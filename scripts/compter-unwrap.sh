@@ -63,6 +63,28 @@ ZERO_EXIGE=(
   miyualicia-api
   miyuwebway_participant
   miyuwebway_tracker
+  miyucloud-server
+  maia
+  jaycloud
+  jaycloud-client
+  jaycontact-client
+  jaydocs-client
+  jaymessage-client
+  jayrdv-client
+  jaysheets-client
+  jayslides-client
+  jaykonta-client
+  jaykoa-client
+  jaymeteo-client
+  maia-llm
+  miyualicia
+  miyualicia-dispatcher
+  miyucloud
+  cog-web-portal
+  team
+  miyucloud-dav
+  jayrdv
+  miyufeeds
 )
 # ----------------------------------------------------------------------------------------
 

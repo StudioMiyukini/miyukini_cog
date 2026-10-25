@@ -710,7 +710,7 @@ impl CalendarEvent {
                 .map_err(|_| "Invalid day".to_string())?;
 
             return match chrono::NaiveDate::from_ymd_opt(year, month, day) {
-                Some(date) => Ok(Utc.from_utc_datetime(&date.and_hms_opt(0, 0, 0).unwrap())),
+                Some(date) => Ok(Utc.from_utc_datetime(&date.and_time(chrono::NaiveTime::MIN))),
                 None => Err("Invalid date components".to_string()),
             };
         }

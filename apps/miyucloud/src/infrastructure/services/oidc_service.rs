@@ -132,18 +132,23 @@ pub struct OidcService {
 }
 
 impl OidcService {
-    pub fn new(config: OidcConfig) -> Self {
+    pub fn new(config: OidcConfig) -> Result<Self, crate::domain::errors::DomainError> {
         let http_client = reqwest::Client::builder()
             .timeout(std::time::Duration::from_secs(10))
             .build()
-            .expect("Failed to build HTTP client for OIDC");
+            .map_err(|e| {
+                crate::domain::errors::DomainError::internal_error(
+                    "OIDC",
+                    format!("Failed to build HTTP client: {e}"),
+                )
+            })?;
 
-        Self {
+        Ok(Self {
             config,
             http_client,
             discovery: RwLock::new(None),
             jwks: RwLock::new(None),
-        }
+        })
     }
 
     /// Fetch and cache the OIDC discovery document (TTL: 1 hour)

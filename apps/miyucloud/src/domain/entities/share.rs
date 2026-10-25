@@ -10,6 +10,15 @@ use uuid::Uuid;
 // Re-export entity errors from the centralized module
 pub use super::entity_errors::ShareError;
 
+/// Secondes écoulées depuis l'époque Unix ; une horloge système antérieure
+/// à 1970 est une erreur, jamais une panique (C-10).
+fn maintenant_secs() -> Result<u64, ShareError> {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .map_err(|_| ShareError::ValidationError("System clock is before UNIX epoch".to_string()))
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Share {
     id: Uuid,
@@ -57,10 +66,7 @@ impl Share {
 
         // Validate expiration date if provided
         if let Some(expires) = expires_at {
-            let now = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .expect("Time went backwards")
-                .as_secs();
+            let now = maintenant_secs()?;
 
             if expires <= now {
                 return Err(ShareError::InvalidExpiration(
@@ -69,10 +75,7 @@ impl Share {
             }
         }
 
-        let now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_secs();
+        let now = maintenant_secs()?;
 
         Ok(Self {
             id: Uuid::new_v4(),
@@ -188,10 +191,11 @@ impl Share {
 
     pub fn is_expired(&self) -> bool {
         if let Some(expires_at) = self.expires_at {
-            let now = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .expect("Time went backwards")
-                .as_secs();
+            // Horloge antérieure à l'époque Unix : le partage est tenu pour
+            // expiré (fail-closed, C-10).
+            let Ok(now) = maintenant_secs() else {
+                return true;
+            };
 
             return expires_at <= now;
         }

@@ -19,6 +19,19 @@
 //!   maia                                # config depuis bridge.toml ou défauts
 //!   MIYUKINI_DATA_DIR=./data maia
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 mod agents;
 mod catalog;
 mod config;
@@ -147,7 +160,11 @@ async fn main() {
     let http_client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(120))
         .build()
-        .expect("reqwest client");
+        .unwrap_or_else(|e| {
+            tracing::error!("Client HTTP impossible à construire : {e}");
+            eprintln!("Refus de démarrer : client HTTP : {e}");
+            std::process::exit(1);
+        });
 
     // Client maia-llm (GGUF local — remplace NativeBackend llama-cpp-2)
     // maia-llm tourne en parallèle sur le port 11435 par défaut.
@@ -405,8 +422,11 @@ fn parse_profile_arg() -> Option<persona::PersonaConfig> {
 }
 
 async fn shutdown_signal() {
-    tokio::signal::ctrl_c()
-        .await
-        .expect("Failed to install Ctrl+C handler");
+    if let Err(e) = tokio::signal::ctrl_c().await {
+        // Pas de panique (C-10) : sans gestionnaire, l'arrêt gracieux est
+        // indisponible mais le signal par défaut du système arrête le processus.
+        tracing::error!("Gestionnaire Ctrl+C non installé : {e}");
+        std::future::pending::<()>().await;
+    }
     tracing::info!("Signal d'arrêt reçu");
 }

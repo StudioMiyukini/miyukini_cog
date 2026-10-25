@@ -4,6 +4,7 @@
 //! @layer  app
 //! @human  miyucloud — module « interfaces nextcloud routes ».
 
+use crate::interfaces::errors::ReponseOu500;
 use axum::{
     Router,
     body::Body,
@@ -234,7 +235,7 @@ async fn handle_legacy_webdav(Path(subpath): Path<String>, user_ext: AuthUser) -
         .status(StatusCode::MOVED_PERMANENTLY)
         .header("location", location)
         .body(Body::empty())
-        .unwrap()
+        .ou_500()
 }
 
 async fn handle_legacy_webdav_root(user_ext: AuthUser) -> Response {
@@ -243,7 +244,7 @@ async fn handle_legacy_webdav_root(user_ext: AuthUser) -> Response {
         .status(StatusCode::MOVED_PERMANENTLY)
         .header("location", location)
         .body(Body::empty())
-        .unwrap()
+        .ou_500()
 }
 
 async fn handle_dav_trashbin(
@@ -275,7 +276,7 @@ async fn handle_connectivity_check() -> Response {
     Response::builder()
         .status(StatusCode::NO_CONTENT)
         .body(Body::empty())
-        .unwrap()
+        .ou_500()
 }
 
 /// Bare `/remote.php/dav` — NC clients (especially Android) probe this endpoint
@@ -286,5 +287,5 @@ async fn handle_dav_discovery() -> Response {
         .header("DAV", "1, 3")
         .header("Allow", "OPTIONS, GET, HEAD, PROPFIND")
         .body(Body::empty())
-        .unwrap()
+        .ou_500()
 }

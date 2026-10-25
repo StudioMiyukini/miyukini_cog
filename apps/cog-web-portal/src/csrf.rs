@@ -18,19 +18,29 @@ const SECRET_MIN: usize = 32;
 /// Clé secrète CSRF : `PORTAL_CSRF_SECRET` (≥ 32 octets) sinon secret aléatoire
 /// propre au processus (jamais de clé codée en dur ; les jetons ne survivent
 /// alors pas à un redémarrage, ce qui est sans conséquence pour des formulaires).
-fn csrf_secret() -> &'static [u8] {
-    static SECRET: std::sync::OnceLock<Vec<u8>> = std::sync::OnceLock::new();
-    SECRET.get_or_init(|| match std::env::var("PORTAL_CSRF_SECRET") {
-        Ok(s) if s.len() >= SECRET_MIN => s.into_bytes(),
-        autre => {
-            if autre.is_ok() {
-                eprintln!("PORTAL_CSRF_SECRET trop court (< {SECRET_MIN} octets) : ignoré");
+///
+/// C-10 : si l'aléa système est indisponible, aucun secret n'existe (`None`) et
+/// tout jeton est refusé (fail-closed) — jamais de panique ni de clé par défaut.
+fn csrf_secret() -> Option<&'static [u8]> {
+    static SECRET: std::sync::OnceLock<Option<Vec<u8>>> = std::sync::OnceLock::new();
+    SECRET
+        .get_or_init(|| match std::env::var("PORTAL_CSRF_SECRET") {
+            Ok(s) if s.len() >= SECRET_MIN => Some(s.into_bytes()),
+            autre => {
+                if autre.is_ok() {
+                    eprintln!("PORTAL_CSRF_SECRET trop court (< {SECRET_MIN} octets) : ignoré");
+                }
+                let mut octets = vec![0u8; 32];
+                match getrandom::getrandom(&mut octets) {
+                    Ok(()) => Some(octets),
+                    Err(e) => {
+                        eprintln!("Aléa système indisponible ({e}) : jetons CSRF refusés");
+                        None
+                    }
+                }
             }
-            let mut octets = vec![0u8; 32];
-            getrandom::getrandom(&mut octets).expect("aléa système indisponible");
-            octets
-        }
-    })
+        })
+        .as_deref()
 }
 
 /// Retourne le timestamp Unix en secondes.
@@ -46,7 +56,10 @@ fn now_secs() -> u64 {
 pub fn generate_csrf_token() -> String {
     let ts = now_secs();
     let ts_hex = format!("{ts:016x}");
-    let mac = compute_mac(&ts_hex);
+    // Sans secret : jeton vide, que `validate_csrf_token` refuse (fail-closed).
+    let Some(mac) = compute_mac(&ts_hex) else {
+        return String::new();
+    };
     format!("{ts_hex}.{mac}")
 }
 
@@ -67,15 +80,16 @@ pub fn validate_csrf_token(token: &str) -> bool {
     }
 
     // Vérification HMAC (constant-time via hmac::Mac::verify_slice).
-    let expected_mac = compute_mac(ts_hex);
+    let Some(expected_mac) = compute_mac(ts_hex) else {
+        return false;
+    };
     constant_time_eq(provided_mac, &expected_mac)
 }
 
-fn compute_mac(data: &str) -> String {
-    let mut mac =
-        HmacSha256::new_from_slice(csrf_secret()).expect("HMAC accepts any key length");
+fn compute_mac(data: &str) -> Option<String> {
+    let mut mac = HmacSha256::new_from_slice(csrf_secret()?).ok()?;
     mac.update(data.as_bytes());
-    hex::encode(mac.finalize().into_bytes())
+    Some(hex::encode(mac.finalize().into_bytes()))
 }
 
 fn constant_time_eq(a: &str, b: &str) -> bool {

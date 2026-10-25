@@ -17,13 +17,27 @@
 
 #![doc(html_root_url = "https://docs.miyukini.com/jaycloud-client")]
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 // @id service.jaycloud.alicia_client
 // @role alicia_to_jaycloud_adapter
 // @layer 7
 // @do bridge_alicia_to_jaycloud
 // @human Adaptateur Alicia → JayCloud : route les intents vers un backend pluggable.
 
-use std::sync::{Arc, RwLock};
+// C-10 : verrous du backend factice levés sans panique en cas d'empoisonnement.
+use std::sync::{Arc, PoisonError, RwLock};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -426,27 +440,27 @@ impl FakeJayCloudBackend {
 
     /// Pose une liste initiale de snapshots (utile pour seed des tests).
     pub fn seed_snapshots(&self, snaps: Vec<SnapshotSummary>) {
-        self.inner.write().unwrap().snapshots = snaps;
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).snapshots = snaps;
     }
 
     /// Pose une liste initiale d'app-passwords.
     pub fn seed_app_passwords(&self, passwords: Vec<AppPasswordSummary>) {
-        self.inner.write().unwrap().app_passwords = passwords;
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).app_passwords = passwords;
     }
 
     /// Force toutes les méthodes à renvoyer une erreur backend.
     pub fn force_failure(&self, message: impl Into<String>) {
-        self.inner.write().unwrap().fail_with = Some(message.into());
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).fail_with = Some(message.into());
     }
 
     /// Snapshot des snapshots actuellement en mémoire (utile en test).
     pub fn snapshot_snapshots(&self) -> Vec<SnapshotSummary> {
-        self.inner.read().unwrap().snapshots.clone()
+        self.inner.read().unwrap_or_else(PoisonError::into_inner).snapshots.clone()
     }
 
     /// Snapshot des app-passwords actuellement en mémoire.
     pub fn snapshot_app_passwords(&self) -> Vec<AppPasswordSummary> {
-        self.inner.read().unwrap().app_passwords.clone()
+        self.inner.read().unwrap_or_else(PoisonError::into_inner).app_passwords.clone()
     }
 }
 
@@ -456,7 +470,7 @@ impl JayCloudBackend for FakeJayCloudBackend {
         &self,
         target_name: Option<&str>,
     ) -> Result<Vec<SnapshotSummary>, JayCloudError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayCloudError::Backend(msg.clone()));
         }
@@ -482,7 +496,7 @@ impl JayCloudBackend for FakeJayCloudBackend {
         target_name: Option<&str>,
         limit: usize,
     ) -> Result<Vec<SnapshotSummary>, JayCloudError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayCloudError::Backend(msg.clone()));
         }
@@ -501,7 +515,7 @@ impl JayCloudBackend for FakeJayCloudBackend {
         file_path: &str,
         destination: Option<&str>,
     ) -> Result<String, JayCloudError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayCloudError::Backend(msg.clone()));
         }
@@ -517,7 +531,7 @@ impl JayCloudBackend for FakeJayCloudBackend {
         expires_in_days: Option<u32>,
         password: Option<&str>,
     ) -> Result<ShareLink, JayCloudError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayCloudError::Backend(msg.clone()));
         }
@@ -535,7 +549,7 @@ impl JayCloudBackend for FakeJayCloudBackend {
     }
 
     async fn list_app_passwords(&self) -> Result<Vec<AppPasswordSummary>, JayCloudError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayCloudError::Backend(msg.clone()));
         }
@@ -543,7 +557,7 @@ impl JayCloudBackend for FakeJayCloudBackend {
     }
 
     async fn revoke_app_password(&self, name: &str) -> Result<(), JayCloudError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayCloudError::Backend(msg.clone()));
         }

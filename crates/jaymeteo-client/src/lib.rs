@@ -14,13 +14,27 @@
 
 #![doc(html_root_url = "https://docs.miyukini.com/jaymeteo-client")]
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 // @id service.jaymeteo.alicia_client
 // @role alicia_to_jaymeteo_adapter
 // @layer 7
 // @do bridge_alicia_to_jaymeteo
 // @human Adaptateur Alicia → JayMeteo : route les intents vers un backend pluggable.
 
-use std::sync::{Arc, RwLock};
+// C-10 : verrous du backend factice levés sans panique en cas d'empoisonnement.
+use std::sync::{Arc, PoisonError, RwLock};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -297,24 +311,24 @@ impl FakeJayMeteoBackend {
 
     /// Pose la météo courante renvoyée pour toute localité.
     pub fn set_current(&self, weather: WeatherNow) {
-        self.inner.write().unwrap().now = Some(weather);
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).now = Some(weather);
     }
 
     /// Pose les prévisions renvoyées pour toute localité.
     pub fn set_forecast(&self, days: Vec<WeatherForecastDay>) {
-        self.inner.write().unwrap().forecast = days;
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).forecast = days;
     }
 
     /// Force toutes les méthodes à renvoyer une erreur backend.
     pub fn force_failure(&self, message: impl Into<String>) {
-        self.inner.write().unwrap().fail_with = Some(message.into());
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).fail_with = Some(message.into());
     }
 }
 
 #[async_trait]
 impl JayMeteoBackend for FakeJayMeteoBackend {
     async fn current_weather(&self, _location: &str) -> Result<WeatherNow, JayMeteoError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayMeteoError::Backend(msg.clone()));
         }
@@ -329,7 +343,7 @@ impl JayMeteoBackend for FakeJayMeteoBackend {
         _location: &str,
         days: u8,
     ) -> Result<Vec<WeatherForecastDay>, JayMeteoError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayMeteoError::Backend(msg.clone()));
         }

@@ -25,7 +25,7 @@ use crate::infrastructure::services::session_token_service::SessionTokenService;
 use moka::sync::Cache;
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::sync::RwLock;
+use std::sync::{PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::time::Duration;
 use uuid::Uuid;
 
@@ -171,10 +171,23 @@ impl AuthApplicationService {
         self
     }
 
+    /// Verrou en lecture sur l'état OIDC. Un empoisonnement est levé sans
+    /// panique : les écrivains n'affectent que deux `Option` d'un bloc, l'état
+    /// reste donc cohérent (C-10) et la configuration réelle est conservée
+    /// (pas de repli permissif type « connexion par mot de passe réactivée »).
+    fn oidc_lecture(&self) -> RwLockReadGuard<'_, OidcState> {
+        self.oidc.read().unwrap_or_else(PoisonError::into_inner)
+    }
+
+    /// Verrou en écriture sur l'état OIDC (voir [`Self::oidc_lecture`]).
+    fn oidc_ecriture(&self) -> RwLockWriteGuard<'_, OidcState> {
+        self.oidc.write().unwrap_or_else(PoisonError::into_inner)
+    }
+
     /// Configures the OIDC service
     pub fn with_oidc(self, oidc_service: Arc<OidcService>, oidc_config: OidcConfig) -> Self {
         {
-            let mut state = self.oidc.write().unwrap();
+            let mut state = self.oidc_ecriture();
             state.service = Some(oidc_service);
             state.config = Some(oidc_config);
         }
@@ -183,27 +196,27 @@ impl AuthApplicationService {
 
     /// Hot-reload OIDC configuration at runtime (called from admin settings service)
     pub fn reload_oidc(&self, oidc_service: Arc<OidcService>, oidc_config: OidcConfig) {
-        let mut state = self.oidc.write().unwrap();
+        let mut state = self.oidc_ecriture();
         state.service = Some(oidc_service);
         state.config = Some(oidc_config);
     }
 
     /// Disable OIDC at runtime (called from admin settings service)
     pub fn disable_oidc(&self) {
-        let mut state = self.oidc.write().unwrap();
+        let mut state = self.oidc_ecriture();
         state.service = None;
         state.config = None;
     }
 
     /// Returns whether OIDC is configured and enabled
     pub fn oidc_enabled(&self) -> bool {
-        let state = self.oidc.read().unwrap();
+        let state = self.oidc_lecture();
         state.service.is_some() && state.config.as_ref().is_some_and(|c| c.enabled)
     }
 
     /// Returns whether password login is disabled (OIDC-only mode)
     pub fn password_login_disabled(&self) -> bool {
-        let state = self.oidc.read().unwrap();
+        let state = self.oidc_lecture();
         state
             .config
             .as_ref()
@@ -212,13 +225,13 @@ impl AuthApplicationService {
 
     /// Returns a clone of the OIDC config if available
     pub fn oidc_config(&self) -> Option<OidcConfig> {
-        let state = self.oidc.read().unwrap();
+        let state = self.oidc_lecture();
         state.config.clone()
     }
 
     /// Returns an Arc clone of the OIDC service if available
     pub fn oidc_service(&self) -> Option<Arc<OidcService>> {
-        let state = self.oidc.read().unwrap();
+        let state = self.oidc_lecture();
         state.service.clone()
     }
 
@@ -423,7 +436,7 @@ impl AuthApplicationService {
             None, // IP (can be added from the HTTP layer)
             None, // User-Agent (can be added from the HTTP layer)
             self.token_service.refresh_token_expiry_days(),
-        );
+        )?;
 
         self.session_storage.create_session(session).await?;
 
@@ -526,7 +539,7 @@ impl AuthApplicationService {
             None,
             None,
             self.token_service.refresh_token_expiry_days(),
-        );
+        )?;
 
         self.session_storage.create_session(new_session).await?;
 
@@ -1044,7 +1057,7 @@ impl AuthApplicationService {
 
         // Clone the Arc and config out of the RwLock so we don't hold the lock across await points
         let (oidc, oidc_config) = {
-            let state = self.oidc.read().unwrap();
+            let state = self.oidc_lecture();
             let svc = state.service.clone().ok_or_else(|| {
                 DomainError::new(
                     ErrorKind::InternalError,
@@ -1243,7 +1256,7 @@ impl AuthApplicationService {
             None,
             None,
             self.token_service.refresh_token_expiry_days(),
-        );
+        )?;
         self.session_storage.create_session(session).await?;
 
         let auth_response = AuthResponseDto {

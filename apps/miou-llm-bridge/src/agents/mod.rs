@@ -18,7 +18,10 @@ pub mod custom;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
+// C-10 : un verrou empoisonné (panique d'un autre fil pendant l'écriture)
+// est levé sans panique ; les sections critiques ne laissent pas d'état
+// partiel et l'état réel est conservé (pas de remise à zéro permissive).
+use std::sync::{Arc, PoisonError, RwLock};
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -164,7 +167,7 @@ impl AgentRegistry {
 
     /// Liste tous les agents (résumés).
     pub fn list_agents(&self) -> Vec<AgentSummary> {
-        let agents = self.agents.read().unwrap();
+        let agents = self.agents.read().unwrap_or_else(PoisonError::into_inner);
         let mut list: Vec<AgentSummary> = agents.values().map(AgentSummary::from).collect();
         list.sort_by(|a, b| a.id.cmp(&b.id));
         list
@@ -172,20 +175,20 @@ impl AgentRegistry {
 
     /// Récupère un agent par ID.
     pub fn get_agent(&self, id: &str) -> Option<AgentDef> {
-        let agents = self.agents.read().unwrap();
+        let agents = self.agents.read().unwrap_or_else(PoisonError::into_inner);
         agents.get(id).cloned()
     }
 
     /// Ajoute ou met à jour un agent custom.
     pub fn upsert_agent(&self, agent: AgentDef) {
-        let mut agents = self.agents.write().unwrap();
+        let mut agents = self.agents.write().unwrap_or_else(PoisonError::into_inner);
         agents.insert(agent.id.clone(), agent);
     }
 
     /// Crée un agent seulement s'il n'existe pas (contrôle et insertion sous
     /// le même verrou d'écriture : pas de course avec une autre création).
     pub fn inserer_nouvel_agent(&self, agent: AgentDef) -> Result<(), &'static str> {
-        let mut agents = self.agents.write().unwrap();
+        let mut agents = self.agents.write().unwrap_or_else(PoisonError::into_inner);
         if agents.contains_key(&agent.id) {
             return Err("Agent déjà existant");
         }
@@ -200,7 +203,7 @@ impl AgentRegistry {
         attendu: &AgentDef,
         agent: AgentDef,
     ) -> Result<(), &'static str> {
-        let mut agents = self.agents.write().unwrap();
+        let mut agents = self.agents.write().unwrap_or_else(PoisonError::into_inner);
         match agents.get(&agent.id) {
             Some(actuel) if meme_agent(actuel, attendu) => {
                 agents.insert(agent.id.clone(), agent);
@@ -212,7 +215,7 @@ impl AgentRegistry {
 
     /// Supprime un agent custom seulement s'il est encore identique à `attendu`.
     pub fn supprimer_si_inchange(&self, attendu: &AgentDef) -> Result<(), &'static str> {
-        let mut agents = self.agents.write().unwrap();
+        let mut agents = self.agents.write().unwrap_or_else(PoisonError::into_inner);
         match agents.get(&attendu.id) {
             Some(actuel) if actuel.is_builtin => Err("Impossible de supprimer un agent built-in"),
             Some(actuel) if meme_agent(actuel, attendu) => {
@@ -225,7 +228,7 @@ impl AgentRegistry {
 
     /// Supprime un agent custom (refuse de supprimer un built-in).
     pub fn delete_agent(&self, id: &str) -> Result<(), &'static str> {
-        let mut agents = self.agents.write().unwrap();
+        let mut agents = self.agents.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(agent) = agents.get(id) {
             if agent.is_builtin {
                 return Err("Impossible de supprimer un agent built-in");
@@ -237,7 +240,7 @@ impl AgentRegistry {
 
     /// Renomme un agent (built-in ou custom).
     pub fn rename_agent(&self, id: &str, new_name: &str) -> Result<(), &'static str> {
-        let mut agents = self.agents.write().unwrap();
+        let mut agents = self.agents.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(agent) = agents.get_mut(id) {
             agent.display_name = new_name.to_string();
             Ok(())
@@ -250,25 +253,25 @@ impl AgentRegistry {
 
     /// Crée une équipe.
     pub fn create_team(&self, team: AgentTeam) {
-        let mut teams = self.teams.write().unwrap();
+        let mut teams = self.teams.write().unwrap_or_else(PoisonError::into_inner);
         teams.insert(team.id.clone(), team);
     }
 
     /// Liste les équipes.
     pub fn list_teams(&self) -> Vec<AgentTeam> {
-        let teams = self.teams.read().unwrap();
+        let teams = self.teams.read().unwrap_or_else(PoisonError::into_inner);
         teams.values().cloned().collect()
     }
 
     /// Récupère une équipe.
     pub fn get_team(&self, id: &str) -> Option<AgentTeam> {
-        let teams = self.teams.read().unwrap();
+        let teams = self.teams.read().unwrap_or_else(PoisonError::into_inner);
         teams.get(id).cloned()
     }
 
     /// Supprime une équipe.
     pub fn delete_team(&self, id: &str) {
-        let mut teams = self.teams.write().unwrap();
+        let mut teams = self.teams.write().unwrap_or_else(PoisonError::into_inner);
         teams.remove(id);
     }
 }

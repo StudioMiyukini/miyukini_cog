@@ -4,13 +4,27 @@
 
 #![doc(html_root_url = "https://docs.miyukini.com/jaysheets-client")]
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 // @id service.jaysheets.alicia_client
 // @role alicia_to_jaysheets_adapter
 // @layer 7
 // @do bridge_alicia_to_jaysheets
 // @human Adaptateur Alicia → JaySheets : route les intents vers un backend pluggable.
 
-use std::sync::{Arc, RwLock};
+// C-10 : verrous du backend factice levés sans panique en cas d'empoisonnement.
+use std::sync::{Arc, PoisonError, RwLock};
 
 use async_trait::async_trait;
 use chrono::Utc;
@@ -268,19 +282,19 @@ impl FakeJaySheetsBackend {
 
     /// Force toutes les méthodes à renvoyer une erreur.
     pub fn force_failure(&self, message: impl Into<String>) {
-        self.inner.write().unwrap().fail_with = Some(message.into());
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).fail_with = Some(message.into());
     }
 
     /// Snapshot des tableurs.
     pub fn snapshot(&self) -> Vec<SheetSummary> {
-        self.inner.read().unwrap().sheets.clone()
+        self.inner.read().unwrap_or_else(PoisonError::into_inner).sheets.clone()
     }
 
     /// Lit la valeur d'une cellule (pour vérifier write_cell).
     pub fn cell_value(&self, sheet_id: &str, cell: &str) -> Option<String> {
         self.inner
             .read()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .cells
             .get(&(sheet_id.to_string(), cell.to_string()))
             .cloned()
@@ -290,7 +304,7 @@ impl FakeJaySheetsBackend {
 #[async_trait]
 impl JaySheetsBackend for FakeJaySheetsBackend {
     async fn create_sheet(&self, title: &str) -> Result<SheetSummary, JaySheetsError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JaySheetsError::Backend(msg.clone()));
         }
@@ -308,7 +322,7 @@ impl JaySheetsBackend for FakeJaySheetsBackend {
     }
 
     async fn list_my_sheets(&self, limit: usize) -> Result<Vec<SheetSummary>, JaySheetsError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JaySheetsError::Backend(msg.clone()));
         }
@@ -324,7 +338,7 @@ impl JaySheetsBackend for FakeJaySheetsBackend {
         cell: &str,
         value: &str,
     ) -> Result<SheetSummary, JaySheetsError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JaySheetsError::Backend(msg.clone()));
         }
@@ -339,7 +353,7 @@ impl JaySheetsBackend for FakeJaySheetsBackend {
             .sheets
             .iter_mut()
             .find(|s| s.id == sheet_id)
-            .unwrap();
+            .ok_or_else(|| JaySheetsError::SheetNotFound(sheet_id.to_string()))?;
         sheet.updated_at = now;
         Ok(sheet.clone())
     }

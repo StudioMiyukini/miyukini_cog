@@ -206,7 +206,7 @@ impl DedupService {
             Ok(hasher.finalize().to_hex().to_string())
         })
         .await
-        .expect("hash_file: spawn_blocking task panicked")
+        .map_err(|e| std::io::Error::other(format!("hash_file: blocking task failed: {e}")))?
     }
 
     // ── Core store operations ────────────────────────────────────

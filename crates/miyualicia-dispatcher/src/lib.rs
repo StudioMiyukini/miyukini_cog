@@ -30,6 +30,19 @@
 
 #![doc(html_root_url = "https://docs.miyukini.com/miyualicia-dispatcher")]
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 // @id service.alicia.dispatcher.lib
 // @role alicia_dispatcher_facade
 // @layer 7

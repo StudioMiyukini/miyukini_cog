@@ -458,7 +458,7 @@ impl ShareUseCase for ShareService {
     }
 }
 
-#[cfg(feature = "integration_tests")]
+#[cfg(all(test, feature = "integration_tests"))]
 #[allow(dead_code)]
 mod tests {
     use super::*;

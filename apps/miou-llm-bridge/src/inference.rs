@@ -11,7 +11,10 @@
 //! - `UpstreamBackend` : proxy HTTP vers LM Studio / Ollama (backup)
 //! - `InferenceRouter` : choisit automatiquement le meilleur backend
 
-use std::sync::{Arc, RwLock};
+// C-10 : un verrou empoisonné (panique d'un autre fil pendant l'écriture)
+// est levé sans panique ; les sections critiques ne laissent pas d'état
+// partiel et l'état réel est conservé (pas de remise à zéro permissive).
+use std::sync::{Arc, PoisonError, RwLock};
 
 use serde::{Deserialize, Serialize};
 
@@ -163,12 +166,12 @@ impl MaiaLlmClient {
 
     /// Vérifie si un modèle est chargé (via cache local).
     pub fn is_loaded(&self) -> bool {
-        self.loaded_model.read().unwrap().is_some()
+        self.loaded_model.read().unwrap_or_else(PoisonError::into_inner).is_some()
     }
 
     /// Retourne le nom du modèle chargé (via cache local).
     pub fn loaded_model_name(&self) -> Option<String> {
-        self.loaded_model.read().unwrap().clone()
+        self.loaded_model.read().unwrap_or_else(PoisonError::into_inner).clone()
     }
 
     // ── Méthodes async (appels HTTP maia-llm) ─────────────────────
@@ -189,7 +192,7 @@ impl MaiaLlmClient {
                         .get("model_name")
                         .and_then(|m| m.as_str())
                         .map(|s| s.to_string());
-                    *self.loaded_model.write().unwrap() = model_name;
+                    *self.loaded_model.write().unwrap_or_else(PoisonError::into_inner) = model_name;
                 }
                 true
             }
@@ -238,7 +241,7 @@ impl MaiaLlmClient {
             .unwrap_or(&filename)
             .to_string();
 
-        *self.loaded_model.write().unwrap() = Some(model_name.clone());
+        *self.loaded_model.write().unwrap_or_else(PoisonError::into_inner) = Some(model_name.clone());
 
         Ok(model_name)
     }
@@ -256,7 +259,7 @@ impl MaiaLlmClient {
             .unwrap_or(false);
 
         if success {
-            *self.loaded_model.write().unwrap() = None;
+            *self.loaded_model.write().unwrap_or_else(PoisonError::into_inner) = None;
         }
 
         success

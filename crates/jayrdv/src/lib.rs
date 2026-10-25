@@ -10,6 +10,19 @@
 //! Intégration : JayKoa (agenda unifié), MiyuBooking, MiyuNotify.
 //! Exclusion : le domaine médical est couvert par JayBobo.
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 pub mod data;
 pub mod domain;
 pub mod hybride;

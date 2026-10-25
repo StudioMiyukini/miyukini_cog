@@ -15,7 +15,9 @@
 //! Seul C conservé : llama.cpp (moteur tenseur GPU — irremplaçable en pur Rust pour GGUF).
 
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+// C-10 : un mutex empoisonné est levé sans panique (l'état — modèle chargé,
+// cache de scan — reste utilisable ; chaque inférence recrée son contexte).
+use std::sync::{Arc, Mutex, PoisonError};
 
 use llama_cpp_2::context::params::LlamaContextParams;
 use llama_cpp_2::llama_backend::LlamaBackend;
@@ -97,16 +99,18 @@ pub struct LlmEngine {
 
 impl LlmEngine {
     /// Initialise le moteur llama.cpp.
-    pub fn new(config: MaiaLlmConfig, politique: PolitiqueModeles) -> Self {
-        let backend = LlamaBackend::init().expect("Impossible d'initialiser llama.cpp");
-        Self {
+    pub fn new(config: MaiaLlmConfig, politique: PolitiqueModeles) -> Result<Self, LlmError> {
+        let backend = LlamaBackend::init().map_err(|e| {
+            LlmError::LlamaError(format!("Impossible d'initialiser llama.cpp : {e}"))
+        })?;
+        Ok(Self {
             state: Arc::new(Mutex::new(LlmState {
                 backend,
                 loaded: None,
                 config,
             })),
             politique: Arc::new(politique),
-        }
+        })
     }
 
     // ── Gestion modèle ────────────────────────────────────────────
@@ -179,7 +183,7 @@ impl LlmEngine {
 
     /// Décharge le modèle actuellement chargé.
     pub fn unload(&self) -> bool {
-        let mut state = self.state.lock().unwrap();
+        let mut state = self.state.lock().unwrap_or_else(PoisonError::into_inner);
         if let Some(m) = state.loaded.take() {
             tracing::info!("Modèle déchargé : {}", m.info.name);
             true
@@ -190,13 +194,13 @@ impl LlmEngine {
 
     /// Retourne les infos du modèle chargé, ou None.
     pub fn model_info(&self) -> Option<ModelInfo> {
-        let state = self.state.lock().unwrap();
+        let state = self.state.lock().unwrap_or_else(PoisonError::into_inner);
         state.loaded.as_ref().map(|l| l.info.clone())
     }
 
     /// Vérifie si un modèle est chargé.
     pub fn is_loaded(&self) -> bool {
-        let state = self.state.lock().unwrap();
+        let state = self.state.lock().unwrap_or_else(PoisonError::into_inner);
         state.loaded.is_some()
     }
 
@@ -210,7 +214,7 @@ impl LlmEngine {
         temperature: f32,
         max_tokens: u32,
     ) -> Result<(String, u32, u32), LlmError> {
-        let state = self.state.lock().unwrap();
+        let state = self.state.lock().unwrap_or_else(PoisonError::into_inner);
         let loaded = state.loaded.as_ref().ok_or(LlmError::NoModelLoaded)?;
 
         let prompt = build_chat_prompt(messages);
@@ -363,7 +367,7 @@ fn stream_inference(
     max_tokens: u32,
     tx: mpsc::Sender<StreamMsg>,
 ) {
-    let state = engine.state.lock().unwrap();
+    let state = engine.state.lock().unwrap_or_else(PoisonError::into_inner);
     let loaded = match state.loaded.as_ref() {
         Some(l) => l,
         None => {

@@ -10,6 +10,19 @@
 //! de sortir. Le bootstrap réel (axum HTTPS + DAV + scheduler) sera
 //! implémenté en PR-3 / PR-4 selon le plan de la Spec.
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 use jaycloud::JayCloudConfig;
 
 #[tokio::main]

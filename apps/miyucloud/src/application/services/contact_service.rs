@@ -1139,7 +1139,7 @@ impl StorageUseCase for ContactService {
                     })?;
 
                 let result = self.create_address_book(dto).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "update_address_book" => {
                 let address_book_id = params["address_book_id"].as_str().ok_or_else(|| {
@@ -1152,7 +1152,7 @@ impl StorageUseCase for ContactService {
                     })?;
 
                 let result = self.update_address_book(address_book_id, update).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "delete_address_book" => {
                 let address_book_id = params["address_book_id"].as_str().ok_or_else(|| {
@@ -1180,7 +1180,7 @@ impl StorageUseCase for ContactService {
                     .map_err(|_| DomainError::validation_error("Invalid user_id format"))?;
 
                 let result = self.get_address_book(address_book_id, user_id).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "list_user_address_books" => {
                 let user_id = params["user_id"]
@@ -1190,11 +1190,11 @@ impl StorageUseCase for ContactService {
                     .map_err(|_| DomainError::validation_error("Invalid user_id format"))?;
 
                 let result = self.list_user_address_books(user_id).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "list_public_address_books" => {
                 let result = self.list_public_address_books().await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "share_address_book" => {
                 let dto: ShareAddressBookDto =
@@ -1240,7 +1240,7 @@ impl StorageUseCase for ContactService {
                 let result = self
                     .get_address_book_shares(address_book_id, user_id)
                     .await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
 
             // Contact operations
@@ -1251,7 +1251,7 @@ impl StorageUseCase for ContactService {
                     })?;
 
                 let result = self.create_contact(dto).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "create_contact_from_vcard" => {
                 let dto: CreateContactVCardDto =
@@ -1260,7 +1260,7 @@ impl StorageUseCase for ContactService {
                     })?;
 
                 let result = self.create_contact_from_vcard(dto).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "update_contact" => {
                 let contact_id = params["contact_id"]
@@ -1273,7 +1273,7 @@ impl StorageUseCase for ContactService {
                     })?;
 
                 let result = self.update_contact(contact_id, update).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "delete_contact" => {
                 let contact_id = params["contact_id"]
@@ -1301,7 +1301,7 @@ impl StorageUseCase for ContactService {
                     .map_err(|_| DomainError::validation_error("Invalid user_id format"))?;
 
                 let result = self.get_contact(contact_id, user_id).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "list_contacts" => {
                 let address_book_id = params["address_book_id"].as_str().ok_or_else(|| {
@@ -1315,7 +1315,7 @@ impl StorageUseCase for ContactService {
                     .map_err(|_| DomainError::validation_error("Invalid user_id format"))?;
 
                 let result = self.list_contacts(address_book_id, user_id).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "search_contacts" => {
                 let address_book_id = params["address_book_id"].as_str().ok_or_else(|| {
@@ -1335,7 +1335,7 @@ impl StorageUseCase for ContactService {
                 let result = self
                     .search_contacts(address_book_id, query, user_id)
                     .await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
 
             // Group operations
@@ -1346,7 +1346,7 @@ impl StorageUseCase for ContactService {
                     })?;
 
                 let result = self.create_group(dto).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "update_group" => {
                 let group_id = params["group_id"]
@@ -1359,7 +1359,7 @@ impl StorageUseCase for ContactService {
                     })?;
 
                 let result = self.update_group(group_id, update).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "delete_group" => {
                 let group_id = params["group_id"]
@@ -1387,7 +1387,7 @@ impl StorageUseCase for ContactService {
                     .map_err(|_| DomainError::validation_error("Invalid user_id format"))?;
 
                 let result = self.get_group(group_id, user_id).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "list_groups" => {
                 let address_book_id = params["address_book_id"].as_str().ok_or_else(|| {
@@ -1401,7 +1401,7 @@ impl StorageUseCase for ContactService {
                     .map_err(|_| DomainError::validation_error("Invalid user_id format"))?;
 
                 let result = self.list_groups(address_book_id, user_id).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
 
             // Group membership operations
@@ -1447,7 +1447,7 @@ impl StorageUseCase for ContactService {
                     .map_err(|_| DomainError::validation_error("Invalid user_id format"))?;
 
                 let result = self.list_contacts_in_group(group_id, user_id).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "list_groups_for_contact" => {
                 let contact_id = params["contact_id"]
@@ -1461,7 +1461,7 @@ impl StorageUseCase for ContactService {
                     .map_err(|_| DomainError::validation_error("Invalid user_id format"))?;
 
                 let result = self.list_groups_for_contact(contact_id, user_id).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
 
             // vCard operations
@@ -1477,7 +1477,7 @@ impl StorageUseCase for ContactService {
                     .map_err(|_| DomainError::validation_error("Invalid user_id format"))?;
 
                 let result = self.get_contact_vcard(contact_id, user_id).await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
             "get_contacts_as_vcards" => {
                 let address_book_id = params["address_book_id"].as_str().ok_or_else(|| {
@@ -1493,7 +1493,7 @@ impl StorageUseCase for ContactService {
                 let result = self
                     .get_contacts_as_vcards(address_book_id, user_id)
                     .await?;
-                Ok(serde_json::to_value(result).unwrap())
+                vers_json(result)
             }
 
             _ => Err(DomainError::validation_error(format!(
@@ -1502,4 +1502,12 @@ impl StorageUseCase for ContactService {
             ))),
         }
     }
+}
+
+/// Sérialise le résultat d'une action en JSON ; un échec devient une erreur
+/// interne propagée (C-10) plutôt qu'une panique.
+fn vers_json<T: serde::Serialize>(result: T) -> Result<serde_json::Value, DomainError> {
+    serde_json::to_value(result).map_err(|e| {
+        DomainError::internal_error("Contact", format!("JSON serialization failed: {e}"))
+    })
 }

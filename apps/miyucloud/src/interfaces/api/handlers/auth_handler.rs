@@ -546,7 +546,9 @@ async fn oidc_providers(State(state): State<Arc<AppState>>) -> Result<impl IntoR
         }));
     }
 
-    let config = auth_app.oidc_config().unwrap();
+    let config = auth_app
+        .oidc_config()
+        .ok_or_else(|| AppError::internal_error("OIDC configuration not available"))?;
 
     Ok(Json(OidcProviderInfoDto {
         enabled: true,
@@ -615,7 +617,9 @@ async fn oidc_callback(
     match result {
         OidcCallbackResult::WebLogin { exchange_code } => {
             // Regular web login — redirect to frontend with exchange code
-            let config = auth_app.oidc_config().unwrap();
+            let config = auth_app
+                .oidc_config()
+                .ok_or_else(|| AppError::internal_error("OIDC configuration not available"))?;
             let frontend_url = config.frontend_url.trim_end_matches('/');
             let redirect_url = format!("{}/?oidc_code={}", frontend_url, exchange_code);
             tracing::info!("OIDC login successful, redirecting with exchange code");

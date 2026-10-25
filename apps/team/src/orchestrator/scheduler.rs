@@ -206,7 +206,7 @@ impl TaskScheduler {
     pub fn pending_count(&self) -> usize {
         self.tasks
             .lock()
-            .unwrap()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
             .values()
             .filter(|e| e.status == TaskStatus::Pending)
             .count()

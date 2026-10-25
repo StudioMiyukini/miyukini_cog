@@ -11,7 +11,8 @@
 // @human Trait ServiceClient + mock programmable pour les tests dispatcher.
 
 use std::collections::HashMap;
-use std::sync::Mutex;
+// C-10 : verrous du client factice levés sans panique en cas d'empoisonnement.
+use std::sync::{Mutex, PoisonError};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -105,13 +106,13 @@ impl MockServiceClient {
     pub fn expect(&self, qualified_id: impl Into<String>, result: ServiceCallResult) {
         self.responses
             .lock()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .insert(qualified_id.into(), result);
     }
 
     /// Récupère la liste des appels reçus.
     pub fn calls(&self) -> Vec<(String, Value)> {
-        self.calls.lock().unwrap().clone()
+        self.calls.lock().unwrap_or_else(PoisonError::into_inner).clone()
     }
 }
 
@@ -120,11 +121,11 @@ impl ServiceClient for MockServiceClient {
     async fn call(&self, qualified_id: &str, params: &Value) -> ServiceCallResult {
         self.calls
             .lock()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .push((qualified_id.to_string(), params.clone()));
         self.responses
             .lock()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .get(qualified_id)
             .cloned()
             .unwrap_or_else(|| ServiceCallResult::ok(Value::Null))

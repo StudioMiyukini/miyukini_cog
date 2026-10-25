@@ -83,12 +83,32 @@ impl WopiTokenValidator {
     }
 
     fn mac(&self, payload: &str) -> HmacSha256 {
-        // HMAC accepte toute longueur de clé : `new_from_slice` ne peut pas échouer.
-        let mut mac = <HmacSha256 as Mac>::new_from_slice(&self.secret)
-            .expect("HMAC accepte toute longueur de clé");
+        // C-10 : construction infaillible à partir du bloc de clé RFC 2104
+        // (même tag que `new_from_slice`, sans `expect`).
+        let mut bloc = bloc_cle_rfc2104(&self.secret);
+        let mut mac = <HmacSha256 as Mac>::new(&bloc.into());
+        bloc.fill(0);
         mac.update(payload.as_bytes());
         mac
     }
+}
+
+/// Bloc de clé HMAC-SHA256 selon RFC 2104 : une clé plus longue que le bloc
+/// (64 octets) est d'abord hachée, puis le résultat est complété par des zéros.
+fn bloc_cle_rfc2104(secret: &[u8]) -> [u8; 64] {
+    use sha2::Digest;
+    let mut bloc = [0u8; 64];
+    if secret.len() > bloc.len() {
+        let condense = Sha256::digest(secret);
+        for (dst, src) in bloc.iter_mut().zip(condense.iter()) {
+            *dst = *src;
+        }
+    } else {
+        for (dst, src) in bloc.iter_mut().zip(secret.iter()) {
+            *dst = *src;
+        }
+    }
+    bloc
 }
 
 /// Décode une chaîne hexadécimale (minuscules ou majuscules) ; `None` si invalide.
@@ -182,6 +202,21 @@ mod tests {
             v.sign("what do ya want for nothing?"),
             "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843"
         );
+    }
+
+    #[test]
+    fn test_bloc_cle_equivaut_new_from_slice() {
+        // Clés courte, exacte (64) et longue (> bloc, hachée) : même tag.
+        for longueur in [0usize, 4, 32, 64, 65, 131] {
+            let secret: Vec<u8> = (0..longueur).map(|i| i as u8).collect();
+            let v = WopiTokenValidator::new(&secret);
+            let mut reference = <HmacSha256 as Mac>::new_from_slice(&secret).unwrap();
+            reference.update(b"payload");
+            assert_eq!(
+                v.sign("payload"),
+                hex::encode(reference.finalize().into_bytes())
+            );
+        }
     }
 
     #[test]

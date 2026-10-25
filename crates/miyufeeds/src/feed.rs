@@ -30,9 +30,11 @@ fn atom_feed_bytes(id: &str, title: &str, feed_type: &str) -> Vec<u8> {
 
 fn rfc3339_utc_now() -> String {
     use std::time::{SystemTime, UNIX_EPOCH};
+    // C-10 : horloge antérieure à 1970 => date d'époque, jamais de panique
+    // (horodatage informatif du flux, sans portée de sécurité).
     let secs = SystemTime::now()
         .duration_since(UNIX_EPOCH)
-        .expect("system time before UNIX_EPOCH")
+        .unwrap_or_default()
         .as_secs();
     let days = (secs / 86400) as i64;
     let (y, mo, d) = unix_days_to_ymd(days);

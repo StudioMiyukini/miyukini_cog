@@ -170,8 +170,7 @@ async fn handle_options() -> Result<Response<Body>, AppError> {
             header::ALLOW,
             "OPTIONS, GET, PUT, DELETE, PROPFIND, PROPPATCH, REPORT, MKCOL",
         )
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ─── PROPFIND ────────────────────────────────────────────────────────
@@ -229,8 +228,7 @@ async fn handle_propfind(
         Ok(Response::builder()
             .status(StatusCode::MULTI_STATUS)
             .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-            .body(Body::from(response_body))
-            .unwrap())
+            .body(Body::from(response_body))?)
     } else {
         let parts: Vec<&str> = path.splitn(2, '/').collect();
         let address_book_id = parts[0];
@@ -267,8 +265,7 @@ async fn handle_propfind(
             Ok(Response::builder()
                 .status(StatusCode::MULTI_STATUS)
                 .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-                .body(Body::from(response_body))
-                .unwrap())
+                .body(Body::from(response_body))?)
         } else {
             // Individual contact .vcf
             let contact_file = parts[1];
@@ -307,8 +304,7 @@ async fn handle_propfind(
             Ok(Response::builder()
                 .status(StatusCode::MULTI_STATUS)
                 .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-                .body(Body::from(response_body))
-                .unwrap())
+                .body(Body::from(response_body))?)
         }
     }
 }
@@ -378,8 +374,7 @@ async fn handle_report(
     Ok(Response::builder()
         .status(StatusCode::MULTI_STATUS)
         .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-        .body(Body::from(response_body))
-        .unwrap())
+        .body(Body::from(response_body))?)
 }
 
 // ─── MKCOL (create address book) ─────────────────────────────────────
@@ -423,8 +418,7 @@ async fn handle_mkcol(
 
     Ok(Response::builder()
         .status(StatusCode::CREATED)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ─── PUT (.vcf) ──────────────────────────────────────────────────────
@@ -487,8 +481,7 @@ async fn handle_put(
         Ok(Response::builder()
             .status(StatusCode::NO_CONTENT)
             .header(header::ETAG, format!("\"{}\"", contact.etag))
-            .body(Body::empty())
-            .unwrap())
+            .body(Body::empty())?)
     } else {
         let create_dto = CreateContactVCardDto {
             address_book_id: address_book_id.to_string(),
@@ -504,8 +497,7 @@ async fn handle_put(
         Ok(Response::builder()
             .status(StatusCode::CREATED)
             .header(header::ETAG, format!("\"{}\"", contact.etag))
-            .body(Body::empty())
-            .unwrap())
+            .body(Body::empty())?)
     }
 }
 
@@ -548,8 +540,7 @@ async fn handle_get(
         Ok(Response::builder()
             .status(StatusCode::OK)
             .header(header::CONTENT_TYPE, "text/vcard; charset=utf-8")
-            .body(Body::from(vcf_data))
-            .unwrap())
+            .body(Body::from(vcf_data))?)
     } else {
         // GET on individual contact
         let contact_file = parts[1];
@@ -571,8 +562,7 @@ async fn handle_get(
             .status(StatusCode::OK)
             .header(header::CONTENT_TYPE, "text/vcard; charset=utf-8")
             .header(header::ETAG, format!("\"{}\"", contact.etag))
-            .body(Body::from(vcard))
-            .unwrap())
+            .body(Body::from(vcard))?)
     }
 }
 
@@ -625,8 +615,7 @@ async fn handle_delete(
 
     Ok(Response::builder()
         .status(StatusCode::NO_CONTENT)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ─── PROPPATCH ───────────────────────────────────────────────────────
@@ -701,6 +690,5 @@ async fn handle_proppatch(
     Ok(Response::builder()
         .status(StatusCode::MULTI_STATUS)
         .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-        .body(Body::from(response_body))
-        .unwrap())
+        .body(Body::from(response_body))?)
 }

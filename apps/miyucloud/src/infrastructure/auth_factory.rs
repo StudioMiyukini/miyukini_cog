@@ -50,7 +50,7 @@ pub async fn create_auth_services(
         config.auth.hash_memory_cost,
         config.auth.hash_time_cost,
         config.auth.hash_parallelism,
-    ));
+    )?);
 
     // Create PostgreSQL repositories
     let user_repository = Arc::new(UserPgRepository::new(pool.clone()));
@@ -78,7 +78,7 @@ pub async fn create_auth_services(
             config.oidc.issuer_url
         );
 
-        let oidc_service = Arc::new(OidcService::new(config.oidc.clone()));
+        let oidc_service = Arc::new(OidcService::new(config.oidc.clone())?);
         auth_app_service = auth_app_service.with_oidc(oidc_service, config.oidc.clone());
 
         if config.oidc.disable_password_login {

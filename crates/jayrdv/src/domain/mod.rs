@@ -180,6 +180,10 @@ pub fn slot_create(
     Ok(s)
 }
 
+/// Durée de blocage par défaut d'un créneau, évaluée à la compilation
+/// (`const`) : aucune panique possible à l'exécution (C-10).
+const HOLD_DEFAUT: chrono::Duration = chrono::Duration::seconds(300);
+
 /// Verrouille temporairement un créneau (hold pendant le parcours client).
 pub fn slot_hold(
     store: &JayRdvStore,
@@ -196,9 +200,8 @@ pub fn slot_hold(
             s.status
         )));
     }
-    let until = Utc::now()
-        + chrono::Duration::try_seconds(hold_duration_sec)
-            .unwrap_or_else(|| chrono::Duration::try_seconds(300).unwrap());
+    let until =
+        Utc::now() + chrono::Duration::try_seconds(hold_duration_sec).unwrap_or(HOLD_DEFAUT);
     s.status = SlotStatus::Held;
     s.held_until = Some(until.to_rfc3339());
     s.held_by = Some(session_id.to_string());

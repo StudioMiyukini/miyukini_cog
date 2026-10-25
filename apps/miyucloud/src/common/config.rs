@@ -761,6 +761,19 @@ impl Default for AppConfig {
 }
 
 impl AppConfig {
+    /// Startup validation of security-critical settings. Fail-closed: the
+    /// server must refuse to start on an inconsistent configuration (C-10).
+    pub fn validate(&self) -> Result<(), String> {
+        if self.encryption.enabled && self.encryption.key_base64.is_empty() {
+            return Err(
+                "FATAL: MIYUCLOUD_ENCRYPTION_ENABLED=true but MIYUCLOUD_ENCRYPTION_KEY is not set. \
+                 Generate a key with: openssl rand -base64 32"
+                    .to_string(),
+            );
+        }
+        Ok(())
+    }
+
     pub fn from_env() -> Self {
         let mut config = Self::default();
 
@@ -1018,13 +1031,8 @@ impl AppConfig {
         if let Ok(v) = env::var("MIYUCLOUD_ENCRYPTION_ALGORITHM") {
             config.encryption.algorithm = v;
         }
-        // Validate encryption config
-        if config.encryption.enabled && config.encryption.key_base64.is_empty() {
-            panic!(
-                "FATAL: MIYUCLOUD_ENCRYPTION_ENABLED=true but MIYUCLOUD_ENCRYPTION_KEY is not set. \
-                 Generate a key with: openssl rand -base64 32"
-            );
-        }
+        // Encryption config is validated by `validate()` (called at startup):
+        // an error, never a panic (C-10).
 
         // TLS configuration
         if let Ok(v) = env::var("MIYUCLOUD_TLS_ENABLED") {

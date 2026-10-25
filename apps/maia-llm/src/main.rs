@@ -12,6 +12,19 @@
 //! (ancres `model_trust_anchors`) sont chargés — voir le module `provenance`.
 //! Outillage : `maia-llm cle-dev --sortie <f>` et `maia-llm sceller-modele …`.
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 mod api;
 mod auth;
 mod canal;
@@ -43,7 +56,7 @@ async fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "maia_llm=info,tower_http=warn".parse().unwrap()),
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("maia_llm=info,tower_http=warn")),
         )
         .init();
 
@@ -108,7 +121,14 @@ async fn main() {
         provenance::PolitiqueModeles::new(ancres, provenance::derogation_demandee(&args));
 
     // Moteur + store
-    let engine = Arc::new(LlmEngine::new((*cfg).clone(), politique));
+    let engine = match LlmEngine::new((*cfg).clone(), politique) {
+        Ok(e) => Arc::new(e),
+        Err(e) => {
+            tracing::error!("{e}");
+            eprintln!("Refus de démarrer : {e}");
+            std::process::exit(1);
+        }
+    };
     let store = Arc::new(ModelStore::new(&models_dir));
 
     // Auto-load du meilleur modèle si activé
@@ -145,16 +165,24 @@ async fn main() {
         .layer(config::build_cors(&state.config.cors_allowed_origins))
         .layer(TraceLayer::new_for_http());
 
-    let listener = tokio::net::TcpListener::bind(&bind_addr)
-        .await
-        .expect("Impossible de binder l'adresse");
+    let listener = match tokio::net::TcpListener::bind(&bind_addr).await {
+        Ok(l) => l,
+        Err(e) => {
+            tracing::error!("Impossible de binder l'adresse {bind_addr} : {e}");
+            eprintln!("Refus de démarrer : impossible de binder {bind_addr} : {e}");
+            std::process::exit(1);
+        }
+    };
 
     tracing::info!("MAIA-LLM en écoute sur http://{bind_addr}");
 
-    axum::serve(listener, app)
+    if let Err(e) = axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await
-        .expect("Erreur serveur");
+    {
+        tracing::error!("Erreur serveur : {e}");
+        std::process::exit(1);
+    }
 }
 
 /// Parse les arguments CLI et charge la config TOML.
@@ -231,8 +259,11 @@ fn available_ram_mb() -> u64 {
 }
 
 async fn shutdown_signal() {
-    tokio::signal::ctrl_c()
-        .await
-        .expect("Impossible d'installer le handler CTRL+C");
+    if let Err(e) = tokio::signal::ctrl_c().await {
+        // Pas de panique (C-10) : sans gestionnaire, l'arrêt gracieux est
+        // indisponible mais le signal par défaut du système arrête le processus.
+        tracing::error!("Impossible d'installer le handler CTRL+C : {e}");
+        std::future::pending::<()>().await;
+    }
     tracing::info!("Signal d'arrêt reçu — shutdown gracieux...");
 }

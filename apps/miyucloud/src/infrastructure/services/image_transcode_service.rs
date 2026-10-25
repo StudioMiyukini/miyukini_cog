@@ -47,16 +47,20 @@ fn transcode_thread_count() -> usize {
 /// Dedicated rayon thread pool for CPU-bound image transcoding.
 /// Isolated from Tokio's blocking pool to prevent starvation of other I/O.
 /// Thread count scales with available CPUs (half cores, min 2).
-fn transcode_pool() -> &'static rayon::ThreadPool {
-    static POOL: OnceLock<rayon::ThreadPool> = OnceLock::new();
+/// Un échec de création du pool est mémorisé et remonté comme erreur de
+/// transcodage, jamais comme panique (C-10).
+fn transcode_pool() -> Result<&'static rayon::ThreadPool, String> {
+    static POOL: OnceLock<Result<rayon::ThreadPool, String>> = OnceLock::new();
     POOL.get_or_init(|| {
         let threads = transcode_thread_count();
         rayon::ThreadPoolBuilder::new()
             .num_threads(threads)
             .thread_name(|idx| format!("transcode-{idx}"))
             .build()
-            .expect("Failed to create transcode thread pool")
+            .map_err(|e| format!("Failed to create transcode thread pool: {e}"))
     })
+    .as_ref()
+    .map_err(Clone::clone)
 }
 
 /// Supported output formats
@@ -253,7 +257,7 @@ impl ImageTranscodeService {
 
         let (tx, rx) = tokio::sync::oneshot::channel();
 
-        transcode_pool().spawn(move || {
+        transcode_pool()?.spawn(move || {
             let result = transcode_image_blocking(&content_for_rayon, &mime_owned, target_format);
             let _ = tx.send(result);
         });
@@ -501,7 +505,7 @@ mod tests {
     #[test]
     fn test_transcode_pool_initializes() {
         // Verify the pool can be created without panic
-        let pool = transcode_pool();
+        let pool = transcode_pool().unwrap();
         assert_eq!(pool.current_num_threads(), transcode_thread_count());
     }
 }

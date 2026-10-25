@@ -4,13 +4,27 @@
 
 #![doc(html_root_url = "https://docs.miyukini.com/jaymessage-client")]
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 // @id service.jaymessage.alicia_client
 // @role alicia_to_jaymessage_adapter
 // @layer 7
 // @do bridge_alicia_to_jaymessage
 // @human Adaptateur Alicia → JayMessage : route les intents vers un backend pluggable.
 
-use std::sync::{Arc, RwLock};
+// C-10 : verrous du backend factice levés sans panique en cas d'empoisonnement.
+use std::sync::{Arc, PoisonError, RwLock};
 
 use async_trait::async_trait;
 use chrono::Utc;
@@ -298,22 +312,22 @@ impl FakeJayMessageBackend {
 
     /// Ajoute un thread fictif.
     pub fn push_thread(&self, thread: ThreadSummary) {
-        self.inner.write().unwrap().threads.push(thread);
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).threads.push(thread);
     }
 
     /// Ajoute un message indexable par `search_threads`.
     pub fn push_message(&self, msg: MessageSummary) {
-        self.inner.write().unwrap().messages.push(msg);
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).messages.push(msg);
     }
 
     /// Force toutes les méthodes à renvoyer une erreur backend.
     pub fn force_failure(&self, message: impl Into<String>) {
-        self.inner.write().unwrap().fail_with = Some(message.into());
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).fail_with = Some(message.into());
     }
 
     /// Snapshot des messages envoyés via send_message (utile en test).
     pub fn snapshot_sent(&self) -> Vec<MessageSummary> {
-        self.inner.read().unwrap().sent.clone()
+        self.inner.read().unwrap_or_else(PoisonError::into_inner).sent.clone()
     }
 }
 
@@ -325,7 +339,7 @@ impl JayMessageBackend for FakeJayMessageBackend {
         body: &str,
         _reply_to: Option<&str>,
     ) -> Result<MessageSummary, JayMessageError> {
-        let mut state = self.inner.write().unwrap();
+        let mut state = self.inner.write().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayMessageError::Backend(msg.clone()));
         }
@@ -350,7 +364,7 @@ impl JayMessageBackend for FakeJayMessageBackend {
         limit: usize,
         unread_only: bool,
     ) -> Result<Vec<ThreadSummary>, JayMessageError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayMessageError::Backend(msg.clone()));
         }
@@ -370,7 +384,7 @@ impl JayMessageBackend for FakeJayMessageBackend {
         query: &str,
         limit: usize,
     ) -> Result<Vec<MessageSummary>, JayMessageError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayMessageError::Backend(msg.clone()));
         }

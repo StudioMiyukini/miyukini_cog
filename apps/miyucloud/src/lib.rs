@@ -5,6 +5,18 @@
 //! @human  miyucloud — module « lib ».
 
 #![allow(async_fn_in_trait)]
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
 
 // Export the main project modules
 pub mod application;

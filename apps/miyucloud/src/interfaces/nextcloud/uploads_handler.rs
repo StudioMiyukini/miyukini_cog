@@ -42,8 +42,7 @@ pub async fn handle_nc_uploads(
         "DELETE" => handle_abort(state, &user, &upload_id).await,
         _ => Ok(Response::builder()
             .status(StatusCode::METHOD_NOT_ALLOWED)
-            .body(Body::empty())
-            .unwrap()),
+            .body(Body::empty())?),
     }
 }
 
@@ -65,8 +64,7 @@ async fn handle_mkcol(
 
     Ok(Response::builder()
         .status(StatusCode::CREATED)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 /// PUT — store a chunk.
@@ -112,8 +110,7 @@ async fn handle_put_chunk(
 
     Ok(Response::builder()
         .status(StatusCode::CREATED)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 /// MOVE — assemble chunks into final file.
@@ -167,8 +164,7 @@ async fn handle_assemble(
         .status(StatusCode::CREATED)
         .header(header::ETAG, format!("\"{}\"", tag))
         .header("oc-etag", format!("\"{}\"", tag))
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 /// Range le fichier assemblé chez l'appelant et renvoie son ETag.
@@ -256,8 +252,7 @@ async fn handle_abort(
 
     Ok(Response::builder()
         .status(StatusCode::NO_CONTENT)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 /// Extract the file subpath from a Destination header pointing to the files DAV namespace.

@@ -28,7 +28,7 @@ use crate::application::ports::chunked_upload_ports::DEFAULT_CHUNK_SIZE;
 use crate::application::ports::file_ports::FileUploadUseCase;
 use crate::application::ports::storage_ports::StorageUsagePort;
 use crate::common::di::AppState;
-use crate::interfaces::errors::AppError;
+use crate::interfaces::errors::{AppError, reponse_json};
 use crate::interfaces::middleware::auth::AuthUser;
 
 /// Request body for creating an upload session
@@ -213,11 +213,7 @@ impl ChunkedUploadHandler {
                     resp = resp.header("Upload-Complete", "true");
                 }
 
-                resp.body(axum::body::Body::from(
-                    serde_json::to_string(&response).unwrap(),
-                ))
-                .unwrap()
-                .into_response()
+                reponse_json(resp, &response)
             }
             Err(e) => AppError::from(e).into_response(),
         }
@@ -234,22 +230,20 @@ impl ChunkedUploadHandler {
         let chunked_service = &state.core.chunked_upload_service;
 
         match chunked_service.get_status(&upload_id, auth_user.id).await {
-            Ok(status) => Response::builder()
-                .status(StatusCode::OK)
-                .header(header::CONTENT_TYPE, "application/json")
-                .header("Upload-Offset", status.bytes_received.to_string())
-                .header("Upload-Length", status.total_size.to_string())
-                .header("Upload-Progress", format!("{:.2}", status.progress * 100.0))
-                .header("Upload-Chunks-Total", status.total_chunks.to_string())
-                .header(
-                    "Upload-Chunks-Complete",
-                    status.completed_chunks.to_string(),
-                )
-                .body(axum::body::Body::from(
-                    serde_json::to_string(&status).unwrap(),
-                ))
-                .unwrap()
-                .into_response(),
+            Ok(status) => {
+                let builder = Response::builder()
+                    .status(StatusCode::OK)
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .header("Upload-Offset", status.bytes_received.to_string())
+                    .header("Upload-Length", status.total_size.to_string())
+                    .header("Upload-Progress", format!("{:.2}", status.progress * 100.0))
+                    .header("Upload-Chunks-Total", status.total_chunks.to_string())
+                    .header(
+                        "Upload-Chunks-Complete",
+                        status.completed_chunks.to_string(),
+                    );
+                reponse_json(builder, &status)
+            }
             Err(e) => AppError::from(e).into_response(),
         }
     }

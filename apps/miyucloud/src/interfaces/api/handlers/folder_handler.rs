@@ -24,7 +24,7 @@ use crate::application::ports::inbound::FolderUseCase;
 use crate::application::ports::trash_ports::TrashUseCase;
 use crate::application::services::folder_service::FolderService;
 use crate::common::di::AppState as GlobalAppState;
-use crate::interfaces::errors::AppError;
+use crate::interfaces::errors::{AppError, ReponseOu500};
 use crate::interfaces::middleware::auth::AuthUser;
 
 type AppState = Arc<FolderService>;
@@ -238,14 +238,16 @@ impl FolderHandler {
                         .status(StatusCode::NOT_MODIFIED)
                         .header(header::ETAG, &etag)
                         .body(Body::empty())
-                        .unwrap()
+                        .ou_500()
                         .into_response();
                 }
 
                 let listing = FolderListingDto { folders, files };
                 let mut resp = (StatusCode::OK, Json(listing)).into_response();
-                resp.headers_mut()
-                    .insert(header::ETAG, header::HeaderValue::from_str(&etag).unwrap());
+                // ETag facultatif : une valeur non représentable est omise.
+                if let Ok(valeur) = header::HeaderValue::from_str(&etag) {
+                    resp.headers_mut().insert(header::ETAG, valeur);
+                }
                 resp
             }
             (Err(err), _) | (_, Err(err)) => AppError::from(err).into_response(),
@@ -411,7 +413,7 @@ impl FolderHandler {
                             .header(header::CONTENT_DISPOSITION, content_disposition)
                             .header(header::CONTENT_LENGTH, file_size)
                             .body(body)
-                            .unwrap();
+                            .ou_500();
 
                         // Keep TempPath alive in the response extensions so the
                         // file is only deleted AFTER the body stream finishes.

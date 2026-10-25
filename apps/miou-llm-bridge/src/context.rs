@@ -15,7 +15,10 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
+// C-10 : un verrou empoisonné (panique d'un autre fil pendant l'écriture)
+// est levé sans panique ; les sections critiques ne laissent pas d'état
+// partiel et l'état réel est conservé (pas de remise à zéro permissive).
+use std::sync::{Arc, PoisonError, RwLock};
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -224,13 +227,13 @@ impl ContextRegistry {
 
     /// Liste toutes les bases (résumés).
     pub fn list_bases(&self) -> Vec<ContextBaseSummary> {
-        let bases = self.bases.read().unwrap();
+        let bases = self.bases.read().unwrap_or_else(PoisonError::into_inner);
         bases.values().map(ContextBaseSummary::from).collect()
     }
 
     /// Récupère une base complète.
     pub fn get_base(&self, id: &str) -> Option<ContextBase> {
-        let bases = self.bases.read().unwrap();
+        let bases = self.bases.read().unwrap_or_else(PoisonError::into_inner);
         bases.get(id).cloned()
     }
 
@@ -251,14 +254,14 @@ impl ContextRegistry {
             created_at: now_iso(),
         };
 
-        let mut bases = self.bases.write().unwrap();
+        let mut bases = self.bases.write().unwrap_or_else(PoisonError::into_inner);
         bases.insert(id, base.clone());
         base
     }
 
     /// Met à jour une base.
     pub fn update_base(&self, id: &str, req: UpdateContextRequest) -> Option<ContextBase> {
-        let mut bases = self.bases.write().unwrap();
+        let mut bases = self.bases.write().unwrap_or_else(PoisonError::into_inner);
         let base = bases.get_mut(id)?;
 
         if let Some(name) = req.name {
@@ -285,14 +288,14 @@ impl ContextRegistry {
 
     /// Supprime une base.
     pub fn delete_base(&self, id: &str) -> bool {
-        let mut bases = self.bases.write().unwrap();
+        let mut bases = self.bases.write().unwrap_or_else(PoisonError::into_inner);
         bases.remove(id).is_some()
     }
 
     /// Compile le contexte pour un agent : sélectionne les meilleurs documents
     /// dans le budget token depuis les bases spécifiées.
     pub fn compile_context(&self, base_ids: &[String], max_tokens: u32) -> String {
-        let bases = self.bases.read().unwrap();
+        let bases = self.bases.read().unwrap_or_else(PoisonError::into_inner);
         let mut all_docs: Vec<(&ContextDocument, &str)> = Vec::new();
 
         for base_id in base_ids {

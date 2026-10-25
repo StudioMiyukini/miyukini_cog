@@ -61,7 +61,8 @@ impl BlobEncryptionService {
     }
 
     fn cipher(&self) -> Aes256Gcm {
-        Aes256Gcm::new_from_slice(&self.key).expect("valid 32-byte key")
+        // Clé de taille fixe (32 octets) : construction infaillible.
+        Aes256Gcm::new(&self.key.into())
     }
 }
 

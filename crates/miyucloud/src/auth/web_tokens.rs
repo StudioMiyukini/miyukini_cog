@@ -46,7 +46,7 @@ pub fn hash_password(password: &str) -> Result<String, MiyucloudError> {
     let mut salt = [0u8; 16];
     rand::rngs::OsRng.fill_bytes(&mut salt);
 
-    let params = password_argon2_params();
+    let params = password_argon2_params()?;
     let argon2 = argon2::Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, params);
     let mut hash = [0u8; 32];
     argon2
@@ -82,7 +82,10 @@ pub fn verify_password(password: &str, stored_hash: &str) -> bool {
         return false;
     };
 
-    let params = password_argon2_params();
+    // Fail-closed : paramètres invalides => vérification refusée.
+    let Ok(params) = password_argon2_params() else {
+        return false;
+    };
     let argon2 = argon2::Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, params);
     let mut computed = [0u8; 32];
     if argon2
@@ -170,15 +173,13 @@ pub fn validate_share_link(
 
 /// Parametres Argon2id pour le hashing de mots de passe de partage.
 /// Parametres plus legers que la master key (car utilise plus frequemment).
-fn password_argon2_params() -> argon2::Params {
+/// Erreur propagée plutôt que panique (C-10).
+fn password_argon2_params() -> Result<argon2::Params, MiyucloudError> {
     #[cfg(debug_assertions)]
-    {
-        argon2::Params::new(4096, 1, 1, Some(32)).expect("valid argon2 params")
-    }
+    let params = argon2::Params::new(4096, 1, 1, Some(32));
     #[cfg(not(debug_assertions))]
-    {
-        argon2::Params::new(16384, 2, 2, Some(32)).expect("valid argon2 params")
-    }
+    let params = argon2::Params::new(16384, 2, 2, Some(32));
+    params.map_err(|e| MiyucloudError::Crypto(format!("Invalid Argon2 params: {e}")))
 }
 
 /// Decode un string hexadecimal en bytes.

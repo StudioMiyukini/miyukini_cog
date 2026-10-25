@@ -138,9 +138,15 @@ fn hmac8(secret: &Key32, message: &[u8]) -> [u8; CHECKSUM_BYTES] {
 
 /// Instancie un HMAC-SHA256 initialisé sur `message`.
 fn hmac_sha256(secret: &Key32, message: &[u8]) -> HmacSha256 {
-    // `new_from_slice` n'échoue jamais pour HMAC (toute longueur de clé est acceptée).
-    let mut mac = <HmacSha256 as Mac>::new_from_slice(&secret.0)
-        .expect("HMAC accepte toute longueur de clé");
+    // RFC 2104 : une clé plus courte que le bloc (64 octets) est complétée
+    // par des zéros. Construire le bloc nous-mêmes donne le même tag que
+    // `new_from_slice` tout en restant infaillible (C-10, aucun `expect`).
+    let mut bloc = [0u8; 64];
+    for (dst, src) in bloc.iter_mut().zip(secret.0.iter()) {
+        *dst = *src;
+    }
+    let mut mac = <HmacSha256 as Mac>::new(&bloc.into());
+    bloc.fill(0);
     mac.update(message);
     mac
 }

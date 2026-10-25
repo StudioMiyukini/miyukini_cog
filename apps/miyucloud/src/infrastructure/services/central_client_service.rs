@@ -23,16 +23,22 @@ pub struct CentralClientService {
 }
 
 impl CentralClientService {
-    pub fn new(config: CentralClientConfig) -> Self {
-        Self {
-            http_client: reqwest::Client::builder()
-                .timeout(Duration::from_secs(10))
-                .build()
-                .expect("Failed to build HTTP client"),
+    pub fn new(config: CentralClientConfig) -> Result<Self, crate::domain::errors::DomainError> {
+        let http_client = reqwest::Client::builder()
+            .timeout(Duration::from_secs(10))
+            .build()
+            .map_err(|e| {
+                crate::domain::errors::DomainError::internal_error(
+                    "CentralClient",
+                    format!("Failed to build HTTP client: {e}"),
+                )
+            })?;
+        Ok(Self {
+            http_client,
             config,
             state: Arc::new(RwLock::new(ConnectionStatus::disabled("central"))),
             shutdown: Arc::new(RwLock::new(false)),
-        }
+        })
     }
 
     /// Register this service with Central.

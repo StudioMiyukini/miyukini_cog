@@ -42,14 +42,18 @@ impl Argon2PasswordHasher {
     /// - `time_cost`:    number of iterations (e.g. 3)
     /// - `parallelism`:  lanes of parallelism (e.g. 2)
     ///
-    /// Panics at startup if the parameters are invalid (caught immediately).
-    pub fn new(memory_cost: u32, time_cost: u32, parallelism: u32) -> Self {
-        let params = Params::new(memory_cost, time_cost, parallelism, None).unwrap_or_else(|e| {
-            panic!(
-                "Invalid Argon2 parameters (m={}, t={}, p={}): {}",
-                memory_cost, time_cost, parallelism, e
+    /// Returns an error at startup if the parameters are invalid (caught
+    /// immediately) — never a panic (C-10).
+    pub fn new(memory_cost: u32, time_cost: u32, parallelism: u32) -> Result<Self, DomainError> {
+        let params = Params::new(memory_cost, time_cost, parallelism, None).map_err(|e| {
+            DomainError::internal_error(
+                "Argon2",
+                format!(
+                    "Invalid Argon2 parameters (m={}, t={}, p={}): {}",
+                    memory_cost, time_cost, parallelism, e
+                ),
             )
-        });
+        })?;
 
         tracing::info!(
             "Argon2PasswordHasher initialized: m_cost={} KiB, t_cost={}, p_cost={}",
@@ -58,7 +62,7 @@ impl Argon2PasswordHasher {
             parallelism,
         );
 
-        Self { params }
+        Ok(Self { params })
     }
 }
 
@@ -125,7 +129,7 @@ mod tests {
 
     /// Test params: small values so tests are fast (~10 ms instead of ~400 ms)
     fn test_hasher() -> Argon2PasswordHasher {
-        Argon2PasswordHasher::new(16384, 1, 1)
+        Argon2PasswordHasher::new(16384, 1, 1).unwrap()
     }
 
     #[tokio::test]

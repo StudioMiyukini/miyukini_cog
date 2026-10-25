@@ -23,13 +23,27 @@
 
 #![doc(html_root_url = "https://docs.miyukini.com/jaykoa-client")]
 
+// C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 // @id service.jaykoa.alicia_client
 // @role alicia_to_jaykoa_adapter
 // @layer 7
 // @do bridge_alicia_to_jaykoa
 // @human Adaptateur Alicia → JayKoa : route les intents vers un backend pluggable.
 
-use std::sync::Arc;
+// C-10 : verrous du backend factice levés sans panique en cas d'empoisonnement.
+use std::sync::{Arc, PoisonError};
 
 use async_trait::async_trait;
 use chrono::NaiveDate;
@@ -247,19 +261,19 @@ impl FakeJayKoaBackend {
     pub fn push_event_on(&self, date: NaiveDate, summary: EventSummary) {
         self.inner
             .write()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .events
             .push(EventWithDate { date, summary });
     }
 
     /// Définit l'événement renvoyé par `next_event`.
     pub fn set_next(&self, ev: Option<EventSummary>) {
-        self.inner.write().unwrap().next = ev;
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).next = ev;
     }
 
     /// Force toutes les méthodes à renvoyer une erreur backend.
     pub fn force_failure(&self, message: impl Into<String>) {
-        self.inner.write().unwrap().fail_with = Some(message.into());
+        self.inner.write().unwrap_or_else(PoisonError::into_inner).fail_with = Some(message.into());
     }
 }
 
@@ -270,7 +284,7 @@ impl JayKoaBackend for FakeJayKoaBackend {
         from: NaiveDate,
         to: NaiveDate,
     ) -> Result<Vec<EventSummary>, JayKoaError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayKoaError::Backend(msg.clone()));
         }
@@ -283,7 +297,7 @@ impl JayKoaBackend for FakeJayKoaBackend {
     }
 
     async fn next_event(&self) -> Result<Option<EventSummary>, JayKoaError> {
-        let state = self.inner.read().unwrap();
+        let state = self.inner.read().unwrap_or_else(PoisonError::into_inner);
         if let Some(msg) = &state.fail_with {
             return Err(JayKoaError::Backend(msg.clone()));
         }

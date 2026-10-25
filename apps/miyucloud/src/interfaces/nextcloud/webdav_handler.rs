@@ -121,8 +121,7 @@ pub async fn handle_nc_webdav(
         }
         _ => Ok(Response::builder()
             .status(StatusCode::METHOD_NOT_ALLOWED)
-            .body(Body::empty())
-            .unwrap()),
+            .body(Body::empty())?),
     }
 }
 
@@ -136,8 +135,7 @@ fn handle_options() -> Result<Response<Body>, AppError> {
             header::ALLOW,
             "OPTIONS, GET, HEAD, PUT, DELETE, MKCOL, MOVE, PROPFIND, PROPPATCH, REPORT, SEARCH",
         )
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ──────────────────── PROPFIND ────────────────────
@@ -232,8 +230,7 @@ async fn handle_propfind(
         return Ok(Response::builder()
             .status(StatusCode::MULTI_STATUS)
             .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-            .body(Body::from(buf))
-            .unwrap());
+            .body(Body::from(buf))?);
     }
 
     // Not a folder — try as a file.
@@ -271,8 +268,7 @@ async fn handle_propfind(
         return Ok(Response::builder()
             .status(StatusCode::MULTI_STATUS)
             .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-            .body(Body::from(buf))
-            .unwrap());
+            .body(Body::from(buf))?);
     }
 
     Err(AppError::not_found("Resource not found"))
@@ -290,8 +286,7 @@ async fn handle_get(
         return Ok(Response::builder()
             .status(StatusCode::OK)
             .header("DAV", "1, 3")
-            .body(Body::empty())
-            .unwrap());
+            .body(Body::empty())?);
     }
 
     let file_service = &state.applications.file_retrieval_service;
@@ -303,8 +298,7 @@ async fn handle_get(
             return Ok(Response::builder()
                 .status(StatusCode::OK)
                 .header("DAV", "1, 3")
-                .body(Body::empty())
-                .unwrap());
+                .body(Body::empty())?);
         }
         Some(OwnedResource::File(file)) => file,
         None => return Err(AppError::not_found("File not found")),
@@ -340,8 +334,7 @@ async fn handle_get(
         .header(header::CONTENT_LENGTH, file.size)
         .header(header::ETAG, format!("\"{}\"", file.id))
         .header(header::LAST_MODIFIED, modified_at.to_rfc2822())
-        .body(Body::from_stream(std::pin::Pin::from(stream)))
-        .unwrap())
+        .body(Body::from_stream(std::pin::Pin::from(stream)))?)
 }
 
 // ──────────────────── HEAD ────────────────────
@@ -356,8 +349,7 @@ async fn handle_head(
         return Ok(Response::builder()
             .status(StatusCode::OK)
             .header("DAV", "1, 3")
-            .body(Body::empty())
-            .unwrap());
+            .body(Body::empty())?);
     }
 
     // M-02 : résolution sous la racine de l'appelant uniquement.
@@ -367,8 +359,7 @@ async fn handle_head(
             return Ok(Response::builder()
                 .status(StatusCode::OK)
                 .header("DAV", "1, 3")
-                .body(Body::empty())
-                .unwrap());
+                .body(Body::empty())?);
         }
         Some(OwnedResource::File(file)) => file,
         None => return Err(AppError::not_found("File not found")),
@@ -384,8 +375,7 @@ async fn handle_head(
         .header(header::CONTENT_LENGTH, file.size)
         .header(header::ETAG, format!("\"{}\"", file.id))
         .header(header::LAST_MODIFIED, modified_at.to_rfc2822())
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ──────────────────── PROPPATCH ────────────────────
@@ -473,8 +463,7 @@ async fn handle_proppatch(
     Ok(Response::builder()
         .status(StatusCode::MULTI_STATUS)
         .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-        .body(Body::from(buf))
-        .unwrap())
+        .body(Body::from(buf))?)
 }
 
 /// Parse the oc:favorite value from a PROPPATCH XML body using quick_xml.
@@ -608,8 +597,7 @@ async fn handle_put(
                 .status(StatusCode::NO_CONTENT)
                 .header(header::ETAG, format!("\"{}\"", updated.etag))
                 .header("oc-etag", format!("\"{}\"", updated.etag))
-                .body(Body::empty())
-                .unwrap())
+                .body(Body::empty())?)
         }
         PutTarget::New { folder_id, name } => {
             let file_dto = upload_service
@@ -628,8 +616,7 @@ async fn handle_put(
                 .status(StatusCode::CREATED)
                 .header(header::ETAG, format!("\"{}\"", file_dto.etag))
                 .header("oc-etag", format!("\"{}\"", file_dto.etag))
-                .body(Body::empty())
-                .unwrap())
+                .body(Body::empty())?)
         }
     }
 }
@@ -652,8 +639,7 @@ async fn handle_mkcol(
     {
         return Ok(Response::builder()
             .status(StatusCode::METHOD_NOT_ALLOWED)
-            .body(Body::empty())
-            .unwrap());
+            .body(Body::empty())?);
     }
 
     // Collect path segments that need to be created (walk from root to leaf)
@@ -710,8 +696,7 @@ async fn handle_mkcol(
 
     Ok(Response::builder()
         .status(StatusCode::CREATED)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ──────────────────── DELETE ────────────────────
@@ -744,8 +729,7 @@ async fn handle_delete(
             .map_err(|e| AppError::internal_error(format!("Failed to trash {}: {}", kind, e)))?;
         return Ok(Response::builder()
             .status(StatusCode::NO_CONTENT)
-            .body(Body::empty())
-            .unwrap());
+            .body(Body::empty())?);
     }
 
     // Fallback: hard delete when trash service is not available.
@@ -770,8 +754,7 @@ async fn handle_delete(
 
     Ok(Response::builder()
         .status(StatusCode::NO_CONTENT)
-        .body(Body::empty())
-        .unwrap())
+        .body(Body::empty())?)
 }
 
 // ──────────────────── MOVE ────────────────────
@@ -847,7 +830,7 @@ async fn handle_move(
                     .header(header::ETAG, format!("\"{}\"", moved.id))
                     .header("oc-etag", format!("\"{}\"", moved.id));
             }
-            Ok(builder.body(Body::empty()).unwrap())
+            Ok(builder.body(Body::empty())?)
         }
         OwnedResource::Folder(folder) => {
             if is_reserved_home_name(dest_name) {
@@ -880,8 +863,7 @@ async fn handle_move(
 
             Ok(Response::builder()
                 .status(StatusCode::CREATED)
-                .body(Body::empty())
-                .unwrap())
+                .body(Body::empty())?)
         }
     }
 }

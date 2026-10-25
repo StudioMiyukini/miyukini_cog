@@ -65,7 +65,7 @@ pub async fn list_photos(
             if let Some(&last_sd) = sort_dates.last() {
                 response
                     .headers_mut()
-                    .insert("X-Next-Cursor", last_sd.to_string().parse().unwrap());
+                    .insert("X-Next-Cursor", axum::http::HeaderValue::from(last_sd));
             }
 
             response
