@@ -51,14 +51,11 @@ pub fn moderate(
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);
     }
-    let _guard = store::comments()
+    // Un seul verrou : reprendre `comments()` sous le garde bloquait à jamais.
+    let commentaires = store::comments()
         .lock()
         .map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
-    if !store::comments()
-        .lock()
-        .map_err(|_| MiyucmsError::InvalidInput("lock".into()))?
-        .contains_key(comment_id)
-    {
+    if !commentaires.contains_key(comment_id) {
         return Err(MiyucmsError::InvalidInput("comment not found".into()));
     }
     Ok(())
