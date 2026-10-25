@@ -1,0 +1,44 @@
+# Compilations reproductibles des Cores et services officiels (EX-04, contrainte C-06).
+# Lance scripts/build-reproductible.sh : deux builds du commit dans deux repertoires
+# source distincts, comparaison des SHA-256. Echec si un binaire differe.
+name: reproductible
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      sous_ensemble:
+        description: "Binaires a verifier, separes par des virgules (vide = liste par defaut)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  reproductible:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: dependances systeme
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang pkg-config libssl-dev
+      - uses: dtolnay/rust-toolchain@ff7f6a3374ce205788da40198ec918bd5d67aea7 # 1.99.0
+        with:
+          toolchain: 1.99.0
+      - name: build reproductible (deux passes, comparaison SHA-256)
+        env:
+          SOUS_ENSEMBLE: ${{ inputs.sous_ensemble }}
+        run: |
+          args=()
+          if [ -n "$SOUS_ENSEMBLE" ]; then
+            args+=(--sous-ensemble "$SOUS_ENSEMBLE")
+          fi
+          scripts/build-reproductible.sh "${args[@]}"
