@@ -6,7 +6,7 @@
 <!-- @human Notes de version de la beta 0.9.0-beta.1 : livraison, installation, mise à jour, limites, vérifications du testeur -->
 <!-- @do describe_beta_release -->
 
-- **Statut** : v1.0, 2026-10-25 · **Version** : `0.9.0-beta.1` (workspace) · **Journal** : [CHANGELOG](../../CHANGELOG.md)
+- **Statut** : v1.1, 2026-10-25 · **Version** : `0.9.0-beta.1` (workspace) · **Journal** : [CHANGELOG](../../CHANGELOG.md)
 - **Cible** : machine de recette **dédiée**, Ubuntu 26.04, physique ou VM, chez un testeur. **Jamais** un hôte de production, un poste de travail ni une VM durable partagée
 - **Liés** : [plan](PLAN-RECETTE-BETA.md) · [cas de test](CAS-DE-TEST-BETA.md) · [limites](LIMITES-CONNUES-BETA.md) · [modèle de PV](PV-RECETTE-MODELE.md)
 
@@ -19,6 +19,33 @@
 - Clé publique Ed25519 (hex) : `d802a28c1319e0d178ba371c401ec1d1d307fc85c0f0256ca9fe8fc5138da938`
 - SHA-256 du fichier `cle-publique-editeur.pem` : `012ea776e61a3d9f6879e901e46b558c189183cff0214fdefcc267bd0229af83`
 - Le testeur reçoit la clé par un canal distinct de l'archive (courriel signé, remise en main propre…) ; la clé contenue dans le paquet ne fait foi **que** si son empreinte correspond
+
+## 1 bis. Paquet livré (empreintes à comparer hors bande)
+
+<!-- @id recette.notes-version.paquet -->
+<!-- @role delivered-package -->
+<!-- @do publish_package_digest -->
+
+- Commit source : `342629e0e470f1844fc56992c9ac6008c81014ee` (arbre **propre**, date du commit `2026-10-25T21:49:12Z`)
+- Archive : `cog-0.9.0-beta.1-342629e0e470.tar.zst` (15 Mo, 289 fichiers au `MANIFESTE`)
+  - SHA-256 de l'archive : `ea1cca7dc6f481d9cc879f6614760f5272fead33f77019ab3bf94977766fef90`
+  - SHA-256 du `MANIFESTE` : `9b6203579f52eb28115ae9cd22e4a59a211f284de08672bbd12923ade27e7e47`
+- Clé publique : SHA-256 de `cle-publique-editeur.pem` = `012ea776e61a3d9f6879e901e46b558c189183cff0214fdefcc267bd0229af83` (inchangée, §1)
+- **Reproductible** : trois constructions du même commit (deux arbres extraits à des chemins différents, deux `CARGO_TARGET_DIR` vierges, puis une reconstruction à cache chaud) ont donné **la même archive au bit près**
+- Dépendances de `outil-sceau` : son `Cargo.lock` n'est pas encore suivi par git ; son SHA-256 (`e9acb45bb70bd987beb8b5abb4b163b7dea91f91b976cc71dda301f1eb8a4b3c`) est consigné dans `VERSION`
+- Paquet de mise à jour fourni pour l'essai `mise-a-jour.sh` : `cog-0.9.0-beta.1-342629e0e470-maj.tar.zst`, SHA-256 `0d192fdcce3dfbe4eee54f7a04a459810329c9a0b3b77ba600d8018475348d38` (même commit, seul le nom diffère, donc le `MANIFESTE` aussi)
+- Vérification par le testeur, avant toute extraction :
+
+```sh
+echo "ea1cca7dc6f481d9cc879f6614760f5272fead33f77019ab3bf94977766fef90  cog-0.9.0-beta.1-342629e0e470.tar.zst" | sha256sum -c -
+zstd -dc cog-0.9.0-beta.1-342629e0e470.tar.zst | tar -xf - && cd cog-0.9.0-beta.1-342629e0e470
+echo "012ea776e61a3d9f6879e901e46b558c189183cff0214fdefcc267bd0229af83  cle-publique-editeur.pem" | sha256sum -c -
+openssl pkeyutl -verify -pubin -inkey cle-publique-editeur.pem -rawin -in MANIFESTE -sigfile MANIFESTE.sig
+grep -v '^#' MANIFESTE | sha256sum --check --strict --quiet - && echo "paquet intègre"
+```
+
+- Reconstruction par un tiers (même chaîne Rust, même clé d'éditeur) : `git worktree add <dir> 342629e0e470` ; copier `deploy/recette/outil-sceau/Cargo.lock` (SHA-256 ci-dessus) ; `deploy/recette/construire-paquet.sh --source <dir>` ; comparer le SHA-256 de l'archive
+- Essais en VM de recette sur ce paquet : `tester.sh` 100/100, `zone.sh` 9/9, `installateur.sh` 48/48, `mise-a-jour.sh` (vers le paquet `-maj`) 50/50, `tester.sh` après mise à jour 100/100
 
 ## 2. Ce qui est livré
 
@@ -107,7 +134,8 @@
 <!-- @do summarize_limits -->
 
 - Liste complète : [LIMITES-CONNUES-BETA](LIMITES-CONNUES-BETA.md) ; principales :
-- Paquet construit depuis un arbre **modifié** tant que le mainteneur n'a pas commité : marqué `non-reproductible` (nom, `VERSION`, `MANIFESTE`) ; reproductibilité vérifiable par `--verifier-reproductible` sur kindmother-server, portail-sas et miyudouane seulement
+- Paquet du §1 bis construit depuis un arbre **propre** et reproductible au bit près (archive entière). Un paquet construit depuis un arbre modifié reste marqué `non-reproductible` (nom, `VERSION`, `MANIFESTE`)
+- `deploy/recette/outil-sceau/Cargo.lock` est exclu par le `.gitignore` (règle `Cargo.lock`) : tant qu'il n'est pas versionné (`git add -f`), les versions des dépendances de `outil-sceau` ne sont pas fixées par le commit, mais par ce fichier, dont le SHA-256 est publié
 - Arrêtés de la Douane : **arrêtés d'essai** (clé jetable, valides un jour, vérifiés à l'installation)
 - MAIA sans modèle (API LLM en 503) ; le compte MAIA n'a pas de flux vers son propre port 11435
 - Sauvegarde automatique chiffrée par une clé **locale** : ne restaure que sur la même machine
