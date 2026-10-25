@@ -15,6 +15,13 @@
 //! [`MemoryStore::open_in_memory`] sert les essais : mêmes intentions, tables
 //! en mémoire vive, rien sur disque.
 //!
+//! Oubli et copie héritée (A-019) : une pierre tombale fait foi partout —
+//! à chaque ouverture et après chaque import, tout fait ou version dont
+//! l'identifiant a une pierre tombale est retiré (un import, même relancé
+//! sans marqueur, ne ressuscite jamais un fait oublié) ; après un import
+//! vérifié, l'ancienne base est effacée de façon sûre ; tant qu'une copie
+//! héritée existe, [`MemoryStore::forget`] refuse (voir [`crate::copie_heritee`]).
+//!
 //! Concurrence : les transitions de confirmation sont des mises à jour
 //! conditionnelles (`clé = {id, statut}`) appliquées atomiquement par
 //! KindMother — une seule réclamation gagne. Les écritures composées (lecture
@@ -29,7 +36,7 @@
 // @human Store de la mémoire d'Alicia (faits, préférences, épisodes, personas) par KindMother.
 
 use std::collections::HashSet;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard};
 
 use chrono::{DateTime, Utc};
@@ -37,6 +44,7 @@ use kindmother_client::{TypedSelect, TypedWriteIntent};
 use serde_json::Value;
 use uuid::Uuid;
 
+use crate::copie_heritee::copie_heritee_presente;
 use crate::entrepot::{Entrepot, Ligne, MAX_LOT};
 use crate::errors::MemoryError;
 use crate::kindmother::{base_heritee_a_importer, ConfigKindMother, EntrepotKindMother};
@@ -59,13 +67,16 @@ pub struct MemoryStore {
     entrepot: Entrepot,
     /// Sérialise les écritures composées (lecture puis lot) du processus.
     ecriture: Mutex<()>,
+    /// Ancienne base SQLite déclarée : tant qu'une copie existe, l'oubli est refusé.
+    base_heritee: Option<PathBuf>,
 }
 
 impl MemoryStore {
-    fn avec(entrepot: Entrepot) -> Self {
+    fn avec(entrepot: Entrepot, base_heritee: Option<PathBuf>) -> Self {
         Self {
             entrepot,
             ecriture: Mutex::new(()),
+            base_heritee,
         }
     }
 
@@ -80,9 +91,9 @@ impl MemoryStore {
     ///
     /// `path` désigne l'**ancienne base SQLite** de la mémoire : si elle
     /// existe (non vide) et n'a pas encore été importée, elle est importée une
-    /// fois (feature `import-heritage`) ; sans cette feature, l'ouverture est
-    /// refusée tant qu'elle n'est pas importée. Le fichier n'est jamais créé,
-    /// modifié ni supprimé. Voir [`MemoryStore::connecter`].
+    /// fois (feature `import-heritage`) puis effacée de façon sûre ; sans
+    /// cette feature, l'ouverture est refusée tant qu'elle n'est pas importée.
+    /// Le fichier n'est jamais créé. Voir [`MemoryStore::connecter`].
     pub fn open(path: &Path) -> Result<Self, MemoryError> {
         Self::connecter(&ConfigKindMother::depuis_env().avec_base_heritee(path))
     }
@@ -94,33 +105,54 @@ impl MemoryStore {
     /// non chiffrée ⇒ refus. Aucun repli sur un fichier local.
     pub fn connecter(cfg: &ConfigKindMother) -> Result<Self, MemoryError> {
         let km = EntrepotKindMother::connecter(cfg)?;
-        let store = Self::avec(Entrepot::KindMother(Box::new(km)));
+        let store = Self::avec(Entrepot::KindMother(Box::new(km)), cfg.base_heritee.clone());
         if let Some(chemin) = &cfg.base_heritee {
             store.reprendre_base_heritee(chemin)?;
         }
+        store.appliquer_pierres_tombales()?;
         store.completer_historique()?;
         Ok(store)
     }
 
     /// Ouvre un store en mémoire vive (tests, développement) : rien sur disque.
     pub fn open_in_memory() -> Result<Self, MemoryError> {
-        Ok(Self::avec(Entrepot::Vif(EntrepotVif::new())))
+        Ok(Self::avec(Entrepot::Vif(EntrepotVif::new()), None))
     }
 
-    /// Ancienne base non importée : import (feature `import-heritage`) ou refus.
+    /// Ancienne base non importée : import puis effacement (feature
+    /// `import-heritage`) ou refus. Copie encore présente avec son marqueur
+    /// (conservation explicite, effacement interrompu) : avertissement,
+    /// l'oubli reste refusé tant qu'elle existe.
     fn reprendre_base_heritee(&self, chemin: &Path) -> Result<(), MemoryError> {
         if !base_heritee_a_importer(chemin) {
+            if copie_heritee_presente(chemin) {
+                tracing::warn!(
+                    base_heritee = %chemin.display(),
+                    "mémoire d'Alicia : copie héritée encore présente (marqueur d'import posé) ; \
+                     l'oubli est refusé tant qu'elle existe — l'effacer avec alicia-memoire-import"
+                );
+            }
             return Ok(());
         }
         #[cfg(feature = "import-heritage")]
         {
-            let rapport = self.importer_base_heritee(chemin)?;
+            let (rapport, effacement) =
+                self.importer_puis_traiter(chemin, crate::copie_heritee::AncienneBase::Effacer)?;
             tracing::info!(
                 base_heritee = %chemin.display(),
                 lignes = rapport.total_attendues(),
                 orphelines = rapport.total_orphelines(),
-                "mémoire d'Alicia : ancienne base SQLite importée dans KindMother (fichier conservé)"
+                "mémoire d'Alicia : ancienne base SQLite importée dans KindMother"
             );
+            // L'import est fait et vérifié : un effacement impossible n'empêche
+            // pas l'ouverture, mais l'oubli reste refusé (copie présente).
+            if let Err(e) = effacement {
+                tracing::warn!(
+                    base_heritee = %chemin.display(),
+                    erreur = %e,
+                    "mémoire d'Alicia : copie héritée non effacée ; l'oubli est refusé tant qu'elle existe"
+                );
+            }
             Ok(())
         }
         #[cfg(not(feature = "import-heritage"))]
@@ -139,14 +171,43 @@ impl MemoryStore {
 
     /// Importe **une fois** l'ancienne base SQLite `chemin` dans KindMother
     /// (identifiants conservés, vérification ligne à ligne, marqueur
-    /// `<chemin>.importe-kindmother`). Idempotent : relancé après succès, ne
-    /// fait rien ; après un échec, reprend sans doublon. Le fichier hérité
-    /// n'est jamais modifié ni supprimé.
+    /// `<chemin>.importe-kindmother`), retire tout fait oublié (pierre
+    /// tombale) puis **efface** l'ancienne base de façon sûre
+    /// ([`crate::copie_heritee`]). Idempotent : relancé après succès, ne fait
+    /// qu'effacer une copie restante identique à celle importée ; après un
+    /// échec, reprend sans doublon.
     #[cfg(feature = "import-heritage")]
     pub fn importer_base_heritee(
         &self,
         chemin: &Path,
     ) -> Result<kindmother_heritage::RapportImport, MemoryError> {
+        self.importer_base_heritee_avec(chemin, crate::copie_heritee::AncienneBase::Effacer)
+    }
+
+    /// Comme [`Self::importer_base_heritee`], en choisissant le sort de
+    /// l'ancienne base : [`crate::AncienneBase::Conserver`] la laisse intacte
+    /// (choix explicite) et l'oubli est alors refusé tant qu'elle existe.
+    /// Effacement impossible ⇒ [`MemoryError::LegacyDatabase`] (import fait).
+    #[cfg(feature = "import-heritage")]
+    pub fn importer_base_heritee_avec(
+        &self,
+        chemin: &Path,
+        ancienne: crate::copie_heritee::AncienneBase,
+    ) -> Result<kindmother_heritage::RapportImport, MemoryError> {
+        let (rapport, effacement) = self.importer_puis_traiter(chemin, ancienne)?;
+        effacement?;
+        Ok(rapport)
+    }
+
+    /// Import (moteur commun), pierres tombales réappliquées, historique
+    /// complété, puis sort de l'ancienne base (résultat séparé : l'import
+    /// peut avoir réussi sans que l'effacement aboutisse).
+    #[cfg(feature = "import-heritage")]
+    fn importer_puis_traiter(
+        &self,
+        chemin: &Path,
+        ancienne: crate::copie_heritee::AncienneBase,
+    ) -> Result<(kindmother_heritage::RapportImport, Result<(), MemoryError>), MemoryError> {
         let rapport =
             {
                 let _g = self.verrou()?;
@@ -158,8 +219,90 @@ impl MemoryStore {
                     )),
                 }
             };
+        // Le moteur rejoue toutes les lignes héritées : un fait oublié depuis
+        // (pierre tombale dans KindMother) ou déjà oublié dans l'ancien
+        // fichier est retiré avant toute lecture.
+        self.appliquer_pierres_tombales()?;
         self.completer_historique()?;
-        Ok(rapport)
+        let effacement = match ancienne {
+            crate::copie_heritee::AncienneBase::Conserver => {
+                if copie_heritee_presente(chemin) {
+                    tracing::warn!(
+                        base_heritee = %chemin.display(),
+                        "mémoire d'Alicia : ancienne base conservée à la demande ; l'oubli est refusé tant qu'elle existe"
+                    );
+                }
+                Ok(())
+            }
+            crate::copie_heritee::AncienneBase::Effacer => effacer_apres_import(chemin, &rapport),
+        };
+        Ok((rapport, effacement))
+    }
+
+    /// Pierre tombale ⇒ ni vue courante ni version (EX-56) : retire tout fait
+    /// ou version dont l'identifiant a une pierre tombale (réapparu par un
+    /// import ou une restauration). Idempotent ; rend le nombre de faits
+    /// concernés.
+    fn appliquer_pierres_tombales(&self) -> Result<usize, MemoryError> {
+        let _g = self.verrou()?;
+        let tombes: HashSet<String> = self
+            .entrepot
+            .toutes(FACT_TOMBSTONES, &[("fact_id", false)], |q| q.columns(["fact_id"]))?
+            .iter()
+            .filter_map(|l| l.get("fact_id").and_then(Value::as_str).map(str::to_string))
+            .collect();
+        if tombes.is_empty() {
+            return Ok(0);
+        }
+        let faits: HashSet<String> = self
+            .entrepot
+            .toutes(FACTS, &[("id", false)], |q| q.columns(["id"]))?
+            .iter()
+            .filter_map(|l| l.get("id").and_then(Value::as_str))
+            .filter(|id| tombes.contains(*id))
+            .map(str::to_string)
+            .collect();
+        let versions: HashSet<String> = self
+            .entrepot
+            .toutes(
+                FACT_VERSIONS,
+                &[("fact_id", false), ("version", false)],
+                |q| q.columns(["fact_id", "version"]),
+            )?
+            .iter()
+            .filter_map(|l| l.get("fact_id").and_then(Value::as_str))
+            .filter(|id| tombes.contains(*id))
+            .map(str::to_string)
+            .collect();
+        let mut ids: Vec<&String> = faits.union(&versions).collect();
+        ids.sort();
+        let mut intents = Vec::new();
+        for id in &ids {
+            if faits.contains(*id) {
+                intents.push(
+                    TypedWriteIntent::delete(FACTS)
+                        .key("id", id.as_str())
+                        .purpose("alicia_memoire_oubli_reapplique"),
+                );
+            }
+            if versions.contains(*id) {
+                intents.push(
+                    TypedWriteIntent::delete(FACT_VERSIONS)
+                        .key("fact_id", id.as_str())
+                        .purpose("alicia_memoire_oubli_reapplique"),
+                );
+            }
+        }
+        for lot in intents.chunks(MAX_LOT) {
+            self.entrepot.soumettre(lot.to_vec())?;
+        }
+        if !ids.is_empty() {
+            tracing::warn!(
+                faits = ids.len(),
+                "mémoire : faits oubliés réapparus (import ou restauration) retirés, pierre tombale appliquée"
+            );
+        }
+        Ok(ids.len())
     }
 
     /// EX-52 : chaque fait sans historique (base antérieure au versionnage)
@@ -293,9 +436,17 @@ impl MemoryStore {
     ///
     /// Renvoie le nombre de faits retirés de la vue courante (0 ou 1). Un fait
     /// inconnu ou déjà oublié renvoie 0 sans nouvelle pierre tombale.
+    ///
+    /// Refusé ([`MemoryError::LegacyCopyPresent`]) tant que l'ancienne base
+    /// SQLite déclarée à l'ouverture existe encore (voir [`crate::copie_heritee`]).
     pub fn forget(&self, id: Uuid, forgotten_by: &str, reason: &str) -> Result<usize, MemoryError> {
         valider_champ_oubli("auteur", forgotten_by, OUBLI_AUTEUR_MAX)?;
         valider_champ_oubli("motif", reason, OUBLI_MOTIF_MAX)?;
+        // L'oubli ne doit jamais être trompeur : refusé tant qu'une copie
+        // héritée (ancienne base SQLite) peut encore contenir la donnée.
+        if let Some(base) = self.base_heritee.as_deref().filter(|b| copie_heritee_presente(b)) {
+            return Err(MemoryError::LegacyCopyPresent(base.display().to_string()));
+        }
         let id_s = id.to_string();
         let _g = self.verrou()?;
         let actuel = !self
@@ -1253,6 +1404,54 @@ impl EtatFait {
             && self.source == fait.source
             && (self.confidence - f64::from(fait.confidence)).abs() < f64::EPSILON
     }
+}
+
+/// Efface l'ancienne base après un import vérifié : son empreinte doit être
+/// celle importée (rapport, ou marqueur si l'import était déjà fait) ; sans
+/// empreinte (marqueur d'abandon posé à la main) ou différente ⇒ refus, le
+/// fichier n'est pas touché. Le marqueur est complété.
+#[cfg(feature = "import-heritage")]
+fn effacer_apres_import(
+    chemin: &Path,
+    rapport: &kindmother_heritage::RapportImport,
+) -> Result<(), MemoryError> {
+    use crate::copie_heritee::{consigner_effacement, effacer_copie_heritee, empreinte_du_marqueur};
+    if !copie_heritee_presente(chemin) {
+        return Ok(());
+    }
+    let attendue = if rapport.deja_importe {
+        empreinte_du_marqueur(&rapport.marqueur)
+    } else {
+        Some(rapport.sha256.clone())
+    };
+    let refus = |motif: String| {
+        MemoryError::LegacyDatabase(format!(
+            "{} : effacement refusé ({motif}) ; l'oubli reste refusé tant qu'elle existe",
+            chemin.display()
+        ))
+    };
+    let attendue = attendue.ok_or_else(|| refus("marqueur sans empreinte : import jamais vérifié".into()))?;
+    if chemin.is_file() {
+        let actuelle =
+            kindmother_heritage::empreinte_sha256(chemin).map_err(|e| refus(e.to_string()))?;
+        if actuelle != attendue {
+            return Err(refus("fichier différent de celui importé".into()));
+        }
+    }
+    let effaces = effacer_copie_heritee(chemin).map_err(|e| refus(e.to_string()))?;
+    consigner_effacement(&rapport.marqueur, &effaces).map_err(|e| {
+        MemoryError::LegacyDatabase(format!(
+            "{} effacée, mais marqueur {} non complété : {e}",
+            chemin.display(),
+            rapport.marqueur.display()
+        ))
+    })?;
+    tracing::info!(
+        base_heritee = %chemin.display(),
+        fichiers = effaces.len(),
+        "mémoire d'Alicia : ancienne base effacée après import vérifié (empreinte gardée au marqueur)"
+    );
+    Ok(())
 }
 
 /// Valide un champ obligatoire d'une demande d'oubli (non vide, borné).

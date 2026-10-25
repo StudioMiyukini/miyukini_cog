@@ -25,9 +25,10 @@ required-features = ["import-heritage"]
 
 [features]
 default = []
-# Reprise de l'ancienne base SQLite (lecture seule, fichier jamais modifié ni supprimé) :
-# import automatique à l'ouverture et commande `alicia-memoire-import`. Sans cette
-# feature, une ancienne base non importée fait refuser l'ouverture (garde de bascule).
+# Reprise de l'ancienne base SQLite (lecture seule par le moteur, puis effacement sûr
+# après import vérifié ; conservation explicite `--conserver-ancienne`, l'oubli étant
+# alors refusé) : import automatique à l'ouverture et commande `alicia-memoire-import`.
+# Sans cette feature, une ancienne base non importée fait refuser l'ouverture.
 import-heritage = ["dep:kindmother-heritage"]
 
 [dependencies]

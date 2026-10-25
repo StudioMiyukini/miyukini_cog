@@ -535,8 +535,12 @@ fn import_unique_idempotent_et_sans_perte() {
     verifier(&s);
     let marqueur = kindmother_heritage::chemin_marqueur_import(&ancienne);
     assert!(marqueur.exists(), "marqueur d'import écrit");
-    assert!(ancienne.exists(), "ancien fichier jamais supprimé");
-    assert_eq!(sha(&ancienne), empreinte, "ancien fichier intact");
+    // Import vérifié : ancienne base effacée, empreinte gardée au marqueur.
+    assert!(!ancienne.exists(), "ancienne base effacée après import vérifié");
+    assert!(!miyualicia_memory::copie_heritee_presente(&ancienne));
+    let trace = std::fs::read_to_string(&marqueur).unwrap();
+    assert!(trace.contains(&format!("sha256: {empreinte}")), "{trace}");
+    assert!(trace.contains("ancienne_base: effacee"), "{trace}");
 
     // Relances : aucun doublon, aucune perte.
     drop(s);
@@ -545,15 +549,16 @@ fn import_unique_idempotent_et_sans_perte() {
     let rapport = s.importer_base_heritee(&ancienne).unwrap();
     assert!(rapport.deja_importe);
     verifier(&s);
-    assert_eq!(sha(&ancienne), empreinte);
 
-    // Reprise forcée (marqueur retiré) : upserts sur les mêmes clés, sans doublon.
+    // Reprise forcée (même ancienne base reposée, marqueur retiré) : upserts
+    // sur les mêmes clés, sans doublon, puis nouvel effacement.
+    kindmother_heritage::fabrique::creer_base_heritee(&ancienne, SCHEMA_HERITE, &lignes).unwrap();
     std::fs::remove_file(&marqueur).unwrap();
     let rapport = s.importer_base_heritee(&ancienne).unwrap();
     assert!(!rapport.deja_importe);
     assert!(rapport.tables.iter().all(|t| t.ecrites == 0), "{rapport}");
     verifier(&s);
-    assert_eq!(sha(&ancienne), empreinte);
+    assert!(!ancienne.exists());
 }
 
 #[test]
@@ -667,7 +672,188 @@ fn ancienne_base_illisible_refusee_sans_marqueur_et_intacte() {
         b"ceci n'est pas une base SQLite"
     );
 
-    // Abandon volontaire (marqueur posé par l'administrateur) : ouverture acceptée.
+    // Abandon volontaire (marqueur posé par l'administrateur) : ouverture acceptée,
+    // mais l'oubli est refusé tant que la copie existe, et elle n'est jamais
+    // effacée sans empreinte d'un import vérifié.
     std::fs::write(kindmother_heritage::chemin_marqueur_import(&ancienne), b"").unwrap();
-    assert!(MemoryStore::connecter(&cfg(&addr, &creds).avec_base_heritee(&ancienne)).is_ok());
+    let s = MemoryStore::connecter(&cfg(&addr, &creds).avec_base_heritee(&ancienne)).unwrap();
+    let f = Fact::new("voice".into(), "user".into(), "x".into(), "user".into());
+    s.remember(&f).unwrap();
+    assert!(matches!(s.forget(f.id, "test", "oubli"), Err(MemoryError::LegacyCopyPresent(_))));
+    assert!(matches!(s.importer_base_heritee(&ancienne), Err(MemoryError::LegacyDatabase(_))));
+    assert_eq!(
+        std::fs::read(&ancienne).unwrap(),
+        b"ceci n'est pas une base SQLite"
+    );
+}
+
+// ----------------------------------------------------------------------
+// Oubli et copie héritée (A-019)
+// ----------------------------------------------------------------------
+
+/// Ancienne base minimale : un fait (deux versions) à oublier, un fait
+/// gardé, et un fait déjà oublié dans l'ancien fichier (ligne et pierre
+/// tombale incohérentes, à ne jamais ressusciter).
+fn base_a_oublier(
+    chemin: &Path,
+    secret: &str,
+) -> (uuid::Uuid, uuid::Uuid, uuid::Uuid) {
+    let maintenant = Utc::now().to_rfc3339();
+    let (oublie, garde, deja) = (uuid::Uuid::new_v4(), uuid::Uuid::new_v4(), uuid::Uuid::new_v4());
+    let fait = |id: uuid::Uuid, contenu: String| {
+        (
+            "facts",
+            vec![
+                ("id", t(&id.to_string())),
+                ("persona", t("voice")),
+                ("subject", t("user")),
+                ("content", t(&contenu)),
+                ("source", t("user")),
+                ("confidence", SqlValue::Real(1.0)),
+                ("created_at", t(&maintenant)),
+                ("updated_at", t(&maintenant)),
+            ],
+        )
+    };
+    let version = |id: uuid::Uuid, v: i64, contenu: String| {
+        (
+            "fact_versions",
+            vec![
+                ("fact_id", t(&id.to_string())),
+                ("version", SqlValue::Integer(v)),
+                ("persona", t("voice")),
+                ("subject", t("user")),
+                ("content", t(&contenu)),
+                ("source", t("user")),
+                ("confidence", SqlValue::Real(1.0)),
+                ("recorded_at", t(&maintenant)),
+            ],
+        )
+    };
+    let lignes = vec![
+        fait(oublie, format!("{secret} courant")),
+        version(oublie, 1, format!("{secret} ancien")),
+        version(oublie, 2, format!("{secret} courant")),
+        fait(garde, "Jean aime le métro".to_string()),
+        fait(deja, format!("{secret} deja oublie")),
+        version(deja, 1, format!("{secret} deja oublie")),
+        (
+            "fact_tombstones",
+            vec![
+                ("fact_id", t(&deja.to_string())),
+                ("forgotten_at", t(&maintenant)),
+                ("forgotten_by", t("user")),
+                ("reason", t("oubli")),
+                ("versions_erased", SqlValue::Integer(1)),
+            ],
+        ),
+    ];
+    kindmother_heritage::fabrique::creer_base_heritee(chemin, SCHEMA_HERITE, &lignes).unwrap();
+    (oublie, garde, deja)
+}
+
+/// Oubli après import : la donnée n'est plus dans aucun fichier (l'ancienne
+/// base est effacée, KindMother chiffré n'en garde rien en clair) ; un fait
+/// déjà oublié dans l'ancien fichier n'est pas importé.
+#[test]
+fn oubli_apres_import_efface_de_tous_les_fichiers() {
+    let dir = tempfile::tempdir().unwrap();
+    let (addr, creds) = serveur(dir.path());
+    let ancienne = dir.path().join("alicia-memoire.db");
+    let secret = "SECRET-HERITE-A-OUBLIER-91c2";
+    let (oublie, garde, deja) = base_a_oublier(&ancienne, secret);
+    assert!(contient(dir.path(), secret), "témoin : secret en clair dans l'ancienne base");
+
+    let s = MemoryStore::connecter(&cfg(&addr, &creds).avec_base_heritee(&ancienne)).unwrap();
+    assert!(!ancienne.exists(), "ancienne base effacée après import vérifié");
+    assert!(s.fact(deja).unwrap().is_none(), "fait déjà oublié dans l'ancien fichier non ressuscité");
+    assert!(s.fact_history(deja).unwrap().is_empty());
+    assert_eq!(s.fact_history(oublie).unwrap().len(), 2);
+    assert_eq!(s.forget(oublie, "test", "droit à l'oubli").unwrap(), 1);
+    drop(s);
+
+    let s = MemoryStore::connecter(&cfg(&addr, &creds).avec_base_heritee(&ancienne)).unwrap();
+    assert!(s.fact(oublie).unwrap().is_none());
+    assert!(s.fact(garde).unwrap().is_some());
+    assert!(
+        !contient(dir.path(), secret),
+        "donnée oubliée encore présente en clair sur disque : {:?}",
+        fichiers(dir.path())
+    );
+}
+
+/// Marqueur supprimé à la main et ancienne base restaurée (sauvegarde) :
+/// le nouvel import ne ressuscite aucun fait oublié.
+#[test]
+fn marqueur_supprime_pas_de_resurrection() {
+    let dir = tempfile::tempdir().unwrap();
+    let (addr, creds) = serveur(dir.path());
+    let ancienne = dir.path().join("alicia-memoire.db");
+    let (oublie, garde, deja) = base_a_oublier(&ancienne, "SECRET-RESTAURE-55ab");
+    let sauvegarde = std::fs::read(&ancienne).unwrap();
+
+    let s = MemoryStore::connecter(&cfg(&addr, &creds).avec_base_heritee(&ancienne)).unwrap();
+    assert_eq!(s.forget(oublie, "test", "oubli").unwrap(), 1);
+    drop(s);
+
+    // Sauvegarde reposée, marqueur retiré : réimport à l'ouverture.
+    std::fs::write(&ancienne, &sauvegarde).unwrap();
+    std::fs::remove_file(kindmother_heritage::chemin_marqueur_import(&ancienne)).unwrap();
+    let s = MemoryStore::connecter(&cfg(&addr, &creds).avec_base_heritee(&ancienne)).unwrap();
+    assert!(s.fact(oublie).unwrap().is_none(), "fait oublié ressuscité par le réimport");
+    assert!(s.fact_history(oublie).unwrap().is_empty());
+    assert!(s.recall("restaure", 10).unwrap().is_empty());
+    assert!(s.fact_tombstone(oublie).unwrap().is_some());
+    assert!(matches!(s.remember(&s.fact(garde).unwrap().map(|mut f| {
+        f.id = oublie;
+        f
+    }).unwrap()), Err(MemoryError::FactForgotten(_))));
+    assert!(s.fact(deja).unwrap().is_none());
+    assert!(s.fact(garde).unwrap().is_some());
+    assert!(!ancienne.exists(), "copie restaurée effacée à nouveau");
+    drop(s);
+
+    // Même chose par la commande explicite (marqueur retiré, copie reposée).
+    std::fs::write(&ancienne, &sauvegarde).unwrap();
+    std::fs::remove_file(kindmother_heritage::chemin_marqueur_import(&ancienne)).unwrap();
+    let s = MemoryStore::connecter(&cfg(&addr, &creds)).unwrap();
+    s.importer_base_heritee(&ancienne).unwrap();
+    assert!(s.fact(oublie).unwrap().is_none());
+    assert!(s.fact_history(oublie).unwrap().is_empty());
+}
+
+/// Conservation explicite (`--conserver-ancienne`) : ancienne base intacte,
+/// oubli refusé tant qu'elle existe (y compris après redémarrage) ;
+/// l'effacement ultérieur (fichier identique à celui importé) le rétablit.
+#[test]
+fn conservation_explicite_oubli_refuse() {
+    let dir = tempfile::tempdir().unwrap();
+    let (addr, creds) = serveur(dir.path());
+    let ancienne = dir.path().join("alicia-memoire.db");
+    let (oublie, _, _) = base_a_oublier(&ancienne, "SECRET-CONSERVE-0d17");
+    let empreinte = sha(&ancienne);
+
+    let outil = MemoryStore::connecter(&cfg(&addr, &creds)).unwrap();
+    outil
+        .importer_base_heritee_avec(&ancienne, miyualicia_memory::AncienneBase::Conserver)
+        .unwrap();
+    assert_eq!(sha(&ancienne), empreinte, "ancienne base conservée intacte");
+
+    let s = MemoryStore::connecter(&cfg(&addr, &creds).avec_base_heritee(&ancienne)).unwrap();
+    assert!(s.fact(oublie).unwrap().is_some());
+    let r = s.forget(oublie, "test", "oubli");
+    assert!(matches!(r, Err(MemoryError::LegacyCopyPresent(_))), "{r:?}");
+    assert!(s.fact(oublie).unwrap().is_some(), "rien d'oublié en apparence");
+    assert!(s.fact_tombstone(oublie).unwrap().is_none());
+
+    // Copie déjà importée et identique : la commande sans conservation l'efface.
+    let rapport = outil.importer_base_heritee(&ancienne).unwrap();
+    assert!(rapport.deja_importe);
+    assert!(!ancienne.exists());
+    assert_eq!(s.forget(oublie, "test", "oubli").unwrap(), 1);
+
+    // Copie différente de celle importée (marqueur présent) : jamais effacée.
+    std::fs::write(&ancienne, b"autre contenu").unwrap();
+    assert!(matches!(outil.importer_base_heritee(&ancienne), Err(MemoryError::LegacyDatabase(_))));
+    assert_eq!(std::fs::read(&ancienne).unwrap(), b"autre contenu");
 }

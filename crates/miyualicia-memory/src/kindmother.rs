@@ -57,8 +57,9 @@ pub struct ConfigKindMother {
     /// emplacement standard de KindMother (`OperatorCredential::load`).
     pub justificatifs: Option<PathBuf>,
     /// Ancienne base SQLite de la mémoire (avant KindMother) : importée une
-    /// fois si présente (feature `import-heritage`), sinon ouverture refusée
-    /// tant qu'elle n'est pas importée. Jamais modifiée ni supprimée.
+    /// fois si présente (feature `import-heritage`) puis effacée de façon
+    /// sûre, sinon ouverture refusée tant qu'elle n'est pas importée. Tant
+    /// qu'une copie existe, l'oubli est refusé ([`crate::copie_heritee`]).
     pub base_heritee: Option<PathBuf>,
 }
 

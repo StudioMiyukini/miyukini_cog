@@ -28,10 +28,18 @@ pub enum MemoryError {
     #[error("base mémoire KindMother non chiffrée : ouverture refusée")]
     NotEncrypted,
 
-    /// Ancienne base SQLite présente et non importée, ou import refusé.
-    /// Le fichier hérité n'est jamais modifié ni supprimé.
+    /// Ancienne base SQLite présente et non importée, import refusé, ou
+    /// effacement de la copie héritée impossible (voir
+    /// [`crate::copie_heritee`]).
     #[error("ancienne base mémoire : {0}")]
     LegacyDatabase(String),
+
+    /// Copie héritée (ancienne base SQLite) encore présente : l'oubli est
+    /// refusé, il ne serait pas réel (la donnée resterait lisible dans
+    /// l'ancien fichier). Effacer la copie (`alicia-memoire-import` sans
+    /// `--conserver-ancienne`) puis recommencer.
+    #[error("oubli refusé : copie héritée de la mémoire encore présente ({0}) ; l'effacer d'abord")]
+    LegacyCopyPresent(String),
 
     /// Ligne lue illisible (colonne absente, type inattendu, valeur inconnue).
     #[error("donnée mémoire illisible : {0}")]

@@ -4,8 +4,10 @@
 //! (empreinte SHA-256 contrôlée avant et après), upserts typés sur la clé
 //! primaire (identifiants conservés), lots atomiques, vérification ligne à
 //! ligne, puis marqueur `<base>.importe-kindmother`. Relancer après succès :
-//! rien à faire ; après un échec : reprise sans doublon. Le fichier hérité
-//! n'est **jamais** modifié ni supprimé.
+//! rien à faire ; après un échec : reprise sans doublon. Le moteur ne modifie
+//! jamais le fichier hérité ; le store, une fois l'import vérifié, réapplique
+//! les pierres tombales puis **efface** l'ancienne base de façon sûre
+//! ([`crate::copie_heritee`] ; conservation seulement explicite).
 //!
 //! Les index FTS5 hérités (`facts_fts`, `episodes_fts` et leurs tables
 //! internes) ne sont pas importés : ce sont des index dérivés du contenu de

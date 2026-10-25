@@ -13,7 +13,9 @@
 //! commune MAIA / Alicia, jamais publiable ; voir [`kindmother`]).
 //! KindMother injoignable ⇒ erreur explicite, jamais de repli sur un fichier
 //! local. L'ancienne base SQLite est importée une fois (feature
-//! `import-heritage`, commande `alicia-memoire-import`), jamais supprimée.
+//! `import-heritage`, commande `alicia-memoire-import`), puis effacée de
+//! façon sûre après vérification (conservation seulement explicite, l'oubli
+//! étant alors refusé : voir [`copie_heritee`]).
 //!
 //! Ce crate ne fait qu'exposer un store typé. L'orchestration (injection dans
 //! le prompt, hot reload) se fait côté `miyualicia`.
@@ -38,6 +40,7 @@
 // @do expose_memory_store
 // @human Façade publique du crate miyualicia-memory.
 
+pub mod copie_heritee;
 mod entrepot;
 pub mod errors;
 #[cfg(feature = "import-heritage")]
@@ -51,6 +54,7 @@ pub mod store;
 pub mod types;
 mod vif;
 
+pub use copie_heritee::{copie_heritee_presente, AncienneBase};
 pub use errors::MemoryError;
 pub use kindmother::{
     ConfigKindMother, ADRESSE_KINDMOTHER_DEFAUT, BASE_KINDMOTHER, ENV_ADRESSE_KINDMOTHER,
