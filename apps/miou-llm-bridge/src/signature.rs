@@ -31,6 +31,12 @@ pub const USAGE_API: &str = "maia/api";
 /// Usage signé des appels du hub TEAM (`POST /v1/agents/{id}/chat`).
 pub const USAGE_TEAM: &str = "maia/team";
 
+/// Usage vérifié de l'appelant, posé dans les extensions de la requête
+/// (`USAGE_API` ou `USAGE_TEAM`) : la mémoire de l'utilisateur n'est jamais
+/// servie au hub TEAM (EX-55 : `nationale`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UsageAppelant(pub &'static str);
+
 /// Corps maximal lu pour vérification (octets) — même borne que le proxy.
 pub const MAX_CORPS_SIGNE: usize = 10 * 1024 * 1024;
 
@@ -115,6 +121,8 @@ pub async fn verifier(gardes: &GardesMaia, req: Request) -> Result<Request, Refu
     garde
         .verifier(&entetes, usage, parts.method.as_str(), chemin, &corps, maintenant)
         .map_err(|r| refus_http(&r))?;
+    let mut parts = parts;
+    parts.extensions.insert(UsageAppelant(usage));
     Ok(Request::from_parts(parts, Body::from(corps)))
 }
 

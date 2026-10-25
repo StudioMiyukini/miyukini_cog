@@ -68,5 +68,11 @@ miyusceau = { path = "../../crates/miyusceau" }
 # Porte obligatoire StrongFather (K-11) : outils et administration des agents
 bondingbrother = { path = "../../crates/bondingbrother" }
 
+# IA fédérée (lot 7, EX-57..63) : Fiches, double MAIA, marquage etranger, corroboration
+maia-federee = { path = "../../crates/maia-federee" }
+
+# Mémoire de l'utilisateur (lot 7, EX-50..56) : N0–N4 sous budget, base KindMother chiffrée
+maia-memoire = { path = "../../crates/maia-memoire" }
+
 [lints]
 workspace = true

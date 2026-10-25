@@ -44,7 +44,7 @@ TRANSITOIRE=(
   "crates/miyucloud|K-13|lot 5|MiyuCloud migré après le premier service H2 (plan, lot 5)"
   "crates/miyucloud-dav|K-13|lot 5|suit MiyuCloud"
   # Hors zone de données COG ou outillage : à revoir (stockage propre ou KindMother).
-  "crates/miyualicia-memory|K-13|lot 7|mémoire Alicia/MAIA locale (FTS5), à passer par KindMother avec le lot MAIA"
+  "crates/miyualicia-memory|K-13|lot 7|mémoire MAIA passée par KindMother (crates/maia-memoire) ; reste le store opérationnel Alicia (confirmations, compétences, épisodes FTS5)"
   "apps/origin|K-13|lot 6|serveur Origin (hors COG) ; stockage propre à isoler avec la fédération"
   "apps/team|K-13|lot 8|outil d'équipe hors zone COG"
   "apps/mipower|K-13|lot 8|éditeur MIP (outillage local)"

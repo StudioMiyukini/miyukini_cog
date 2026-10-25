@@ -29,7 +29,7 @@ pub mod types;
 
 pub use errors::MemoryError;
 pub use learning::{detect_repetitions, propose_from_pattern, DetectorOptions, RepetitionPattern};
-pub use prompt::{build_persona_context, ContextOptions};
+pub use prompt::{borne_jetons, build_persona_context, ContextOptions};
 pub use store::MemoryStore;
 pub use types::{
     Episode, EpisodeOutcome, Fact, FactTombstone, FactVersion, LearnedSkill, LearnedSkillStatus,

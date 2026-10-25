@@ -1,0 +1,31 @@
+[package]
+name = "maia-federee"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "IA fédérée MAIA — Fiches signées (Sceau 0x09), normalisation, double MAIA (Planificateur / Lecteur), marquage etranger, corroboration par k COG, requêtes déterministes (lot 7, EX-57..63)"
+
+# Aucune dépendance réseau ni LLM : la crate décide ; les modèles sont injectés
+# par traits (Planificateur, Lecteur) et le transport reste ailleurs.
+[dependencies]
+miyusceau = { path = "../miyusceau" }
+miyuracine = { path = "../miyuracine" }
+miyufederation = { path = "../miyufederation" }
+miyauth = { path = "../miyauth" }
+sha2 = "0.10"
+tracing = "0.1"
+thiserror = "2"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+unicode-normalization = "0.1"
+
+[dev-dependencies]
+
+[lints]
+workspace = true

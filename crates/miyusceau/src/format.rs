@@ -69,6 +69,10 @@ pub enum TypeSceau {
     Certificat = 0x06,
     /// Reconnaissance entre COG.
     Reconnaissance = 0x07,
+    /// Fiche fédérée (IA fédérée, EX-57). `0x08` est pris par la déclaration
+    /// de voie MSCE (A-004, décodée par `miyuportail`) : code `0x09`
+    /// (amendement du lot 7 proposé).
+    Fiche = 0x09,
 }
 
 impl TryFrom<u8> for TypeSceau {
@@ -83,6 +87,7 @@ impl TryFrom<u8> for TypeSceau {
             0x05 => Self::TeteRegistre,
             0x06 => Self::Certificat,
             0x07 => Self::Reconnaissance,
+            0x09 => Self::Fiche,
             autre => return Err(ErreurSceau::TypeInconnu(autre)),
         })
     }

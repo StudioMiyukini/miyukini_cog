@@ -191,12 +191,29 @@ pub struct UpdateContextRequest {
 #[derive(Debug, Clone)]
 pub struct ContextRegistry {
     bases: Arc<RwLock<HashMap<String, ContextBase>>>,
+    /// Mémoire de l'utilisateur de l'instance (lot 7) ; `None` : non configurée.
+    memoire: Option<crate::memoire::MemoireUtilisateur>,
 }
 
 impl ContextRegistry {
     pub fn new() -> Self {
         Self {
             bases: Arc::new(RwLock::new(HashMap::new())),
+            memoire: None,
+        }
+    }
+
+    /// Attache la mémoire de l'utilisateur (vue MAIA : lecture et proposition).
+    pub fn avec_memoire(mut self, memoire: Option<crate::memoire::MemoireUtilisateur>) -> Self {
+        self.memoire = memoire;
+        self
+    }
+
+    /// Bloc `<memoire>` sous budget mesuré pour `requete` (EX-50) ; `None` sans mémoire.
+    pub async fn bloc_memoire(&self, requete: &str) -> Option<String> {
+        match &self.memoire {
+            Some(m) => m.bloc(requete).await,
+            None => None,
         }
     }
 

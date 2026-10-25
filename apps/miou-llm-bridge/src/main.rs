@@ -31,6 +31,7 @@ mod hardware;
 mod health;
 mod inference;
 mod llm_api;
+mod memoire;
 mod mode;
 mod model_manager;
 mod persona;
@@ -127,7 +128,7 @@ async fn main() {
 
     // Initialisation des registres
     let agent_registry = AgentRegistry::new();
-    let context_registry = ContextRegistry::new();
+    let context_registry = ContextRegistry::new().avec_memoire(memoire::depuis_env().await);
     let rate_limiter = RateLimiter::new(RateLimitConfig::default());
     let audit_log = AuditLog::new(10_000);
     let security_audit = SecurityAuditLog::new(5_000);

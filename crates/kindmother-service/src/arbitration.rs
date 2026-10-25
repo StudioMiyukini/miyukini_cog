@@ -20,6 +20,51 @@ use tokio::sync::RwLock;
 
 use crate::errors::ServiceError;
 
+/// Préfixe des opérateurs et bases de mémoire MAIA (une par utilisateur, EX-55).
+pub const MAIA_PREFIX: &str = "maia-";
+
+/// Fichier `<data_dir>/maia-utilisateurs` : un identifiant d'utilisateur par ligne
+/// (`#` : commentaire). Absent : aucune mémoire MAIA.
+pub const MAIA_USERS_FILE: &str = "maia-utilisateurs";
+
+/// Longueur maximale d'un identifiant d'utilisateur MAIA.
+pub const MAX_MAIA_USER_LEN: usize = 48;
+
+/// Identifiant d'utilisateur MAIA valide : `[a-z0-9][a-z0-9_-]{0,47}`.
+pub fn is_valid_maia_user(user: &str) -> bool {
+    let mut chars = user.chars();
+    matches!(chars.next(), Some(c) if c.is_ascii_lowercase() || c.is_ascii_digit())
+        && user.len() <= MAX_MAIA_USER_LEN
+        && chars.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_' || c == '-')
+}
+
+/// Lit `<data_dir>/maia-utilisateurs`. Une entrée invalide est un refus de démarrer
+/// (configuration explicite fautive, fail-closed).
+pub fn read_maia_users(data_dir: &std::path::Path) -> Result<Vec<String>, ServiceError> {
+    let path = data_dir.join(MAIA_USERS_FILE);
+    let content = match std::fs::read_to_string(&path) {
+        Ok(c) => c,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
+        Err(e) => return Err(ServiceError::Internal(format!("Cannot read {path:?}: {e}"))),
+    };
+    let mut users: Vec<String> = Vec::new();
+    for line in content.lines().map(str::trim) {
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        if !is_valid_maia_user(line) {
+            return Err(ServiceError::Internal(format!(
+                "Invalid MAIA user entry in {MAIA_USERS_FILE}: {:?}",
+                line.chars().take(60).collect::<String>()
+            )));
+        }
+        if !users.iter().any(|u| u == line) {
+            users.push(line.to_string());
+        }
+    }
+    Ok(users)
+}
+
 /// Permission d'accès à une base de données.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Permission {
@@ -155,6 +200,16 @@ impl ArbitrationEngine {
             table_scope: HashMap::new(),
         })
         .await;
+    }
+
+    /// Enregistre la mémoire MAIA de chaque utilisateur déclaré (lot 7, EX-55) :
+    /// opérateur `maia-<utilisateur>` propriétaire de la seule base `maia-<utilisateur>`
+    /// (clé SQLCipher propre, aucun accès à la base d'un autre utilisateur).
+    pub async fn register_maia_users(&self, users: &[String]) {
+        for user in users {
+            let id = format!("{MAIA_PREFIX}{user}");
+            self.register_operator(OperatorConfig::owner(&id, &id)).await;
+        }
     }
 
     /// Vérifie qu'un opérateur (authentifié) peut accéder à une base dans le mode donné.
@@ -338,5 +393,26 @@ mod tests {
             .authorize("reader", "db", AccessMode::Write)
             .await
             .is_err());
+    }
+
+    #[tokio::test]
+    async fn memoire_maia_une_base_par_utilisateur() {
+        let dir = std::env::temp_dir().join(format!("km-maia-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).expect("dir");
+        assert!(read_maia_users(&dir).expect("absent").is_empty());
+        std::fs::write(dir.join(MAIA_USERS_FILE), "# utilisateurs\nalice\n\nbob\nalice\n").expect("w");
+        let users = read_maia_users(&dir).expect("lecture");
+        assert_eq!(users, vec!["alice".to_string(), "bob".to_string()]);
+
+        let engine = ArbitrationEngine::new();
+        engine.register_maia_users(&users).await;
+        assert!(engine.authorize("maia-alice", "maia-alice", AccessMode::Write).await.is_ok());
+        assert!(engine.authorize("maia-alice", "maia-bob", AccessMode::Read).await.is_err());
+
+        for invalide in ["Alice", "-a", "a b", "a/../b", &"a".repeat(49)] {
+            std::fs::write(dir.join(MAIA_USERS_FILE), invalide).expect("w");
+            assert!(read_maia_users(&dir).is_err(), "{invalide:?}");
+        }
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

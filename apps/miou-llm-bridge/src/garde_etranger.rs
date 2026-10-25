@@ -210,6 +210,26 @@ impl EtatTour {
     }
 }
 
+/// Source affichée pour une réponse sur connaissances fédérées (Fiches, lot 7).
+pub const SOURCE_FICHES: &str = "fiches_federees";
+
+impl EtatTour {
+    /// Consultation fédérée (lot 7, EX-60) : la réponse sourcée est un
+    /// contenu `etranger` ; le tour (et, par la balise, les tours suivants)
+    /// est contaminé.
+    pub fn enregistrer_consultation_federee(&mut self) {
+        self.enregistrer(SOURCE_FICHES, Provenance::Etranger);
+    }
+}
+
+/// Correspondance avec la provenance de `maia-federee` (Fiches, mémoire).
+pub fn depuis_provenance_federee(p: maia_federee::Provenance) -> Provenance {
+    match p {
+        maia_federee::Provenance::Etranger => Provenance::Etranger,
+        maia_federee::Provenance::Utilisateur | maia_federee::Provenance::Deduit => Provenance::Locale,
+    }
+}
+
 /// Neutralise toute balise de délimitation présente dans le contenu
 /// (un contenu étranger ne doit pas pouvoir fermer son propre bloc).
 fn neutraliser_balises(contenu: &str) -> String {
@@ -389,6 +409,21 @@ mod tests {
     fn description_action_deterministe() {
         let a = p(&[("b", 2.into()), ("a", 1.into())]);
         assert_eq!(decrire_action("file_ops", &a), r#"file_ops {"a":1,"b":2}"#);
+    }
+
+    #[test]
+    fn consultation_federee_contamine_le_tour() {
+        let mut etat = EtatTour::new();
+        etat.enregistrer_consultation_federee();
+        assert!(etat.contient_etranger());
+        assert!(matches!(
+            etat.decider("shell_exec", &p(&[("command", "ls".into())])),
+            Decision::ConfirmationRequise(m) if m.contains(SOURCE_FICHES)
+        ));
+        assert_eq!(
+            depuis_provenance_federee(maia_federee::Provenance::Etranger),
+            Provenance::Etranger
+        );
     }
 
     #[test]

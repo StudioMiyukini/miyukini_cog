@@ -44,6 +44,7 @@ members = [
     "crates/miyuregistre",        # Registre Merkle local et fédéral : journal append-only, têtes signées, Median-Time-Past (lot 4, EX-22, EX-34)
     "crates/miyucanal",           # Canal officiel : relevé du dépôt officiel via le Portail, annonces 2 sur 2, quarantaine (lot 4, EX-01, EX-02, EX-20, EX-26)
     "crates/miyufederation",      # Fédération : candidature hashcash, statuts invité / membre, blacklist sur preuves et quorum de 6, note locale, anti-éclipse, sans Origin (lot 6, EX-30..33, EX-35, EX-37, EX-38)
+    "crates/maia-federee",        # IA fédérée MAIA : Fiches signées 0x09, double MAIA, marquage etranger, corroboration (lot 7, EX-57..63)
     "crates/miyuweb",
     "crates/miyuclock",
     "crates/miyuforum",
@@ -118,6 +119,7 @@ members = [
     "crates/miyualicia-api",
     "crates/miyualicia-skills",
     "crates/miyualicia-memory",
+    "crates/maia-memoire",           # Mémoire MAIA N0–N4 (lot 7, EX-50..56)
     "crates/miyualicia-dispatcher",
     "crates/miyualicia-cores-gate",
     "crates/jaykoa-client",

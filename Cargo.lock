@@ -6052,6 +6052,8 @@ dependencies = [
  "hex",
  "hostname",
  "hound",
+ "maia-federee",
+ "maia-memoire",
  "miyauth",
  "miyusceau",
  "rand 0.8.5",
@@ -6068,6 +6070,22 @@ dependencies = [
  "tower-http 0.6.8",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "maia-federee"
+version = "0.1.0"
+dependencies = [
+ "miyauth",
+ "miyufederation",
+ "miyuracine",
+ "miyusceau",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror 2.0.18",
+ "tracing",
+ "unicode-normalization",
 ]
 
 [[package]]
@@ -6097,6 +6115,22 @@ dependencies = [
  "tower-http 0.6.8",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "maia-memoire"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "kindmother-client",
+ "kindmother-service",
+ "miyualicia-memory",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]

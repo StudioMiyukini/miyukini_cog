@@ -55,6 +55,16 @@ pub struct ContextOptions {
     pub max_recent_episodes: usize,
     /// Inclure les préférences `global` en plus des préférences scope=persona.
     pub include_global_preferences: bool,
+    /// Budget du bloc en jetons (EX-50), mesuré par la borne supérieure garantie
+    /// « octets UTF-8 + 1 » (tokenizers BPE / SentencePiece à repli octet) : les
+    /// dernières lignes (épisodes, puis préférences, puis faits) sont retirées
+    /// jusqu'à tenir ; l'en-tête reste toujours.
+    pub max_tokens: usize,
+}
+
+/// Jetons d'un texte, borne supérieure garantie (octets UTF-8 + 1).
+pub fn borne_jetons(texte: &str) -> usize {
+    texte.len() + 1
 }
 
 impl Default for ContextOptions {
@@ -64,6 +74,8 @@ impl Default for ContextOptions {
             max_preferences: 12,
             max_recent_episodes: 5,
             include_global_preferences: true,
+            // Profil « petit modèle » de la mémoire MAIA (§7) : 600 jetons.
+            max_tokens: 600,
         }
     }
 }
@@ -141,7 +153,25 @@ pub fn build_persona_context(
         }
     }
 
-    Ok(out)
+    Ok(tronquer_au_budget(out, opts.max_tokens))
+}
+
+/// Retire les dernières lignes jusqu'à tenir dans `max_tokens` (en-tête conservé).
+fn tronquer_au_budget(out: String, max_tokens: usize) -> String {
+    if borne_jetons(&out) <= max_tokens {
+        return out;
+    }
+    let mut lignes: Vec<&str> = out.lines().collect();
+    while lignes.len() > 1 && borne_jetons(&lignes.join("\n")) > max_tokens {
+        lignes.pop();
+        // Pas de titre de section orphelin.
+        while lignes.len() > 1 && lignes.last().is_some_and(|l| l.is_empty() || l.starts_with("## ")) {
+            lignes.pop();
+        }
+    }
+    let mut t = lignes.join("\n");
+    t.push('\n');
+    t
 }
 
 /// Formate une valeur de préférence pour affichage Markdown — string sans
@@ -267,6 +297,33 @@ mod tests {
         let ctx = build_persona_context("voice", &s, &opts).unwrap();
         assert!(ctx.contains("a = 1"));
         assert!(!ctx.contains("b = 2"));
+    }
+
+    #[test]
+    fn build_context_respecte_le_budget_de_jetons() {
+        let s = store();
+        s.upsert_persona(&Persona::new("voice".into(), "Voix".into(), String::new(), true))
+            .unwrap();
+        for i in 0..10 {
+            s.remember(&Fact::new(
+                "voice".into(),
+                "user".into(),
+                format!("Fait numéro {i} assez long pour peser dans le budget"),
+                "user".into(),
+            ))
+            .unwrap();
+        }
+        let opts = ContextOptions {
+            max_tokens: 200,
+            ..ContextOptions::default()
+        };
+        let ctx = build_persona_context("voice", &s, &opts).unwrap();
+        assert!(borne_jetons(&ctx) <= 200, "{}", borne_jetons(&ctx));
+        assert!(ctx.starts_with("# Contexte Alicia"));
+        assert!(ctx.contains("- Fait numéro"));
+        assert!(ctx.matches("- Fait numéro").count() < 10);
+        let large = build_persona_context("voice", &s, &ContextOptions::default()).unwrap();
+        assert_eq!(large.matches("- Fait numéro").count(), 10);
     }
 
     #[test]

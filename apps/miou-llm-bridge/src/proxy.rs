@@ -365,6 +365,9 @@ struct AgentChatRequest {
     /// Active le tool calling si le modèle le supporte (défaut: true).
     #[serde(default = "default_true")]
     enable_tools: bool,
+    /// Joint la mémoire de l'utilisateur (lot 7) : opt-in, jamais pour le hub TEAM.
+    #[serde(default)]
+    memoire: bool,
 }
 
 fn default_true() -> bool {
@@ -374,6 +377,7 @@ fn default_true() -> bool {
 async fn chat_with_agent(
     State(state): State<ProxyState>,
     Path(id): Path<String>,
+    usage: Option<axum::Extension<crate::signature::UsageAppelant>>,
     Json(req): Json<AgentChatRequest>,
 ) -> impl IntoResponse {
     let agent = match state.agent_registry.get_agent(&id) {
@@ -434,9 +438,16 @@ async fn chat_with_agent(
         "- Réponds de manière concise et utile. Reste dans ton rôle d'assistant.",
     ));
 
+    // Mémoire de l'utilisateur (EX-50..56) : appelant API signé et demande explicite seulement.
+    let bloc = match usage {
+        Some(axum::Extension(u)) if req.memoire && u.0 == crate::signature::USAGE_API => {
+            state.context_registry.bloc_memoire(&req.message).await
+        }
+        _ => None,
+    };
     let messages = vec![
         serde_json::json!({ "role": "system", "content": system_prompt }),
-        serde_json::json!({ "role": "user", "content": req.message }),
+        serde_json::json!({ "role": "user", "content": crate::memoire::avec_memoire(bloc, &req.message) }),
     ];
 
     let model = req.model.unwrap_or_else(|| "default".into());

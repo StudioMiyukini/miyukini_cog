@@ -198,6 +198,10 @@ impl KindMotherServer {
 
         // Enregistrer les opérateurs par défaut
         arbitration.register_default_operators().await;
+        // Mémoire MAIA : un opérateur et une base par utilisateur déclaré (lot 7, EX-55).
+        arbitration
+            .register_maia_users(&crate::arbitration::read_maia_users(data_dir)?)
+            .await;
 
         let operator_ids = arbitration.operator_ids().await;
         let credentials = Arc::new(CredentialStore::provision(

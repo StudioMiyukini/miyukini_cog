@@ -1,0 +1,43 @@
+# @id: maia_memoire_crate_config
+# @do: declarer_crate_memoire_maia
+# @layer: 8
+# @human: Mémoire stratifiée de MAIA (N0–N4) sous budget de tokens, notes versionnées,
+#         provenance obligatoire, oubli à la demande ; stockage par KindMother (EX-50..56).
+
+[package]
+name = "maia-memoire"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Mémoire de MAIA — strates N0–N4 sous budget de tokens, identifiants hiérarchiques, notes versionnées, provenance, oubli tracé ; une base KindMother chiffrée par utilisateur (EX-50 à EX-56)"
+
+[features]
+default = []
+# Conversion des types de miyualicia-memory (mémoire commune MAIA / Alicia, §11).
+pont-alicia = ["dep:miyualicia-memory"]
+
+[dependencies]
+# Stockage : KindMother seul écrivain (K-13) — intentions typées, aucune instruction SQL d'écriture.
+kindmother-client = { path = "../kindmother-client" }
+serde      = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono     = { version = "0.4", features = ["serde"] }
+uuid       = { version = "1", features = ["v4", "serde"] }
+thiserror  = "2"
+tracing    = "0.1"
+tokio      = { version = "1", features = ["sync"] }
+miyualicia-memory = { path = "../miyualicia-memory", optional = true }
+
+[dev-dependencies]
+# Serveur KindMother réel (SQLCipher par défaut) pour les tests EX-55.
+kindmother-service = { path = "../kindmother-service" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
+[lints]
+workspace = true
