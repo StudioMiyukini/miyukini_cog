@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.11 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.12 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -70,6 +70,7 @@
 | A-009 | 2026-10-25 | IA fédérée §2–§5, §7 · Mémoire MAIA §4, §9, §10, §12 · Lot 2 §4.1 : choix du lot 7 (Fiche `0x09`, *k* = 3, quotas, identifiants et budgets mémoire, une base `maia-<utilisateur>`) ; **deux décisions** : republication d'une donnée étrangère après validation TAMR, notes ordinaires écrites par MAIA | 1.9 |
 | A-010 | 2026-10-25 | Mémoire MAIA §9 : « note ordinaire » écrite par MAIA = note des strates N2 / N3 seulement (jamais N0 ni N1) ; précision fail-closed d'A-009 | 1.10 |
 | A-011 | 2026-10-25 | Lot 2 §5 · Zones §16 · Services hybrides §4.1 · Mémoire MAIA §9 : formats et choix consignés tels qu'implémentés — fichier de clé racine `MYRC`, durcissement du processus, état fédéral `MFED`, quotas et révocations de la façade, chemin TAMR et routes de la mémoire ; **à valider par le propriétaire** | 1.11 |
+| A-012 | 2026-10-25 | Lot 2 §6, §8 · Services hybrides §3 · Zones §7 : choix consignés tels qu'implémentés — clé d'appareil par COG de destination, transport des registres de révocation vers Origin et MiyuCloud, fichiers MiyuCloud `inconnu`, Landlock du sas, installateur de modèles de Central ; **à valider par le propriétaire** | 1.12 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -461,3 +462,32 @@
   - Outil `memoire_noter` (StrongFather `memoire.noter`) : jamais de Règle ; **tour contenant du contenu étranger ⇒ provenance `etranger`, candidat seulement**
   - Politiques ajoutées à `config/strongfather/maia.toml` : `maia-tamr-approbation`, `maia-memoire-noter`
 - **Impact** : EX-04 (builds reproductibles, hors gel) ; NC-ANSSI-25 ; EX-32..34 (persistance) ; EX-44, EX-56 ; plan lots 2, 5, 6, 7 mis à jour
+
+### A-012 — Clés d'appareil, révocations relayées, sas confiné, modèles
+
+<!-- @id arch.gel.a012 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a012 -->
+
+- **Date** : 2026-10-25 · **version** 1.12 · consignation de l'implémenté (restes des lots 2, 3, 4) ; **validation du propriétaire attendue** — tout point refusé sera retiré du code
+- **Clé d'appareil par COG de destination** (`miyauth::appareil`, EX-14 non-corrélation)
+  - Clé = graine Ed25519 issue de HKDF-SHA256 (sel `miyukini/miyauth/cle-appareil/v1`, ikm = graine d'appareil, info = `"cog:" || cog_id de destination`)
+  - Liaison au COG d'origine : message `"miyukini/miyauth/liaison-appareil/v1" || 0x00 || origine || destination || clé de destination`, signé par la clé principale appairée (autorisation) **et** par la clé de destination (possession), `verify_strict` ; clé de destination égale à la clé principale refusée
+  - Format du passeport inchangé ; révoquer un appareil = révoquer **chaque** clé de destination liée (non reliables entre elles)
+- **Révocations relayées** (A-007 : fraîcheur ≤ 15 min, absente ou périmée ⇒ refus)
+  - **Origin** : le COG pousse son registre (`POST /api/auth/revocations/sync`, `{cog_id, depuis, tete, entrees}`, ≤ 2 Mio, ≤ 4 096 entrées ; 409 si `depuis` ≠ taille du miroir) ; sécurité portée par la tête signée et la racine Merkle, sans authentification de transport ; configuration `[[forum.cogs_reconnus]]` + `registre` + `cle_journal` ; **un COG reconnu qui n'a jamais poussé son registre voit ses titres refusés**
+  - **MiyuCloud** : dépôt local `tete.sceau` + `entrees.mrgj` (≤ 1 Mio, ≤ 256 Mio), relu toutes les 60 s, miroir en mémoire ; variables `MIYUCLOUD_MIYU_REGISTRE`, `…_CLE_JOURNAL`, `…_REVOCATIONS_DEPOT` (tout ou rien) ; ancre sans source ⇒ tout visa refusé
+  - Clé de journal du COG : signe têtes et entrées de révocation (ancre unique, seuil 1)
+- **MiyuCloud, fichiers `inconnu`** (hérités d'avant le CDR, A-004)
+  - Jamais servis, même avec accord explicite (téléchargement 403 `NonReclasse`, WebDAV, ZIP exclus, blob par empreinte 404)
+  - Reclassement au démarrage puis toutes les 15 min (`MIYUCLOUD_CDR_RECLASSEMENT=0` le coupe) : désarmable ⇒ `desarme` (nouveau blob) ; non désarmable ou refusé par le CDR ⇒ **quarantaine** ; erreur technique ⇒ reste `inconnu` ; écritures conditionnelles (aucune écriture de l'utilisateur écrasée)
+- **Sas du Portail** (`portail-sas`, A-004)
+  - Domaine **Landlock** sans aucune règle (aucun chemin accessible), avant rlimits et seccomp ; noyau sans Landlock ⇒ le sas refuse de démarrer (code de sortie 5), tout le lot est refusé, sans réglage pour lever ce refus
+  - Chaque voie déclarée porte un identifiant d'instance jamais réutilisé : le contrôle « voie inchangée » compare (instance, génération) — une voie redéclarée pendant une relève ou une publication ⇒ `VoieCoupee`
+- **Central, canal officiel** (A-007)
+  - Champ facultatif `modeles` de `canal-officiel.json` : `{"dossier": <chemin absolu>, "ancres": [<64 hex>…]}` ; absent ⇒ tout modèle refusé ; invalide ⇒ canal désactivé ; installateur délégué = celui de maia-llm (`MMIA`)
+- **Non faits, décision ou format manquant**
+  - Certificat racine → clé d'émission : aucune nature de certificat `0x06` « émission » ni champs définis (A-003 « à décider ») ; seul l'épinglage explicite est accepté
+  - Séparation des processus entrant / sortant du Portail : protocole interprocessus, répartition de l'état et propagation des coupures non spécifiés
+  - Source des révocations des vérificateurs de `central-remote` : liste locale du COG ou registre du COG
+- **Impact** : EX-14, EX-36 ; EX-44, EX-45 ; plan lots 2, 3, 4 mis à jour
