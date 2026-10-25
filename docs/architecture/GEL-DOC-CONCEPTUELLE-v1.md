@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.16 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16` (à poser au commit)
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.17 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -75,6 +75,7 @@
 | A-014 | 2026-10-25 | Synchro des révocations vers Origin : chaque envoi (morceau ou tête) signé par la clé de journal du COG, débit par COG après authentification, budget global ; **à valider par le propriétaire** | 1.14 |
 | A-015 | 2026-10-25 | Éditeur du registre de révocation côté COG (dépôt et envois Origin) ; étiquette `publiable` de KindMother (EX-47) et règle de dérivation des Fiches ; relais NFLOG des Vigies (format de ligne, témoin) ; **à valider par le propriétaire** | 1.15 |
 | A-016 | 2026-10-25 | Table hôte de la Douane (description v2, flux de boucle locale par compte, aucun DNS), journalisation bornée, règle EX-12 des Vigies, relais (panne immédiate, ligne sans ports), étiquette `publiable` v2 (paramètres signés, propriété des bases), dérivation stricte des Fiches ; **à valider par le propriétaire** | 1.16 |
+| A-017 | 2026-10-25 | Route de publication des Fiches depuis MAIA : requête signée par l'utilisateur, champs structurels calculés par le serveur, porte des Cores, débits ; clé d'identité dans le pont (à trancher) ; **à valider par le propriétaire** | 1.17 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -589,3 +590,28 @@
 - **Règle de dérivation des Fiches originales** (précise A-015) : `id` = `km.` + 32 hex de l'empreinte de la référence de donnée ; `date` à ±300 s ; `version` = dernière publiée + 1 ; `type`, `langue`, `licence`, `audience` égaux aux paramètres signés ; ≤ 8 attestations par donnée et par 24 h
 - **Éditeur du registre** (précise A-015) : une tête n'est jamais datée au-delà de `maintenant + tolérance` (horloge en recul ⇒ refus explicite) ; verrou `flock` avec délai 10 s ; graine effacée après usage
 - **Impact** : EX-12, EX-35, EX-47, EX-57 ; INV-Z1, INV-Z4 ; plan lots 3, 7
+
+### A-017 — Route de publication des Fiches depuis MAIA
+
+<!-- @id arch.gel.a017 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a017 -->
+
+- **Date** : 2026-10-25 · **version** 1.17 · consignation de l'implémenté (reste du lot 7 signalé par A-015) ; **validation du propriétaire attendue**, en particulier sur la garde de la clé d'identité (dernier point)
+- **Route** `POST /v1/federee/{utilisateur}/publier` (pont `maia`, `apps/miou-llm-bridge/src/routes_federee.rs`)
+  - Requête signée par une clé de l'utilisateur épinglée (`MAIA_MEMOIRE_CLES_UTILISATEUR`), usage propre `maia/federee/<instance>/<utilisateur>` : une requête de la mémoire n'est pas rejouable ici ; POST seulement, aucun cookie, aucun CORS, origine vérifiée ; corps JSON ≤ 64 Kio, champs inconnus refusés
+  - Entrée : `donnee` (référence exacte de la cellule KindMother), `sujet`, `texte` ; facultatifs `relations`, `sources` ; champs structurels **déclarés** (`id`, `version`, `date`, `type`, `langue`, `licence`, `audience`, `provenance`, `reprises`) seulement **comparés**, jamais utilisés
+  - Sortie : `{"publiee":{"id","version","date","empreinte","fiche"}}` ; `empreinte` = empreinte de publication (celle que cite `reprises`), distincte du hachage du sceau entier utilisé par TAMR
+  - Codes : 400 corps / donnée invalides, cookie ; 401 signature requise ; 403 autre utilisateur, donnée `nationale`, non publiable, republication TAMR requise, refus de la porte ; 409 version déjà publiée ; 413 corps trop volumineux ; 422 champ structurel falsifié, non dérivée, Fiche invalide ; 429 débit IP, débit utilisateur, plafond d'attestations ; 503 publication désactivée, KindMother indisponible
+- **Vérifications, dans l'ordre**
+  1. Débit : 60 requêtes/min par IP, puis 30 propositions/h par utilisateur (acceptées ou refusées)
+  2. Contenu étranger (`provenance` ≠ `locale`, ou `reprises` présent) ⇒ refus sans appel à KindMother ; la republication reste au chemin TAMR (non routé)
+  3. Base `maia-*` ⇒ refus sans appel à KindMother, sans tenir compte de la casse
+  4. Étiquette relue dans KindMother : `nationale`, absente, retirée, contenu modifié depuis la pose, ou sans paramètres signés ⇒ refus
+  5. Le **serveur calcule** tous les champs structurels (règle de dérivation d'A-016) ; un champ déclaré différent ⇒ refus ; version déclarée ≤ dernière ⇒ 409 ; date déclarée à plus de 300 s ⇒ 422
+  6. Fiche signée par la clé d'identité du COG ; `PublieurOriginal::attester` relit l'étiquette et applique la dérivation stricte et le plafond de 8 attestations / donnée / 24 h
+  7. Décision par la **porte des Cores** (`data.operation = "federee.publier"`, refus par défaut) ; politiques `maia-federee-publier` (autorisation) et `maia-federee-publier-non-locale` (refus critique) dans `config/strongfather/maia.toml` ; seule une décision ALLOW publie (`ServiceRequete::publier` revérifie la version)
+  8. Chaque publication et chaque refus tracés (`maia::federee::audit`), journal en mémoire borné à 1 024 entrées
+- **Configuration** : `MAIA_FEDEREE_CLE_IDENTITE` (graine de 32 octets, même format que `identite_cog.key` de Central) ; `MAIA_FEDEREE_OPERATEUR` (opérateur KindMother en lecture sur les bases étiquetables, à enregistrer) ; sans clé ⇒ route désactivée (503)
+- **Limites connues** : Fiches publiées et plafond d'attestations **en mémoire** (perdus au redémarrage, versions repartent à 1) ; un refus de la porte consomme une attestation ; aucune route de republication ; **garde de la clé d'identité dans le pont** : alternative à trancher — la laisser à Central qui signerait pour le pont
+- **Impact** : EX-47, EX-57, EX-60 ; plan lot 7
