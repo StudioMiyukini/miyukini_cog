@@ -463,14 +463,14 @@ async fn handle_connection(
     }
 
     // Auth forum : POST /api/auth/* (passeport + visa + PoP, sync signée par COG).
-    // En-têtes contrôlés avant toute lecture du corps (borné à TAILLE_MAX_CORPS_AUTH).
+    // En-têtes contrôlés avant toute lecture du corps (borné par `taille_max_corps`).
     if method == "POST" && path.starts_with("/api/auth/") {
         if let Some(store) = &forum_auth_store {
             if let Some(refus) = forum_auth::precontrole(path, &headers, store.as_ref()) {
                 write_response(&mut writer, refus).await?;
                 return Ok(());
             }
-            let len = match content_length_checked(&headers, forum_auth::TAILLE_MAX_CORPS_AUTH) {
+            let len = match content_length_checked(&headers, forum_auth::taille_max_corps(path)) {
                 Ok(n) => n,
                 Err(e) => {
                     write_response(&mut writer, body_error_response(&e)).await?;

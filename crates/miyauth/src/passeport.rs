@@ -122,9 +122,12 @@ impl From<ErreurSceau> for RefusIdentite {
 
 /// Clés d'émission épinglées, chacune rattachée à son `cog_id`.
 ///
-/// Incrément actuel : ancres directes (clés d'émission). La validation de chaîne
-/// racine → clé d'émission (certificat `0x06`) remplacera l'épinglage direct quand
-/// la crate de racine sera livrée.
+/// Seul mode admis : clés d'émission **explicitement épinglées** (ancres directes).
+/// La chaîne racine → clé d'émission (certificat `0x06`) n'est pas implémentée :
+/// la doc gelée ne définit ni la `nature` d'un certificat d'émission (table du
+/// lot 2 §4.1 : `0x01`, `0x41`–`0x44` seulement, tout autre code refusé) ni ses
+/// champs TLV (A-003, « à décider ultérieurement »). Une clé non épinglée est
+/// refusée (`EmetteurIncoherent` ou signataire inconnu).
 #[derive(Debug, Clone, Default)]
 pub struct AnnuaireEmetteurs {
     ancres: AncresDeConfiance,

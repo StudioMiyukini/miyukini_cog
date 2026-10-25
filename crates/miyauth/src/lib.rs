@@ -26,6 +26,7 @@
 )]
 
 pub mod admin_cell;
+pub mod appareil;
 pub mod attest;
 pub mod context;
 pub mod errors;
@@ -43,6 +44,10 @@ pub mod verify;
 pub use admin_cell::{
     miyauth_admin_cell, MiyauthAdminCell, MiyauthIdentification, MiyauthIntegrity,
     MiyauthTestManifest, TOOLKIT_ID,
+};
+pub use appareil::{
+    cle_appareil_pour, emettre_passeport_lie, lier_cle_appareil, message_liaison, verifier_liaison, DemandeLiaison,
+    GraineAppareil, LiaisonVerifiee,
 };
 pub use attest::attest as identity_attest;
 pub use context::GovernedContext;

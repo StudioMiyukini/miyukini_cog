@@ -37,6 +37,7 @@ use tracing::{debug, error, info, warn};
 use miyauth::http::{b64_encoder, RequeteHttp, ENTETE_POP};
 
 use super::acces::{AccesAdmin, RefusAdmin};
+use crate::web::revocations::RevocationsReconnues;
 use crate::config::OriginConfig;
 use crate::relay::session::SessionManager;
 use crate::tracker::pool::PoolManager;
@@ -127,10 +128,11 @@ pub struct AdminServer {
 }
 
 impl AdminServer {
-    /// Crée un nouveau serveur admin.
+    /// Crée un nouveau serveur admin. `revocations` : suivi des registres des COG
+    /// reconnus, partagé avec le forum (alimenté par `/api/auth/revocations/sync`).
     #[must_use]
-    pub fn new(config: Arc<OriginConfig>) -> Self {
-        let acces = match AccesAdmin::depuis_config(&config) {
+    pub fn new(config: Arc<OriginConfig>, revocations: Arc<RevocationsReconnues>) -> Self {
+        let acces = match AccesAdmin::depuis_config(&config, revocations) {
             Ok(a) => a,
             Err(e) => {
                 error!("Admin : configuration de connexion par passeport invalide, connexion désactivée : {}", e);
@@ -1505,7 +1507,11 @@ mod tests {
     fn monde_admin(autoriser: bool) -> MondeAdmin {
         let cle_h = CleSignature::generer();
         let cog_h = CogId::new(&cog_id_depuis_cle(&cle_h.cle_publique())).unwrap();
-        let hote = HoteForum::new(CleSignature::generer(), &[(cog_h.clone(), cle_h.cle_publique())]).unwrap();
+        // Registre de `h` déclaré et poussé : révocations fraîches (≤ 15 min).
+        let mut registre = crate::web::revocations::banc::RegistreCog::new(cog_h.clone());
+        let revocations = Arc::new(crate::web::revocations::RevocationsReconnues::new(&[registre.declaration()]).unwrap());
+        registre.pousser(&revocations, miyauth::http::service::maintenant_unix()).unwrap();
+        let hote = HoteForum::new(CleSignature::generer(), &[(cog_h.clone(), cle_h.cle_publique())], revocations).unwrap();
         let cog_origin = hote.cog.clone();
         let secret = SecretTitulaire::generer();
         let mut admins = std::collections::HashSet::new();

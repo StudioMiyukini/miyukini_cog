@@ -14,6 +14,7 @@ pub mod forum_auth;
 pub mod jaybureau;
 pub mod market;
 pub mod pages;
+pub mod revocations;
 pub mod server;
 
 pub use jaybureau::JayBureauState;

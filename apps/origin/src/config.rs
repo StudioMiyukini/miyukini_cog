@@ -368,6 +368,15 @@ pub struct CogReconnuConfig {
     pub cog_id: String,
     /// Clé publique Ed25519 d'émission (64 caractères hexadécimaux).
     pub cle_emission: String,
+    /// Identifiant du registre du COG (64 caractères hexadécimaux). Avec `cle_journal`,
+    /// active le suivi de ses révocations ; sans eux, ses passeports sont **refusés**
+    /// (aucune liste de révocation, fail-closed).
+    #[serde(default)]
+    pub registre: Option<String>,
+    /// Clé publique de journal du COG (64 caractères hexadécimaux) : signe les têtes de
+    /// son registre et ses entrées de révocation.
+    #[serde(default)]
+    pub cle_journal: Option<String>,
 }
 
 /// Authentification forum (inventaire #11 à #13, sortie du lot 2).

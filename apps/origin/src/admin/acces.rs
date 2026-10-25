@@ -23,15 +23,19 @@
 //! - liste d'administrateurs vide ou clé d'hôte absente : connexion par passeport refusée ;
 //! - entrée de liste invalide : toute la connexion par passeport est désactivée ;
 //! - portée `origin-admin` exigée dans le passeport (un passeport « forum » ne suffit pas) ;
-//! - passeport de plus de 15 min refusé (aucune liste de révocation distribuée à Origin).
+//! - passeport de plus de 15 min refusé (défense en profondeur) ;
+//! - révocations du COG d'origine : registre vérifié ≤ 15 min, partagé avec le forum
+//!   ([`crate::web::revocations`]) ; absente ou périmée ⇒ refus.
 
 use std::collections::HashSet;
+use std::sync::Arc;
 
 use miyauth::http::{verifier_requete_passeport, DefiEmis, MagasinDefis, RefusHttp, RequeteHttp};
 use miyauth::titres::DUREE_MAX_VISA_SECS;
 use miyauth::{emettre_visa, CogId, DemandeVisa, Portees};
 
 use crate::config::OriginConfig;
+use crate::web::revocations::RevocationsReconnues;
 use crate::web::forum_auth::{
     identite_opaque, HoteForum, ParametresForum, DUREE_MAX_PASSEPORT_FORUM_SECS,
 };
@@ -40,7 +44,7 @@ use crate::web::forum_auth::{
 pub const AUDIENCE_ADMIN: &str = "origin-admin";
 /// Portée exigée dans le passeport et recopiée dans le visa.
 pub const PORTEE_ADMIN: &str = "origin-admin";
-/// Durée maximale d'un passeport accepté pour l'admin (révocation non vérifiable au-delà).
+/// Durée maximale d'un passeport accepté pour l'admin (défense en profondeur).
 pub const DUREE_MAX_PASSEPORT_ADMIN_SECS: u64 = DUREE_MAX_PASSEPORT_FORUM_SECS;
 
 /// Refus de connexion admin par passeport.
@@ -113,7 +117,9 @@ impl AccesAdmin {
     /// Construit l'accès depuis la configuration. `Ok(None)` : clé d'hôte absente ou liste
     /// d'administrateurs vide (connexion par passeport désactivée). Toute entrée invalide
     /// est une erreur (fail-closed).
-    pub fn depuis_config(config: &OriginConfig) -> Result<Option<Self>, String> {
+    ///
+    /// `revocations` : suivi partagé des registres des COG reconnus (le même que le forum).
+    pub fn depuis_config(config: &OriginConfig, revocations: Arc<RevocationsReconnues>) -> Result<Option<Self>, String> {
         if config.admin.administrateurs.is_empty() {
             return Ok(None);
         }
@@ -123,12 +129,12 @@ impl AccesAdmin {
             .iter()
             .map(|a| analyser_administrateur(a))
             .collect::<Result<HashSet<_>, _>>()?;
-        let parametres = ParametresForum::depuis_config(&config.forum)?;
+        let parametres = ParametresForum::depuis_config(&config.forum, revocations)?;
         let Some(cle) = parametres.cle_hote else {
             return Ok(None);
         };
         Ok(Some(Self::new(
-            HoteForum::new(cle, &parametres.cogs_reconnus)?,
+            HoteForum::new(cle, &parametres.cogs_reconnus, parametres.revocations)?,
             administrateurs,
         )))
     }
@@ -234,11 +240,11 @@ mod tests {
     #[test]
     fn liste_vide_ou_entree_invalide() {
         let mut c = OriginConfig::default();
-        assert!(AccesAdmin::depuis_config(&c).unwrap().is_none());
+        assert!(AccesAdmin::depuis_config(&c, Arc::default()).unwrap().is_none());
         c.admin.administrateurs = vec!["pw:invalide".into()];
-        assert!(AccesAdmin::depuis_config(&c).is_err());
+        assert!(AccesAdmin::depuis_config(&c, Arc::default()).is_err());
         // Liste valide mais clé d'hôte absente : désactivé.
         c.admin.administrateurs = vec![format!("pw:{}:{}", "a".repeat(26), "00".repeat(32))];
-        assert!(AccesAdmin::depuis_config(&c).unwrap().is_none());
+        assert!(AccesAdmin::depuis_config(&c, Arc::default()).unwrap().is_none());
     }
 }

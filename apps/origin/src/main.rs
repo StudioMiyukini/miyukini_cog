@@ -163,12 +163,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pool_manager = tracker.pool_manager();
     let slug_registry = tracker.slug_registry();
 
+    // Révocations des COG reconnus (registres vérifiés, ≤ 15 min) : partagées par le
+    // forum et l'admin. Déclaration invalide : aucune liste (passeports refusés).
+    let revocations_reconnues = Arc::new(
+        web::revocations::RevocationsReconnues::depuis_config(&config.forum).unwrap_or_else(|e| {
+            error!("Révocations des COG reconnus : {} — aucune liste, passeports des COG reconnus refusés", e);
+            web::revocations::RevocationsReconnues::default()
+        }),
+    );
+
     // Auth forum unifiée Central (profils synchronisés pour forum.miyukini.com)
     let forum_auth_store: Option<std::sync::Arc<web::forum_auth::ForumAuthStore>> = config
         .tracker
         .forum_profiles_db_path
         .as_ref()
-        .and_then(|path| match web::forum_auth::ParametresForum::depuis_config(&config.forum)
+        .and_then(|path| match web::forum_auth::ParametresForum::depuis_config(&config.forum, Arc::clone(&revocations_reconnues))
             .and_then(|parametres| web::forum_auth::ForumAuthStore::open(path, parametres))
         {
             Ok(store) => {
@@ -251,7 +260,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     // Créer le serveur admin
-    let admin = AdminServer::new(Arc::clone(&config)).with_pools(Arc::clone(&pool_manager));
+    let admin = AdminServer::new(Arc::clone(&config), Arc::clone(&revocations_reconnues)).with_pools(Arc::clone(&pool_manager));
     let tracker_handle = {
         let tracker = tracker;
         tokio::spawn(async move {

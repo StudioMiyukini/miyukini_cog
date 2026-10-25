@@ -32,13 +32,17 @@
 //!
 //! Passeports acceptés : seulement ceux des COG épinglés dans `[forum] cogs_reconnus`
 //! (`cog_id` + clé d'émission, niveau « reconnu »). Choix fail-closed : la chaîne
-//! racine → clé d'émission (certificat) n'est pas encore spécifiée (A-003).
+//! racine → clé d'émission (certificat) n'est pas spécifiée par la doc gelée (A-003) :
+//! seule une clé d'émission explicitement épinglée est acceptée.
 //!
-//! Révocation : aucune liste de révocation des COG reconnus n'est encore distribuée à
-//! Origin. Choix fail-closed : Origin n'accepte que des passeports de **15 minutes au
-//! plus** ; un appareil révoqué par son COG d'origine ne peut plus obtenir de passeport et
-//! perd l'accès en moins de 15 min (même borne que la fraîcheur des listes de révocation).
-//! Les COG non reconnus sont refusés (liste absente).
+//! Révocation : liste de chaque COG reconnu tirée de son **registre vérifié**
+//! ([`crate::web::revocations`], `miyuregistre::RevocationsRegistre`) — tête signée par
+//! sa clé de journal (`registre`, `cle_journal` de `[[forum.cogs_reconnus]]`),
+//! fraîcheur **≤ 15 min** ; liste absente (registre non déclaré, jamais poussé) ou
+//! périmée ⇒ **refus** du passeport. Le COG pousse son registre par
+//! `POST /api/auth/revocations/sync` (`{cog_id, depuis, tete, entrees}`, base64 URL).
+//! La borne de **15 minutes** des passeports acceptés est conservée (défense en
+//! profondeur). Les COG non reconnus sont refusés.
 //!
 //! # Synchronisation des profils (#13)
 //!
@@ -55,7 +59,7 @@
 
 use argon2::password_hash::{PasswordHash, PasswordVerifier};
 use miyauth::http::{
-    b64_encoder, verifier_requete_passeport, verifier_requete_signee, verifier_requete_visa, EntetesSignees,
+    b64_decoder, b64_encoder, verifier_requete_passeport, verifier_requete_signee, verifier_requete_visa, EntetesSignees,
     MagasinDefis, MagasinDefisMemoire, RefusHttp, RegistreNonces, RequeteHttp, ENTETE_HORODATAGE, ENTETE_NONCE,
     ENTETE_POP, ENTETE_SIGNATAIRE, ENTETE_SIGNATURE,
 };
@@ -69,10 +73,11 @@ use miyuwebway_participant::identite::cog_id_depuis_cle;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tracing::{debug, info, warn};
 
 use crate::config::ForumConfig;
+use crate::web::revocations::{RefusSynchro, RevocationsReconnues};
 
 // ---------------------------------------------------------------------------
 // Constantes
@@ -92,11 +97,14 @@ pub const DUREE_MAX_PASSEPORT_FORUM_SECS: u64 = 15 * 60;
 const PREFIXE_PORTEE_FORUM: &str = "forum:";
 /// Taille maximale du corps des routes `/api/auth/*` (contrôlée avant lecture).
 pub const TAILLE_MAX_CORPS_AUTH: usize = 4096;
+/// Taille maximale du corps de `/api/auth/revocations/sync` (tête + entrées, base64).
+pub const TAILLE_MAX_CORPS_REVOCATIONS: usize = 2 * 1024 * 1024;
 
 const ROUTE_DEFI: &str = "/api/auth/forum/defi";
 const ROUTE_LOGIN: &str = "/api/auth/forum/login";
 const ROUTE_SYNC: &str = "/api/auth/forum/sync";
 const ROUTE_SESSION: &str = "/api/auth/session/verify";
+const ROUTE_REVOCATIONS: &str = "/api/auth/revocations/sync";
 
 // ---------------------------------------------------------------------------
 // Types publics
@@ -133,6 +141,9 @@ pub struct ParametresForum {
     pub password_login: bool,
     /// Propriétaire désigné des profils hérités (`cog_id` vide) ; None = lecture seule.
     pub cog_heritage: Option<String>,
+    /// Révocations des COG reconnus (partagées avec l'admin). Vide : tout passeport
+    /// d'un COG reconnu est refusé.
+    pub revocations: Arc<RevocationsReconnues>,
 }
 
 fn cle_hex(texte: &str, champ: &str) -> Result<[u8; 32], String> {
@@ -145,7 +156,8 @@ fn cle_hex(texte: &str, champ: &str) -> Result<[u8; 32], String> {
 impl ParametresForum {
     /// Construit les paramètres depuis la configuration (charge ou crée la clé d'Origin).
     /// Toute entrée invalide est une erreur (fail-closed : pas d'entrée ignorée).
-    pub fn depuis_config(config: &ForumConfig) -> Result<Self, String> {
+    /// `revocations` : suivi partagé des registres des COG reconnus.
+    pub fn depuis_config(config: &ForumConfig, revocations: Arc<RevocationsReconnues>) -> Result<Self, String> {
         let cle_hote = match config.cle_emission_path.as_deref() {
             Some(chemin) => Some(CleSignature::depuis_graine(&charger_ou_creer_graine(Path::new(chemin))?)),
             None => None,
@@ -166,7 +178,7 @@ impl ParametresForum {
             ),
             None => None,
         };
-        Ok(Self { cle_hote, cogs_reconnus, sync_cles, password_login: config.password_login, cog_heritage })
+        Ok(Self { cle_hote, cogs_reconnus, sync_cles, password_login: config.password_login, cog_heritage, revocations })
     }
 }
 
@@ -197,24 +209,22 @@ fn charger_ou_creer_graine(chemin: &Path) -> Result<[u8; 32], String> {
 // COG hôte (visas forum)
 // ---------------------------------------------------------------------------
 
-/// Statut de révocation vu d'Origin (voir l'en-tête du module).
+/// Statut de révocation vu d'Origin (voir l'en-tête du module) : bannissements
+/// locaux pour Origin, registre vérifié (≤ 15 min) pour chaque COG reconnu.
 #[derive(Debug)]
 struct RevocationsOrigin {
     cog_local: CogId,
-    reconnus: HashSet<CogId>,
+    reconnues: Arc<RevocationsReconnues>,
     locales: Mutex<HashSet<CibleRevocation>>,
 }
 
 impl SourceRevocation for RevocationsOrigin {
-    fn est_revoque(&self, emetteur: &CogId, cible: &CibleRevocation, _maintenant: u64) -> Result<bool, ErreurRevocation> {
+    fn est_revoque(&self, emetteur: &CogId, cible: &CibleRevocation, maintenant: u64) -> Result<bool, ErreurRevocation> {
         if emetteur == &self.cog_local {
             return Ok(self.locales.lock().unwrap_or_else(std::sync::PoisonError::into_inner).contains(cible));
         }
-        if self.reconnus.contains(emetteur) {
-            // Pas de liste distribuée : compensé par la durée maximale des passeports (15 min).
-            return Ok(false);
-        }
-        Err(ErreurRevocation::ListeAbsente)
+        // Liste absente (registre non déclaré ou jamais poussé) ou périmée : erreur ⇒ refus.
+        self.reconnues.est_revoque(emetteur, cible, maintenant)
     }
 }
 
@@ -228,13 +238,16 @@ pub(crate) struct HoteForum {
 }
 
 impl HoteForum {
-    pub(crate) fn new(cle: CleSignature, reconnus: &[(CogId, [u8; 32])]) -> Result<Self, String> {
+    pub(crate) fn new(
+        cle: CleSignature,
+        reconnus: &[(CogId, [u8; 32])],
+        revocations: Arc<RevocationsReconnues>,
+    ) -> Result<Self, String> {
         let cog = CogId::new(&cog_id_depuis_cle(&cle.cle_publique())).ok_or("cog_id d'Origin invalide")?;
         let mut annuaire = AnnuaireEmetteurs::new();
         annuaire
             .ajouter(cog.clone(), &cle.cle_publique(), NiveauConfiance::Souverain)
             .map_err(|e| format!("clé forum : {e}"))?;
-        let mut ids = HashSet::new();
         for (c, k) in reconnus {
             if c == &cog {
                 return Err("forum.cogs_reconnus : le cog_id d'Origin ne peut pas être « reconnu »".into());
@@ -242,9 +255,11 @@ impl HoteForum {
             annuaire
                 .ajouter(c.clone(), k, NiveauConfiance::Reconnu)
                 .map_err(|e| format!("forum.cogs_reconnus ({c}) : {e}"))?;
-            ids.insert(c.clone());
+            if !revocations.suit(c) {
+                warn!("forum.cogs_reconnus ({c}) : registre non déclaré, ses passeports seront refusés");
+            }
         }
-        let revocations = RevocationsOrigin { cog_local: cog.clone(), reconnus: ids, locales: Mutex::new(HashSet::new()) };
+        let revocations = RevocationsOrigin { cog_local: cog.clone(), reconnues: revocations, locales: Mutex::new(HashSet::new()) };
         Ok(Self { cog, cle, annuaire, revocations, defis: MagasinDefisMemoire::default() })
     }
 
@@ -284,6 +299,8 @@ pub struct ForumAuthStore {
     password_login: bool,
     /// Propriétaire désigné des profils hérités (`cog_id` vide) ; None = lecture seule.
     cog_heritage: Option<String>,
+    /// Révocations des COG reconnus (alimentées par `/api/auth/revocations/sync`).
+    revocations: Arc<RevocationsReconnues>,
 }
 
 impl ForumAuthStore {
@@ -295,7 +312,7 @@ impl ForumAuthStore {
         }
         let conn = rusqlite::Connection::open(path).map_err(|e| e.to_string())?;
         let hote = match parametres.cle_hote {
-            Some(cle) => Some(HoteForum::new(cle, &parametres.cogs_reconnus)?),
+            Some(cle) => Some(HoteForum::new(cle, &parametres.cogs_reconnus, Arc::clone(&parametres.revocations))?),
             None => None,
         };
         let sync_cles = parametres.sync_cles.iter().map(|k| (*k, cog_id_depuis_cle(k))).collect::<HashMap<_, _>>();
@@ -307,6 +324,7 @@ impl ForumAuthStore {
             sync_nonces: RegistreNonces::default(),
             password_login: parametres.password_login,
             cog_heritage: parametres.cog_heritage,
+            revocations: parametres.revocations,
         };
         if let Some(h) = &store.hote {
             info!("Forum : connexion par passeport activée (Origin cog_id {})", h.cog);
@@ -601,10 +619,19 @@ fn json_value(status: u16, v: &serde_json::Value) -> super::server::RouteRespons
     json_response(status, &serde_json::to_string(v).unwrap_or_default())
 }
 
+/// Taille maximale du corps d'une route `/api/auth/*` (contrôlée avant lecture).
+pub fn taille_max_corps(path: &str) -> usize {
+    if chemin_sans_requete(path) == ROUTE_REVOCATIONS {
+        TAILLE_MAX_CORPS_REVOCATIONS
+    } else {
+        TAILLE_MAX_CORPS_AUTH
+    }
+}
+
 /// Traite une requête API auth (POST, corps déjà lu et borné).
 pub fn handle_api(path: &str, body: &[u8], headers: &[String], store: &ForumAuthStore) -> super::server::RouteResponse {
     let path_clean = chemin_sans_requete(path);
-    if body.len() > TAILLE_MAX_CORPS_AUTH {
+    if body.len() > taille_max_corps(path_clean) {
         return json_response(400, r#"{"ok":false,"error":"payload too large"}"#);
     }
     let maintenant = epoch_secs();
@@ -613,6 +640,7 @@ pub fn handle_api(path: &str, body: &[u8], headers: &[String], store: &ForumAuth
         ROUTE_LOGIN => route_login(store, path_clean, body, headers, maintenant),
         ROUTE_SESSION => route_session(store, path_clean, body, headers, maintenant),
         ROUTE_SYNC => route_sync(store, path_clean, body, headers, maintenant),
+        ROUTE_REVOCATIONS => route_revocations(&store.revocations, body, maintenant),
         "/api/auth/forum/validate" | "/api/auth/validate" => route_validate(store, body),
         // `/api/auth/security/info` : retiré du routage public (404).
         _ => json_response(404, r#"{"ok":false,"error":"not_found"}"#),
@@ -752,6 +780,49 @@ fn route_sync(store: &ForumAuthStore, chemin: &str, body: &[u8], headers: &[Stri
     }
 }
 
+/// Corps JSON de `POST /api/auth/revocations/sync` (poussé par un COG reconnu).
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RevocationsSyncRequest {
+    /// COG dont le registre est poussé.
+    pub cog_id: String,
+    /// Taille du miroir d'Origin à laquelle les entrées font suite.
+    pub depuis: u64,
+    /// Tête de registre scellée (base64 URL).
+    pub tete: String,
+    /// Entrées `depuis..taille de la tête` (base64 URL).
+    pub entrees: Vec<String>,
+}
+
+pub(crate) fn route_revocations(revocations: &RevocationsReconnues, body: &[u8], maintenant: u64) -> super::server::RouteResponse {
+    let Ok(req) = serde_json::from_slice::<RevocationsSyncRequest>(body) else {
+        return json_response(400, r#"{"ok":false,"error":"invalid json"}"#);
+    };
+    let Some(cog) = CogId::new(req.cog_id.trim()) else {
+        return json_response(400, r#"{"ok":false,"error":"cog_id"}"#);
+    };
+    let tete = b64_decoder(&req.tete);
+    let entrees: Option<Vec<Vec<u8>>> = req.entrees.iter().map(|e| b64_decoder(e)).collect();
+    let (Some(tete), Some(entrees)) = (tete, entrees) else {
+        return json_response(400, r#"{"ok":false,"error":"base64"}"#);
+    };
+    match revocations.synchroniser(&cog, req.depuis, &tete, &entrees, maintenant) {
+        Ok(s) => json_value(
+            200,
+            &serde_json::json!({ "ok": true, "taille": s.taille, "a_jour_au": s.a_jour_au, "ajoutees": s.ajoutees }),
+        ),
+        Err(RefusSynchro::Position { taille }) => {
+            json_value(409, &serde_json::json!({ "ok": false, "error": "position", "taille": taille }))
+        }
+        Err(RefusSynchro::CogInconnu) => json_response(403, r#"{"ok":false,"error":"cog_inconnu"}"#),
+        Err(RefusSynchro::EtatIndisponible) => json_response(503, r#"{"ok":false,"error":"unavailable"}"#),
+        Err(e) => {
+            warn!("Révocations de {} refusées : {}", cog, e);
+            json_response(400, r#"{"ok":false,"error":"rejected"}"#)
+        }
+    }
+}
+
 fn route_validate(store: &ForumAuthStore, body: &[u8]) -> super::server::RouteResponse {
     if !store.password_login {
         return json_response(403, r#"{"ok":false,"error":"password_login_disabled"}"#);
@@ -786,6 +857,7 @@ fn json_response(status: u16, body: &str) -> super::server::RouteResponse {
         401 => "401 Unauthorized",
         403 => "403 Forbidden",
         404 => "404 Not Found",
+        409 => "409 Conflict",
         429 => "429 Too Many Requests",
         503 => "503 Service Unavailable",
         _ => "500 Internal Server Error",
@@ -821,6 +893,7 @@ mod tests {
         liaison_requete, signer_pop, signer_requete,
     };
     use miyauth::{emettre_passeport, DemandePasseport, SecretTitulaire};
+    use crate::web::revocations::banc::RegistreCog;
 
     /// COG d'origine d'un utilisateur (reconnu par Origin) et son appareil.
     struct Monde {
@@ -830,22 +903,38 @@ mod tests {
         appareil: CleSignature,
         secret: SecretTitulaire,
         cle_sync: CleSignature,
+        /// Registre du COG `h` (révocations poussées vers Origin).
+        registre: RegistreCog,
+        revocations: Arc<RevocationsReconnues>,
     }
 
     fn monde_avec(password_login: bool) -> Monde {
         let cle_h = CleSignature::generer();
         let cog_h = CogId::new(&cog_id_depuis_cle(&CleSignature::generer().cle_publique())).unwrap();
         let cle_sync = CleSignature::generer();
+        let mut registre = RegistreCog::new(cog_h.clone());
+        let revocations = Arc::new(RevocationsReconnues::new(&[registre.declaration()]).unwrap());
         let parametres = ParametresForum {
             cle_hote: Some(CleSignature::generer()),
             cogs_reconnus: vec![(cog_h.clone(), cle_h.cle_publique())],
             sync_cles: vec![cle_sync.cle_publique()],
             password_login,
             cog_heritage: None,
+            revocations: Arc::clone(&revocations),
         };
         let path = std::env::temp_dir().join(format!("forum_auth_test_{}.db", uuid::Uuid::new_v4()));
         let store = ForumAuthStore::open(path, parametres).expect("store");
-        Monde { store, cog_h, cle_h, appareil: CleSignature::generer(), secret: SecretTitulaire::generer(), cle_sync }
+        registre.pousser(&revocations, epoch_secs()).unwrap();
+        Monde {
+            store,
+            cog_h,
+            cle_h,
+            appareil: CleSignature::generer(),
+            secret: SecretTitulaire::generer(),
+            cle_sync,
+            registre,
+            revocations,
+        }
     }
 
     fn monde() -> Monde {
@@ -910,6 +999,19 @@ mod tests {
                 entete("X-Miyu-PoP", &self.pop(ROUTE_LOGIN, b"")),
             ];
             handle_api(ROUTE_LOGIN, b"", &h, &self.store)
+        }
+
+        /// Pousse le registre de `h` par la route HTTP (`depuis` = taille du miroir).
+        fn pousser_http(&mut self, depuis: u64) -> RouteResponse {
+            let (tete, entrees) = self.registre.publier(depuis, epoch_secs());
+            let corps = serde_json::json!({
+                "cog_id": self.cog_h.as_str(),
+                "depuis": depuis,
+                "tete": b64_encoder(&tete),
+                "entrees": entrees.iter().map(|e| b64_encoder(e)).collect::<Vec<_>>(),
+            })
+            .to_string();
+            handle_api(ROUTE_REVOCATIONS, corps.as_bytes(), &[], &self.store)
         }
 
         fn session(&self, visa: &[u8], passeport: &[u8], pop: &str) -> RouteResponse {
@@ -989,6 +1091,80 @@ mod tests {
         let m = monde();
         assert!(m.store.bannir(CibleRevocation::appareil(&m.appareil.cle_publique())));
         assert!(status_of(&m.login(&m.passeport(600, &m.cle_h))).starts_with("401"));
+    }
+
+    #[test]
+    fn revocations_du_registre_du_cog_reconnu() {
+        let mut m = monde();
+        let p = m.passeport(600, &m.cle_h);
+        assert!(status_of(&m.login(&p)).starts_with("200"));
+        let maintenant = epoch_secs();
+        let politique_origin = m.store.hote.as_ref().unwrap().politique();
+        let cible = CibleRevocation::appareil(&m.appareil.cle_publique());
+        // Au-delà de 15 min sans tête nouvelle : liste périmée ⇒ refus (fail-closed).
+        assert!(matches!(
+            politique_origin.revocations.est_revoque(&m.cog_h, &cible, maintenant + 15 * 60 + 5),
+            Err(ErreurRevocation::Perimee { .. })
+        ));
+        // COG reconnu dont le registre n'est pas déclaré : liste absente ⇒ refus.
+        let autre = CogId::new(&cog_id_depuis_cle(&CleSignature::generer().cle_publique())).unwrap();
+        assert_eq!(politique_origin.revocations.est_revoque(&autre, &cible, maintenant), Err(ErreurRevocation::ListeAbsente));
+
+        // Révocation de l'appareil inscrite au registre de `h`, poussée par HTTP : refus.
+        m.registre.revoquer(&cible, None, maintenant);
+        // Mauvaise position : 409 et taille attendue.
+        let r = m.pousser_http(5);
+        assert!(status_of(&r).starts_with("409"), "{}", status_of(&r));
+        let depuis = json_of(&r)["taille"].as_u64().unwrap();
+        let r = m.pousser_http(depuis);
+        assert!(status_of(&r).starts_with("200"), "{}", status_of(&r));
+        assert_eq!(json_of(&r)["ajoutees"], 1);
+        assert!(status_of(&m.login(&m.passeport(600, &m.cle_h))).starts_with("401"));
+        assert_eq!(m.revocations.taille(&m.cog_h), Some(1));
+
+        // Corps invalides, COG inconnu.
+        assert!(status_of(&handle_api(ROUTE_REVOCATIONS, b"{}", &[], &m.store)).starts_with("400"));
+        let inconnu = serde_json::json!({"cog_id": autre.as_str(), "depuis": 0, "tete": "!!", "entrees": []}).to_string();
+        assert!(status_of(&handle_api(ROUTE_REVOCATIONS, inconnu.as_bytes(), &[], &m.store)).starts_with("400"));
+        let (tete, _) = m.registre.publier(1, epoch_secs());
+        let inconnu =
+            serde_json::json!({"cog_id": autre.as_str(), "depuis": 0, "tete": b64_encoder(&tete), "entrees": []}).to_string();
+        assert!(status_of(&handle_api(ROUTE_REVOCATIONS, inconnu.as_bytes(), &[], &m.store)).starts_with("403"));
+        assert_eq!(taille_max_corps(ROUTE_REVOCATIONS), TAILLE_MAX_CORPS_REVOCATIONS);
+        assert_eq!(taille_max_corps(ROUTE_LOGIN), TAILLE_MAX_CORPS_AUTH);
+    }
+
+    #[test]
+    fn cog_reconnu_sans_liste_refuse() {
+        let cle_h = CleSignature::generer();
+        let cog_h = CogId::new(&cog_id_depuis_cle(&CleSignature::generer().cle_publique())).unwrap();
+        let mut registre = RegistreCog::new(cog_h.clone());
+        let revocations = Arc::new(RevocationsReconnues::new(&[registre.declaration()]).unwrap());
+        let parametres = ParametresForum {
+            cle_hote: Some(CleSignature::generer()),
+            cogs_reconnus: vec![(cog_h.clone(), cle_h.cle_publique())],
+            revocations: Arc::clone(&revocations),
+            ..Default::default()
+        };
+        let path = std::env::temp_dir().join(format!("forum_auth_test_{}.db", uuid::Uuid::new_v4()));
+        let store = ForumAuthStore::open(path, parametres).unwrap();
+        let mut m = Monde {
+            store,
+            cog_h,
+            cle_h,
+            appareil: CleSignature::generer(),
+            secret: SecretTitulaire::generer(),
+            cle_sync: CleSignature::generer(),
+            registre: RegistreCog::new(CogId::new("zzzzzzzzzzzzzzzzzzzzzzzzzz").unwrap()),
+            revocations: Arc::clone(&revocations),
+        };
+        // Registre déclaré mais jamais poussé : liste absente ⇒ refus (plus de « 15 min suffisent »).
+        assert!(status_of(&m.login(&m.passeport(600, &m.cle_h))).starts_with("401"));
+        registre.pousser(&revocations, epoch_secs()).unwrap();
+        assert!(status_of(&m.login(&m.passeport(600, &m.cle_h))).starts_with("200"));
+        // Tête signée par une autre clé que la clé de journal déclarée : refusée.
+        m.registre = RegistreCog::new(m.cog_h.clone());
+        assert!(status_of(&m.pousser_http(0)).starts_with("400"));
     }
 
     #[test]

@@ -19,6 +19,8 @@ miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
 miyumarket = { path = "../../crates/miyumarket" }
 miyauth = { path = "../../crates/miyauth", features = ["http"] }
 miyusceau = { path = "../../crates/miyusceau" }
+# Révocations des COG reconnus ← miroir vérifié de leur registre (lot 2 §8.2).
+miyuregistre = { path = "../../crates/miyuregistre", features = ["miyauth"] }
 jaybureau-core = { path = "../../crates/jaybureau-suite/jaybureau-core" }
 jay-collab = { path = "../../crates/jaybureau-suite/jay-collab" }
 
