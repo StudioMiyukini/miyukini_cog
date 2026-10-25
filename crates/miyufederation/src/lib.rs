@@ -49,11 +49,13 @@ pub mod titres;
 pub use eclipse::CarnetPairs;
 pub use erreurs::ErreurFederation;
 pub use federation::{
-    Federation, Parametres, RevocationFederale, RevocationsFederation, SuspensionFederale, PERIODE_QUOTA_SECS,
-    QUOTA_CONFIRMATIONS, TAILLE_MAX_ETAT, TEMOINS_MIN,
+    Federation, Parametres, RevocationFederale, RevocationsFederation, SuspensionFederale, MOTIF_REVOCATION_FEDERALE,
+    PERIODE_QUOTA_SECS, QUOTA_CONFIRMATIONS, TAILLE_MAX_ETAT, TEMOINS_MIN,
 };
 pub use note::{NoteLocale, Observation, SEUIL_BANNISSEMENT};
-pub use persistance::{CleEtatFederal, ErreurEtat, Reprise, StockageFederal, FICHIER_ETAT};
+pub use persistance::{
+    AncreRegistre, CleEtatFederal, ErreurEtat, RegistreLocal, Reprise, StockageFederal, FICHIER_ETAT, FICHIER_VERROU,
+};
 pub use preuve::Preuve;
 pub use statut::{
     Sanction, Statut, CONFIRMATIONS_INVITE, CONFIRMATIONS_MEMBRE, DELAI_CONTESTATION_SECS, DUREE_CONFIRMATION_MAX_SECS,

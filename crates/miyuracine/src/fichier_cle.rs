@@ -299,6 +299,18 @@ pub fn lire_parametres(chemin: &std::path::Path) -> Result<ParametresArgon2, Err
     en_tete_valide(&octets, &BORNES).ok_or(ErreurRacine::FichierCleInvalide)
 }
 
+/// Lit un fichier **secret** (part SLIP-39, phrase, mot de passe) avec les
+/// mêmes contrôles que le fichier de clé (Linux) : dernier composant ouvert
+/// en `O_NOFOLLOW` (lien symbolique ⇒ refus), fichier ordinaire, aucun droit
+/// pour le groupe ni les autres (`0600` ou plus strict), propriétaire = uid
+/// effectif, au plus `taille_max` octets (lecture bornée, tampon effacé à la
+/// libération). Refus : [`ErreurRacine::FichierSecretRefuse`].
+pub fn lire_fichier_secret(chemin: &std::path::Path, taille_max: u64) -> Result<Zeroizing<Vec<u8>>, ErreurRacine> {
+    systeme::lire_borne(chemin, taille_max, ErreurRacine::FichierSecretRefuse, || {
+        ErreurRacine::FichierSecretRefuse("fichier trop grand")
+    })
+}
+
 /// Lit et déchiffre un fichier de clé racine (contrôles de la section « Lecture »).
 pub fn lire_fichier_cle(
     chemin: &std::path::Path,
@@ -318,6 +330,7 @@ mod systeme {
     use rand_core::{OsRng, RngCore};
     use rustix::fs::{Mode, OFlags, RenameFlags, CWD};
     use rustix::io::Errno;
+    use zeroize::Zeroizing;
 
     use super::TAILLE_FICHIER;
     use crate::erreurs::ErreurRacine;
@@ -326,21 +339,61 @@ mod systeme {
         ErreurRacine::EntreeSortie(e.into().kind())
     }
 
-    fn controler(meta: &std::fs::Metadata) -> Result<(), ErreurRacine> {
+    fn controler(
+        meta: &std::fs::Metadata,
+        refus: fn(&'static str) -> ErreurRacine,
+    ) -> Result<(), ErreurRacine> {
         if !meta.file_type().is_file() {
-            return Err(ErreurRacine::FichierCleRefuse("pas un fichier ordinaire"));
+            return Err(refus("pas un fichier ordinaire"));
         }
         if meta.mode() & 0o077 != 0 {
-            return Err(ErreurRacine::FichierCleRefuse(
+            return Err(refus(
                 "droits trop larges (attendu 0600, aucun accès groupe/autres)",
             ));
         }
         if meta.uid() != rustix::process::geteuid().as_raw() {
-            return Err(ErreurRacine::FichierCleRefuse(
-                "propriétaire différent de l'utilisateur effectif",
-            ));
+            return Err(refus("propriétaire différent de l'utilisateur effectif"));
         }
         Ok(())
+    }
+
+    /// Lecture stricte commune (fichier de clé, fichiers secrets) : `O_NOFOLLOW`,
+    /// contrôles de métadonnées sur le descripteur ouvert, au plus `taille_max`
+    /// octets lus dans un tampon préalloué (aucune réallocation, effacé).
+    pub(super) fn lire_borne(
+        chemin: &Path,
+        taille_max: u64,
+        refus: fn(&'static str) -> ErreurRacine,
+        trop_grand: impl Fn() -> ErreurRacine,
+    ) -> Result<Zeroizing<Vec<u8>>, ErreurRacine> {
+        let fd = rustix::fs::open(
+            chemin,
+            OFlags::RDONLY | OFlags::NOFOLLOW | OFlags::CLOEXEC | OFlags::NOCTTY | OFlags::NONBLOCK,
+            Mode::empty(),
+        )
+        .map_err(|e| {
+            if e == Errno::LOOP {
+                refus("lien symbolique")
+            } else {
+                es(e)
+            }
+        })?;
+        let fichier = File::from(fd);
+        let meta = fichier.metadata().map_err(es)?;
+        controler(&meta, refus)?;
+        if meta.len() > taille_max {
+            return Err(trop_grand());
+        }
+        let capacite = usize::try_from(taille_max.saturating_add(1)).map_err(|_| trop_grand())?;
+        let mut octets = Zeroizing::new(Vec::with_capacity(capacite));
+        fichier
+            .take(taille_max.saturating_add(1))
+            .read_to_end(&mut octets)
+            .map_err(es)?;
+        if octets.len() as u64 > taille_max {
+            return Err(trop_grand());
+        }
+        Ok(octets)
     }
 
     pub(super) fn refuser_existant(chemin: &Path) -> Result<(), ErreurRacine> {
@@ -354,30 +407,10 @@ mod systeme {
         }
     }
 
-    pub(super) fn lire(chemin: &Path) -> Result<Vec<u8>, ErreurRacine> {
-        let fd = rustix::fs::open(
-            chemin,
-            OFlags::RDONLY | OFlags::NOFOLLOW | OFlags::CLOEXEC | OFlags::NOCTTY | OFlags::NONBLOCK,
-            Mode::empty(),
-        )
-        .map_err(|e| {
-            if e == Errno::LOOP {
-                ErreurRacine::FichierCleRefuse("lien symbolique")
-            } else {
-                es(e)
-            }
+    pub(super) fn lire(chemin: &Path) -> Result<Zeroizing<Vec<u8>>, ErreurRacine> {
+        let octets = lire_borne(chemin, TAILLE_FICHIER as u64, ErreurRacine::FichierCleRefuse, || {
+            ErreurRacine::FichierCleInvalide
         })?;
-        let fichier = File::from(fd);
-        let meta = fichier.metadata().map_err(es)?;
-        controler(&meta)?;
-        if meta.len() != TAILLE_FICHIER as u64 {
-            return Err(ErreurRacine::FichierCleInvalide);
-        }
-        let mut octets = Vec::with_capacity(TAILLE_FICHIER + 1);
-        fichier
-            .take(TAILLE_FICHIER as u64 + 1)
-            .read_to_end(&mut octets)
-            .map_err(es)?;
         if octets.len() != TAILLE_FICHIER {
             return Err(ErreurRacine::FichierCleInvalide);
         }
@@ -414,7 +447,7 @@ mod systeme {
         let resultat = (|| {
             rustix::fs::fchmod(&fd, Mode::from_raw_mode(0o600)).map_err(es)?;
             let mut fichier = File::from(fd);
-            controler(&fichier.metadata().map_err(es)?)?;
+            controler(&fichier.metadata().map_err(es)?, ErreurRacine::FichierCleRefuse)?;
             fichier.write_all(octets).map_err(es)?;
             fichier.sync_all().map_err(es)?;
             drop(fichier);
@@ -452,8 +485,16 @@ mod systeme {
     pub(super) fn refuser_existant(_: &Path) -> Result<(), ErreurRacine> {
         Err(REFUS)
     }
-    pub(super) fn lire(_: &Path) -> Result<Vec<u8>, ErreurRacine> {
+    pub(super) fn lire(_: &Path) -> Result<zeroize::Zeroizing<Vec<u8>>, ErreurRacine> {
         Err(REFUS)
+    }
+    pub(super) fn lire_borne(
+        _: &Path,
+        _: u64,
+        refus: fn(&'static str) -> ErreurRacine,
+        _: impl Fn() -> ErreurRacine,
+    ) -> Result<zeroize::Zeroizing<Vec<u8>>, ErreurRacine> {
+        Err(refus("plateforme non prise en charge (Linux requis)"))
     }
     pub(super) fn ecrire_atomique(_: &Path, _: &[u8]) -> Result<(), ErreurRacine> {
         Err(REFUS)
@@ -679,6 +720,45 @@ mod tests {
         assert!(systeme::refuser_existant(&pendant).is_err());
         assert!(systeme::ecrire_atomique(&pendant, &chiffrer_faible(&racine())).is_err());
         assert!(!d.join("absent").exists());
+        std::fs::remove_dir_all(&d).unwrap();
+    }
+
+    /// B5 : fichiers secrets (parts, phrase, mot de passe) — mêmes contrôles
+    /// stricts que le fichier de clé.
+    #[test]
+    fn fichier_secret_strict() {
+        let d = dossier();
+        let ok = d.join("part.txt");
+        std::fs::write(&ok, b"mots de la part\n").unwrap();
+        std::fs::set_permissions(&ok, std::fs::Permissions::from_mode(0o600)).unwrap();
+        assert_eq!(lire_fichier_secret(&ok, 4096).unwrap().as_slice(), b"mots de la part\n");
+        std::fs::set_permissions(&ok, std::fs::Permissions::from_mode(0o400)).unwrap();
+        assert!(lire_fichier_secret(&ok, 4096).is_ok());
+        // Droits ouverts au groupe ou aux autres : refus.
+        for mode in [0o640, 0o604, 0o644, 0o660] {
+            std::fs::set_permissions(&ok, std::fs::Permissions::from_mode(mode)).unwrap();
+            assert!(
+                matches!(lire_fichier_secret(&ok, 4096), Err(ErreurRacine::FichierSecretRefuse(_))),
+                "mode {mode:o}"
+            );
+        }
+        std::fs::set_permissions(&ok, std::fs::Permissions::from_mode(0o600)).unwrap();
+        // Lien symbolique (même vers un fichier valide) : refus.
+        let lien = d.join("lien.txt");
+        std::os::unix::fs::symlink(&ok, &lien).unwrap();
+        assert_eq!(
+            lire_fichier_secret(&lien, 4096).unwrap_err(),
+            ErreurRacine::FichierSecretRefuse("lien symbolique")
+        );
+        // Trop grand, non ordinaire : refus.
+        assert_eq!(
+            lire_fichier_secret(&ok, 4).unwrap_err(),
+            ErreurRacine::FichierSecretRefuse("fichier trop grand")
+        );
+        assert_eq!(
+            lire_fichier_secret(&d, 4096).unwrap_err(),
+            ErreurRacine::FichierSecretRefuse("pas un fichier ordinaire")
+        );
         std::fs::remove_dir_all(&d).unwrap();
     }
 

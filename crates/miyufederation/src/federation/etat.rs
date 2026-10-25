@@ -20,8 +20,8 @@
 //! # Enveloppe (big-endian, taille exacte)
 //!
 //! ```text
-//! "MFED" | version 0x01 | n (4, ≤ 64 Mio) | corps (n) | mac (32)
-//! mac = HMAC-SHA256(K, "MFED" | 0x01 | n | corps)
+//! "MFED" | version 0x02 | n (4, ≤ 64 Mio) | corps (n) | mac (32)
+//! mac = HMAC-SHA256(K, "MFED" | 0x02 | n | corps)
 //! K   = HMAC-SHA256(secret local du COG, "miyukini/miyufederation/etat/v1")
 //! ```
 //!
@@ -48,6 +48,15 @@
 //! | accusations levées | `compte (≤ 65 536)` × (`depuis (8)` \| `levee_a (8)` \| `bloc` accusation \| `bloc` preuve \| `bloc` recours), identités croissantes | accusation idem ; recours `0x06`/`0x44` : ≥ 6 signataires distincts connus hors accusé à `levee_a`, même accusation et même empreinte, `depuis` ≤ `levee_a` < `depuis` + 72 h |
 //! | quotas | `compte` × (`membre (32)` \| `confirme (32)` \| `premiere (8)` \| `derniere (8)`), groupés par membre | HMAC ; dossiers connus, `premiere` ≤ `derniere` ≤ `heure` |
 //! | note locale | `compte` × (`kid (32)` \| `points (4)` \| `maj (8)`), `kid` croissants | HMAC (jamais exportée) |
+//! | ancre du registre local | `taille (8)` \| `racine (32)` : tête du registre local à l'écriture | HMAC ; au chargement, doit être un **préfixe** du registre fourni ([`crate::persistance::StockageFederal::charger`]) |
+//! | révocations à publier | `compte` × `kid (32)`, strictement croissants | HMAC ; chaque `kid` est une révocation ci-dessus (pièces revérifiées) |
+//! | révocations inscrites | `compte` × (`kid (32)` \| `inscrite_a (8)`), `kid` strictement croissants | HMAC ; ni suspendu ni révoqué avec pièces, `inscrite_a` ≤ `heure` ; dossier éventuel au statut révoqué |
+//!
+//! Version `0x02` (amendement à consigner) : ajout des trois derniers champs
+//! (ancre du registre local, file des révocations à publier, révocations
+//! constatées au registre). La version `0x01` est **refusée**
+//! ([`ErreurEtat::VersionInconnue`]) : l'accepter rouvrirait le rejeu d'un
+//! état ancien sans ancre.
 //!
 //! # Reprise (fail-closed)
 //!
@@ -59,9 +68,9 @@
 //!   instants où un statut peut changer (débuts et fins d'intervalles, + 7 j)
 //!   et aux échéances des suspensions : une suspension échue pendant l'arrêt
 //!   devient une révocation définitive **à son échéance**, exactement comme
-//!   si le processus avait tourné ; elle est renvoyée une seule fois (l'état
-//!   repris la contient ; [`crate::persistance::StockageFederal::charger`] le
-//!   réécrit avant de rendre la main).
+//!   si le processus avait tourné ; elle entre dans la file des révocations
+//!   **à publier**, persistée, rendue à chaque reprise tant qu'elle n'est pas
+//!   acquittée après inscription au registre.
 //! - Limites : les têtes témoignées sont revérifiées mais leur fraîcheur
 //!   (`vue_a_jour_au`) reste soumise au contrôle de 15 min ; au-delà de
 //!   64 confirmations conservées par couple (confirmé, confirmateur), les
@@ -81,7 +90,7 @@ use super::{
 };
 use crate::calcul::DIFFICULTE_PLANCHER;
 use crate::erreurs::ErreurFederation;
-use crate::persistance::{CleEtatFederal, ErreurEtat};
+use crate::persistance::{AncreRegistre, CleEtatFederal, ErreurEtat};
 use crate::preuve::Preuve;
 use crate::statut::{
     Sanction, Statut, DELAI_CONTESTATION_SECS, DUREE_MEMBRE_SECS, QUORUM_BLACKLIST, QUORUM_RECOURS,
@@ -91,7 +100,7 @@ use crate::titres::{Accusation, Candidature, Confirmation, Recours};
 /// Magie du format.
 pub(crate) const MAGIC: &[u8; 4] = b"MFED";
 /// Version du format.
-pub(crate) const VERSION: u8 = 0x01;
+pub(crate) const VERSION: u8 = 0x02;
 /// Entête : magie, version, longueur du corps.
 pub(crate) const TAILLE_ENTETE: usize = 4 + 1 + 4;
 /// Taille du MAC final.
@@ -265,6 +274,9 @@ struct Corps<'a> {
     levees: Vec<(SanctionBrute<'a>, u64, &'a [u8])>,
     quotas: Vec<(Kid, Kid, u64, u64)>,
     fiches: Vec<(Kid, u32, u64)>,
+    ancre: AncreRegistre,
+    a_publier: Vec<Kid>,
+    inscrites: Vec<(Kid, u64)>,
 }
 
 fn lire_sanction<'a>(l: &mut Lecteur<'a>, depuis: u64) -> Result<SanctionBrute<'a>, ErreurEtat> {
@@ -325,10 +337,33 @@ fn lire_corps(octets: &[u8]) -> Result<Corps<'_>, ErreurEtat> {
     for _ in 0..nn {
         fiches.push((l.b32()?, l.u32()?, l.u64()?));
     }
+    let ancre = AncreRegistre { taille: l.u64()?, racine: l.b32()? };
+    let np = l.compte(MAX_ELEMENTS)?;
+    let mut a_publier = Vec::with_capacity(np.min(1024));
+    for _ in 0..np {
+        a_publier.push(l.b32()?);
+    }
+    let ni = l.compte(MAX_ELEMENTS)?;
+    let mut inscrites = Vec::with_capacity(ni.min(1024));
+    for _ in 0..ni {
+        inscrites.push((l.b32()?, l.u64()?));
+    }
     if l.pos != octets.len() {
         return Err(illisible("octets en trop"));
     }
-    Ok(Corps { heure, vue_a_jour_au, dossiers, suspensions, revocations, levees, quotas, fiches })
+    Ok(Corps {
+        heure,
+        vue_a_jour_au,
+        dossiers,
+        suspensions,
+        revocations,
+        levees,
+        quotas,
+        fiches,
+        ancre,
+        a_publier,
+        inscrites,
+    })
 }
 
 // ── Scellement ──────────────────────────────────────────────────────────────
@@ -346,10 +381,11 @@ fn mac(cle: &CleEtatFederal, entete_et_corps: &[u8]) -> [u8; 32] {
 }
 
 impl Federation {
-    /// Scelle la vue fédérale locale au format `MFED` (voir [`etat`](self)).
-    /// À écrire atomiquement après chaque opération qui la modifie
+    /// Scelle la vue fédérale locale au format `MFED` (voir [`etat`](self)),
+    /// ancrée sur la tête `ancre` du registre local. À écrire atomiquement
+    /// après chaque opération qui la modifie
     /// ([`crate::persistance::StockageFederal::enregistrer`]).
-    pub fn sceller_etat(&self, cle: &CleEtatFederal) -> Result<Vec<u8>, ErreurEtat> {
+    pub fn sceller_etat(&self, cle: &CleEtatFederal, ancre: &AncreRegistre) -> Result<Vec<u8>, ErreurEtat> {
         let mut e = Ecrivain(Vec::with_capacity(4096));
         e.u64(self.heure);
         match self.vue_a_jour_au {
@@ -411,6 +447,17 @@ impl Federation {
             e.u32(points);
             e.u64(maj);
         }
+        e.u64(ancre.taille);
+        e.b32(&ancre.racine);
+        e.compte(self.a_publier.len(), MAX_ELEMENTS)?;
+        for kid in &self.a_publier {
+            e.b32(kid);
+        }
+        e.compte(self.inscrites.len(), MAX_ELEMENTS)?;
+        for (kid, inscrite_a) in &self.inscrites {
+            e.b32(kid);
+            e.u64(*inscrite_a);
+        }
         let corps = e.0;
         if corps.len() > TAILLE_MAX_ETAT {
             return Err(ErreurEtat::TropGrand);
@@ -428,10 +475,11 @@ impl Federation {
     /// Reprend une vue fédérale scellée (`MFED`) puis la fait avancer jusqu'à
     /// `maintenant` comme si le processus avait tourné (voir [`etat`](self)).
     ///
-    /// Renvoie la vue et les révocations définitives produites pendant
-    /// l'arrêt (suspensions échues, révoquées à leur échéance) : à inscrire
-    /// au registre, **et** à persister aussitôt (elles ne seront plus
-    /// renvoyées par une reprise de l'état réécrit).
+    /// Renvoie la vue, les révocations définitives produites pendant l'arrêt
+    /// (suspensions échues, révoquées à leur échéance ; elles sont aussi dans
+    /// la file à publier, [`Federation::revocations_a_publier`]) et l'ancre
+    /// du registre local scellée avec l'état (à contrôler par l'appelant :
+    /// [`crate::persistance::StockageFederal::charger`]).
     ///
     /// Tout refus (illisible, altéré, version inconnue, titre refusé,
     /// incohérence, heure en recul) ⇒ `Err` : aucun état n'est repris, la
@@ -442,7 +490,7 @@ impl Federation {
         parametres: Parametres,
         origin: Option<[u8; 32]>,
         maintenant: u64,
-    ) -> Result<(Self, Vec<RevocationFederale>), ErreurEtat> {
+    ) -> Result<(Self, Vec<RevocationFederale>, AncreRegistre), ErreurEtat> {
         if octets.len() < TAILLE_ENTETE + TAILLE_MAC || &octets[0..4] != MAGIC {
             return Err(illisible("magie"));
         }
@@ -464,7 +512,7 @@ impl Federation {
         let mut f = Self::new(parametres, origin);
         f.restaurer(&corps)?;
         let definitives = f.rattraper(maintenant)?;
-        Ok((f, definitives))
+        Ok((f, definitives, corps.ancre))
     }
 
     // ── Restauration (revérification) ──────────────────────────────────────
@@ -602,10 +650,38 @@ impl Federation {
             );
         }
 
+        // Révocations constatées au registre (sans pièces) : ni suspendu ni révoqué avec pièces.
+        let mut precedent: Option<Kid> = None;
+        for (kid, inscrite_a) in &c.inscrites {
+            if precedent.is_some_and(|p| p >= *kid) {
+                return Err(ErreurEtat::Incoherent("ordre des révocations inscrites"));
+            }
+            precedent = Some(*kid);
+            if *inscrite_a > c.heure {
+                return Err(ErreurEtat::Incoherent("révocation inscrite future"));
+            }
+            if self.suspensions.contains_key(kid) || self.revocations.contains_key(kid) {
+                return Err(ErreurEtat::Incoherent("révocation inscrite en double"));
+            }
+            self.inscrites.insert(*kid, *inscrite_a);
+        }
+        // File des révocations à publier : révocations (avec pièces) connues.
+        let mut precedent: Option<Kid> = None;
+        for kid in &c.a_publier {
+            if precedent.is_some_and(|p| p >= *kid) {
+                return Err(ErreurEtat::Incoherent("ordre des révocations à publier"));
+            }
+            precedent = Some(*kid);
+            if !self.revocations.contains_key(kid) {
+                return Err(ErreurEtat::Incoherent("révocation à publier inconnue"));
+            }
+            self.a_publier.insert(*kid);
+        }
+
         // Statuts : cohérence avec les sanctions ; le recalcul suit (rattrapage).
         let mut statuts = Vec::with_capacity(c.dossiers.len());
         for ((kid, d), b) in self.dossiers.iter().zip(&c.dossiers) {
-            let statut = if self.revocations.contains_key(kid) {
+            let statut = if self.est_revoque(kid) {
                 (b.statut == 4 && !b.membre).then_some(Statut::Revoque)
             } else if let Some(s) = self.suspensions.get(kid) {
                 (b.statut == 3 && !b.membre)
@@ -785,6 +861,8 @@ mod tests {
         CleEtatFederal::deriver(&[3; 32])
     }
 
+    const ANCRE: AncreRegistre = AncreRegistre { taille: 3, racine: [7; 32] };
+
     fn fed() -> Federation {
         Federation::new(Parametres::default().avec_difficulte(8).unwrap(), None)
     }
@@ -818,10 +896,11 @@ mod tests {
     #[test]
     fn reseller_a_l_identique() {
         let (f, _) = exemple();
-        let o = f.sceller_etat(&cle()).unwrap();
-        let (g, rev) = Federation::reprendre(&o, &cle(), *f.parametres(), None, T + 10).unwrap();
+        let o = f.sceller_etat(&cle(), &ANCRE).unwrap();
+        let (g, rev, ancre) = Federation::reprendre(&o, &cle(), *f.parametres(), None, T + 10).unwrap();
         assert_eq!(rev, Vec::new());
-        assert_eq!(g.sceller_etat(&cle()).unwrap(), o);
+        assert_eq!(ancre, ANCRE);
+        assert_eq!(g.sceller_etat(&cle(), &ANCRE).unwrap(), o);
     }
 
     #[test]
@@ -833,7 +912,7 @@ mod tests {
         let t = d.titres.values_mut().next().unwrap().first_mut().unwrap();
         let dernier = t.octets.len() - 1;
         t.octets[dernier] ^= 1;
-        let o = f.sceller_etat(&cle()).unwrap();
+        let o = f.sceller_etat(&cle(), &ANCRE).unwrap();
         assert!(matches!(
             Federation::reprendre(&o, &cle(), *f.parametres(), None, T + 10),
             Err(ErreurEtat::Titre(_))
@@ -847,7 +926,7 @@ mod tests {
         let d = f.dossiers.values_mut().find(|d| !d.fondateur).unwrap();
         assert_eq!(d.statut, Statut::Invite);
         d.statut = Statut::Membre;
-        let o = f.sceller_etat(&cle()).unwrap();
+        let o = f.sceller_etat(&cle(), &ANCRE).unwrap();
         assert!(matches!(
             Federation::reprendre(&o, &cle(), *f.parametres(), None, T + 10),
             Err(ErreurEtat::Incoherent(_))
@@ -855,9 +934,39 @@ mod tests {
     }
 
     #[test]
+    fn version_1_refusee() {
+        let (f, _) = exemple();
+        let mut o = f.sceller_etat(&cle(), &ANCRE).unwrap();
+        o[4] = 0x01;
+        assert!(matches!(
+            Federation::reprendre(&o, &cle(), *f.parametres(), None, T + 10),
+            Err(ErreurEtat::VersionInconnue(0x01))
+        ));
+    }
+
+    #[test]
+    fn file_a_publier_et_inscrites_coherentes() {
+        let (mut f, _) = exemple();
+        // Un `kid` à publier sans révocation : incohérent (HMAC pourtant valide).
+        f.a_publier.insert([9; 32]);
+        let o = f.sceller_etat(&cle(), &ANCRE).unwrap();
+        assert!(matches!(
+            Federation::reprendre(&o, &cle(), *f.parametres(), None, T + 10),
+            Err(ErreurEtat::Incoherent(_))
+        ));
+        f.a_publier.clear();
+        // Révocation inscrite d'un `kid` inconnu : conservée telle quelle.
+        f.inscrites.insert([9; 32], T);
+        let o = f.sceller_etat(&cle(), &ANCRE).unwrap();
+        let (g, _, _) = Federation::reprendre(&o, &cle(), *f.parametres(), None, T + 10).unwrap();
+        assert!(g.est_revoque(&[9; 32]));
+        assert_eq!(g.sceller_etat(&cle(), &ANCRE).unwrap(), o);
+    }
+
+    #[test]
     fn heure_en_recul_refusee() {
         let (f, _) = exemple();
-        let o = f.sceller_etat(&cle()).unwrap();
+        let o = f.sceller_etat(&cle(), &ANCRE).unwrap();
         assert!(matches!(
             Federation::reprendre(&o, &cle(), *f.parametres(), None, T + 9),
             Err(ErreurEtat::RetourHorloge)

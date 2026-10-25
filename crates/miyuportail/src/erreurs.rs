@@ -114,6 +114,14 @@ pub enum ErreurSas {
     /// démarrer, sans réglage pour lever ce refus (fail-closed).
     #[error("Landlock indisponible : sas refusé")]
     LandlockIndisponible,
+    /// Descripteur au-delà de 0, 1, 2 transmissible au sas (côté parent :
+    /// sans `FD_CLOEXEC`) ou hérité par le sas (code de sortie
+    /// [`crate::sas::SORTIE_DESCRIPTEURS`]) : lancement refusé (fail-closed).
+    #[error("descripteur hérité par le sas : refus")]
+    DescripteurHerite,
+    /// Chemin du binaire du sas non absolu (aucune résolution par `PATH`).
+    #[error("chemin du sas non absolu : refus")]
+    CheminRelatif,
 }
 
 /// Erreur du Portail interne. Toute erreur est un refus (C-12).

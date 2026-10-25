@@ -307,14 +307,26 @@ impl Voie {
     }
 }
 
-type Voies = BTreeMap<IdService, Voie>;
+/// Table des voies. Le verrou **global** (la table) n'est tenu que le temps
+/// d'une recherche, d'une déclaration ou d'une suppression ; chaque voie a
+/// son **propre** verrou, sous lequel se font ses contrôles, son anti-rejeu
+/// et son inscription au registre : une inscription lente ne bloque que sa
+/// voie (B8), sans course (l'état de la voie et l'inscription restent
+/// atomiques l'un par rapport à l'autre). Ordre des verrous : table puis
+/// voie, jamais l'inverse (la table est relâchée avant de prendre la voie).
+type Voies = BTreeMap<IdService, Arc<Mutex<Voie>>>;
 
 fn verrouiller(voies: &Mutex<Voies>) -> Result<MutexGuard<'_, Voies>, ErreurPortail> {
     voies.lock().map_err(|_| ErreurPortail::EtatIndisponible)
 }
 
-fn voie_mut<'a>(voies: &'a mut Voies, service: &IdService) -> Result<&'a mut Voie, ErreurPortail> {
-    voies.get_mut(service).ok_or(ErreurPortail::VoieNonDeclaree)
+/// Voie d'un service ; le verrou global est relâché au retour.
+fn voie_partagee(voies: &Mutex<Voies>, service: &IdService) -> Result<Arc<Mutex<Voie>>, ErreurPortail> {
+    verrouiller(voies)?.get(service).cloned().ok_or(ErreurPortail::VoieNonDeclaree)
+}
+
+fn verrouiller_voie(voie: &Mutex<Voie>) -> Result<MutexGuard<'_, Voie>, ErreurPortail> {
+    voie.lock().map_err(|_| ErreurPortail::EtatIndisponible)
 }
 
 fn empreinte(octets: &[u8]) -> Empreinte {
@@ -357,8 +369,8 @@ fn couper_voie(
     motif: MotifCoupure,
 ) -> Result<(), ErreurPortail> {
     {
-        let mut v = verrouiller(voies)?;
-        voie_mut(&mut v, service)?.couper(motif);
+        let partagee = voie_partagee(voies, service)?;
+        verrouiller_voie(&partagee)?.couper(motif);
     }
     registre
         .inscrire(&Evenement::Coupure { service: service.clone(), motif })
@@ -413,7 +425,7 @@ impl PortailInterne {
             }
         }
         for c in contrats {
-            v.insert(c.service.clone(), Voie::new(c.clone()));
+            v.insert(c.service.clone(), Arc::new(Mutex::new(Voie::new(c.clone()))));
         }
         Ok(())
     }
@@ -430,8 +442,9 @@ impl PortailInterne {
 
     /// Active l'exposition (action explicite de l'utilisateur, EX-48).
     pub fn activer(&self, service: &IdService) -> Result<(), ErreurPortail> {
-        let mut v = verrouiller(&self.voies)?;
-        let voie = voie_mut(&mut v, service)?;
+        let partagee = voie_partagee(&self.voies, service)?;
+        let mut garde = verrouiller_voie(&partagee)?;
+        let voie = &mut *garde;
         match voie.etat {
             EtatVoie::Desactivee => {
                 voie.etat = EtatVoie::Active;
@@ -444,8 +457,9 @@ impl PortailInterne {
 
     /// Désactive l'exposition : session close, files purgées.
     pub fn desactiver(&self, service: &IdService) -> Result<(), ErreurPortail> {
-        let mut v = verrouiller(&self.voies)?;
-        let voie = voie_mut(&mut v, service)?;
+        let partagee = voie_partagee(&self.voies, service)?;
+        let mut garde = verrouiller_voie(&partagee)?;
+        let voie = &mut *garde;
         if matches!(voie.etat, EtatVoie::Coupee(_)) {
             return Err(ErreurPortail::TransitionRefusee);
         }
@@ -460,8 +474,9 @@ impl PortailInterne {
     /// Rétablit une voie coupée (décision explicite, hors WorrySentinel) :
     /// elle repasse **désactivée**, avec une **nouvelle** clé de publication.
     pub fn retablir(&self, service: &IdService) -> Result<(), ErreurPortail> {
-        let mut v = verrouiller(&self.voies)?;
-        let voie = voie_mut(&mut v, service)?;
+        let partagee = voie_partagee(&self.voies, service)?;
+        let mut garde = verrouiller_voie(&partagee)?;
+        let voie = &mut *garde;
         if !matches!(voie.etat, EtatVoie::Coupee(_)) {
             return Err(ErreurPortail::TransitionRefusee);
         }
@@ -473,7 +488,9 @@ impl PortailInterne {
 
     /// État d'une voie.
     pub fn etat(&self, service: &IdService) -> Result<EtatVoie, ErreurPortail> {
-        Ok(verrouiller(&self.voies)?.get(service).ok_or(ErreurPortail::VoieNonDeclaree)?.etat)
+        let partagee = voie_partagee(&self.voies, service)?;
+        let etat = verrouiller_voie(&partagee)?.etat;
+        Ok(etat)
     }
 
     /// Ouvre une session : épingle la clé de session de la façade (émise par
@@ -494,8 +511,9 @@ impl PortailInterne {
                 return Err(ErreurPortail::CleInvalide);
             }
         }
-        let mut v = verrouiller(&self.voies)?;
-        let voie = voie_mut(&mut v, service)?;
+        let partagee = voie_partagee(&self.voies, service)?;
+        let mut garde = verrouiller_voie(&partagee)?;
+        let voie = &mut *garde;
         voie.exiger(Sens::Entrante)?;
         voie.generation = voie.generation.wrapping_add(1);
         voie.quarantaine.clear();
@@ -512,8 +530,9 @@ impl PortailInterne {
     /// plus de [`MAX_AUTEURS`] épinglés ou de [`MAX_AUTEURS_CONNUS`] connus.
     pub fn ajouter_auteur(&self, service: &IdService, auteur: [u8; 32]) -> Result<(), ErreurPortail> {
         cle_valide(&auteur)?;
-        let mut v = verrouiller(&self.voies)?;
-        let voie = voie_mut(&mut v, service)?;
+        let partagee = voie_partagee(&self.voies, service)?;
+        let mut garde = verrouiller_voie(&partagee)?;
+        let voie = &mut *garde;
         voie.exiger(Sens::Entrante)?;
         let session = voie.session.as_mut().ok_or(ErreurPortail::SessionAbsente)?;
         if auteur == session.ancres.emetteur {
@@ -542,8 +561,9 @@ impl PortailInterne {
     /// cours de décodage ; les autres auteurs continuent. Sa marque haute est
     /// conservée. Le dernier auteur ne se retire pas (fermer la session).
     pub fn retirer_auteur(&self, service: &IdService, auteur: &[u8; 32]) -> Result<(), ErreurPortail> {
-        let mut v = verrouiller(&self.voies)?;
-        let voie = voie_mut(&mut v, service)?;
+        let partagee = voie_partagee(&self.voies, service)?;
+        let mut garde = verrouiller_voie(&partagee)?;
+        let voie = &mut *garde;
         let session = voie.session.as_mut().ok_or(ErreurPortail::SessionAbsente)?;
         let suivi = session.auteurs.get_mut(&kid(auteur)).filter(|s| s.epingle).ok_or(ErreurPortail::AuteurNonEpingle)?;
         if session.ancres.auteurs.len() <= 1 {
@@ -556,15 +576,16 @@ impl PortailInterne {
 
     /// Clés des auteurs épinglés de la session ouverte (côté Cores).
     pub fn auteurs(&self, service: &IdService) -> Result<Vec<[u8; 32]>, ErreurPortail> {
-        let v = verrouiller(&self.voies)?;
-        let voie = v.get(service).ok_or(ErreurPortail::VoieNonDeclaree)?;
+        let partagee = voie_partagee(&self.voies, service)?;
+        let voie = verrouiller_voie(&partagee)?;
         Ok(voie.session.as_ref().ok_or(ErreurPortail::SessionAbsente)?.ancres.auteurs.clone())
     }
 
     /// Ferme la session : quarantaine purgée.
     pub fn fermer_session(&self, service: &IdService) -> Result<(), ErreurPortail> {
-        let mut v = verrouiller(&self.voies)?;
-        let voie = voie_mut(&mut v, service)?;
+        let partagee = voie_partagee(&self.voies, service)?;
+        let mut garde = verrouiller_voie(&partagee)?;
+        let voie = &mut *garde;
         voie.generation = voie.generation.wrapping_add(1);
         voie.session = None;
         voie.quarantaine.clear();
@@ -575,8 +596,9 @@ impl PortailInterne {
     /// Contrôles : voie déclarée, sens ouvert, voie active, session, taille,
     /// liste blanche `MSCE`, débit, quota.
     pub fn deposer(&self, service: &IdService, trame: Vec<u8>) -> Result<(), ErreurPortail> {
-        let mut v = verrouiller(&self.voies)?;
-        let voie = voie_mut(&mut v, service)?;
+        let partagee = voie_partagee(&self.voies, service)?;
+        let mut garde = verrouiller_voie(&partagee)?;
+        let voie = &mut *garde;
         voie.exiger(Sens::Entrante)?;
         if voie.session.is_none() {
             return Err(ErreurPortail::SessionAbsente);
@@ -607,8 +629,9 @@ impl PortailInterne {
     ) -> Result<Vec<Result<DeclarationAdmise, ErreurPortail>>, ErreurPortail> {
         // 1. Prise du lot (verrou court).
         let (requete, identite) = {
-            let mut v = verrouiller(&self.voies)?;
-            let voie = voie_mut(&mut v, service)?;
+            let partagee = voie_partagee(&self.voies, service)?;
+            let mut garde = verrouiller_voie(&partagee)?;
+            let voie = &mut *garde;
             voie.exiger(Sens::Entrante)?;
             let ancres = voie.session.as_ref().ok_or(ErreurPortail::SessionAbsente)?.ancres.clone();
             let n = max.min(MAX_LOT).min(voie.quarantaine.len());
@@ -639,8 +662,9 @@ impl PortailInterne {
         };
 
         // 3. Anti-rejeu et inscription (verrou) ; voie coupée entre-temps = tout refusé.
-        let mut v = verrouiller(&self.voies)?;
-        let voie = voie_mut(&mut v, service)?;
+        let partagee = voie_partagee(&self.voies, service)?;
+        let mut garde = verrouiller_voie(&partagee)?;
+        let voie = &mut *garde;
         let toujours_valide = voie.etat == EtatVoie::Active && voie.identite() == identite;
         let mut sortie = Vec::with_capacity(candidats.len());
         for candidat in candidats {
@@ -733,8 +757,9 @@ impl PortailInterne {
         }
         // 1. Contrôles de voie et instantané du traité.
         let (traite, identite) = {
-            let mut v = verrouiller(&self.voies)?;
-            let voie = voie_mut(&mut v, service)?;
+            let partagee = voie_partagee(&self.voies, service)?;
+            let mut garde = verrouiller_voie(&partagee)?;
+            let voie = &mut *garde;
             voie.exiger(Sens::Sortante)?;
             (voie.contrat.traite.clone(), voie.identite())
         };
@@ -753,8 +778,9 @@ impl PortailInterne {
         let mut declaration = self.desarmer(brouillon, &traite)?;
 
         // 3. Réencodage signé, quota, débit, inscription (verrou).
-        let mut v = verrouiller(&self.voies)?;
-        let voie = voie_mut(&mut v, service)?;
+        let partagee = voie_partagee(&self.voies, service)?;
+        let mut garde = verrouiller_voie(&partagee)?;
+        let voie = &mut *garde;
         voie.exiger(Sens::Sortante)?;
         if voie.identite() != identite {
             return Err(ErreurPortail::VoieCoupee);
@@ -780,8 +806,9 @@ impl PortailInterne {
 
     /// **Côté Franche** : la façade lit la prochaine publication (trame MSCE neuve).
     pub fn lire_publication(&self, service: &IdService) -> Result<Option<Vec<u8>>, ErreurPortail> {
-        let mut v = verrouiller(&self.voies)?;
-        let voie = voie_mut(&mut v, service)?;
+        let partagee = voie_partagee(&self.voies, service)?;
+        let mut garde = verrouiller_voie(&partagee)?;
+        let voie = &mut *garde;
         voie.exiger(Sens::Sortante)?;
         let trame = voie.publication.pop_front();
         if trame.is_some() {
@@ -792,14 +819,16 @@ impl PortailInterne {
 
     /// Clé publique de publication de la voie (vérification par la façade).
     pub fn cle_publication(&self, service: &IdService) -> Result<[u8; 32], ErreurPortail> {
-        let v = verrouiller(&self.voies)?;
-        Ok(v.get(service).ok_or(ErreurPortail::VoieNonDeclaree)?.cle_publication.verifying_key().to_bytes())
+        let partagee = voie_partagee(&self.voies, service)?;
+        let cle = verrouiller_voie(&partagee)?.cle_publication.verifying_key().to_bytes();
+        Ok(cle)
     }
 
     /// Compteurs de la voie (acquittements par compteurs uniquement).
     pub fn compteurs(&self, service: &IdService) -> Result<CompteursVoie, ErreurPortail> {
-        let v = verrouiller(&self.voies)?;
-        Ok(v.get(service).ok_or(ErreurPortail::VoieNonDeclaree)?.compteurs)
+        let partagee = voie_partagee(&self.voies, service)?;
+        let compteurs = verrouiller_voie(&partagee)?.compteurs;
+        Ok(compteurs)
     }
 }
 
@@ -968,8 +997,9 @@ mod tests {
         impl DecodeurIsole for SasRetirant {
             fn decoder_lot(&self, requete: &RequeteSas) -> Result<Vec<ResultatTrame>, ErreurSas> {
                 if let Some((voies, service, auteur)) = self.0.lock().unwrap().take() {
-                    let mut v = voies.lock().unwrap();
-                    let session = v.get_mut(&service).unwrap().session.as_mut().unwrap();
+                    let v = voies.lock().unwrap();
+                    let mut voie = v.get(&service).unwrap().lock().unwrap();
+                    let session = voie.session.as_mut().unwrap();
                     session.auteurs.get_mut(&kid(&auteur)).unwrap().epingle = false;
                     session.ancres.auteurs.retain(|a| *a != auteur);
                 }

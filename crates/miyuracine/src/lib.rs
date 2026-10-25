@@ -51,7 +51,8 @@ pub mod usages;
 pub use durcissement::{durcir_processus, EtatDurcissement, PolitiqueVerrouillage};
 pub use erreurs::ErreurRacine;
 pub use fichier_cle::{
-    chiffrer_racine, dechiffrer_racine, ecrire_fichier_cle, lire_fichier_cle, ParametresArgon2,
+    chiffrer_racine, dechiffrer_racine, ecrire_fichier_cle, lire_fichier_cle, lire_fichier_secret,
+    ParametresArgon2,
 };
 pub use passation::{verifier_passation, Passation, NATURE_PASSATION};
 pub use racine::{

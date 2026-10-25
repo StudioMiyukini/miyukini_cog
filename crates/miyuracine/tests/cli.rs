@@ -44,6 +44,12 @@ fn chemin(p: &Path) -> &str {
     p.to_str().unwrap()
 }
 
+/// Écrit un fichier secret d'entrée (phrase, mot de passe, part) en 0600.
+fn ecrire_secret(p: &Path, contenu: impl AsRef<[u8]>) {
+    fs::write(p, contenu).unwrap();
+    fs::set_permissions(p, fs::Permissions::from_mode(0o600)).unwrap();
+}
+
 /// Échec attendu, message d'erreur contenant `motif`.
 fn refus(args: &[&str], motif: &str) {
     let o = lancer(args);
@@ -156,7 +162,7 @@ fn generer_ecrit_trois_parts_0600_sans_ecraser() {
 fn generer_sur_la_sortie_standard() {
     let d = dossier();
     let phrase = d.join("phrase");
-    fs::write(&phrase, "phrase de test\r\n").unwrap();
+    ecrire_secret(&phrase, "phrase de test\r\n");
     let s = succes(&[
         "generer",
         "--exposant",
@@ -229,7 +235,7 @@ fn recuperer_refuse_sources_invalides() {
         "lecture de",
     );
     let gros = d.join("gros");
-    fs::write(&gros, vec![b'a'; 5000]).unwrap();
+    ecrire_secret(&gros, vec![b'a'; 5000]);
     refus(
         &["recuperer", "--part", &p(0), "--part", chemin(&gros)],
         "fichier trop grand",
@@ -237,7 +243,7 @@ fn recuperer_refuse_sources_invalides() {
     let altere = d.join("altere");
     let mut texte = fs::read_to_string(&parts[1]).unwrap();
     texte = texte.replacen(texte.split(' ').nth(5).unwrap(), "zzz", 1);
-    fs::write(&altere, texte).unwrap();
+    ecrire_secret(&altere, texte);
     refus(
         &["recuperer", "--part", &p(0), "--part", chemin(&altere)],
         "récupération refusée",
@@ -464,7 +470,7 @@ fn exporter_cle_refuse_avant_tout_calcul() {
     let p1 = chemin(&parts[1]).to_string();
     let sortie = d.join("racine.myrc");
     let mdp = d.join("mdp");
-    fs::write(&mdp, "court\n").unwrap();
+    ecrire_secret(&mdp, "court\n");
     let base = ["exporter-cle", "--part", &p0, "--part", &p1];
     refus(&base, "--sortie <fichier> est requis");
     refus(
@@ -549,7 +555,7 @@ fn exporter_cle_puis_relire_par_cle() {
     let p1 = chemin(&parts[1]).to_string();
     let sortie = d.join("racine.myrc");
     let mdp = d.join("mdp");
-    fs::write(&mdp, "mot de passe de cérémonie\n").unwrap();
+    ecrire_secret(&mdp, "mot de passe de cérémonie\n");
     let s = succes(&[
         "exporter-cle",
         "--part",
@@ -600,5 +606,91 @@ fn exporter_cle_puis_relire_par_cle() {
             chemin(&mdp),
         ],
         "refusé",
+    );
+}
+
+// ─── Fichiers secrets (B5) ─────────────────────────────────────────────────
+
+#[test]
+fn fichiers_secrets_stricts() {
+    let (d, parts) = generer();
+    let p0 = chemin(&parts[0]).to_string();
+    // Part par lien symbolique (vers une part valide) : refus.
+    let lien = d.join("lien-part");
+    std::os::unix::fs::symlink(&parts[1], &lien).unwrap();
+    refus(
+        &["recuperer", "--part", &p0, "--part", chemin(&lien)],
+        "lien symbolique",
+    );
+    // Part lisible par le groupe : refus.
+    let ouverte = d.join("part-ouverte");
+    fs::copy(&parts[1], &ouverte).unwrap();
+    fs::set_permissions(&ouverte, fs::Permissions::from_mode(0o644)).unwrap();
+    refus(
+        &["recuperer", "--part", &p0, "--part", chemin(&ouverte)],
+        "droits trop larges",
+    );
+    fs::set_permissions(&ouverte, fs::Permissions::from_mode(0o600)).unwrap();
+    succes(&["recuperer", "--part", &p0, "--part", chemin(&ouverte)]);
+    // Phrase en 0644 : refus.
+    let phrase = d.join("phrase");
+    fs::write(&phrase, "phrase").unwrap();
+    fs::set_permissions(&phrase, fs::Permissions::from_mode(0o644)).unwrap();
+    refus(
+        &[
+            "recuperer",
+            "--part",
+            &p0,
+            "--part",
+            chemin(&parts[1]),
+            "--phrase-fichier",
+            chemin(&phrase),
+        ],
+        "fichier secret refusé",
+    );
+}
+
+#[test]
+fn exporter_cle_change_de_mot_de_passe() {
+    let (d, parts) = generer();
+    let p0 = chemin(&parts[0]).to_string();
+    let p1 = chemin(&parts[1]).to_string();
+    let ancien = d.join("ancien.myrc");
+    let mdp = d.join("mdp");
+    ecrire_secret(&mdp, "ancien mot de passe 2026\n");
+    let argon2 = ["--argon2-memoire-mio", "256", "--argon2-iterations", "3"];
+    succes(
+        &[
+            &["exporter-cle", "--part", &p0, "--part", &p1, "--sortie", chemin(&ancien)][..],
+            &["--mot-de-passe-fichier", chemin(&mdp)],
+            &argon2,
+        ]
+        .concat(),
+    );
+    // Nouveau fichier, nouveau mot de passe, depuis l'ancien fichier de clé.
+    let nouveau = d.join("nouveau.myrc");
+    let nmdp = d.join("nouveau-mdp");
+    ecrire_secret(&nmdp, "nouveau mot de passe 2026\n");
+    let s = succes(
+        &[
+            &["exporter-cle", "--cle", chemin(&ancien), "--mot-de-passe-fichier", chemin(&mdp)][..],
+            &["--nouveau-mot-de-passe-fichier", chemin(&nmdp), "--sortie", chemin(&nouveau)],
+            &argon2,
+        ]
+        .concat(),
+    );
+    assert!(s.contains("écrit et vérifié"));
+    let attendu = racine_de(&parts).cog_id();
+    let r = succes(&["recuperer", "--cle", chemin(&nouveau), "--mot-de-passe-fichier", chemin(&nmdp)]);
+    assert_eq!(cog_id(&r), attendu);
+    // L'ancien mot de passe n'ouvre pas le nouveau fichier.
+    refus(
+        &["recuperer", "--cle", chemin(&nouveau), "--mot-de-passe-fichier", chemin(&mdp)],
+        "fichier de clé invalide",
+    );
+    // Option réservée à exporter-cle.
+    refus(
+        &["recuperer", "--cle", chemin(&nouveau), "--nouveau-mot-de-passe-fichier", chemin(&nmdp)],
+        "option inattendue",
     );
 }

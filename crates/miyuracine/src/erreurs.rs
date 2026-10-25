@@ -70,6 +70,10 @@ pub enum ErreurRacine {
     /// Fichier de clé refusé avant lecture (lien symbolique, droits, propriétaire,
     /// destination existante) : métadonnées seulement.
     FichierCleRefuse(&'static str),
+    /// Fichier secret (part, phrase, mot de passe) refusé : lien symbolique,
+    /// fichier non ordinaire, droits ouverts au groupe ou aux autres,
+    /// propriétaire différent de l'uid effectif, taille excessive.
+    FichierSecretRefuse(&'static str),
     /// Paramètres Argon2id hors bornes (m ≥ 256 Mio, t ≥ 3, 1 ≤ p ≤ 16…).
     ParametresArgon2HorsBornes,
     /// Mot de passe du fichier de clé trop court.
@@ -124,6 +128,7 @@ impl fmt::Display for ErreurRacine {
                 "fichier de clé invalide : mot de passe incorrect, fichier altéré ou format inconnu",
             ),
             Self::FichierCleRefuse(m) => write!(f, "fichier de clé refusé : {m}"),
+            Self::FichierSecretRefuse(m) => write!(f, "fichier secret refusé : {m}"),
             Self::ParametresArgon2HorsBornes => f.write_str(
                 "paramètres Argon2id hors bornes (256 Mio ≤ m ≤ 4 Gio, 3 ≤ t ≤ 64, 1 ≤ p ≤ 16)",
             ),

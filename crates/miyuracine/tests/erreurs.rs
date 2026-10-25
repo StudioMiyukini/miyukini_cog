@@ -38,6 +38,7 @@ fn toutes() -> Vec<ErreurRacine> {
         Sceau(miyusceau::ErreurSceau::SignatureInvalide),
         FichierCleInvalide,
         FichierCleRefuse("lien symbolique"),
+        FichierSecretRefuse("lien symbolique"),
         ParametresArgon2HorsBornes,
         MotDePasseTropCourt,
         EntreeSortie(std::io::ErrorKind::NotFound),

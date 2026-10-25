@@ -27,7 +27,7 @@ thiserror = "2"
 [target.'cfg(target_os = "linux")'.dependencies]
 seccompiler = { version = "0.5", default-features = false }
 landlock = "0.4.7"
-rustix = { version = "1", default-features = false, features = ["std", "process"] }
+rustix = { version = "1", default-features = false, features = ["std", "process", "fs"] }
 libc = { version = "0.2", default-features = false }
 
 [lints]

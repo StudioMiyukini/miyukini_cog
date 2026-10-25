@@ -146,6 +146,10 @@ impl Parametres {
     }
 }
 
+/// Préfixe du motif des entrées de registre de révocation fédérale
+/// ([`RevocationFederale::entree`]) : sert à les reconnaître au registre.
+pub const MOTIF_REVOCATION_FEDERALE: &str = "blacklist federale ";
+
 /// Révocation fédérale décidée localement après vérification du quorum.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RevocationFederale {
@@ -167,7 +171,7 @@ impl RevocationFederale {
     /// Entrée de registre (lot 2 §8.3, nature révocation, cible clé).
     pub fn entree(&self) -> EntreeRegistre {
         use std::fmt::Write;
-        let mut motif = String::from("blacklist federale ");
+        let mut motif = String::from(MOTIF_REVOCATION_FEDERALE);
         for o in &self.accusation[..8] {
             let _ = write!(motif, "{o:02x}");
         }
@@ -303,6 +307,13 @@ pub struct Federation {
     pieces_revocations: BTreeMap<Kid, PiecesRevocation>,
     /// Accusations levées par un recours accepté (identités) : rejeu refusé.
     levees: BTreeMap<[u8; 32], Levee>,
+    /// Révocations définitives **à publier** (à inscrire au registre local) :
+    /// purgées seulement par [`Federation::acquitter`] (M2, persistées).
+    a_publier: BTreeSet<Kid>,
+    /// Révocations fédérales constatées au registre local sans les pièces
+    /// (reprise d'un état plus ancien que le registre, M3) : `kid` ⇒ heure
+    /// d'inscription. Définitives, comme [`Self::revocations`].
+    inscrites: BTreeMap<Kid, u64>,
     quotas: BTreeMap<Kid, Vec<Quota>>,
     heure: u64,
     vue_a_jour_au: Option<u64>,
@@ -376,6 +387,8 @@ impl Federation {
             suspensions: BTreeMap::new(),
             pieces_revocations: BTreeMap::new(),
             levees: BTreeMap::new(),
+            a_publier: BTreeSet::new(),
+            inscrites: BTreeMap::new(),
             quotas: BTreeMap::new(),
             heure: 0,
             vue_a_jour_au: None,
@@ -409,7 +422,7 @@ impl Federation {
     }
 
     fn est_revoque(&self, kid: &Kid) -> bool {
-        self.revocations.contains_key(kid)
+        self.revocations.contains_key(kid) || self.inscrites.contains_key(kid)
     }
 
     fn est_suspendu(&self, kid: &Kid) -> bool {
@@ -565,14 +578,9 @@ impl Federation {
                 sanction: Sanction::RevocationIdentite,
             };
             self.revocations.insert(kid, revocation.clone());
-            if let Some(d) = self.dossiers.get_mut(&kid) {
-                d.statut = Statut::Revoque;
-                d.membre = false;
-                // Confirmateurs responsables : le COG confirmé est blacklisté.
-                for c in d.confirmations.keys() {
-                    self.note.observer(c, Observation::ConfirmateurResponsable, maintenant);
-                }
-            }
+            // À publier jusqu'à l'accusé d'inscription au registre (M2).
+            self.a_publier.insert(kid);
+            self.marquer_revoque(&kid, maintenant);
             definitives.push(revocation);
         }
         if !definitives.is_empty() {
@@ -581,17 +589,88 @@ impl Federation {
         definitives
     }
 
+    /// Dossier révoqué : statut, drapeau membre, confirmateurs responsables
+    /// (le COG confirmé est blacklisté).
+    fn marquer_revoque(&mut self, kid: &Kid, maintenant: u64) {
+        if let Some(d) = self.dossiers.get_mut(kid) {
+            d.statut = Statut::Revoque;
+            d.membre = false;
+            for c in d.confirmations.keys() {
+                self.note.observer(c, Observation::ConfirmateurResponsable, maintenant);
+            }
+        }
+    }
+
+    /// Révocations définitives **à publier** (non acquittées), à inscrire au
+    /// registre local ([`RevocationFederale::entree`]) puis à acquitter
+    /// ([`Self::acquitter`]). La file est persistée avec l'état (`MFED`) :
+    /// un plantage entre la décision et l'inscription ne perd rien.
+    pub fn revocations_a_publier(&self) -> Vec<RevocationFederale> {
+        self.a_publier.iter().filter_map(|k| self.revocations.get(k)).cloned().collect()
+    }
+
+    /// Accusé d'inscription au registre : retire `kid` de la file des
+    /// révocations à publier. Renvoie `false` si elle ne l'y trouvait pas.
+    /// À n'appeler qu'**après** l'inscription durable (puis persister l'état ;
+    /// voir `StockageFederal::acquitter`, qui vérifie l'entrée au registre).
+    pub fn acquitter(&mut self, kid: &Kid) -> bool {
+        self.a_publier.remove(kid)
+    }
+
+    /// Révocations fédérales constatées au registre local sans les pièces
+    /// (`kid`, heure d'inscription) : voir `StockageFederal::charger`.
+    pub fn revocations_inscrites(&self) -> impl Iterator<Item = (&Kid, &u64)> {
+        self.inscrites.iter()
+    }
+
+    /// Ré-applique une révocation fédérale **déjà inscrite** au registre
+    /// local (reprise d'un état plus ancien, M3). Sans effet si `kid` est
+    /// déjà révoqué. Suspension en cours échue ⇒ révocation complète (pièces
+    /// conservées), datée de l'inscription bornée à `[échéance, heure]` ;
+    /// sinon révocation sans pièces ([`Self::revocations_inscrites`]), même
+    /// pour un `kid` encore inconnu (sa candidature sera refusée). Jamais
+    /// remise dans la file à publier (elle est déjà au registre).
+    pub(crate) fn appliquer_revocation_inscrite(&mut self, kid: Kid, inscrite_a: u64) -> bool {
+        if self.est_revoque(&kid) {
+            return false;
+        }
+        let heure = self.heure;
+        match self.suspensions.get(&kid).map(|s| s.publique.echeance()) {
+            Some(echeance) if echeance <= heure => {
+                let Some(en) = self.suspensions.remove(&kid) else { return false };
+                let s = en.publique;
+                self.pieces_revocations.insert(kid, PiecesRevocation { pieces: en.pieces, depuis: s.depuis });
+                let revocation = RevocationFederale {
+                    racine: s.racine,
+                    kid,
+                    cog: s.cog,
+                    accusation: s.accusation,
+                    revoque_a: inscrite_a.clamp(echeance, heure),
+                    sanction: Sanction::RevocationIdentite,
+                };
+                self.revocations.insert(kid, revocation);
+            }
+            _ => {
+                self.suspensions.remove(&kid);
+                self.inscrites.insert(kid, inscrite_a.min(heure));
+            }
+        }
+        self.marquer_revoque(&kid, heure);
+        self.recalculer(heure);
+        true
+    }
+
     fn recalculer(&mut self, maintenant: u64) {
         for _ in 0..=self.dossiers.len() {
             let membres: BTreeSet<Kid> = self
                 .dossiers
                 .iter()
-                .filter(|(k, d)| d.statut == Statut::Membre && !self.revocations.contains_key(*k))
+                .filter(|(k, d)| d.statut == Statut::Membre && !self.est_revoque(k))
                 .map(|(k, _)| *k)
                 .collect();
             let mut changements = Vec::new();
             for (kid, d) in &self.dossiers {
-                let (statut, membre) = if self.revocations.contains_key(kid) {
+                let (statut, membre) = if self.est_revoque(kid) {
                     (Statut::Revoque, false)
                 } else if let Some(s) = self.suspensions.get(kid) {
                     (Statut::Suspendu { depuis: s.publique.depuis, accusation: s.publique.accusation }, false)

@@ -18,14 +18,14 @@
 //! (dérogation explicite, avertissement sur la sortie d'erreur).
 
 use std::fs::{self, File, OpenOptions};
-use std::io::{self, Read, Write};
+use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use miyuracine::fichier_cle::{lire_parametres, MEMOIRE_ARGON2_MAX};
 use miyuracine::{
-    durcir_processus, ecrire_fichier_cle, lire_fichier_cle, verifier_passation, ParametresArgon2,
+    durcir_processus, ecrire_fichier_cle, lire_fichier_cle, lire_fichier_secret, verifier_passation, ParametresArgon2,
     PartsRacine, Passation, PolitiqueVerrouillage, Racine, Usage, EXPOSANT_DEFAUT, NOMBRE_PARTS,
 };
 use sha2::{Digest, Sha256};
@@ -37,6 +37,8 @@ const PHRASE: &str = "--phrase-fichier";
 const CLE: &str = "--cle";
 /// Option commune : fichier du mot de passe du fichier de clé.
 const MDP: &str = "--mot-de-passe-fichier";
+/// Option d'`exporter-cle` : nouveau mot de passe du fichier écrit.
+const NOUVEAU_MDP: &str = "--nouveau-mot-de-passe-fichier";
 /// Option globale : dérogation au verrouillage mémoire.
 const SANS_MLOCK: &str = "--sans-mlock";
 
@@ -73,12 +75,18 @@ UTILISATION
 
   miyuracine exporter-cle --part <f> --part <f> --sortie <fichier> --mot-de-passe-fichier <f>
                        [--phrase-fichier <f>] [--argon2-memoire-mio <256-4096>] [--argon2-iterations <3-64>]
+                       [--nouveau-mot-de-passe-fichier <f>]
       Écrit la racine chiffrée (Argon2id + XChaCha20-Poly1305, format MYRC v1, 122 octets)
       dans un fichier neuf en 0600 (écriture atomique), puis la relit pour vérification.
       Défaut : 1024 Mio, 4 itérations. Mot de passe : 12 octets au moins.
+      Changer de mot de passe : --cle <ancien> --mot-de-passe-fichier <ancien mdp>
+      --nouveau-mot-de-passe-fichier <nouveau mdp> --sortie <nouveau fichier>.
 
   Source de la racine : partout où deux --part sont demandées, on peut donner à la place
-  --cle <fichier> --mot-de-passe-fichier <f> (fichier 0600, propriétaire courant, pas de lien).
+  --cle <fichier> --mot-de-passe-fichier <f>.
+
+  Fichiers secrets (parts, phrases, mots de passe, fichier de clé) : fichier ordinaire,
+  0600 ou plus strict, propriétaire = utilisateur effectif, pas de lien symbolique ; sinon refus.
 
 DURCISSEMENT
   Core dumps désactivés (RLIMIT_CORE = 0, PR_SET_DUMPABLE = 0) et mémoire verrouillée
@@ -110,6 +118,7 @@ struct Options {
     passation: Option<PathBuf>,
     cle: Option<PathBuf>,
     mot_de_passe_fichier: Option<PathBuf>,
+    nouveau_mot_de_passe_fichier: Option<PathBuf>,
     argon2_memoire_mio: Option<u32>,
     argon2_iterations: Option<u32>,
 }
@@ -176,6 +185,9 @@ fn analyser(arguments: &[String], autorisees: &[&str]) -> Result<Options, String
             "--mot-de-passe-fichier" => {
                 definir(&mut o.mot_de_passe_fichier, PathBuf::from(valeur), nom)?;
             }
+            "--nouveau-mot-de-passe-fichier" => {
+                definir(&mut o.nouveau_mot_de_passe_fichier, PathBuf::from(valeur), nom)?;
+            }
             "--argon2-memoire-mio" => {
                 let m: u32 = valeur
                     .parse()
@@ -196,18 +208,21 @@ fn analyser(arguments: &[String], autorisees: &[&str]) -> Result<Options, String
 
 // ─── Fichiers ──────────────────────────────────────────────────────────────
 
+/// Lit un fichier secret (part, phrase, mot de passe) : contrôles stricts
+/// communs avec le fichier de clé ([`lire_fichier_secret`] : `O_NOFOLLOW`,
+/// fichier ordinaire, `0600` ou plus strict, propriétaire = uid effectif,
+/// au plus [`TAILLE_MAX_FICHIER`] octets), texte UTF-8.
 fn lire_secret(chemin: &Path) -> Result<Zeroizing<String>, String> {
-    let fichier =
-        File::open(chemin).map_err(|e| erreur(format!("lecture de {} : {e}", chemin.display())))?;
-    let mut texte = Zeroizing::new(String::new());
-    fichier
-        .take(TAILLE_MAX_FICHIER + 1)
-        .read_to_string(&mut texte)
+    let mut octets = lire_fichier_secret(chemin, TAILLE_MAX_FICHIER)
         .map_err(|e| erreur(format!("lecture de {} : {e}", chemin.display())))?;
-    if texte.len() as u64 > TAILLE_MAX_FICHIER {
-        return Err(erreur(format!("{} : fichier trop grand", chemin.display())));
+    match String::from_utf8(std::mem::take(&mut *octets)) {
+        Ok(texte) => Ok(Zeroizing::new(texte)),
+        Err(e) => {
+            // Octets invalides effacés avant libération.
+            drop(Zeroizing::new(e.into_bytes()));
+            Err(erreur(format!("lecture de {} : texte non UTF-8", chemin.display())))
+        }
     }
-    Ok(texte)
 }
 
 fn lire_phrase(chemin: Option<&Path>) -> Result<Zeroizing<Vec<u8>>, String> {
@@ -241,11 +256,30 @@ fn creer_neuf(_chemin: &Path, _mode: u32) -> io::Result<File> {
 }
 
 fn ecrire_neuf(chemin: &Path, mode: u32, octets: &[u8]) -> Result<(), String> {
+    ecrire_neuf_avec(chemin, mode, |f| f.write_all(octets).and_then(|()| f.sync_all()))
+}
+
+/// Crée `chemin` (neuf) et y écrit par `ecrire` ; en cas d'échec d'écriture,
+/// le fichier **partiel** (créé ici même) est supprimé.
+fn ecrire_neuf_avec(
+    chemin: &Path,
+    mode: u32,
+    ecrire: impl FnOnce(&mut File) -> io::Result<()>,
+) -> Result<(), String> {
     let mut f = creer_neuf(chemin, mode)
         .map_err(|e| erreur(format!("création de {} : {e}", chemin.display())))?;
-    f.write_all(octets)
-        .and_then(|()| f.sync_all())
-        .map_err(|e| erreur(format!("écriture de {} : {e}", chemin.display())))
+    if let Err(e) = ecrire(&mut f) {
+        drop(f);
+        let suppression = match fs::remove_file(chemin) {
+            Ok(()) => "fichier partiel supprimé".to_string(),
+            Err(s) => format!("fichier partiel NON supprimé ({s}) : à effacer"),
+        };
+        return Err(erreur(format!(
+            "écriture de {} : {e} ; {suppression}",
+            chemin.display()
+        )));
+    }
+    Ok(())
 }
 
 fn chemins_parts(dossier: &Path) -> Result<Vec<PathBuf>, String> {
@@ -331,6 +365,15 @@ fn lire_mot_de_passe(o: &Options) -> Result<Zeroizing<Vec<u8>>, String> {
         .as_deref()
         .ok_or_else(|| erreur("--mot-de-passe-fichier <f> est requis"))?;
     lire_phrase(Some(chemin))
+}
+
+/// Mot de passe du fichier écrit par `exporter-cle` : le nouveau s'il est
+/// donné (changement de mot de passe), sinon celui de `--mot-de-passe-fichier`.
+fn lire_mot_de_passe_sortie(o: &Options) -> Result<Zeroizing<Vec<u8>>, String> {
+    match o.nouveau_mot_de_passe_fichier.as_deref() {
+        Some(chemin) => lire_phrase(Some(chemin)),
+        None => lire_mot_de_passe(o),
+    }
 }
 
 fn recuperer_racine(o: &Options) -> Result<Racine, String> {
@@ -521,7 +564,7 @@ fn exporter_cle(o: &Options) -> Result<(), String> {
         return Err(erreur(format!("{} existe déjà : refus", sortie.display())));
     }
     let racine = recuperer_racine(o)?;
-    let mot_de_passe = lire_mot_de_passe(o)?;
+    let mot_de_passe = lire_mot_de_passe_sortie(o)?;
     ecrire_fichier_cle(sortie, &racine, &mot_de_passe, params)
         .map_err(|e| erreur(format!("{} : {e}", sortie.display())))?;
     // Relecture complète avant d'annoncer le succès (fail-closed).
@@ -605,6 +648,7 @@ fn executer(arguments: &[String]) -> Result<(), String> {
             PHRASE,
             CLE,
             MDP,
+            NOUVEAU_MDP,
             "--sortie",
             "--argon2-memoire-mio",
             "--argon2-iterations",
@@ -640,5 +684,41 @@ fn main() -> ExitCode {
             eprintln!("miyuracine : {message}");
             ExitCode::FAILURE
         }
+    }
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use super::*;
+
+    fn dossier(nom: &str) -> PathBuf {
+        let d = std::env::temp_dir().join(format!("miyuracine-bin-{nom}-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&d);
+        fs::create_dir_all(&d).unwrap();
+        d
+    }
+
+    /// B5 : échec d'écriture ⇒ le fichier partiel (créé ici) est supprimé ;
+    /// un fichier préexistant n'est jamais touché.
+    #[test]
+    fn ecrire_neuf_supprime_le_fichier_partiel() {
+        let d = dossier("partiel");
+        let chemin = d.join("part-1-sur-3.txt");
+        let e = ecrire_neuf_avec(&chemin, 0o600, |f| {
+            f.write_all(b"debut de part")?;
+            Err(io::Error::other("disque plein"))
+        })
+        .unwrap_err();
+        assert!(e.contains("fichier partiel supprimé"), "{e}");
+        assert!(!chemin.exists());
+
+        fs::write(&chemin, b"existant").unwrap();
+        assert!(ecrire_neuf(&chemin, 0o600, b"neuf").is_err());
+        assert_eq!(fs::read(&chemin).unwrap(), b"existant");
+
+        let neuf = d.join("neuf");
+        ecrire_neuf(&neuf, 0o600, b"contenu").unwrap();
+        assert_eq!(fs::read(&neuf).unwrap(), b"contenu");
+        fs::remove_dir_all(&d).unwrap();
     }
 }

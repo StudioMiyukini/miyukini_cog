@@ -22,6 +22,12 @@ hmac = "0.12"
 zeroize = "1"
 thiserror = "2"
 
+# Verrou `flock`, uid effectif, ouverture sans suivre de lien : appels
+# système sans `unsafe` (le crate est `forbid(unsafe_code)`). Déjà dans le
+# graphe (miyuracine, miyuportail) ; Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT.
+[target.'cfg(unix)'.dependencies]
+rustix = { version = "1", default-features = false, features = ["std", "fs", "process"] }
+
 [dev-dependencies]
 
 [lints]

@@ -393,6 +393,82 @@ fn sas_sans_landlock_refuse_le_lot() {
     assert_eq!(r, vec![ErreurPortail::Sas(ErreurSas::LandlockIndisponible); 2]);
 }
 
+/// B8 : chemin du binaire non absolu ⇒ refus (aucune résolution par `PATH`).
+#[test]
+fn sas_chemin_relatif_refuse() {
+    let m = monde(Box::new(SasProcessus::new("portail-sas")), Box::new(RefusParDefaut));
+    let s = m.voie_ouverte("docs");
+    m.portail.deposer(&s, m.trame(&s, 1)).unwrap();
+    assert_eq!(erreurs(m.portail.relever(&s, 1).unwrap()), vec![ErreurPortail::Sas(ErreurSas::CheminRelatif)]);
+}
+
+/// M1 : un intermédiaire transmet un descripteur (5) au sas ; le sas refuse
+/// de démarrer (`SORTIE_DESCRIPTEURS`), le parent refuse le lot.
+#[cfg(target_os = "linux")]
+#[test]
+fn sas_descripteur_herite_refuse_le_lot() {
+    use std::os::unix::fs::PermissionsExt;
+    let dossier = std::env::temp_dir().join(format!("miyuportail-fd-herite-{}", std::process::id()));
+    std::fs::create_dir_all(&dossier).unwrap();
+    let script = dossier.join("portail-sas");
+    std::fs::write(&script, format!("#!/bin/sh\nexec 5</dev/null\nexec {}\n", env!("CARGO_BIN_EXE_portail-sas")))
+        .unwrap();
+    std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o700)).unwrap();
+    let m = monde(Box::new(SasProcessus::new(&script)), Box::new(RefusParDefaut));
+    let s = m.voie_ouverte("docs");
+    m.portail.deposer(&s, m.trame(&s, 1)).unwrap();
+    let r = erreurs(m.portail.relever(&s, 1).unwrap());
+    std::fs::remove_dir_all(&dossier).unwrap();
+    assert_eq!(r, vec![ErreurPortail::Sas(ErreurSas::DescripteurHerite)]);
+}
+
+/// B8 : l'inscription au registre se fait hors du verrou global des voies :
+/// une inscription lente sur une voie ne bloque pas les autres voies.
+#[test]
+fn inscription_lente_ne_bloque_pas_les_autres_voies() {
+    use std::sync::mpsc;
+
+    struct RegistreLent {
+        entree: Mutex<mpsc::Sender<()>>,
+        reprise: Mutex<mpsc::Receiver<()>>,
+    }
+    impl Inscription for RegistreLent {
+        fn inscrire(&self, e: &Evenement) -> Result<(), ErreurInscription> {
+            if matches!(e, Evenement::Entree { .. }) {
+                let _ = self.entree.lock().unwrap().send(());
+                // Borne : jamais de blocage infini si le verrou global était tenu.
+                let _ = self.reprise.lock().unwrap().recv_timeout(Duration::from_secs(5));
+            }
+            Ok(())
+        }
+    }
+    let (tx_entree, rx_entree) = mpsc::channel();
+    let (tx_reprise, rx_reprise) = mpsc::channel();
+    let registre = Arc::new(RegistreLent { entree: Mutex::new(tx_entree), reprise: Mutex::new(rx_reprise) });
+    let m = Monde {
+        portail: PortailInterne::new(Box::new(SasEnProcessus), Box::new(RefusParDefaut), registre),
+        registre: Arc::new(RegistreMemoire::new()),
+        facade: cle(7),
+        auteur: cle(9),
+    };
+    let lente = m.voie_ouverte("lente");
+    let autre = m.voie_ouverte("autre");
+    m.portail.deposer(&lente, m.trame(&lente, 1)).unwrap();
+    std::thread::scope(|portee| {
+        let releve = portee.spawn(|| m.portail.relever(&lente, 1));
+        rx_entree.recv_timeout(Duration::from_secs(5)).unwrap();
+        // Inscription en cours sur « lente » : « autre » reste utilisable.
+        let debut = Instant::now();
+        m.portail.deposer(&autre, m.trame(&autre, 1)).unwrap();
+        assert_eq!(m.portail.etat(&autre).unwrap(), EtatVoie::Active);
+        assert!(debut.elapsed() < Duration::from_secs(2), "voie « autre » bloquée par l'inscription");
+        tx_reprise.send(()).unwrap();
+        let r = releve.join().unwrap().unwrap();
+        assert_eq!(r.len(), 1);
+        assert!(r[0].is_ok());
+    });
+}
+
 #[cfg(target_os = "linux")]
 mod seccomp {
     use std::os::unix::process::ExitStatusExt;
@@ -432,6 +508,20 @@ mod seccomp {
         let code = lancer("--essai=landlock").code();
         assert_eq!(code, Some(miyuportail::sas::SORTIE_OK), "code de sortie {code:?}");
         assert!(!std::path::Path::new("/tmp/portail-sas-essai-landlock").exists());
+    }
+
+    /// M1 : descripteur hérité ⇒ refus avant Landlock, code dédié.
+    #[test]
+    fn descripteur_herite_refuse_au_demarrage() {
+        let statut = Command::new("/bin/sh")
+            .args(["-c", "exec 5</dev/null; exec \"$0\"", env!("CARGO_BIN_EXE_portail-sas")])
+            .env_clear()
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+            .unwrap();
+        assert_eq!(statut.code(), Some(miyuportail::sas::SORTIE_DESCRIPTEURS));
     }
 
     #[test]

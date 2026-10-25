@@ -18,9 +18,17 @@ fn durcissement_core_dumps_et_politique_mlock() {
         PolitiqueVerrouillage::Exiger
     );
 
-    // Exiger avec un budget impossible : refus fail-closed (si la limite est finie).
+    // Exiger avec un budget impossible : refus fail-closed (si la limite est
+    // finie et le processus sans privilège : root ou CAP_IPC_LOCK relèvent la
+    // limite ou y dérogent, et `mlockall` serait réellement tenté).
     let limite = getrlimit(Resource::Memlock);
-    if limite.maximum.is_some() {
+    let cap_eff = std::fs::read_to_string("/proc/self/status")
+        .ok()
+        .and_then(|t| t.lines().find_map(|l| l.strip_prefix("CapEff:")).map(|v| v.trim().to_owned()))
+        .and_then(|v| u64::from_str_radix(&v, 16).ok())
+        .unwrap_or(0);
+    let privilegie = rustix::process::geteuid().is_root() || cap_eff & (1 << 14) != 0;
+    if limite.maximum.is_some() && !privilegie {
         assert_eq!(
             durcir_processus(PolitiqueVerrouillage::Exiger, u64::MAX / 2).unwrap_err(),
             ErreurRacine::VerrouillageMemoire

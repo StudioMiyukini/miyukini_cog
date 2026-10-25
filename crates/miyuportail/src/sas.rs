@@ -254,6 +254,11 @@ pub const SORTIE_LANDLOCK: i32 = 5;
 /// Code de sortie d'un mode d'essai dont la propriété n'est pas tenue.
 #[cfg(debug_assertions)]
 pub const SORTIE_ESSAI_ECHEC: i32 = 6;
+/// Code de sortie : un descripteur au-delà de 0, 1, 2 est ouvert au
+/// démarrage (hérité) — refus **avant** Landlock et avant toute lecture
+/// ([`crate::bac_a_sable::refuser_descripteurs_herites`]) ; le parent le
+/// traduit en [`ErreurSas::DescripteurHerite`].
+pub const SORTIE_DESCRIPTEURS: i32 = 7;
 
 /// Point d'entrée du binaire `portail-sas` : confinement, lecture bornée de
 /// l'entrée standard, traitement, écriture de la réponse. Renvoie le code de sortie.
@@ -272,6 +277,12 @@ pub fn executer(arguments: &[String]) -> i32 {
         return SORTIE_ARGUMENTS;
     }
 
+    // Avant Landlock et avant toute lecture : aucun descripteur hérité.
+    #[cfg(target_os = "linux")]
+    if crate::bac_a_sable::refuser_descripteurs_herites().is_err() {
+        return SORTIE_DESCRIPTEURS;
+    }
+
     #[cfg(all(debug_assertions, target_os = "linux"))]
     if essai == Some(Essai::Landlock) {
         return essai_landlock();
@@ -280,6 +291,7 @@ pub fn executer(arguments: &[String]) -> i32 {
     match crate::bac_a_sable::installer() {
         Ok(()) => {}
         Err(ErreurSas::LandlockIndisponible) => return SORTIE_LANDLOCK,
+        Err(ErreurSas::DescripteurHerite) => return SORTIE_DESCRIPTEURS,
         Err(_) => return SORTIE_BAC_A_SABLE,
     }
 
@@ -380,6 +392,12 @@ pub trait DecodeurIsole: Send + Sync {
 }
 
 /// Sas par processus `portail-sas` confiné (seule implémentation admise en production).
+///
+/// Le chemin du binaire doit être **absolu** (aucune résolution par `PATH`,
+/// sinon [`ErreurSas::CheminRelatif`]). Avant chaque lancement, le parent
+/// vérifie qu'aucun de ses descripteurs au-delà de 0, 1, 2 n'est
+/// transmissible (sans `FD_CLOEXEC`) : sinon [`ErreurSas::DescripteurHerite`] ;
+/// le sas refuse lui-même tout descripteur hérité ([`SORTIE_DESCRIPTEURS`]).
 #[derive(Debug, Clone)]
 pub struct SasProcessus {
     binaire: PathBuf,
@@ -414,6 +432,12 @@ impl SasProcessus {
 
     #[cfg(target_os = "linux")]
     fn lancer(&self, entree: Vec<u8>, attendus: usize) -> Result<Vec<ResultatTrame>, ErreurSas> {
+        if !self.binaire.is_absolute() {
+            return Err(ErreurSas::CheminRelatif);
+        }
+        if !crate::bac_a_sable::descripteurs_heritables()?.is_empty() {
+            return Err(ErreurSas::DescripteurHerite);
+        }
         let mut commande = Command::new(&self.binaire);
         commande.env_clear().current_dir("/").stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null());
         #[cfg(debug_assertions)]
@@ -457,6 +481,9 @@ impl SasProcessus {
         let reponse = lecteur.join().ok().flatten();
         if statut.code() == Some(SORTIE_LANDLOCK) {
             return Err(ErreurSas::LandlockIndisponible);
+        }
+        if statut.code() == Some(SORTIE_DESCRIPTEURS) {
+            return Err(ErreurSas::DescripteurHerite);
         }
         if !statut.success() || !ecrit {
             return Err(ErreurSas::FinAnormale);
