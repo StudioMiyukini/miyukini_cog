@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.9 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.10 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -68,6 +68,7 @@
 | A-007 | 2026-10-25 | Zones §7, §10, §16, §17 · Services hybrides §1, §3.1, §4.1 · Lot 2 §4.1, §8.2, §8.3, §9, §10 · IA fédérée §2, §7 · Menaces EX-32, EX-34 : intégrations du lot 4, choix des lots 5 (services hybrides) et 6 (fédération) ; délai de contestation 72 h ; registre fédéral sans Origin (≥ 3 témoins membres, **remplace** une phrase d'A-006) ; anti-rejeu du Portail par auteur ; code des Fiches ≠ `0x08` ; détail ci-dessous | 1.7 |
 | A-008 | 2026-10-25 | Lot 2 §4.1, §10.1 · Services hybrides §3.1, §4.1 : nature `0x44` du recours accepté (encodage prévu par A-007) ; règles de suspension et de levée ; alignements consignés (recours, témoins membres, séquence par auteur) | 1.8 |
 | A-009 | 2026-10-25 | IA fédérée §2–§5, §7 · Mémoire MAIA §4, §9, §10, §12 · Lot 2 §4.1 : choix du lot 7 (Fiche `0x09`, *k* = 3, quotas, identifiants et budgets mémoire, une base `maia-<utilisateur>`) ; **deux décisions** : republication d'une donnée étrangère après validation TAMR, notes ordinaires écrites par MAIA | 1.9 |
+| A-010 | 2026-10-25 | Mémoire MAIA §9 : « note ordinaire » écrite par MAIA = note des strates N2 / N3 seulement (jamais N0 ni N1) ; précision fail-closed d'A-009 | 1.10 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -412,3 +413,18 @@
   - **EX** : EX-53 précisée (seule la provenance `etranger` exige la validation) ; EX-57 type `0x09` ; EX-60 republication sous TAMR, marquée `reprises`, hors corroboration ; EX-50..56, 58, 59, 61..63 implémentées au niveau bibliothèque
   - **Plan** : lot 7 — sortie atteinte au niveau bibliothèque ; restent les modèles réels, les routes et l'interface de la mémoire, le transport entre COG
   - **Code** : `maia-federee`, `maia-memoire`, `miyusceau` (`TypeSceau::Fiche`), `miou-llm-bridge`, `kindmother-service`
+
+### A-010 — Notes de MAIA : strates N2 / N3 seulement
+
+<!-- @id arch.gel.a010 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a010 -->
+
+- **Date** : 2026-10-25 · **version** 1.10 · précision **plus stricte** d'une décision du propriétaire (A-009), signalée à lui
+- **Motif** : revue de sécurité du lot 7 — une note écrite directement par MAIA en N0 (domaine `moi`, préférence d'importance ≥ 8) ou en N1 (résumé de domaine) serait injectée dans **chaque** contexte : une injection réussie dans un échange deviendrait une consigne quasi permanente
+- **Documents touchés** : [Mémoire MAIA](MEMOIRE-MAIA.md) bandeau, §9
+- **Décision**
+  - « Note ordinaire » (A-009) = note dont la version écrite tombe en **N2 ou N3**
+  - Domaine `moi`, préférence d'importance ≥ 8, résumé de domaine (N1), Règle ⇒ **candidat** à valider, comme toute autre exception d'A-009
+  - Une correction qui ferait passer une note de MAIA en N0 ou N1 (importance relevée) ⇒ candidat
+- **Impact** : EX-53, EX-54 renforcées ; code `maia-memoire::MemoireMaia::noter`

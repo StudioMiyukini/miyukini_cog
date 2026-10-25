@@ -1,6 +1,6 @@
 # Mémoire de MAIA — mémoire stratifiée
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-009** (v1.9 : identifiants, budgets, base `maia-<utilisateur>`, notes ordinaires écrites par MAIA). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-009** (v1.9 : identifiants, budgets, base `maia-<utilisateur>`, notes ordinaires écrites par MAIA) · amendé **A-010** (v1.10 : notes de MAIA en N2 / N3 seulement). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id arch.ia.memoire-maia -->
 <!-- @role architecture-specification -->
@@ -173,7 +173,7 @@ famille.lea.s1 …
 
 - **Écriture**
   - propos explicites de l'utilisateur → acceptés directement
-  - déductions → confiance réduite (≤ 6) ; ~~validées en lot par l'utilisateur~~ **notes ordinaires écrites par MAIA elle-même** (auteur `maia`, 50 au plus par 24 h, A-009) ; corrections d'une note de l'utilisateur → candidats validés en lot
+  - déductions → confiance réduite (≤ 6) ; ~~validées en lot par l'utilisateur~~ **notes ordinaires écrites par MAIA elle-même** (auteur `maia`, 50 au plus par 24 h, A-009 ; strates N2 / N3 seulement, jamais N0 ni N1, A-010) ; corrections d'une note de l'utilisateur → candidats validés en lot
   - types sensibles (santé, finances, tiers) → validation TAMR
   - **Règles** : uniquement sur demande explicite de l'utilisateur
 - **Versionnage** : jamais d'écrasement ; une correction crée une nouvelle version qui remplace l'ancienne ; historique dans le registre (KindMother)
