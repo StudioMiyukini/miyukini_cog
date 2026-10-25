@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.20 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.21 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -79,6 +79,7 @@
 | A-018 | 2026-10-25 | État de publication persistant dans KindMother (base réservée `cog-federee`, une insertion par version, rechargement fail-closed), plafond décompté après ALLOW, contrôle du propriétaire de l'étiquette ; **à valider par le propriétaire** | 1.18 |
 | A-019 | 2026-10-25 | État fédéral persistant (`MFED` v3 avec carnet de pairs, support KindMother `miyufederation`, rechargement revérifié, 72 h à travers les arrêts), fuzzing ; mémoire d'Alicia dans KindMother (`maia-_alicia`, `nationale`), import unique ; **à valider par le propriétaire** | 1.19 |
 | A-020 | 2026-10-25 | Effacement physique dans KindMother (`secure_delete` relu, WAL vidé après suppression), effacement de l'ancienne base d'Alicia, anti-retour de l'état fédéral (`MFED` v4, compteur `MFFR`), encodage canonique du Sceau ; **à valider par le propriétaire** | 1.20 |
+| A-021 | 2026-10-25 | Oubli typé (`erasure`, entrée d'audit `effacement`), nettoyage unique des bases antérieures (`VACUUM`, marqueur `a020_secure_vacuum`), point de contrôle après toute écriture SQL modifiante ; **à valider par le propriétaire** | 1.21 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -686,3 +687,20 @@
   - Preuves Merkle : chemin > 64 refusé à l'encodage
   - `sceller`, `sceller_multi`, `cosigner` : la charge doit se relire et se ré-encoder à l'octet près (`EncodageNonCanonique`)
 - **Impact** : EX-30, EX-35, EX-50..56 ; plan lots 2, 6, 7
+
+### A-021 — Oubli typé, nettoyage des bases antérieures, point de contrôle décidé par SQLite
+
+<!-- @id arch.gel.a021 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a021 -->
+
+- **Date** : 2026-10-25 · **version** 1.21 · complète A-020 (limites « bases antérieures » et « oubli reconnu par texte libre ») et corrige un constat de revue (décision du point de contrôle d'après le texte SQL) ; **validation du propriétaire attendue**
+- **Oubli typé** : `TypedWriteIntent::forget(table)` = `Delete` avec le champ filaire **`erasure: true`** (absent quand faux : les anciennes intentions restent valides) ; `.erasure()` admis sur `Update`/`Upsert` (écraser une valeur à oublier), refusé sur `Insert` ; octet `'e'` ajouté à l'empreinte canonique **seulement** si vrai
+  - Un lot contenant un effacement déclenche toujours `wal_checkpoint(TRUNCATE)`, même sans ligne touchée ; chaque effacement ajoute une entrée d'audit de type **`effacement`** (verdict `effacee` ou `residu_wal`, empreinte de la clé, nombre de lignes, jamais la valeur) ; point de contrôle incomplet ⇒ issue `Appliquee` avec motif signalé à l'appelant
+  - Les oublis de MAIA (`maia-memoire`) et d'Alicia (`miyualicia-memory`) utilisent `forget`
+  - **Compatibilité** : une version antérieure de KindMother refuse de vérifier un journal qui contient une entrée `effacement` ; aucun retour arrière de version après la première entrée
+- **Nettoyage unique des bases antérieures** : à la première ouverture en écriture par cette version, `VACUUM` sous `secure_delete`, puis `wal_checkpoint(TRUNCATE)` complet, entrée d'audit `effacement` / `secure-vacuum`, puis marqueur **`a020_secure_vacuum = "1"`** dans `_kindmother_meta` ; base neuve marquée sans `VACUUM` ; espace libre exigé = taille + `-wal` + 4 Mio, sinon refus (`QuotaExceeded`) ; tout échec ⇒ base refusée, marqueur non posé, reprise à l'ouverture suivante (fail-closed) ; mémoire de l'ordre de la taille de la base pendant l'opération
+- **Chemin SQL brut (transition)** : le point de contrôle `TRUNCATE` suit **toute écriture qui a modifié des lignes** (`total_changes()`), y compris `REPLACE`, upsert, `UPDATE` et déclencheurs, et chaque migration de schéma ; la détection par mot-clé est supprimée ; `DROP TABLE` reste refusé par l'autorisateur ; coût ≈ 10 ms par écriture brute modifiante
+- **Inchangé** : `Update`/`Upsert` ordinaires sans `erasure` ne déclenchent pas de point de contrôle (ce ne sont pas des oublis)
+- **Reste ouvert** : sauvegardes `_backups/` antérieures (règle de conservation à décider par le propriétaire)
+- **Impact** : EX-50..56 ; RGPD art. 17 ; plan lots C, 7
