@@ -1,0 +1,20 @@
+[package]
+name = "miyuregistre"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Registre Merkle local et fédéral (RFC 9162) — entrées typées, journal append-only crash-safe, têtes signées, Median-Time-Past (lot 4, EX-22, EX-34)"
+
+[dependencies]
+miyusceau = { path = "../miyusceau" }
+sha2 = "0.10"
+thiserror = "2"
+
+[lints]
+workspace = true

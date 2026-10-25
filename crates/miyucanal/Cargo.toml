@@ -1,0 +1,23 @@
+[package]
+name = "miyucanal"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Canal officiel — relevé du dépôt officiel (Franche) par la zone COG via le Portail, annonces 2 sur 2, quarantaine temporelle, anti-retour (lot 4, EX-01, EX-02, EX-20, EX-26)"
+
+[dependencies]
+miyusceau = { path = "../miyusceau" }
+miyuregistre = { path = "../miyuregistre" }
+hmac = "0.12"
+sha2 = "0.10"
+thiserror = "2"
+zeroize = "1"
+
+[lints]
+workspace = true

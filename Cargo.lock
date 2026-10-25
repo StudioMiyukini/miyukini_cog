@@ -6639,6 +6639,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "miyucanal"
+version = "0.1.0"
+dependencies = [
+ "hmac",
+ "miyuregistre",
+ "miyusceau",
+ "sha2",
+ "thiserror 2.0.18",
+ "zeroize",
+]
+
+[[package]]
 name = "miyucdr"
 version = "0.1.0"
 dependencies = [
@@ -7353,6 +7365,15 @@ dependencies = [
  "serde_json",
  "sha2",
  "zeroize",
+]
+
+[[package]]
+name = "miyuregistre"
+version = "0.1.0"
+dependencies = [
+ "miyusceau",
+ "sha2",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
