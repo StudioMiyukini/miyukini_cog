@@ -309,20 +309,37 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // Authentification Miyukini (lot 2) : défis de possession (public, débit
         // limité : un défi par requête signée par visa) et liaison d'identité.
+        // I6 : gestion des clés d'appareil (liaison, retrait, rotation) ; même
+        // origine exigée en plus du jeton CSRF pour les sessions du navigateur.
         let defi_limiter = Arc::new(RateLimiter::new(600, 60, 100_000));
-        let miyu_public = miyu_auth_handler::miyu_public_routes()
-            .layer(axum::middleware::from_fn_with_state(
-                defi_limiter,
-                rate_limit_refresh,
-            ))
-            .with_state(app_state.clone());
-        let miyu_protected = miyu_auth_handler::miyu_protected_routes()
-            .layer(axum::middleware::from_fn(csrf_middleware))
-            .layer(axum::middleware::from_fn_with_state(
-                app_state.clone(),
-                auth_middleware,
-            ))
-            .with_state(app_state.clone());
+        let (miyu_public, miyu_protected) = match app_state.miyu_auth.clone() {
+            Some(svc) => (
+                miyu_auth_handler::miyu_public_routes()
+                    .layer(axum::middleware::from_fn_with_state(
+                        defi_limiter,
+                        rate_limit_refresh,
+                    ))
+                    .with_state(svc.clone()),
+                miyu_auth_handler::miyu_protected_routes()
+                    .layer(axum::middleware::from_fn(
+                        miyucloud_server::interfaces::middleware::csrf::same_origin_middleware,
+                    ))
+                    .layer(axum::middleware::from_fn(csrf_middleware))
+                    .layer(axum::middleware::from_fn_with_state(
+                        app_state.clone(),
+                        auth_middleware,
+                    ))
+                    .with_state(svc),
+            ),
+            // Sans base de données : authentification Miyukini indisponible (503).
+            None => {
+                let indisponible = || async { axum::http::StatusCode::SERVICE_UNAVAILABLE };
+                (
+                    Router::new().route("/{*reste}", axum::routing::any(indisponible)),
+                    Router::new(),
+                )
+            }
+        };
 
         // Protected API routes — session / visa / device key / app password + bandwidth throttling
         let protected_api = api_routes

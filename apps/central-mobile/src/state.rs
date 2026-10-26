@@ -21,6 +21,8 @@ pub enum AppScreen {
     Connexion,
     /// Écran principal avec navigation par onglets.
     Main,
+    /// Régénération de l'identité de l'appareil (I6).
+    Identite,
 }
 
 /// État global de l'application mobile.

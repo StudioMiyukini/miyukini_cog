@@ -154,6 +154,16 @@ pub fn ConnexionScreen() -> Element {
                 },
                 "Changer de COG Host"
             }
+
+            // Régénération de l'identité (clé perdue, compromise ou révoquée).
+            button {
+                style: "padding: 8px 16px; background: transparent; border: none; color: #888; font-size: 13px; cursor: pointer; text-decoration: underline;",
+                disabled: is_loading,
+                onclick: move |_| {
+                    state.write().screen = AppScreen::Identite;
+                },
+                "Régénérer l'identité de l'appareil"
+            }
         }
     }
 }

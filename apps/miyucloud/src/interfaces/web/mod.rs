@@ -84,3 +84,39 @@ async fn serve_device_verify_page() -> Html<&'static str> {
         "/device-verify.html"
     )))
 }
+
+#[cfg(test)]
+mod rendu_tests {
+    /// Rendu de la page de profil : sections et formulaires des liaisons
+    /// d'appareils et d'identités (I6), branchés sur les routes protégées.
+    #[test]
+    fn profile_page_exposes_device_and_identity_links() {
+        let html = include_str!(concat!(env!("OUT_DIR"), "/profile.html"));
+        for id in [
+            "miyu-devices-section",
+            "miyu-dev-form",
+            "miyu-dev-request",
+            "miyu-dev-scopes",
+            "miyu-identities-section",
+            "miyu-id-form",
+            "miyu-id-proof",
+            "/js/core/csrf.js",
+        ] {
+            assert!(html.contains(id), "{id}");
+        }
+        let js = include_str!("../../../static/js/views/profile/profile.js");
+        for attendu in [
+            "'/auth/miyu/appareils'",
+            "'/auth/miyu/liaisons'",
+            "X-Miyu-Delegations",
+            "credentials: 'same-origin'",
+        ] {
+            assert!(js.contains(attendu), "{attendu}");
+        }
+        // Toute requête modifiante des liaisons porte le jeton CSRF (headers()).
+        assert!(!js.contains("method: 'POST', credentials"));
+        // Textes affichés : jamais d'innerHTML sur une donnée du serveur.
+        assert!(!js.contains("innerHTML = d."));
+        assert!(!js.contains("innerHTML = i."));
+    }
+}

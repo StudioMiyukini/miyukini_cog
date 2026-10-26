@@ -93,6 +93,8 @@ async function init() {
     }
 
     loadAppPasswords();
+    loadMiyuDevices();
+    loadMiyuIdentities();
 
     try {
       const oidcResp = await fetch(API + '/auth/oidc/providers', { credentials: 'same-origin' });
@@ -350,6 +352,243 @@ async function revokeAppPassword(id, label) {
   }
 }
 
+// ── Appareils et identités Miyukini (I6) ──
+
+function statusAlert(el, ok, message) {
+  el.innerHTML = '<div class="alert ' + (ok ? 'alert-success' : 'alert-error') + '"><i class="fas ' +
+    (ok ? 'fa-check-circle' : 'fa-exclamation-circle') + '"></i> ' + escapeHtml(message) + '</div>';
+}
+
+async function errorMessage(resp, fallbackKey) {
+  const err = await resp.json().catch(() => ({}));
+  return err.message || err.error || t(fallbackKey);
+}
+
+/** Empreinte courte d'une clé publique (base64 URL) pour l'affichage. */
+function shortKey(key) {
+  return (key || '').length > 12 ? key.substring(0, 6) + '…' + key.substring(key.length - 6) : (key || '');
+}
+
+function cell(text) {
+  const td = document.createElement('td');
+  td.textContent = text;
+  return td;
+}
+
+function removeButton(titleKey, handler) {
+  const td = document.createElement('td');
+  const btn = document.createElement('button');
+  btn.className = 'btn btn-danger-sm';
+  btn.innerHTML = '<i class="fas fa-trash"></i>';
+  btn.title = t(titleKey);
+  btn.addEventListener('click', handler);
+  td.appendChild(btn);
+  return td;
+}
+
+/*
+ * @id     cog.cloudViewProfile.loadMiyuDevices
+ * @do     charger_appareils_lies
+ * @role   securite
+ * @layer  ui
+ * @human  Liste les clés d'appareil liées au compte (nom, empreinte, portées, usage).
+ */
+async function loadMiyuDevices() {
+  const section = document.getElementById('miyu-devices-section');
+  try {
+    const resp = await fetch(API + '/auth/miyu/appareils', { headers: headers(), credentials: 'same-origin' });
+    if (!resp.ok) { section.classList.add('hidden'); return; }
+    section.classList.remove('hidden');
+    const devices = await resp.json();
+    const tbody = document.getElementById('miyu-dev-tbody');
+    tbody.innerHTML = '';
+    document.getElementById('miyu-dev-table').classList.toggle('hidden', devices.length === 0);
+    document.getElementById('miyu-dev-empty').classList.toggle('hidden', devices.length !== 0);
+    for (const d of devices) {
+      const tr = document.createElement('tr');
+      const key = cell(shortKey(d.public_key));
+      key.title = d.public_key;
+      tr.append(
+        cell(d.client_name), key, cell(d.scopes),
+        cell(new Date(d.created_at).toLocaleDateString()),
+        cell(d.last_used_at ? timeAgo(d.last_used_at) : t('profile.never')),
+        removeButton('profile.miyu_remove_device', function () { removeMiyuDevice(d.id, d.client_name); })
+      );
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    console.error('Failed to load linked devices', e);
+  }
+}
+
+/*
+ * @id     cog.cloudViewProfile.linkMiyuDevice
+ * @do     lier_cle_appareil
+ * @role   securite
+ * @layer  ui
+ * @human  Lie une nouvelle clé d'appareil à partir de sa demande de liaison signée (MLA2).
+ */
+async function linkMiyuDevice(e) {
+  e.preventDefault();
+  const statusEl = document.getElementById('miyu-dev-status');
+  const scopes = Array.from(document.querySelectorAll('#miyu-dev-scopes input:checked')).map(function (c) { return c.value; });
+  if (scopes.length === 0) { statusAlert(statusEl, false, t('profile.miyu_scope_required')); return; }
+  const btn = document.getElementById('miyu-dev-submit');
+  btn.disabled = true;
+  try {
+    const resp = await fetch(API + '/auth/miyu/appareils', {
+      method: 'POST',
+      headers: headers(),
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        demande: document.getElementById('miyu-dev-request').value.trim(),
+        nom: document.getElementById('miyu-dev-name').value.trim(),
+        portees: scopes.join(',')
+      })
+    });
+    if (resp.status === 201) {
+      statusAlert(statusEl, true, t('profile.miyu_device_linked'));
+      document.getElementById('miyu-dev-form').reset();
+      loadMiyuDevices();
+    } else {
+      statusAlert(statusEl, false, await errorMessage(resp, 'profile.miyu_link_failed'));
+    }
+  } catch (err) {
+    statusAlert(statusEl, false, t('profile.error_network', { message: err.message }));
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/*
+ * @id     cog.cloudViewProfile.removeMiyuDevice
+ * @do     retirer_cle_appareil
+ * @role   securite
+ * @layer  ui
+ * @human  Retire une clé d'appareil : ses requêtes signées et ses visas sont refusés aussitôt.
+ */
+async function removeMiyuDevice(id, name) {
+  if (!confirm(t('profile.miyu_confirm_remove_device', { label: name }))) return;
+  const statusEl = document.getElementById('miyu-dev-status');
+  try {
+    const resp = await fetch(API + '/auth/miyu/appareils/' + encodeURIComponent(id), {
+      method: 'DELETE', headers: headers(), credentials: 'same-origin'
+    });
+    if (resp.status === 204) {
+      statusAlert(statusEl, true, t('profile.miyu_device_removed'));
+      loadMiyuDevices();
+    } else {
+      statusAlert(statusEl, false, await errorMessage(resp, 'profile.error_revoke'));
+    }
+  } catch (err) {
+    statusAlert(statusEl, false, t('profile.error_network', { message: err.message }));
+  }
+}
+
+/*
+ * @id     cog.cloudViewProfile.loadMiyuIdentities
+ * @do     charger_identites_liees
+ * @role   securite
+ * @layer  ui
+ * @human  Liste les identités Miyukini liées au compte.
+ */
+async function loadMiyuIdentities() {
+  const section = document.getElementById('miyu-identities-section');
+  try {
+    const resp = await fetch(API + '/auth/miyu/liaisons', { headers: headers(), credentials: 'same-origin' });
+    if (!resp.ok) { section.classList.add('hidden'); return; }
+    section.classList.remove('hidden');
+    const ids = await resp.json();
+    const tbody = document.getElementById('miyu-id-tbody');
+    tbody.innerHTML = '';
+    document.getElementById('miyu-id-table').classList.toggle('hidden', ids.length === 0);
+    document.getElementById('miyu-id-empty').classList.toggle('hidden', ids.length !== 0);
+    for (const i of ids) {
+      const tr = document.createElement('tr');
+      tr.append(
+        cell(i.label), cell(i.cog_id),
+        cell(new Date(i.created_at).toLocaleDateString()),
+        cell(i.last_used_at ? timeAgo(i.last_used_at) : t('profile.never')),
+        removeButton('profile.miyu_unlink_identity', function () { unlinkMiyuIdentity(i.id, i.label); })
+      );
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    console.error('Failed to load linked identities', e);
+  }
+}
+
+/*
+ * @id     cog.cloudViewProfile.linkMiyuIdentity
+ * @do     lier_identite_miyukini
+ * @role   securite
+ * @layer  ui
+ * @human  Lie une identité Miyukini à partir d'une preuve collée (visa, preuve de possession, délégations).
+ */
+async function linkMiyuIdentity(e) {
+  e.preventDefault();
+  const statusEl = document.getElementById('miyu-id-status');
+  let proof;
+  try {
+    proof = JSON.parse(document.getElementById('miyu-id-proof').value);
+  } catch (_) {
+    statusAlert(statusEl, false, t('profile.miyu_proof_invalid'));
+    return;
+  }
+  if (!proof || typeof proof.visa !== 'string' || typeof proof.pop !== 'string') {
+    statusAlert(statusEl, false, t('profile.miyu_proof_invalid'));
+    return;
+  }
+  const h = headers();
+  delete h['Content-Type'];
+  h['X-Miyu-Visa'] = proof.visa;
+  h['X-Miyu-PoP'] = proof.pop;
+  if (typeof proof.delegations === 'string' && proof.delegations) h['X-Miyu-Delegations'] = proof.delegations;
+  const label = document.getElementById('miyu-id-label').value.trim();
+  // Corps vide : la preuve de l'appareil est liée à « POST /api/auth/miyu/liaisons » sans corps.
+  const url = API + '/auth/miyu/liaisons' + (label ? '?label=' + encodeURIComponent(label) : '');
+  const btn = document.getElementById('miyu-id-submit');
+  btn.disabled = true;
+  try {
+    const resp = await fetch(url, { method: 'POST', headers: h, credentials: 'same-origin' });
+    if (resp.status === 201) {
+      statusAlert(statusEl, true, t('profile.miyu_identity_linked'));
+      document.getElementById('miyu-id-form').reset();
+      loadMiyuIdentities();
+    } else {
+      statusAlert(statusEl, false, await errorMessage(resp, 'profile.miyu_link_failed'));
+    }
+  } catch (err) {
+    statusAlert(statusEl, false, t('profile.error_network', { message: err.message }));
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/*
+ * @id     cog.cloudViewProfile.unlinkMiyuIdentity
+ * @do     delier_identite_miyukini
+ * @role   securite
+ * @layer  ui
+ * @human  Retire la liaison d'une identité Miyukini (effet immédiat).
+ */
+async function unlinkMiyuIdentity(id, label) {
+  if (!confirm(t('profile.miyu_confirm_unlink', { label: label }))) return;
+  const statusEl = document.getElementById('miyu-id-status');
+  try {
+    const resp = await fetch(API + '/auth/miyu/liaisons/' + encodeURIComponent(id), {
+      method: 'DELETE', headers: headers(), credentials: 'same-origin'
+    });
+    if (resp.status === 204) {
+      loadMiyuIdentities();
+    } else {
+      statusAlert(statusEl, false, await errorMessage(resp, 'profile.error_revoke'));
+    }
+  } catch (err) {
+    statusAlert(statusEl, false, t('profile.error_network', { message: err.message }));
+  }
+}
+
 function escapeHtml(str) {
   var div = document.createElement('div');
   div.textContent = str || '';
@@ -363,6 +602,8 @@ document.getElementById('password-form').addEventListener('submit', changePasswo
 document.getElementById('app-pw-generate').addEventListener('click', createAppPassword);
 document.getElementById('app-pw-copy-btn').addEventListener('click', copyAppPassword);
 document.getElementById('app-pw-auto-toggle').addEventListener('click', toggleAutoPasswords);
+document.getElementById('miyu-dev-form').addEventListener('submit', linkMiyuDevice);
+document.getElementById('miyu-id-form').addEventListener('submit', linkMiyuIdentity);
 
 /* Re-render when language changes */
 window.addEventListener('translationsLoaded', function () { init(); });

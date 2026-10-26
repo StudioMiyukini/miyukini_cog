@@ -204,6 +204,9 @@ pub fn app_password_allows(path: &str, scopes: &str) -> bool {
     false
 }
 
+/// Rotation d'une clé d'appareil par elle-même (requête signée par l'ancienne clé).
+pub const CHEMIN_ROTATION_APPAREIL: &str = "/api/auth/miyu/appareils/rotation";
+
 /// Méthode par laquelle la requête a été authentifiée (posée dans les
 /// extensions par [`auth_middleware`]).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -319,9 +322,11 @@ pub async fn auth_middleware(
         })?;
         // Titres vérifiés (signatures, ancre, audience, révocation) avant de
         // lire le moindre octet du corps : un anonyme ne fait pas lire 16 Mio.
+        let delegations = entete(&headers, miyauth::http::ENTETE_DELEGATIONS);
         miyu.precontroler_visa(
             Some(valeur),
             entete(&headers, miyauth::http::ENTETE_POP),
+            delegations,
             maintenant(),
         )
         .map_err(refus_miyu)?;
@@ -339,6 +344,7 @@ pub async fn auth_middleware(
                 },
                 Some(valeur),
                 entete(&headers, miyauth::http::ENTETE_POP),
+                delegations,
                 maintenant(),
             )
             .await
@@ -377,8 +383,12 @@ pub async fn auth_middleware(
             .await
             .map_err(refus_miyu)?;
         let (chemin, chemin_et_requete) = chemins(&request);
-        // Portées de l'appareil (mêmes règles que les mots de passe d'application).
-        if !app_password_allows(&chemin, &cle.scopes) {
+        // Portées de l'appareil (mêmes règles que les mots de passe d'application) ;
+        // seule exception : une clé peut toujours se faire remplacer elle-même
+        // (rotation autorisée par sa propre signature, I6).
+        let rotation =
+            request.method() == axum::http::Method::POST && chemin == CHEMIN_ROTATION_APPAREIL;
+        if !rotation && !app_password_allows(&chemin, &cle.scopes) {
             return Err(AuthError::AccessDenied(
                 "Device key scope does not allow this endpoint".to_string(),
             ));
@@ -400,6 +410,8 @@ pub async fn auth_middleware(
         let user = utilisateur_actif(&state, cle.user_id).await?;
         request.extensions_mut().insert(Arc::new(user));
         request.extensions_mut().insert(AuthMethod::Appareil);
+        // Clé signataire, pour la rotation (seule route qui la lit).
+        request.extensions_mut().insert(Arc::new(cle));
         return Ok(next.run(request).await);
     }
 

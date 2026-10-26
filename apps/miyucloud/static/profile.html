@@ -141,6 +141,68 @@
       </div>
     </div>
 
+    <div class="profile-card hidden" id="miyu-devices-section">
+      <h2><i class="fas fa-mobile-alt"></i> <span data-i18n="profile.miyu_devices">Linked devices</span></h2>
+      <p class="app-pw-desc" data-i18n="profile.miyu_devices_desc">Devices that sign their requests with their own key. Removing a device immediately ends all its sessions (signed requests and visas).</p>
+
+      <div id="miyu-dev-status"></div>
+      <table class="app-pw-table" id="miyu-dev-table">
+        <thead>
+          <tr><th data-i18n="profile.col_device">Device</th><th data-i18n="profile.col_key">Key</th><th data-i18n="profile.col_scopes">Scopes</th><th data-i18n="profile.col_created">Created</th><th data-i18n="profile.col_last_used">Last Used</th><th></th></tr>
+        </thead>
+        <tbody id="miyu-dev-tbody"></tbody>
+      </table>
+      <div id="miyu-dev-empty" class="app-pw-empty hidden" data-i18n="profile.no_miyu_devices">No linked device yet.</div>
+
+      <h3 data-i18n="profile.miyu_link_device">Link a new device</h3>
+      <p class="app-pw-desc" data-i18n="profile.miyu_link_device_desc">On the new device, create a link request (MLA2 format, valid 5 minutes) and paste it here. The device proves it holds its key; this session authorises the link.</p>
+      <form id="miyu-dev-form">
+        <div class="form-group">
+          <label for="miyu-dev-request" data-i18n="profile.miyu_link_request">Link request</label>
+          <textarea id="miyu-dev-request" rows="3" required spellcheck="false" autocomplete="off" maxlength="300"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="miyu-dev-name" data-i18n="profile.miyu_device_name">Device name</label>
+          <input type="text" id="miyu-dev-name" maxlength="255" data-i18n-placeholder="profile.miyu_device_name_placeholder" placeholder="e.g. Phone">
+        </div>
+        <fieldset class="form-group" id="miyu-dev-scopes">
+          <legend data-i18n="profile.col_scopes">Scopes</legend>
+          <label><input type="checkbox" value="webdav" checked> WebDAV</label>
+          <label><input type="checkbox" value="caldav"> CalDAV</label>
+          <label><input type="checkbox" value="carddav"> CardDAV</label>
+          <label><input type="checkbox" value="api"> API</label>
+        </fieldset>
+        <button type="submit" class="btn btn-primary" id="miyu-dev-submit"><i class="fas fa-link"></i> <span data-i18n="profile.miyu_link">Link</span></button>
+      </form>
+    </div>
+
+    <div class="profile-card hidden" id="miyu-identities-section">
+      <h2><i class="fas fa-passport"></i> <span data-i18n="profile.miyu_identities">Miyukini identities</span></h2>
+      <p class="app-pw-desc" data-i18n="profile.miyu_identities_desc">Identities of your COG allowed to open this account with a visa. Unlinking takes effect immediately.</p>
+      <div id="miyu-id-status"></div>
+      <table class="app-pw-table" id="miyu-id-table">
+        <thead>
+          <tr><th data-i18n="profile.col_label">Label</th><th>COG</th><th data-i18n="profile.col_created">Created</th><th data-i18n="profile.col_last_used">Last Used</th><th></th></tr>
+        </thead>
+        <tbody id="miyu-id-tbody"></tbody>
+      </table>
+      <div id="miyu-id-empty" class="app-pw-empty hidden" data-i18n="profile.no_miyu_identities">No linked identity yet.</div>
+
+      <h3 data-i18n="profile.miyu_link_identity">Link an identity</h3>
+      <p class="app-pw-desc" data-i18n="profile.miyu_link_identity_desc">Paste the link proof produced by your device (visa, possession proof and delegations for POST /api/auth/miyu/liaisons, valid 60 seconds).</p>
+      <form id="miyu-id-form">
+        <div class="form-group">
+          <label for="miyu-id-proof" data-i18n="profile.miyu_link_proof">Link proof (JSON)</label>
+          <textarea id="miyu-id-proof" rows="4" required spellcheck="false" autocomplete="off" maxlength="20000"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="miyu-id-label" data-i18n="profile.col_label">Label</label>
+          <input type="text" id="miyu-id-label" maxlength="255">
+        </div>
+        <button type="submit" class="btn btn-primary" id="miyu-id-submit"><i class="fas fa-link"></i> <span data-i18n="profile.miyu_link">Link</span></button>
+      </form>
+    </div>
+
     <div class="profile-card" id="password-section">
       <h2><i class="fas fa-key"></i> <span data-i18n="profile.change_password">Change Password</span></h2>
       <form id="password-form">

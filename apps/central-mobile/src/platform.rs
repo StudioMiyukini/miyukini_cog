@@ -18,6 +18,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 /// Retourne true si l'app tourne sur Android.
+#[allow(dead_code)] // API de plateforme, pas encore appelée.
 pub fn is_android() -> bool {
     cfg!(target_os = "android")
 }
@@ -63,6 +64,7 @@ pub fn get_device_id() -> String {
 }
 
 /// Retourne le salt persisté (utile pour le E2E).
+#[allow(dead_code)] // API de plateforme, pas encore appelée.
 pub fn get_device_salt() -> String {
     let path = identity_path();
     if let Ok(data) = std::fs::read_to_string(&path) {
@@ -172,7 +174,7 @@ fn identity_path() -> PathBuf {
 }
 
 /// Chemin du fichier de l'identité E2E de l'appareil (graine ed25519, `0600`).
-fn e2e_identity_path() -> PathBuf {
+pub(crate) fn e2e_identity_path() -> PathBuf {
     storage_dir().join("e2e_identity.key")
 }
 
@@ -194,7 +196,7 @@ pub fn load_e2e_identity() -> Result<miyukini_cog_bridge::E2eIdentity, String> {
     load_e2e_identity_at(&e2e_identity_path())
 }
 
-fn load_or_create_e2e_identity_at(
+pub(crate) fn load_or_create_e2e_identity_at(
     path: &std::path::Path,
 ) -> Result<miyukini_cog_bridge::E2eIdentity, String> {
     match std::fs::symlink_metadata(path) {
@@ -204,7 +206,7 @@ fn load_or_create_e2e_identity_at(
     }
 }
 
-fn load_e2e_identity_at(
+pub(crate) fn load_e2e_identity_at(
     path: &std::path::Path,
 ) -> Result<miyukini_cog_bridge::E2eIdentity, String> {
     use std::io::Read;
@@ -333,7 +335,7 @@ mod tests {
     fn serial_read_fallback() {
         // En test desktop, doit retourner hostname-user (pas vide)
         let serial = read_device_serial();
-        assert!(!serial.is_empty());
+        assert_ne!(serial, "");
     }
 
     #[test]

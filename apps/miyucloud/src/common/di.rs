@@ -923,9 +923,24 @@ impl AppServiceFactory {
                     }
                     (None, None) => RevocationsMiyuCloud::absentes(),
                 };
+                // A-029 / I6 : défis et nonces persistants (rejeu refusé après
+                // redémarrage et entre instances). Dossier inutilisable : refus
+                // de démarrer (fail-closed).
+                let etat = std::env::var("MIYUCLOUD_MIYU_ETAT_DIR")
+                    .ok()
+                    .map(|v| v.trim().to_string())
+                    .filter(|v| !v.is_empty())
+                    .map(std::path::PathBuf::from)
+                    .unwrap_or_else(|| self.config.storage_path.join(".miyauth-etat"));
                 let svc = MiyuAuthService::new(miyu_store.clone(), ancre)
                     .map_err(|e| DomainError::internal_error("MiyuAuth", e))?
-                    .avec_revocations(revocations);
+                    .avec_revocations(revocations)
+                    .avec_etat_persistant(&etat)
+                    .map_err(|e| DomainError::internal_error("MiyuAuth", e))?;
+                tracing::info!(
+                    "Défis et nonces Miyukini persistants dans {}",
+                    etat.display()
+                );
                 app_state.miyu_auth = Some(Arc::new(svc));
             }
 

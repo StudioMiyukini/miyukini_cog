@@ -292,6 +292,7 @@ pub fn PairingScreen() -> Element {
 #[component]
 fn IdleView(step_signal: Signal<PairingStep>) -> Element {
     let mut step = step_signal;
+    let mut state = use_context::<Signal<AppState>>();
 
     rsx! {
         p {
@@ -324,6 +325,15 @@ fn IdleView(step_signal: Signal<PairingStep>) -> Element {
             },
             div { style: "font-weight: bold;", "Connexion SSH" }
             div { style: "font-size: 13px; color: #888;", "Hors LAN (bientôt)" }
+        }
+
+        // Clé révoquée ou perdue : régénérer l'identité avant de ré-appairer (I6).
+        button {
+            style: "margin-top: 8px; padding: 8px 16px; background: transparent; border: none; color: #888; font-size: 13px; cursor: pointer; text-decoration: underline;",
+            onclick: move |_| {
+                state.write().screen = AppScreen::Identite;
+            },
+            "Régénérer l'identité de l'appareil"
         }
     }
 }

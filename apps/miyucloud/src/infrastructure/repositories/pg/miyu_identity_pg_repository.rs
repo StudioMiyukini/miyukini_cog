@@ -199,4 +199,61 @@ impl MiyuIdentityStore for MiyuIdentityPgRepository {
         .map_err(|e| erreur("revoke device key", e))?;
         Ok(r.rows_affected() > 0)
     }
+
+    async fn device_key_revoked(&self, public_key: &[u8; 32]) -> Result<bool, DomainError> {
+        let row = sqlx::query(
+            "SELECT EXISTS (SELECT 1 FROM auth.device_keys              WHERE public_key = $1 AND revoked) AS retiree",
+        )
+        .bind(&public_key[..])
+        .fetch_one(self.pool.as_ref())
+        .await
+        .map_err(|e| erreur("lookup revoked device key", e))?;
+        row.try_get("retiree")
+            .map_err(|e| erreur("lookup revoked device key", e))
+    }
+
+    async fn rotate_device_key(
+        &self,
+        user_id: Uuid,
+        ancienne_id: Uuid,
+        nouvelle: &[u8; 32],
+    ) -> Result<Option<CleAppareil>, DomainError> {
+        let mut tx = self
+            .pool
+            .begin()
+            .await
+            .map_err(|e| erreur("rotate device key", e))?;
+        // Verrou de ligne : deux rotations concurrentes de la même clé ne
+        // peuvent pas toutes deux réussir.
+        let ancienne = sqlx::query(
+            "UPDATE auth.device_keys SET revoked = TRUE              WHERE id = $1 AND user_id = $2 AND NOT revoked              RETURNING client_name, scopes",
+        )
+        .bind(ancienne_id)
+        .bind(user_id)
+        .fetch_optional(&mut *tx)
+        .await
+        .map_err(|e| erreur("rotate device key", e))?;
+        let Some(ancienne) = ancienne else {
+            // Rien n'a changé : la transaction est abandonnée.
+            return Ok(None);
+        };
+        let lire = |e: sqlx::Error| erreur("rotate device key", e);
+        let nom: String = ancienne.try_get("client_name").map_err(lire)?;
+        let portees: String = ancienne.try_get("scopes").map_err(lire)?;
+        let row = sqlx::query(&format!(
+            "INSERT INTO auth.device_keys (user_id, public_key, client_name, scopes)              VALUES ($1, $2, $3, $4) RETURNING {COLONNES_CLE}"
+        ))
+        .bind(user_id)
+        .bind(&nouvelle[..])
+        .bind(&nom)
+        .bind(&portees)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(|e| erreur("rotate device key", e))?;
+        let cle = ligne_cle(&row)?;
+        tx.commit()
+            .await
+            .map_err(|e| erreur("rotate device key", e))?;
+        Ok(Some(cle))
+    }
 }

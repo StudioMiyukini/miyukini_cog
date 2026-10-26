@@ -11,6 +11,7 @@
 
 mod app;
 mod bridge;
+mod identite;
 mod login;
 mod platform;
 mod state;
@@ -19,6 +20,7 @@ mod theme;
 // Écrans
 mod screens {
     pub mod connexion;
+    pub mod identite;
     pub mod pairing;
 }
 

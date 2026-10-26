@@ -44,6 +44,9 @@ pub fn App() -> Element {
                 AppScreen::Connexion => rsx! {
                     crate::screens::connexion::ConnexionScreen {}
                 },
+                AppScreen::Identite => rsx! {
+                    crate::screens::identite::IdentiteScreen {}
+                },
                 AppScreen::Main => rsx! {
                     // Zone de contenu principal (flex: 1)
                     div {

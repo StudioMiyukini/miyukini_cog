@@ -67,6 +67,12 @@ miyukini-cog-bridge = { path = "../../crates/miyukini-cog-bridge" }
 # Protocole CentralRemote (types sans axum)
 central-remote-protocol = { path = "../../crates/central-remote-protocol" }
 
+# Régénération d'identité (I6) : demande de liaison d'appareil v2 (MLA2) et
+# requête de rotation signée par l'ancienne clé, vers MiyuCloud.
+miyauth = { path = "../../crates/miyauth", features = ["http"] }
+miyusceau = { path = "../../crates/miyusceau" }
+ed25519-dalek = "2"
+
 # WebSocket client pour CentralRemote
 tokio-tungstenite = "0.24"
 
