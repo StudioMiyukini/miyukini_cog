@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.22 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.23 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -81,6 +81,7 @@
 | A-020 | 2026-10-25 | Effacement physique dans KindMother (`secure_delete` relu, WAL vidé après suppression), effacement de l'ancienne base d'Alicia, anti-retour de l'état fédéral (`MFED` v4, compteur `MFFR`), encodage canonique du Sceau ; **validé par le propriétaire (2026-10-26)** | 1.20 |
 | A-021 | 2026-10-25 | Oubli typé (`erasure`, entrée d'audit `effacement`), nettoyage unique des bases antérieures (`VACUUM`, marqueur `a020_secure_vacuum`), point de contrôle après toute écriture SQL modifiante ; **validé par le propriétaire (2026-10-26)** | 1.21 |
 | A-022 | 2026-10-26 | **Décisions du propriétaire** : guichet des visas en zone COG (clé d'usage `visas`, indice 5, visa ≤ 15 min), délégation de clé d'usage (nature `0x45`), Portail scindé entrée / sortie, clé `fiches` (indice 6), sauvegardes 30 j et oublis réappliqués à la restauration, NFQUEUE écarté, `tc` généré par la Douane ; validation en bloc d'A-010 à A-021 | 1.22 |
+| A-023 | 2026-10-26 | Mise en forme du trafic par la Douane : `tc` HTB + `fq_codel` par voie et par flux depuis l'arrêté signé, filet nftables par sens à 5/4, application et audit | 1.23 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -733,3 +734,19 @@
 - **6. NFQUEUE** : **non implémenté** (décision d'architecture confirmée) : la Douane bloque par règles, les Vigies observent et coupent la voie
 - **7. Débit par `tc`** : la Douane **génère** les règles `tc` à partir des débits déjà déclarés au manifeste (« entrées externes », Kio/s) : une classe HTB par voie, `fq_codel`, dépassement ⇒ mise en file, jamais refus ; auditées comme les tables nftables ; format consigné par amendement de suite
 - **Impact** : EX-01, EX-02, EX-09, EX-24, EX-47, EX-50..56 ; INV-H2 ; plan lots 2, 3, 5, 7
+
+### A-023 — Mise en forme du trafic par la Douane (`tc`)
+
+<!-- @id arch.gel.a023 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a023 -->
+
+- **Date** : 2026-10-26 · **version** 1.23 · consignation de l'implémenté d'A-022 §7 (`crates/miyudouane/src/tc.rs`)
+- **Source des débits** : l'**arrêté signé** de la frontière externe (qui reprend le champ 8 du manifeste) ; la description ne porte aucun débit, seulement la capacité des interfaces : un débit non signé ne peut pas être injecté
+- **Description `miyudouane-tc 1`** : ASCII, analyse stricte ; `capacite <interface> <Kio/s>` (facultatif, défaut 1 250 000, plage 1..=4 000 000) ; interface hors de la frontière, doublon, ou somme des débits ≥ capacité ⇒ refus
+- **Rendu** (`tc -batch`, espace de noms de la frontière externe) : par interface, racine HTB `4d44:`, classe de capacité `4d44:f000`, classe par défaut `4d44:ffff` (file `4d45:`) ; une classe par voie `4d44:(1000+rang)` (débit = plafond = somme de ses flux) ; une feuille par flux `4d44:<marque>` (débit = plafond = débit déclaré, `fq_codel`, cible adaptée aux bas débits) ; aller mis en forme sur l'interface de sortie, réponses sur l'interface d'entrée ; classification **par marque seulement** (filtre `fw`) ; le texte ne contient que `qdisc add`, `class add`, `filter add`
+- **nftables** : la marque est copiée dans le paquet (`meta mark set ct mark` sur les connexions établies, `meta mark set m` sur les nouvelles) ; le filet `DEBIT` devient **par sens** : `ct direction original|reply limit rate over ⌈D×5/4⌉ kbytes/second burst B bytes`, B = ⌈D×1024/100⌉ + 1 600 octets, égal à la rafale HTB : le filet ne coupe que du trafic non mis en forme
+- **Application** (`miyudouane tc … --appliquer`) : audit ; refus avant toute modification si une racine étrangère existe sur une interface ; fichier 0600 ; retrait de la seule racine `4d44:` (avec `handle`) ; un seul `tc -batch` ; échec ⇒ racine retirée, filet nftables en place ; fenêtre de quelques millisecondes sans mise en forme couverte par le filet
+- **Audit** : tout écart au rendu attendu (classe modifiée, plafond relevé, filtre détourné, classe ajoutée, `del`/`replace`, interface ou racine étrangère, action) ⇒ refus
+- **Reste** : intégration aux installateurs (règles nftables d'abord, puis `tc` après chaque arrêté externe, coupure ou rétablissement de voie, et au démarrage de l'espace de noms) ; l'IPS compte encore aller et retour confondus (sans effet tant qu'il ne voit que les rejets)
+- **Impact** : EX-14, EX-24 ; plan lot 3
