@@ -19,8 +19,11 @@ pub struct BridgeConfig {
     #[serde(default = "default_bind_addr")]
     pub bind_addr: String,
 
-    /// URL upstream de LM Studio / Ollama (backup).
-    #[serde(default = "default_upstream_url")]
+    /// URL d'un moteur d'IA **hors COG** compatible OpenAI (essais seulement).
+    /// Vide par défaut ; même renseignée, elle n'est utilisée que si StrongFather
+    /// autorise l'intention `inference.externe` — refusée par la politique de
+    /// production (`maia-inference-externe-refusee`).
+    #[serde(default)]
     pub upstream_url: String,
 
     /// Modèle par défaut (optionnel, auto-detect si absent).
@@ -145,9 +148,6 @@ pub struct SecurityConfig {
 fn default_bind_addr() -> String {
     "127.0.0.1:11435".into()
 }
-fn default_upstream_url() -> String {
-    "http://localhost:1234".into()
-}
 fn default_true() -> bool {
     true
 }
@@ -178,7 +178,7 @@ impl Default for BridgeConfig {
     fn default() -> Self {
         Self {
             bind_addr: default_bind_addr(),
-            upstream_url: default_upstream_url(),
+            upstream_url: String::new(),
             default_model: None,
             cle_service: None,
             auth_token: None,
@@ -418,6 +418,13 @@ mod tests {
         // Jamais réécrit dans un fichier : seule la mémoire change ; entrée mal formée ⇒ refus.
         c.fusionner_cles_appelants(Some("pas-une-cle"));
         assert!(c.validate_startup().is_err());
+    }
+
+    #[test]
+    fn aucun_moteur_hors_cog_par_defaut() {
+        assert_eq!(BridgeConfig::default().upstream_url, "");
+        let c: BridgeConfig = toml::from_str("bind_addr = \"127.0.0.1:1\"").unwrap();
+        assert_eq!(c.upstream_url, "");
     }
 
     #[test]

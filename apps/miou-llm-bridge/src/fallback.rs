@@ -23,7 +23,7 @@ use serde::{Deserialize, Serialize};
 pub enum LlmAvailability {
     /// Inférence GGUF native opérationnelle (moteur principal).
     NativeOnline,
-    /// Upstream (LM Studio / Ollama) opérationnel (backup).
+    /// Moteur hors COG opérationnel (essais seulement, autorisé par politique).
     UpstreamOnline,
     /// Aucun LLM disponible — proto-IA de secours active.
     Fallback,
@@ -35,7 +35,7 @@ impl LlmAvailability {
     pub fn label(self) -> &'static str {
         match self {
             Self::NativeOnline => "Natif (GGUF local — full power)",
-            Self::UpstreamOnline => "Upstream (LM Studio — backup)",
+            Self::UpstreamOnline => "Moteur hors COG (essai, autorisé par politique)",
             Self::Fallback => "Secours (réponses bornées)",
             Self::Offline => "Hors-ligne (critique)",
         }
@@ -145,12 +145,11 @@ pub fn fallback_respond(user_message: &str) -> FallbackResponse {
         QuestionCategory::StatusQuery => FallbackResponse {
             content: "⚠️ Mode secours actif.\n\n\
                      • Inférence native : ❌ Aucun modèle GGUF chargé\n\
-                     • Upstream (backup) : ❌ Injoignable\n\
+                     • Moteur hors COG : ❌ désactivé (politique)\n\
                      • Proto-IA : ✅ Active (capacités très limitées)\n\n\
                      Pour retrouver les capacités complètes :\n\
-                     1. Placez un fichier .gguf dans le dossier models/\n\
-                     2. Ou lancez LM Studio / Ollama en backup\n\
-                     3. Alicia vous guidera dès que possible"
+                     1. Installez un modèle signé par le canal officiel\n\
+                     2. Vérifiez que le service maia-llm est démarré"
                 .into(),
             answered: true,
             refusal_reason: None,
@@ -197,8 +196,8 @@ pub fn fallback_respond(user_message: &str) -> FallbackResponse {
                  Je ne peux pas répondre à cette question car je risquerais \
                  de donner une réponse incorrecte ou trompeuse. \
                  Dès qu'un modèle sera chargé, je pourrai vous aider. \
-                 En attendant, vérifiez que LM Studio est lancé ou qu'un modèle \
-                 local est disponible."
+                 En attendant, vérifiez que le service maia-llm est démarré \
+                 avec un modèle signé."
                     .into(),
             ),
             confidence: 0.0,
@@ -207,59 +206,10 @@ pub fn fallback_respond(user_message: &str) -> FallbackResponse {
     }
 }
 
-/// Vérifie la disponibilité des LLM.
-///
-/// Chaîne : NativeOnline (GGUF chargé) → UpstreamOnline (LM Studio / Ollama) → Fallback.
-pub async fn probe_availability(
-    client: &reqwest::Client,
-    upstream_url: &str,
-    native_loaded: bool,
-) -> LlmAvailability {
-    // 1. Vérifier si un modèle GGUF est chargé nativement (moteur principal)
-    if native_loaded {
-        return LlmAvailability::NativeOnline;
-    }
-
-    // 2. Tester le upstream configuré
-    let upstream_probe = format!("{upstream_url}/v1/models");
-    let upstream_ok = client
-        .get(&upstream_probe)
-        .timeout(std::time::Duration::from_secs(5))
-        .send()
-        .await
-        .is_ok_and(|r| r.status().is_success());
-
-    if upstream_ok {
-        return LlmAvailability::UpstreamOnline;
-    }
-
-    // 3. Tester les backends locaux connus (LM Studio, Ollama)
-    let local_urls = [
-        "http://localhost:1234/v1/models",
-        "http://localhost:11434/api/tags", // Ollama
-    ];
-
-    for url in &local_urls {
-        // Ne pas re-tester si c'est la même URL que l'upstream
-        if upstream_url.contains("localhost:1234") && url.contains("localhost:1234") {
-            continue;
-        }
-        if upstream_url.contains("localhost:11434") && url.contains("localhost:11434") {
-            continue;
-        }
-
-        let ok = client
-            .get(*url)
-            .timeout(std::time::Duration::from_secs(3))
-            .send()
-            .await
-            .is_ok_and(|r| r.status().is_success());
-
-        if ok {
-            return LlmAvailability::UpstreamOnline;
-        }
-    }
-
-    // 4. Aucun LLM disponible → mode secours
-    LlmAvailability::Fallback
+/// Vérifie la disponibilité des LLM : maia-llm (cache rafraîchi), puis le
+/// moteur hors COG **seulement s'il est autorisé par la politique**, sinon
+/// secours. Aucune sonde vers LM Studio / Ollama « connus » : MAIA ne cherche
+/// jamais de lui-même un moteur d'IA hors du COG.
+pub async fn probe_availability(router: &crate::inference::InferenceRouter) -> LlmAvailability {
+    router.disponibilite().await
 }

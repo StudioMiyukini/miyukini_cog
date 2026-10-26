@@ -9,11 +9,11 @@
 //! Orchestrateur d'agents IA — délègue l'inférence GGUF à maia-llm (HTTP).
 //! Expose une API OpenAI-compatible enrichie avec :
 //! - Client HTTP vers maia-llm (GGUF local) — moteur principal
-//! - Proxy HTTP vers LM Studio / Ollama — backup
 //! - 17 agents spécialisés avec tool calling
 //! - Système de skills (fichiers, shell, web, services COG)
 //! - Bases de contexte pour enrichir les prompts
-//! - Dégradation graduée (maia-llm → upstream → proto-IA)
+//! - Dégradation graduée (maia-llm → proto-IA de secours) ; aucun moteur
+//!   d'IA hors COG sans autorisation StrongFather (refusée en production)
 //!
 //! Usage :
 //!   maia                                # config depuis bridge.toml ou défauts
@@ -37,6 +37,8 @@ mod catalog;
 mod config;
 mod confirmations;
 mod context;
+#[cfg(test)]
+mod essai_reel;
 mod fallback;
 mod garde_etranger;
 mod gouvernance;
@@ -45,6 +47,7 @@ mod health;
 mod inference;
 mod llm_api;
 mod memoire;
+mod mention_ia;
 mod mode;
 mod model_manager;
 mod outil_memoire;
@@ -192,8 +195,16 @@ async fn main() {
         MaiaLlmClient::new(maia_llm_url.clone(), Some(cle.clone()), http_client.clone());
     let model_manager = ModelManager::new(&cfg.native.models_dir);
 
-    // Backend upstream (LM Studio / Ollama — backup)
-    let upstream_backend = UpstreamBackend::new(http_client.clone(), cfg.upstream_url.clone());
+    // Porte StrongFather (K-11) : chargée une fois ; absente / invalide ⇒ refus de tout outil.
+    let gouvernance = std::sync::Arc::new(gouvernance::GouvernanceMaia::depuis_fichier(
+        gouvernance::chemin_politiques_maia(cfg.politiques_dir.as_deref()),
+    ));
+
+    // Moteur d'IA hors COG : inactif sauf autorisation StrongFather de
+    // `inference.externe` — refusée par la politique de production.
+    let upstream_backend = UpstreamBackend::new(http_client.clone(), cfg.upstream_url.clone())
+        .autoriser(gouvernance.autoriser_inference_externe(&cfg.upstream_url, "production"));
+    let upstream_actif = upstream_backend.est_autorise();
     let inference_router =
         InferenceRouter::new(maia_client, upstream_backend, cfg.native.prefer_native);
 
@@ -241,7 +252,11 @@ async fn main() {
     tracing::info!("║  Listen   : {:<37}║", cfg.bind_addr);
     tracing::info!(
         "║  Upstream : {:<37}║",
-        format!("{} (backup)", cfg.upstream_url)
+        if upstream_actif {
+            format!("{} (hors COG, autorisé)", cfg.upstream_url)
+        } else {
+            "aucun (moteur hors COG refusé)".to_string()
+        }
     );
     if let Some(ref name) = native_model {
         tracing::info!("║  Natif    : {:<37}║", name);
@@ -293,7 +308,7 @@ async fn main() {
         if native_model.is_some() {
             "Natif (GGUF)"
         } else {
-            "Upstream (backup)"
+            "maia-llm (aucun modèle chargé)"
         }
     );
     tracing::info!("╠══════════════════════════════════════════════════╣");
@@ -356,11 +371,6 @@ async fn main() {
             team_registered = client.register().await;
         }
     }
-
-    // Porte StrongFather (K-11) : chargée une fois ; absente / invalide ⇒ refus de tout outil.
-    let gouvernance = std::sync::Arc::new(gouvernance::GouvernanceMaia::depuis_fichier(
-        gouvernance::chemin_politiques_maia(cfg.politiques_dir.as_deref()),
-    ));
 
     let etat_memoire = std::sync::Arc::new(routes_memoire::EtatMemoireHttp::depuis_env(
         acces_memoire,

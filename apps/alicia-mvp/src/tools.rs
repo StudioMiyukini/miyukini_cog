@@ -863,12 +863,9 @@ async fn tool_load_skill(ctx: &ToolContext, args: &serde_json::Value) -> String 
 
 async fn tool_unload_skill(ctx: &ToolContext) -> String {
     let mut active = ctx.active_skill.write().await;
-    if active.is_none() {
+    let Some(name) = active.take().map(|s| s.name) else {
         return "Aucun skill actif".to_string();
-    }
-
-    let name = active.as_ref().unwrap().name.clone();
-    *active = None;
+    };
     drop(active);
 
     // Restaurer le system prompt par defaut

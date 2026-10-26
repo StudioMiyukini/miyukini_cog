@@ -238,3 +238,19 @@ condition = "data.operation == 'memoire.noter' && data.contenu_etranger == 'true
 rule = "data.ecriture_directe_possible == 'true'"
 [policy.target]
 origins = ["maia"]
+
+# ── Moteur d'IA hors COG (COG-POSTE-100 A2) ──
+# Intention « inference.externe » (apps/miou-llm-bridge, gouvernance::intention_inference_externe),
+# décidée au démarrage avant toute activation de `upstream_url` : MAIA n'utilise QUE maia-llm
+# (llama.cpp local, modèle signé du canal officiel). Aucun repli vers un service d'IA hors du
+# COG (LM Studio, Ollama, koboldcpp, API distante) : refus explicite, prioritaire sur toute
+# autorisation. Les essais d'intégration utilisent une politique d'essai distincte, jamais ce fichier.
+[[policy]]
+id = "maia-inference-externe-refusee"
+type = "permission"
+effect = "deny"
+priority = "critical"
+condition = "data.operation == 'inference.externe'"
+rule = "data.operation == 'inference.externe'"
+[policy.target]
+origins = ["maia"]

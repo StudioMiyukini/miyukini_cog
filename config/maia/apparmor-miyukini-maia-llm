@@ -1,0 +1,68 @@
+# AppArmor — maia-llm (moteur llama.cpp de MAIA et d'Alicia, 127.0.0.1:11436).
+# À copier par l'installateur vers /etc/apparmor.d/miyukini-maia-llm (COG-POSTE-100 A1–A3).
+# Données : /var/lib/miyukini/maia-llm (config en lecture seule). Modèles : /var/lib/miyukini/modeles,
+# écrits par l'installateur du canal officiel (Central), JAMAIS par maia-llm.
+# Aucun processus fils : la détection GPU passe par llama.cpp (périphériques ggml), l'outil SMI
+# de NVIDIA est explicitement interdit d'exécution.
+#include <tunables/global>
+
+profile miyukini-maia-llm /opt/miyukini/bin/maia-llm flags=(enforce) {
+  #include <abstractions/base>
+
+  network inet stream,
+  network inet6 stream,
+
+  /opt/miyukini/bin/maia-llm mr,
+
+  # Mémoire et CPU (choix du profil, fils de calcul, détection des jeux d'instructions par ggml).
+  @{PROC}/meminfo r,
+  @{PROC}/cpuinfo r,
+  @{PROC}/@{pid}/status r,
+  @{PROC}/@{pid}/cgroup r,
+  /sys/fs/cgroup/**/cpu.max r,
+  /sys/devices/system/cpu/ r,
+  /sys/devices/system/cpu/** r,
+  /sys/devices/system/node/ r,
+  /sys/devices/system/node/** r,
+
+  # Configuration (copie en lecture seule, BindReadOnlyPaths).
+  /var/lib/miyukini/maia-llm/ r,
+  /var/lib/miyukini/maia-llm/maia-llm.toml r,
+  deny /var/lib/miyukini/maia-llm/** w,
+
+  # Modèles du canal officiel : lecture seule (le fichier est mmappé par llama.cpp).
+  /var/lib/miyukini/modeles/ r,
+  /var/lib/miyukini/modeles/*.gguf r,
+  /var/lib/miyukini/modeles/*.gguf.sceau r,
+  /var/lib/miyukini/modeles/.canal-modeles.json r,
+  deny /var/lib/miyukini/modeles/** w,
+
+  # ── GPU NVIDIA (binaire compilé avec la fonctionnalité `cuda` seulement) ──
+  # Le binaire CPU (--no-default-features, VM) n'a besoin d'aucune des règles ci-dessous ;
+  # l'installateur peut les omettre sur une machine sans GPU.
+  /dev/nvidiactl rw,
+  /dev/nvidia[0-9]* rw,
+  /dev/nvidia-uvm rw,
+  /dev/nvidia-uvm-tools rw,
+  @{PROC}/driver/nvidia/ r,
+  @{PROC}/driver/nvidia/** r,
+  @{PROC}/devices r,
+  /sys/bus/pci/devices/ r,
+  /sys/devices/pci[0-9]*/** r,
+  /usr/lib/x86_64-linux-gnu/libcuda.so* mr,
+  /usr/lib/x86_64-linux-gnu/libnvidia-*.so* mr,
+  /usr/lib/x86_64-linux-gnu/libcudart.so* mr,
+  /usr/lib/x86_64-linux-gnu/libcublas*.so* mr,
+  # Cache de compilation JIT de CUDA : refusé (aucune écriture hors de /var/lib/miyukini/maia-llm).
+  deny @{HOME}/.nv/** rw,
+  # L'outil SMI de NVIDIA n'est jamais exécuté (aucune exécution n'est permise ; refus explicite).
+  deny /usr/bin/nvidia-smi x,
+  deny /usr/lib/nvidia*/bin/nvidia-smi x,
+
+  deny /var/lib/miyukini/kindmother/** rw,
+  deny /var/lib/miyukini/maia/** rw,
+  deny /var/lib/miyukini/miyucloud/** rw,
+  deny /etc/miyukini/** w,
+  deny /etc/** w,
+  deny /opt/miyukini/** w,
+}

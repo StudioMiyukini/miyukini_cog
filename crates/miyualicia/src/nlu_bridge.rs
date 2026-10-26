@@ -154,7 +154,7 @@ pub struct NluBridge {
 }
 
 /// POST JSON signe par `cle` (si fournie) pour `usage`.
-fn post_signe<T: Serialize>(
+pub(crate) fn post_signe<T: Serialize>(
     client: &reqwest::Client,
     url: &str,
     usage: &str,

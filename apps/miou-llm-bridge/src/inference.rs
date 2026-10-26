@@ -8,8 +8,12 @@
 //!
 //! Architecture :
 //! - `MaiaLlmClient` : client HTTP vers le service maia-llm (GGUF, local)
-//! - `UpstreamBackend` : proxy HTTP vers LM Studio / Ollama (backup)
-//! - `InferenceRouter` : choisit automatiquement le meilleur backend
+//! - `UpstreamBackend` : moteur compatible OpenAI **hors COG** (LM Studio,
+//!   Ollama, koboldcpp…) — **désactivé par défaut** : il n'est actif que si
+//!   `upstream_url` est renseigné **et** que StrongFather autorise l'intention
+//!   `inference.externe` ; la politique de production (`maia.toml`) la refuse
+//!   toujours. Il ne sert donc qu'aux essais (politique d'essai dédiée).
+//! - `InferenceRouter` : maia-llm d'abord ; l'upstream seulement s'il est autorisé
 
 // C-10 : un verrou empoisonné (panique d'un autre fil pendant l'écriture)
 // est levé sans panique ; les sections critiques ne laissent pas d'état
@@ -98,6 +102,8 @@ pub enum InferenceError {
     LlamaError(String),
     UpstreamError(String),
     NoBackendAvailable,
+    /// Moteur hors COG non autorisé par la politique (défaut).
+    UpstreamRefuse,
 }
 
 impl std::fmt::Display for InferenceError {
@@ -107,6 +113,10 @@ impl std::fmt::Display for InferenceError {
             Self::LlamaError(e) => write!(f, "Erreur maia-llm : {e}"),
             Self::UpstreamError(e) => write!(f, "Erreur upstream : {e}"),
             Self::NoBackendAvailable => write!(f, "Aucun backend d'inférence disponible"),
+            Self::UpstreamRefuse => write!(
+                f,
+                "Moteur d'IA hors COG refusé par la politique (inference.externe)"
+            ),
         }
     }
 }
@@ -364,22 +374,43 @@ impl MaiaLlmClient {
 
 // ── UpstreamBackend ────────────────────────────────────────────────
 
-/// Backend HTTP upstream (LM Studio, Ollama, etc.) — backup si maia-llm indisponible.
+/// Backend HTTP hors COG (LM Studio, Ollama, koboldcpp…). **Inactif** tant
+/// que [`UpstreamBackend::autoriser`] n'a pas été appelé après une décision
+/// StrongFather favorable (jamais en production).
 #[derive(Clone)]
 pub struct UpstreamBackend {
     client: reqwest::Client,
     upstream_url: String,
+    autorise: bool,
 }
 
 impl UpstreamBackend {
+    /// Backend **inactif** (aucun appel réseau tant qu'il n'est pas autorisé).
     pub fn new(client: reqwest::Client, upstream_url: String) -> Self {
         Self {
             client,
             upstream_url,
+            autorise: false,
         }
     }
 
+    /// Active le backend : à n'appeler qu'après autorisation de l'intention
+    /// `inference.externe` par StrongFather ; URL vide ⇒ reste inactif.
+    #[must_use]
+    pub fn autoriser(mut self, decision_strongfather: bool) -> Self {
+        self.autorise = decision_strongfather && !self.upstream_url.trim().is_empty();
+        self
+    }
+
+    /// Vrai si le backend est autorisé (politique) et configuré.
+    pub fn est_autorise(&self) -> bool {
+        self.autorise
+    }
+
     pub async fn is_available(&self) -> bool {
+        if !self.autorise {
+            return false;
+        }
         let url = format!("{}/v1/models", self.upstream_url);
         self.client
             .get(&url)
@@ -393,6 +424,9 @@ impl UpstreamBackend {
         &self,
         body: &serde_json::Value,
     ) -> Result<serde_json::Value, InferenceError> {
+        if !self.autorise {
+            return Err(InferenceError::UpstreamRefuse);
+        }
         let url = format!("{}/v1/chat/completions", self.upstream_url);
 
         let resp = self
@@ -443,11 +477,30 @@ impl InferenceRouter {
     }
 
     /// Exécute une chat completion en routant vers le meilleur backend.
+    /// Vrai si maia-llm a un modèle chargé ; le cache est rafraîchi depuis
+    /// `/maia/llm/health` quand il est vide (maia-llm démarré après MAIA, ou
+    /// modèle chargé par l'auto-chargement de maia-llm).
+    pub async fn natif_pret(&self) -> bool {
+        self.native.is_loaded() || (self.native.is_available().await && self.native.is_loaded())
+    }
+
+    /// Disponibilité : natif, sinon upstream **autorisé**, sinon secours.
+    pub async fn disponibilite(&self) -> crate::fallback::LlmAvailability {
+        use crate::fallback::LlmAvailability;
+        if self.natif_pret().await {
+            LlmAvailability::NativeOnline
+        } else if self.upstream.is_available().await {
+            LlmAvailability::UpstreamOnline
+        } else {
+            LlmAvailability::Fallback
+        }
+    }
+
     pub async fn chat_completion(
         &self,
         body: serde_json::Value,
     ) -> Result<ChatCompletionResponse, InferenceError> {
-        if self.prefer_native && self.native.is_loaded() {
+        if self.prefer_native && self.natif_pret().await {
             match self.try_native(&body).await {
                 Ok(resp) => return Ok(resp),
                 Err(e) => tracing::warn!("maia-llm échoué, fallback upstream : {e}"),
@@ -458,7 +511,7 @@ impl InferenceRouter {
             return self.try_upstream(&body).await;
         }
 
-        if !self.prefer_native && self.native.is_loaded() {
+        if !self.prefer_native && self.natif_pret().await {
             return self.try_native(&body).await;
         }
 
@@ -612,6 +665,38 @@ mod tests {
             let _ = axum::serve(ecoute, app).await;
         });
         format!("http://{adresse}")
+    }
+
+    #[tokio::test]
+    async fn upstream_inactif_par_defaut_et_sans_url() {
+        let c = reqwest::Client::new();
+        let amont = UpstreamBackend::new(c.clone(), "http://127.0.0.1:9".into());
+        assert!(!amont.est_autorise());
+        assert!(!amont.is_available().await);
+        assert!(matches!(
+            amont.chat_completion(&serde_json::json!({})).await,
+            Err(InferenceError::UpstreamRefuse)
+        ));
+        assert!(!UpstreamBackend::new(c.clone(), "http://127.0.0.1:9".into())
+            .autoriser(false)
+            .est_autorise());
+        assert!(!UpstreamBackend::new(c.clone(), "  ".into())
+            .autoriser(true)
+            .est_autorise());
+        // Aucun moteur : secours, jamais un appel hors COG.
+        let routeur = InferenceRouter::new(
+            MaiaLlmClient::new("http://127.0.0.1:9".into(), None, c.clone()),
+            amont,
+            true,
+        );
+        assert_eq!(
+            routeur.disponibilite().await,
+            crate::fallback::LlmAvailability::Fallback
+        );
+        assert!(matches!(
+            routeur.chat_completion(serde_json::json!({})).await,
+            Err(InferenceError::NoBackendAvailable)
+        ));
     }
 
     #[tokio::test]

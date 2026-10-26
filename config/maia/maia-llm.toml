@@ -1,0 +1,30 @@
+# @id     maia_llm_config_cog
+# @do     configurer_moteur_ia_local
+# @role   config
+# @layer  8
+# @human  Configuration de production de maia-llm (llama.cpp) pour un COG poste : modèle du canal
+# @human  officiel, écoute loopback, appelants épinglés (MAIA et Alicia), aucun GPU imposé.
+#
+# Emplacement : /var/lib/miyukini/maia-llm/maia-llm.toml (lecture seule, MAIA_DATA_DIR).
+# Les « À_REMPLACER » sont posés par l'installateur (clés publiques) — absents ⇒ refus (fail-closed).
+
+# 11435 est le port de MAIA : maia-llm écoute sur 11436 (MAIA_LLM_URL=http://127.0.0.1:11436).
+bind_addr = "127.0.0.1:11436"
+# Dossier du canal officiel (installateur ModeleIa : `.canal-modeles.json`, X.gguf + X.gguf.sceau).
+models_dir = "/var/lib/miyukini/modeles"
+# -1 = auto : GPU seulement si ce binaire a CUDA ET que la VRAM libre suffit ; sinon CPU.
+# Mettre 0 pour imposer le CPU (VM, GPU partagé avec un autre service).
+gpu_layers = -1
+context_size = 4096
+# 0 = moitié des fils logiques (≈ cœurs physiques), au plus 8.
+threads = 0
+journal_llama = false
+auto_load = true
+log_requests = true
+# Clés publiques Ed25519 (base64 URL) de MAIA (bridge, clé de service) et d'Alicia (cle_voix).
+appelants_inference = ["À_REMPLACER_CLE_MAIA", "À_REMPLACER_CLE_ALICIA"]
+# Seule MAIA gère les modèles (chargement / déchargement).
+appelants_modeles = ["À_REMPLACER_CLE_MAIA"]
+cors_allowed_origins = []
+# Clé publique (hex) du signataire des manifestes de modèles du canal officiel.
+model_trust_anchors = ["À_REMPLACER_ANCRE_MODELES"]

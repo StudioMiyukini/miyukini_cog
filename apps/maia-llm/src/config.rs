@@ -30,6 +30,14 @@ pub struct MaiaLlmConfig {
     #[serde(default = "default_context_size")]
     pub context_size: u32,
 
+    /// Fils CPU de l'inférence (0 = automatique, au plus 8).
+    #[serde(default)]
+    pub threads: u32,
+
+    /// Journaux internes de llama.cpp sur la sortie d'erreur (défaut : non).
+    #[serde(default)]
+    pub journal_llama: bool,
+
     /// Charger automatiquement le meilleur modèle au démarrage.
     #[serde(default = "default_true")]
     pub auto_load: bool,
@@ -74,6 +82,8 @@ impl Default for MaiaLlmConfig {
             models_dir: default_models_dir(),
             gpu_layers: default_gpu_layers(),
             context_size: default_context_size(),
+            threads: 0,
+            journal_llama: false,
             auto_load: true,
             appelants_inference: Vec::new(),
             appelants_modeles: Vec::new(),

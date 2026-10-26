@@ -235,10 +235,10 @@ fn detect_gpu_nvidia_smi() -> Option<GpuInfo> {
     })
 }
 
-/// Détecte le GPU sur Linux via `nvidia-smi` (NVIDIA) ou `/sys/class/drm` (AMD/Intel).
+/// Détecte le GPU sur Linux : pilote NVIDIA (`/proc/driver/nvidia`) ou `/sys/class/drm` (AMD/Intel), sans processus externe.
 #[cfg(target_os = "linux")]
 fn detect_gpu() -> Option<GpuInfo> {
-    // 1. Essayer nvidia-smi (NVIDIA)
+    // 1. NVIDIA : fichier du pilote (aucun outil externe)
     if let Some(gpu) = detect_gpu_nvidia() {
         return Some(gpu);
     }
@@ -251,33 +251,34 @@ fn detect_gpu() -> Option<GpuInfo> {
 
 #[cfg(target_os = "linux")]
 fn detect_gpu_nvidia() -> Option<GpuInfo> {
-    let output = std::process::Command::new("nvidia-smi")
-        .args([
-            "--query-gpu=name,memory.total",
-            "--format=csv,noheader,nounits",
-        ])
-        .output()
-        .ok()?;
-
-    if !output.status.success() {
-        return None;
+    // Pilote NVIDIA : /proc/driver/nvidia/gpus/<bus>/information (« Model: … »).
+    // Aucun processus externe : l'outil SMI de NVIDIA est interdit d'exécution
+    // par le profil AppArmor. La VRAM n'y figure pas (0 = inconnue) : la
+    // mémoire réellement utilisable est relevée par maia-llm (llama.cpp).
+    let gpus = std::fs::read_dir("/proc/driver/nvidia/gpus").ok()?;
+    for entree in gpus.flatten() {
+        let Ok(info) = std::fs::read_to_string(entree.path().join("information")) else {
+            continue;
+        };
+        if let Some(name) = modele_nvidia(&info) {
+            return Some(GpuInfo {
+                name,
+                vram_mb: 0,
+                vendor: "nvidia".into(),
+            });
+        }
     }
+    None
+}
 
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let line = stdout.lines().next()?.trim();
-    let mut parts = line.splitn(2, ',');
-    let name = parts.next()?.trim().to_string();
-    let vram_mb: u64 = parts.next()?.trim().parse().unwrap_or(0);
-
-    if name.is_empty() {
-        return None;
-    }
-
-    Some(GpuInfo {
-        name,
-        vram_mb,
-        vendor: "nvidia".into(),
-    })
+/// Nom du GPU dans un fichier `information` du pilote NVIDIA.
+#[cfg(target_os = "linux")]
+fn modele_nvidia(information: &str) -> Option<String> {
+    information
+        .lines()
+        .find_map(|l| l.strip_prefix("Model:"))
+        .map(|m| m.trim().to_string())
+        .filter(|m| !m.is_empty())
 }
 
 #[cfg(target_os = "linux")]
@@ -336,7 +337,8 @@ fn compute_tier(ram_total_mb: u64, gpu: Option<&GpuInfo>) -> HardwareTier {
     let vram_gb = vram_mb / 1024;
 
     // GPU discret détecté : le tier est piloté principalement par la VRAM
-    if let Some(g) = gpu {
+    // VRAM inconnue (0, ex. NVIDIA lu sans outil externe) : tier selon la RAM.
+    if let Some(g) = gpu.filter(|g| g.vram_mb > 0) {
         if g.vendor == "nvidia" || g.vendor == "amd" {
             return match vram_gb {
                 v if v >= 16 => HardwareTier::Heavy,
@@ -369,5 +371,26 @@ mod tests_detection {
         assert!(hw.cpu_cores >= 1);
         assert!(hw.ram_total_mb > 0);
         assert!(hw.ram_available_mb <= hw.ram_total_mb);
+    }
+}
+
+#[cfg(all(test, target_os = "linux"))]
+mod tests_nvidia {
+    use super::*;
+
+    #[test]
+    fn modele_lu_dans_le_pilote_sans_outil_externe() {
+        let info = "Model: \t\t NVIDIA GeForce RTX 3060 Ti\nIRQ:   137\n";
+        assert_eq!(modele_nvidia(info).as_deref(), Some("NVIDIA GeForce RTX 3060 Ti"));
+        assert_eq!(modele_nvidia("IRQ: 1\n"), None);
+        let src = include_str!("hardware.rs");
+        let linux = src.split("fn detect_gpu() -> Option<GpuInfo> {").nth(2).unwrap_or("");
+        assert!(!linux.contains(&["nvidia", "-smi"].concat()));
+    }
+
+    #[test]
+    fn vram_inconnue_tier_selon_la_ram() {
+        let g = GpuInfo { name: "x".into(), vram_mb: 0, vendor: "nvidia".into() };
+        assert_eq!(compute_tier(32 * 1024, Some(&g)), compute_tier(32 * 1024, None));
     }
 }

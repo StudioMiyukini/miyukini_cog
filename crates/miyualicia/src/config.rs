@@ -125,6 +125,13 @@ pub struct AliciaConfig {
     #[serde(default)]
     pub cle_voix: Option<String>,
 
+    /// Moteur d'IA **local** (maia-llm, llama.cpp) partagé avec MAIA pour
+    /// comprendre les commandes. Absent : analyse par expressions régulières
+    /// seulement. Jamais un service d'IA extérieur : l'URL doit être en boucle
+    /// locale (sinon le moteur est ignoré, voir `AliciaService::new`).
+    #[serde(default)]
+    pub moteur_ia: Option<crate::nlu_local::MoteurLocalConfig>,
+
     /// Configuration du wake word.
     #[serde(default)]
     pub wake_word: WakeWordConfig,
@@ -202,6 +209,7 @@ impl Default for AliciaConfig {
             tts_service_url: Self::default_tts_service_url(),
             tts_feature_enabled: false,
             cle_voix: None,
+            moteur_ia: None,
             wake_word: WakeWordConfig::default(),
             rooms: Self::default_rooms(),
             db_path: Self::default_db_path(),

@@ -1,0 +1,38 @@
+# @id     maia_catalogue_modeles
+# @do     consigner_modeles_livres
+# @role   config
+# @layer  8
+# @human  Modèles IA livrés à MAIA et Alicia par le canal officiel (COG-POSTE-100 A1) : source,
+# @human  licence vérifiée (C-72), empreinte, profil matériel. Aucun poids dans le dépôt.
+#
+# Informatif : la décision de chargement reste celle de maia-llm (manifeste signé `X.gguf.sceau`
+# par une ancre `model_trust_anchors`, empreinte SHA-256 recalculée, licence Apache-2.0/MIT).
+
+version = 1
+
+[[modele]]
+composant = "qwen2.5-1.5b-instruct-q4_k_m"           # composant du canal (fichier imposé : <composant>.gguf)
+version_canal = 1
+nom = "Qwen2.5-1.5B-Instruct"
+editeur = "Qwen (Alibaba Cloud)"
+quantification = "Q4_K_M (GGUF officiel de l'éditeur)"
+taille_octets = 1117320736
+sha256 = "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e"
+licence = "Apache-2.0"                                # vérifiée : fiche HF (license: apache-2.0) + fichier LICENSE du dépôt
+fiche = "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct"
+source = "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/91cad51170dc346986eccefdc2dd33a9da36ead9/qwen2.5-1.5b-instruct-q4_k_m.gguf"
+commit_source = "91cad51170dc346986eccefdc2dd33a9da36ead9"
+date_coupure = "non publiée (estimée 2024)"           # NP : à mesurer par le jeu de questions datées (doc §1)
+contexte_max = 32768
+langues = "29+ dont le français"
+usages = ["maia", "alicia"]                           # un seul chargement, partagé par MAIA et Alicia
+# Profils matériels (MODELES-IA-PETITES-CONFIGS §2) : mini modèle valable partout.
+profils = ["P1", "P2", "P3"]
+# Réglages conseillés du moteur selon le profil (maia-llm.toml) :
+#   P1 (CPU seul, VM)   : gpu_layers = 0  ; context_size = 4096 (2048 sous 8 Gio de RAM) ; threads = 0 (½ fils logiques)
+#   P2/P3 (GPU dédié)   : gpu_layers = -1 (auto : GPU seulement si ≥ 2,1 Gio de VRAM libre) ; context_size = 8192
+# Mesures (hôte i5-10400F, CPU seul, 2026-10-26) : 27–34 jetons/s, premier jeton 0,45–0,8 s
+# (prompt court), RSS ≈ 1,1 Gio ; intentions Alicia : 17/18 (94 %).
+
+# Écartés (C-72) : Qwen2.5-3B et 72B (licence Qwen), Gemma ≤ 3 (Gemma Terms of Use), Llama 3.x.
+# Gemma 4 E2B-it (Apache-2.0) : 3,11 Go en Q4_K_M, au-delà de la cible ≤ 2 Go.

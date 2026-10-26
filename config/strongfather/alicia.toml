@@ -54,3 +54,16 @@ condition = "has(data.borderguard_franchissement)"
 rule = "data.borderguard_franchissement != 'autorise'"
 [policy.target]
 origins = ["alicia"]
+
+# Commandes domotiques PROPOSÉES par l'IA locale d'Alicia (COG-POSTE-100 A3) : l'IA ne fait que
+# proposer une intention typée et validée (crate miyualicia, module nlu_local) ; l'exécution passe
+# par cette porte (AliciaService::executer_proposition). Seuls le pilotage d'appareils et les
+# routines nommées sont autorisés ; toute autre intention « domotique » est refusée par défaut.
+[[policy]]
+id = "alicia-domotique-proposition-ia"
+type = "permission"
+effect = "authorize"
+rule = "data.service == 'domotique' && data.intent in ['control_device', 'activate_routine'] && data.ecriture == 'true'"
+[policy.target]
+actions = ["modification"]
+origins = ["alicia"]

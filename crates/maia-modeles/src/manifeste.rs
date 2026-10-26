@@ -326,6 +326,8 @@ mod tests {
     #[test]
     fn genre_et_type_imposes() {
         // Un sceau d'un autre type (ex. passeport) est refusé par le type.
+        // (Depuis A-024, le scellement exige une charge relue à l'identique :
+        // les décodeurs d'essai lisent donc leur champ.)
         struct Autre;
         impl Titre for Autre {
             const TYPE: TypeSceau = TypeSceau::Passeport;
@@ -333,7 +335,8 @@ mod tests {
                 e.texte(1, GENRE_MODELE)?;
                 Ok(())
             }
-            fn decoder(_: &mut LecteurTlv<'_>) -> Result<Self, ErreurSceau> {
+            fn decoder(l: &mut LecteurTlv<'_>) -> Result<Self, ErreurSceau> {
+                l.exiger_texte(1)?;
                 Ok(Self)
             }
         }
@@ -351,7 +354,8 @@ mod tests {
                 e.texte(1, "service/paquet")?;
                 Ok(())
             }
-            fn decoder(_: &mut LecteurTlv<'_>) -> Result<Self, ErreurSceau> {
+            fn decoder(l: &mut LecteurTlv<'_>) -> Result<Self, ErreurSceau> {
+                l.exiger_texte(1)?;
                 Ok(Self)
             }
         }

@@ -22,6 +22,14 @@ pub struct LlmHealth {
     pub context_size: Option<u32>,
     pub models_available: usize,
     pub uptime_secs: u64,
+    /// Date de coupure des connaissances (manifeste signé du modèle chargé).
+    pub date_coupure: Option<String>,
+    /// Licence du modèle chargé (manifeste signé).
+    pub licence: Option<String>,
+    /// GPU utilisable par ce binaire (détection llama.cpp, sans outil externe).
+    pub gpu_utilisable: bool,
+    /// Profil matériel recommandé (P1/P2/P3).
+    pub recommandation: crate::materiel::Recommandation,
 }
 
 pub async fn health_handler(State(state): State<AppState>) -> impl IntoResponse {
@@ -43,6 +51,10 @@ pub async fn health_handler(State(state): State<AppState>) -> impl IntoResponse 
         context_size: model_info.as_ref().map(|m| m.context_size),
         models_available,
         uptime_secs,
+        date_coupure: model_info.as_ref().and_then(|m| m.date_coupure.clone()),
+        licence: model_info.as_ref().and_then(|m| m.licence.clone()),
+        gpu_utilisable: state.engine.gpu_utilisable(),
+        recommandation: crate::materiel::recommander_ici(),
     };
 
     Json(health)

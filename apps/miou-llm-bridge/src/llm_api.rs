@@ -100,11 +100,7 @@ pub async fn llm_chat(
     }
 
     // Disponibilité
-    let availability = fallback::probe_availability(
-        &state.client,
-        &state.upstream_url,
-        state.inference.native.is_loaded(),
-    )
+    let availability = fallback::probe_availability(&state.inference)
     .await;
     if availability.is_degraded() {
         return (
@@ -134,13 +130,13 @@ pub async fn llm_chat(
                 .and_then(|c| c.as_str())
                 .unwrap_or("");
 
-            Json(serde_json::json!({
+            Json(crate::mention_ia::marquer(serde_json::json!({
                 "content": content,
                 "model": resp.model,
                 "backend": resp.backend,
                 "usage": resp.usage,
                 "availability": availability,
-            }))
+            }), true))
             .into_response()
         }
         Err(e) => (
@@ -169,11 +165,7 @@ pub async fn llm_complete(
     }
 
     // Disponibilité
-    let availability = fallback::probe_availability(
-        &state.client,
-        &state.upstream_url,
-        state.inference.native.is_loaded(),
-    )
+    let availability = fallback::probe_availability(&state.inference)
     .await;
     if availability.is_degraded() {
         return (
@@ -207,13 +199,13 @@ pub async fn llm_complete(
                 .and_then(|c| c.as_str())
                 .unwrap_or("");
 
-            Json(serde_json::json!({
+            Json(crate::mention_ia::marquer(serde_json::json!({
                 "text": text,
                 "model": resp.model,
                 "backend": resp.backend,
                 "usage": resp.usage,
                 "availability": availability,
-            }))
+            }), true))
             .into_response()
         }
         Err(e) => (
@@ -296,7 +288,7 @@ pub async fn llm_models(State(state): State<ProxyState>) -> impl IntoResponse {
 pub async fn llm_status(State(state): State<ProxyState>) -> impl IntoResponse {
     let native_loaded = state.inference.native.is_loaded();
     let availability =
-        fallback::probe_availability(&state.client, &state.upstream_url, native_loaded).await;
+        fallback::probe_availability(&state.inference).await;
 
     let upstream_ids: Vec<String> = fetch_upstream_model_ids(&state).await;
     let local_models = state.model_manager.scan_models();
@@ -329,6 +321,10 @@ pub async fn llm_status(State(state): State<ProxyState>) -> impl IntoResponse {
 
 /// Liste les modèles chargés dans l'upstream (LM Studio/Ollama) via GET /v1/models.
 async fn fetch_upstream_model_ids(state: &ProxyState) -> Vec<String> {
+    // Moteur hors COG non autorisé (défaut) : aucun appel.
+    if !state.inference.upstream.est_autorise() {
+        return Vec::new();
+    }
     let url = format!("{}/v1/models", state.upstream_url);
     #[derive(serde::Deserialize)]
     struct M {

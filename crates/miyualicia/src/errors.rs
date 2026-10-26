@@ -71,6 +71,11 @@ pub enum AliciaError {
     #[error("parametres refuses : {0}")]
     ParamsRefused(String),
 
+    /// Proposition de l'IA refusée par la porte des Cores (StrongFather) :
+    /// rien n'est exécuté.
+    #[error("refusé par les Cores : {0}")]
+    RefusParLesCores(String),
+
     /// Erreur interne imprevue.
     #[error("erreur interne : {0}")]
     InternalError(String),

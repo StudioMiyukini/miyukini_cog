@@ -10,7 +10,9 @@
 //!
 //! EX-26 : seuls les modèles accompagnés d'un manifeste signé `X.gguf.sceau`
 //! (ancres `model_trust_anchors`) sont chargés — voir la crate `maia-modeles`.
-//! Outillage : `maia-llm cle-dev --sortie <f>` et `maia-llm sceller-modele …`.
+//! Outillage : `maia-llm cle-dev --sortie <f>`, `maia-llm sceller-modele …`,
+//! `maia-llm emballer-modele …` (artefact `MMIA`), `maia-llm installer-modele …`
+//! (installateur du canal) et `maia-llm banc …` (banc d'essai).
 
 // C-10 : aucun unwrap/expect/panic hors tests dans le code exposé au réseau.
 #![cfg_attr(
@@ -27,8 +29,10 @@
 
 mod api;
 mod auth;
+mod banc;
 mod config;
 mod engine;
+mod materiel;
 mod store;
 
 use std::sync::Arc;
@@ -65,6 +69,20 @@ async fn main() {
         match r {
             Ok(msg) => {
                 println!("{msg}");
+                return;
+            }
+            Err(e) => {
+                eprintln!("{e}");
+                std::process::exit(2);
+            }
+        }
+    }
+
+    // Banc d'essai (au premier plan, hors service).
+    if let Some(r) = banc::executer(&args, derogation_du_binaire(&args)) {
+        match r {
+            Ok(json) => {
+                println!("{json}");
                 return;
             }
             Err(e) => {

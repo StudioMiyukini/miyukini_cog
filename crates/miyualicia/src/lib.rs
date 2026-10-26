@@ -2,7 +2,7 @@
 //!
 //! Orchestrateur central d'Alicia Home Assistante.
 //! Connecte le registre de dispositifs, les transports MQTT/HTTP,
-//! le pipeline NLU (miou-llm-bridge + fallback regex), le wake word,
+//! le pipeline NLU (moteur local maia-llm à sortie contrainte, repli regex), le wake word,
 //! et expose un snapshot complet de l'etat de la maison.
 //!
 //! ## Loi d'Autonomie
@@ -40,6 +40,7 @@ pub mod errors;
 pub mod intent;
 pub mod nlu_bridge;
 pub mod nlu_fallback;
+pub mod nlu_local;
 pub mod service;
 pub mod snapshot;
 
@@ -47,5 +48,6 @@ pub use capabilities_runtime::{CapabilitiesRuntime, CapabilitiesRuntimeConfig, P
 pub use config::AliciaConfig;
 pub use errors::AliciaError;
 pub use intent::Intent;
+pub use nlu_local::{PropositionIa, MENTION_IA_ALICIA, PRESENTATION_ALICIA};
 pub use service::AliciaService;
 pub use snapshot::AliciaSnapshot;

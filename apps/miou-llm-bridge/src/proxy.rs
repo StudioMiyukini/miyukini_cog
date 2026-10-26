@@ -105,7 +105,9 @@ pub fn proxy_router(state: ProxyState) -> Router {
         .route("/", get(ui_handler))
         .route("/health", get(health_handler))
         // MAIA health endpoint — état complet pour TEAM et monitoring
-        .route("/maia/health", get(crate::health::health_handler));
+        .route("/maia/health", get(crate::health::health_handler))
+        // AI Act art. 50 : présentation publique de MAIA comme IA.
+        .route("/maia/presentation", get(crate::mention_ia::presentation_handler));
 
     // Routes protégées (sécurité : origine IP + requête signée par un appelant épinglé)
     let protected_routes = Router::new()
@@ -400,16 +402,12 @@ async fn chat_with_agent(
     };
 
     // Vérifier la disponibilité LLM (native → upstream → fallback)
-    let availability = fallback::probe_availability(
-        &state.client,
-        &state.upstream_url,
-        state.inference.native.is_loaded(),
-    )
+    let availability = fallback::probe_availability(&state.inference)
     .await;
 
     if availability.is_degraded() {
         let fb = fallback::fallback_respond(&req.message);
-        return Json(serde_json::json!({
+        return Json(crate::mention_ia::marquer(serde_json::json!({
             "agent": agent.display_name,
             "role": agent.role,
             "icon": agent.icon,
@@ -417,7 +415,7 @@ async fn chat_with_agent(
             "answered": fb.answered,
             "availability": fb.availability,
             "fallback": true,
-        }))
+        }), false))
         .into_response();
     }
 
@@ -430,7 +428,9 @@ async fn chat_with_agent(
             .compile_context(&req.context_ids, 4096)
     };
 
-    let mut system_prompt = agent.system_prompt.clone();
+    // Identité d'IA d'abord (AI Act art. 50 §1), puis la consigne de l'agent.
+    let mut system_prompt = crate::mention_ia::consigne_systeme(&agent.display_name);
+    system_prompt.push_str(&agent.system_prompt);
     if !context_text.is_empty() {
         system_prompt.push_str("\n\n# Contexte additionnel\n");
         system_prompt.push_str(&context_text);
@@ -497,7 +497,7 @@ async fn chat_with_agent(
                     .and_then(|c| c.as_str())
                     .unwrap_or("Pas de réponse");
 
-                Json(serde_json::json!({
+                Json(crate::mention_ia::marquer(serde_json::json!({
                     "agent": agent.display_name,
                     "agent_id": agent.id,
                     "role": agent.role,
@@ -509,12 +509,12 @@ async fn chat_with_agent(
                     "fallback": false,
                     "tool_calls": [],
                     "iterations": 1,
-                }))
+                }), true))
                 .into_response()
             }
             Err(e) => {
                 let fb = fallback::fallback_respond(&req.message);
-                Json(serde_json::json!({
+                Json(crate::mention_ia::marquer(serde_json::json!({
                     "agent": agent.display_name,
                     "icon": agent.icon,
                     "content": if fb.answered { fb.content } else { fb.refusal_reason.unwrap_or_default() },
@@ -522,7 +522,7 @@ async fn chat_with_agent(
                     "availability": "fallback",
                     "fallback": true,
                     "error": format!("{e}"),
-                }))
+                }), false))
                 .into_response()
             }
         }
@@ -541,7 +541,7 @@ async fn chat_with_agent(
         )
         .await
         {
-            Ok(result) => Json(serde_json::json!({
+            Ok(result) => Json(crate::mention_ia::marquer(serde_json::json!({
                 "agent": agent.display_name,
                 "agent_id": agent.id,
                 "role": agent.role,
@@ -554,10 +554,10 @@ async fn chat_with_agent(
                 "iterations": result.iterations,
                 "foreign_content": result.contenu_etranger,
                 "pending_confirmations": result.confirmations_en_attente,
-            }))
+            }), true))
             .into_response(),
 
-            Err(crate::tools::ToolChatError::MaxIterationsExceeded) => Json(serde_json::json!({
+            Err(crate::tools::ToolChatError::MaxIterationsExceeded) => Json(crate::mention_ia::marquer(serde_json::json!({
                 "agent": agent.display_name,
                 "agent_id": agent.id,
                 "icon": agent.icon,
@@ -566,12 +566,12 @@ async fn chat_with_agent(
                 "error": "max_tool_iterations",
                 "availability": availability,
                 "fallback": false,
-            }))
+            }), false))
             .into_response(),
 
             Err(crate::tools::ToolChatError::UpstreamError(msg)) => {
                 let fb = fallback::fallback_respond(&req.message);
-                Json(serde_json::json!({
+                Json(crate::mention_ia::marquer(serde_json::json!({
                     "agent": agent.display_name,
                     "icon": agent.icon,
                     "content": if fb.answered { fb.content } else { fb.refusal_reason.unwrap_or_default() },
@@ -579,7 +579,7 @@ async fn chat_with_agent(
                     "availability": "fallback",
                     "fallback": true,
                     "upstream_error": msg,
-                }))
+                }), false))
                 .into_response()
             }
 
@@ -866,11 +866,7 @@ async fn team_task(
 // ═══════════════════════════════════════════════════════════════════════
 
 async fn availability_handler(State(state): State<ProxyState>) -> impl IntoResponse {
-    let availability = fallback::probe_availability(
-        &state.client,
-        &state.upstream_url,
-        state.inference.native.is_loaded(),
-    )
+    let availability = fallback::probe_availability(&state.inference)
     .await;
     Json(serde_json::json!({
         "availability": availability,
@@ -951,7 +947,7 @@ async fn inference_status(State(state): State<ProxyState>) -> impl IntoResponse 
     let local_models = state.model_manager.scan_models();
 
     let availability =
-        fallback::probe_availability(&state.client, &state.upstream_url, native_loaded).await;
+        fallback::probe_availability(&state.inference).await;
 
     Json(serde_json::json!({
         "availability": availability,
@@ -1115,6 +1111,17 @@ async fn security_status_handler(State(state): State<ProxyState>) -> impl IntoRe
 /// `security_middleware` (requête signée) ; ses en-têtes d'authentification ne
 /// sont jamais relayés.
 async fn proxy_handler(State(state): State<ProxyState>, req: Request<Body>) -> impl IntoResponse {
+    // Le relais vers un moteur hors COG n'existe que si la politique l'autorise
+    // (jamais en production : `maia-inference-externe-refusee`).
+    if !state.inference.upstream.est_autorise() {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({
+                "error": crate::inference::InferenceError::UpstreamRefuse.to_string(),
+            })),
+        )
+            .into_response();
+    }
     let method = req.method().clone();
     let uri = req.uri().clone();
     let headers = req.headers().clone();

@@ -23,7 +23,7 @@ use serde_json::json;
 use std::convert::Infallible;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::engine::StreamMsg;
+use crate::engine::{Generation, LlmError, StreamMsg};
 use crate::AppState;
 
 // ── Types requête ─────────────────────────────────────────────────
@@ -39,6 +39,34 @@ pub struct ChatRequest {
     pub max_tokens: u32,
     #[serde(default)]
     pub stream: bool,
+    /// Grammaire GBNF (racine `root`) contraignant la sortie (compatible
+    /// llama.cpp server) ; bornée à [`crate::engine::GRAMMAIRE_MAX`] octets.
+    #[serde(default)]
+    pub grammar: Option<String>,
+    /// Graine de l'échantillonneur (défaut 42).
+    #[serde(default)]
+    pub seed: Option<u32>,
+}
+
+impl ChatRequest {
+    /// Paramètres de génération du moteur.
+    pub fn generation(&self) -> Generation {
+        Generation {
+            temperature: self.temperature as f32,
+            max_tokens: self.max_tokens.clamp(1, MAX_TOKENS_PLAFOND),
+            graine: self.seed.unwrap_or(42),
+            grammaire: self.grammar.clone(),
+        }
+    }
+}
+
+/// Plafond de jetons générés par requête (C-13).
+const MAX_TOKENS_PLAFOND: u32 = 4096;
+
+/// Marquage des contenus générés (AI Act art. 50 §2) : toute réponse de
+/// maia-llm est un contenu produit par une IA, signalé de façon lisible par machine.
+pub fn marquage_ia(model: &str) -> serde_json::Value {
+    json!({ "genere_par_ia": true, "moteur": "maia-llm", "modele": model })
 }
 
 fn default_temperature() -> f64 {
@@ -52,6 +80,8 @@ fn default_max_tokens() -> u32 {
 
 #[derive(Serialize)]
 struct ChatResponse {
+    /// Marquage IA lisible par machine (AI Act art. 50 §2).
+    x_miyukini: serde_json::Value,
     id: String,
     object: &'static str,
     created: u64,
@@ -108,20 +138,18 @@ async fn handle_blocking(
     req: ChatRequest,
     model_name: String,
 ) -> Response {
-    let temperature = req.temperature as f32;
-    let max_tokens = req.max_tokens;
+    let generation = req.generation();
     let messages = req.messages;
 
     let result = tokio::task::spawn_blocking(move || {
-        state.engine.infer_blocking(&messages, temperature, max_tokens)
+        state.engine.infer_blocking(&messages, &generation)
     })
-    .await
-    .map_err(|e| format!("Task join : {e}"))
-    .and_then(|r| r.map_err(|e| e.to_string()));
+    .await;
 
     match result {
-        Ok((content, prompt_tokens, completion_tokens)) => {
+        Ok(Ok((content, prompt_tokens, completion_tokens))) => {
             let resp = ChatResponse {
+                x_miyukini: marquage_ia(&model_name),
                 id: gen_id("chatcmpl"),
                 object: "chat.completion",
                 created: unix_ts(),
@@ -139,9 +167,19 @@ async fn handle_blocking(
             };
             Json(resp).into_response()
         }
+        Ok(Err(e @ LlmError::ParametresInvalides(_))) => (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": {"message": e.to_string(), "type": "invalid_request_error"}})),
+        )
+            .into_response(),
+        Ok(Err(e)) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": {"message": e.to_string(), "type": "inference_error"}})),
+        )
+            .into_response(),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({"error": {"message": e, "type": "inference_error"}})),
+            Json(json!({"error": {"message": format!("Task join : {e}"), "type": "inference_error"}})),
         )
             .into_response(),
     }
@@ -154,19 +192,19 @@ async fn handle_stream(
     req: ChatRequest,
     model_name: String,
 ) -> Response {
-    let temperature = req.temperature as f32;
-    let max_tokens = req.max_tokens;
+    let generation = req.generation();
     let messages = req.messages;
 
-    let rx = match state
-        .engine
-        .chat_stream(messages, temperature, max_tokens)
-        .await
-    {
+    let rx = match state.engine.chat_stream(messages, generation).await {
         Ok(rx) => rx,
         Err(e) => {
+            let statut = if matches!(e, LlmError::ParametresInvalides(_)) {
+                StatusCode::BAD_REQUEST
+            } else {
+                StatusCode::SERVICE_UNAVAILABLE
+            };
             return (
-                StatusCode::SERVICE_UNAVAILABLE,
+                statut,
                 Json(json!({"error": {"message": e.to_string(), "type": "inference_error"}})),
             )
                 .into_response();
@@ -194,6 +232,7 @@ fn build_sse_stream(
             match rx.recv().await {
                 Some(StreamMsg::Token(piece)) => {
                     let chunk = json!({
+                        "x_miyukini": marquage_ia(&model_name),
                         "id": req_id,
                         "object": "chat.completion.chunk",
                         "created": created,
@@ -209,6 +248,7 @@ fn build_sse_stream(
                 Some(StreamMsg::Done(_, _)) | None => {
                     // Chunk de fin
                     let finish_chunk = json!({
+                        "x_miyukini": marquage_ia(&model_name),
                         "id": req_id,
                         "object": "chat.completion.chunk",
                         "created": created,
@@ -248,4 +288,33 @@ fn gen_id(prefix: &str) -> String {
         .unwrap_or_default()
         .as_nanos();
     format!("{prefix}-{ts:x}")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn requete_avec_grammaire_et_bornes() {
+        let r: ChatRequest = serde_json::from_value(json!({
+            "messages": [],
+            "temperature": 0.0,
+            "max_tokens": 100000,
+            "grammar": "root ::= \"a\"",
+            "seed": 7
+        }))
+        .unwrap();
+        let g = r.generation();
+        assert_eq!(g.max_tokens, MAX_TOKENS_PLAFOND);
+        assert_eq!(g.graine, 7);
+        assert_eq!(g.grammaire.as_deref(), Some("root ::= \"a\""));
+        assert!(g.temperature <= 0.0);
+    }
+
+    #[test]
+    fn reponse_marquee_comme_generee_par_ia() {
+        let m = marquage_ia("qwen");
+        assert_eq!(m["genere_par_ia"], true);
+        assert_eq!(m["modele"], "qwen");
+    }
 }

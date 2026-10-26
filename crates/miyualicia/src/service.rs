@@ -26,7 +26,17 @@ use crate::config::AliciaConfig;
 use crate::errors::AliciaError;
 use crate::intent::Intent;
 use crate::nlu_bridge::{NluBridge, NluBridgeConfig};
+use crate::nlu_local::{capacite_domotique, NluLocal, PieceConnue, PropositionIa, VocabulaireNlu};
+use miyualicia_dispatcher::{CoreGate, CoreGateOutcome};
 use crate::snapshot::AliciaSnapshot;
+
+/// Vrai si `url` désigne la boucle locale (127.0.0.1, ::1, localhost).
+fn url_boucle_locale(url: &str) -> bool {
+    reqwest::Url::parse(url)
+        .ok()
+        .and_then(|u| u.host_str().map(str::to_string))
+        .is_some_and(|h| h == "127.0.0.1" || h == "localhost" || h == "[::1]" || h == "::1")
+}
 
 /// Nombre maximal d'entrees dans le journal d'activite en memoire.
 const MAX_ACTIVITY_LOG: usize = 500;
@@ -41,6 +51,8 @@ pub struct AliciaService {
     mqtt_client: Option<MqttClient>,
     http_client: HttpDeviceClient,
     nlu_bridge: NluBridge,
+    /// Moteur d'IA local (maia-llm) ; `None` : repli regex seulement.
+    nlu_local: Option<NluLocal>,
     activity_log: RwLock<Vec<CommandLogEntry>>,
     capabilities: RwLock<Option<std::sync::Arc<CapabilitiesRuntime>>>,
 }
@@ -67,20 +79,24 @@ impl AliciaService {
             ..Default::default()
         };
         let reqwest_client = reqwest::Client::new();
-        let mut nlu_bridge = NluBridge::new(nlu_config, reqwest_client);
+        let mut nlu_bridge = NluBridge::new(nlu_config, reqwest_client.clone());
+        let mut cle_alicia = None;
         if let Some(chemin) = config.cle_voix.as_deref() {
             match miyauth::http::service::charger_ou_creer_cle(std::path::Path::new(chemin)) {
                 Ok(cle) => {
                     tracing::info!(
                         cle_publique = %miyauth::http::service::encoder_cle_publique(&cle.cle_publique()),
-                        "cle d'Alicia chargee (a epingler sur MiyuSTT / MiyuTTS)"
+                        "cle d'Alicia chargee (a epingler sur MiyuSTT / MiyuTTS et maia-llm)"
                     );
-                    nlu_bridge = nlu_bridge.avec_cle(std::sync::Arc::new(cle));
+                    let cle = std::sync::Arc::new(cle);
+                    nlu_bridge = nlu_bridge.avec_cle(cle.clone());
+                    cle_alicia = Some(cle);
                 }
                 // Fail-closed : sans cle, les requetes STT/TTS seront refusees.
                 Err(e) => tracing::error!("cle d'Alicia illisible ({chemin}) : {e}"),
             }
         }
+        let nlu_local = Self::construire_nlu_local(&config, reqwest_client, cle_alicia);
 
         Self {
             config,
@@ -88,6 +104,7 @@ impl AliciaService {
             mqtt_client,
             http_client,
             nlu_bridge,
+            nlu_local,
             activity_log: RwLock::new(Vec::new()),
             capabilities: RwLock::new(None),
         }
@@ -249,6 +266,79 @@ impl AliciaService {
             client.connect().await?;
         }
         Ok(())
+    }
+
+    /// Moteur local d'après la configuration ; URL hors boucle locale ⇒ ignoré
+    /// (Alicia n'appelle jamais un service d'IA extérieur).
+    fn construire_nlu_local(
+        config: &AliciaConfig,
+        client: reqwest::Client,
+        cle: Option<std::sync::Arc<miyusceau::CleSignature>>,
+    ) -> Option<NluLocal> {
+        let moteur = config.moteur_ia.clone()?;
+        if !url_boucle_locale(&moteur.url) {
+            tracing::error!(
+                url = %moteur.url,
+                "moteur_ia hors boucle locale refusé : Alicia n'utilise que maia-llm local"
+            );
+            return None;
+        }
+        let vocabulaire = VocabulaireNlu::new(
+            config
+                .rooms
+                .iter()
+                .map(|r| PieceConnue { id: r.id.clone(), nom: r.name.clone() })
+                .collect(),
+            vec!["bonne nuit".to_string(), "je pars".to_string()],
+        );
+        let n = NluLocal::new(moteur, vocabulaire, client);
+        if let Some(c) = cle {
+            Some(n.avec_cle(c))
+        } else {
+            tracing::warn!("moteur_ia sans cle d'Alicia : maia-llm refusera les requetes");
+            Some(n)
+        }
+    }
+
+    /// Interprète une commande : **proposition** du moteur local (sortie
+    /// contrainte et validée), sinon repli regex (`genere_par_ia = false`).
+    /// Rien n'est exécuté ici.
+    pub async fn proposer_intention(&self, transcript: &str) -> PropositionIa {
+        if let Some(n) = &self.nlu_local {
+            match n.proposer(transcript).await {
+                Ok(p) => return p,
+                Err(e) => tracing::warn!("moteur local : {e} — repli regex"),
+            }
+        }
+        PropositionIa {
+            intent: crate::nlu_fallback::FallbackNluParser.parse(transcript),
+            genere_par_ia: false,
+            mention_ia: "Interprétation par règles fixes (sans IA).",
+            modele: "regex".to_string(),
+        }
+    }
+
+    /// Exécute une proposition **seulement si les Cores l'autorisent** :
+    /// intention actionnable ⇒ capacité `domotique.<intent>` soumise à `gate`
+    /// (StrongFather en production) ; refus ⇒ [`AliciaError::RefusParLesCores`],
+    /// rien n'est exécuté. Intention non actionnable ⇒ `Ok(None)`.
+    pub async fn executer_proposition(
+        &self,
+        proposition: &PropositionIa,
+        gate: &dyn CoreGate,
+        persona: &str,
+        source: CommandSource,
+    ) -> Result<Option<u64>, AliciaError> {
+        let Some((capacite, params)) = capacite_domotique(&proposition.intent) else {
+            return Ok(None);
+        };
+        match gate.validate(&capacite, &params, persona).await {
+            CoreGateOutcome::Allowed => self.dispatch_intent(&proposition.intent, source).await,
+            CoreGateOutcome::Denied(motif) => {
+                tracing::info!(motif = %motif, "proposition de l'IA refusée par les Cores");
+                Err(AliciaError::RefusParLesCores(motif))
+            }
+        }
     }
 
     /// Retourne une reference au bridge NLU.

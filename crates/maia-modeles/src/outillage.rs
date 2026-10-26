@@ -9,14 +9,22 @@
 //! - `maia-llm cle-dev --sortie cle.hex` : génère une graine de signature de
 //!   développement (fichier `0600`) et affiche la clé publique à épingler ;
 //! - `maia-llm sceller-modele --graine cle.hex --modele X.gguf --licence MIT
-//!   --coupure 2025-06` : écrit `X.gguf.sceau`.
+//!   --coupure 2025-06` : écrit `X.gguf.sceau` ;
+//! - `maia-llm emballer-modele --modele X.gguf --ancre <hex> --sortie X.mmia` :
+//!   vérifie le couple `X.gguf` + `X.gguf.sceau` puis écrit l'artefact `MMIA`
+//!   du canal officiel (écriture en flux, jamais d'écrasement) ;
+//! - `maia-llm installer-modele --dossier D --ancre <hex> --composant C
+//!   --version N --artefact X.mmia` (fonctionnalité `canal`) : installe
+//!   l'artefact comme le canal officiel (signature, nom imposé, taille,
+//!   licence, **empreinte vérifiée avant toute écriture**, refus sinon).
 
 use std::path::{Path, PathBuf};
 
 use miyusceau::{sceller, CleSignature};
 
-use crate::fichier::{chemin_manifeste, sha256_fichier};
-use crate::manifeste::{ManifesteModele, LICENCES_AUTORISEES};
+use crate::artefact::{MAGIC_ARTEFACT, TAILLE_MAX_MANIFESTE, VERSION_ARTEFACT};
+use crate::fichier::{chemin_manifeste, lire_manifeste, sha256_fichier, verifier_modele};
+use crate::manifeste::{ancres_depuis_hex, ManifesteModele, LICENCES_AUTORISEES};
 
 /// Scelle le manifeste d'un modèle et l'écrit dans `X.gguf.sceau`.
 pub fn sceller_modele(
@@ -48,6 +56,52 @@ pub fn sceller_modele(
     let sortie = chemin_manifeste(modele);
     std::fs::write(&sortie, octets).map_err(|e| e.to_string())?;
     Ok(sortie)
+}
+
+/// Écrit l'artefact `MMIA` de `modele` (manifeste voisin `X.gguf.sceau`)
+/// dans `sortie` (créée, jamais écrasée), **après** avoir vérifié le couple
+/// contre `ancres`. Les octets du modèle sont copiés en flux.
+pub fn emballer_modele(
+    modele: &Path,
+    ancres: &miyusceau::AncresDeConfiance,
+    sortie: &Path,
+) -> Result<ManifesteModele, String> {
+    use std::io::Write;
+    let manifeste_verifie = verifier_modele(modele, ancres).map_err(|e| e.to_string())?;
+    let manifeste = lire_manifeste(&chemin_manifeste(modele)).map_err(|e| e.to_string())?;
+    if manifeste.is_empty() || manifeste.len() > TAILLE_MAX_MANIFESTE {
+        return Err("manifeste vide ou trop gros".into());
+    }
+    let longueur = u32::try_from(manifeste.len()).map_err(|e| e.to_string())?;
+    let mut source = std::fs::File::open(modele).map_err(|e| e.to_string())?;
+    let mut opts = std::fs::OpenOptions::new();
+    opts.write(true).create_new(true);
+    let f = opts.open(sortie).map_err(|e| format!("{} : {e}", sortie.display()))?;
+    let mut w = std::io::BufWriter::new(f);
+    let resultat = (|| -> std::io::Result<u64> {
+        w.write_all(MAGIC_ARTEFACT)?;
+        w.write_all(&[VERSION_ARTEFACT])?;
+        w.write_all(&longueur.to_be_bytes())?;
+        w.write_all(&manifeste)?;
+        let n = std::io::copy(&mut source, &mut w)?;
+        w.flush()?;
+        w.get_ref().sync_all()?;
+        Ok(n)
+    })();
+    match resultat {
+        Ok(n) if n == manifeste_verifie.taille => Ok(manifeste_verifie),
+        Ok(n) => {
+            let _ = std::fs::remove_file(sortie);
+            Err(format!(
+                "modèle modifié pendant l'emballage ({n} o copiés, {} o signés)",
+                manifeste_verifie.taille
+            ))
+        }
+        Err(e) => {
+            let _ = std::fs::remove_file(sortie);
+            Err(format!("écriture de l'artefact : {e}"))
+        }
+    }
 }
 
 /// Lit une graine de signature (64 caractères hexadécimaux) depuis un fichier.
@@ -114,6 +168,42 @@ pub fn executer_outil(args: &[String]) -> Option<Result<String, String>> {
                 hex::encode(cle.cle_publique())
             ))
         })()),
+        Some("emballer-modele") => Some((|| -> Result<String, String> {
+            const USAGE: &str = "usage : maia-llm emballer-modele --modele <X.gguf> \
+                                 --ancre <64 hex> --sortie <X.mmia>";
+            let modele = valeur("--modele").ok_or(USAGE)?;
+            let ancre = texte("--ancre").ok_or(USAGE)?;
+            let sortie = valeur("--sortie").ok_or(USAGE)?;
+            let ancres = ancres_depuis_hex(&[ancre]).map_err(|e| e.to_string())?;
+            let m = emballer_modele(&modele, &ancres, &sortie)?;
+            Ok(format!(
+                "Artefact MMIA écrit : {} (modèle {}, {} o, SHA-256 {}, licence {}, coupure {})",
+                sortie.display(),
+                m.nom_fichier,
+                m.taille,
+                hex::encode(m.sha256),
+                m.licence,
+                m.date_coupure
+            ))
+        })()),
+        #[cfg(feature = "canal")]
+        Some("installer-modele") => Some((|| -> Result<String, String> {
+            const USAGE: &str = "usage : maia-llm installer-modele --dossier <D> --ancre <64 hex> \
+                                 --composant <c> --version <N> --artefact <X.mmia>";
+            let dossier = valeur("--dossier").ok_or(USAGE)?;
+            let ancre = texte("--ancre").ok_or(USAGE)?;
+            let composant = texte("--composant").ok_or(USAGE)?;
+            let version: u64 = texte("--version")
+                .ok_or(USAGE)?
+                .parse()
+                .map_err(|_| "--version : entier attendu".to_string())?;
+            let artefact = valeur("--artefact").ok_or(USAGE)?;
+            let ancres = ancres_depuis_hex(&[ancre]).map_err(|e| e.to_string())?;
+            let octets = std::fs::read(&artefact).map_err(|e| e.to_string())?;
+            let installe = crate::canal::InstallateurModeles::new(dossier, ancres)
+                .installer_artefact(&composant, version, &octets)?;
+            Ok(format!("Modèle installé et vérifié : {}", installe.display()))
+        })()),
         _ => None,
     }
 }
@@ -124,6 +214,7 @@ mod tests {
     use crate::ancres_depuis_hex;
     use crate::essai::{cle, dossier, modele};
     use crate::fichier::verifier_modele;
+    use miyusceau::CleSignature;
 
     #[test]
     fn outil_cle_dev_puis_scellement() {
@@ -154,6 +245,69 @@ mod tests {
         assert!(executer_outil(&["maia-llm".into(), "cle-dev".into()])
             .unwrap()
             .is_err());
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn emballage_mmia_verifie_puis_decodable() {
+        let d = dossier("emballer");
+        let p = modele(&d);
+        let cle_essai = cle();
+        sceller_modele(&p, &cle_essai, "Apache-2.0", "2024-06").unwrap();
+        let ancres_essai = crate::essai::ancres(&cle_essai);
+        let sortie = d.join("m.mmia");
+        let manifeste_lu = emballer_modele(&p, &ancres_essai, &sortie).unwrap();
+        assert_eq!(manifeste_lu.licence, "Apache-2.0");
+        let octets = std::fs::read(&sortie).unwrap();
+        let (manifeste, corps) = crate::decoder_artefact(&octets).unwrap();
+        assert_eq!(corps, std::fs::read(&p).unwrap().as_slice());
+        assert_eq!(manifeste, std::fs::read(chemin_manifeste(&p)).unwrap().as_slice());
+        // Jamais d'écrasement ; ancre étrangère ou modèle altéré ⇒ refus, rien d'écrit.
+        assert!(emballer_modele(&p, &ancres_essai, &sortie).is_err());
+        let autre = crate::essai::ancres(&CleSignature::depuis_graine(&[3u8; 32]));
+        let s2 = d.join("m2.mmia");
+        assert!(emballer_modele(&p, &autre, &s2).is_err());
+        assert!(!s2.exists());
+        std::fs::write(&p, b"GGUF\x03\x00\x00\x00 FAUX modele de test").unwrap();
+        assert!(emballer_modele(&p, &ancres_essai, &s2).is_err());
+        assert!(!s2.exists());
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[cfg(feature = "canal")]
+    #[test]
+    fn installation_par_l_outil_refuse_une_empreinte_differente() {
+        let d = dossier("installer");
+        let p = modele(&d);
+        let cle_essai = cle();
+        sceller_modele(&p, &cle_essai, "MIT", "2024-06").unwrap();
+        let ancres_essai = crate::essai::ancres(&cle_essai);
+        let art = d.join("qwen-mini.mmia");
+        emballer_modele(&p, &ancres_essai, &art).unwrap();
+        let cible = d.join("canal");
+        let ancre = hex::encode(cle_essai.cle_publique());
+        let args = |artefact: &Path, version: &str| -> Vec<String> {
+            [
+                "maia-llm", "installer-modele", "--dossier", cible.to_str().unwrap(), "--ancre",
+                &ancre, "--composant", "qwen-mini", "--version", version, "--artefact",
+                artefact.to_str().unwrap(),
+            ]
+            .iter()
+            .map(ToString::to_string)
+            .collect()
+        };
+        // Octet du modèle altéré dans l'artefact : empreinte différente ⇒ refus, rien installé.
+        let mut altere = std::fs::read(&art).unwrap();
+        let dernier = altere.len() - 1;
+        altere[dernier] ^= 0x01;
+        let art_altere = d.join("altere.mmia");
+        std::fs::write(&art_altere, &altere).unwrap();
+        let refus = executer_outil(&args(&art_altere, "1")).unwrap();
+        assert!(matches!(&refus, Err(e) if e.contains("empreinte")), "{refus:?}");
+        assert!(!cible.join("qwen-mini.gguf").exists());
+        // Artefact intact : installé puis chargeable.
+        assert!(executer_outil(&args(&art, "1")).unwrap().is_ok());
+        assert!(verifier_modele(&cible.join("qwen-mini.gguf"), &ancres_essai).is_ok());
         let _ = std::fs::remove_dir_all(&d);
     }
 

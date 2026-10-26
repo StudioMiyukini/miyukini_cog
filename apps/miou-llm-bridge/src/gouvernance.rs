@@ -148,6 +148,57 @@ impl GouvernanceMaia {
     }
 }
 
+/// Intention « moteur d'IA hors COG » (`inference.externe`) : décidée une fois
+/// au démarrage, avant toute activation de l'upstream. `contexte` = `production`
+/// (service) ou `essai` (tests).
+pub fn intention_inference_externe(url: &str, contexte: &str) -> Intent {
+    let hote_loopback = reqwest::Url::parse(url)
+        .ok()
+        .and_then(|u| u.host_str().map(str::to_string))
+        .is_some_and(|h| h == "127.0.0.1" || h == "localhost" || h == "[::1]");
+    let content: HashMap<String, String> = [
+        ("operation", "inference.externe".to_string()),
+        ("url", url.to_string()),
+        ("loopback", hote_loopback.to_string()),
+        ("contexte", contexte.to_string()),
+    ]
+    .into_iter()
+    .map(|(k, v)| (k.to_string(), v))
+    .collect();
+    Intent::new(
+        format!("maia-inference-externe-{}", std::process::id()),
+        ActionType::Read,
+        "maia.inference.externe".to_string(),
+        CallContext {
+            caller_identity: APPELANT_LOCAL.to_string(),
+            origin: ORIGINE_MAIA.to_string(),
+            instance: "local".to_string(),
+        },
+        IntentData { content },
+    )
+}
+
+impl GouvernanceMaia {
+    /// Décision StrongFather sur l'usage d'un moteur hors COG ; URL vide ⇒ non.
+    /// Refus (défaut, politique de production) ⇒ `false`, journalisé.
+    pub fn autoriser_inference_externe(&self, url: &str, contexte: &str) -> bool {
+        if url.trim().is_empty() {
+            return false;
+        }
+        let intent = intention_inference_externe(url, contexte);
+        match self.executer(&intent, |_| ()) {
+            Ok(()) => {
+                tracing::warn!("Moteur d'IA hors COG AUTORISÉ par la politique ({contexte}) : {url}");
+                true
+            }
+            Err(motif) => {
+                tracing::info!("Moteur d'IA hors COG refusé ({url}) : {motif}");
+                false
+            }
+        }
+    }
+}
+
 /// Contexte d'exécution d'un outil.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ModeExecution {
