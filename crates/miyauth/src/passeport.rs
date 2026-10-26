@@ -303,6 +303,26 @@ impl AnnuaireEmetteurs {
         Ok(copie)
     }
 
+    /// Vrai si la racine (clé d'identité) du COG `cog` est épinglée.
+    pub fn racine_epinglee(&self, cog: &CogId) -> bool {
+        self.racines.contains_key(cog)
+    }
+
+    /// Vrai si le mode strict ([`Self::exiger_delegations`]) est actif.
+    pub fn est_strict(&self) -> bool {
+        self.strict
+    }
+
+    /// Vrai si une ancre **directe** (mode de transition) est épinglée.
+    pub fn a_des_ancres_directes(&self) -> bool {
+        !self.cogs.is_empty()
+    }
+
+    /// Délégation `0x45` vérifiée de la clé `kid` (COG et délégation), si elle est connue.
+    pub fn delegation(&self, kid: &Kid) -> Option<(&CogId, &DelegationCle)> {
+        self.deleguees.get(kid).map(|e| (&e.cog, &e.delegation))
+    }
+
     /// Retire une clé (rotation ou compromission), directe ou déléguée.
     pub fn retirer(&mut self, kid: &Kid) -> bool {
         self.cogs.remove(kid);

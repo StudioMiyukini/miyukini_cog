@@ -37,6 +37,20 @@
 //!   l'exporteur TLS peut fournir sa propre liaison ([`RequeteHttp::liaison`]).
 //! - Base64 : alphabet URL (RFC 4648 §5), **sans remplissage**, décodage strict
 //!   (représentation canonique unique).
+//! - **Délégations** (A-024) : `X-Miyu-Delegations: <b64url(sceau 0x45)>[.<…>]`
+//!   (1 à 4, chacune ≤ 4096 o) accompagne le visa : délégation de la clé
+//!   `visas` (indice 5) et, si la racine du COG d'origine est épinglée, celle
+//!   de sa clé `emission` (indice 1). Vérifiées par
+//!   [`verifier_requete_visa_avec_delegations`] (annuaire augmenté pour la
+//!   seule requête, mêmes contrôles qu'`ajouter_delegation`).
+//! - **Liaison au canal TLS** : [`liaison_canal_tls`] (exporteur RFC 5705 /
+//!   8446, étiquette [`ETIQUETTE_EXPORTEUR_TLS`]) pour un service qui termine
+//!   TLS lui-même ; les vérificateurs actuels (façades sans serveur TLS,
+//!   central-remote et MiyuCloud derrière un mandataire, clients navigateur
+//!   sans accès à l'exporteur) gardent la liaison à la requête.
+//! - **Persistance** (I5) : [`MagasinDefisFichier`] et
+//!   [`RegistreNonces::persistant`] (module [`persistant`]) : usage unique tenu
+//!   après redémarrage et entre instances partageant un dossier.
 //!
 //! # 2. Machine à machine : requête signée par une clé épinglée
 //!
@@ -75,7 +89,12 @@ use crate::passeport::{
 };
 use crate::titres::audience_valide;
 
+#[cfg(unix)]
+pub mod persistant;
 pub mod service;
+
+#[cfg(unix)]
+pub use persistant::MagasinDefisFichier;
 
 /// Schéma `Authorization` portant un visa et son passeport.
 pub const SCHEMA_VISA: &str = "MiyuVisa";
@@ -91,6 +110,11 @@ pub const ENTETE_HORODATAGE: &str = "x-miyu-horodatage";
 pub const ENTETE_NONCE: &str = "x-miyu-nonce";
 /// En-tête : signature d'une requête signée.
 pub const ENTETE_SIGNATURE: &str = "x-miyu-signature";
+/// En-tête : délégations `0x45` présentées avec un titre (A-024).
+pub const ENTETE_DELEGATIONS: &str = "x-miyu-delegations";
+/// Nombre maximal de délégations dans [`ENTETE_DELEGATIONS`] (visa, passeport
+/// et une génération de recouvrement pour chacun).
+pub const MAX_DELEGATIONS_ENTETE: usize = 4;
 
 /// Domaine de la liaison à la requête.
 pub const DOMAINE_LIAISON: &[u8] = b"miyukini/http-liaison/v1";
@@ -438,6 +462,29 @@ pub fn liaison_requete(methode: &str, chemin: &str, corps: &[u8]) -> [u8; 32] {
     h.finalize().into()
 }
 
+/// Étiquette de l'exporteur TLS (RFC 5705 / RFC 8446 §7.5) de la liaison de canal :
+/// `export_keying_material(32, ETIQUETTE_EXPORTEUR_TLS, contexte vide)`.
+pub const ETIQUETTE_EXPORTEUR_TLS: &[u8] = b"EXPORTER-miyukini-pop-v1";
+/// Domaine de la liaison au canal TLS.
+pub const DOMAINE_LIAISON_TLS: &[u8] = b"miyukini/tls-liaison/v1";
+
+/// Liaison de la preuve **au canal TLS et à la requête** (doc lot 2 §7) :
+/// `SHA-256("miyukini/tls-liaison/v1" || 0 || exporteur (32 o) || liaison_requete(…))`.
+///
+/// `exporteur` = 32 octets tirés de la session TLS par **les deux bouts**
+/// (rustls : `export_keying_material(&mut [0; 32], ETIQUETTE_EXPORTEUR_TLS, None)`,
+/// navigateur : non disponible). Utilisable seulement par un service qui
+/// termine TLS lui-même ; à passer dans [`RequeteHttp::liaison`]. Une preuve
+/// relayée vers une autre connexion TLS ne vérifie pas (anti-relais).
+pub fn liaison_canal_tls(exporteur: &[u8; 32], methode: &str, chemin: &str, corps: &[u8]) -> [u8; 32] {
+    let mut h = Sha256::new();
+    h.update(DOMAINE_LIAISON_TLS);
+    h.update([0u8]);
+    h.update(exporteur);
+    h.update(liaison_requete(methode, chemin, corps));
+    h.finalize().into()
+}
+
 /// Signe une preuve de possession (côté client, clé d'appareil).
 pub fn signer_pop(cle_appareil: &CleSignature, defi: &[u8; 32], audience: &str, liaison: &[u8; 32]) -> [u8; 64] {
     SigningKey::from_bytes(&cle_appareil.graine()).sign(&message_possession(defi, audience, liaison)).to_bytes()
@@ -471,6 +518,84 @@ impl RequeteHttp<'_> {
         let defi = magasin.consommer(&pop.id_defi, audience, maintenant)?;
         Ok((defi, pop.signature))
     }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Transport des délégations 0x45 (A-022 §1, A-024)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Analyse `X-Miyu-Delegations: <b64url(délégation)>[.<b64url(délégation)>]…`
+/// (1 à [`MAX_DELEGATIONS_ENTETE`] sceaux `0x06`/`0x45` complets, chacun ≤
+/// [`TAILLE_MAX_TITRE_ENTETE`]). Le contenu n'est **pas** vérifié ici : il
+/// l'est par [`crate::AnnuaireEmetteurs::avec_delegations`] (signature de la
+/// racine épinglée, `cog_id`, fenêtre), une délégation inutile ou d'une racine
+/// inconnue faisant refuser la requête.
+pub fn analyser_delegations(valeur: &str) -> Result<Vec<Vec<u8>>, RefusHttp> {
+    let parties: Vec<&str> = valeur.trim().split('.').collect();
+    if parties.is_empty() || parties.len() > MAX_DELEGATIONS_ENTETE {
+        return Err(RefusHttp::EnteteMalFormee(ENTETE_DELEGATIONS));
+    }
+    parties
+        .into_iter()
+        .map(|p| titre_entete(p).map_err(|_| RefusHttp::EnteteMalFormee(ENTETE_DELEGATIONS)))
+        .collect()
+}
+
+/// Formate `X-Miyu-Delegations` (côté émetteur ou client).
+pub fn formater_delegations(delegations: &[&[u8]]) -> String {
+    delegations.iter().map(|d| b64_encoder(d)).collect::<Vec<_>>().join(".")
+}
+
+fn annuaire_presente(
+    politique: &PolitiqueIdentite<'_>,
+    delegations: &[Vec<u8>],
+    maintenant: u64,
+) -> Result<crate::passeport::AnnuaireEmetteurs, RefusHttp> {
+    let refs: Vec<&[u8]> = delegations.iter().map(Vec::as_slice).collect();
+    Ok(politique.annuaire.avec_delegations(&refs, maintenant)?)
+}
+
+/// Comme [`verifier_requete_visa`], avec les délégations `0x45` **présentées
+/// avec le titre** (`X-Miyu-Delegations`, valeur brute ou `None`) : l'annuaire
+/// de la politique est augmenté de ces délégations (mêmes contrôles que
+/// [`crate::AnnuaireEmetteurs::ajouter_delegation`]) pour cette seule requête.
+/// Ordre : en-têtes analysés, défi consommé, délégations vérifiées, titres.
+pub fn verifier_requete_visa_avec_delegations(
+    requete: &RequeteHttp<'_>,
+    delegations: Option<&str>,
+    audience: &str,
+    politique: &PolitiqueIdentite<'_>,
+    magasin: &dyn MagasinDefis,
+    maintenant: u64,
+) -> Result<AccesProuve, RefusHttp> {
+    let (visa, passeport) =
+        analyser_autorisation_visa(requete.autorisation.ok_or(RefusHttp::EnteteAbsente("authorization"))?)?;
+    let presentees = delegations.map(analyser_delegations).transpose()?.unwrap_or_default();
+    let (defi, signature) = requete.preuve(audience, magasin, maintenant)?;
+    let annuaire = annuaire_presente(politique, &presentees, maintenant)?;
+    let augmentee = PolitiqueIdentite { cog_local: politique.cog_local.clone(), annuaire: &annuaire, revocations: politique.revocations };
+    let acces = verifier_visa(&visa, &passeport, audience, &augmentee, maintenant)?;
+    Ok(acces.verifier_possession(&defi, &requete.liaison_effective(), &signature)?)
+}
+
+/// Comme [`verifier_requete_passeport`], avec les délégations présentées
+/// (`X-Miyu-Delegations`) : celle de la clé `emission` du COG d'origine.
+pub fn verifier_requete_passeport_avec_delegations(
+    requete: &RequeteHttp<'_>,
+    delegations: Option<&str>,
+    audience: &str,
+    politique: &PolitiqueIdentite<'_>,
+    magasin: &dyn MagasinDefis,
+    maintenant: u64,
+) -> Result<PossessionProuvee, RefusHttp> {
+    let passeport =
+        analyser_autorisation_passeport(requete.autorisation.ok_or(RefusHttp::EnteteAbsente("authorization"))?)?;
+    let presentees = delegations.map(analyser_delegations).transpose()?.unwrap_or_default();
+    let (defi, signature) = requete.preuve(audience, magasin, maintenant)?;
+    let annuaire = annuaire_presente(politique, &presentees, maintenant)?;
+    let augmentee = PolitiqueIdentite { cog_local: politique.cog_local.clone(), annuaire: &annuaire, revocations: politique.revocations };
+    let pv = verifier_passeport(&passeport, &augmentee, maintenant)?;
+    Ok(prouver_possession(pv, &defi, audience, &requete.liaison_effective(), &signature)?)
 }
 
 /// Vérifie une requête `MiyuVisa` + `X-Miyu-PoP` pour `audience` et rend un
@@ -618,10 +743,26 @@ pub fn signer_requete(
     EntetesSignees { signataire: cle.cle_publique(), horodatage, nonce, signature }
 }
 
+/// Stockage des nonces vus : mémoire (un processus) ou fichiers (persistant,
+/// partagé entre instances, [`persistant::NoncesFichier`]).
+#[derive(Debug)]
+enum StockageNonces {
+    Memoire(Mutex<HashMap<(Kid, Vec<u8>), u64>>),
+    #[cfg(unix)]
+    Fichier(persistant::NoncesFichier),
+}
+
 /// Nonces déjà vus (anti-rejeu), bornés en nombre et en durée.
+///
+/// [`RegistreNonces::new`] / `default` : en mémoire (un rejeu après
+/// redémarrage n'est refusé que par la fenêtre d'horodatage).
+/// [`RegistreNonces::persistant`] : un fichier par nonce, créé de façon
+/// exclusive (`O_CREAT|O_EXCL`) et synchronisé **avant** d'accepter la
+/// requête : rejeu refusé après redémarrage et entre instances partageant
+/// le dossier (I5).
 #[derive(Debug)]
 pub struct RegistreNonces {
-    vus: Mutex<HashMap<(Kid, Vec<u8>), u64>>,
+    stockage: StockageNonces,
     capacite: usize,
     fenetre: u64,
 }
@@ -633,9 +774,17 @@ impl Default for RegistreNonces {
 }
 
 impl RegistreNonces {
-    /// Registre de `capacite` nonces, fenêtre d'horodatage `fenetre` secondes.
+    /// Registre en mémoire de `capacite` nonces, fenêtre d'horodatage `fenetre` secondes.
     pub fn new(capacite: usize, fenetre: u64) -> Self {
-        Self { vus: Mutex::new(HashMap::new()), capacite, fenetre }
+        Self { stockage: StockageNonces::Memoire(Mutex::new(HashMap::new())), capacite, fenetre }
+    }
+
+    /// Registre **persistant et partagé** dans `dossier` (créé `0700` s'il est
+    /// absent ; refusé s'il est un lien, n'est pas un répertoire ou est ouvert
+    /// aux « autres »). Plusieurs instances d'un service peuvent le partager.
+    #[cfg(unix)]
+    pub fn persistant(dossier: &std::path::Path, capacite: usize, fenetre: u64) -> std::io::Result<Self> {
+        Ok(Self { stockage: StockageNonces::Fichier(persistant::NoncesFichier::ouvrir(dossier)?), capacite, fenetre })
     }
 
     /// Fenêtre d'horodatage acceptée.
@@ -644,26 +793,46 @@ impl RegistreNonces {
     }
 
     /// Vrai si le nonce a déjà été accepté (contrôle précoce, sans enregistrement).
+    /// Stockage illisible ⇒ vrai (fail-closed).
     pub fn deja_vu(&self, kid: &Kid, nonce: &[u8]) -> bool {
-        self.vus
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner)
-            .contains_key(&(*kid, nonce.to_vec()))
+        match &self.stockage {
+            StockageNonces::Memoire(vus) => vus
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .contains_key(&(*kid, nonce.to_vec())),
+            #[cfg(unix)]
+            StockageNonces::Fichier(f) => f.deja_vu(kid, nonce),
+        }
+    }
+
+    /// Enregistre le nonce `(kid, nonce)` une fois pour toutes : déjà vu ⇒
+    /// [`RefusHttp::Rejeu`] ; registre plein ou stockage indisponible ⇒
+    /// [`RefusHttp::NoncesSatures`]. À appeler **après** toutes les autres
+    /// vérifications (un refus ne doit pas brûler le nonce d'autrui).
+    pub fn consommer(&self, kid: Kid, nonce: &[u8], maintenant: u64) -> Result<(), RefusHttp> {
+        // Un nonce reste mémorisé tant que son horodatage peut encore être accepté.
+        let expire = maintenant.saturating_add(2 * self.fenetre + 1);
+        match &self.stockage {
+            StockageNonces::Memoire(vus) => {
+                let mut vus = vus.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+                vus.retain(|_, e| *e > maintenant);
+                let cle = (kid, nonce.to_vec());
+                if vus.contains_key(&cle) {
+                    return Err(RefusHttp::Rejeu);
+                }
+                if vus.len() >= self.capacite {
+                    return Err(RefusHttp::NoncesSatures);
+                }
+                vus.insert(cle, expire);
+                Ok(())
+            }
+            #[cfg(unix)]
+            StockageNonces::Fichier(f) => f.consommer(&kid, nonce, expire, self.capacite, maintenant),
+        }
     }
 
     fn enregistrer(&self, kid: Kid, nonce: &[u8], maintenant: u64) -> Result<(), RefusHttp> {
-        let mut vus = self.vus.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
-        vus.retain(|_, expire| *expire > maintenant);
-        let cle = (kid, nonce.to_vec());
-        if vus.contains_key(&cle) {
-            return Err(RefusHttp::Rejeu);
-        }
-        if vus.len() >= self.capacite {
-            return Err(RefusHttp::NoncesSatures);
-        }
-        // Un nonce reste mémorisé tant que son horodatage peut encore être accepté.
-        vus.insert(cle, maintenant.saturating_add(2 * self.fenetre + 1));
-        Ok(())
+        self.consommer(kid, nonce, maintenant)
     }
 }
 

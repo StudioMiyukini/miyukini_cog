@@ -26,6 +26,9 @@ sha2 = "0.10"
 # Banc d'essai : registre vérifié dont la zone COG tire les révocations remises à la façade.
 miyuregistre = { path = "../miyuregistre", features = ["miyauth"] }
 miyuportail = { path = "../miyuportail" }
+# Bout en bout : guichet des visas en zone COG (clé `visas`, délégations 0x45 réelles).
+miyuhybride = { path = "../miyuhybride", features = ["revocations", "visas"] }
+miyuracine = { path = "../miyuracine" }
 
 [lints]
 workspace = true

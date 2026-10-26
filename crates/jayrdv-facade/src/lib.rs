@@ -23,7 +23,7 @@ pub mod client;
 pub mod facade;
 
 pub use api::{ReponseHttp, ReponseJson, RequeteHttp};
-pub use client::{ClientFedere, DefiRecu};
+pub use client::{requete_demande_visa, requete_lire_visa, ClientFedere, DefiRecu, ParametresDemandeVisa, VisaRecu};
 pub use facade::{ConfigurationFacade, FacadeJayRdv, PORTEE_RESERVER};
 
 /// Empreinte de l'image de façade de cette version (INV-H5) : en production,

@@ -32,6 +32,8 @@ default = []
 douane = ["dep:borderguard", "dep:miyudouane"]
 # Rafraîchissement des révocations d'une façade (`revocations::RevocationsFacade`).
 revocations = ["dep:miyauth", "dep:miyuregistre"]
+# Guichet des visas en zone COG (émission par la clé `visas`, A-022 §1) ; jamais en Franche.
+visas = ["revocations", "miyauth/http"]
 
 [lints]
 workspace = true

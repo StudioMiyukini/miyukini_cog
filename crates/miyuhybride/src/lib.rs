@@ -44,6 +44,7 @@ pub mod quotas;
 #[cfg(feature = "revocations")]
 pub mod revocations;
 pub mod service;
+pub mod visas;
 
 pub use db_secondaire::DbSecondaire;
 pub use erreurs::{ErreurHybride, ErreurManifeste, ErreurTraite};
@@ -65,6 +66,12 @@ pub use revocations::{
     controler_fraicheur_revocations, RefusRemise, RevocationsFacade, FRAICHEUR_REVOCATIONS_FACADE_SECS,
 };
 pub use service::{FacadeJetable, LancementFacade, ServiceHybride, Superviseur};
+pub use visas::{
+    contrat_voies_visas, liaison_demande_visa, portees_texte, traite_visas, DemandeVisaGuichet, GuichetVisasFranche,
+    MotifRefusVisa, ReponseVisas, VisaEmis, VisaRefuse, VoieVisas, SERVICE_VISAS,
+};
+#[cfg(feature = "visas")]
+pub use visas::{BilanGuichet, ConfigGuichetVisas, GuichetVisas};
 
 // Réexportations nécessaires à la macro et aux services.
 pub use miyuportail::{

@@ -28,6 +28,34 @@
 //! Fichier présent mais lien symbolique, non régulier, aux droits ouverts ou de
 //! taille ≠ 32 ⇒ le serveur refuse de démarrer.
 //!
+//! # Chaîne racine → clés d'usage (A-022, A-024) et mode strict
+//!
+//! Avec un **dossier de chaîne** ([`RemoteServerConfig::chaine_dir`](crate::server::RemoteServerConfig),
+//! défaut : variable `CENTRAL_REMOTE_CHAINE_DIR`), la racine du COG est connue
+//! et le mode strict est activé (`AnnuaireEmetteurs::exiger_delegations`) :
+//!
+//! | fichier | contenu |
+//! |---|---|
+//! | `racine.pub` | clé publique d'identité (indice 0), 64 hex ; `cog_id` = son empreinte |
+//! | `emission.delegation` | sceau `0x45` (binaire) de la clé `emission` (indice 1), qui signe les passeports |
+//! | `visas.key` | graine (32 o, `0600`) de la clé `visas` (indice 5), qui signe les visas |
+//! | `visas.delegation` | sceau `0x45` (binaire) de la clé `visas` |
+//!
+//! Produits par la cérémonie (`miyuracine deleguer --usage emission|visas …`,
+//! `miyuracine deriver … --exporter-graine-usage visas`) ; la graine
+//! `emission` reste au chemin de la clé d'émission. Chaque visa est rendu avec
+//! l'en-tête `X-Miyu-Delegations` (délégations `visas` puis `emission`) et ne
+//! dépasse jamais la fin de la délégation `visas` ; les délégations présentées
+//! par l'appareil avec un visa sont vérifiées (`avec_delegations`). Sans
+//! dossier de chaîne : mode de transition (clé d'émission épinglée
+//! directement, signe passeports et visas).
+//!
+//! # Défis et nonces (I5)
+//!
+//! [`AutoriteAppareils::charger`] les persiste dans `central-remote-etat/`
+//! (à côté de la clé d'émission, `0700`) : usage unique tenu après un
+//! redémarrage et entre instances (`miyauth::http::persistant`).
+//!
 //! # Titulaires
 //!
 //! Le passeport porte un identifiant **par paire** (EX-36) du titulaire : le
@@ -52,14 +80,15 @@ use central_remote_protocol::identite::{
 };
 use hkdf::Hkdf;
 use miyauth::http::{
-    verifier_requete_passeport, verifier_requete_signee, verifier_requete_visa, DefiEmis,
-    EntetesSignees, MagasinDefis, MagasinDefisMemoire, RefusHttp, RegistreNonces, RequeteHttp,
+    verifier_requete_passeport_avec_delegations, verifier_requete_signee,
+    verifier_requete_visa_avec_delegations, DefiEmis, EntetesSignees, MagasinDefis,
+    MagasinDefisFichier, MagasinDefisMemoire, RefusHttp, RegistreNonces, RequeteHttp,
 };
 use miyauth::titres::DUREE_MAX_VISA_SECS;
 use miyauth::{
     emettre_passeport, emettre_visa, AnnuaireEmetteurs, CibleRevocation, CogId, DemandePasseport,
     DemandeVisa, ErreurRevocation, IdentityRole, PolitiqueIdentite, Portees, RefusIdentite,
-    SecretTitulaire, SourceRevocation,
+    SecretTitulaire, SourceRevocation, INDICE_USAGE_EMISSION, INDICE_USAGE_VISAS,
 };
 use miyusceau::{CleSignature, NiveauConfiance};
 use sha2::Sha256;
@@ -76,6 +105,44 @@ pub const FICHIER_TITULAIRES_DEFAUT: &str = "central-remote-titulaires.key";
 pub const DUREE_PASSEPORT_APPAREIL_SECS: u64 = 24 * 3600;
 /// Sel de domaine des secrets de titulaires.
 pub const SEL_TITULAIRE: &[u8] = b"miyukini/central-remote/titulaire/v1";
+/// Dossier (à côté de la clé d'émission) des défis et nonces persistants.
+pub const DOSSIER_ETAT_DEFAUT: &str = "central-remote-etat";
+
+/// Chaîne racine → clés d'usage (A-024) : racine connue, mode strict.
+#[derive(Debug)]
+pub struct ChaineCog {
+    /// Clé publique d'identité (indice 0) du COG.
+    pub racine: [u8; 32],
+    /// Délégation `0x45` de la clé `emission` (indice 1).
+    pub delegation_emission: Vec<u8>,
+    /// Clé `visas` (indice 5).
+    pub cle_visas: CleSignature,
+    /// Délégation `0x45` de la clé `visas`.
+    pub delegation_visas: Vec<u8>,
+}
+
+impl ChaineCog {
+    /// Lit le dossier de chaîne (voir l'en-tête du module) ; tout fichier
+    /// absent, mal formé ou aux droits ouverts ⇒ erreur (refus de démarrer).
+    pub fn charger(dossier: &Path) -> Result<Self, String> {
+        let lire = |nom: &str| {
+            std::fs::read(dossier.join(nom)).map_err(|e| format!("chaîne {} : {e}", dossier.join(nom).display()))
+        };
+        let racine_hex = String::from_utf8(lire("racine.pub")?).map_err(|_| "racine.pub : texte attendu")?;
+        let racine: [u8; 32] = hex::decode(racine_hex.trim())
+            .ok()
+            .and_then(|v| v.try_into().ok())
+            .ok_or("racine.pub : clé publique (64 hex) attendue")?;
+        let cle_visas = miyauth::http::service::charger_cle(&dossier.join("visas.key"))
+            .map_err(|e| format!("visas.key : {e}"))?;
+        Ok(Self {
+            racine,
+            delegation_emission: lire("emission.delegation")?,
+            cle_visas,
+            delegation_visas: lire("visas.delegation")?,
+        })
+    }
+}
 
 /// Accès prouvé d'un appareil appairé (visa + possession vérifiés).
 #[derive(Debug, Clone)]
@@ -118,10 +185,16 @@ fn identite_opaque(cog: &CogId, sujet: &[u8; 32]) -> String {
 pub struct AutoriteAppareils {
     cog: CogId,
     cle: CleSignature,
+    /// Clé qui scelle les visas : `visas` (indice 5) en mode chaîné, sinon `cle`.
+    cle_visas: CleSignature,
+    /// Délégations rendues avec chaque visa (`visas`, `emission`) ; vide en transition.
+    delegations: Vec<Vec<u8>>,
+    /// Fin de la délégation `visas` (aucun visa au-delà) ; `u64::MAX` en transition.
+    fin_visas: u64,
     annuaire: AnnuaireEmetteurs,
     titulaires: Zeroizing<[u8; 32]>,
     pairing: Arc<PairingManager>,
-    defis: MagasinDefisMemoire,
+    defis: Box<dyn MagasinDefis>,
     nonces: RegistreNonces,
 }
 
@@ -155,17 +228,134 @@ impl AutoriteAppareils {
             .map_err(|e| format!("révocations : {e}"))?;
         Ok(Self {
             cog,
+            cle_visas: CleSignature::depuis_graine(&cle.graine()),
             cle,
+            delegations: Vec::new(),
+            fin_visas: u64::MAX,
             annuaire,
             titulaires: Zeroizing::new(graine_titulaires),
             pairing,
-            defis: MagasinDefisMemoire::default(),
+            defis: Box::new(MagasinDefisMemoire::default()),
             nonces: RegistreNonces::default(),
         })
     }
 
-    /// Charge (ou crée, `0600`) la clé d'émission et la graine des titulaires.
+    /// Autorité en **mode chaîné** (racine connue, mode strict) : passeports
+    /// signés par `cle` (clé `emission`, indice 1), visas par la clé `visas`
+    /// (indice 5), chacune certifiée par sa délégation ; `cog_id` = celui de la racine.
+    pub fn new_chaine(
+        cle: CleSignature,
+        chaine: ChaineCog,
+        graine_titulaires: [u8; 32],
+        pairing: Arc<PairingManager>,
+        maintenant: u64,
+    ) -> Result<Self, String> {
+        let cog = CogId::new(&miyuracine::cog_id_depuis_cle(&chaine.racine)).ok_or("cog_id de la racine invalide")?;
+        let mut annuaire = AnnuaireEmetteurs::new();
+        annuaire
+            .epingler_racine(cog.clone(), &chaine.racine, NiveauConfiance::Souverain)
+            .map_err(|e| format!("racine : {e}"))?;
+        for (octets, cle_attendue, indice) in [
+            (&chaine.delegation_emission, &cle, INDICE_USAGE_EMISSION),
+            (&chaine.delegation_visas, &chaine.cle_visas, INDICE_USAGE_VISAS),
+        ] {
+            let kid = annuaire.ajouter_delegation(octets, maintenant).map_err(|e| format!("délégation : {e}"))?;
+            let d = annuaire.delegation(&kid).map(|(_, d)| d.clone()).ok_or("délégation absente")?;
+            if kid != cle_attendue.kid() || d.indice() != indice {
+                return Err(format!("délégation d'indice {} : clé ou usage incohérents", d.indice()));
+            }
+        }
+        let fin_visas = annuaire
+            .delegation(&chaine.cle_visas.kid())
+            .map(|(_, d)| d.pas_apres())
+            .ok_or("délégation visas absente")?;
+        annuaire.exiger_delegations();
+        pairing.activer_revocations(cog.clone()).map_err(|e| format!("révocations : {e}"))?;
+        Ok(Self {
+            cog,
+            cle,
+            cle_visas: chaine.cle_visas,
+            delegations: vec![chaine.delegation_visas, chaine.delegation_emission],
+            fin_visas,
+            annuaire,
+            titulaires: Zeroizing::new(graine_titulaires),
+            pairing,
+            defis: Box::new(MagasinDefisMemoire::default()),
+            nonces: RegistreNonces::default(),
+        })
+    }
+
+    /// Défis et nonces **persistants et partagés** dans `dossier` (I5).
+    pub fn avec_etat_persistant(mut self, dossier: &Path) -> Result<Self, String> {
+        self.defis = Box::new(
+            MagasinDefisFichier::ouvrir_defaut(&dossier.join("defis")).map_err(|e| format!("défis : {e}"))?,
+        );
+        self.nonces = RegistreNonces::persistant(
+            &dossier.join("nonces"),
+            miyauth::http::CAPACITE_NONCES_DEFAUT,
+            miyauth::http::FENETRE_HORODATAGE_SECS,
+        )
+        .map_err(|e| format!("nonces : {e}"))?;
+        Ok(self)
+    }
+
+    /// Vrai si l'autorité est en mode chaîné (racine connue, délégations exigées).
+    pub fn mode_strict(&self) -> bool {
+        self.annuaire.est_strict()
+    }
+
+    /// Délégations à rendre avec un visa (`X-Miyu-Delegations`) ; vide en transition.
+    pub fn delegations_visa(&self) -> &[Vec<u8>] {
+        &self.delegations
+    }
+
+    /// Charge (ou crée, `0600`) la clé d'émission et la graine des titulaires ;
+    /// défis et nonces persistés dans `central-remote-etat/` ; mode chaîné si
+    /// `chaine` est donné.
+    pub fn charger_avec_chaine(
+        cle_emission: &Path,
+        cog_id: Option<&str>,
+        chaine: Option<&Path>,
+        pairing: Arc<PairingManager>,
+    ) -> Result<Self, String> {
+        let dossier = cle_emission.parent().unwrap_or_else(|| Path::new(""));
+        let autorite = match chaine {
+            None => Self::charger_transition(cle_emission, cog_id, pairing)?,
+            Some(c) => {
+                let cle = miyauth::http::service::charger_cle(cle_emission)
+                    .map_err(|e| format!("clé d'émission ({}) : {e}", cle_emission.display()))?;
+                let chemin_titulaires = dossier.join(FICHIER_TITULAIRES_DEFAUT);
+                let titulaires = miyauth::http::service::charger_ou_creer_cle(&chemin_titulaires)
+                    .map_err(|e| format!("secrets de titulaires ({}) : {e}", chemin_titulaires.display()))?;
+                let a = Self::new_chaine(
+                    cle,
+                    ChaineCog::charger(c)?,
+                    titulaires.graine(),
+                    pairing,
+                    miyauth::http::service::maintenant_unix(),
+                )?;
+                if let Some(attendu) = cog_id {
+                    if attendu.trim() != a.cog.as_str() {
+                        return Err("cog_id configuré différent de celui de la racine".into());
+                    }
+                }
+                a
+            }
+        };
+        autorite.avec_etat_persistant(&dossier.join(DOSSIER_ETAT_DEFAUT))
+    }
+
+    /// Charge (ou crée, `0600`) la clé d'émission et la graine des titulaires
+    /// (mode de transition) ; défis et nonces persistés.
     pub fn charger(
+        cle_emission: &Path,
+        cog_id: Option<&str>,
+        pairing: Arc<PairingManager>,
+    ) -> Result<Self, String> {
+        Self::charger_avec_chaine(cle_emission, cog_id, None, pairing)
+    }
+
+    fn charger_transition(
         cle_emission: &Path,
         cog_id: Option<&str>,
         pairing: Arc<PairingManager>,
@@ -283,14 +473,35 @@ impl AutoriteAppareils {
     /// Échange `MiyuPasseport` + `X-Miyu-PoP` contre un visa (audience
     /// [`AUDIENCE`], ≤ 15 min, dans la fenêtre du passeport).
     pub fn delivrer_visa(&self, requete: &RequeteHttp<'_>, maintenant: u64) -> Result<VisaDelivre, RefusHttp> {
-        let possession =
-            verifier_requete_passeport(requete, AUDIENCE, &self.politique(), &self.defis, maintenant)?;
+        self.delivrer_visa_avec_delegations(requete, None, maintenant)
+    }
+
+    /// Comme [`Self::delivrer_visa`], avec les délégations présentées par
+    /// l'appareil (`X-Miyu-Delegations`). En mode chaîné, le visa est scellé
+    /// par la clé `visas` et ne dépasse pas la fin de sa délégation.
+    pub fn delivrer_visa_avec_delegations(
+        &self,
+        requete: &RequeteHttp<'_>,
+        delegations: Option<&str>,
+        maintenant: u64,
+    ) -> Result<VisaDelivre, RefusHttp> {
+        let possession = verifier_requete_passeport_avec_delegations(
+            requete,
+            delegations,
+            AUDIENCE,
+            &self.politique(),
+            self.defis.as_ref(),
+            maintenant,
+        )?;
         let p = possession.passeport().passeport();
         let pas_avant = maintenant.max(p.pas_avant);
-        let pas_apres = maintenant.saturating_add(DUREE_MAX_VISA_SECS).min(p.pas_apres);
+        let pas_apres = maintenant.saturating_add(DUREE_MAX_VISA_SECS).min(p.pas_apres).min(self.fin_visas);
+        if pas_apres <= pas_avant {
+            return Err(RefusIdentite::DelegationHorsFenetre.into());
+        }
         let visa = emettre_visa(
             &self.cog,
-            &self.cle,
+            &self.cle_visas,
             &possession,
             &DemandeVisa {
                 audience: AUDIENCE.to_string(),
@@ -314,7 +525,25 @@ impl AutoriteAppareils {
 
     /// Vérifie `MiyuVisa` + `X-Miyu-PoP` (défi neuf, consommé) pour [`AUDIENCE`].
     pub fn verifier_acces(&self, requete: &RequeteHttp<'_>, maintenant: u64) -> Result<AccesAppareil, RefusHttp> {
-        let prouve = verifier_requete_visa(requete, AUDIENCE, &self.politique(), &self.defis, maintenant)?;
+        self.verifier_acces_avec_delegations(requete, None, maintenant)
+    }
+
+    /// Comme [`Self::verifier_acces`], avec les délégations présentées
+    /// (`X-Miyu-Delegations`) : vérifiées contre la racine épinglée.
+    pub fn verifier_acces_avec_delegations(
+        &self,
+        requete: &RequeteHttp<'_>,
+        delegations: Option<&str>,
+        maintenant: u64,
+    ) -> Result<AccesAppareil, RefusHttp> {
+        let prouve = verifier_requete_visa_avec_delegations(
+            requete,
+            delegations,
+            AUDIENCE,
+            &self.politique(),
+            self.defis.as_ref(),
+            maintenant,
+        )?;
         let visa = prouve.acces().visa();
         let appareil = self.appareil_de(&visa.cle_appareil)?;
         Ok(AccesAppareil {
@@ -348,7 +577,10 @@ impl SourceRevocation for AutoriteAppareils {
         // Révocation durable : une clé (autre que la clé d'émission) doit être
         // celle d'un appareil encore appairé.
         if let CibleRevocation::Cle(kid) = cible {
-            if *kid != self.cle.kid() && self.pairing.device_for_key_id(kid).is_none() {
+            if *kid != self.cle.kid()
+                && *kid != self.cle_visas.kid()
+                && self.pairing.device_for_key_id(kid).is_none()
+            {
                 return Ok(true);
             }
         }
@@ -498,4 +730,116 @@ mod tests {
         assert_eq!(a3.cog().as_str(), racine);
         assert!(AutoriteAppareils::charger(&chemin, Some("invalide"), Arc::new(PairingManager::new())).is_err());
     }
+
+    /// Mode chaîné : racine connue, délégations `emission` et `visas`, strict.
+    fn monde_chaine(fin_visas: u64) -> (AutoriteAppareils, CleSignature, miyuracine::Racine) {
+        use miyuracine::{Racine, Usage};
+        let mgr = Arc::new(PairingManager::new());
+        let device = E2eIdentity::generate();
+        appairer(&mgr, &device, "device-identite-02");
+        let racine = Racine::depuis_secret(&[0x77; 32]);
+        let t = maintenant();
+        let chaine = ChaineCog {
+            racine: racine.cle_publique_identite(),
+            delegation_emission: racine.deleguer(Usage::Emission, 0, t - 60, t + 30 * 86_400).unwrap(),
+            cle_visas: racine.cle(Usage::Visas, 0).unwrap(),
+            delegation_visas: racine.deleguer(Usage::Visas, 0, t - 60, fin_visas).unwrap(),
+        };
+        let a = AutoriteAppareils::new_chaine(racine.cle(Usage::Emission, 0).unwrap(), chaine, [3; 32], mgr, t).unwrap();
+        (a, CleSignature::depuis_graine(&device.secret_bytes()), racine)
+    }
+
+    #[test]
+    #[allow(clippy::many_single_char_names)]
+    fn mode_chaine_visas_par_l_indice_5_et_strict() {
+        let (a, cle, racine) = monde_chaine(maintenant() + 300);
+        assert!(a.mode_strict());
+        assert_eq!(a.cog().as_str(), miyuracine::cog_id_depuis_cle(&racine.cle_publique_identite()));
+        assert_eq!(a.delegations_visa().len(), 2, "délégations `visas` et `emission` rendues avec le visa");
+        let p = passeport(&a, &cle);
+        let v = visa(&a, &cle, &p);
+        assert!(v.acces.expire_a <= maintenant() + 300, "jamais au-delà de la délégation `visas`");
+        // Accès accepté, délégations présentées ou non (déjà connues de l'annuaire).
+        let auth = formater_autorisation_visa(&v.visa, &p);
+        let deleg: Vec<&[u8]> = a.delegations_visa().iter().map(Vec::as_slice).collect();
+        let entete = miyauth::http::formater_delegations(&deleg);
+        let pop1 = pop(&a, &cle, "GET", "/ws");
+        let r = RequeteHttp { methode: "GET", chemin: "/ws", corps: b"", autorisation: Some(&auth), pop: Some(&pop1), liaison: None };
+        assert!(a.verifier_acces_avec_delegations(&r, Some(&entete), maintenant()).is_ok());
+        // Délégation présentée d'une autre racine : refus.
+        let autre = miyuracine::Racine::depuis_secret(&[0x78; 32]);
+        let t = maintenant();
+        let etrangere = autre.deleguer(miyuracine::Usage::Visas, 0, t - 60, t + 600).unwrap();
+        let pop2 = pop(&a, &cle, "GET", "/ws");
+        let r2 = RequeteHttp { pop: Some(&pop2), ..r };
+        let e2 = miyauth::http::formater_delegations(&[&etrangere]);
+        assert!(a.verifier_acces_avec_delegations(&r2, Some(&e2), maintenant()).is_err());
+        // Visa scellé par la clé `emission` (indice 1) : refusé (strict, usage incorrect).
+        let possession = {
+            let auth = formater_autorisation_passeport(&p);
+            let pop = pop(&a, &cle, "POST", "/x");
+            let r = RequeteHttp { methode: "POST", chemin: "/x", corps: b"", autorisation: Some(&auth), pop: Some(&pop), liaison: None };
+            miyauth::http::verifier_requete_passeport(&r, AUDIENCE, &a.politique(), a.defis.as_ref(), maintenant()).unwrap()
+        };
+        let faux = emettre_visa(
+            &a.cog,
+            &racine.cle(miyuracine::Usage::Emission, 0).unwrap(),
+            &possession,
+            &DemandeVisa {
+                audience: AUDIENCE.into(),
+                portees: Portees::new([PORTEE_PILOTAGE]).unwrap(),
+                pas_avant: maintenant(),
+                pas_apres: maintenant() + 60,
+            },
+        )
+        .unwrap();
+        let auth = formater_autorisation_visa(&faux, &p);
+        let pop3 = pop(&a, &cle, "GET", "/ws");
+        let r3 = RequeteHttp { methode: "GET", chemin: "/ws", corps: b"", autorisation: Some(&auth), pop: Some(&pop3), liaison: None };
+        assert!(matches!(
+            a.verifier_acces(&r3, maintenant()),
+            Err(RefusHttp::Identite(RefusIdentite::UsageIncorrect { attendu: 5, delegue: 1 }))
+        ));
+    }
+
+    #[test]
+    fn delegation_visas_expiree_refuse_de_demarrer() {
+        use miyuracine::{Racine, Usage};
+        let racine = Racine::depuis_secret(&[0x79; 32]);
+        let t = maintenant();
+        let chaine = ChaineCog {
+            racine: racine.cle_publique_identite(),
+            delegation_emission: racine.deleguer(Usage::Emission, 0, t - 60, t + 86_400).unwrap(),
+            cle_visas: racine.cle(Usage::Visas, 0).unwrap(),
+            delegation_visas: racine.deleguer(Usage::Visas, 0, t - 86_400, t - 600).unwrap(),
+        };
+        let mgr = Arc::new(PairingManager::new());
+        assert!(AutoriteAppareils::new_chaine(racine.cle(Usage::Emission, 0).unwrap(), chaine, [3; 32], mgr, t).is_err());
+    }
+
+    #[test]
+    fn nonces_et_defis_persistants_apres_redemarrage() {
+        let dir = std::env::temp_dir().join(format!("cr-etat-{}", uuid::Uuid::new_v4()));
+        let mgr = Arc::new(PairingManager::new());
+        let device = E2eIdentity::generate();
+        appairer(&mgr, &device, "device-identite-03");
+        let cle = CleSignature::depuis_graine(&device.secret_bytes());
+        let emission = CleSignature::generer();
+        let a = AutoriteAppareils::new(CleSignature::depuis_graine(&emission.graine()), None, [3; 32], mgr.clone())
+            .unwrap()
+            .avec_etat_persistant(&dir)
+            .unwrap();
+        let e = signer_requete(&cle, USAGE_PASSEPORT, "POST", PASSEPORT_ENDPOINT, b"", maintenant());
+        assert!(a.delivrer_passeport(&e, b"", maintenant()).is_ok());
+        let d = a.emettre_defi(maintenant()).unwrap();
+        drop(a);
+        // Redémarrage : même dossier d'état.
+        let b = AutoriteAppareils::new(emission, None, [3; 32], mgr).unwrap().avec_etat_persistant(&dir).unwrap();
+        assert_eq!(b.delivrer_passeport(&e, b"", maintenant()).unwrap_err(), RefusHttp::Rejeu, "nonce rejoué");
+        // Le défi émis avant le redémarrage reste consommable une fois.
+        assert!(b.defis.consommer(&d.id, AUDIENCE, maintenant()).is_ok());
+        assert!(b.defis.consommer(&d.id, AUDIENCE, maintenant()).is_err());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
 }

@@ -493,3 +493,192 @@ fn repertoire_trop_ouvert_refuse_au_demarrage() {
     assert!(controler_repertoire(&b.etat_e, Some(moi)).is_ok());
     assert_eq!(verifier_cloisonnement(&[b.racine.join("absent")]), Ok(()));
 }
+
+// ---------------------------------------------------------------- dérive d'état (revue A-027)
+
+fn ecraser(chemin: &Path, octets: &[u8]) {
+    std::fs::write(chemin, octets).unwrap();
+    std::fs::set_permissions(chemin, std::fs::Permissions::from_mode(0o600)).unwrap();
+}
+
+fn root() -> bool {
+    rustix::process::geteuid().as_raw() == 0
+}
+
+#[test]
+fn descripteurs_illisibles_voies_conservees_et_etat_intact() {
+    let b = Banc::new();
+    let (s, _, _) = voie_h2(&b, "jayrdv");
+    let (mut e, mut so) = (b.entree(), b.sortie());
+    so.une_passe();
+    e.une_passe();
+    b.deposer(&s, 1);
+    assert_eq!(e.une_passe().emis, 1);
+    let a = b.moteur_relever().remove(0);
+    let rejeu = b.etat_e.join("jayrdv.rejeu");
+    let jetons = b.etat_s.join("jayrdv.jetons");
+    let (avant_e, avant_s) = (std::fs::read(&rejeu).unwrap(), std::fs::read(&jetons).unwrap());
+
+    // Descripteur présent mais corrompu : voie conservée, état intact.
+    let desc_e = b.voies_e.join("jayrdv.voie");
+    let desc_s = b.voies_s.join("jayrdv.voie");
+    let (bon_e, bon_s) = (std::fs::read(&desc_e).unwrap(), std::fs::read(&desc_s).unwrap());
+    ecraser(&desc_e, b"illisible");
+    ecraser(&desc_s, b"illisible");
+    e.une_passe();
+    so.une_passe();
+    assert_eq!(std::fs::read(&rejeu).unwrap(), avant_e, "marques intactes");
+    assert_eq!(std::fs::read(&jetons).unwrap(), avant_s, "jetons intacts");
+    b.deposer(&s, 2);
+    assert_eq!(e.une_passe().emis, 1, "voie toujours servie");
+    b.moteur_repondre(a.jeton.octets(), "ok");
+    assert_eq!(so.une_passe().emis, 1, "sortie toujours servie");
+
+    // Répertoire des descripteurs illisible (hors root) : idem.
+    if !root() {
+        ecraser(&desc_e, &bon_e);
+        ecraser(&desc_s, &bon_s);
+        for d in [&b.voies_e, &b.voies_s] {
+            std::fs::set_permissions(d, std::fs::Permissions::from_mode(0o000)).unwrap();
+        }
+        e.une_passe();
+        so.une_passe();
+        b.deposer(&s, 3);
+        assert_eq!(e.une_passe().emis, 1, "voies conservées");
+        assert!(rejeu.exists() && jetons.exists(), "état conservé");
+        for d in [&b.voies_e, &b.voies_s] {
+            std::fs::set_permissions(d, std::fs::Permissions::from_mode(0o700)).unwrap();
+        }
+    }
+    // Rejeu de la trame 1 toujours refusé.
+    let t1 = sceller(&declaration(&s, Sens::Entrante, ENTRANT, 1, champs_simples()), &[&b.facade, &b.auteur]).unwrap();
+    File::new(&b.depot).ecrire(&s, EXT_MSCE, &t1).unwrap();
+    assert_eq!(e.une_passe().emis, 0);
+}
+
+#[test]
+fn jetons_corrompus_session_refusee() {
+    let b = Banc::new();
+    let (s, _, _) = voie_h2(&b, "jayrdv");
+    let (mut e, mut so) = (b.entree(), b.sortie());
+    so.une_passe();
+    e.une_passe();
+    b.deposer(&s, 1);
+    e.une_passe();
+    let a = b.moteur_relever().remove(0);
+    b.moteur_repondre(a.jeton.octets(), "un");
+    assert_eq!(so.une_passe().emis, 1);
+    drop(so);
+
+    // Fichier de jetons corrompu : la sortie refuse d'ouvrir la session ; rien n'est rejouable.
+    ecraser(&b.etat_s.join("jayrdv.jetons"), b"MPJ0-corrompu");
+    let mut so = b.sortie();
+    so.une_passe();
+    assert_eq!(so.portail().session(&s).unwrap(), None, "session non ouverte");
+    b.moteur_repondre(a.jeton.octets(), "rejeu");
+    let bilan = so.une_passe();
+    assert_eq!((bilan.emis, bilan.refuses), (0, 1));
+    assert_eq!(std::fs::read(b.etat_s.join("jayrdv.jetons")).unwrap(), b"MPJ0-corrompu", "aucune remise à zéro");
+}
+
+#[test]
+fn jetons_fin_dechiree_enregistrements_complets_gardes() {
+    let b = Banc::new();
+    let (s, _, _) = voie_h2(&b, "jayrdv");
+    let (mut e, mut so) = (b.entree(), b.sortie());
+    so.une_passe();
+    e.une_passe();
+    b.deposer(&s, 1);
+    b.deposer(&s, 2);
+    e.une_passe();
+    let admises = b.moteur_relever();
+    b.moteur_repondre(admises[0].jeton.octets(), "un");
+    assert_eq!(so.une_passe().emis, 1);
+    drop(so);
+
+    // Ajout interrompu : 10 octets en fin de fichier.
+    let chemin = b.etat_s.join("jayrdv.jetons");
+    let mut o = std::fs::read(&chemin).unwrap();
+    assert_eq!(o.len(), 36 + 32);
+    o.extend_from_slice(&[0xAB; 10]);
+    ecraser(&chemin, &o);
+    let mut so = b.sortie();
+    so.une_passe();
+    assert_eq!(std::fs::read(&chemin).unwrap().len(), 36 + 32, "seule la fin déchirée est retirée");
+    b.moteur_repondre(admises[0].jeton.octets(), "rejeu");
+    assert_eq!(so.une_passe().refuses, 1, "jeton complet toujours consommé");
+    b.moteur_repondre(admises[1].jeton.octets(), "deux");
+    assert_eq!(so.une_passe().emis, 1);
+    assert_eq!(std::fs::read(&chemin).unwrap().len(), 36 + 64, "ajouts suivants alignés");
+}
+
+#[test]
+fn marques_corrompues_l_entree_refuse() {
+    let b = Banc::new();
+    let (s, _, _) = voie_h2(&b, "jayrdv");
+    let mut e = b.entree();
+    e.une_passe();
+    let t1 = b.deposer(&s, 1);
+    assert_eq!(e.une_passe().emis, 1);
+    b.moteur_relever();
+    drop(e);
+
+    ecraser(&b.etat_e.join("jayrdv.rejeu"), b"MPM1court");
+    let mut e = b.entree();
+    e.une_passe();
+    assert_eq!(e.portail().session(&s).unwrap(), None, "session non ouverte");
+    File::new(&b.depot).ecrire(&s, EXT_MSCE, &t1).unwrap();
+    b.deposer(&s, 2);
+    let bilan = e.une_passe();
+    assert_eq!((bilan.emis, bilan.refuses), (0, 2), "rien admis, pas même le rejeu");
+    assert_eq!(std::fs::read(b.etat_e.join("jayrdv.rejeu")).unwrap(), b"MPM1court", "aucune remise à zéro");
+}
+
+#[test]
+fn session_close_puis_reapparue_refusee() {
+    let b = Banc::new();
+    let (s, jetons, id1) = voie_h2(&b, "jayrdv");
+    let (mut e, mut so) = (b.entree(), b.sortie());
+    so.une_passe();
+    e.une_passe();
+    let t1 = b.deposer(&s, 1);
+    assert_eq!(e.une_passe().emis, 1);
+    let a = b.moteur_relever().remove(0);
+
+    // Les Cores passent à une session neuve, puis la voie est retirée.
+    let id2 = [0x22; 32];
+    let jetons2 = CleJetons::generer();
+    b.cores(contrat("jayrdv", ClasseExposition::H2), EtatVoie::Active, 0, Some((id2, &jetons2)));
+    e.une_passe();
+    so.une_passe();
+    assert_eq!(e.portail().session(&s).unwrap(), Some(id2));
+    std::fs::remove_file(b.voies_e.join("jayrdv.voie")).unwrap();
+    std::fs::remove_file(b.voies_s.join("jayrdv.voie")).unwrap();
+    e.une_passe();
+    so.une_passe();
+    assert!(!b.etat_e.join("jayrdv.rejeu").exists(), "état supprimé, session inscrite close");
+
+    // La session 1 réapparaît (descripteur rejoué) : refusée, même après redémarrage.
+    b.cores(contrat("jayrdv", ClasseExposition::H2), EtatVoie::Active, 0, Some((id1, &jetons)));
+    drop((e, so));
+    let (mut e, mut so) = (b.entree(), b.sortie());
+    so.une_passe();
+    e.une_passe();
+    assert_eq!(e.portail().session(&s).unwrap(), None);
+    assert_eq!(so.portail().session(&s).unwrap(), None);
+    File::new(&b.depot).ecrire(&s, EXT_MSCE, &t1).unwrap();
+    assert_eq!(e.une_passe().emis, 0, "trame de la session close non rejouable");
+    b.moteur_repondre(a.jeton.octets(), "rejeu");
+    assert_eq!(so.une_passe().emis, 0, "jeton de la session close non rejouable");
+
+    // La session 2 aussi est close (voie retirée) ; une session neuve passe.
+    b.cores(contrat("jayrdv", ClasseExposition::H2), EtatVoie::Active, 0, Some((id2, &jetons2)));
+    e.une_passe();
+    assert_eq!(e.portail().session(&s).unwrap(), None);
+    let id3 = [0x33; 32];
+    b.cores(contrat("jayrdv", ClasseExposition::H2), EtatVoie::Active, 0, Some((id3, &CleJetons::generer())));
+    e.une_passe();
+    so.une_passe();
+    assert_eq!(e.portail().session(&s).unwrap(), Some(id3));
+    assert_eq!(so.portail().session(&s).unwrap(), Some(id3));
+}

@@ -36,26 +36,42 @@
 //! - DB secondaire : réponses publiées et cache des créneaux publiés, **jamais
 //!   autoritaire** (le moteur décide en zone COG à chaque réservation).
 //!
+//! - **visas** (A-022 §1, I3) : `POST /v1/visa` transmet une demande typée
+//!   (passeport, clé d'appareil, preuve de possession, portées, durée) au
+//!   guichet des visas **en zone COG** par sa voie du Portail
+//!   ([`miyuhybride::GuichetVisasFranche`]) ; la façade ne vérifie ni ne
+//!   signe rien (aucune clé, INV-H2) et sert la réponse publiée ;
+//! - **délégations** (A-024) : la délégation `0x45` présentée dans
+//!   `X-Miyu-Delegations` est vérifiée contre la racine épinglée
+//!   (`AnnuaireEmetteurs::avec_delegations`) ; **mode strict** dès que la
+//!   racine du COG hôte est épinglée dans la configuration (toute ancre
+//!   directe est alors refusée, y compris celles des COG reconnus).
+//!
 //! La façade ne connaît ni l'adresse ni une poignée du moteur ou de
-//! KindMother : son seul lien est le [`GuichetFranche`] de sa voie.
+//! KindMother : ses seuls liens sont le [`GuichetFranche`] de sa voie et,
+//! s'il est remis, le guichet Franche de la voie des visas.
 
 use std::collections::BTreeMap;
 
 use jayrdv_traite::{CreneauDisponible, DemandeCreneaux, Motif, Reservation, Sortant};
-use miyauth::http::{b64_decoder, b64_encoder, verifier_requete_visa, MagasinDefis, MagasinDefisMemoire};
+use miyauth::http::{
+    b64_decoder, b64_encoder, verifier_requete_visa_avec_delegations, MagasinDefis, MagasinDefisMemoire,
+    ENTETE_DELEGATIONS,
+};
 use miyauth::{
     AnnuaireEmetteurs, CibleRevocation, CogId, ErreurRevocation, PolitiqueIdentite, RevocationsFederees,
     SourceRevocation,
 };
 use miyuhybride::{
     declaration_entrante, DbSecondaire, ErreurHybride, ErreurPortail, EtatVoie, FacadeJetable, GuichetFranche,
-    controler_fraicheur_revocations, LancementFacade, MessageTraite, QuotasService, RefusDecodage, RevocationsFacade,
-    SessionsClients, DELAI_INACTIVITE_DEFAUT_SECS,
+    controler_fraicheur_revocations, portees_texte, DemandeVisaGuichet, GuichetVisasFranche, LancementFacade,
+    MessageTraite, MotifRefusVisa, QuotasService, RefusDecodage, ReponseVisas, RevocationsFacade, SessionsClients,
+    DELAI_INACTIVITE_DEFAUT_SECS,
 };
 
 use crate::api::{
-    AccepteJson, CreneauJson, DefiJson, DemandeCreneauxJson, EnAttenteJson, ReponseHttp, ReponseJson, RequeteHttp,
-    ReservationJson, MAX_CORPS,
+    AccepteJson, CreneauJson, DefiJson, DemandeCreneauxJson, DemandeVisaJson, EnAttenteJson, ReponseHttp,
+    ReponseJson, RequeteHttp, ReservationJson, VisaJson, MAX_CORPS,
 };
 
 /// Portée exigée dans le visa (choix fail-closed : la doc gelée n'en définit pas pour JayRDV).
@@ -69,6 +85,8 @@ const T_ATTENTE: &str = "attente";
 const T_REPONSES: &str = "reponses";
 const T_PARTIEL: &str = "partiel";
 const T_CRENEAUX: &str = "creneaux";
+const T_VISAS_ATTENTE: &str = "visas_attente";
+const T_VISAS: &str = "visas";
 
 /// Configuration publique de la façade (aucun secret).
 #[derive(Debug, Clone)]
@@ -120,6 +138,8 @@ pub struct FacadeJayRdv {
     dernieres_sequences: BTreeMap<[u8; 32], u64>,
     ouverte_le: Option<u64>,
     condamnee: bool,
+    /// Guichet Franche de la voie des visas (zone COG), s'il est remis.
+    visas: Option<GuichetVisasFranche>,
 }
 
 impl FacadeJetable for FacadeJayRdv {
@@ -168,7 +188,11 @@ impl FacadeJayRdv {
         Self::construire(lancement, config, Some(revocations))
     }
 
-    fn construire(lancement: LancementFacade, config: ConfigurationFacade, revocations: Option<RevocationsFacade>) -> Self {
+    fn construire(lancement: LancementFacade, mut config: ConfigurationFacade, revocations: Option<RevocationsFacade>) -> Self {
+        // Racine du COG hôte connue : mode strict (seules les clés déléguées signent).
+        if config.annuaire.racine_epinglee(&config.cog_local) {
+            config.annuaire.exiger_delegations();
+        }
         Self {
             guichet: lancement.guichet,
             db: lancement.db,
@@ -182,7 +206,20 @@ impl FacadeJayRdv {
             dernieres_sequences: BTreeMap::new(),
             ouverte_le: None,
             condamnee: false,
+            visas: None,
         }
+    }
+
+    /// Remet le guichet Franche de la voie des visas : la façade sert alors
+    /// `POST /v1/visa` et `GET /v1/visa/<demande>`.
+    pub fn avec_guichet_visas(mut self, guichet: GuichetVisasFranche) -> Self {
+        self.visas = Some(guichet);
+        self
+    }
+
+    /// Vrai si la configuration est en mode strict (délégations exigées).
+    pub fn mode_strict(&self) -> bool {
+        self.config.annuaire.est_strict()
     }
 
     /// DB secondaire (inspection : cache non autoritaire).
@@ -243,6 +280,10 @@ impl FacadeJayRdv {
             ("POST", "/v1/reservations") => self.reserver(r, maintenant),
             ("GET", "/v1/creneaux") if r.corps.is_empty() => self.cache_creneaux(r, maintenant),
             ("DELETE", "/v1/session") if r.corps.is_empty() => self.fermer_session(r, maintenant),
+            ("POST", "/v1/visa") => self.demander_visa(r, maintenant),
+            ("GET", chemin) if r.corps.is_empty() && chemin.starts_with("/v1/visa/") => {
+                self.lire_visa(&chemin["/v1/visa/".len()..])
+            }
             ("GET", chemin) if r.corps.is_empty() && chemin.starts_with("/v1/reponses/") => {
                 self.reponse(r, &chemin["/v1/reponses/".len()..], maintenant)
             }
@@ -295,8 +336,15 @@ impl FacadeJayRdv {
         };
         let politique =
             PolitiqueIdentite { cog_local: self.config.cog_local.clone(), annuaire: &self.config.annuaire, revocations };
-        let acces = verifier_requete_visa(&requete, &self.audience, &politique, &self.defis, maintenant)
-            .map_err(|e| ReponseHttp::refus(e.statut(), "identite"))?;
+        let acces = verifier_requete_visa_avec_delegations(
+            &requete,
+            r.entete(ENTETE_DELEGATIONS),
+            &self.audience,
+            &politique,
+            &self.defis,
+            maintenant,
+        )
+        .map_err(|e| ReponseHttp::refus(e.statut(), "identite"))?;
         let visa = acces.acces().visa();
         if !visa.portees.contient(PORTEE_RESERVER) {
             return Err(ReponseHttp::refus(403, "portee"));
@@ -308,6 +356,107 @@ impl FacadeJayRdv {
             return Err(ReponseHttp::refus(403, "auteur_hors_session"));
         }
         Ok(cle)
+    }
+
+    /// `POST /v1/visa` : traduit en [`DemandeVisaGuichet`] et dépose sur la voie
+    /// des visas. Aucune vérification ici : tout est vérifié en zone COG.
+    fn demander_visa(&mut self, r: &RequeteHttp, maintenant: u64) -> ReponseHttp {
+        let Some(guichet) = self.visas.as_ref() else {
+            return ReponseHttp::refus(404, "inconnu");
+        };
+        let Ok(c) = serde_json::from_slice::<DemandeVisaJson>(&r.corps) else {
+            return ReponseHttp::refus(400, "corps");
+        };
+        let delegation = match c.delegation_passeport.as_deref().map(b64_decoder) {
+            None => None,
+            Some(Some(d)) => Some(d),
+            Some(None) => return ReponseHttp::refus(400, "corps"),
+        };
+        let (Some(passeport), Some(cle), Some(defi), Some(preuve)) =
+            (b64_decoder(&c.passeport), b64_taille::<32>(&c.cle_appareil), b64_taille::<32>(&c.defi), b64_taille::<64>(&c.preuve))
+        else {
+            return ReponseHttp::refus(400, "corps");
+        };
+        let demande = DemandeVisaGuichet {
+            passeport,
+            delegation_passeport: delegation,
+            cle_appareil: cle.to_vec(),
+            audience: self.audience.clone(),
+            portees: portees_texte(&c.portees),
+            duree_secs: c.duree_secs,
+            emise_le: c.emise_le,
+            defi: defi.to_vec(),
+            preuve: preuve.to_vec(),
+        };
+        match guichet.deposer(&demande, maintenant) {
+            Ok(empreinte) => {
+                if self.db.ecrire(T_VISAS_ATTENTE, &empreinte, Vec::new()).is_err() {
+                    return ReponseHttp::refus(503, "db_secondaire_pleine");
+                }
+                ReponseHttp::json(202, &AccepteJson { demande: b64_encoder(&empreinte) })
+            }
+            Err(ErreurHybride::Portail(ErreurPortail::FilePleine | ErreurPortail::DebitDepasse)) => {
+                ReponseHttp::refus(429, "contre_pression")
+            }
+            Err(ErreurHybride::Traite(_) | ErreurHybride::Decodage(_)) => ReponseHttp::refus(400, "traite"),
+            Err(_) => ReponseHttp::refus(503, "guichet_visas"),
+        }
+    }
+
+    /// Range les réponses publiées par le guichet des visas.
+    fn relever_visas(&mut self) {
+        let Some(guichet) = self.visas.as_ref() else {
+            return;
+        };
+        let Ok(reponses) = guichet.lire_reponses(MAX_LECTURES) else {
+            return;
+        };
+        for rep in reponses {
+            let demande = rep.demande().to_vec();
+            if self.db.lire(T_VISAS_ATTENTE, &demande).is_none() {
+                continue; // Réponse orpheline : écartée.
+            }
+            let corps = match rep {
+                ReponseVisas::Emis(v) => {
+                    let j = VisaJson { visa: b64_encoder(&v.visa), delegation: b64_encoder(&v.delegation), pas_apres: v.pas_apres };
+                    let mut o = vec![1u8];
+                    o.extend(serde_json::to_vec(&j).unwrap_or_default());
+                    o
+                }
+                ReponseVisas::Refuse(r) => {
+                    let motif = MotifRefusVisa::depuis_code(r.motif).unwrap_or(MotifRefusVisa::Indisponible);
+                    let mut o = vec![0u8];
+                    o.extend_from_slice(format!("visa_{}", motif.texte()).as_bytes());
+                    o
+                }
+            };
+            let _ = self.db.ecrire(T_VISAS, &demande, corps);
+        }
+    }
+
+    /// `GET /v1/visa/<demande>`.
+    fn lire_visa(&mut self, demande_b64: &str) -> ReponseHttp {
+        if self.visas.is_none() {
+            return ReponseHttp::refus(404, "inconnu");
+        }
+        let Some(demande) = b64_taille::<32>(demande_b64) else {
+            return ReponseHttp::refus(400, "demande");
+        };
+        if self.db.lire(T_VISAS_ATTENTE, &demande).is_none() {
+            return ReponseHttp::refus(404, "inconnu");
+        }
+        self.relever_visas();
+        match self.db.retirer(T_VISAS, &demande) {
+            Some(o) => {
+                self.db.retirer(T_VISAS_ATTENTE, &demande);
+                match o.split_first() {
+                    Some((1, corps)) => ReponseHttp { statut: 200, corps: corps.to_vec() },
+                    Some((_, motif)) => ReponseHttp::refus(403, &String::from_utf8_lossy(motif)),
+                    None => ReponseHttp::refus(503, "guichet_visas"),
+                }
+            }
+            None => ReponseHttp::json(202, &EnAttenteJson { etat: "en_attente".into() }),
+        }
     }
 
     fn demander_creneaux(&mut self, r: &RequeteHttp, maintenant: u64) -> ReponseHttp {

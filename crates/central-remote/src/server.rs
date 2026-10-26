@@ -115,7 +115,7 @@ use futures_util::{SinkExt, StreamExt};
 use miyauth::http::service::maintenant_unix;
 use miyauth::http::{
     b64_encoder, EntetesSignees, RefusHttp, RequeteHttp, ENTETE_HORODATAGE, ENTETE_NONCE,
-    ENTETE_POP, ENTETE_SIGNATAIRE, ENTETE_SIGNATURE,
+    ENTETE_POP, ENTETE_SIGNATAIRE, ENTETE_SIGNATURE, ENTETE_DELEGATIONS, formater_delegations,
 };
 use miyukini_central::auth::CentralAuthDb;
 use miyukini_cog_bridge::e2e::MAX_HANDSHAKE_JSON_LEN;
@@ -184,6 +184,11 @@ pub struct RemoteServerConfig {
     /// `cog_id` du COG (celui de la racine `miyuracine`). Absent : dérivé de la
     /// clé d'émission.
     pub cog_id: Option<String>,
+    /// Dossier de la chaîne racine → clés d'usage (A-024 ; voir
+    /// [`crate::identite`]) : racine connue, clé `visas`, délégations, **mode
+    /// strict**. Défaut : variable d'environnement `CENTRAL_REMOTE_CHAINE_DIR`
+    /// (absente : mode de transition).
+    pub chaine_dir: Option<String>,
 }
 
 impl Default for RemoteServerConfig {
@@ -199,6 +204,7 @@ impl Default for RemoteServerConfig {
             pairing_require_same_source: true,
             cle_emission_path: None,
             cog_id: None,
+            chaine_dir: std::env::var("CENTRAL_REMOTE_CHAINE_DIR").ok().filter(|v| !v.trim().is_empty()),
         }
     }
 }
@@ -282,7 +288,9 @@ fn build_cors(origins: &[String]) -> Option<CorsLayer> {
                 header::CONTENT_TYPE,
                 header::AUTHORIZATION,
                 header::HeaderName::from_static(ENTETE_POP),
-            ]),
+                header::HeaderName::from_static(ENTETE_DELEGATIONS),
+            ])
+            .expose_headers([header::HeaderName::from_static(ENTETE_DELEGATIONS)]),
     )
 }
 
@@ -391,8 +399,13 @@ pub async fn start_remote_server(
         PathBuf::from,
     );
     let autorite = Arc::new(
-        AutoriteAppareils::charger(&emission_path, config.cog_id.as_deref(), pairing.clone())
-            .map_err(|e| format!("CentralRemote: {e}"))?,
+        AutoriteAppareils::charger_avec_chaine(
+            &emission_path,
+            config.cog_id.as_deref(),
+            config.chaine_dir.as_deref().map(Path::new),
+            pairing.clone(),
+        )
+        .map_err(|e| format!("CentralRemote: {e}"))?,
     );
     info!("CentralRemote: COG d'origine des appareils, cog_id {}", autorite.cog());
 
@@ -659,17 +672,26 @@ async fn handle_bridge_visa(
         return too_many();
     }
     let requete = requete_http("POST", VISA_ENDPOINT, &headers, &body);
-    match state.autorite.delivrer_visa(&requete, maintenant_unix()) {
+    let delegations = entete(&headers, ENTETE_DELEGATIONS);
+    match state.autorite.delivrer_visa_avec_delegations(&requete, delegations, maintenant_unix()) {
         Ok(v) => {
             state.pairing.touch_device(&v.acces.appareil.device_id);
-            Json(VisaResponse {
+            let mut reponse = Json(VisaResponse {
                 visa: b64_encoder(&v.visa),
                 expire_a: v.acces.expire_a,
                 role: texte_role(v.acces.role).into(),
                 display_name: display_name(&state, &v.acces),
                 identite: v.acces.identite,
             })
-            .into_response()
+            .into_response();
+            // Délégations 0x45 (`visas`, `emission`) à présenter avec le visa (A-024).
+            let d: Vec<&[u8]> = state.autorite.delegations_visa().iter().map(Vec::as_slice).collect();
+            if !d.is_empty() {
+                if let Ok(valeur) = HeaderValue::from_str(&formater_delegations(&d)) {
+                    reponse.headers_mut().insert(ENTETE_DELEGATIONS, valeur);
+                }
+            }
+            reponse
         }
         Err(e) => refus_reply("visa", &e),
     }
@@ -686,7 +708,8 @@ async fn handle_bridge_validate(
         return too_many();
     }
     let requete = requete_http("POST", VALIDATE_ENDPOINT, &headers, &body);
-    match state.autorite.verifier_acces(&requete, maintenant_unix()) {
+    let delegations = entete(&headers, ENTETE_DELEGATIONS);
+    match state.autorite.verifier_acces_avec_delegations(&requete, delegations, maintenant_unix()) {
         Ok(acces) => {
             state.pairing.touch_device(&acces.appareil.device_id);
             Json(ValidateResponse {
@@ -719,7 +742,8 @@ async fn handle_ws_upgrade(
             .into_response();
     }
     let requete = requete_http("GET", WS_ENDPOINT, &headers, b"");
-    match state.autorite.verifier_acces(&requete, maintenant_unix()) {
+    let delegations = entete(&headers, ENTETE_DELEGATIONS);
+    match state.autorite.verifier_acces_avec_delegations(&requete, delegations, maintenant_unix()) {
         Ok(acces) => {
             info!(
                 "CentralRemote WS upgrade ({})",

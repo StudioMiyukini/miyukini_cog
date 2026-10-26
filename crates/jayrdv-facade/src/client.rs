@@ -17,12 +17,15 @@
 
 use jayrdv_traite::{DemandeCreneaux, Reservation, SERVICE, VERSION};
 use miyauth::http::{
-    b64_decoder, b64_encoder, formater_autorisation_visa, formater_pop, liaison_requete, signer_pop, IdDefi,
+    b64_decoder, b64_encoder, formater_autorisation_visa, formater_delegations, formater_pop, liaison_requete,
+    signer_pop, IdDefi, ENTETE_DELEGATIONS,
 };
-use miyuhybride::{declaration_entrante, signer_auteur, ErreurHybride, IdService, MessageTraite};
+use miyuhybride::{
+    declaration_entrante, liaison_demande_visa, portees_texte, signer_auteur, ErreurHybride, IdService, MessageTraite,
+};
 use miyusceau::CleSignature;
 
-use crate::api::{DefiJson, DemandeCreneauxJson, RequeteHttp, ReservationJson};
+use crate::api::{DefiJson, DemandeCreneauxJson, DemandeVisaJson, RequeteHttp, ReservationJson, VisaJson};
 
 /// Défi reçu de la façade.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -39,19 +42,90 @@ impl DefiRecu {
     }
 }
 
+/// Visa reçu du guichet (`GET /v1/visa/<demande>`, 200).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VisaRecu {
+    /// Visa scellé.
+    pub visa: Vec<u8>,
+    /// Délégation `0x45` de la clé `visas`.
+    pub delegation: Vec<u8>,
+    /// Fin de validité.
+    pub pas_apres: u64,
+}
+
+impl VisaRecu {
+    /// Décode la réponse 200 de `GET /v1/visa/<demande>`.
+    pub fn depuis(corps: &[u8]) -> Option<Self> {
+        let v: VisaJson = serde_json::from_slice(corps).ok()?;
+        Some(Self { visa: b64_decoder(&v.visa)?, delegation: b64_decoder(&v.delegation)?, pas_apres: v.pas_apres })
+    }
+}
+
+/// Paramètres d'une demande de visa.
+#[derive(Debug, Clone)]
+pub struct ParametresDemandeVisa<'a> {
+    /// Passeport.
+    pub passeport: &'a [u8],
+    /// Délégation de la clé `emission` du COG d'origine (si sa racine est épinglée).
+    pub delegation_passeport: Option<&'a [u8]>,
+    /// Portées demandées.
+    pub portees: &'a [&'a str],
+    /// Durée demandée (secondes).
+    pub duree_secs: u64,
+    /// Date d'émission.
+    pub emise_le: u64,
+}
+
+/// `POST /v1/visa` : demande de visa signée par la clé d'appareil (preuve de
+/// possession sur tout le contenu, défi `defi` de la façade).
+pub fn requete_demande_visa(cle: &CleSignature, defi: &DefiRecu, p: &ParametresDemandeVisa<'_>) -> RequeteHttp {
+    let portees = portees_texte(p.portees);
+    let cle_appareil = cle.cle_publique();
+    let liaison = liaison_demande_visa(p.passeport, &cle_appareil, SERVICE, &portees, p.duree_secs, p.emise_le);
+    let preuve = signer_pop(cle, &defi.defi, SERVICE, &liaison);
+    let corps = DemandeVisaJson {
+        passeport: b64_encoder(p.passeport),
+        delegation_passeport: p.delegation_passeport.map(b64_encoder),
+        cle_appareil: b64_encoder(&cle_appareil),
+        portees: p.portees.iter().map(ToString::to_string).collect(),
+        duree_secs: p.duree_secs,
+        emise_le: p.emise_le,
+        defi: b64_encoder(&defi.defi),
+        preuve: b64_encoder(&preuve),
+    };
+    RequeteHttp {
+        methode: "POST".into(),
+        chemin: "/v1/visa".into(),
+        entetes: Vec::new(),
+        corps: serde_json::to_vec(&corps).unwrap_or_default(),
+    }
+}
+
+/// `GET /v1/visa/<demande>`.
+pub fn requete_lire_visa(demande: &str) -> RequeteHttp {
+    RequeteHttp { methode: "GET".into(), chemin: format!("/v1/visa/{demande}"), entetes: Vec::new(), corps: Vec::new() }
+}
+
 /// Client d'un appareil fédéré (détient la clé d'appareil, le visa, le passeport).
 #[derive(Debug)]
 pub struct ClientFedere {
     cle: CleSignature,
     visa: Vec<u8>,
     passeport: Vec<u8>,
+    delegations: Vec<Vec<u8>>,
     sequence: u64,
 }
 
 impl ClientFedere {
     /// Client avec ses titres.
     pub fn new(cle: CleSignature, visa: Vec<u8>, passeport: Vec<u8>) -> Self {
-        Self { cle, visa, passeport, sequence: 0 }
+        Self { cle, visa, passeport, delegations: Vec::new(), sequence: 0 }
+    }
+
+    /// Délégations `0x45` présentées avec le visa (`X-Miyu-Delegations`).
+    pub fn avec_delegations(mut self, delegations: Vec<Vec<u8>>) -> Self {
+        self.delegations = delegations;
+        self
     }
 
     /// Clé publique d'appareil (auteur épinglé par les Cores).
@@ -71,15 +145,15 @@ impl ClientFedere {
 
     fn authentifiee(&self, defi: &DefiRecu, methode: &str, chemin: &str, corps: Vec<u8>) -> RequeteHttp {
         let pop = signer_pop(&self.cle, &defi.defi, SERVICE, &liaison_requete(methode, chemin, &corps));
-        RequeteHttp {
-            methode: methode.into(),
-            chemin: chemin.into(),
-            entetes: vec![
-                ("authorization".into(), formater_autorisation_visa(&self.visa, &self.passeport)),
-                ("x-miyu-pop".into(), formater_pop(&defi.id, &pop)),
-            ],
-            corps,
+        let mut entetes = vec![
+            ("authorization".into(), formater_autorisation_visa(&self.visa, &self.passeport)),
+            ("x-miyu-pop".into(), formater_pop(&defi.id, &pop)),
+        ];
+        if !self.delegations.is_empty() {
+            let d: Vec<&[u8]> = self.delegations.iter().map(Vec::as_slice).collect();
+            entetes.push((ENTETE_DELEGATIONS.into(), formater_delegations(&d)));
         }
+        RequeteHttp { methode: methode.into(), chemin: chemin.into(), entetes, corps }
     }
 
     fn signer<M: MessageTraite>(&mut self, m: &M, emise_le: u64) -> Result<(u64, String), ErreurHybride> {

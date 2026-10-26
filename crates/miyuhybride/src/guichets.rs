@@ -228,6 +228,22 @@ pub struct MessageSortant {
 }
 
 impl MessageSortant {
+    /// Code du type de déclaration sortant.
+    pub fn type_code(&self) -> u64 {
+        self.type_code
+    }
+
+    /// Refus « indisponible » du guichet des visas (repli sans échec possible).
+    pub(crate) fn refus_interne(demande: &[u8; 32]) -> Self {
+        Self {
+            type_code: 102,
+            champs: vec![
+                Champ { tag: 1, valeur: miyuportail::Valeur::Octets(demande.to_vec()) },
+                Champ { tag: 2, valeur: miyuportail::Valeur::Entier(12) },
+            ],
+        }
+    }
+
     /// Message sortant depuis un message du traité.
     pub fn de<M: MessageTraite>(m: &M) -> Result<Self, ErreurTraite> {
         if M::SENS != Sens::Sortante {

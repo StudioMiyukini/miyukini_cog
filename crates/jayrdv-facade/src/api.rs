@@ -14,6 +14,12 @@
 //! | `GET` | `/v1/reponses/<demande>` | visa + PoP | vide | 200 [`ReponseJson`] ou 202 en attente |
 //! | `GET` | `/v1/creneaux` | visa + PoP | vide | 200 cache des créneaux publiés (non autoritaire) |
 //! | `DELETE` | `/v1/session` | visa + PoP | vide | 204 : session cliente de l'appareil close (quota rendu) |
+//! | `POST` | `/v1/visa` | passeport + PoP **dans le corps** | [`DemandeVisaJson`] | 202 [`AccepteJson`] (demande transmise au guichet des visas, zone COG) |
+//! | `GET` | `/v1/visa/<demande>` | aucune (empreinte imprévisible) | vide | 200 [`VisaJson`], 403 `visa_<motif>` ou 202 en attente |
+//!
+//! Requêtes `MiyuVisa` : l'en-tête `X-Miyu-Delegations` porte la délégation
+//! `0x45` de la clé `visas` reçue avec le visa (et, pour un passeport d'un COG
+//! à racine épinglée, celle de sa clé `emission`) ; voir `miyauth::http`.
 //!
 //! Refus de quota (contrat de service) : 429 `quota_sessions`, 429
 //! `quota_taches` ; 503 `db_secondaire_pleine` (disque).
@@ -180,4 +186,40 @@ pub struct EnAttenteJson {
 pub struct RefusJson {
     /// Motif court.
     pub refus: String,
+}
+
+/// Corps de `POST /v1/visa` : demande de visa transmise au guichet (zone COG).
+/// La preuve de possession couvre tout le contenu
+/// (`miyuhybride::liaison_demande_visa`, audience = service de la façade).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DemandeVisaJson {
+    /// Passeport (base64 URL).
+    pub passeport: String,
+    /// Délégation `0x45` de la clé `emission` du COG d'origine (base64 URL), facultative.
+    pub delegation_passeport: Option<String>,
+    /// Clé publique de l'appareil (base64 URL, 32 o).
+    pub cle_appareil: String,
+    /// Portées demandées.
+    pub portees: Vec<String>,
+    /// Durée demandée (1..=900 s).
+    pub duree_secs: u64,
+    /// Date d'émission de la demande.
+    pub emise_le: u64,
+    /// Défi de la preuve (base64 URL, 32 o).
+    pub defi: String,
+    /// Preuve de possession (base64 URL, 64 o).
+    pub preuve: String,
+}
+
+/// Visa émis par le guichet (zone COG).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct VisaJson {
+    /// Visa (base64 URL).
+    pub visa: String,
+    /// Délégation `0x45` de la clé `visas` (base64 URL), à présenter dans `X-Miyu-Delegations`.
+    pub delegation: String,
+    /// Fin de validité.
+    pub pas_apres: u64,
 }

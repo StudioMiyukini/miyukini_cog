@@ -5391,6 +5391,7 @@ dependencies = [
  "miyauth",
  "miyuhybride",
  "miyuportail",
+ "miyuracine",
  "miyuregistre",
  "miyusceau",
  "serde",

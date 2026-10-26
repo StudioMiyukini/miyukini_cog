@@ -25,6 +25,19 @@
 //! - **Usage unique tenu à travers un redémarrage** : la sortie persiste
 //!   chaque jeton consommé **avant** d'écrire la publication ; l'entrée
 //!   persiste ses marques anti-rejeu **avant** de remettre un lot au moteur.
+//! - **Aucune dérive d'état ouverte** (revue de sécurité d'A-027) :
+//!   répertoire des descripteurs illisible ⇒ voies **conservées** ;
+//!   descripteur présent mais illisible ⇒ sa voie est conservée ; seule
+//!   l'absence du fichier retire une voie. Toute session quittée (voie
+//!   retirée, contrat changé, voie non active, autre session) est inscrite
+//!   dans `_sessions.closes` (`MPC1`) **avant** que son état soit supprimé :
+//!   elle ne se rouvre jamais, même après redémarrage.
+//! - **État anti-rejeu jamais remis à zéro** : marques (`.rejeu`) et jetons
+//!   (`.jetons`) vides seulement si le fichier est **absent** (session
+//!   neuve, fichier créé à l'ouverture) ; fichier illisible ou mal formé ⇒
+//!   session refusée ; fichier d'une autre session ⇒ celle-ci est inscrite
+//!   close ; fin déchirée du fichier de jetons ⇒ seul l'enregistrement
+//!   partiel est retiré.
 //! - **Contre-pression** : un élément écrit et non encore relevé par le
 //!   lecteur compte dans le quota de la voie ; au-delà, le processus laisse
 //!   ses propres entrées en attente.
@@ -162,34 +175,152 @@ fn ecrire_etat(chemin: &Path, octets: &[u8]) -> std::io::Result<()> {
     r
 }
 
-fn lire_etat(chemin: &Path, max: usize) -> Option<Vec<u8>> {
-    let dir = chemin.parent()?;
-    let nom = chemin.file_name()?.to_str()?;
-    File::new(dir).lire(nom, max).ok()
+/// Lecture stricte d'un fichier d'état : `Ok(None)` **seulement** s'il est
+/// absent ; illisible, lien, non régulier ou trop grand ⇒ erreur (jamais
+/// confondu avec un état neuf).
+fn lire_etat(chemin: &Path, max: usize) -> Result<Option<Vec<u8>>, String> {
+    match std::fs::symlink_metadata(chemin) {
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(e) => return Err(e.to_string()),
+        Ok(_) => {}
+    }
+    let dir = chemin.parent().ok_or("chemin d'état sans parent")?;
+    let nom = chemin.file_name().and_then(|n| n.to_str()).ok_or("nom d'état invalide")?;
+    File::new(dir).lire(nom, max).map(Some).map_err(|e| e.to_string())
 }
 
 fn retirer_etat(chemin: &Path) {
     let _ = std::fs::remove_file(chemin);
 }
 
+// ---------------------------------------------------------------- sessions closes
+
+/// Nom du fichier des sessions closes dans l'état propre de chaque processus.
+pub const FICHIER_SESSIONS_CLOSES: &str = "_sessions.closes";
+/// Nombre maximal de sessions closes mémorisées (au-delà, les plus anciennes
+/// sont oubliées : une session réapparue après 65 536 autres n'est plus reconnue).
+pub const MAX_SESSIONS_CLOSES: usize = 65_536;
+const MAGIC_SESSIONS_CLOSES: &[u8; 4] = b"MPC1";
+
+/// Sessions que ce processus a servies puis closes (persistées, `0600`) :
+/// une session close ne se rouvre **jamais**, même si son état anti-rejeu a
+/// été supprimé (voie retirée) ou remplacé par celui d'une autre session.
+#[derive(Debug)]
+struct SessionsCloses {
+    chemin: PathBuf,
+    ids: std::collections::VecDeque<IdSession>,
+}
+
+impl SessionsCloses {
+    /// Charge la liste ; absente = vide ; illisible ou mal formée ⇒ refus de démarrer.
+    fn charger(chemin: PathBuf) -> Result<Self, ErreurDemon> {
+        let octets = lire_etat(&chemin, 8 + 32 * MAX_SESSIONS_CLOSES).map_err(ErreurDemon::Etat)?;
+        let mut ids = std::collections::VecDeque::new();
+        if let Some(o) = octets {
+            let refus = || ErreurDemon::Etat(format!("{} : liste des sessions closes illisible", chemin.display()));
+            let mut c = Curseur::new(&o);
+            if c.prendre(4).map_err(|_| refus())? != MAGIC_SESSIONS_CLOSES {
+                return Err(refus());
+            }
+            let n = c.prendre(4).map_err(|_| refus())?;
+            let n = u32::from_be_bytes([n[0], n[1], n[2], n[3]]) as usize;
+            if n > MAX_SESSIONS_CLOSES {
+                return Err(refus());
+            }
+            for _ in 0..n {
+                ids.push_back(c.b32().map_err(|_| refus())?);
+            }
+            c.fin().map_err(|_| refus())?;
+        }
+        Ok(Self { chemin, ids })
+    }
+
+    fn contient(&self, id: &IdSession) -> bool {
+        self.ids.contains(id)
+    }
+
+    /// Inscrit `id` (persisté atomiquement **avant** toute suppression d'état).
+    fn ajouter(&mut self, id: IdSession) -> Result<(), ErreurDemon> {
+        if self.contient(&id) {
+            return Ok(());
+        }
+        let mut ids = self.ids.clone();
+        ids.push_back(id);
+        while ids.len() > MAX_SESSIONS_CLOSES {
+            ids.pop_front();
+        }
+        let mut s = Vec::with_capacity(8 + 32 * ids.len());
+        s.extend_from_slice(MAGIC_SESSIONS_CLOSES);
+        s.extend_from_slice(&(ids.len() as u32).to_be_bytes());
+        for i in &ids {
+            s.extend_from_slice(i);
+        }
+        ecrire_etat(&self.chemin, &s).map_err(|e| ErreurDemon::Etat(e.to_string()))?;
+        self.ids = ids;
+        Ok(())
+    }
+}
+
+/// Session décrite (identifiant), quel que soit le rôle.
+fn id_session(d: &DescripteurVoie) -> Option<IdSession> {
+    match &d.session {
+        Some(SessionDecrite::Entree { id, .. } | SessionDecrite::Sortie { id, .. }) => Some(*id),
+        None => None,
+    }
+}
+
+/// Session de l'ancien descripteur qui **ne continue pas** avec le nouveau
+/// (voie retirée, contrat changé, voie non active, autre session).
+fn session_quittee(ancien: Option<&DescripteurVoie>, nouveau: Option<&DescripteurVoie>) -> Option<IdSession> {
+    let a = ancien?;
+    let id = id_session(a)?;
+    let continue_ = nouveau
+        .is_some_and(|n| n.etat == EtatVoie::Active && n.contrat == a.contrat && id_session(n) == Some(id));
+    (!continue_).then_some(id)
+}
+
 /// Descripteurs du rôle lus dans `dir` : `<service>.voie`, service du nom =
-/// service du contrat ; tout descripteur illisible ou d'un autre rôle est
-/// ignoré (voie absente : elle n'existe pas).
+/// service du contrat.
+///
+/// Fail-closed sur l'**état** : `None` si le répertoire est illisible (les
+/// voies actuelles sont alors conservées telles quelles, jamais considérées
+/// retirées) ; un descripteur présent mais illisible, refusé ou d'un autre
+/// service est rangé parmi les services **indéterminés** (sa voie actuelle
+/// est conservée). Seule l'absence du fichier retire une voie.
+#[allow(clippy::type_complexity)]
 fn charger_descripteurs(
     processus: &str,
     dir: &Path,
     role: Role,
     signales: &mut BTreeSet<(String, Vec<u8>)>,
-) -> BTreeMap<IdService, (Vec<u8>, DescripteurVoie)> {
+) -> Option<(BTreeMap<IdService, (Vec<u8>, DescripteurVoie)>, BTreeSet<IdService>)> {
     let mut voies = BTreeMap::new();
+    let mut indetermines = BTreeSet::new();
     let file = File::new(dir);
     let elements = match std::fs::read_dir(dir) {
-        Ok(it) => it.filter_map(|e| e.ok()?.file_name().into_string().ok()).collect::<Vec<_>>(),
+        Ok(it) => {
+            let mut noms = Vec::new();
+            for e in it {
+                match e {
+                    Ok(e) => {
+                        if let Ok(n) = e.file_name().into_string() {
+                            noms.push(n);
+                        }
+                    }
+                    // Lecture partielle du répertoire : on ne sait pas ce qui manque.
+                    Err(err) => {
+                        journal(processus, &format!("descripteurs illisibles ({}) : {err}", dir.display()));
+                        return None;
+                    }
+                }
+            }
+            noms
+        }
         Err(e) => {
             if signales.insert((String::new(), e.to_string().into_bytes())) {
-                journal(processus, &format!("descripteurs illisibles ({}) : {e}", dir.display()));
+                journal(processus, &format!("descripteurs illisibles ({}) : {e} ; voies conservées", dir.display()));
             }
-            return voies;
+            return None;
         }
     };
     for nom in elements {
@@ -199,8 +330,17 @@ fn charger_descripteurs(
         if nom.starts_with('.') {
             continue;
         }
-        let Ok(octets) = file.lire(&nom, TAILLE_MAX_DESCRIPTEUR) else {
-            continue;
+        let octets = match file.lire(&nom, TAILLE_MAX_DESCRIPTEUR) {
+            Ok(o) => o,
+            Err(e) => {
+                if let Ok(s) = IdService::new(base) {
+                    indetermines.insert(s);
+                }
+                if signales.insert((nom.clone(), e.to_string().into_bytes())) {
+                    journal(processus, &format!("descripteur {nom} illisible : {e} ; voie conservée"));
+                }
+                continue;
+            }
         };
         let decode = DescripteurVoie::decoder(&octets, role);
         match decode {
@@ -208,14 +348,17 @@ fn charger_descripteurs(
                 voies.insert(d.contrat.service.clone(), (octets, d));
             }
             autre => {
+                if let Ok(s) = IdService::new(base) {
+                    indetermines.insert(s);
+                }
                 if signales.insert((nom.clone(), octets)) {
                     let motif = autre.map_or_else(|e| e.to_string(), |_| "service différent du nom".to_string());
-                    journal(processus, &format!("descripteur {nom} refusé : {motif}"));
+                    journal(processus, &format!("descripteur {nom} refusé : {motif} ; voie conservée"));
                 }
             }
         }
     }
-    voies
+    Some((voies, indetermines))
 }
 
 /// Transition d'état demandée par un descripteur (coupure inscrite au journal du processus).
@@ -309,6 +452,7 @@ pub struct DemonEntree {
     admises: File,
     emis: BTreeMap<IdService, Vec<String>>,
     marques_ecrites: BTreeMap<IdService, Vec<u8>>,
+    closes: SessionsCloses,
 }
 
 impl std::fmt::Debug for DemonEntree {
@@ -328,6 +472,7 @@ impl DemonEntree {
     ) -> Result<Self, ErreurDemon> {
         let registre = RegistreJournal::ouvrir(&chemins.etat.join("registre.journal"))
             .map_err(|e| ErreurDemon::Etat(e.to_string()))?;
+        let closes = SessionsCloses::charger(chemins.etat.join(FICHIER_SESSIONS_CLOSES))?;
         Ok(Self {
             depot: File::new(&chemins.depot),
             admises: File::new(&chemins.admises),
@@ -337,6 +482,7 @@ impl DemonEntree {
             signales: BTreeSet::new(),
             emis: BTreeMap::new(),
             marques_ecrites: BTreeMap::new(),
+            closes,
         })
     }
 
@@ -390,12 +536,26 @@ impl DemonEntree {
     }
 
     fn synchroniser(&mut self) {
-        let voulus = charger_descripteurs(ENTREE, &self.chemins.voies, Role::Entree, &mut self.signales);
-        let partis: Vec<IdService> = self.connus.keys().filter(|s| !voulus.contains_key(*s)).cloned().collect();
+        let Some((voulus, indetermines)) =
+            charger_descripteurs(ENTREE, &self.chemins.voies, Role::Entree, &mut self.signales)
+        else {
+            return; // Descripteurs illisibles : voies et état conservés tels quels.
+        };
+        let partis: Vec<IdService> = self
+            .connus
+            .keys()
+            .filter(|s| !voulus.contains_key(*s) && !indetermines.contains(*s))
+            .cloned()
+            .collect();
         for s in partis {
             let _ = self.portail.supprimer(&s);
             self.purger_emis(&s);
-            retirer_etat(&self.chemin_marques(&s));
+            // Session inscrite close AVANT de supprimer son état : elle ne se rouvrira jamais.
+            let quittee = self.connus.get(&s).and_then(|(_, d)| session_quittee(Some(d), None));
+            match quittee.map_or(Ok(()), |id| self.closes.ajouter(id)) {
+                Ok(()) => retirer_etat(&self.chemin_marques(&s)),
+                Err(e) => journal(ENTREE, &format!("voie {s} : session close non inscrite, état conservé : {e}")),
+            }
             self.connus.remove(&s);
             self.marques_ecrites.remove(&s);
             journal(ENTREE, &format!("voie {s} supprimée"));
@@ -405,6 +565,13 @@ impl DemonEntree {
                 continue;
             }
             let ancien = self.connus.get(&s).map(|(_, a)| a.clone());
+            if let Some(id) = session_quittee(ancien.as_ref(), Some(&d)) {
+                if let Err(e) = self.closes.ajouter(id) {
+                    // Sans inscription, rien n'est appliqué : nouvel essai à la passe suivante.
+                    journal(ENTREE, &format!("voie {s} : session close non inscrite, descripteur différé : {e}"));
+                    continue;
+                }
+            }
             match self.appliquer(ancien.as_ref(), &d) {
                 Ok(()) => journal(ENTREE, &format!("voie {s} : descripteur appliqué ({:?})", d.etat)),
                 Err(e) => journal(ENTREE, &format!("voie {s} : descripteur appliqué en partie : {e}")),
@@ -453,7 +620,11 @@ impl DemonEntree {
                         }
                     }
                 } else {
+                    if actuelle.is_some() {
+                        self.portail.fermer_session(s)?;
+                    }
                     self.purger_emis(s);
+                    let restaurer = self.etat_session(s, id)?;
                     self.portail.ouvrir_session(
                         s,
                         SessionEntree {
@@ -464,11 +635,10 @@ impl DemonEntree {
                         },
                     )?;
                     // Redémarrage : marques de la même session restaurées (aucun rejeu).
-                    if let Some((sid, marques)) =
-                        lire_etat(&self.chemin_marques(s), 4 + 32 + 2 + 65_535 * 40).and_then(|o| decoder_marques(&o))
-                    {
-                        if sid == *id {
-                            self.portail.restaurer_marques(s, id, &marques)?;
+                    if let Some(marques) = restaurer {
+                        if let Err(e) = self.portail.restaurer_marques(s, id, &marques) {
+                            let _ = self.portail.fermer_session(s);
+                            return Err(e);
                         }
                     }
                 }
@@ -476,6 +646,40 @@ impl DemonEntree {
             Some(SessionDecrite::Sortie { .. }) => return Err(ErreurPortail::TransitionRefusee),
         }
         Ok(())
+    }
+
+    /// État anti-rejeu de la session `id` avant de l'ouvrir (fail-closed) :
+    ///
+    /// - session déjà close ⇒ refus (jamais rouverte) ;
+    /// - fichier de marques **absent** ⇒ session neuve : fichier créé tout de
+    ///   suite (vide, à son identifiant), aucune marque ;
+    /// - fichier de cette session ⇒ marques restaurées ;
+    /// - fichier d'une **autre** session ⇒ celle-ci est inscrite close, puis la
+    ///   nouvelle part de zéro (elle n'a jamais été servie : toute session
+    ///   servie a son fichier ou figure parmi les closes) ;
+    /// - fichier illisible ou mal formé ⇒ refus (aucune remise à zéro).
+    fn etat_session(&mut self, s: &IdService, id: &IdSession) -> Result<Option<Vec<Marque>>, ErreurPortail> {
+        let refus = |m: String| {
+            journal(ENTREE, &format!("voie {s} : session refusée : {m}"));
+            ErreurPortail::EtatIndisponible
+        };
+        if self.closes.contient(id) {
+            journal(ENTREE, &format!("voie {s} : session déjà close, réouverture refusée"));
+            return Err(ErreurPortail::TransitionRefusee);
+        }
+        let chemin = self.chemin_marques(s);
+        let lu = lire_etat(&chemin, 4 + 32 + 2 + 65_535 * 40).map_err(refus)?;
+        if let Some(o) = lu {
+            match decoder_marques(&o) {
+                None => return Err(refus("marques anti-rejeu illisibles".into())),
+                Some((sid, marques)) if sid == *id => return Ok(Some(marques)),
+                Some((sid, _)) => self.closes.ajouter(sid).map_err(|e| refus(e.to_string()))?,
+            }
+        }
+        let octets = encoder_marques(id, &[]);
+        ecrire_etat(&chemin, &octets).map_err(|e| refus(e.to_string()))?;
+        self.marques_ecrites.insert(s.clone(), octets);
+        Ok(None)
     }
 
     fn lire_depot(&mut self, b: &mut Bilan) {
@@ -635,21 +839,31 @@ fn decoder_cle(octets: &[u8]) -> Option<(u64, EtatCle)> {
     Some((rotation, (graine, sequence)))
 }
 
-fn decoder_jetons(octets: &[u8]) -> Option<(IdSession, Vec<Empreinte>)> {
+/// Décode le fichier des jetons consommés : `(session, jetons complets, fin
+/// déchirée)`. Une fin déchirée (dernier ajout interrompu, < 32 o) n'invalide
+/// pas les enregistrements complets ; en-tête absent ou faux ⇒ `None`.
+fn decoder_jetons(octets: &[u8]) -> Option<(IdSession, Vec<Empreinte>, bool)> {
     let mut c = Curseur::new(octets);
     if c.prendre(4).ok()? != MAGIC_JETONS {
         return None;
     }
     let id = c.b32().ok()?;
     let reste = octets.len().checked_sub(36)?;
-    if reste % 32 != 0 {
-        return None;
-    }
     let mut e = Vec::with_capacity(reste / 32);
     for _ in 0..reste / 32 {
         e.push(c.b32().ok()?);
     }
-    Some((id, e))
+    Some((id, e, reste % 32 != 0))
+}
+
+fn encoder_jetons(id: &IdSession, consommes: &[Empreinte]) -> Vec<u8> {
+    let mut o = Vec::with_capacity(36 + 32 * consommes.len());
+    o.extend_from_slice(MAGIC_JETONS);
+    o.extend_from_slice(id);
+    for e in consommes {
+        o.extend_from_slice(e);
+    }
+    o
 }
 
 /// Processus `portail-sortie` : publie, ne relève jamais.
@@ -663,6 +877,7 @@ pub struct DemonSortie {
     emis: BTreeMap<IdService, Vec<String>>,
     cles_ecrites: BTreeMap<IdService, Vec<u8>>,
     cles_publiees: BTreeMap<IdService, [u8; 32]>,
+    closes: SessionsCloses,
 }
 
 impl std::fmt::Debug for DemonSortie {
@@ -683,7 +898,9 @@ impl DemonSortie {
     pub fn new(chemins: CheminsSortie, cdr: Box<dyn Desarmement>) -> Result<Self, ErreurDemon> {
         let registre = RegistreJournal::ouvrir(&chemins.etat.join("registre.journal"))
             .map_err(|e| ErreurDemon::Etat(e.to_string()))?;
+        let closes = SessionsCloses::charger(chemins.etat.join(FICHIER_SESSIONS_CLOSES))?;
         Ok(Self {
+            closes,
             reponses: File::new(&chemins.reponses),
             publication: File::new(&chemins.publication),
             portail: PortailSortie::new(cdr, Arc::new(registre)),
@@ -749,14 +966,28 @@ impl DemonSortie {
     }
 
     fn synchroniser(&mut self) {
-        let voulus = charger_descripteurs(SORTIE, &self.chemins.voies, Role::Sortie, &mut self.signales);
-        let partis: Vec<IdService> = self.connus.keys().filter(|s| !voulus.contains_key(*s)).cloned().collect();
+        let Some((voulus, indetermines)) =
+            charger_descripteurs(SORTIE, &self.chemins.voies, Role::Sortie, &mut self.signales)
+        else {
+            return; // Descripteurs illisibles : voies et état conservés tels quels.
+        };
+        let partis: Vec<IdService> = self
+            .connus
+            .keys()
+            .filter(|s| !voulus.contains_key(*s) && !indetermines.contains(*s))
+            .cloned()
+            .collect();
         for s in partis {
             let _ = self.portail.supprimer(&s);
             self.purger_emis(&s);
             let _ = self.publication.retirer(&nom_cle_publication(&s));
             retirer_etat(&self.chemin_cle(&s));
-            retirer_etat(&self.chemin_jetons(&s));
+            // Session inscrite close AVANT de supprimer ses jetons consommés.
+            let quittee = self.connus.get(&s).and_then(|(_, d)| session_quittee(Some(d), None));
+            match quittee.map_or(Ok(()), |id| self.closes.ajouter(id)) {
+                Ok(()) => retirer_etat(&self.chemin_jetons(&s)),
+                Err(e) => journal(SORTIE, &format!("voie {s} : session close non inscrite, jetons conservés : {e}")),
+            }
             self.connus.remove(&s);
             self.cles_ecrites.remove(&s);
             self.cles_publiees.remove(&s);
@@ -767,6 +998,12 @@ impl DemonSortie {
                 continue;
             }
             let ancien = self.connus.get(&s).map(|(_, a)| a.clone());
+            if let Some(id) = session_quittee(ancien.as_ref(), Some(&d)) {
+                if let Err(e) = self.closes.ajouter(id) {
+                    journal(SORTIE, &format!("voie {s} : session close non inscrite, descripteur différé : {e}"));
+                    continue;
+                }
+            }
             match self.appliquer(ancien.as_ref(), &d) {
                 Ok(()) => journal(SORTIE, &format!("voie {s} : descripteur appliqué ({:?})", d.etat)),
                 Err(e) => journal(SORTIE, &format!("voie {s} : descripteur appliqué en partie : {e}")),
@@ -808,7 +1045,10 @@ impl DemonSortie {
             }
             self.portail.declarer(d.contrat.clone())?;
             // Clé persistée reprise seulement pour la même rotation.
-            if let Some((rotation, etat)) = lire_etat(&self.chemin_cle(&s), 64).and_then(|o| decoder_cle(&o)) {
+            // Clé illisible : une clé neuve est tirée (perte de clé ≠ rejeu ; la façade relit la clé publiée).
+            if let Some((rotation, etat)) =
+                lire_etat(&self.chemin_cle(&s), 64).ok().flatten().and_then(|o| decoder_cle(&o))
+            {
                 if rotation == d.rotation {
                     self.portail.installer_cle(&s, etat)?;
                 }
@@ -844,19 +1084,14 @@ impl DemonSortie {
             }
             Some(SessionDecrite::Sortie { id, ancre_jetons }) => {
                 if actuelle != Some(*id) {
+                    if actuelle.is_some() {
+                        self.portail.fermer_session(&s)?;
+                    }
+                    let consommes = self.etat_session(&s, id)?;
                     self.portail.ouvrir_session(&s, SessionSortie { id: *id, ancre_jetons: *ancre_jetons })?;
-                    let chemin = self.chemin_jetons(&s);
-                    match lire_etat(&chemin, 36 + 32 * crate::sortie::MAX_JETONS_CONSOMMES)
-                        .and_then(|o| decoder_jetons(&o))
-                    {
-                        Some((sid, consommes)) if sid == *id => self.portail.restaurer_jetons(&s, id, &consommes)?,
-                        _ => {
-                            let mut entete = MAGIC_JETONS.to_vec();
-                            entete.extend_from_slice(id);
-                            ecrire_etat(&chemin, &entete)
-                                .map_err(|e| ErreurDemon::Etat(e.to_string()))
-                                .map_err(etat_err)?;
-                        }
+                    if let Err(e) = self.portail.restaurer_jetons(&s, id, &consommes) {
+                        let _ = self.portail.fermer_session(&s);
+                        return Err(e);
                     }
                 }
             }
@@ -865,12 +1100,62 @@ impl DemonSortie {
         Ok(())
     }
 
+    /// Jetons consommés de la session `id` avant de l'ouvrir (fail-closed) :
+    ///
+    /// - session déjà close ⇒ refus (jamais rouverte) ;
+    /// - fichier **absent** ⇒ session neuve : fichier créé (en-tête seul) ;
+    /// - fichier de cette session ⇒ jetons restaurés ; fin déchirée : seul
+    ///   l'enregistrement partiel est retiré (réécriture atomique), tous les
+    ///   jetons complets sont gardés ;
+    /// - fichier d'une **autre** session ⇒ celle-ci est inscrite close, puis
+    ///   la nouvelle part de zéro ;
+    /// - fichier illisible ou en-tête faux ⇒ refus (aucune remise à zéro).
+    fn etat_session(&mut self, s: &IdService, id: &IdSession) -> Result<Vec<Empreinte>, ErreurPortail> {
+        let refus = |m: String| {
+            journal(SORTIE, &format!("voie {s} : session refusée : {m}"));
+            ErreurPortail::EtatIndisponible
+        };
+        if self.closes.contient(id) {
+            journal(SORTIE, &format!("voie {s} : session déjà close, réouverture refusée"));
+            return Err(ErreurPortail::TransitionRefusee);
+        }
+        let chemin = self.chemin_jetons(s);
+        let lu = lire_etat(&chemin, 36 + 32 * crate::sortie::MAX_JETONS_CONSOMMES + 31).map_err(refus)?;
+        if let Some(o) = lu {
+            match decoder_jetons(&o) {
+                None => return Err(refus("jetons consommés illisibles".into())),
+                Some((sid, consommes, dechire)) if sid == *id => {
+                    if dechire {
+                        ecrire_etat(&chemin, &encoder_jetons(id, &consommes)).map_err(|e| refus(e.to_string()))?;
+                        journal(SORTIE, &format!("voie {s} : fin déchirée retirée, {} jetons gardés", consommes.len()));
+                    }
+                    return Ok(consommes);
+                }
+                Some((sid, _, _)) => self.closes.ajouter(sid).map_err(|e| refus(e.to_string()))?,
+            }
+        }
+        ecrire_etat(&chemin, &encoder_jetons(id, &[])).map_err(|e| refus(e.to_string()))?;
+        Ok(Vec::new())
+    }
+
     /// Ajoute un jeton consommé à l'état propre (avant toute publication).
+    ///
+    /// Un ajout interrompu est retiré (fichier ramené à sa longueur d'avant) :
+    /// les ajouts suivants restent alignés. Si même ce retrait échoue, la
+    /// session est close (plus aucune réponse jusqu'à une session neuve).
     fn persister_jeton(&self, s: &IdService, empreinte: &Empreinte) -> std::io::Result<()> {
         let mut f =
             std::fs::OpenOptions::new().append(true).custom_flags(libc::O_NOFOLLOW).open(self.chemin_jetons(s))?;
-        f.write_all(empreinte)?;
-        f.sync_data()
+        let avant = f.metadata()?.len();
+        if avant < 36 || (avant - 36) % 32 != 0 {
+            let _ = self.portail.fermer_session(s);
+            return Err(std::io::Error::new(std::io::ErrorKind::InvalidData, "fichier de jetons désaligné"));
+        }
+        let ecrit = f.write_all(empreinte).and_then(|()| f.sync_data());
+        if ecrit.is_err() && f.set_len(avant).and_then(|()| f.sync_data()).is_err() {
+            let _ = self.portail.fermer_session(s);
+        }
+        ecrit
     }
 
     fn traiter_reponses(&mut self, b: &mut Bilan) {

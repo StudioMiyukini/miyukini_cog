@@ -16,10 +16,21 @@
 //!   `miyucloud`, 60 s, **usage unique**) et consommé avant toute vérification.
 //! - La preuve est liée à la requête : `liaison_requete(méthode, chemin sans
 //!   requête, corps)` (TLS terminé par un mandataire : pas d'exporteur TLS).
-//! - Ancre de confiance : la **clé d'émission épinglée du COG d'origine**
-//!   (`MIYUCLOUD_MIYU_COG_ID` + `MIYUCLOUD_MIYU_CLE_EMISSION`), niveau souverain :
-//!   passeport **et** visa doivent être scellés par ce COG. Aucune clé épinglée ⇒
-//!   schéma désactivé (refus).
+//! - Ancre de confiance (`MIYUCLOUD_MIYU_COG_ID` + l'un des deux modes) :
+//!   - **chaîne (A-022, A-024)** : `MIYUCLOUD_MIYU_RACINE` = clé publique
+//!     d'identité du COG (indice 0 ; `cog_id` = son empreinte, contrôlé) et
+//!     `MIYUCLOUD_MIYU_DELEGATIONS` = délégations `0x45` en cours, au format de
+//!     l'en-tête `X-Miyu-Delegations` (base64 URL séparées par `.`), en
+//!     principe `emission` (indice 1, passeports) et `visas` (indice 5, visas).
+//!     La racine connue active le **mode strict** : seules les clés déléguées
+//!     signent, un visa signé par l'indice 1 est refusé. Une délégation
+//!     invalide ou expirée au démarrage ⇒ refus de démarrer. Les délégations
+//!     présentées avec un visa (`X-Miyu-Delegations`) sont acceptées par
+//!     [`MiyuAuthService::verifier_visa_avec_delegations`] ;
+//!   - **transition** : `MIYUCLOUD_MIYU_CLE_EMISSION` = clé d'émission épinglée
+//!     directement (passeport et visa scellés par elle).
+//!
+//!   Niveau souverain ; aucune ancre ⇒ schéma désactivé (refus).
 //! - Révocation : liste tirée du **registre vérifié** du COG d'origine
 //!   ([`super::miyu_revocations`], `miyuregistre::RevocationsRegistre`) :
 //!   passeport, visa, clé d'appareil et clé d'émission sont contrôlés à chaque
@@ -46,7 +57,7 @@ use std::sync::Arc;
 use miyauth::http::{
     DefiEmis, EntetesSignees, MagasinDefis, MagasinDefisMemoire, RefusHttp, RegistreNonces,
     RequeteHttp, analyser_autorisation_visa, analyser_pop, verifier_requete_signee,
-    verifier_requete_visa,
+    verifier_requete_visa_avec_delegations,
 };
 use miyauth::{AnnuaireEmetteurs, CogId, PolitiqueIdentite};
 use miyusceau::NiveauConfiance;
@@ -88,43 +99,118 @@ pub fn analyser_cle_publique(texte: &str) -> Option<[u8; 32]> {
 pub struct AncreCog {
     /// `cog_id` du COG d'origine.
     pub cog_id: CogId,
-    /// Clé publique d'émission épinglée.
-    pub cle_emission: [u8; 32],
+    /// Transition : clé publique d'émission épinglée directement.
+    pub cle_emission: Option<[u8; 32]>,
+    /// Chaîne : clé publique d'identité (racine) du COG ⇒ mode strict.
+    pub racine: Option<[u8; 32]>,
+    /// Chaîne : délégations `0x45` configurées (sceaux complets).
+    pub delegations: Vec<Vec<u8>>,
 }
 
 impl AncreCog {
-    /// Lit `MIYUCLOUD_MIYU_COG_ID` et `MIYUCLOUD_MIYU_CLE_EMISSION`.
+    /// Lit `MIYUCLOUD_MIYU_COG_ID` avec `MIYUCLOUD_MIYU_CLE_EMISSION`
+    /// (transition) **ou** `MIYUCLOUD_MIYU_RACINE` (+ `MIYUCLOUD_MIYU_DELEGATIONS`).
     ///
-    /// Les deux absents : `Ok(None)` (schéma visa désactivé). Un seul présent ou
-    /// une valeur invalide : erreur (fail-closed, le serveur refuse de démarrer).
+    /// Tout absent : `Ok(None)` (schéma visa désactivé). Combinaison incomplète,
+    /// les deux modes à la fois ou valeur invalide : erreur (fail-closed, le
+    /// serveur refuse de démarrer).
     pub fn depuis_env() -> Result<Option<Self>, String> {
-        Self::depuis_valeurs(
+        Self::depuis_valeurs_chaine(
             std::env::var("MIYUCLOUD_MIYU_COG_ID").ok().as_deref(),
             std::env::var("MIYUCLOUD_MIYU_CLE_EMISSION").ok().as_deref(),
+            std::env::var("MIYUCLOUD_MIYU_RACINE").ok().as_deref(),
+            std::env::var("MIYUCLOUD_MIYU_DELEGATIONS").ok().as_deref(),
         )
     }
 
-    /// Variante pure de [`Self::depuis_env`].
+    /// Variante pure de [`Self::depuis_env`], mode de transition seulement.
     pub fn depuis_valeurs(cog: Option<&str>, cle: Option<&str>) -> Result<Option<Self>, String> {
-        let cog = cog.map(str::trim).filter(|s| !s.is_empty());
-        let cle = cle.map(str::trim).filter(|s| !s.is_empty());
-        match (cog, cle) {
-            (None, None) => Ok(None),
-            (Some(c), Some(k)) => {
-                let cog_id = CogId::new(c)
-                    .ok_or_else(|| format!("MIYUCLOUD_MIYU_COG_ID invalide « {c} »"))?;
-                let cle_emission = analyser_cle_publique(k).ok_or(
-                    "MIYUCLOUD_MIYU_CLE_EMISSION : clé publique Ed25519 (64 hex ou base64 URL) attendue",
-                )?;
-                Ok(Some(Self {
-                    cog_id,
-                    cle_emission,
-                }))
+        Self::depuis_valeurs_chaine(cog, cle, None, None)
+    }
+
+    /// Variante pure de [`Self::depuis_env`].
+    pub fn depuis_valeurs_chaine(
+        cog: Option<&str>,
+        cle: Option<&str>,
+        racine: Option<&str>,
+        delegations: Option<&str>,
+    ) -> Result<Option<Self>, String> {
+        let nettoyer = |v: Option<&str>| v.map(str::trim).filter(|s| !s.is_empty()).map(str::to_string);
+        let (cog, cle, racine, delegations) =
+            (nettoyer(cog), nettoyer(cle), nettoyer(racine), nettoyer(delegations));
+        let cog_id = match (&cog, &cle, &racine) {
+            (None, None, None) if delegations.is_none() => return Ok(None),
+            (Some(c), Some(_), None) | (Some(c), None, Some(_)) => {
+                CogId::new(c).ok_or_else(|| format!("MIYUCLOUD_MIYU_COG_ID invalide « {c} »"))?
             }
-            _ => Err(
-                "MIYUCLOUD_MIYU_COG_ID et MIYUCLOUD_MIYU_CLE_EMISSION vont ensemble".to_string(),
-            ),
+            (Some(_), Some(_), Some(_)) => {
+                return Err("MIYUCLOUD_MIYU_CLE_EMISSION et MIYUCLOUD_MIYU_RACINE s'excluent".to_string());
+            }
+            _ => {
+                return Err(
+                    "MIYUCLOUD_MIYU_COG_ID va avec MIYUCLOUD_MIYU_CLE_EMISSION ou MIYUCLOUD_MIYU_RACINE"
+                        .to_string(),
+                );
+            }
+        };
+        let cle_emission = match cle {
+            None => None,
+            Some(k) => Some(analyser_cle_publique(&k).ok_or(
+                "MIYUCLOUD_MIYU_CLE_EMISSION : clé publique Ed25519 (64 hex ou base64 URL) attendue",
+            )?),
+        };
+        let racine = match racine {
+            None => None,
+            Some(k) => {
+                let r = analyser_cle_publique(&k).ok_or(
+                    "MIYUCLOUD_MIYU_RACINE : clé publique Ed25519 (64 hex ou base64 URL) attendue",
+                )?;
+                if miyusceau::cog_id_depuis_cle(&r) != cog_id.as_str() {
+                    return Err("MIYUCLOUD_MIYU_RACINE : cog_id différent de MIYUCLOUD_MIYU_COG_ID".to_string());
+                }
+                Some(r)
+            }
+        };
+        let delegations = match delegations {
+            None => Vec::new(),
+            Some(_) if racine.is_none() => {
+                return Err("MIYUCLOUD_MIYU_DELEGATIONS exige MIYUCLOUD_MIYU_RACINE".to_string());
+            }
+            Some(d) => miyauth::http::analyser_delegations(&d)
+                .map_err(|_| "MIYUCLOUD_MIYU_DELEGATIONS : délégations base64 URL séparées par « . »")?,
+        };
+        Ok(Some(Self {
+            cog_id,
+            cle_emission,
+            racine,
+            delegations,
+        }))
+    }
+
+    /// Annuaire d'émetteurs de l'ancre ; racine ⇒ délégations vérifiées à
+    /// `maintenant` et **mode strict**.
+    pub fn annuaire(&self, maintenant: u64) -> Result<AnnuaireEmetteurs, String> {
+        let mut annuaire = AnnuaireEmetteurs::new();
+        match (self.cle_emission, self.racine) {
+            (Some(cle), None) => {
+                annuaire
+                    .ajouter(self.cog_id.clone(), &cle, NiveauConfiance::Souverain)
+                    .map_err(|e| format!("MIYUCLOUD_MIYU_CLE_EMISSION : {e}"))?;
+            }
+            (None, Some(racine)) => {
+                annuaire
+                    .epingler_racine(self.cog_id.clone(), &racine, NiveauConfiance::Souverain)
+                    .map_err(|e| format!("MIYUCLOUD_MIYU_RACINE : {e}"))?;
+                for d in &self.delegations {
+                    annuaire
+                        .ajouter_delegation(d, maintenant)
+                        .map_err(|e| format!("MIYUCLOUD_MIYU_DELEGATIONS : {e}"))?;
+                }
+                annuaire.exiger_delegations();
+            }
+            _ => return Err("ancre du COG incomplète".to_string()),
         }
+        Ok(annuaire)
     }
 }
 
@@ -332,14 +418,7 @@ impl<S: MiyuIdentityStore> MiyuAuthService<S> {
         let hote = match ancre {
             None => None,
             Some(a) => {
-                let mut annuaire = AnnuaireEmetteurs::new();
-                annuaire
-                    .ajouter(
-                        a.cog_id.clone(),
-                        &a.cle_emission,
-                        NiveauConfiance::Souverain,
-                    )
-                    .map_err(|e| format!("MIYUCLOUD_MIYU_CLE_EMISSION : {e}"))?;
+                let annuaire = a.annuaire(maintenant())?;
                 Some(HoteVisa {
                     // Fail-closed : sans source branchée, tout visa est refusé.
                     revocations: RevocationsMiyuCloud::absentes(),
@@ -422,6 +501,19 @@ impl<S: MiyuIdentityStore> MiyuAuthService<S> {
         pop: Option<&str>,
         maintenant: u64,
     ) -> Result<IdentiteVisa, RefusMiyu> {
+        self.verifier_visa_avec_delegations(requete, autorisation, pop, None, maintenant)
+    }
+
+    /// Comme [`Self::verifier_visa`], avec les délégations `0x45` présentées
+    /// (`X-Miyu-Delegations`, valeur brute) : vérifiées contre la racine épinglée.
+    pub fn verifier_visa_avec_delegations(
+        &self,
+        requete: RequeteProuvee<'_>,
+        autorisation: Option<&str>,
+        pop: Option<&str>,
+        delegations: Option<&str>,
+        maintenant: u64,
+    ) -> Result<IdentiteVisa, RefusMiyu> {
         let hote = self.hote.as_ref().ok_or(RefusMiyu::VisaDesactive)?;
         let req = RequeteHttp {
             methode: requete.methode,
@@ -431,8 +523,9 @@ impl<S: MiyuIdentityStore> MiyuAuthService<S> {
             pop,
             liaison: None,
         };
-        let acces = verifier_requete_visa(
+        let acces = verifier_requete_visa_avec_delegations(
             &req,
+            delegations,
             AUDIENCE_MIYUCLOUD,
             &hote.politique(),
             &self.defis,
@@ -698,7 +791,9 @@ pub(crate) mod tests {
                 Arc::new(MemoireIdentites::default()),
                 Some(AncreCog {
                     cog_id: cog.clone(),
-                    cle_emission: cle_cog.cle_publique(),
+                    cle_emission: Some(cle_cog.cle_publique()),
+                    racine: None,
+                    delegations: Vec::new(),
                 }),
             )
             .unwrap()
@@ -810,12 +905,46 @@ pub(crate) mod tests {
         let a = AncreCog::depuis_valeurs(Some(&cog), Some(&hex::encode(cle)))
             .unwrap()
             .unwrap();
-        assert_eq!(a.cle_emission, cle);
+        assert_eq!(a.cle_emission, Some(cle));
         let b = AncreCog::depuis_valeurs(Some(&cog), Some(&b64_encoder(&cle)))
             .unwrap()
             .unwrap();
         assert_eq!(a, b);
         assert!(AncreCog::depuis_valeurs(Some(&cog), Some("pas une clé")).is_err());
+    }
+
+    #[test]
+    fn anchor_chain_mode_is_strict_and_checks_delegations() {
+        use miyusceau::DelegationCle;
+        let identite = CleSignature::generer();
+        let racine = identite.cle_publique();
+        let cog = miyusceau::cog_id_depuis_cle(&racine);
+        let visas = CleSignature::generer();
+        let t = maintenant();
+        let delegation = |debut: u64, fin: u64| {
+            DelegationCle::nouvelle(&cog, 5, 0, visas.cle_publique(), debut, fin)
+                .unwrap()
+                .sceller(&identite)
+                .unwrap()
+        };
+        let valide = b64_encoder(&delegation(t - 60, t + 86_400));
+        let a = AncreCog::depuis_valeurs_chaine(Some(&cog), None, Some(&hex::encode(racine)), Some(&valide))
+            .unwrap()
+            .unwrap();
+        let annuaire = a.annuaire(t).unwrap();
+        assert!(annuaire.est_strict() && annuaire.delegation(&visas.kid()).is_some());
+        // Les deux modes à la fois, racine d'un autre COG, délégations sans racine : refus.
+        let cle = hex::encode(CleSignature::generer().cle_publique());
+        assert!(AncreCog::depuis_valeurs_chaine(Some(&cog), Some(&cle), Some(&hex::encode(racine)), None).is_err());
+        let autre = miyusceau::cog_id_depuis_cle(&CleSignature::generer().cle_publique());
+        assert!(AncreCog::depuis_valeurs_chaine(Some(&autre), None, Some(&hex::encode(racine)), None).is_err());
+        assert!(AncreCog::depuis_valeurs_chaine(Some(&cog), Some(&cle), None, Some(&valide)).is_err());
+        // Délégation expirée au démarrage : refus de démarrer.
+        let expiree = b64_encoder(&delegation(t - 86_400, t - 600));
+        let b = AncreCog::depuis_valeurs_chaine(Some(&cog), None, Some(&hex::encode(racine)), Some(&expiree))
+            .unwrap()
+            .unwrap();
+        assert!(b.annuaire(t).is_err());
     }
 
     #[test]
@@ -1204,7 +1333,9 @@ pub(crate) mod tests {
             Arc::new(MemoireIdentites::default()),
             Some(AncreCog {
                 cog_id: m.cog.clone(),
-                cle_emission: m.cle_cog.cle_publique(),
+                cle_emission: Some(m.cle_cog.cle_publique()),
+                racine: None,
+                delegations: Vec::new(),
             }),
         )
         .unwrap();

@@ -330,7 +330,7 @@ fn forger_delegation(m: &Monde, modifier: impl FnOnce(&mut Vec<(u8, Vec<u8>)>)) 
 fn plus_de_90_jours_refuse() {
     let mut m = Monde::sans_delegation();
     let octets = forger_delegation(&m, |c| {
-        c[6] = (7, (T0 + 90 * JOUR + 1).to_be_bytes().to_vec())
+        c[6] = (7, (T0 + 90 * JOUR + 1).to_be_bytes().to_vec());
     });
     assert_eq!(
         m.annuaire.ajouter_delegation(&octets, T0).unwrap_err(),
