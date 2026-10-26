@@ -33,9 +33,9 @@
 |---|---|---|
 | I1 | Racine hors ligne, passeports, preuve de possession | fait (lot 2) |
 | I2 | Délégation de clé d'usage `0x45`, clés `visas` (5) et `fiches` (6) | fait (A-024) ; migration des émetteurs et mode strict avec I3 |
-| I3 | Guichet des visas en zone COG (visa ≤ 15 min) | à faire (après I2, S5) |
+| I3 | Guichet des visas en zone COG (visa ≤ 15 min) | fait (A-029) ; placement des délégations par l'installateur à faire |
 | I4 | Routes mémoire MAIA authentifiées par passeport et visa | à faire (après I3) |
-| I5 | Défis et nonces persistants (plusieurs instances) ; preuve de possession liée au canal TLS | à faire |
+| I5 | Défis et nonces persistants (plusieurs instances) ; preuve de possession liée au canal TLS | fait (A-029) ; liaison TLS fournie, non branchée (aucun vérificateur ne termine TLS) ; MiyuCloud encore en mémoire |
 | I6 | Liaison d'identité et de clé d'appareil dans MiyuCloud ; régénération d'identité mobile | à faire |
 
 ## 3. Données
