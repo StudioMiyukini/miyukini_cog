@@ -598,9 +598,134 @@ SEED_KM=$(sudo -n cat "$KMDIR/$OPER.key" | tr -d '\n')
 r=$(python3 -I "$TEST_PY" km "$KM" "$OPER" "$SEED_KM" "$PIN_KM")
 egalite "témoin positif : l'opérateur de la mémoire s'authentifie avec sa clé" Authenticated "$r"
 
+# ─────────────────────────────────────────────────────────────── 11 bis. Portail scindé (A-022 §3)
+echo "# 11 bis. Portail scindé : entrée et sortie, files à sens unique, jeton à usage unique, pannes, AppArmor"
+OUTIL=/home/cog/cog-paquet/outils/portail_essai
+PF=/var/lib/miyukini/portail-files
+VE=/etc/miyukini/portail-entree/voies
+VS=/etc/miyukini/portail-sortie/voies
+SP=essai.portail
+# Dossier d'essai jetable (clés d'essai, jetons) lisible des comptes façade et moteur.
+T=$(sudo -n mktemp -d /run/cog-portail.XXXXXX)
+sudo -n install -m 0755 "$OUTIL" "$T/outil"
+sudo -n chmod 1777 "$T"
+facade() { sudo -n -u miyukini-facade "$T/outil" "$@"; }
+moteur() { sudo -n -u miyukini-moteur "$T/outil" "$@"; }
+# attendre COMMANDE… : réessaie 15 s au plus
+attendre() { local i; for i in $(seq 1 30); do "$@" >"$W/attendre.out" 2>&1 && return 0; sleep 0.5; done; return 1; }
+cores() { sudo -n "$T/outil" cores --cles "$T/cles" --service "$SP" --voies-entree "$VE" --voies-sortie "$VS" \
+	--entree-uid "$(id -u miyukini-portail-entree)" --entree-gid "$(id -g miyukini-portail-entree)" "$@" >/dev/null; }
+cle_publiee() { sudo -n -u miyukini-facade test -s "$PF/publication/$SP.cle"; }
+nb_publications() { facade lire --publication "$PF/publication" --service "$SP" 2>/dev/null; }
+
+if [[ ! -x $OUTIL ]]; then
+	nok "outil d'essai du Portail présent dans le paquet" "$OUTIL absent"
+else
+	cores --etat active
+	sudo -n chmod 0644 "$T/cles"
+	egalite "Cores : descripteur de l'entrée (graine des jetons) en 0600 au compte de l'entrée" "600 miyukini-portail-entree" \
+		"$(sudo -n stat -c '%a %U' "$VE/$SP.voie")"
+	egalite "Cores : descripteur de la sortie (sans secret) en 0640, groupe de la sortie" "640 miyukini-portail-sortie" \
+		"$(sudo -n stat -c '%a %G' "$VS/$SP.voie")"
+	attendre cle_publiee && ok "sortie : clé de publication de la voie publiée pour la façade" || nok "sortie : clé de publication publiée"
+
+	# Chemin nominal : façade → entrée → moteur → sortie → façade.
+	facade deposer --cles "$T/cles" --service "$SP" --depot "$PF/depot" --sequence 1 >/dev/null
+	attendre moteur relever --admises "$PF/admises" --jeton "$T/jeton1" &&
+		egalite "entrée : déclaration de la façade admise et remise au moteur (séquence)" 1 "$(cat "$W/attendre.out")" ||
+		nok "entrée : déclaration admise et remise au moteur" "$(head -c 200 "$W/attendre.out")"
+	moteur repondre --reponses "$PF/reponses" --jeton "$T/jeton1" --texte "créneau 10h" >/dev/null
+	attendre bash -c "[ \"\$(sudo -n -u miyukini-facade '$T/outil' lire --publication '$PF/publication' --service '$SP' 2>/dev/null)\" = 1 ]" &&
+		ok "sortie : réponse à jeton publiée, signée par la clé de la voie (vérifiée par la façade)" ||
+		nok "sortie : réponse publiée et vérifiée"
+
+	# Jeton à usage unique.
+	moteur repondre --reponses "$PF/reponses" --jeton "$T/jeton1" --texte "rejeu" >/dev/null
+	attendre bash -c "sudo -n journalctl -u miyukini-portail-sortie --since '-30s' --no-pager -o cat | grep -q 'jeton de réponse déjà utilisé'" &&
+		ok "sortie : second usage du même jeton refusé (journal)" || nok "sortie : second usage du jeton refusé"
+	egalite "sortie : aucune publication pour le jeton rejoué" 0 "$(nb_publications)"
+	# Rejeu d'une trame déjà admise.
+	facade deposer --cles "$T/cles" --service "$SP" --depot "$PF/depot" --sequence 1 >/dev/null
+	attendre bash -c "sudo -n journalctl -u miyukini-portail-entree --since '-30s' --no-pager -o cat | grep -q 'séquence rejouée'" &&
+		ok "entrée : trame rejouée refusée (anti-rejeu par auteur)" || nok "entrée : trame rejouée refusée"
+
+	# L'entrée refuse toute publication : une réponse glissée dans le dépôt est rejetée, rien ne sort.
+	sudo -n -u miyukini-facade "$T/outil" repondre --reponses "$PF/depot" --jeton "$T/jeton1" --texte "par l'entrée" >/dev/null 2>&1
+	attendre bash -c "sudo -n journalctl -u miyukini-portail-entree --since '-30s' --no-pager -o cat | grep -q 'élément non admis'" &&
+		ok "entrée : réponse déposée dans sa file refusée (l'entrée ne publie jamais)" ||
+		nok "entrée : réponse déposée refusée"
+	egalite "entrée : rien publié par ce chemin" 0 "$(nb_publications)"
+
+	# Pannes : kill -9 de l'entrée, la sortie répond encore ; kill -9 de la sortie, l'entrée admet encore.
+	facade deposer --cles "$T/cles" --service "$SP" --depot "$PF/depot" --sequence 2 >/dev/null
+	attendre moteur relever --admises "$PF/admises" --jeton "$T/jeton2" >/dev/null
+	sudo -n systemctl stop miyukini-portail-entree
+	egalite "panne de l'entrée (arrêtée) : la sortie reste active" active "$(systemctl is-active miyukini-portail-sortie)"
+	moteur repondre --reponses "$PF/reponses" --jeton "$T/jeton2" --texte "pendant la panne de l'entrée" >/dev/null
+	attendre bash -c "[ \"\$(sudo -n -u miyukini-facade '$T/outil' lire --publication '$PF/publication' --service '$SP' 2>/dev/null)\" = 1 ]" &&
+		ok "panne de l'entrée : la sortie publie la réponse" || nok "panne de l'entrée : la sortie publie"
+	sudo -n systemctl start miyukini-portail-entree
+	attendre systemctl is-active --quiet miyukini-portail-entree
+	PID_S=$(systemctl show -p MainPID --value miyukini-portail-sortie)
+	[[ $PID_S =~ ^[1-9][0-9]*$ ]] && sudo -n kill -9 "$PID_S"
+	facade deposer --cles "$T/cles" --service "$SP" --depot "$PF/depot" --sequence 3 >/dev/null
+	attendre moteur relever --admises "$PF/admises" --jeton "$T/jeton3" &&
+		egalite "kill -9 de la sortie : l'entrée admet encore (séquence)" 3 "$(cat "$W/attendre.out")" ||
+		nok "kill -9 de la sortie : l'entrée admet encore"
+	attendre bash -c "[ \"\$(systemctl show -p MainPID --value miyukini-portail-sortie)\" != '$PID_S' ] && systemctl is-active --quiet miyukini-portail-sortie" &&
+		ok "kill -9 de la sortie : relancée par systemd (Restart=on-failure)" || nok "sortie relancée après kill -9"
+	moteur repondre --reponses "$PF/reponses" --jeton "$T/jeton3" --texte "après relance" >/dev/null
+	attendre bash -c "[ \"\$(sudo -n -u miyukini-facade '$T/outil' lire --publication '$PF/publication' --service '$SP' 2>/dev/null)\" = 1 ]" &&
+		ok "sortie relancée : clé et jetons repris de son état, réponse publiée" || nok "sortie relancée : réponse publiée"
+	moteur repondre --reponses "$PF/reponses" --jeton "$T/jeton1" --texte "rejeu après relance" >/dev/null
+	sleep 2
+	egalite "sortie relancée : jeton consommé avant la panne toujours refusé" 0 "$(nb_publications)"
+	PID_E=$(systemctl show -p MainPID --value miyukini-portail-entree)
+	[[ $PID_E =~ ^[1-9][0-9]*$ ]] && sudo -n kill -9 "$PID_E"
+	egalite "kill -9 de l'entrée : la sortie reste active" active "$(systemctl is-active miyukini-portail-sortie)"
+	facade deposer --cles "$T/cles" --service "$SP" --depot "$PF/depot" --sequence 2 >/dev/null
+	facade deposer --cles "$T/cles" --service "$SP" --depot "$PF/depot" --sequence 4 >/dev/null
+	attendre moteur relever --admises "$PF/admises" --jeton "$T/jeton4" &&
+		egalite "entrée relancée après kill -9 : marques reprises, rejeu refusé, trame neuve admise" 4 "$(cat "$W/attendre.out")" ||
+		nok "entrée relancée : admission après kill -9"
+
+	# AppArmor : chaque profil refuse l'écriture dans les files de l'autre sens. Le compte qui exécute
+	# la sonde est le PROPRIÉTAIRE de la file visée (les droits l'y autoriseraient) : seul AppArmor refuse.
+	# Témoin : la même sonde, binaire copié hors de son chemin de profil (non confiné), y écrit.
+	sonde_e() { sudo -n -u miyukini-facade "$1" --voies "$VE" --etat /nonexistent --depot "$PF/depot" --admises "$PF/admises" \
+		--sas /opt/miyukini/bin/portail-sas --interdit "$PF/publication" --verifier-cloisonnement >/dev/null 2>&1; }
+	sonde_s() { sudo -n -u miyukini-portail-entree "$1" --voies "$VS" --etat /nonexistent --reponses "$PF/reponses" \
+		--publication "$PF/publication" --interdit "$PF/depot" --verifier-cloisonnement >/dev/null 2>&1; }
+	sudo -n install -m 0755 /opt/miyukini/bin/portail-entree "$T/entree-non-confinee"
+	sudo -n install -m 0755 /opt/miyukini/bin/portail-sortie "$T/sortie-non-confinee"
+	sonde_e "$T/entree-non-confinee"; egalite "témoin : sans profil, le propriétaire de la file de publication y écrit" 1 "$?"
+	sonde_e /opt/miyukini/bin/portail-entree; egalite "AppArmor : l'entrée ne peut pas écrire dans la file de publication" 0 "$?"
+	attendre bash -c "sudo -n journalctl -k --since '-60s' --no-pager | grep 'apparmor=\"DENIED\"' | grep 'profile=\"miyukini-portail-entree\"' | grep -q 'portail-files/publication/.sonde-cloisonnement'" &&
+		ok "AppArmor : refus journalisé (profil miyukini-portail-entree, file publication)" || nok "AppArmor : refus de l'entrée journalisé"
+	sonde_s "$T/sortie-non-confinee"; egalite "témoin : sans profil, le propriétaire de la file de dépôt y écrit" 1 "$?"
+	sonde_s /opt/miyukini/bin/portail-sortie; egalite "AppArmor : la sortie ne peut pas écrire dans la file de dépôt" 0 "$?"
+	attendre bash -c "sudo -n journalctl -k --since '-60s' --no-pager | grep 'apparmor=\"DENIED\"' | grep 'profile=\"miyukini-portail-sortie\"' | grep -q 'portail-files/depot/.sonde-cloisonnement'" &&
+		ok "AppArmor : refus journalisé (profil miyukini-portail-sortie, file dépôt)" || nok "AppArmor : refus de la sortie journalisé"
+
+	# Coupure puis rétablissement : clé retirée, puis nouvelle clé (rotation).
+	CLE_AVANT=$(sudo -n cat "$PF/publication/$SP.cle")
+	cores --etat coupee
+	attendre bash -c "! sudo -n test -e '$PF/publication/$SP.cle'" && ok "coupure : clé de publication retirée par la sortie" || nok "coupure : clé retirée"
+	cores --etat active --rotation 1
+	attendre cle_publiee && [[ $(sudo -n cat "$PF/publication/$SP.cle") != "$CLE_AVANT" ]] &&
+		ok "rétablissement : nouvelle clé de publication" || nok "rétablissement : nouvelle clé"
+
+	# Nettoyage : voie supprimée (aucun résidu dans les files).
+	sudo -n rm -f "$VE/$SP.voie" "$VS/$SP.voie"
+	attendre bash -c "! sudo -n test -e '$PF/publication/$SP.cle' && ! sudo -n test -e /var/lib/miyukini/portail-sortie/$SP.cle" &&
+		ok "voie supprimée : clé et état de la sortie effacés" || nok "voie supprimée : aucun résidu"
+fi
+sudo -n rm -rf "$T"
+
 # ─────────────────────────────────────────────────────────────── 12. AppArmor : aucun refus COG
 echo "# 12. AppArmor : aucun refus des profils COG pendant le scénario"
-REFUS=$(sudo -n journalctl -k --since "$DEBUT_NOYAU" --no-pager 2>/dev/null | grep -c 'apparmor="DENIED".*profile="miyukini-')
+# Les sondes de cloisonnement de la section 11 bis sont des refus VOULUS (fichier .sonde-cloisonnement).
+REFUS=$(sudo -n journalctl -k --since "$DEBUT_NOYAU" --no-pager 2>/dev/null | grep 'apparmor="DENIED".*profile="miyukini-' | grep -vc '\.sonde-cloisonnement-')
 [[ ${REFUS:-0} -eq 0 ]] && ok "aucun refus AppArmor (profils miyukini-*) dans le journal noyau" || nok "refus AppArmor pendant le scénario" "$REFUS refus"
 
 echo "# bilan : $((N - NOK)) ok, $NOK not ok"

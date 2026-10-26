@@ -1,0 +1,39 @@
+# AppArmor — Portail, processus « entrée » (Franche → zone COG, A-022 §3).
+# Relève les dépôts de la façade et remet les déclarations admises au moteur. AUCUNE capacité de
+# publier : aucun droit sur les files reponses/ et publication/, ni sur l'état ou la configuration
+# de la sortie (refus audités). Lance le sas de décodage par lot SOUS CE PROFIL (ix) : avec
+# NoNewPrivileges, le noyau refuse toute transition vers un autre profil, même en pile
+# (« no new privs », observé en VM) ; le sas se confine en plus lui-même (Landlock, seccomp, rlimits).
+#include <tunables/global>
+
+profile miyukini-portail-entree /opt/miyukini/bin/portail-entree flags=(enforce) {
+  #include <abstractions/base>
+
+  /opt/miyukini/bin/portail-entree mr,
+  /opt/miyukini/bin/portail-sas rmix,
+
+  # Descripteurs de voie remis par les Cores (lecture seule).
+  /etc/miyukini/portail-entree/voies/ r,
+  /etc/miyukini/portail-entree/voies/* r,
+  # État propre : marques anti-rejeu, journal.
+  owner /var/lib/miyukini/portail-entree/ r,
+  owner /var/lib/miyukini/portail-entree/** rw,
+  # File de dépôt (lecture, retrait) et file des admises (création seule).
+  /var/lib/miyukini/portail-files/depot/ r,
+  /var/lib/miyukini/portail-files/depot/* rw,
+  /var/lib/miyukini/portail-files/admises/* w,
+  # Fichier temporaire propre (.<nom>.tmp) : le renommage atomique exige « r » sur la source.
+  /var/lib/miyukini/portail-files/admises/.*.tmp rw,
+  # Descripteurs hérités refusés avant de lancer le sas.
+  @{PROC}/@{pid}/fd/ r,
+  @{PROC}/@{pid}/fdinfo/* r,
+
+  deny network,
+  audit deny /var/lib/miyukini/portail-files/reponses/** rwlk,
+  audit deny /var/lib/miyukini/portail-files/publication/** rwlk,
+  audit deny /var/lib/miyukini/portail-sortie/** rwlk,
+  audit deny /etc/miyukini/portail-sortie/** rw,
+  deny /var/lib/miyukini/{kindmother,maia,miyucloud,cog-web-portal}/** rw,
+  deny /etc/miyukini/*.env r,
+  deny /home/** rw,
+}

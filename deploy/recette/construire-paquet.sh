@@ -7,7 +7,8 @@
 #
 # Produit cog-<version>-<commit12>[-<suffixe>].tar.zst (+ .sha256) :
 #   bin/        binaires serveur (kindmother-server, maia, miyucloud-server, cog-web-portal,
-#               portail-sas, miyudouane, miyurelais, miyuregistre-publier), exemple arretes_essai,
+#               portail-sas, portail-entree, portail-sortie, miyudouane, miyurelais,
+#               miyuregistre-publier), exemple arretes_essai,
 #               outil-sceau. miyuracine N'EST PAS inclus (cérémonie hors ligne).
 #   config/     bridge.toml et strongfather/*.toml (défauts fail-closed du dépôt)
 #   static/     statiques MiyuCloud (version de production et source)
@@ -225,11 +226,11 @@ if ((SANS_COMPILATION == 0)); then
 		-p kindmother-service -p maia -p miyucloud-server -p cog-web-portal -p miyuportail \
 		-p miyudouane -p miyurelais -p miyuregistre -p maia-memoire --features miyuregistre/publier \
 		--bin kindmother-server --bin maia --bin miyucloud-server --bin cog-web-portal \
-		--bin portail-sas --bin miyudouane --bin miyurelais --bin miyuregistre-publier \
+		--bin portail-sas --bin portail-entree --bin portail-sortie --bin miyudouane --bin miyurelais --bin miyuregistre-publier \
 		--example arretes_essai) || die "compilation release"
 fi
 
-for b in kindmother-server maia miyucloud-server cog-web-portal portail-sas miyudouane miyurelais miyuregistre-publier; do
+for b in kindmother-server maia miyucloud-server cog-web-portal portail-sas portail-entree portail-sortie miyudouane miyurelais miyuregistre-publier; do
 	[[ -x $REL/$b ]] || die "binaire absent : $REL/$b"
 done
 [[ -x $REL/examples/arretes_essai ]] || die "exemple absent : $REL/examples/arretes_essai"
@@ -255,7 +256,7 @@ trap 'rm -rf "$STAGE_PARENT"' EXIT
 P="$STAGE_PARENT/$NOM"
 mkdir -p "$P/bin" "$P/config" "$P/static" "$P/apparmor" "$P/systemd" "$P/exploitation" "$P/tests"
 
-for b in kindmother-server maia miyucloud-server cog-web-portal portail-sas miyudouane miyurelais miyuregistre-publier; do
+for b in kindmother-server maia miyucloud-server cog-web-portal portail-sas portail-entree portail-sortie miyudouane miyurelais miyuregistre-publier; do
 	cp "$REL/$b" "$P/bin/$b"
 done
 cp "$REL/examples/arretes_essai" "$P/bin/arretes_essai"

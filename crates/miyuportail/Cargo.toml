@@ -15,6 +15,14 @@ description = "Portail interne — voies à sens unique par service, rupture pro
 name = "portail-sas"
 path = "src/bin/portail-sas.rs"
 
+[[bin]]
+name = "portail-entree"
+path = "src/bin/portail-entree.rs"
+
+[[bin]]
+name = "portail-sortie"
+path = "src/bin/portail-sortie.rs"
+
 [dependencies]
 miyusceau = { path = "../miyusceau" }
 ed25519-dalek = { version = "2", features = ["rand_core"] }

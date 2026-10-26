@@ -58,7 +58,8 @@ code_http() { curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$@"; }
 
 # ------------------------------------------------------------------ services
 
-for u in postgresql miyukini-douane-cog miyukini-attente-kindmother miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
+for u in postgresql miyukini-douane-cog miyukini-attente-kindmother miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal \
+	miyukini-portail-entree miyukini-portail-sortie; do
 	controle "$u actif" systemctl is-active --quiet "$u"
 done
 
@@ -94,7 +95,7 @@ controle "Douane : unité de zone rechargeable (ExecReload = nft -f du rendu miy
 	bash -c "systemctl show -p ExecReload --value miyukini-douane-cog | grep -q '/etc/miyukini/douane-cog.nft'"
 controle "Douane : minuteur de contrôle périodique de la zone actif (fail-closed)" \
 	systemctl is-active --quiet miyukini-douane-cog-controle.timer
-for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
+for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-entree miyukini-portail-sortie; do
 	controle "COG $u : lié à la zone (BindsTo=miyukini-douane-cog.service)" \
 		bash -c "systemctl show -p BindsTo --value $u | grep -qw miyukini-douane-cog.service"
 done
@@ -270,20 +271,22 @@ controle "portail : chemin inconnu sans erreur serveur (< 500)" bash -c \
 # ------------------------------------------------------------------ AppArmor (enforce)
 
 # Les cinq profils sont chargés en mode enforce (aucun en complain).
-for p in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-sas; do
+for p in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-sas \
+	miyukini-portail-entree miyukini-portail-sortie; do
 	controle "AppArmor : profil $p chargé en enforce" \
 		sudo -n grep -q "^$p (enforce)\$" /sys/kernel/security/apparmor/profiles
 done
 controle "AppArmor : aucun profil miyukini-* en complain" \
 	bash -c "! sudo -n grep -q '^miyukini-.* (complain)\$' /sys/kernel/security/apparmor/profiles"
-for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
+for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-entree miyukini-portail-sortie; do
 	controle "$u : processus principal confiné par son profil (enforce)" bash -c \
 		"pid=\$(systemctl show -p MainPID --value $u) && sudo -n cat /proc/\$pid/attr/current | grep -qE '^$u(//&unconfined)? \\(enforce\\)\$'"
 done
 
 # ------------------------------------------------------------------ durcissement et permissions
 
-for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-portail; do
+for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-portail miyukini-portail-entree miyukini-portail-sortie \
+	miyukini-facade miyukini-moteur; do
 	controle "compte de service $u : UID système, shell nologin" bash -c \
 		"e=\$(getent passwd $u) && uid=\$(echo \"\$e\" | cut -d: -f3) && sh=\$(echo \"\$e\" | cut -d: -f7) && test \"\$uid\" -lt 1000 && test \"\$sh\" = /usr/sbin/nologin"
 done
@@ -317,11 +320,54 @@ controle "binaires installés conformes à /opt/miyukini/MANIFESTE" bash -c \
 	"cd /opt/miyukini && grep -v '^#' MANIFESTE | grep '  \\./bin/' | grep -v 'bin/arretes_essai$' | sha256sum --check --strict --quiet -"
 
 propriete_egale() { [[ "$(systemctl show -p "$2" --value "$1")" == "$3" ]]; }
-for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
+for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-entree miyukini-portail-sortie; do
 	controle "$u : NoNewPrivileges=yes" propriete_egale "$u" NoNewPrivileges yes
 	controle "$u : ProtectSystem=strict" propriete_egale "$u" ProtectSystem strict
 	controle "$u : PrivateTmp=yes" propriete_egale "$u" PrivateTmp yes
 done
+
+# ------------------------------------------------------------------ Portail scindé (A-022 §3)
+
+PF=$VAR/portail-files
+# Processus sous leurs comptes, l'un sans l'autre.
+for m in entree sortie; do
+	controle "portail-$m : processus principal sous le compte miyukini-portail-$m" bash -c \
+		"pid=\$(systemctl show -p MainPID --value miyukini-portail-$m) && test \"\$(ps -o user= -p \$pid)\" = miyukini-portail-$m"
+	controle "portail-$m : sans réseau (PrivateNetwork=yes)" propriete_egale "miyukini-portail-$m" PrivateNetwork yes
+	controle "portail-$m : UMask=0027" propriete_egale "miyukini-portail-$m" UMask 0027
+done
+controle "portail : entrée et sortie indépendantes (aucune ne requiert, ne lie ni n'attend l'autre)" bash -c '
+	for a in entree sortie; do b=entree; [ $a = entree ] && b=sortie
+		systemctl show -p Requires -p BindsTo -p Requisite -p After -p PartOf --value miyukini-portail-$a | grep -q "miyukini-portail-$b" && exit 1
+	done; exit 0'
+# Groupes de file : chaque file réunit son seul écrivain et son seul lecteur ; aucun groupe commun.
+controle "portail : groupes de file (q-depot, q-admises) pour l'entrée seulement" bash -c \
+	"g=\$(id -nG miyukini-portail-entree) && [[ \$g == *miyukini-q-depot* && \$g == *miyukini-q-admises* && \$g != *miyukini-q-reponses* && \$g != *miyukini-q-publication* ]]"
+controle "portail : groupes de file (q-reponses, q-publication) pour la sortie seulement" bash -c \
+	"g=\$(id -nG miyukini-portail-sortie) && [[ \$g == *miyukini-q-reponses* && \$g == *miyukini-q-publication* && \$g != *miyukini-q-depot* && \$g != *miyukini-q-admises* ]]"
+controle "portail : entrée et sortie sans aucun groupe commun" bash -c \
+	"! comm -12 <(id -G miyukini-portail-entree | tr ' ' '\n' | sort) <(id -G miyukini-portail-sortie | tr ' ' '\n' | sort) | grep -q ."
+for ligne in "depot miyukini-portail-entree" "admises miyukini-moteur" "reponses miyukini-portail-sortie" "publication miyukini-facade"; do
+	read -r f lecteur <<<"$ligne"
+	controle "portail : file $f à son lecteur $lecteur, groupe miyukini-q-$f, 3730 (rien pour les autres)" bash -c \
+		"test \"\$(stat -c '%a %U %G' $PF/$f)\" = '3730 $lecteur miyukini-q-$f'"
+done
+for m in entree sortie; do
+	controle "portail-$m : état propre $VAR/portail-$m 0700 à son compte" bash -c \
+		"test \"\$(sudo -n stat -c '%a %U' $VAR/portail-$m)\" = '700 miyukini-portail-$m'"
+	controle "portail-$m : descripteurs $ETC/portail-$m/voies root, groupe du compte, 2750" bash -c \
+		"test \"\$(sudo -n stat -c '%a %U %G' $ETC/portail-$m/voies)\" = '2750 root miyukini-portail-$m'"
+done
+controle "portail : aucun état commun (états, configurations et files distincts, aucun lien)" bash -c \
+	"test \"\$(sudo -n stat -c %i $VAR/portail-entree)\" != \"\$(sudo -n stat -c %i $VAR/portail-sortie)\" && ! sudo -n find $VAR/portail-entree $VAR/portail-sortie $PF -type l | grep -q ."
+controle "portail-entree : files de la sortie inaccessibles dans son espace (InaccessiblePaths)" bash -c \
+	"systemctl show -p InaccessiblePaths --value miyukini-portail-entree | grep -q '$PF/publication'"
+controle "portail-sortie : files de l'entrée inaccessibles dans son espace (InaccessiblePaths)" bash -c \
+	"systemctl show -p InaccessiblePaths --value miyukini-portail-sortie | grep -q '$PF/depot'"
+controle "portail-entree : démarrage annoncé « relève seule, aucune capacité de publier »" bash -c \
+	"sudo -n journalctl -u miyukini-portail-entree --no-pager -o cat | grep -q 'aucune capacité de publier'"
+controle "portail-sortie : démarrage annoncé « aucune capacité de relever »" bash -c \
+	"sudo -n journalctl -u miyukini-portail-sortie --no-pager -o cat | grep -q 'aucune capacité de relever'"
 
 # ------------------------------------------------------------------ périmètre (Douane, sas, racine)
 

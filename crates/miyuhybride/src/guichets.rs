@@ -29,7 +29,9 @@
 //! déclaration un [`JetonReponse`] à usage unique, sans lequel
 //! [`GuichetMoteur::repondre`] n'existe pas. La réponse porte l'étiquette
 //! `session` (visible des participants de la session, jamais `publiable`),
-//! et le jeton d'une session close est refusé.
+//! et le jeton d'une session close est refusé. Le jeton est signé par la
+//! moitié entrée du Portail et consommé par la moitié sortie (A-022 §3) :
+//! un second usage est refusé (`JetonDejaUtilise`) même s'il était recopié.
 
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, RwLock};
@@ -185,17 +187,20 @@ impl GuichetFranche {
 // ---------------------------------------------------------------- zone COG
 
 /// Jeton de réponse : remis avec une déclaration admise, consommé par la réponse.
-/// Ni `Clone` ni constructible hors de ce crate.
+/// Ni `Clone` ni constructible hors de ce crate. Il enveloppe le jeton
+/// **signé** du Portail ([`miyuportail::JetonReponse`], A-022 §3) : la moitié
+/// sortie le vérifie et le consomme (usage unique tenu à l'exécution, pas
+/// seulement par les types).
 #[derive(Debug, PartialEq, Eq)]
 pub struct JetonReponse {
     epoque: u64,
-    empreinte: EmpreinteDemande,
+    jeton: miyuportail::JetonReponse,
 }
 
 impl JetonReponse {
     /// Empreinte de la trame à laquelle on répond (à recopier dans la réponse).
     pub fn empreinte(&self) -> &EmpreinteDemande {
-        &self.empreinte
+        self.jeton.empreinte()
     }
 }
 
@@ -266,7 +271,7 @@ impl GuichetMoteur {
             .map(|r| {
                 r.map(|admise| DemandeAdmise {
                     declaration: admise.declaration,
-                    jeton: JetonReponse { epoque, empreinte: admise.empreinte },
+                    jeton: JetonReponse { epoque, jeton: admise.jeton },
                 })
             })
             .collect())
@@ -282,16 +287,16 @@ impl GuichetMoteur {
         if jeton.epoque != self.epoque.load(Ordering::SeqCst) {
             return Err(ErreurHybride::SessionPerimee);
         }
-        let mut numeros = Vec::with_capacity(messages.len());
-        for m in messages {
-            let publication = Publication {
+        let publications = messages
+            .iter()
+            .map(|m| Publication {
                 type_code: m.type_code,
                 champs: m.champs.clone(),
                 etiquette: Sensibilite::Session,
                 declencheur: Declencheur::Utilisateur,
-            };
-            numeros.push(self.portail.publier(&self.service, publication)?);
-        }
-        Ok(numeros)
+            })
+            .collect();
+        // Jeton vérifié (session, service, signature) et consommé par la sortie ; tous les messages ou aucun.
+        Ok(self.portail.repondre(&self.service, &jeton.jeton, publications)?)
     }
 }

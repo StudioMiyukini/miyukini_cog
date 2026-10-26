@@ -26,8 +26,8 @@ Installation de test des services COG dans la VM jetable `cog-essai` (Ubuntu 26.
 ```sh
 deploy/cog-vm/pousser.sh          # construit le paquet, pousse, installe
 # dans la VM :
-/home/cog/cog-paquet/tester.sh          # tests de fumée (100 contrôles)
-/home/cog/cog-paquet/tester.sh --banc   # + banc d'intrusion lot 3 (root, ~2 min ; 101 contrôles, dont le banc à 100)
+/home/cog/cog-paquet/tester.sh          # tests de fumée (141 contrôles)
+/home/cog/cog-paquet/tester.sh --banc   # + banc d'intrusion lot 3 (root, ~2 min ; 142 contrôles, dont le banc)
 ```
 
 Les binaires doivent être construits au préalable (`cargo build --release -p <paquet>`).
@@ -63,6 +63,8 @@ Dans la VM, avant toute installation :
 | `miyukini-maia` | `miyukini-maia` | 127.0.0.1:11435 | `/var/lib/miyukini/maia` | sans modèle GGUF ni appelant épinglé : API protégée en 503 |
 | `miyukini-miyucloud` | `miyukini-miyucloud` | 127.0.0.1:8086 | `/var/lib/miyukini/miyucloud` | PostgreSQL local (rôle et base `miyucloud`), chiffrement au repos activé |
 | `miyukini-cog-web-portal` | `miyukini-portail` | 127.0.0.1:8090 | `/var/lib/miyukini/cog-web-portal` | aucun service PortalContract raccordé pour l'instant |
+| `miyukini-portail-entree` | `miyukini-portail-entree` | aucune (`PrivateNetwork`) | `/var/lib/miyukini/portail-entree` | Portail, sens Franche → zone COG : relève seule (A-022 §3) |
+| `miyukini-portail-sortie` | `miyukini-portail-sortie` | aucune (`PrivateNetwork`) | `/var/lib/miyukini/portail-sortie` | Portail, sens zone COG → Franche : réponses à jeton et H1 seules |
 | `postgresql` (paquet) | `postgres` | 127.0.0.1:5432 | `/var/lib/postgresql` | dépendance de MiyuCloud |
 
 Arborescence de configuration :
@@ -81,6 +83,36 @@ PostgreSQL sont tirés au hasard à la première installation et conservés aux 
 Le mot de passe du rôle `miyucloud` est posé par `psql` via l'entrée standard, après
 `SET log_statement = 'none'` et `SET log_min_duration_statement = -1` dans la même session : il
 n'apparaît ni dans `argv` ni dans les journaux PostgreSQL.
+
+## Portail scindé (A-022 §3)
+
+Deux processus **sans aucun état commun**, deux comptes, deux profils AppArmor, deux unités
+**indépendantes** (aucune ne requiert ni n'attend l'autre) :
+
+| | entrée (`portail-entree`) | sortie (`portail-sortie`) |
+|---|---|---|
+| compte | `miyukini-portail-entree` | `miyukini-portail-sortie` |
+| lit | `portail-files/depot` (trames MSCE de la façade) | `portail-files/reponses` (réponses à jeton, publications H1 du moteur) |
+| écrit | `portail-files/admises` (déclarations admises + jeton signé) | `portail-files/publication` (trames signées par la clé de la voie, `<service>.cle`) |
+| état propre (0700) | `/var/lib/miyukini/portail-entree` : marques anti-rejeu, journal | `/var/lib/miyukini/portail-sortie` : clé de publication, jetons consommés, journal |
+| configuration (Cores) | `/etc/miyukini/portail-entree/voies` (2750, graine des jetons en 0600) | `/etc/miyukini/portail-sortie/voies` (2750, ancre des jetons) |
+| aveugle à | `reponses`, `publication`, état et configuration de la sortie | `depot`, `admises`, état et configuration de l'entrée |
+
+Files à sens unique (`/var/lib/miyukini/portail-files/`) : répertoire du **lecteur**, mode `3730`
+(collant, setgid, groupe `-wx`, rien pour les autres) ; groupe **propre à la file**, qui ne réunit
+que son écrivain et son lecteur :
+
+| file | lecteur (propriétaire) | écrivain | groupe |
+|---|---|---|---|
+| `depot` | `miyukini-portail-entree` | `miyukini-facade` | `miyukini-q-depot` |
+| `admises` | `miyukini-moteur` | `miyukini-portail-entree` | `miyukini-q-admises` |
+| `reponses` | `miyukini-portail-sortie` | `miyukini-moteur` | `miyukini-q-reponses` |
+| `publication` | `miyukini-facade` | `miyukini-portail-sortie` | `miyukini-q-publication` |
+
+`miyukini-facade` et `miyukini-moteur` identifient les extrémités des files (aucun service installé
+pour eux dans la VM ; `scenarios.sh` les emploie via `outils/portail_essai`). Éléments créés en
+`0640` (`UMask=0027`) ; chaque processus refuse de démarrer si un de ses répertoires est ouvert aux
+« autres », n'appartient pas au compte attendu, ou s'il **peut** écrire dans une file de l'autre sens.
 
 ## Zone COG (Douane) et profils AppArmor
 
@@ -115,6 +147,8 @@ n'apparaît ni dans `argv` ni dans les journaux PostgreSQL.
 | `miyukini-maia` | `/opt/miyukini/bin/maia` | `/var/lib/miyukini/maia/**` rwk (`bridge.toml` en lecture seule), `/etc/miyukini/strongfather/**` r, TCP, sondes `/proc/uptime`, `/proc/`, `/sys/class/drm/**` r (et `vendor` / `mem_info_vram_total` du périphérique PCI) ; `/proc/N/stat` et `/proc/N/task/` refusés en silence (`deny` : parcours des processus par `sysinfo`, inutile) ; aucun exec |
 | `miyukini-miyucloud` | `/opt/miyukini/bin/miyucloud-server` | `/var/lib/miyukini/miyucloud/**` rwk, `/opt/miyukini/share/miyucloud/**` r, `/tmp` (fichiers temporaires), TCP (PostgreSQL et écoute), NSS `passwd`/`group`/`nsswitch.conf` r |
 | `miyukini-cog-web-portal` | `/opt/miyukini/bin/cog-web-portal` | `/var/lib/miyukini/cog-web-portal/**` rwk, TCP, `cpu.max` et `/proc/PID/cgroup` r |
+| `miyukini-portail-entree` | `/opt/miyukini/bin/portail-entree` | descripteurs de l'entrée r, état propre rw, `depot/` r + retrait, `admises/*` w ; lance `portail-sas` **sous ce profil** (`ix` : `NoNewPrivileges` interdit toute transition, même en pile — refus « no new privs » observé) ; refus **audités** sur `reponses/`, `publication/`, état et configuration de la sortie ; aucun réseau |
+| `miyukini-portail-sortie` | `/opt/miyukini/bin/portail-sortie` | descripteurs de la sortie r, état propre rw, `reponses/` r + retrait, `publication/*` w ; refus **audités** sur `depot/`, `admises/`, état et configuration de l'entrée ; aucun réseau, aucun exec |
 | `miyukini-portail-sas` | `/opt/miyukini/bin/portail-sas` | aucun réseau (`deny network`), aucun fichier hors bibliothèques ; `/proc/PID/fd/` r (fermeture des descripteurs). Second niveau derrière Landlock et seccomp du sas |
 
 - Chaque profil refuse explicitement l'écriture dans les répertoires des autres services et dans `/etc/miyukini`, `/opt/miyukini`.
@@ -122,7 +156,7 @@ n'apparaît ni dans `argv` ni dans les journaux PostgreSQL.
   profil avec `apparmor_parser -r -W` (échec = arrêt). Les unités portent `AppArmorProfile=`.
 - L'attente de KindMother par MAIA est une unité distincte (`miyukini-attente-kindmother`, sans profil) : systemd
   applique `AppArmorProfile=` à chaque commande de l'unité, et MAIA ne doit pas pouvoir exécuter `bash`.
-- `tester.sh` vérifie que les cinq profils sont chargés en enforce (`/sys/kernel/security/apparmor/profiles`) et que
+- `tester.sh` vérifie que les sept profils sont chargés en enforce (`/sys/kernel/security/apparmor/profiles`) et que
   le processus principal de chaque service est confiné. `scenarios.sh` échoue à la section 12 si le journal noyau
   contient un `DENIED` d'un profil `miyukini-*` depuis le début du passage.
 - Les refus hors boucle locale (`tester.sh`) s'exécutent sur une copie du binaire placée hors de son chemin de profil :
@@ -133,8 +167,8 @@ n'apparaît ni dans `argv` ni dans les journaux PostgreSQL.
 - **Douane (`miyudouane`)** : pas de démon. C'est un outil de génération et de mise en place de règles
   nftables, appliqué par script sur les interfaces. Il est exercé par le banc `tests/intrusion-lot3/`
   dans des espaces de noms jetables, qui exige en outre que `/etc/miyukini/douane` soit absent.
-- **Portail (`portail-sas`)** : processus de décodage lancé par lot par le Portail interne (pas encore
-  de processus réseau). Le binaire est installé ; le testeur vérifie seulement son refus sans argument.
+- **Sas (`portail-sas`)** : pas de service ; lancé par lot par `portail-entree` (confiné par
+  le profil de l’entrée, `NoNewPrivileges` interdisant la transition ; son propre profil ne s’applique qu’à un lancement hors entrée). Le testeur vérifie aussi son refus sans argument.
 - **Stub Central (`miyukini-central-stub`)** : binaire qui attend une entrée standard puis quitte ; sans
   intérêt comme service.
 - **Racine hors ligne (`miyuracine`)** : outil de cérémonie hors ligne (SLIP-39) ; il ne doit pas
@@ -170,7 +204,14 @@ sortie TAP, code de retour = nombre de « not ok ». Le script :
   la VM) puis teste EXIF / désarmement / chiffrement sur disque (`MIYUCENC`), plages, quarantaine, polyglotte,
   copie + suppression de l'original (`ref_count`), corbeille et ramasse-miettes, réconciliation après corruption,
   WebDAV, WOPI sans jeton, cohérence SQL de `storage.blobs` / `storage.files` ;
-- contrôle final (section 12) : aucun refus AppArmor `DENIED` d'un profil `miyukini-*` pendant le passage ;
+- Portail scindé (section 11 bis, outil `outils/portail_essai` du paquet, clés jetables) : descripteurs des Cores
+  (0600 / 0640), chemin façade → entrée → moteur → sortie → façade (trame vérifiée avec la clé publiée), jeton
+  rejoué refusé, trame rejouée refusée, réponse glissée dans le dépôt refusée, panne (arrêt, `kill -9`) de chaque
+  processus sans arrêt de l'autre, reprise des marques et des jetons après relance, refus AppArmor de l'écriture
+  croisée (sonde exécutée par le **propriétaire** de la file visée, témoin non confiné qui y écrit), coupure et
+  rotation de clé, suppression sans résidu ;
+- contrôle final (section 12) : aucun refus AppArmor `DENIED` d'un profil `miyukini-*` pendant le passage (hors
+  sondes voulues `.sonde-cloisonnement-*` de la section 11 bis) ;
 - configure les routes mémoire de MAIA **dans la VM seulement** : déclaration de `alice` dans
   `maia-utilisateurs` (KindMother provisionne `maia-alice`), drop-in systemd `memoire-essai.conf` avec deux clés
   épinglées distinctes (utilisateur ≠ approbation), redémarrage de KindMother puis MAIA ; puis teste les requêtes

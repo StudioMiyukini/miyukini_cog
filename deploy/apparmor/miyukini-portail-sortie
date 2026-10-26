@@ -1,0 +1,33 @@
+# AppArmor — Portail, processus « sortie » (zone COG → Franche, A-022 §3).
+# Publie seulement les réponses à jeton à usage unique et les publications H1 reçues du moteur.
+# AUCUNE capacité de relever : aucun droit sur les files depot/ et admises/, ni sur l'état ou la
+# configuration de l'entrée (refus audités). Aucun exec, aucun réseau.
+#include <tunables/global>
+
+profile miyukini-portail-sortie /opt/miyukini/bin/portail-sortie flags=(enforce) {
+  #include <abstractions/base>
+
+  /opt/miyukini/bin/portail-sortie mr,
+
+  # Descripteurs de voie remis par les Cores (lecture seule).
+  /etc/miyukini/portail-sortie/voies/ r,
+  /etc/miyukini/portail-sortie/voies/* r,
+  # État propre : clés de publication, jetons consommés, journal.
+  owner /var/lib/miyukini/portail-sortie/ r,
+  owner /var/lib/miyukini/portail-sortie/** rw,
+  # File des réponses (lecture, retrait) et file de publication (création seule).
+  /var/lib/miyukini/portail-files/reponses/ r,
+  /var/lib/miyukini/portail-files/reponses/* rw,
+  /var/lib/miyukini/portail-files/publication/* w,
+  # Fichier temporaire propre (.<nom>.tmp) : le renommage atomique exige « r » sur la source.
+  /var/lib/miyukini/portail-files/publication/.*.tmp rw,
+
+  deny network,
+  audit deny /var/lib/miyukini/portail-files/depot/** rwlk,
+  audit deny /var/lib/miyukini/portail-files/admises/** rwlk,
+  audit deny /var/lib/miyukini/portail-entree/** rwlk,
+  audit deny /etc/miyukini/portail-entree/** rw,
+  deny /var/lib/miyukini/{kindmother,maia,miyucloud,cog-web-portal}/** rw,
+  deny /etc/miyukini/*.env r,
+  deny /home/** rw,
+}

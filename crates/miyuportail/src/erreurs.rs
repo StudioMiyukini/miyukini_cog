@@ -208,6 +208,21 @@ pub enum ErreurPortail {
     /// Transition d'état refusée.
     #[error("transition d'état refusée")]
     TransitionRefusee,
+    /// Jeton de réponse invalide : signature, session ou service (A-022 §3).
+    #[error("jeton de réponse invalide")]
+    JetonInvalide,
+    /// Jeton de réponse déjà consommé (usage unique).
+    #[error("jeton de réponse déjà utilisé")]
+    JetonDejaUtilise,
+    /// Publication sans jeton sur une voie H2/H3 : seule une réponse sort.
+    #[error("publication hors réponse refusée : jeton requis")]
+    JetonRequis,
+    /// Trop de jetons consommés dans la session : la rouvrir.
+    #[error("jetons de la session épuisés")]
+    JetonsEpuises,
+    /// Réponse vide ou trop longue.
+    #[error("réponse hors bornes (1 à 32 messages)")]
+    ReponseHorsBornes,
 }
 
 impl From<RefusDecodage> for ErreurPortail {

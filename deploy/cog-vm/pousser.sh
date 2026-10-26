@@ -40,17 +40,19 @@ ssh_vm() { "$VM/ssh-vm.sh" "$@"; }
 
 # ------------------------------------------------------------------ vérifications locales
 
-BINAIRES=(kindmother-server maia miyucloud-server cog-web-portal miyudouane portail-sas)
+BINAIRES=(kindmother-server maia miyucloud-server cog-web-portal miyudouane portail-sas portail-entree portail-sortie)
 for b in "${BINAIRES[@]}"; do
 	[[ -x $REL/$b ]] || die "binaire manquant : $REL/$b (cargo build --release -p <paquet>)"
 done
 [[ -x $REL/examples/arretes_essai ]] || die "exemple manquant : $REL/examples/arretes_essai"
+# Outil d'essai du Portail scindé (Cores, façade, moteur ; clés jetables) : scenarios.sh, section 11 bis.
+[[ -x $REL/examples/portail_essai ]] || die "exemple manquant : $REL/examples/portail_essai (cargo build --release -p miyuportail --example portail_essai)"
 
 # ------------------------------------------------------------------ paquet (hors dépôt)
 
 STAGE=$(mktemp -d "${TMPDIR:-/tmp}/cog-paquet.XXXXXX")
 trap 'rm -rf "$STAGE"' EXIT
-mkdir -p "$STAGE/bin" "$STAGE/config" "$STAGE/static" "$STAGE/apparmor" "$STAGE/banc/tests" "$STAGE/banc/cible/examples"
+mkdir -p "$STAGE/bin" "$STAGE/config" "$STAGE/static" "$STAGE/apparmor" "$STAGE/banc/tests" "$STAGE/banc/cible/examples" "$STAGE/outils"
 
 for b in "${BINAIRES[@]}"; do
 	cp "$REL/$b" "$STAGE/bin/$b"
@@ -64,6 +66,7 @@ cp "$RACINE"/deploy/apparmor/miyukini-* "$STAGE/apparmor/"
 cp -r "$RACINE/tests/intrusion-lot3" "$STAGE/banc/tests/intrusion-lot3"
 cp "$REL/miyudouane" "$STAGE/banc/cible/miyudouane"
 cp "$REL/examples/arretes_essai" "$STAGE/banc/cible/examples/arretes_essai"
+cp "$REL/examples/portail_essai" "$STAGE/outils/portail_essai"
 chmod 0755 "$STAGE/installer.sh" "$STAGE/tester.sh"
 find "$STAGE/banc" -name '*.sh' -exec chmod 0755 {} +
 

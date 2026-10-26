@@ -82,3 +82,49 @@ impl Inscription for RegistreMemoire {
         Ok(())
     }
 }
+
+/// Registre local d'un processus du Portail scindé : journal **propre** au
+/// processus (fichier en ajout seul dans son état), jusqu'au registre Merkle
+/// réel (lot 4). Une ligne par événement : `entree|publication <service> <sha256>`
+/// ou `coupure <service> <motif>`. Échec d'écriture = passage refusé.
+#[cfg(unix)]
+#[derive(Debug)]
+pub struct RegistreJournal {
+    fichier: Mutex<std::fs::File>,
+}
+
+#[cfg(unix)]
+impl RegistreJournal {
+    /// Ouvre (ou crée, mode 0600) le journal en ajout seul.
+    pub fn ouvrir(chemin: &std::path::Path) -> std::io::Result<Self> {
+        use std::os::unix::fs::OpenOptionsExt;
+        let fichier = std::fs::OpenOptions::new()
+            .append(true)
+            .create(true)
+            .mode(0o600)
+            .open(chemin)?;
+        Ok(Self {
+            fichier: Mutex::new(fichier),
+        })
+    }
+}
+
+#[cfg(unix)]
+impl Inscription for RegistreJournal {
+    fn inscrire(&self, evenement: &Evenement) -> Result<(), ErreurInscription> {
+        use std::io::Write;
+        let ligne = match evenement {
+            Evenement::Entree { service, empreinte } => {
+                format!("entree {service} {}\n", crate::hex(empreinte))
+            }
+            Evenement::Publication { service, empreinte } => {
+                format!("publication {service} {}\n", crate::hex(empreinte))
+            }
+            Evenement::Coupure { service, motif } => format!("coupure {service} {motif:?}\n"),
+        };
+        let mut f = self.fichier.lock().map_err(|_| ErreurInscription)?;
+        f.write_all(ligne.as_bytes())
+            .and_then(|()| f.sync_data())
+            .map_err(|_| ErreurInscription)
+    }
+}

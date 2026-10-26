@@ -32,13 +32,29 @@ MANIFESTE_ATTENDU=${MANIFESTE_ATTENDU:-}
 AVEC_BANC=${AVEC_BANC:-0}
 
 # Binaires des services, puis outils installés sans service (présents dans le paquet seulement).
-BINAIRES=(kindmother-server maia miyucloud-server cog-web-portal miyudouane portail-sas)
+BINAIRES=(kindmother-server maia miyucloud-server cog-web-portal miyudouane portail-sas portail-entree portail-sortie)
 BINAIRES_OUTILS=(miyurelais miyuregistre-publier outil-sceau)
 
-# Un utilisateur système par service ; aucun shell, aucun home.
-UTILISATEURS=(miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-portail)
+# Un utilisateur système par service ; aucun shell, aucun home. Portail scindé (A-022 §3) : un
+# compte par moitié (entrée, sortie) et un compte par extrémité de file (façade, moteur), sans service
+# installé pour ces deux derniers (ils identifient l'écrivain ou le lecteur d'une file).
+UTILISATEURS=(miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-portail
+	miyukini-portail-entree miyukini-portail-sortie miyukini-facade miyukini-moteur)
 # Ordre de démarrage ; l'arrêt se fait dans l'ordre inverse.
-SERVICES=(miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal)
+SERVICES=(miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal
+	miyukini-portail-entree miyukini-portail-sortie)
+
+# Portail scindé : files à sens unique. Chaque file : répertoire du LECTEUR, mode 3730 (collant,
+# setgid, groupe -wx, rien pour les autres), groupe PROPRE à la file réunissant son seul écrivain et
+# son seul lecteur. L'entrée et la sortie n'ont aucun groupe en commun.
+PORTAIL_FILES=$VAR/portail-files
+#  <file> <lecteur (propriétaire)> <écrivain>
+FILES_PORTAIL=(
+	"depot miyukini-portail-entree miyukini-facade"
+	"admises miyukini-moteur miyukini-portail-entree"
+	"reponses miyukini-portail-sortie miyukini-moteur"
+	"publication miyukini-facade miyukini-portail-sortie"
+)
 
 DOUANE_VAR=$VAR/douane
 DOUANE_NFT=$ETC/douane-cog.nft
@@ -166,6 +182,23 @@ utilisateurs() {
 			useradd --system --no-create-home --home-dir /nonexistent --shell /usr/sbin/nologin "$u"
 		fi
 	done
+	groupes_files_portail
+}
+
+# Groupes des files du Portail : miyukini-q-<file>, membres = écrivain et lecteur de CETTE file
+# seulement (toute autre appartenance est retirée : idempotent et correctif).
+groupes_files_portail() {
+	local ligne f lecteur ecrivain g m
+	for ligne in "${FILES_PORTAIL[@]}"; do
+		read -r f lecteur ecrivain <<<"$ligne"
+		g=miyukini-q-$f
+		getent group "$g" >/dev/null || groupadd --system "$g"
+		for m in $(getent group "$g" | cut -d: -f4 | tr ',' ' '); do
+			[[ $m == "$lecteur" || $m == "$ecrivain" ]] || gpasswd -d "$m" "$g" >/dev/null
+		done
+		usermod -a -G "$g" "$lecteur"
+		usermod -a -G "$g" "$ecrivain"
+	done
 }
 
 # ------------------------------------------------------------------ répertoires et binaires
@@ -184,6 +217,27 @@ repertoires() {
 	chown miyukini-miyucloud "$VAR/miyucloud"
 	chown miyukini-portail "$VAR/cog-web-portal"
 	install -d -o miyukini-miyucloud -g miyukini-miyucloud -m 0700 "$VAR/miyucloud/storage"
+	repertoires_portail
+}
+
+# Portail scindé : états propres (0700, un par moitié), descripteurs des Cores (root, groupe du
+# compte destinataire, 2750 : jamais lisibles des autres ni de l'autre moitié), files (3730).
+repertoires_portail() {
+	local m ligne f lecteur ecrivain
+	for m in entree sortie; do
+		install -d -o "miyukini-portail-$m" -g "miyukini-portail-$m" -m 0700 "$VAR/portail-$m"
+		chown "miyukini-portail-$m:miyukini-portail-$m" "$VAR/portail-$m"
+		chmod 0700 "$VAR/portail-$m"
+		install -d -o root -g "miyukini-portail-$m" -m 0750 "$ETC/portail-$m" "$ETC/portail-$m/voies"
+		chmod 2750 "$ETC/portail-$m/voies"
+	done
+	install -d -o root -g root -m 0755 "$PORTAIL_FILES"
+	for ligne in "${FILES_PORTAIL[@]}"; do
+		read -r f lecteur ecrivain <<<"$ligne"
+		install -d "$PORTAIL_FILES/$f"
+		chown "$lecteur:miyukini-q-$f" "$PORTAIL_FILES/$f"
+		chmod 3730 "$PORTAIL_FILES/$f"
+	done
 }
 
 binaires() {
@@ -444,11 +498,12 @@ MemoryDenyWriteExecute=true
 UMask=0077
 LimitNOFILE=65535'
 
-# ecrire_unite <nom> <description> <utilisateur> <répertoire> <commande> <chemins-rw> <après> <env-fichier> <env-lignes> <profil-apparmor>
+# ecrire_unite <nom> <description> <utilisateur> <répertoire> <commande> <chemins-rw> <après> <env-fichier> <env-lignes> <profil-apparmor> [<lignes-finales>]
 # Toute unité dépend de la zone COG de la Douane (Requires= : pas de service sans zone).
+# <lignes-finales> : écrites après le durcissement commun (elles l'emportent, ex. UMask=).
 ecrire_unite() {
 	local nom=$1 description=$2 utilisateur=$3 repertoire=$4 commande=$5 rw=$6 apres=$7 fichier_env=$8 env_lignes=$9
-	local profil=${10:-}
+	local profil=${10:-} finales=${11:-}
 	local envfile="" rwligne="" profligne=""
 	[[ -n $fichier_env ]] && envfile="EnvironmentFile=-$fichier_env"
 	[[ -n $rw ]] && rwligne="ReadWritePaths=$rw"
@@ -477,6 +532,7 @@ TimeoutStartSec=30
 TimeoutStopSec=30
 $DURCISSEMENT
 $rwligne
+$finales
 
 [Install]
 WantedBy=multi-user.target
@@ -499,7 +555,7 @@ Description=Douane — zone COG (table nftables miyudouane_hote)
 # liés à la Douane (BindsTo=) et s'arrêtent avec elle : jamais de service sans zone.
 After=nftables.service
 PartOf=nftables.service
-Before=miyukini-kindmother.service miyukini-maia.service miyukini-miyucloud.service miyukini-cog-web-portal.service
+Before=miyukini-kindmother.service miyukini-maia.service miyukini-miyucloud.service miyukini-cog-web-portal.service miyukini-portail-entree.service miyukini-portail-sortie.service
 
 [Service]
 Type=oneshot
@@ -524,7 +580,7 @@ Requires=$DOUANE_UNITE
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c 'if nft list table inet miyudouane_hote >/dev/null 2>&1; then exit 0; fi; logger -t miyukini-douane "zone COG absente : rechargement"; if nft -f $DOUANE_NFT && nft list table inet miyudouane_hote >/dev/null 2>&1; then exit 0; fi; logger -t miyukini-douane "zone COG non rétablie : arrêt des services COG"; systemctl stop miyukini-cog-web-portal miyukini-miyucloud miyukini-maia miyukini-kindmother; exit 1'
+ExecStart=/bin/bash -c 'if nft list table inet miyudouane_hote >/dev/null 2>&1; then exit 0; fi; logger -t miyukini-douane "zone COG absente : rechargement"; if nft -f $DOUANE_NFT && nft list table inet miyudouane_hote >/dev/null 2>&1; then exit 0; fi; logger -t miyukini-douane "zone COG non rétablie : arrêt des services COG"; systemctl stop miyukini-portail-sortie miyukini-portail-entree miyukini-cog-web-portal miyukini-miyucloud miyukini-maia miyukini-kindmother; exit 1'
 FIN
 	chmod 0644 "$UNITES_DIR/miyukini-douane-cog-controle.service"
 	cat >"$UNITES_DIR/miyukini-douane-cog-controle.timer" <<FIN
@@ -595,6 +651,27 @@ Environment=RUST_LOG=info" "miyukini-miyucloud"
 	ecrire_unite miyukini-cog-web-portal "COG Web Portal — portail HTTP (COG)" \
 		miyukini-portail "$VAR/cog-web-portal" "$BIN/cog-web-portal" "" "" "$ETC/cog-web-portal.env" \
 		"Environment=PORTAL_LISTEN=127.0.0.1:8090" "miyukini-cog-web-portal"
+
+	# Portail scindé (A-022 §3) : deux unités INDÉPENDANTES (aucune ne requiert l'autre : la panne de
+	# l'une n'arrête pas l'autre), sans réseau, chacune aveugle aux files, à l'état et à la
+	# configuration de l'autre sens (InaccessiblePaths, en plus des droits et d'AppArmor).
+	local pf=$PORTAIL_FILES
+	ecrire_unite miyukini-portail-entree "Portail — entrée (Franche → zone COG ; relève, ne publie jamais)" \
+		miyukini-portail-entree "$VAR/portail-entree" \
+		"$BIN/portail-entree --voies $ETC/portail-entree/voies --etat $VAR/portail-entree --depot $pf/depot --admises $pf/admises --interdit $pf/reponses --interdit $pf/publication --sas $BIN/portail-sas" \
+		"$VAR/portail-entree $pf/depot $pf/admises" "" "" \
+		"PrivateNetwork=yes
+IPAddressDeny=any
+InaccessiblePaths=-$pf/reponses -$pf/publication -$VAR/portail-sortie -$ETC/portail-sortie
+# Sas de décodage (lancé par lot) : Landlock et seccomp (groupe @sandbox).
+SystemCallFilter=@sandbox" "miyukini-portail-entree" "UMask=0027"
+	ecrire_unite miyukini-portail-sortie "Portail — sortie (zone COG → Franche ; réponses à jeton et H1, ne relève jamais)" \
+		miyukini-portail-sortie "$VAR/portail-sortie" \
+		"$BIN/portail-sortie --voies $ETC/portail-sortie/voies --etat $VAR/portail-sortie --reponses $pf/reponses --publication $pf/publication --interdit $pf/depot --interdit $pf/admises" \
+		"$VAR/portail-sortie $pf/reponses $pf/publication" "" "" \
+		"PrivateNetwork=yes
+IPAddressDeny=any
+InaccessiblePaths=-$pf/depot -$pf/admises -$VAR/portail-entree -$ETC/portail-entree" "miyukini-portail-sortie" "UMask=0027"
 }
 
 # unites : unités du paquet (systemd/, si présentes) sinon générées sur place.

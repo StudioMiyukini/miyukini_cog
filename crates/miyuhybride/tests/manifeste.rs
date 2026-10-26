@@ -171,8 +171,12 @@ fn sceller_brut(cle: &CleSignature, contrat: &[u8]) -> Vec<u8> {
             e.texte(1, "jayrdv")?.texte(2, "0.1.0")?.b32(3, &[3; 32])?.octets(5, &self.0)?;
             Ok(())
         }
-        fn decoder(_: &mut miyusceau::LecteurTlv<'_>) -> Result<Self, miyusceau::ErreurSceau> {
-            Err(miyusceau::ErreurSceau::ValeurInvalide(0))
+        // Décodeur symétrique : `sceller` relit ce qu'il signe (A-020).
+        fn decoder(l: &mut miyusceau::LecteurTlv<'_>) -> Result<Self, miyusceau::ErreurSceau> {
+            l.exiger_texte(1)?;
+            l.exiger_texte(2)?;
+            l.exiger_b32(3)?;
+            Ok(Brut(l.exiger(5)?.to_vec()))
         }
     }
     miyusceau::sceller(&Brut(contrat.to_vec()), cle).unwrap()
