@@ -692,6 +692,14 @@ impl CalendarEvent {
      * @return Result containing the parsed DateTime or an error
      */
     fn parse_ical_datetime(datetime: &str) -> std::result::Result<DateTime<Utc>, String> {
+        // Value comes from client-supplied iCalendar data (CalDAV PUT): byte
+        // slicing used to panic on a non-ASCII value such as `202é0101T000000Z`
+        // (C-10). `get` refuses ranges that do not fall on char boundaries.
+        fn champ_ical(s: &str, debut: usize, fin: usize) -> std::result::Result<&str, String> {
+            s.get(debut..fin)
+                .ok_or_else(|| "Invalid date/time format".to_string())
+        }
+
         // Handle VALUE=DATE format
         if datetime.contains("VALUE=DATE") {
             let date_str = datetime.split(':').next_back().unwrap_or("");
@@ -699,13 +707,13 @@ impl CalendarEvent {
                 return Err("Invalid date format".to_string());
             }
 
-            let year = date_str[0..4]
+            let year = champ_ical(date_str, 0, 4)?
                 .parse::<i32>()
                 .map_err(|_| "Invalid year".to_string())?;
-            let month = date_str[4..6]
+            let month = champ_ical(date_str, 4, 6)?
                 .parse::<u32>()
                 .map_err(|_| "Invalid month".to_string())?;
-            let day = date_str[6..8]
+            let day = champ_ical(date_str, 6, 8)?
                 .parse::<u32>()
                 .map_err(|_| "Invalid day".to_string())?;
 
@@ -721,23 +729,23 @@ impl CalendarEvent {
             return Err("Invalid datetime format".to_string());
         }
 
-        let year = datetime_str[0..4]
+        let year = champ_ical(datetime_str, 0, 4)?
             .parse::<i32>()
             .map_err(|_| "Invalid year".to_string())?;
-        let month = datetime_str[4..6]
+        let month = champ_ical(datetime_str, 4, 6)?
             .parse::<u32>()
             .map_err(|_| "Invalid month".to_string())?;
-        let day = datetime_str[6..8]
+        let day = champ_ical(datetime_str, 6, 8)?
             .parse::<u32>()
             .map_err(|_| "Invalid day".to_string())?;
 
-        let hour = datetime_str[9..11]
+        let hour = champ_ical(datetime_str, 9, 11)?
             .parse::<u32>()
             .map_err(|_| "Invalid hour".to_string())?;
-        let minute = datetime_str[11..13]
+        let minute = champ_ical(datetime_str, 11, 13)?
             .parse::<u32>()
             .map_err(|_| "Invalid minute".to_string())?;
-        let second = datetime_str[13..15]
+        let second = champ_ical(datetime_str, 13, 15)?
             .parse::<u32>()
             .map_err(|_| "Invalid second".to_string())?;
 
@@ -820,5 +828,40 @@ impl CalendarEvent {
             let after = &self.ical_data[value_end..];
             self.ical_data = format!("{}{}", before, after);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::CalendarEvent;
+    use uuid::Uuid;
+
+    fn vevent(dtstart: &str) -> String {
+        format!(
+            "BEGIN:VEVENT\nUID:t\nSUMMARY:Test\nDTSTART:{dtstart}\nDTEND:20240101T110000Z\nEND:VEVENT\n"
+        )
+    }
+
+    #[test]
+    fn from_ical_accepte_une_date_valide() {
+        assert!(CalendarEvent::from_ical(Uuid::new_v4(), vevent("20240101T100000Z")).is_ok());
+    }
+
+    /// Ancienne panique atteignable par `PUT /caldav/{cal}/{uid}.ics` : découpe
+    /// d'octets au milieu d'un caractère multi-octets dans DTSTART.
+    #[test]
+    fn from_ical_dtstart_non_ascii_est_refuse_sans_panique() {
+        for dt in ["202é0101T000000Z", "2024010é1T00000Z", "20240101T1é000Z0Z"] {
+            assert!(
+                CalendarEvent::from_ical(Uuid::new_v4(), vevent(dt)).is_err(),
+                "{dt}"
+            );
+        }
+    }
+
+    #[test]
+    fn parse_ical_date_seule_non_ascii_est_refusee() {
+        assert!(CalendarEvent::parse_ical_datetime("VALUE=DATE:2é240101").is_err());
+        assert!(CalendarEvent::parse_ical_datetime("VALUE=DATE:202é101").is_err());
     }
 }

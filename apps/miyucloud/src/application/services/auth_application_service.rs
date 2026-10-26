@@ -1133,7 +1133,7 @@ impl AuthApplicationService {
             .preferred_username
             .clone()
             .or(claims.name.clone())
-            .unwrap_or_else(|| format!("oidc_{}", &claims.sub[..8.min(claims.sub.len())]));
+            .unwrap_or_else(|| format!("oidc_{}", premiers_caracteres(&claims.sub, 8)));
         let oidc_email = claims
             .email
             .clone()
@@ -1184,7 +1184,7 @@ impl AuthApplicationService {
                 // Sanitize username (max 32 chars, ensure uniqueness)
                 let mut username = oidc_username.chars().take(32).collect::<String>();
                 if username.len() < 3 {
-                    username = format!("user_{}", &claims.sub[..8.min(claims.sub.len())]);
+                    username = format!("user_{}", premiers_caracteres(&claims.sub, 8));
                 }
 
                 // Check for username collision
@@ -1194,8 +1194,8 @@ impl AuthApplicationService {
                     .await
                     .is_ok()
                 {
-                    let suffix = &claims.sub[..4.min(claims.sub.len())];
-                    username = format!("{}_{}", &username[..username.len().min(27)], suffix);
+                    let suffix = premiers_caracteres(&claims.sub, 4);
+                    username = format!("{}_{}", premiers_caracteres(&username, 27), suffix);
                 }
 
                 let new_user = User::new_oidc(
@@ -1345,4 +1345,39 @@ impl AuthApplicationService {
 fn base64_url_encode(input: &[u8]) -> String {
     use base64::Engine;
     base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(input)
+}
+
+/// Les `n` premiers caractères (et non octets) de `s`.
+///
+/// Les champs OIDC (`sub`, `preferred_username`) viennent du fournisseur
+/// d'identité : un découpage par octets (`&s[..8]`) paniquait sur un caractère
+/// multi-octets à la frontière, par exemple un `preferred_username` accentué
+/// déjà pris (C-10).
+fn premiers_caracteres(s: &str, n: usize) -> &str {
+    match s.char_indices().nth(n) {
+        Some((fin, _)) => s.get(..fin).unwrap_or(s),
+        None => s,
+    }
+}
+
+#[cfg(test)]
+mod tests_premiers_caracteres {
+    use super::premiers_caracteres;
+
+    #[test]
+    fn ascii_et_chaine_courte() {
+        assert_eq!(premiers_caracteres("abcdefghij", 8), "abcdefgh");
+        assert_eq!(premiers_caracteres("abc", 8), "abc");
+        assert_eq!(premiers_caracteres("", 4), "");
+    }
+
+    /// Ancienne panique au retour OIDC : `&username[..27]` avec un
+    /// `preferred_username` en collision composé de caractères de 2 octets.
+    #[test]
+    fn multi_octets_coupe_sur_une_frontiere_de_caractere() {
+        let nom: String = "é".repeat(32);
+        let tronque = premiers_caracteres(&nom, 27);
+        assert_eq!(tronque.chars().count(), 27);
+        assert_eq!(premiers_caracteres("ü-sub-ïd", 4), "ü-su");
+    }
 }

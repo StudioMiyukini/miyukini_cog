@@ -776,7 +776,7 @@ impl FileWritePort for FileBlobWriteRepository {
             "📂 TREE COPY: {} folders + {} files (root: {}, zero-copy via dedup)",
             row.1,
             row.2,
-            &row.0[..8]
+            row.0.get(..8).unwrap_or(row.0.as_str())
         );
 
         Ok(CopyFolderTreeResult {

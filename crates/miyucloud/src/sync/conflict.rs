@@ -64,10 +64,11 @@ impl ConflictResolver {
         let conflict_id = uuid::Uuid::new_v4().to_string();
 
         // Build conflict filename: "name.conflict-{node_short}-{ts}.ext"
-        let node_short = if remote_node_id.len() > 8 {
-            &remote_node_id[..8]
-        } else {
-            remote_node_id
+        // 8 premiers caractères (et non octets) : l'identifiant vient du pair
+        // distant et `&id[..8]` paniquait sur un caractère multi-octets.
+        let node_short = match remote_node_id.char_indices().nth(8) {
+            Some((fin, _)) => remote_node_id.get(..fin).unwrap_or(remote_node_id),
+            None => remote_node_id,
         };
         let ts = chrono::Utc::now().format("%Y%m%d%H%M%S").to_string();
         let conflict_name = build_conflict_filename(&file_entry.name, node_short, &ts);
@@ -168,6 +169,18 @@ mod tests {
         let local = VectorClock::from_entries(vec![("node-a".into(), 2)]);
         let remote = VectorClock::from_entries(vec![("node-a".into(), 2)]);
         assert!(ConflictResolver::detect(&local, &remote).is_none());
+    }
+
+    /// Ancienne panique : identifiant de pair distant multi-octets coupé à 8 octets.
+    #[test]
+    fn test_create_conflict_copy_remote_id_multibyte() {
+        let entry = make_file_entry("doc.txt");
+        let conflict = ConflictResolver::create_conflict_copy(&entry, "nœud-éloigné-42");
+        assert!(
+            conflict.remote_version.contains("nœud-élo"),
+            "{}",
+            conflict.remote_version
+        );
     }
 
     #[test]

@@ -38,8 +38,14 @@ pub fn sanitize_filename(name: &str) -> String {
 
     let cleaned = cleaned.trim().to_string();
 
+    // Troncature à 255 octets sur une frontière de caractère : `&s[..255]`
+    // paniquait si l'octet 255 tombait au milieu d'un caractère multi-octets.
     let cleaned = if cleaned.len() > 255 {
-        cleaned[..255].to_string()
+        let mut fin = 255;
+        while !cleaned.is_char_boundary(fin) {
+            fin -= 1;
+        }
+        cleaned.get(..fin).unwrap_or_default().to_string()
     } else {
         cleaned
     };
@@ -185,6 +191,16 @@ mod tests {
     fn test_sanitize_filename_empty() {
         assert_eq!(sanitize_filename(""), "unnamed");
         assert_eq!(sanitize_filename(".."), "unnamed");
+    }
+
+    /// Ancienne panique : octet 255 au milieu d'un caractère multi-octets.
+    #[test]
+    fn test_sanitize_filename_long_multibyte_boundary() {
+        let long_name = format!("{}é{}", "a".repeat(254), "b".repeat(10));
+        let result = sanitize_filename(&long_name);
+        assert_eq!(result, "a".repeat(254));
+        let long_name = "é".repeat(200);
+        assert_eq!(sanitize_filename(&long_name).len(), 254);
     }
 
     #[test]

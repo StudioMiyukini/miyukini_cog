@@ -114,11 +114,18 @@ fn hex_decode(hex: &str) -> Result<Vec<u8>, String> {
     if !hex.len().is_multiple_of(2) {
         return Err("Odd length hex string".into());
     }
-    (0..hex.len())
-        .step_by(2)
-        .map(|i| {
-            u8::from_str_radix(&hex[i..i + 2], 16)
-                .map_err(|e| format!("Invalid hex at {i}: {e}"))
+    // Travaille sur les octets : `&hex[i..i + 2]` paniquait sur une entrée
+    // non ASCII de longueur paire (frontière de caractère).
+    hex.as_bytes()
+        .as_chunks::<2>()
+        .0
+        .iter()
+        .enumerate()
+        .map(|(i, paire)| {
+            std::str::from_utf8(paire)
+                .ok()
+                .and_then(|p| u8::from_str_radix(p, 16).ok())
+                .ok_or_else(|| format!("Invalid hex at {}", i * 2))
         })
         .collect()
 }
@@ -126,6 +133,16 @@ fn hex_decode(hex: &str) -> Result<Vec<u8>, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Ancienne panique : entrée non ASCII de longueur paire (`&hex[i..i + 2]`
+    /// coupait un caractère multi-octets).
+    #[test]
+    fn hex_decode_non_ascii_refuse_sans_panique() {
+        assert!(hex_decode("aéa").is_err());
+        assert!(hex_decode("éé").is_err());
+        assert!(hex_decode("0g").is_err());
+        assert_eq!(hex_decode("00ff"), Ok(vec![0, 0xff]));
+    }
 
     #[test]
     fn test_content_hash_deterministic() {

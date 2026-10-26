@@ -860,8 +860,8 @@ impl FileReadPort for FileBlobReadRepository {
         criteria: &SearchCriteriaDto,
         user_id: Uuid,
     ) -> Result<(Vec<File>, usize), DomainError> {
-        let offset = criteria.offset as i64;
-        let limit = criteria.limit as i64;
+        let offset = i64::try_from(criteria.offset).unwrap_or(i64::MAX);
+        let limit = i64::try_from(criteria.limit).unwrap_or(i64::MAX);
 
         // Determine sort order
         let (order_column, order_dir) = match criteria.sort_by.as_str() {
@@ -986,8 +986,8 @@ impl FileReadPort for FileBlobReadRepository {
             Some(id) => id,
         };
 
-        let offset = criteria.offset as i64;
-        let limit = criteria.limit as i64;
+        let offset = i64::try_from(criteria.offset).unwrap_or(i64::MAX);
+        let limit = i64::try_from(criteria.limit).unwrap_or(i64::MAX);
 
         // Determine sort order
         let (order_column, order_dir) = match criteria.sort_by.as_str() {

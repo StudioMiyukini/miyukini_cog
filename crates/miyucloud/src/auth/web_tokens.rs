@@ -184,20 +184,35 @@ fn password_argon2_params() -> Result<argon2::Params, MiyucloudError> {
 
 /// Decode un string hexadecimal en bytes.
 fn hex_decode(hex: &str) -> Option<Vec<u8>> {
+    // Travaille sur les octets : `&hex[i..i + 2]` paniquait sur une entrée
+    // non ASCII de longueur paire (frontière de caractère).
     if !hex.len().is_multiple_of(2) {
         return None;
     }
-    let mut bytes = Vec::with_capacity(hex.len() / 2);
-    for i in (0..hex.len()).step_by(2) {
-        let byte = u8::from_str_radix(&hex[i..i + 2], 16).ok()?;
-        bytes.push(byte);
-    }
-    Some(bytes)
+    hex.as_bytes()
+        .as_chunks::<2>()
+        .0
+        .iter()
+        .map(|paire| {
+            let paire = std::str::from_utf8(paire).ok()?;
+            u8::from_str_radix(paire, 16).ok()
+        })
+        .collect()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Ancienne panique : entrée non ASCII de longueur paire (`&hex[i..i + 2]`
+    /// coupait un caractère multi-octets).
+    #[test]
+    fn hex_decode_non_ascii_refuse_sans_panique() {
+        assert!(hex_decode("aéa").is_none());
+        assert!(hex_decode("éé").is_none());
+        assert!(hex_decode("0g").is_none());
+        assert_eq!(hex_decode("00ff"), Some(vec![0, 0xff]));
+    }
 
     #[test]
     fn test_generate_token_is_32_bytes_hex() {

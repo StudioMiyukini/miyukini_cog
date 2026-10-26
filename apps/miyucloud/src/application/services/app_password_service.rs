@@ -523,7 +523,13 @@ fn nc_normalize_password(password: &str) -> String {
         .collect()
 }
 
-/// Extract the first 8 characters as the token prefix for DB lookup.
+/// Extract the first 8 bytes as the token prefix for DB lookup.
+///
+/// The password comes straight from a `Authorization: Basic` header, before
+/// any authentication: slicing by bytes used to panic when byte 8 fell inside
+/// a multi-byte character (e.g. `AAAAAAAé`). Generated passwords are pure
+/// ASCII, so a prefix that is not on a character boundary can never match and
+/// is rejected as invalid input (C-10).
 fn nc_token_prefix(normalized: &str) -> Result<String, DomainError> {
     if normalized.len() < NC_PREFIX_LEN {
         return Err(DomainError::new(
@@ -532,7 +538,16 @@ fn nc_token_prefix(normalized: &str) -> Result<String, DomainError> {
             "App password too short",
         ));
     }
-    Ok(normalized[..NC_PREFIX_LEN].to_string())
+    normalized
+        .get(..NC_PREFIX_LEN)
+        .map(str::to_string)
+        .ok_or_else(|| {
+            DomainError::new(
+                ErrorKind::InvalidInput,
+                "AppPassword",
+                "App password has an invalid format",
+            )
+        })
 }
 
 #[cfg(test)]
@@ -566,6 +581,17 @@ mod tests {
     #[test]
     fn test_nc_token_prefix_extracts_first_8_chars() {
         assert_eq!(nc_token_prefix("ABCDEFGHIJKLMNOP").unwrap(), "ABCDEFGH");
+    }
+
+    /// Former panic reachable without authentication:
+    /// `Authorization: Basic base64("admin:AAAAAAAé")` sliced inside `é`.
+    #[test]
+    fn test_nc_token_prefix_multibyte_boundary_is_rejected_not_panicking() {
+        let normalized = nc_normalize_password("AAAAAAAé");
+        assert_eq!(normalized.len(), 9);
+        assert!(nc_token_prefix(&normalized).is_err());
+        // A multi-byte char after the prefix is harmless.
+        assert_eq!(nc_token_prefix("ABCDEFGHé").unwrap(), "ABCDEFGH");
     }
 
     #[test]

@@ -27,6 +27,58 @@ use crate::infrastructure::repositories::pg::folder_db_repository::FolderDbRepos
 use std::hash::{Hash, Hasher};
 use uuid::Uuid;
 
+/// Fenêtre de pagination « dossiers d'abord, puis fichiers ».
+///
+/// Les dossiers sont paginés en mémoire ; les fichiers sont paginés par la base,
+/// avec un décalage **relatif à la liste des fichiers**. Les anciennes versions
+/// recoupaient la page de fichiers déjà renvoyée par la base avec des indices
+/// absolus, ce qui paniquait (`start > end`) dès que `offset` dépassait la taille
+/// de la page (ex. `GET /api/search?q=x&offset=150&limit=10`) et débordait sur
+/// `offset + limit` (C-10).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct FenetrePagination {
+    /// Tranche des dossiers triés à renvoyer ; `start <= end <= nb_dossiers`.
+    pub(crate) dossiers: std::ops::Range<usize>,
+    /// Décalage dans la liste des fichiers correspondants.
+    pub(crate) fichiers_offset: usize,
+    /// Nombre de fichiers à renvoyer sur cette page (peut être nul).
+    pub(crate) fichiers_limite: usize,
+}
+
+impl FenetrePagination {
+    pub(crate) fn calculer(nb_dossiers: usize, offset: usize, limit: usize) -> Self {
+        let fin = offset.saturating_add(limit);
+        let dossiers = offset.min(nb_dossiers)..fin.min(nb_dossiers);
+        let fichiers_offset = offset.saturating_sub(nb_dossiers);
+        let fichiers_limite = fin
+            .saturating_sub(nb_dossiers)
+            .saturating_sub(fichiers_offset);
+        Self {
+            dossiers,
+            fichiers_offset,
+            fichiers_limite,
+        }
+    }
+
+    /// Dossiers de la page (vide si la tranche sort de la liste).
+    pub(crate) fn dossiers_de<T: Clone>(&self, dossiers: &[T]) -> Vec<T> {
+        dossiers
+            .get(self.dossiers.clone())
+            .map(<[T]>::to_vec)
+            .unwrap_or_default()
+    }
+
+    /// Critères transmis à la base pour la page de fichiers. La limite vaut au
+    /// moins 1 pour que la base renvoie toujours le total (`COUNT(*) OVER()`) ;
+    /// l'appelant tronque ensuite à `fichiers_limite`.
+    pub(crate) fn criteres_fichiers(&self, criteres: &SearchCriteriaDto) -> SearchCriteriaDto {
+        let mut c = criteres.clone();
+        c.offset = self.fichiers_offset;
+        c.limit = self.fichiers_limite.max(1);
+        c
+    }
+}
+
 /**
  * High-performance search service implementation for files and folders.
  *
@@ -310,19 +362,6 @@ impl SearchUseCase for SearchService {
         // For non-recursive searches, use efficient database-level pagination
         // This avoids loading all files into memory
         if !criteria.recursive {
-            // Use database-level pagination
-            let (files, total_file_count) = self
-                .file_repository
-                .search_files_paginated(criteria.folder_id.as_deref(), &criteria, user_id)
-                .await?;
-
-            // Convert to DTOs and enrich with metadata
-            let file_dtos: Vec<FileDto> = files.into_iter().map(FileDto::from).collect();
-            let enriched_files: Vec<SearchFileResultDto> = file_dtos
-                .iter()
-                .map(|f| Self::enrich_file(f, &query_lower))
-                .collect();
-
             // Get folders for this folder (non-recursive, filtered in SQL)
             let folders = self
                 .folder_repository
@@ -362,22 +401,28 @@ impl SearchUseCase for SearchService {
                 }
             }
 
+            // Combine and paginate (folders first, then files). The file page is
+            // fetched from the database with offsets relative to the file list.
             let folder_count = enriched_folders.len();
-            let total_count = total_file_count + folder_count;
+            let fenetre =
+                FenetrePagination::calculer(folder_count, criteria.offset, criteria.limit);
+            let paginated_folders = fenetre.dossiers_de(&enriched_folders);
 
-            // Combine and paginate (folders first, then files)
-            let start_idx = criteria.offset.min(total_count);
-            let end_idx = (criteria.offset + criteria.limit).min(total_count);
-
-            let folder_start = start_idx.min(folder_count);
-            let folder_end = end_idx.min(folder_count);
-            let paginated_folders = enriched_folders[folder_start..folder_end].to_vec();
-
-            let file_start = start_idx.saturating_sub(folder_count);
-            let file_end = end_idx
-                .saturating_sub(folder_count)
-                .min(enriched_files.len());
-            let paginated_files = enriched_files[file_start..file_end].to_vec();
+            let (files, total_file_count) = self
+                .file_repository
+                .search_files_paginated(
+                    criteria.folder_id.as_deref(),
+                    &fenetre.criteres_fichiers(&criteria),
+                    user_id,
+                )
+                .await?;
+            let paginated_files: Vec<SearchFileResultDto> = files
+                .into_iter()
+                .take(fenetre.fichiers_limite)
+                .map(FileDto::from)
+                .map(|f| Self::enrich_file(&f, &query_lower))
+                .collect();
+            let total_count = total_file_count.saturating_add(folder_count);
 
             let elapsed_ms = start.elapsed().as_millis() as u64;
 
@@ -400,11 +445,6 @@ impl SearchUseCase for SearchService {
         // Uses PostgreSQL ltree GiST index to find all files and folders
         // in the subtree in O(1) queries, replacing the O(N) spawn-per-folder
         // approach that could saturate the connection pool.
-        let (found_files, total_file_count) = self
-            .file_repository
-            .search_files_in_subtree(criteria.folder_id.as_deref(), &criteria, user_id)
-            .await?;
-
         // Get folders (SQL-filtered, user-scoped, recursive when applicable)
         let found_folders: Vec<Folder> = self
             .folder_repository
@@ -417,12 +457,6 @@ impl SearchUseCase for SearchService {
             .await?;
 
         // ── Convert to DTOs and enrich with server-computed metadata ──
-        let file_dtos: Vec<FileDto> = found_files.into_iter().map(FileDto::from).collect();
-        let enriched_files: Vec<SearchFileResultDto> = file_dtos
-            .iter()
-            .map(|f| Self::enrich_file(f, &query_lower))
-            .collect();
-
         let folder_dtos: Vec<FolderDto> = found_folders.into_iter().map(FolderDto::from).collect();
         let mut enriched_folders: Vec<SearchFolderResultDto> = folder_dtos
             .iter()
@@ -450,19 +484,24 @@ impl SearchUseCase for SearchService {
 
         // ── Pagination (folders first, then files) ──
         let folder_count = enriched_folders.len();
-        let total_count = total_file_count + folder_count;
-        let start_idx = criteria.offset.min(total_count);
-        let end_idx = (criteria.offset + criteria.limit).min(total_count);
+        let fenetre = FenetrePagination::calculer(folder_count, criteria.offset, criteria.limit);
+        let paginated_folders = fenetre.dossiers_de(&enriched_folders);
 
-        let folder_start = start_idx.min(folder_count);
-        let folder_end = end_idx.min(folder_count);
-        let paginated_folders = enriched_folders[folder_start..folder_end].to_vec();
-
-        let file_start = start_idx.saturating_sub(folder_count);
-        let file_end = end_idx
-            .saturating_sub(folder_count)
-            .min(enriched_files.len());
-        let paginated_files = enriched_files[file_start..file_end].to_vec();
+        let (found_files, total_file_count) = self
+            .file_repository
+            .search_files_in_subtree(
+                criteria.folder_id.as_deref(),
+                &fenetre.criteres_fichiers(&criteria),
+                user_id,
+            )
+            .await?;
+        let paginated_files: Vec<SearchFileResultDto> = found_files
+            .into_iter()
+            .take(fenetre.fichiers_limite)
+            .map(FileDto::from)
+            .map(|f| Self::enrich_file(&f, &query_lower))
+            .collect();
+        let total_count = total_file_count.saturating_add(folder_count);
 
         let elapsed_ms = start.elapsed().as_millis() as u64;
 
@@ -535,5 +574,56 @@ impl SearchService {
         }
 
         SearchServiceStub
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::FenetrePagination;
+
+    #[test]
+    fn fenetre_page_entierement_de_dossiers() {
+        let f = FenetrePagination::calculer(30, 0, 10);
+        assert_eq!(f.dossiers, 0..10);
+        assert_eq!(f.fichiers_offset, 0);
+        assert_eq!(f.fichiers_limite, 0);
+    }
+
+    #[test]
+    fn fenetre_page_a_cheval_dossiers_fichiers() {
+        let f = FenetrePagination::calculer(5, 0, 10);
+        assert_eq!(f.dossiers, 0..5);
+        assert_eq!(f.fichiers_offset, 0);
+        assert_eq!(f.fichiers_limite, 5);
+    }
+
+    /// Ancienne panique : `offset` au-delà de la page de fichiers renvoyée par
+    /// la base (`GET /api/search?q=x&offset=150&limit=10`).
+    #[test]
+    fn fenetre_offset_au_dela_de_la_page_ne_panique_pas() {
+        let f = FenetrePagination::calculer(0, 150, 10);
+        assert_eq!(f.dossiers, 0..0);
+        assert_eq!(f.fichiers_offset, 150);
+        assert_eq!(f.fichiers_limite, 10);
+
+        let f = FenetrePagination::calculer(3, 150, 10);
+        assert_eq!(f.dossiers, 3..3);
+        assert_eq!(f.fichiers_offset, 147);
+        assert_eq!(f.fichiers_limite, 10);
+        assert!(f.dossiers_de(&[1, 2, 3]).is_empty());
+    }
+
+    /// Ancienne panique : `offset + limit` débordait (`limit=usize::MAX`).
+    #[test]
+    fn fenetre_bornes_extremes_saturent() {
+        let f = FenetrePagination::calculer(4, 2, usize::MAX);
+        assert_eq!(f.dossiers, 2..4);
+        assert_eq!(f.fichiers_offset, 0);
+        assert_eq!(f.fichiers_limite, usize::MAX - 4);
+        assert_eq!(f.dossiers_de(&['a', 'b', 'c', 'd']), vec!['c', 'd']);
+
+        let f = FenetrePagination::calculer(4, usize::MAX, usize::MAX);
+        assert_eq!(f.dossiers, 4..4);
+        assert_eq!(f.fichiers_limite, 0);
     }
 }
