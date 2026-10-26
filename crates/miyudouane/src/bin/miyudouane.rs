@@ -21,6 +21,9 @@
 //! miyudouane hote --description <fichier> [--arrete <portail>=<fichier>… --ancre <hex>]
 //!            [--maintenant <secs>] [--sandbox <zone>:<service>]… [--couper <voie>]…
 //!            [--appliquer [--fichier <chemin>]]
+//! miyudouane tc --description <fichier> --arrete <fichier> --ancre <hex>
+//!            [--maintenant <secs>] [--sandbox <zone>:<service>]… [--couper <voie>]…
+//!            [--appliquer [--fichier <chemin>]]
 //! ```
 //!
 //! - `regles` : règles d'une frontière ; `--couper` omet une voie (EX-49).
@@ -33,6 +36,13 @@
 //!   signé de portail (`--arrete portail-interne=…`). Avec `--appliquer` :
 //!   `nft -c -f` puis `nft -f` sur l'hôte, seule cette table est remplacée
 //!   (défaut `--fichier` : `/etc/miyukini/douane/miyudouane-hote.nft`).
+//! - `tc` : mise en forme du trafic de la frontière externe (A-022 §7,
+//!   module `miyudouane::tc`) : débits et marques lus de l'arrêté **signé**
+//!   de la frontière externe (en vigueur), capacités d'interfaces lues de la
+//!   description (`miyudouane-tc 1`) ; `--couper` omet une voie comme
+//!   `regles`. Avec `--appliquer` : audit, refus de toute racine `tc`
+//!   étrangère, puis `tc -batch` dans l'espace de la frontière (défaut
+//!   `--fichier` : `/etc/miyukini/douane/<netns>.tc`).
 //! - `zones` : script de mise en place + unités systemd ; `mise-en-place` et
 //!   `retrait` : le script seul (pour un banc d'essai).
 //!
@@ -63,6 +73,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use borderguard::{verifier_arrete, ArreteVerifie, Constitution, Frontiere, Zone};
 use miyudouane::hote::{self, DescriptionHote};
+use miyudouane::tc::{self, DescriptionTc};
 use miyudouane::{application, compiler, nft, zones, InstanceDouane, PlanReseau};
 use miyusceau::{AncresDeConfiance, NiveauConfiance};
 
@@ -99,7 +110,7 @@ fn zone(s: &str) -> Result<Zone, String> {
 fn lire_options() -> Result<Options, String> {
     let mut args = std::env::args().skip(1);
     let commande =
-        args.next().ok_or("commande attendue : regles | fermeture | zone | zones | mise-en-place | retrait | hote")?;
+        args.next().ok_or("commande attendue : regles | fermeture | zone | zones | mise-en-place | retrait | hote | tc")?;
     let mut o = Options {
         commande,
         frontiere: None,
@@ -163,6 +174,47 @@ fn lire_description(chemin: &std::path::Path) -> Result<DescriptionHote, String>
         .read_to_string(&mut texte)
         .map_err(|e| format!("{}: {e}", chemin.display()))?;
     DescriptionHote::analyser(&texte).map_err(|e| format!("{}: {e}", chemin.display()))
+}
+
+/// Lit un fichier texte borné (taille vérifiée avant analyse).
+fn lire_borne(chemin: &std::path::Path, max: usize) -> Result<String, String> {
+    use std::io::Read as _;
+    let f = std::fs::File::open(chemin).map_err(|e| format!("{}: {e}", chemin.display()))?;
+    let mut texte = String::new();
+    f.take(max as u64 + 1).read_to_string(&mut texte).map_err(|e| format!("{}: {e}", chemin.display()))?;
+    Ok(texte)
+}
+
+/// Commande `tc` : mise en forme du trafic de la frontière externe.
+fn commande_tc(o: Options, plan: &PlanReseau, maintenant: u64) -> Result<(), String> {
+    let chemin = o.description.as_deref().ok_or("--description <fichier> attendu")?;
+    let d = DescriptionTc::analyser(&lire_borne(chemin, tc::TAILLE_MAX_DESCRIPTION)?)
+        .map_err(|e| format!("{}: {e}", chemin.display()))?;
+    let [arrete] = o.arretes.as_slice() else {
+        return Err("--arrete <fichier> attendu (une seule fois, frontière externe)".into());
+    };
+    let verifie = lire_arrete(arrete, o.ancre.as_ref(), maintenant)?;
+    if !verifie.en_vigueur(maintenant) {
+        return Err(format!("{arrete} : arrêté hors vigueur"));
+    }
+    if let Some(v) = o.coupees.iter().find(|v| !verifie.arrete().voies.iter().any(|x| x.id == **v)) {
+        return Err(format!("--couper : voie « {v} » absente de l'arrêté"));
+    }
+    let p = tc::planifier(&verifie, plan, &d, &o.coupees).map_err(|e| e.to_string())?;
+    let texte = tc::generer_tc(&p);
+    if o.appliquer {
+        let fichier =
+            o.fichier.unwrap_or_else(|| PathBuf::from(format!("{}/{}.tc", zones::REPERTOIRE_REGLES, p.netns)));
+        application::appliquer_tc(&texte, &p, &fichier).map_err(|e| e.to_string())?;
+        eprintln!("appliqué : mise en forme {} ({})", p.netns, fichier.display());
+    } else {
+        let ecarts = tc::auditer_tc(&texte, &p);
+        if !ecarts.is_empty() {
+            return Err(format!("audit : {}", ecarts.join(" ; ")));
+        }
+        print!("{texte}");
+    }
+    Ok(())
 }
 
 /// Commande `hote` : table de la zone COG sur l'hôte.
@@ -308,6 +360,7 @@ fn executer() -> Result<(), String> {
             appliquer_ou_imprimer(&texte, &voies, o.appliquer, &defz.netns, o.fichier)
         }
         "hote" => commande_hote(o, &plan, maintenant),
+        "tc" => commande_tc(o, &plan, maintenant),
         autre => Err(format!("commande inconnue « {autre} »")),
     }
 }

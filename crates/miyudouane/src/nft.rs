@@ -16,9 +16,16 @@
 //! 1. bouclage (`lo`) accepté (entrée et sortie seulement) ;
 //! 2. `ct state invalid` → journal `INVALIDE` + rejet ;
 //! 3. pour chaque flux (marque conntrack `m`) : paquet trop grand → `TAILLE`,
-//!    débit au-delà du plafond → `DEBIT` (limite par chaîne, donc par sens) ;
-//! 4. `ct state established,related` accepté (réponses des seules connexions admises) ;
-//! 5. connexions nouvelles **déclarées** : `ct state new`, marque posée,
+//!    débit au-delà du **filet** → `DEBIT` : `ct direction original|reply
+//!    limit rate over ⌈D × 5/4⌉ kbytes/second burst B bytes`, une limite par
+//!    sens et par chaîne. Le débit déclaré `D` est tenu par la mise en forme
+//!    `tc` ([`crate::tc`] : dépassement mis en file) ; la règle `DEBIT` n'est
+//!    qu'un filet au-delà de 125 % (rapport documenté dans [`crate::tc`]) ;
+//! 4. `meta mark set ct mark` (marque du paquet = marque du flux, lue par le
+//!    filtre `fw` de `tc`) puis `ct state established,related` accepté
+//!    (réponses des seules connexions admises) ;
+//! 5. connexions nouvelles **déclarées** : `ct state new`, marques posées
+//!    (`ct mark set m meta mark set m`),
 //!    `comment "voie=<id> service=<s> flux=<n>"` ;
 //! 6. toute source dans la zone COG → `SORTIE-COG` ; toute destination dans
 //!    la zone COG → `ENTREE-COG` (INV-Z1, INV-Z2 : incidents critiques) ;
@@ -58,6 +65,10 @@ use borderguard::{ArreteVerifie, Frontiere, Reseau, Zone};
 
 use crate::compilation::{Crochet, RegleCompilee};
 use crate::plan::{DefinitionFrontiere, PlanReseau};
+use crate::tc::{filet_kio_s, rafale_octets, Sens};
+
+/// Copie de la marque conntrack dans la marque du paquet (classification `tc`).
+pub const COPIE_MARQUE: &str = "meta mark set ct mark";
 
 /// Préfixe commun des journaux Douane.
 pub const PREFIXE_JOURNAL: &str = "MDOU";
@@ -187,7 +198,11 @@ fn regle_nouvelle(r: &RegleCompilee, iif: Option<&str>, oif: Option<&str>, poser
     if let Some(o) = oif {
         let _ = write!(prefixe, "oifname \"{o}\" ");
     }
-    let marque = if poser_marque { format!("ct mark set 0x{:08x} ", r.marque) } else { String::new() };
+    let marque = if poser_marque {
+        format!("ct mark set 0x{m:08x} meta mark set 0x{m:08x} ", m = r.marque)
+    } else {
+        String::new()
+    };
     selecteurs_adresses(&r.sources, &r.destinations)
         .into_iter()
         .map(|sel| {
@@ -282,14 +297,26 @@ pub fn generer_frontiere(
                 "TAILLE",
                 g,
             ));
-            lignes.extend(rejet(
-                &format!("ct mark 0x{:08x} limit rate over {} kbytes/second", m.marque, m.debit_max_kio_s),
-                lieu,
-                nom,
-                "DEBIT",
-                g,
-            ));
+            // Filet de sécurité au-delà de la mise en forme `tc` (crate::tc) :
+            // plafond × 5/4, par sens, même rafale que la feuille HTB.
+            for sens in [Sens::Original, Sens::Reponse] {
+                lignes.extend(rejet(
+                    &format!(
+                        "ct mark 0x{:08x} ct direction {} limit rate over {} kbytes/second burst {} bytes",
+                        m.marque,
+                        sens.nom(),
+                        filet_kio_s(m.debit_max_kio_s),
+                        rafale_octets(m.debit_max_kio_s)
+                    ),
+                    lieu,
+                    nom,
+                    "DEBIT",
+                    g,
+                ));
+            }
         }
+        // Marque du paquet = marque du flux : classification `tc` (filtre `fw`).
+        lignes.push(COPIE_MARQUE.to_string());
         lignes.push("ct state established,related counter accept".to_string());
         for r in actives.iter().filter(|r| r.crochet == crochet) {
             lignes.extend(regle_nouvelle(r, r.iif.as_deref(), r.oif.as_deref(), true));

@@ -264,7 +264,7 @@ pub fn nom_compte_valide(nom: &str) -> bool {
 }
 
 /// Entier décimal strict (sans signe, sans zéro de tête, ≤ 10 chiffres).
-fn entier(s: &str) -> Option<u64> {
+pub(crate) fn entier(s: &str) -> Option<u64> {
     if s.is_empty() || s.len() > 10 || (s.len() > 1 && s.starts_with('0')) || !s.bytes().all(|b| b.is_ascii_digit()) {
         return None;
     }

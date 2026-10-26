@@ -33,15 +33,22 @@ table inet miyudouane {
 		ct mark 0x00000001 meta length > 1400 update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|TAILLE|" group 101
 		ct mark 0x00000001 meta length > 1400 update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|TAILLE|" group 101
 		ct mark 0x00000001 meta length > 1400 counter name "rejets" drop
-		ct mark 0x00000001 limit rate over 512 kbytes/second update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|DEBIT|" group 101
-		ct mark 0x00000001 limit rate over 512 kbytes/second update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|DEBIT|" group 101
-		ct mark 0x00000001 limit rate over 512 kbytes/second counter name "rejets" drop
+		ct mark 0x00000001 ct direction original limit rate over 640 kbytes/second burst 6843 bytes update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|DEBIT|" group 101
+		ct mark 0x00000001 ct direction original limit rate over 640 kbytes/second burst 6843 bytes update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|DEBIT|" group 101
+		ct mark 0x00000001 ct direction original limit rate over 640 kbytes/second burst 6843 bytes counter name "rejets" drop
+		ct mark 0x00000001 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|DEBIT|" group 101
+		ct mark 0x00000001 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|DEBIT|" group 101
+		ct mark 0x00000001 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes counter name "rejets" drop
 		ct mark 0x00000002 meta length > 1400 update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|TAILLE|" group 101
 		ct mark 0x00000002 meta length > 1400 update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|TAILLE|" group 101
 		ct mark 0x00000002 meta length > 1400 counter name "rejets" drop
-		ct mark 0x00000002 limit rate over 512 kbytes/second update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|DEBIT|" group 101
-		ct mark 0x00000002 limit rate over 512 kbytes/second update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|DEBIT|" group 101
-		ct mark 0x00000002 limit rate over 512 kbytes/second counter name "rejets" drop
+		ct mark 0x00000002 ct direction original limit rate over 640 kbytes/second burst 6843 bytes update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|DEBIT|" group 101
+		ct mark 0x00000002 ct direction original limit rate over 640 kbytes/second burst 6843 bytes update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|DEBIT|" group 101
+		ct mark 0x00000002 ct direction original limit rate over 640 kbytes/second burst 6843 bytes counter name "rejets" drop
+		ct mark 0x00000002 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|DEBIT|" group 101
+		ct mark 0x00000002 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|DEBIT|" group 101
+		ct mark 0x00000002 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes counter name "rejets" drop
+		meta mark set ct mark
 		ct state established,related counter accept
 		ip saddr 10.77.0.0/24 update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|entree|SORTIE-COG|" group 101
 		ip saddr 10.77.0.0/24 counter name "rejets" drop
@@ -59,18 +66,25 @@ table inet miyudouane {
 		ct mark 0x00000001 meta length > 1400 update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|TAILLE|" group 101
 		ct mark 0x00000001 meta length > 1400 update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|TAILLE|" group 101
 		ct mark 0x00000001 meta length > 1400 counter name "rejets" drop
-		ct mark 0x00000001 limit rate over 512 kbytes/second update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|DEBIT|" group 101
-		ct mark 0x00000001 limit rate over 512 kbytes/second update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|DEBIT|" group 101
-		ct mark 0x00000001 limit rate over 512 kbytes/second counter name "rejets" drop
+		ct mark 0x00000001 ct direction original limit rate over 640 kbytes/second burst 6843 bytes update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|DEBIT|" group 101
+		ct mark 0x00000001 ct direction original limit rate over 640 kbytes/second burst 6843 bytes update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|DEBIT|" group 101
+		ct mark 0x00000001 ct direction original limit rate over 640 kbytes/second burst 6843 bytes counter name "rejets" drop
+		ct mark 0x00000001 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|DEBIT|" group 101
+		ct mark 0x00000001 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|DEBIT|" group 101
+		ct mark 0x00000001 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes counter name "rejets" drop
 		ct mark 0x00000002 meta length > 1400 update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|TAILLE|" group 101
 		ct mark 0x00000002 meta length > 1400 update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|TAILLE|" group 101
 		ct mark 0x00000002 meta length > 1400 counter name "rejets" drop
-		ct mark 0x00000002 limit rate over 512 kbytes/second update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|DEBIT|" group 101
-		ct mark 0x00000002 limit rate over 512 kbytes/second update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|DEBIT|" group 101
-		ct mark 0x00000002 limit rate over 512 kbytes/second counter name "rejets" drop
+		ct mark 0x00000002 ct direction original limit rate over 640 kbytes/second burst 6843 bytes update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|DEBIT|" group 101
+		ct mark 0x00000002 ct direction original limit rate over 640 kbytes/second burst 6843 bytes update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|DEBIT|" group 101
+		ct mark 0x00000002 ct direction original limit rate over 640 kbytes/second burst 6843 bytes counter name "rejets" drop
+		ct mark 0x00000002 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|DEBIT|" group 101
+		ct mark 0x00000002 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|DEBIT|" group 101
+		ct mark 0x00000002 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes counter name "rejets" drop
+		meta mark set ct mark
 		ct state established,related counter accept
-		iifname "ext0" oifname "ext-franche" ip saddr { 198.51.100.7, 203.0.113.0/24 } ip daddr 10.77.1.11 tcp dport 443 meta length <= 1400 ct state new ct mark set 0x00000001 counter accept comment "voie=site service=site flux=0"
-		iifname "wg-fed" oifname "ext-franche" ip saddr 10.78.0.0/16 ip daddr 10.77.1.10 udp dport 51820 meta length <= 1400 ct state new ct mark set 0x00000002 counter accept comment "voie=jayoffice service=jayoffice flux=1"
+		iifname "ext0" oifname "ext-franche" ip saddr { 198.51.100.7, 203.0.113.0/24 } ip daddr 10.77.1.11 tcp dport 443 meta length <= 1400 ct state new ct mark set 0x00000001 meta mark set 0x00000001 counter accept comment "voie=site service=site flux=0"
+		iifname "wg-fed" oifname "ext-franche" ip saddr 10.78.0.0/16 ip daddr 10.77.1.10 udp dport 51820 meta length <= 1400 ct state new ct mark set 0x00000002 meta mark set 0x00000002 counter accept comment "voie=jayoffice service=jayoffice flux=1"
 		ip saddr 10.77.0.0/24 update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|SORTIE-COG|" group 101
 		ip saddr 10.77.0.0/24 counter name "rejets" drop
 		ip daddr 10.77.0.0/24 update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|transit|ENTREE-COG|" group 101
@@ -88,15 +102,22 @@ table inet miyudouane {
 		ct mark 0x00000001 meta length > 1400 update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|TAILLE|" group 101
 		ct mark 0x00000001 meta length > 1400 update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|TAILLE|" group 101
 		ct mark 0x00000001 meta length > 1400 counter name "rejets" drop
-		ct mark 0x00000001 limit rate over 512 kbytes/second update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|DEBIT|" group 101
-		ct mark 0x00000001 limit rate over 512 kbytes/second update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|DEBIT|" group 101
-		ct mark 0x00000001 limit rate over 512 kbytes/second counter name "rejets" drop
+		ct mark 0x00000001 ct direction original limit rate over 640 kbytes/second burst 6843 bytes update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|DEBIT|" group 101
+		ct mark 0x00000001 ct direction original limit rate over 640 kbytes/second burst 6843 bytes update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|DEBIT|" group 101
+		ct mark 0x00000001 ct direction original limit rate over 640 kbytes/second burst 6843 bytes counter name "rejets" drop
+		ct mark 0x00000001 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|DEBIT|" group 101
+		ct mark 0x00000001 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|DEBIT|" group 101
+		ct mark 0x00000001 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes counter name "rejets" drop
 		ct mark 0x00000002 meta length > 1400 update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|TAILLE|" group 101
 		ct mark 0x00000002 meta length > 1400 update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|TAILLE|" group 101
 		ct mark 0x00000002 meta length > 1400 counter name "rejets" drop
-		ct mark 0x00000002 limit rate over 512 kbytes/second update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|DEBIT|" group 101
-		ct mark 0x00000002 limit rate over 512 kbytes/second update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|DEBIT|" group 101
-		ct mark 0x00000002 limit rate over 512 kbytes/second counter name "rejets" drop
+		ct mark 0x00000002 ct direction original limit rate over 640 kbytes/second burst 6843 bytes update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|DEBIT|" group 101
+		ct mark 0x00000002 ct direction original limit rate over 640 kbytes/second burst 6843 bytes update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|DEBIT|" group 101
+		ct mark 0x00000002 ct direction original limit rate over 640 kbytes/second burst 6843 bytes counter name "rejets" drop
+		ct mark 0x00000002 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|DEBIT|" group 101
+		ct mark 0x00000002 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes update @journal_v6 { ip6 saddr . ip6 daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|DEBIT|" group 101
+		ct mark 0x00000002 ct direction reply limit rate over 640 kbytes/second burst 6843 bytes counter name "rejets" drop
+		meta mark set ct mark
 		ct state established,related counter accept
 		ip saddr 10.77.0.0/24 update @journal_v4 { ip saddr . ip daddr . meta l4proto limit rate 1/second } limit name "journal" log prefix "MDOU|externe|sortie|SORTIE-COG|" group 101
 		ip saddr 10.77.0.0/24 counter name "rejets" drop

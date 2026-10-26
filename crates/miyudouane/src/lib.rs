@@ -21,8 +21,12 @@
 //!   unités systemd des sandboxes), texte seulement ;
 //! - [`hote`] : table hôte `inet miyudouane_hote` (zone COG sans sortie pour
 //!   les services COG lancés sur l'hôte), depuis une description validée ;
-//! - [`application`] : l'unique étape privilégiée (`nft -c -f` puis `nft -f`),
-//!   appelée par la CLI `miyudouane … --appliquer`, jamais en test.
+//! - [`tc`] : mise en forme du trafic (`tc -batch`) de la frontière externe
+//!   depuis les débits déclarés (A-022 §7) : une classe HTB par voie, une
+//!   feuille `fq_codel` par flux, classification par marque, audit ;
+//! - [`application`] : l'unique étape privilégiée (`nft -c -f` puis `nft -f` ;
+//!   `tc -batch` pour la mise en forme), appelée par la CLI
+//!   `miyudouane … --appliquer`, jamais en test.
 //!
 //! ## Convention de journalisation (Vigies)
 //!
@@ -64,6 +68,7 @@ pub mod instance;
 pub mod ips;
 pub mod nft;
 pub mod plan;
+pub mod tc;
 pub mod zones;
 
 pub use compilation::{compiler, Crochet, ErreurCompilation, RegleCompilee};

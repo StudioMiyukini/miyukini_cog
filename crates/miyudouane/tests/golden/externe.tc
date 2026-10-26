@@ -1,0 +1,56 @@
+# Généré par miyudouane tc — ne pas modifier à la main.
+# Douane — mise en forme du trafic (A-022 §7), espace mcog-f-externe : tc -batch
+# frontiere=externe arrete=7 empreinte=<sha256>
+# validite=1800000000..1802592000 emetteur=borderguard
+# une classe HTB par voie, une feuille fq_codel par flux (marque conntrack -> meta mark -> fw) ;
+# depassement = mise en file ; filet nftables DEBIT = plafond x 5/4 par sens.
+
+# interface ext-franche capacite 1250000 KiB/s, garanti aux voies 2816 KiB/s
+qdisc add dev ext-franche root handle 4d44: htb default ffff
+class add dev ext-franche parent 4d44: classid 4d44:f000 htb rate 1250000KiBps ceil 1250000KiBps burst 12801600 cburst 12801600 quantum 1600
+class add dev ext-franche parent 4d44:f000 classid 4d44:ffff htb rate 1247184KiBps ceil 1250000KiBps burst 12772765 cburst 12801600 quantum 1600
+qdisc add dev ext-franche parent 4d44:ffff handle 4d45: fq_codel limit 1024 flows 1024 target 5000us interval 100000us ecn
+# voie=jayoffice service=jayoffice debit=2048 KiB/s
+class add dev ext-franche parent 4d44:f000 classid 4d44:1000 htb rate 2048KiBps ceil 2048KiBps burst 22572 cburst 22572 quantum 1600
+# flux=2 marque=0x00000003 sens=original debit=2048 KiB/s taille_max=1420
+class add dev ext-franche parent 4d44:1000 classid 4d44:3 htb rate 2048KiBps ceil 2048KiBps burst 22572 cburst 22572 quantum 1600
+qdisc add dev ext-franche parent 4d44:3 handle 3: fq_codel limit 1024 flows 1024 target 5000us interval 100000us ecn
+filter add dev ext-franche parent 4d44: protocol all prio 10 handle 0x3 fw classid 4d44:3
+# voie=site service=site debit=768 KiB/s
+class add dev ext-franche parent 4d44:f000 classid 4d44:1001 htb rate 768KiBps ceil 768KiBps burst 9465 cburst 9465 quantum 1600
+# flux=0 marque=0x00000001 sens=original debit=256 KiB/s taille_max=1400
+class add dev ext-franche parent 4d44:1001 classid 4d44:1 htb rate 256KiBps ceil 256KiBps burst 4222 cburst 4222 quantum 1600
+qdisc add dev ext-franche parent 4d44:1 handle 1: fq_codel limit 1024 flows 1024 target 8012us interval 103012us ecn
+filter add dev ext-franche parent 4d44: protocol all prio 10 handle 0x1 fw classid 4d44:1
+# flux=1 marque=0x00000002 sens=original debit=512 KiB/s taille_max=1400
+class add dev ext-franche parent 4d44:1001 classid 4d44:2 htb rate 512KiBps ceil 512KiBps burst 6843 cburst 6843 quantum 1600
+qdisc add dev ext-franche parent 4d44:2 handle 2: fq_codel limit 1024 flows 1024 target 5000us interval 100000us ecn
+filter add dev ext-franche parent 4d44: protocol all prio 10 handle 0x2 fw classid 4d44:2
+
+# interface ext0 capacite 125000 KiB/s, garanti aux voies 768 KiB/s
+qdisc add dev ext0 root handle 4d44: htb default ffff
+class add dev ext0 parent 4d44: classid 4d44:f000 htb rate 125000KiBps ceil 125000KiBps burst 1281600 cburst 1281600 quantum 1600
+class add dev ext0 parent 4d44:f000 classid 4d44:ffff htb rate 124232KiBps ceil 125000KiBps burst 1273736 cburst 1281600 quantum 1600
+qdisc add dev ext0 parent 4d44:ffff handle 4d45: fq_codel limit 1024 flows 1024 target 5000us interval 100000us ecn
+# voie=site service=site debit=768 KiB/s
+class add dev ext0 parent 4d44:f000 classid 4d44:1001 htb rate 768KiBps ceil 768KiBps burst 9465 cburst 9465 quantum 1600
+# flux=0 marque=0x00000001 sens=reply debit=256 KiB/s taille_max=1400
+class add dev ext0 parent 4d44:1001 classid 4d44:1 htb rate 256KiBps ceil 256KiBps burst 4222 cburst 4222 quantum 1600
+qdisc add dev ext0 parent 4d44:1 handle 1: fq_codel limit 1024 flows 1024 target 8012us interval 103012us ecn
+filter add dev ext0 parent 4d44: protocol all prio 10 handle 0x1 fw classid 4d44:1
+# flux=1 marque=0x00000002 sens=reply debit=512 KiB/s taille_max=1400
+class add dev ext0 parent 4d44:1001 classid 4d44:2 htb rate 512KiBps ceil 512KiBps burst 6843 cburst 6843 quantum 1600
+qdisc add dev ext0 parent 4d44:2 handle 2: fq_codel limit 1024 flows 1024 target 5000us interval 100000us ecn
+filter add dev ext0 parent 4d44: protocol all prio 10 handle 0x2 fw classid 4d44:2
+
+# interface wg-fed capacite 12500 KiB/s, garanti aux voies 2048 KiB/s
+qdisc add dev wg-fed root handle 4d44: htb default ffff
+class add dev wg-fed parent 4d44: classid 4d44:f000 htb rate 12500KiBps ceil 12500KiBps burst 129600 cburst 129600 quantum 1600
+class add dev wg-fed parent 4d44:f000 classid 4d44:ffff htb rate 10452KiBps ceil 12500KiBps burst 108629 cburst 129600 quantum 1600
+qdisc add dev wg-fed parent 4d44:ffff handle 4d45: fq_codel limit 1024 flows 1024 target 5000us interval 100000us ecn
+# voie=jayoffice service=jayoffice debit=2048 KiB/s
+class add dev wg-fed parent 4d44:f000 classid 4d44:1000 htb rate 2048KiBps ceil 2048KiBps burst 22572 cburst 22572 quantum 1600
+# flux=2 marque=0x00000003 sens=reply debit=2048 KiB/s taille_max=1420
+class add dev wg-fed parent 4d44:1000 classid 4d44:3 htb rate 2048KiBps ceil 2048KiBps burst 22572 cburst 22572 quantum 1600
+qdisc add dev wg-fed parent 4d44:3 handle 3: fq_codel limit 1024 flows 1024 target 5000us interval 100000us ecn
+filter add dev wg-fed parent 4d44: protocol all prio 10 handle 0x3 fw classid 4d44:3

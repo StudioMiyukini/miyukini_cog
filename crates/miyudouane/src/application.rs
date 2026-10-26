@@ -12,6 +12,9 @@
 //! Étapes : audit du texte → écriture d'un fichier `0600` → `nft -c -f`
 //! (contrôle à blanc) → `nft -f` (application atomique), dans l'espace de
 //! noms demandé (`ip netns exec <ns>`). Tout écart arrête la procédure.
+//!
+//! Mise en forme `tc` : [`appliquer_tc`] (audit, refus de toute racine
+//! étrangère avant modification, `tc -batch` dans l'espace de la frontière).
 
 use std::collections::BTreeSet;
 use std::fs;
@@ -22,6 +25,7 @@ use std::process::Command;
 
 use crate::hote::auditer_hote;
 use crate::nft::auditer;
+use crate::tc::{auditer_tc, classer_racine, PlanTc, RacineTc, POIGNEE_RACINE};
 
 /// Échec de l'application.
 #[derive(Debug)]
@@ -34,6 +38,11 @@ pub enum ErreurApplication {
     Es(std::io::Error),
     /// `nft` a refusé (étape, sortie d'erreur).
     Nft(&'static str, String),
+    /// `tc` a refusé (étape, sortie d'erreur).
+    Tc(&'static str, String),
+    /// Une interface porte une configuration `tc` qui n'est pas celle de la
+    /// Douane : rien n'est touché.
+    TcEtranger(String),
 }
 
 impl std::fmt::Display for ErreurApplication {
@@ -43,6 +52,8 @@ impl std::fmt::Display for ErreurApplication {
             Self::NetnsInvalide => f.write_str("espace de noms invalide"),
             Self::Es(e) => write!(f, "entrée-sortie : {e}"),
             Self::Nft(etape, err) => write!(f, "nft ({etape}) : {err}"),
+            Self::Tc(etape, err) => write!(f, "tc ({etape}) : {err}"),
+            Self::TcEtranger(e) => write!(f, "configuration tc étrangère, rien n'est touché : {e}"),
         }
     }
 }
@@ -84,11 +95,98 @@ pub fn appliquer(
         return Err(ErreurApplication::Audit(ecarts));
     }
     if let Some(ns) = netns {
-        if ns.is_empty() || !ns.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-') {
+        if !netns_valide(ns) {
             return Err(ErreurApplication::NetnsInvalide);
         }
     }
     ecrire_controler_appliquer(texte, netns, fichier)
+}
+
+fn netns_valide(ns: &str) -> bool {
+    !ns.is_empty() && ns.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
+}
+
+fn tc(netns: &str, args: &[&str]) -> Command {
+    let mut c = Command::new("ip");
+    c.args(["netns", "exec", netns, "tc"]);
+    c.args(args);
+    c
+}
+
+fn sortie_tc(c: Command, etape: &'static str) -> Result<String, ErreurApplication> {
+    let mut c = c;
+    let sortie = c.output().map_err(ErreurApplication::Es)?;
+    if sortie.status.success() {
+        Ok(String::from_utf8_lossy(&sortie.stdout).into_owned())
+    } else {
+        Err(ErreurApplication::Tc(etape, String::from_utf8_lossy(&sortie.stderr).into_owned()))
+    }
+}
+
+/// Mise en forme `tc` ([`crate::tc`]) dans l'espace de noms de la frontière :
+///
+/// 1. audit ([`auditer_tc`] : écart au rendu attendu ⇒ refus) ;
+/// 2. lecture de la racine de **chaque** interface du plan ; une racine qui
+///    n'est ni celle de la Douane (`htb 4d44:`) ni la file par défaut du noyau
+///    ⇒ refus **avant toute modification** ([`ErreurApplication::TcEtranger`]) ;
+/// 3. écriture du fichier `0600` ;
+/// 4. retrait de la seule racine `4d44:` là où elle existe ;
+/// 5. `tc -batch` (un seul processus, arrêt à la première erreur ; `qdisc
+///    add … root` échoue si une racine étrangère est apparue entre temps).
+///
+/// En cas d'échec en 4 ou 5, la racine de la Douane est retirée des
+/// interfaces où elle se trouve (retour à la file par défaut ; le filet
+/// nftables reste en place) et l'erreur est rendue.
+pub fn appliquer_tc(texte: &str, attendu: &PlanTc, fichier: &Path) -> Result<(), ErreurApplication> {
+    let ecarts = auditer_tc(texte, attendu);
+    if !ecarts.is_empty() {
+        return Err(ErreurApplication::Audit(ecarts));
+    }
+    let ns = attendu.netns.as_str();
+    if !netns_valide(ns) {
+        return Err(ErreurApplication::NetnsInvalide);
+    }
+    let mut a_retirer = Vec::new();
+    let mut etrangeres = Vec::new();
+    for i in &attendu.interfaces {
+        let dev = i.interface.as_str();
+        match classer_racine(&sortie_tc(tc(ns, &["qdisc", "show", "dev", dev, "root"]), "lecture")?) {
+            RacineTc::Defaut => {}
+            RacineTc::Douane => a_retirer.push(dev),
+            RacineTc::Etrangere(e) => etrangeres.push(format!("{dev} : {e}")),
+        }
+    }
+    if !etrangeres.is_empty() {
+        return Err(ErreurApplication::TcEtranger(etrangeres.join(" ; ")));
+    }
+    ecrire(texte, fichier)?;
+    let chemin = fichier.to_string_lossy().into_owned();
+    // `handle 4d44:` : le noyau refuse la suppression si la racine a changé
+    // de main entre la lecture et le retrait.
+    let poignee = format!("{POIGNEE_RACINE:x}:");
+    let resultat = a_retirer
+        .iter()
+        .try_for_each(|dev| {
+            sortie_tc(tc(ns, &["qdisc", "del", "dev", dev, "root", "handle", &poignee]), "retrait").map(|_| ())
+        })
+        .and_then(|()| sortie_tc(tc(ns, &["-batch", &chemin]), "application").map(|_| ()));
+    if resultat.is_err() {
+        retirer_racines_douane(attendu);
+    }
+    resultat
+}
+
+/// Retire la racine de la Douane (et elle seule) des interfaces du plan.
+fn retirer_racines_douane(attendu: &PlanTc) {
+    let ns = attendu.netns.as_str();
+    for i in &attendu.interfaces {
+        let dev = i.interface.as_str();
+        let lue = sortie_tc(tc(ns, &["qdisc", "show", "dev", dev, "root"]), "lecture");
+        if lue.is_ok_and(|s| classer_racine(&s) == RacineTc::Douane) {
+            let poignee = format!("{POIGNEE_RACINE:x}:");
+            let _ = sortie_tc(tc(ns, &["qdisc", "del", "dev", dev, "root", "handle", &poignee]), "retrait");
+        }
+    }
 }
 
 /// Table hôte `inet miyudouane_hote` ([`crate::hote`]) : audit propre à
@@ -103,7 +201,8 @@ pub fn appliquer_hote(texte: &str, voies_exceptions: &BTreeSet<String>, fichier:
     ecrire_controler_appliquer(texte, None, fichier)
 }
 
-fn ecrire_controler_appliquer(texte: &str, netns: Option<&str>, fichier: &Path) -> Result<(), ErreurApplication> {
+/// Écrit le texte dans un fichier neuf `0600` (remplace l'ancien).
+fn ecrire(texte: &str, fichier: &Path) -> Result<(), ErreurApplication> {
     let _ = fs::remove_file(fichier);
     let mut f = fs::OpenOptions::new()
         .write(true)
@@ -112,7 +211,11 @@ fn ecrire_controler_appliquer(texte: &str, netns: Option<&str>, fichier: &Path) 
         .open(fichier)
         .map_err(ErreurApplication::Es)?;
     f.write_all(texte.as_bytes()).map_err(ErreurApplication::Es)?;
-    f.sync_all().map_err(ErreurApplication::Es)?;
+    f.sync_all().map_err(ErreurApplication::Es)
+}
+
+fn ecrire_controler_appliquer(texte: &str, netns: Option<&str>, fichier: &Path) -> Result<(), ErreurApplication> {
+    ecrire(texte, fichier)?;
     let chemin = fichier.to_string_lossy();
     executer(nft(netns, &["-c", "-f", &chemin]), "contrôle")?;
     executer(nft(netns, &["-f", &chemin]), "application")
