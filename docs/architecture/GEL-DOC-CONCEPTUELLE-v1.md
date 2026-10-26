@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.25 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`, `doc-conceptuelle-v1.24`, `doc-conceptuelle-v1.25`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.26 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`, `doc-conceptuelle-v1.24`, `doc-conceptuelle-v1.25`, `doc-conceptuelle-v1.26`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -84,6 +84,7 @@
 | A-023 | 2026-10-26 | Mise en forme du trafic par la Douane : `tc` HTB + `fq_codel` par voie et par flux depuis l'arrêté signé, filet nftables par sens à 5/4, application et audit | 1.23 |
 | A-024 | 2026-10-26 | Délégation de clé d'usage `0x45` (disposition des tags), clés `visas` (5) et `fiches` (6), vérification de chaîne des passeports et visas, transition | 1.24 |
 | A-025 | 2026-10-26 | Sauvegardes de KindMother (chiffrées, 30 j, purge sûre, restauration qui rejoue les oublis, registre `oublis`) ; correction d'A-023 : règle de débit stricte par défaut, filet 5/4 seulement en externe après `tc` | 1.25 |
+| A-026 | 2026-10-26 | Modèle local réel pour MAIA et Alicia (Qwen2.5-1.5B-Instruct Apache-2.0, `maia-llm` CPU sur 11436, canal MMIA), Alicia contrainte par grammaire, serrure toujours confirmée, mention IA (AI Act art. 50) | 1.26 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -805,3 +806,19 @@
   - **Ordre** : (a) règles strictes ; (b) `tc` (refusé si les règles strictes ne sont pas en place ; échec ⇒ racine retirée, règle stricte maintenue) ; (c) règles avec filet (refusé si une interface ne porte pas la racine `htb 4d44:`) ; à refaire à chaque arrêté externe, coupure ou rétablissement de voie et au démarrage de l'espace de noms
   - L'audit n'accepte que la forme correspondant à l'état déclaré
 - **Impact** : EX-14, EX-24, EX-50..56 ; plan lots 3, C
+
+### A-026 — Modèle local réel pour MAIA et Alicia, mention IA
+
+<!-- @id arch.gel.a026 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a026 -->
+
+- **Date** : 2026-10-26 · **version** 1.26 · demande du propriétaire (« un mini modèle via llama.cpp pour MAIA et Alicia ») ; consignation de l'implémenté
+- **Modèle de base** : **Qwen2.5-1.5B-Instruct, Q4_K_M** (GGUF de l'éditeur, 1 117 320 736 octets), **Apache-2.0** (C-72, vérifiée sur la fiche et le fichier LICENSE) ; SHA-256 `6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e` ; source figée sur le commit `91cad51170dc346986eccefdc2dd33a9da36ead9` du dépôt `Qwen/Qwen2.5-1.5B-Instruct-GGUF` ; jamais dans le dépôt git
+- **Livraison** : artefact `MMIA` inchangé ; outils `maia-llm emballer-modele` et `installer-modele` (passage par l'installateur du canal, empreinte vérifiée avant chargement, un octet altéré ⇒ refus) ; date de coupure du modèle « non publiée (estimée …) » admise au manifeste ; **signature de développement** en attendant la re-signature par la clé du canal
+- **`maia-llm`** : port **11436** (MAIA garde 11435) ; CPU par défaut (moitié des fils logiques, ≤ 8), GPU seulement si la VRAM libre suffit (≈ 2,1 Gio pour ce modèle) ; détection GPU par llama.cpp, jamais `nvidia-smi` ; gabarit de chat du modèle ; requête : `grammar` (GBNF, ≤ 16 Kio) et `seed` ; réponse marquée `x_miyukini.genere_par_ia` ; sous-commande `banc` ; banc CPU (i5-10400F) : premier jeton ≈ 0,5–0,8 s, ≈ 28–34 jetons/s, 1,13 Gio résidents
+- **MAIA** : aucun service d'IA extérieur par défaut (`upstream_url` vide, sondes LM Studio / Ollama supprimées) ; tout moteur hors COG passe par StrongFather (intention `inference.externe`, politique `maia-inference-externe-refusee` : refus en production ; un moteur de test local n'est admis que sous politique de test)
+- **Alicia** : même moteur `maia-llm` (un seul chargement), requêtes signées, moteur non local ignoré (`[moteur_ia] url`) ; sortie **contrainte par grammaire GBNF** construite depuis les pièces et routines connues, puis revalidée (schéma JSON des intentions) ; l'IA **propose** seulement, exécution derrière la porte des Cores (`domotique.control_device`, `domotique.activate_routine`, politique `alicia-domotique-proposition-ia`) ; **toute commande de serrure proposée par l'IA exige une confirmation** et est refusée par la politique de base ; taux mesuré : 17/18 phrases françaises
+- **Mention IA (AI Act art. 50)** : route `GET /maia/presentation` ; consigne d'identité d'IA placée avant celle de chaque agent, non levable ; champs `genere_par_ia` et `mention_ia` sur chaque réponse de MAIA ; `PRESENTATION_ALICIA`, `MENTION_IA_ALICIA` et `genere_par_ia` sur chaque proposition d'Alicia
+- **Reste** : unité, compte, profil AppArmor (`config/maia/apparmor-miyukini-maia-llm`) et configuration à intégrer aux installateurs (`config/maia/INSTALLATEUR.md`) ; re-signature du modèle par la clé du canal ; build CUDA (édition de liens `cudart_static`) ; réutilisation du cache de l'invite pour la latence d'Alicia
+- **Impact** : EX-50..63 ; AI Act art. 50 ; C-72 ; plan lot 7

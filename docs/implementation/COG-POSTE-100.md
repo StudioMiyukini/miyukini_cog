@@ -50,10 +50,10 @@
 
 | # | Point | État |
 |---|---|---|
-| A1 | **Mini modèle réel via llama.cpp** (licence Apache-2.0 / MIT, C-72), livré par le canal `MMIA`, empreinte vérifiée | à faire |
-| A2 | MAIA répond avec ce modèle, sous la porte des Cores, mémoire et Fiches branchées | à faire |
-| A3 | **Alicia** utilise le même moteur local (aucun service externe) | à faire |
-| A4 | Mention IA (AI Act art. 50) dans MAIA et Alicia | à faire |
+| A1 | **Mini modèle réel via llama.cpp** (licence Apache-2.0 / MIT, C-72), livré par le canal `MMIA`, empreinte vérifiée | fait (A-026) ; re-signature canal à faire |
+| A2 | MAIA répond avec ce modèle, sous la porte des Cores, mémoire et Fiches branchées | fait (A-026) |
+| A3 | **Alicia** utilise le même moteur local (aucun service externe) | fait (A-026) |
+| A4 | Mention IA (AI Act art. 50) dans MAIA et Alicia | fait (A-026) |
 | A5 | Interface de la mémoire (voir, corriger, exporter, oublier, valider) | à faire (après I4) |
 | A6 | Publication des Fiches, état persistant | fait (A-017, A-018) |
 | A7 | TAMR branché sur la republication d'une donnée étrangère | à faire |
