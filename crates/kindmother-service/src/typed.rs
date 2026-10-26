@@ -93,7 +93,7 @@ pub(crate) fn to_value(v: &SqlValue) -> Value {
 }
 
 /// Clause `WHERE` d'égalités (`IS NULL` pour une valeur nulle).
-fn where_clause(filter: &BTreeMap<String, SqlValue>, params: &mut Vec<Value>) -> String {
+pub(crate) fn where_clause(filter: &BTreeMap<String, SqlValue>, params: &mut Vec<Value>) -> String {
     let parts: Vec<String> = filter
         .iter()
         .map(|(column, value)| {

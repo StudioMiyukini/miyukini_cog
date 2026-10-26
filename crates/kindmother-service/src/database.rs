@@ -60,7 +60,7 @@
 
 use rusqlite::types::Value;
 use rusqlite::{params_from_iter, Connection, OpenFlags, OptionalExtension, Statement};
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tokio::sync::{Mutex, RwLock};
@@ -71,11 +71,15 @@ use kindmother::intent::{
     TypedWriteIntent, MAX_INTENTS_PER_BATCH,
 };
 
-use crate::audit::{sha256_hex, AuditJournal, AuditKind, AuditRecord, OubliRejouable, MARQUE_REJEU};
+use crate::audit::{
+    sha256_hex, AuditJournal, AuditKind, AuditRecord, CreationsIntention, IdentiteOubli, OubliRejouable,
+    MARQUE_CREATIONS, MARQUE_REJEU,
+};
+use crate::identite::{self, ColonnesIdentite};
 use crate::errors::ServiceError;
 use crate::sauvegardes::{
     analyser_nom, date_effective, effacer_fichier_sur, empreinte_sauvegarde, fichiers_de,
-    ARejouer, RetentionSauvegardes, BACKUP_DIR, RESTORE_DIR,
+    lignes_du_detail, ARejouer, EntreeRejeu, RetentionSauvegardes, BACKUP_DIR, RESTORE_DIR,
 };
 use crate::sql_guard::{map_prepare_error, prepare_single, AuthorizerGuard, SqlPolicy};
 use crate::typed;
@@ -291,8 +295,17 @@ fn write_meta(conn: &Connection, key: &str, value: &str) -> Result<(), ServiceEr
     .map_err(|e| ServiceError::Database(format!("Cannot write metadata '{key}': {e}")))
 }
 
-/// Résultat de l'application d'un lot : (lignes, rowid) par intention, ou (indice, motif).
-type Applied = Result<Vec<(u64, Option<i64>)>, (usize, String)>;
+/// Application d'une intention : lignes, rowid, identités normalisées des lignes
+/// effacées (intention d'effacement) et des lignes créées (A-025).
+struct Applique {
+    rows: u64,
+    last_id: Option<i64>,
+    effacees: Option<Vec<String>>,
+    creees: BTreeSet<String>,
+}
+
+/// Résultat de l'application d'un lot, ou (indice, motif).
+type Applied = Result<Vec<Applique>, (usize, String)>;
 
 /// Lignes JSON d'une lecture.
 pub type Rows = Vec<HashMap<String, serde_json::Value>>;
@@ -945,14 +958,39 @@ impl EncryptedDatabase {
         };
         let mut conn = conn.lock().await;
 
-        // 1. Validation contre le schéma (aucune écriture).
+        // 1. Validation contre le schéma (aucune écriture). Un effacement exige une
+        //    identité normalisée de ses lignes (clé primaire ou unique déclarée, A-025).
         let mut statements: Vec<(String, Vec<Value>)> = Vec::with_capacity(intents.len());
+        let mut identites_cols: Vec<Option<ColonnesIdentite>> = vec![None; intents.len()];
         for (i, intent) in intents.iter().enumerate() {
             if reasons[i].is_some() {
                 continue;
             }
             match typed::build_write(&conn, intent) {
                 Ok(stmt) => {
+                    let utile = intent.erasure
+                        || matches!(
+                            intent.operation,
+                            kindmother::IntentOperation::Insert | kindmother::IntentOperation::Upsert
+                        );
+                    if utile {
+                        match identite::colonnes_identite(&conn, &intent.table) {
+                            Ok(Some(c)) => identites_cols[i] = Some(c),
+                            Ok(None) if intent.erasure => {
+                                reasons[i] = Some(format!(
+                                    "erasure refused on {}: no declared primary key nor NOT NULL unique key \
+                                     (A-025: erased rows need a normalized identity to be replayed on restore)",
+                                    intent.table
+                                ));
+                                continue;
+                            }
+                            Ok(None) => {}
+                            Err(e) => {
+                                reasons[i] = Some(e);
+                                continue;
+                            }
+                        }
+                    }
                     // Défense en profondeur : préparation sous l'autorisateur.
                     let _guard = AuthorizerGuard::install(&conn, SqlPolicy::DATA_WRITE);
                     match conn.prepare(&stmt.0) {
@@ -990,12 +1028,63 @@ impl EncryptedDatabase {
                 .map_err(|e| (0, format!("Cannot begin transaction: {e}")))?;
             let mut out = Vec::with_capacity(statements.len());
             for (i, (sql, params)) in statements.iter().enumerate() {
-                let _guard = AuthorizerGuard::install(&tx, SqlPolicy::DATA_WRITE);
-                let rows = tx
-                    .prepare(sql)
-                    .and_then(|mut s| s.execute(params_from_iter(params.iter())))
-                    .map_err(|e| (i, e.to_string()))?;
-                out.push((rows as u64, Some(tx.last_insert_rowid())));
+                let intent = &intents[i];
+                let cols = identites_cols[i].as_ref();
+                // Lignes désignées par la clé de l'intention, identifiées par la base.
+                let par_cle = |c: &ColonnesIdentite| {
+                    let mut p = Vec::new();
+                    let filtre = typed::where_clause(&intent.key, &mut p);
+                    identite::identites(&tx, &intent.table, &c.colonnes, &filtre, &p).map_err(|e| (i, e))
+                };
+                let upsert = intent.operation == kindmother::IntentOperation::Upsert;
+                let avant = match cols {
+                    Some(c) if intent.erasure || upsert => Some(par_cle(c)?),
+                    _ => None,
+                };
+                let rows = {
+                    let _guard = AuthorizerGuard::install(&tx, SqlPolicy::DATA_WRITE);
+                    tx.prepare(sql)
+                        .and_then(|mut s| s.execute(params_from_iter(params.iter())))
+                        .map_err(|e| (i, e.to_string()))? as u64
+                };
+                let rowid = tx.last_insert_rowid();
+                let effacees = if intent.erasure {
+                    let avant = avant.as_deref().unwrap_or_default();
+                    if avant.iter().any(|l| l.contient_null) {
+                        return Err((i, "erasure refused: an erased row has a NULL key column \
+                                        (identity not determinable, A-025)".to_string()));
+                    }
+                    let ids: BTreeSet<String> = avant.iter().map(|l| l.identite.clone()).collect();
+                    let exacte = ids.len() == avant.len()
+                        && (upsert || ids.len() as u64 == rows);
+                    if !exacte {
+                        return Err((i, format!(
+                            "erasure refused: {rows} row(s) affected, {} identified (A-025)",
+                            ids.len()
+                        )));
+                    }
+                    Some(ids.into_iter().collect())
+                } else {
+                    None
+                };
+                let creees: BTreeSet<String> = match (intent.operation, cols) {
+                    (kindmother::IntentOperation::Insert, Some(c)) if rows == 1 => {
+                        identite::identite_inseree(&tx, &intent.table, c, &intent.values, rowid)
+                            .into_iter()
+                            .collect()
+                    }
+                    (kindmother::IntentOperation::Upsert, Some(c)) => {
+                        let avant: BTreeSet<&str> =
+                            avant.iter().flatten().map(|l| l.identite.as_str()).collect();
+                        par_cle(c)?
+                            .into_iter()
+                            .filter(|l| !l.contient_null && !avant.contains(l.identite.as_str()))
+                            .map(|l| l.identite)
+                            .collect()
+                    }
+                    _ => BTreeSet::new(),
+                };
+                out.push(Applique { rows, last_id: Some(rowid), effacees, creees });
             }
             tx.commit().map_err(|e| (0, format!("Cannot commit: {e}")))?;
             Ok(out)
@@ -1005,8 +1094,8 @@ impl EncryptedDatabase {
         // contrôle TRUNCATE (pages remises à zéro recopiées, `-wal` vidé). Les autres lots
         // n'en paient pas le coût.
         let erased = applied.as_ref().is_ok_and(|results| {
-            intents.iter().zip(results).any(|(i, (rows, _))| {
-                i.erasure || (i.operation == kindmother::IntentOperation::Delete && *rows > 0)
+            intents.iter().zip(results).any(|(i, a)| {
+                i.erasure || (i.operation == kindmother::IntentOperation::Delete && a.rows > 0)
             })
         });
         let wal_clean = !erased || truncate_wal_after_erasure(&conn, database);
@@ -1016,12 +1105,32 @@ impl EncryptedDatabase {
         let mut outcomes = Vec::with_capacity(intents.len());
         let mut records = Vec::with_capacity(intents.len());
         let mut erasures: Vec<(AuditRecord, OubliRejouable)> = Vec::new();
+        let mut creations: Vec<(usize, CreationsIntention)> = Vec::new();
+        let mut marques_creation: Vec<Option<String>> = vec![None; intents.len()];
         for (i, (intent, mut lc)) in intents.iter().zip(lifecycles).enumerate() {
             let (state, rows, last_id, reason) = match &applied {
                 Ok(results) => {
+                    let a = &results[i];
+                    if !a.creees.is_empty() {
+                        let c = CreationsIntention {
+                            database: database.to_string(),
+                            table: intent.table.to_ascii_lowercase(),
+                            identites: a.creees.clone(),
+                        };
+                        marques_creation[i] = Some(format!("; {MARQUE_CREATIONS}{}", c.empreinte()));
+                        creations.push((i, c));
+                    }
                     let reason = if intent.erasure {
-                        let oubli = OubliRejouable::depuis_intention(intent, database);
-                        match erasure_record(intent, operator_id, database, results[i].0, wal_clean, &oubli) {
+                        let mut oubli = OubliRejouable::depuis_intention(intent, database);
+                        if let (Some(ids), Some(c)) = (&a.effacees, &identites_cols[i]) {
+                            oubli = oubli.avec_identite(IdentiteOubli {
+                                colonnes: c.colonnes.clone(),
+                                types: c.types.clone(),
+                                lignes: ids.len() as u64,
+                                identites: ids.clone(),
+                            });
+                        }
+                        match erasure_record(intent, operator_id, database, a.rows, wal_clean, &oubli) {
                             Ok(rec) => erasures.push((rec, oubli)),
                             Err(e) => error!("Cannot build erasure record on '{database}': {e}"),
                         }
@@ -1029,7 +1138,7 @@ impl EncryptedDatabase {
                     } else {
                         None
                     };
-                    (IntentState::Appliquee, results[i].0, results[i].1, reason)
+                    (IntentState::Appliquee, a.rows, a.last_id, reason)
                 }
                 Err((failed, msg)) => {
                     let reason = if *failed == i {
@@ -1042,8 +1151,9 @@ impl EncryptedDatabase {
             };
             let _ = lc.transition(state);
             let note = if wal_clean { "" } else { WAL_RESIDUE_NOTE };
+            let creees = marques_creation[i].as_deref().unwrap_or_default();
             let detail = match (state, &reason) {
-                (IntentState::Appliquee, _) | (_, None) => format!("{rows} rows{note}"),
+                (IntentState::Appliquee, _) | (_, None) => format!("{rows} rows{note}{creees}"),
                 (_, Some(reason)) => reason.clone(),
             };
             records.push(intent_record(intent, operator_id, database, state, detail));
@@ -1062,7 +1172,7 @@ impl EncryptedDatabase {
             records.push(rec);
             oublis.push((base + i, oubli));
         }
-        let archived = match self.journal.append_all_avec_oublis(&records, false, &oublis) {
+        let archived = match self.journal.append_all_avec_registres(&records, false, &oublis, &creations) {
             Ok(()) => true,
             Err(e) => {
                 error!("AUDIT FAILURE after typed write on '{database}' (outcome not archived): {e}");
@@ -1685,7 +1795,7 @@ impl EncryptedDatabase {
             }
         };
         effacer_staging();
-        let prep = (|| -> Result<Vec<(i64, u64)>, ServiceError> {
+        let prep = (|| -> Result<Vec<(i64, crate::sauvegardes::BilanRejeu)>, ServiceError> {
             copier_prive(&chemin, &staging)?;
             let wal = wal_file(&chemin);
             if file_len(&wal) > 0 {
@@ -1709,22 +1819,71 @@ impl EncryptedDatabase {
             let tx = sc
                 .transaction()
                 .map_err(|e| ServiceError::Database(format!("Cannot begin replay: {e}")))?;
+            // Preuve qu'une ligne oubliée absente de la copie a été créée après elle (A-025) :
+            // création inscrite au registre des créations, couverte par la chaîne
+            // (`creations=` dans le détail de l'entrée terminale de l'intention), à une
+            // entrée postérieure à la sauvegarde **inscrite** et antérieure à l'oubli.
+            let preuve = |table: &str, identite: &str, avant: i64| -> Result<bool, String> {
+                if inscrite.is_none() {
+                    return Ok(false);
+                }
+                let seqs = self
+                    .journal
+                    .entrees_de_creation(database, table, identite)
+                    .map_err(|e| e.to_string())?;
+                for seq in seqs.into_iter().filter(|s| *s > depuis && *s < avant) {
+                    let entree = entries
+                        .binary_search_by_key(&seq, |e| e.seq)
+                        .ok()
+                        .and_then(|i| entries.get(i))
+                        .ok_or_else(|| format!("creation registry entry #{seq} has no journal entry"))?;
+                    let attendue = entree
+                        .record
+                        .detail
+                        .split("; ")
+                        .find_map(|p| p.strip_prefix(MARQUE_CREATIONS))
+                        .ok_or_else(|| format!("creation registry entry #{seq} not covered by the journal"))?;
+                    let c = self
+                        .journal
+                        .creations(seq)
+                        .map_err(|e| e.to_string())?
+                        .ok_or_else(|| format!("creation registry entry #{seq} missing"))?;
+                    let conforme = entree.record.kind == AuditKind::Intent
+                        && entree.record.verdict == IntentState::Appliquee.as_str()
+                        && entree.record.database == database
+                        && entree.record.table.as_deref().is_some_and(|t| t.eq_ignore_ascii_case(table))
+                        && c.database == database
+                        && c.table.eq_ignore_ascii_case(table)
+                        && c.empreinte() == attendue;
+                    if !conforme {
+                        return Err(format!("creation registry entry #{seq} altered"));
+                    }
+                    if c.identites.contains(identite) {
+                        return Ok(true);
+                    }
+                }
+                Ok(false)
+            };
             let mut rejoues = Vec::with_capacity(a_rejouer.len());
             for (e, oubli) in &a_rejouer {
-                let cible = match oubli {
-                    Some(o) => ARejouer::Registre(o),
-                    None => ARejouer::Ancien {
-                        table: e.record.table.as_deref().unwrap_or_default(),
-                        params_hash: &e.record.params_hash,
+                let cible = EntreeRejeu {
+                    oubli: match oubli {
+                        Some(o) => ARejouer::Registre(o),
+                        None => ARejouer::Ancien {
+                            table: e.record.table.as_deref().unwrap_or_default(),
+                            params_hash: &e.record.params_hash,
+                        },
                     },
+                    seq: e.seq,
+                    lignes_journal: lignes_du_detail(&e.record.detail),
                 };
-                let n = crate::sauvegardes::rejouer(&tx, &cible).map_err(|m| {
+                let bilan = crate::sauvegardes::rejouer(&tx, &cible, &preuve).map_err(|m| {
                     ServiceError::PermissionDenied(format!(
                         "restoration refused: erasure #{} cannot be replayed ({m})",
                         e.seq
                     ))
                 })?;
-                rejoues.push((e.seq, n));
+                rejoues.push((e.seq, bilan));
             }
             tx.commit()
                 .map_err(|e| ServiceError::Database(format!("Cannot commit replay: {e}")))?;
@@ -1747,13 +1906,14 @@ impl EncryptedDatabase {
                 return Err(ouverte(e));
             }
         };
-        let lignes: u64 = rejoues.iter().map(|(_, n)| n).sum();
+        let lignes: u64 = rejoues.iter().map(|(_, b)| b.lignes).sum();
+        let posterieures: u64 = rejoues.iter().map(|(_, b)| b.posterieures).sum();
 
         // 6. Journal avant toute mise à disposition (fail-closed).
         let mut records: Vec<AuditRecord> = a_rejouer
             .iter()
             .zip(&rejoues)
-            .map(|((e, _), (seq, n))| AuditRecord {
+            .map(|((e, _), (seq, b))| AuditRecord {
                 kind: AuditKind::Effacement,
                 intent_id: None,
                 operator_id: operator_id.to_string(),
@@ -1763,7 +1923,10 @@ impl EncryptedDatabase {
                 verdict: "effacee".to_string(),
                 decision_digest: None,
                 params_hash: e.record.params_hash.clone(),
-                detail: format!("restauration de {fichier}; entree #{seq}; {n} rows"),
+                detail: format!(
+                    "restauration de {fichier}; entree #{seq}; {} rows; retrouvees={}; posterieures={}; filet={}",
+                    b.lignes, b.retrouvees, b.posterieures, b.filet
+                ),
             })
             .collect();
         let nom_avant = avant
@@ -1848,6 +2011,7 @@ impl EncryptedDatabase {
             depuis_entree: depuis,
             oublis_rejoues: rejoues.len(),
             lignes_effacees: lignes,
+            lignes_posterieures: posterieures,
             sauvegarde_avant_restauration: nom_avant,
         })
     }
@@ -1910,6 +2074,9 @@ pub struct RapportRestauration {
     pub oublis_rejoues: usize,
     /// Lignes effacées ou caviardées par le rejeu.
     pub lignes_effacees: u64,
+    /// Lignes oubliées absentes de la sauvegarde, prouvées créées après elle (registre
+    /// des créations, A-025).
+    pub lignes_posterieures: u64,
     /// Copie de l'état remplacé (dans `_backups/`, soumise à la même conservation).
     pub sauvegarde_avant_restauration: String,
 }

@@ -33,6 +33,16 @@
 //!   `erasure`), les valeurs de remplacement. Le détail de l'entrée chaînée porte
 //!   `rejeu=<SHA-256 de la ligne>` : la chaîne couvre le registre. Ajout seul
 //!   (déclencheurs). Sert à réappliquer les oublis à toute restauration de sauvegarde.
+//!   Depuis A-025 (rejeu fail-closed), chaque ligne porte aussi l'**identité normalisée
+//!   par la base** des lignes réellement effacées ou caviardées (`crate::identite` :
+//!   colonnes de clé primaire ou unique, types déclarés, empreintes typées triées) et
+//!   leur nombre (`lignes`) ; l'empreinte de la ligne passe alors au domaine `v2`. Les
+//!   lignes écrites avant A-025 (colonnes nulles) gardent l'empreinte `v1`.
+//! - **Registre des créations** (A-025, table `creations`) : pour chaque intention typée
+//!   `Insert`/`Upsert` appliquée qui a créé des lignes, les empreintes d'identité de ces
+//!   lignes, au numéro (`seq`) de l'entrée terminale de l'intention, dont le détail porte
+//!   `creations=<empreinte de l'ensemble>` (la chaîne couvre le registre). Sert à
+//!   **prouver** qu'une ligne oubliée absente d'une sauvegarde a été créée après elle.
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -183,6 +193,46 @@ pub fn empreinte_cle(cle: &BTreeMap<String, SqlValue>) -> String {
     sha256_hex(&buf)
 }
 
+/// Domaine de l'empreinte d'une ligne du registre des oublis portant l'identité
+/// normalisée (A-025).
+const DOMAINE_REGISTRE_OUBLI_V2: &[u8] = b"kindmother/oubli/registre/v2";
+
+/// Préfixe, dans le détail de l'entrée terminale d'une intention, de l'empreinte de
+/// l'ensemble des identités qu'elle a créées (registre des créations, A-025).
+pub const MARQUE_CREATIONS: &str = "creations=";
+
+/// Identité normalisée des lignes effacées ou caviardées par un oubli (A-025), relue
+/// dans la base avant l'effacement (voir `crate::identite`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IdentiteOubli {
+    /// Colonnes d'identité (clé primaire, à défaut clé unique NOT NULL), ordre de la clé.
+    pub colonnes: Vec<String>,
+    /// Types déclarés de ces colonnes au moment de l'oubli (normalisés).
+    pub types: Vec<String>,
+    /// Empreintes d'identité des lignes visées, triées, sans doublon.
+    pub identites: Vec<String>,
+    /// Nombre de lignes effacées ou caviardées (égal au nombre d'identités).
+    pub lignes: u64,
+}
+
+/// Créations d'une intention (registre des créations, A-025).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CreationsIntention {
+    /// Base.
+    pub database: String,
+    /// Table (minuscules).
+    pub table: String,
+    /// Empreintes d'identité des lignes créées.
+    pub identites: std::collections::BTreeSet<String>,
+}
+
+impl CreationsIntention {
+    /// Empreinte de l'ensemble (portée par `creations=` dans le détail chaîné).
+    pub fn empreinte(&self) -> String {
+        crate::identite::empreinte_creations(&self.database, &self.table, &self.identites)
+    }
+}
+
 /// Oubli rejouable (A-022 §5) : de quoi réappliquer un oubli à une copie restaurée,
 /// sans la valeur oubliée.
 #[derive(Debug, Clone, PartialEq)]
@@ -199,6 +249,9 @@ pub struct OubliRejouable {
     pub cle_empreinte: String,
     /// Valeurs de remplacement (caviardage) ; vide pour un oubli par suppression.
     pub valeurs: BTreeMap<String, SqlValue>,
+    /// Identité normalisée des lignes visées (A-025) ; `None` pour une ligne du registre
+    /// écrite avant A-025.
+    pub identite: Option<IdentiteOubli>,
 }
 
 impl OubliRejouable {
@@ -215,7 +268,14 @@ impl OubliRejouable {
             } else {
                 intent.values.clone()
             },
+            identite: None,
         }
+    }
+
+    /// Le même, avec l'identité normalisée des lignes visées.
+    pub fn avec_identite(mut self, identite: IdentiteOubli) -> Self {
+        self.identite = Some(identite);
+        self
     }
 
     fn valeurs_json(&self) -> Result<String, ServiceError> {
@@ -228,10 +288,28 @@ impl OubliRejouable {
             .map_err(|e| ServiceError::Internal(format!("Cannot encode erasure key columns: {e}")))
     }
 
-    /// Empreinte de la ligne du registre (portée par le détail de l'entrée chaînée).
+    fn identite_json(&self) -> Result<Option<(String, String, String, i64)>, ServiceError> {
+        let Some(id) = &self.identite else {
+            return Ok(None);
+        };
+        let enc = |v: &Vec<String>| {
+            serde_json::to_string(v)
+                .map_err(|e| ServiceError::Internal(format!("Cannot encode erasure identity: {e}")))
+        };
+        let lignes = i64::try_from(id.lignes)
+            .map_err(|_| ServiceError::Internal("erasure row count out of range".to_string()))?;
+        Ok(Some((enc(&id.colonnes)?, enc(&id.types)?, enc(&id.identites)?, lignes)))
+    }
+
+    /// Empreinte de la ligne du registre (portée par le détail de l'entrée chaînée) :
+    /// domaine `v1` sans identité normalisée, `v2` avec.
     pub fn empreinte(&self) -> Result<String, ServiceError> {
         let mut buf = Vec::with_capacity(256);
-        push_len_prefixed(&mut buf, DOMAINE_REGISTRE_OUBLI);
+        let identite = self.identite_json()?;
+        push_len_prefixed(
+            &mut buf,
+            if identite.is_some() { DOMAINE_REGISTRE_OUBLI_V2 } else { DOMAINE_REGISTRE_OUBLI },
+        );
         for champ in [
             self.database.as_str(),
             self.table.as_str(),
@@ -241,6 +319,12 @@ impl OubliRejouable {
             self.valeurs_json()?.as_str(),
         ] {
             push_len_prefixed(&mut buf, champ.as_bytes());
+        }
+        if let Some((colonnes, types, identites, lignes)) = identite {
+            for champ in [colonnes.as_str(), types.as_str(), identites.as_str()] {
+                push_len_prefixed(&mut buf, champ.as_bytes());
+            }
+            buf.extend_from_slice(&lignes.to_be_bytes());
         }
         Ok(sha256_hex(&buf))
     }
@@ -351,6 +435,18 @@ impl AuditJournal {
         fresh_intents: bool,
         oublis: &[(usize, OubliRejouable)],
     ) -> Result<(), ServiceError> {
+        self.append_all_avec_registres(records, fresh_intents, oublis, &[])
+    }
+
+    /// Comme [`Self::append_all_avec_oublis`], et inscrit au registre des créations, dans
+    /// la même transaction, chaque `(indice de l'entrée dans records, créations)`.
+    pub fn append_all_avec_registres(
+        &self,
+        records: &[AuditRecord],
+        fresh_intents: bool,
+        oublis: &[(usize, OubliRejouable)],
+        creations: &[(usize, CreationsIntention)],
+    ) -> Result<(), ServiceError> {
         let mut inner = self.lock()?;
         if fresh_intents {
             let mut seen = std::collections::HashSet::new();
@@ -375,6 +471,14 @@ impl AuditJournal {
             if result.is_ok() {
                 for (_, oubli) in oublis.iter().filter(|(j, _)| *j == i) {
                     result = insert_oubli(&inner.conn, inner.head_seq, oubli);
+                    if result.is_err() {
+                        break;
+                    }
+                }
+            }
+            if result.is_ok() {
+                for (_, c) in creations.iter().filter(|(j, _)| *j == i) {
+                    result = insert_creations(&inner.conn, inner.head_seq, c);
                     if result.is_err() {
                         break;
                     }
@@ -482,13 +586,76 @@ impl AuditJournal {
         let inner = self.lock()?;
         read_oubli(&inner.conn, seq)
     }
+
+    /// Numéros des entrées dont le registre des créations contient `identite` pour la
+    /// table `table` de `database`.
+    pub fn entrees_de_creation(&self, database: &str, table: &str, identite: &str) -> Result<Vec<i64>, ServiceError> {
+        let inner = self.lock()?;
+        let mut stmt = inner
+            .conn
+            .prepare(
+                "SELECT seq FROM creations WHERE database_name = ?1 AND table_name = ?2 AND identite = ?3
+                  ORDER BY seq",
+            )
+            .map_err(|e| ServiceError::Internal(format!("Creation registry read failed: {e}")))?;
+        let lignes = stmt
+            .query_map(params![database, table.to_ascii_lowercase(), identite], |r| r.get::<_, i64>(0))
+            .map_err(|e| ServiceError::Internal(format!("Creation registry read failed: {e}")))?;
+        lignes
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| ServiceError::Internal(format!("Creation registry read failed: {e}")))
+    }
+
+    /// Créations inscrites à l'entrée `seq` (`None` si aucune ; plusieurs bases ou tables
+    /// pour un même numéro ⇒ registre corrompu).
+    pub fn creations(&self, seq: i64) -> Result<Option<CreationsIntention>, ServiceError> {
+        let inner = self.lock()?;
+        let mut stmt = inner
+            .conn
+            .prepare("SELECT database_name, table_name, identite FROM creations WHERE seq = ?1")
+            .map_err(|e| ServiceError::Internal(format!("Creation registry read failed: {e}")))?;
+        let lignes = stmt
+            .query_map([seq], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?, r.get::<_, String>(2)?)))
+            .map_err(|e| ServiceError::Internal(format!("Creation registry read failed: {e}")))?
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| ServiceError::Internal(format!("Creation registry read failed: {e}")))?;
+        let mut out: Option<CreationsIntention> = None;
+        for (database, table, identite) in lignes {
+            let c = out.get_or_insert_with(|| CreationsIntention {
+                database: database.clone(),
+                table: table.clone(),
+                identites: std::collections::BTreeSet::new(),
+            });
+            if c.database != database || c.table != table {
+                return Err(ServiceError::Internal("creation registry corrupt: mixed entry".to_string()));
+            }
+            c.identites.insert(identite);
+        }
+        Ok(out)
+    }
+}
+
+fn insert_creations(conn: &Connection, seq: i64, c: &CreationsIntention) -> Result<(), ServiceError> {
+    for identite in &c.identites {
+        conn.execute(
+            "INSERT INTO creations (seq, database_name, table_name, identite) VALUES (?1, ?2, ?3, ?4)",
+            params![seq, c.database, c.table.to_ascii_lowercase(), identite],
+        )
+        .map_err(|e| ServiceError::Internal(format!("Creation registry append failed: {e}")))?;
+    }
+    Ok(())
 }
 
 fn insert_oubli(conn: &Connection, seq: i64, oubli: &OubliRejouable) -> Result<(), ServiceError> {
+    let identite = oubli.identite_json()?;
+    let (ic, it, ii, il) = match identite {
+        Some((c, t, i, l)) => (Some(c), Some(t), Some(i), Some(l)),
+        None => (None, None, None, None),
+    };
     conn.execute(
         r"INSERT INTO oublis (seq, database_name, table_name, operation, cle_colonnes,
-              cle_empreinte, valeurs)
-          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+              cle_empreinte, valeurs, identite_colonnes, identite_types, identites, lignes)
+          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
         params![
             seq,
             oubli.database,
@@ -497,6 +664,10 @@ fn insert_oubli(conn: &Connection, seq: i64, oubli: &OubliRejouable) -> Result<(
             oubli.colonnes_json()?,
             oubli.cle_empreinte,
             oubli.valeurs_json()?,
+            ic,
+            it,
+            ii,
+            il,
         ],
     )
     .map(|_| ())
@@ -507,24 +678,47 @@ fn read_oubli(conn: &Connection, seq: i64) -> Result<Option<OubliRejouable>, Ser
     let corrupt = |what: &str| ServiceError::Internal(format!("erasure registry corrupt: {what}"));
     let row = conn
         .query_row(
-            r"SELECT database_name, table_name, operation, cle_colonnes, cle_empreinte, valeurs
+            r"SELECT database_name, table_name, operation, cle_colonnes, cle_empreinte, valeurs,
+                     identite_colonnes, identite_types, identites, lignes
               FROM oublis WHERE seq = ?1",
             [seq],
             |r| {
                 Ok((
-                    r.get::<_, String>(0)?,
-                    r.get::<_, String>(1)?,
-                    r.get::<_, String>(2)?,
-                    r.get::<_, String>(3)?,
-                    r.get::<_, String>(4)?,
-                    r.get::<_, String>(5)?,
+                    (
+                        r.get::<_, String>(0)?,
+                        r.get::<_, String>(1)?,
+                        r.get::<_, String>(2)?,
+                        r.get::<_, String>(3)?,
+                        r.get::<_, String>(4)?,
+                        r.get::<_, String>(5)?,
+                    ),
+                    (
+                        r.get::<_, Option<String>>(6)?,
+                        r.get::<_, Option<String>>(7)?,
+                        r.get::<_, Option<String>>(8)?,
+                        r.get::<_, Option<i64>>(9)?,
+                    ),
                 ))
             },
         )
         .optional()
         .map_err(|e| ServiceError::Internal(format!("Erasure registry read failed: {e}")))?;
-    let Some((database, table, operation, colonnes, cle_empreinte, valeurs)) = row else {
+    let Some(((database, table, operation, colonnes, cle_empreinte, valeurs), identite)) = row else {
         return Ok(None);
+    };
+    let identite = match identite {
+        (None, None, None, None) => None,
+        (Some(c), Some(t), Some(i), Some(l)) => {
+            let colonnes: Vec<String> = serde_json::from_str(&c).map_err(|_| corrupt("identity columns"))?;
+            let types: Vec<String> = serde_json::from_str(&t).map_err(|_| corrupt("identity types"))?;
+            let identites: Vec<String> = serde_json::from_str(&i).map_err(|_| corrupt("identities"))?;
+            let lignes = u64::try_from(l).map_err(|_| corrupt("row count"))?;
+            if colonnes.is_empty() || colonnes.len() != types.len() || identites.len() as u64 != lignes {
+                return Err(corrupt("identity"));
+            }
+            Some(IdentiteOubli { colonnes, types, identites, lignes })
+        }
+        _ => return Err(corrupt("partial identity")),
     };
     Ok(Some(OubliRejouable {
         database,
@@ -533,6 +727,7 @@ fn read_oubli(conn: &Connection, seq: i64) -> Result<Option<OubliRejouable>, Ser
         cle_colonnes: serde_json::from_str(&colonnes).map_err(|_| corrupt("key columns"))?,
         cle_empreinte,
         valeurs: serde_json::from_str(&valeurs).map_err(|_| corrupt("values"))?,
+        identite,
     }))
 }
 
@@ -607,9 +802,40 @@ fn open_journal(path: &Path, pragma_key: Option<&str>) -> Result<Connection, Ser
         CREATE TRIGGER IF NOT EXISTS oublis_append_only_delete
             BEFORE DELETE ON oublis
             BEGIN SELECT RAISE(ABORT, 'erasure registry is append-only'); END;
+        CREATE TABLE IF NOT EXISTS creations (
+            seq INTEGER NOT NULL,
+            database_name TEXT NOT NULL,
+            table_name TEXT NOT NULL,
+            identite TEXT NOT NULL,
+            PRIMARY KEY (seq, identite)
+        );
+        CREATE INDEX IF NOT EXISTS creations_identite ON creations (database_name, table_name, identite);
+        CREATE TRIGGER IF NOT EXISTS creations_append_only_update
+            BEFORE UPDATE ON creations
+            BEGIN SELECT RAISE(ABORT, 'creation registry is append-only'); END;
+        CREATE TRIGGER IF NOT EXISTS creations_append_only_delete
+            BEFORE DELETE ON creations
+            BEGIN SELECT RAISE(ABORT, 'creation registry is append-only'); END;
         ",
     )
     .map_err(|e| ServiceError::Internal(format!("Cannot initialise audit journal: {e}")))?;
+    // Registre des oublis antérieur à A-025 : colonnes d'identité ajoutées (nulles pour
+    // les lignes existantes, qui gardent leur empreinte `v1`).
+    let presentes: Vec<String> = conn
+        .prepare("SELECT name FROM pragma_table_info('oublis')")
+        .and_then(|mut s| s.query_map([], |r| r.get::<_, String>(0))?.collect::<Result<Vec<_>, _>>())
+        .map_err(|e| ServiceError::Internal(format!("Cannot inspect erasure registry: {e}")))?;
+    for (colonne, type_sql) in [
+        ("identite_colonnes", "TEXT"),
+        ("identite_types", "TEXT"),
+        ("identites", "TEXT"),
+        ("lignes", "INTEGER"),
+    ] {
+        if !presentes.iter().any(|p| p == colonne) {
+            conn.execute_batch(&format!("ALTER TABLE oublis ADD COLUMN {colonne} {type_sql}"))
+                .map_err(|e| ServiceError::Internal(format!("Cannot upgrade erasure registry: {e}")))?;
+        }
+    }
     Ok(conn)
 }
 

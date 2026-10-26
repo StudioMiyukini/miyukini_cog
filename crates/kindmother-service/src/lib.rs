@@ -70,6 +70,7 @@ pub mod audit;
 mod credentials;
 mod database;
 mod errors;
+mod identite;
 pub mod etiquettes;
 mod protocol;
 pub mod sauvegardes;

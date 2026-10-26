@@ -40,8 +40,21 @@
 //! copie remplace la base. Journal illisible ou rompu, oubli non rejouable, empreinte de
 //! la copie différente de celle inscrite, échec d'audit ⇒ restauration refusée, base
 //! courante inchangée (fail-closed).
+//!
+//! **Rejeu fail-closed (A-025)** : l'oubli enregistre l'identité **normalisée par la
+//! base** des lignes réellement visées (`crate::identite` : clé primaire, à défaut clé
+//! unique NOT NULL déclarée — sinon l'oubli typé est refusé ; valeurs relues avant
+//! l'effacement avec leur classe de stockage) et leur nombre. Au rejeu, la même identité
+//! est calculée sur la copie : chaque identité retrouvée est effacée (une ligne
+//! exactement) ; une identité **absente** n'est acceptée que si sa création est prouvée
+//! postérieure à la sauvegarde (registre des créations couvert par la chaîne, entrée
+//! entre la sauvegarde **inscrite** et l'oubli) **et** que les colonnes d'identité de la
+//! copie ont les types déclarés enregistrés ; sinon refus. Une entrée sans identité
+//! normalisée (registre antérieur, entrée `Ancien`) n'est acceptée que si son rejeu est
+//! prouvé exact (voir [`rejouer`]). « 0 correspondance » n'est jamais un succès par
+//! défaut.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -52,7 +65,8 @@ use rusqlite::types::Value;
 use rusqlite::Connection;
 use sha2::{Digest, Sha256};
 
-use crate::audit::{empreinte_cle, OubliRejouable};
+use crate::audit::{empreinte_cle, IdentiteOubli, OubliRejouable};
+use crate::identite;
 use crate::errors::ServiceError;
 use crate::typed::{table_schema, ObjectKind};
 
@@ -313,7 +327,7 @@ pub(crate) fn date_effective(nom: Option<&NomSauvegarde>, modifie: Option<DateTi
 
 /// Oubli à rejouer.
 pub(crate) enum ARejouer<'a> {
-    /// Ligne du registre des oublis (entrées écrites par cette version).
+    /// Ligne du registre des oublis (avec identité normalisée depuis A-025, sans avant).
     Registre(&'a OubliRejouable),
     /// Entrée `effacement` antérieure au registre : seule l'empreinte des paramètres est
     /// connue (`Delete` seulement) ; colonnes de clé recherchées parmi les colonnes et
@@ -324,6 +338,39 @@ pub(crate) enum ARejouer<'a> {
         /// Empreinte SHA-256 des paramètres canoniques de l'intention.
         params_hash: &'a str,
     },
+}
+
+/// Entrée `effacement` à rejouer sur la copie.
+pub(crate) struct EntreeRejeu<'a> {
+    /// Oubli.
+    pub oubli: ARejouer<'a>,
+    /// Numéro de l'entrée `effacement` au journal.
+    pub seq: i64,
+    /// Lignes touchées lors de l'oubli, lues dans le détail chaîné (`<n> rows`).
+    pub lignes_journal: Option<u64>,
+}
+
+/// Preuve qu'une identité absente de la copie a été créée **après** la sauvegarde et
+/// avant l'oubli `avant_seq` : `(table, identité, avant_seq) -> prouvé ?`.
+pub(crate) type PreuveCreation<'a> = &'a dyn Fn(&str, &str, i64) -> Result<bool, String>;
+
+/// Bilan du rejeu d'un oubli.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct BilanRejeu {
+    /// Lignes effacées ou caviardées dans la copie (identités retrouvées + filet).
+    pub lignes: u64,
+    /// Identités enregistrées retrouvées dans la copie (ou lignes retrouvées par
+    /// l'empreinte de clé, pour une entrée sans identité).
+    pub retrouvees: u64,
+    /// Identités enregistrées absentes de la copie, prouvées créées après elle.
+    pub posterieures: u64,
+    /// Lignes supplémentaires touchées par le filet de l'empreinte de clé.
+    pub filet: u64,
+}
+
+/// Nombre de lignes du détail d'une entrée `effacement` (`<n> rows; …`).
+pub(crate) fn lignes_du_detail(detail: &str) -> Option<u64> {
+    detail.split("; ").next()?.strip_suffix(" rows")?.parse().ok()
 }
 
 /// Nombre maximal de colonnes de clé pour lesquelles les variantes de type
@@ -341,7 +388,8 @@ fn vers_sql(v: &Value) -> SqlValue {
 }
 
 /// Valeurs qu'une intention a pu porter pour une valeur stockée (affinité de colonne :
-/// `'5'` comparé à une colonne entière vaut `5`, et inversement).
+/// `'5'` comparé à une colonne entière vaut `5`, et inversement). Heuristique : sert au
+/// filet et aux entrées sans identité normalisée, jamais de preuve à elle seule.
 fn variantes(v: &Value) -> Vec<SqlValue> {
     let mut out = vec![vers_sql(v)];
     match v {
@@ -448,70 +496,240 @@ fn appliquer(
         .map_err(|e| format!("replay on {table} failed: {e}"))
 }
 
-/// Rejoue un oubli sur `conn` (copie en cours de restauration). Retourne le nombre de
-/// lignes effacées ou caviardées. `Err` ⇒ oubli non rejouable : restauration refusée.
-pub(crate) fn rejouer(conn: &Connection, oubli: &ARejouer<'_>) -> Result<u64, String> {
-    let table = match oubli {
+/// Recherche par empreinte de clé (avec variantes de type) dans les ensembles de
+/// colonnes `ensembles` ; applique l'oubli aux lignes trouvées. Retourne `(lignes
+/// touchées, nombre d'ensembles ayant des correspondances)`.
+fn par_empreinte_de_cle(
+    conn: &Connection,
+    table: &str,
+    ensembles: &[Vec<String>],
+    correspond: &dyn Fn(&BTreeMap<String, SqlValue>) -> bool,
+    operation: IntentOperation,
+    remplacement: &BTreeMap<String, SqlValue>,
+) -> Result<(u64, usize), String> {
+    let mut total = 0;
+    let mut ensembles_touches = 0;
+    for ensemble in ensembles.iter().filter(|e| e.iter().all(|c| is_valid_identifier(c))) {
+        let mut touche = false;
+        for nuplet in nuplets(conn, table, ensemble)? {
+            if combinaisons(ensemble, &nuplet).iter().any(correspond) {
+                touche = true;
+                total += appliquer(conn, table, operation, ensemble, &nuplet, remplacement)?;
+            }
+        }
+        ensembles_touches += usize::from(touche);
+    }
+    Ok((total, ensembles_touches))
+}
+
+/// Rejoue un oubli sur `conn` (copie en cours de restauration), **fail-closed** (A-025).
+///
+/// - **Avec identité normalisée** : les identités des lignes de la copie sont calculées
+///   exactement comme à l'oubli (mêmes colonnes, même sérialisation typée) ; chaque
+///   identité enregistrée retrouvée est effacée (ou caviardée) — une ligne exactement ;
+///   chaque identité absente doit être **prouvée** créée après la sauvegarde
+///   (`preuve`, registre des créations) **et** les colonnes d'identité de la copie doivent
+///   avoir les types déclarés enregistrés (sinon une absence peut n'être qu'une
+///   différence de normalisation) ; sinon refus. Puis filet : lignes encore porteuses de
+///   la clé de l'intention (empreinte de clé, variantes de type) effacées aussi.
+/// - **Sans identité normalisée** (registre antérieur à A-025, entrée `Ancien`) : refus
+///   sauf rejeu **prouvé exact** : nombre de lignes du détail chaîné connu, correspondances
+///   dans un seul jeu de colonnes, et lignes touchées égales à ce nombre (ou nombre nul).
+///
+/// `Err` ⇒ oubli non rejouable : restauration refusée.
+pub(crate) fn rejouer(conn: &Connection, entree: &EntreeRejeu<'_>, preuve: PreuveCreation<'_>) -> Result<BilanRejeu, String> {
+    let table = match &entree.oubli {
         ARejouer::Registre(o) => o.table.as_str(),
         ARejouer::Ancien { table, .. } => table,
     };
     kindmother::intent::check_table_name(table).map_err(|e| format!("invalid table in journal: {e}"))?;
-    let Some(schema) = table_schema(conn, table).map_err(|e| e.to_string())? else {
-        // Table absente de la copie : aucune ligne à oublier.
-        return Ok(0);
-    };
-    if schema.kind != ObjectKind::Table {
+    let schema = table_schema(conn, table).map_err(|e| e.to_string())?;
+    if schema.as_ref().is_some_and(|s| s.kind != ObjectKind::Table) {
         return Err(format!("{table} is not a table in the restored copy"));
     }
-    match oubli {
+    match &entree.oubli {
         ARejouer::Registre(o) => {
             if o.operation == IntentOperation::Insert || o.cle_colonnes.is_empty() {
                 return Err(format!("erasure on {table}: invalid registry entry"));
             }
-            for colonne in o.cle_colonnes.iter().chain(o.valeurs.keys()) {
+            let colonnes_id = o.identite.as_ref().map(|i| i.colonnes.as_slice()).unwrap_or_default();
+            for colonne in o.cle_colonnes.iter().chain(o.valeurs.keys()).chain(colonnes_id) {
                 if !is_valid_identifier(colonne) {
                     return Err(format!("erasure on {table}: invalid column name in registry"));
                 }
-                if !schema.has_column(colonne) {
-                    return Err(format!(
-                        "erasure on {table} cannot be replayed: column {colonne} absent from the restored copy"
-                    ));
+            }
+            let remplacement_present = schema
+                .as_ref()
+                .is_none_or(|s| o.valeurs.keys().all(|c| s.has_column(c)));
+            if !remplacement_present {
+                return Err(format!("erasure on {table} cannot be replayed: redaction column absent from the restored copy"));
+            }
+            match &o.identite {
+                Some(id) => rejouer_identite(conn, table, schema.as_ref(), o, id, entree, preuve),
+                None => {
+                    let cle_presente = schema
+                        .as_ref()
+                        .is_some_and(|s| o.cle_colonnes.iter().all(|c| s.has_column(c)));
+                    let ensembles = if cle_presente { vec![o.cle_colonnes.clone()] } else { Vec::new() };
+                    let attendu = o.cle_empreinte.as_str();
+                    rejouer_sans_identite(
+                        conn,
+                        table,
+                        schema.is_some(),
+                        &ensembles,
+                        &|cle| empreinte_cle(cle) == attendu,
+                        o.operation,
+                        &o.valeurs,
+                        entree,
+                    )
                 }
             }
-            let mut total = 0;
-            for nuplet in nuplets(conn, table, &o.cle_colonnes)? {
-                let correspond = combinaisons(&o.cle_colonnes, &nuplet)
-                    .iter()
-                    .any(|cle| empreinte_cle(cle) == o.cle_empreinte);
-                if correspond {
-                    total += appliquer(conn, table, o.operation, &o.cle_colonnes, &nuplet, &o.valeurs)?;
-                }
-            }
-            Ok(total)
         }
         ARejouer::Ancien { params_hash, .. } => {
-            let mut colonnes = schema.columns.clone();
-            colonnes.sort();
-            let mut ensembles: Vec<Vec<String>> = colonnes.iter().map(|c| vec![c.clone()]).collect();
-            for (i, a) in colonnes.iter().enumerate() {
-                for b in &colonnes[i + 1..] {
-                    ensembles.push(vec![a.clone(), b.clone()]);
-                }
-            }
-            let mut total = 0;
-            for ensemble in ensembles.iter().filter(|e| e.iter().all(|c| is_valid_identifier(c))) {
-                for nuplet in nuplets(conn, table, ensemble)? {
-                    let correspond = combinaisons(ensemble, &nuplet)
-                        .iter()
-                        .any(|cle| params_hash_oubli(cle) == *params_hash);
-                    if correspond {
-                        total += appliquer(conn, table, IntentOperation::Delete, ensemble, &nuplet, &BTreeMap::new())?;
+            let mut ensembles: Vec<Vec<String>> = Vec::new();
+            if let Some(schema) = &schema {
+                let mut colonnes = schema.columns.clone();
+                colonnes.sort();
+                ensembles = colonnes.iter().map(|c| vec![c.clone()]).collect();
+                for (i, a) in colonnes.iter().enumerate() {
+                    for b in &colonnes[i + 1..] {
+                        ensembles.push(vec![a.clone(), b.clone()]);
                     }
                 }
             }
-            Ok(total)
+            rejouer_sans_identite(
+                conn,
+                table,
+                schema.is_some(),
+                &ensembles,
+                &|cle| params_hash_oubli(cle) == **params_hash,
+                IntentOperation::Delete,
+                &BTreeMap::new(),
+                entree,
+            )
         }
     }
+}
+
+fn rejouer_identite(
+    conn: &Connection,
+    table: &str,
+    schema: Option<&crate::typed::TableSchema>,
+    o: &OubliRejouable,
+    id: &IdentiteOubli,
+    entree: &EntreeRejeu<'_>,
+    preuve: PreuveCreation<'_>,
+) -> Result<BilanRejeu, String> {
+    if id.colonnes.is_empty() || id.colonnes.len() != id.types.len() || id.identites.len() as u64 != id.lignes {
+        return Err(format!("erasure on {table}: inconsistent identity in registry"));
+    }
+    // Le nombre de lignes du journal chaîné et celui du registre concordent (suppression
+    // et caviardage par `UPDATE` touchent exactement les lignes identifiées).
+    if matches!(o.operation, IntentOperation::Delete | IntentOperation::Update)
+        && entree.lignes_journal.is_some_and(|n| n != id.lignes)
+    {
+        return Err(format!("erasure on {table}: row count differs between journal and registry"));
+    }
+    let attendues: BTreeSet<&str> = id.identites.iter().map(String::as_str).collect();
+    let mut trouvees: BTreeMap<String, Vec<Value>> = BTreeMap::new();
+    // Les types déclarés de la copie sont-ils ceux de l'oubli ? (`true` si la table
+    // n'existe pas : aucune ligne ne peut y revenir sous une autre représentation.)
+    let memes_types = match schema {
+        None => true,
+        Some(s) if id.colonnes.iter().all(|c| s.has_column(c)) => {
+            for ligne in identite::identites(conn, table, &id.colonnes, "", &[])? {
+                if !attendues.contains(ligne.identite.as_str()) {
+                    continue;
+                }
+                let valeurs = ligne
+                    .valeurs
+                    .ok_or_else(|| format!("erasure on {table}: key value not representable (invalid UTF-8)"))?;
+                if trouvees.insert(ligne.identite, valeurs).is_some() {
+                    return Err(format!("erasure on {table}: identity matches several rows of the copy"));
+                }
+            }
+            let types = identite::types_declares(conn, table, &id.colonnes)?;
+            types.iter().zip(&id.types).all(|(t, attendu)| t.as_deref() == Some(attendu.as_str()))
+        }
+        Some(_) => false,
+    };
+    let mut bilan = BilanRejeu::default();
+    for identite in attendues.iter().filter(|i| !trouvees.contains_key(**i)) {
+        if !memes_types {
+            return Err(format!(
+                "erased row absent from the copy whose identity columns differ ({}): absence not provable",
+                id.colonnes.join(", ")
+            ));
+        }
+        if !preuve(table, identite, entree.seq)? {
+            return Err(format!(
+                "erased row absent from the copy without proof that it was created after the backup \
+                 ({} of {} rows found)",
+                trouvees.len(),
+                id.lignes
+            ));
+        }
+        bilan.posterieures += 1;
+    }
+    for valeurs in trouvees.values() {
+        let n = appliquer(conn, table, o.operation, &id.colonnes, valeurs, &o.valeurs)?;
+        if n != 1 && !(o.valeurs.is_empty() && o.operation != IntentOperation::Delete) {
+            return Err(format!("erasure on {table}: identity replay touched {n} rows instead of 1"));
+        }
+        bilan.retrouvees += 1;
+        bilan.lignes += n;
+    }
+    // Filet : lignes encore porteuses de la clé de l'intention (p. ex. ligne supprimée
+    // ordinairement avant l'oubli, présente dans la copie).
+    if let Some(s) = schema {
+        if o.cle_colonnes.iter().all(|c| s.has_column(c)) {
+            let attendu = o.cle_empreinte.as_str();
+            let (n, _) = par_empreinte_de_cle(
+                conn,
+                table,
+                std::slice::from_ref(&o.cle_colonnes),
+                &|cle| empreinte_cle(cle) == attendu,
+                o.operation,
+                &o.valeurs,
+            )?;
+            bilan.filet = n;
+            bilan.lignes += n;
+        }
+    }
+    Ok(bilan)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn rejouer_sans_identite(
+    conn: &Connection,
+    table: &str,
+    table_presente: bool,
+    ensembles: &[Vec<String>],
+    correspond: &dyn Fn(&BTreeMap<String, SqlValue>) -> bool,
+    operation: IntentOperation,
+    remplacement: &BTreeMap<String, SqlValue>,
+    entree: &EntreeRejeu<'_>,
+) -> Result<BilanRejeu, String> {
+    let attendu = entree.lignes_journal.ok_or_else(|| {
+        format!("erasure on {table} has no normalized identity and no recorded row count: replay not provable")
+    })?;
+    let (n, ensembles_touches) = if table_presente {
+        par_empreinte_de_cle(conn, table, ensembles, correspond, operation, remplacement)?
+    } else {
+        (0, 0)
+    };
+    if ensembles_touches > 1 {
+        return Err(format!(
+            "erasure on {table} has no normalized identity and matches several column sets: ambiguous"
+        ));
+    }
+    if attendu > 0 && n != attendu {
+        return Err(format!(
+            "erasure on {table} has no normalized identity: {n} row(s) found in the copy, {attendu} erased \
+             (replay not provable)"
+        ));
+    }
+    Ok(BilanRejeu { lignes: n, retrouvees: n, posterieures: 0, filet: 0 })
 }
 
 #[cfg(test)]
@@ -576,41 +794,157 @@ mod tests {
         let _ = std::fs::remove_dir_all(dir);
     }
 
-    #[test]
-    fn rejeu_par_registre_et_ancien() {
+    use kindmother::intent::TypedWriteIntent;
+
+    /// Oubli tel que l'écrit `submit_intents` : identité relue dans `live` avant l'effacement.
+    fn oubli_identifie(live: &Connection, intent: &TypedWriteIntent) -> OubliRejouable {
+        let cols = identite::colonnes_identite(live, &intent.table).expect("schema").expect("identite");
+        let mut p = Vec::new();
+        let filtre = crate::typed::where_clause(&intent.key, &mut p);
+        let ids: BTreeSet<String> = identite::identites(live, &intent.table, &cols.colonnes, &filtre, &p)
+            .expect("identites")
+            .into_iter()
+            .map(|l| l.identite)
+            .collect();
+        OubliRejouable::depuis_intention(intent, "db").avec_identite(IdentiteOubli {
+            colonnes: cols.colonnes,
+            types: cols.types,
+            lignes: ids.len() as u64,
+            identites: ids.into_iter().collect(),
+        })
+    }
+
+    fn entree<'a>(oubli: &'a OubliRejouable, lignes: Option<u64>) -> EntreeRejeu<'a> {
+        EntreeRejeu { oubli: ARejouer::Registre(oubli), seq: 10, lignes_journal: lignes }
+    }
+
+    fn base(sql: &str) -> Connection {
         let c = Connection::open_in_memory().expect("mem");
-        c.execute_batch(
-            "CREATE TABLE t (id TEXT PRIMARY KEY, n INTEGER, v TEXT);
-             INSERT INTO t VALUES ('a', 1, 'x'), ('b', 2, 'y'), ('c', 3, 'z');",
-        )
-        .expect("schema");
-        let intent = kindmother::intent::TypedWriteIntent::forget("t").key("id", "a");
-        let oubli = OubliRejouable::depuis_intention(&intent, "db");
-        assert_eq!(rejouer(&c, &ARejouer::Registre(&oubli)).expect("rejeu"), 1);
-        assert_eq!(rejouer(&c, &ARejouer::Registre(&oubli)).expect("idempotent"), 0);
-        // Clé texte '2' sur colonne entière.
-        let intent = kindmother::intent::TypedWriteIntent::forget("t").key("n", "2");
-        let oubli = OubliRejouable::depuis_intention(&intent, "db");
-        assert_eq!(rejouer(&c, &ARejouer::Registre(&oubli)).expect("variante"), 1);
-        // Caviardage.
-        let intent = kindmother::intent::TypedWriteIntent::update("t").key("id", "c").value("v", "[oublie]").erasure();
-        let oubli = OubliRejouable::depuis_intention(&intent, "db");
-        assert_eq!(rejouer(&c, &ARejouer::Registre(&oubli)).expect("caviardage"), 1);
-        let v: String = c.query_row("SELECT v FROM t WHERE id = 'c'", [], |r| r.get(0)).expect("v");
+        c.execute_batch(sql).expect("schema");
+        c
+    }
+
+    fn compte(c: &Connection, table: &str) -> i64 {
+        c.query_row(&format!("SELECT count(*) FROM {table}"), [], |r| r.get(0)).expect("count")
+    }
+
+    const NON: &dyn Fn(&str, &str, i64) -> Result<bool, String> = &|_, _, _| Ok(false);
+    const OUI: &dyn Fn(&str, &str, i64) -> Result<bool, String> = &|_, _, _| Ok(true);
+
+    #[test]
+    fn rejeu_par_identite_normalisee() {
+        let schema = "CREATE TABLE t (id TEXT PRIMARY KEY, n INTEGER, v TEXT);
+                      INSERT INTO t VALUES ('5', 1, 'x'), ('b', 2, 'y'), ('c', 3, 'z');";
+        let live = base(schema);
+        let copie = base(schema);
+        // Clé entière sur colonne TEXT : identité = valeur stockée ('5', texte).
+        let intent = TypedWriteIntent::forget("t").key("id", 5_i64);
+        let oubli = oubli_identifie(&live, &intent);
+        assert_eq!(oubli.identite.as_ref().map(|i| i.lignes), Some(1));
+        let b = rejouer(&copie, &entree(&oubli, Some(1)), NON).expect("rejeu");
+        assert_eq!((b.retrouvees, b.posterieures, b.lignes), (1, 0, 1));
+        assert_eq!(compte(&copie, "t"), 2);
+        // Caviardage par identité.
+        let intent = TypedWriteIntent::update("t").key("id", "c").value("v", "[oublie]").erasure();
+        let oubli = oubli_identifie(&live, &intent);
+        let b = rejouer(&copie, &entree(&oubli, Some(1)), NON).expect("caviardage");
+        assert_eq!(b.retrouvees, 1);
+        let v: String = copie.query_row("SELECT v FROM t WHERE id = 'c'", [], |r| r.get(0)).expect("v");
         assert_eq!(v, "[oublie]");
-        // Colonne de clé absente : non rejouable.
-        let intent = kindmother::intent::TypedWriteIntent::forget("t").key("absente", "c");
-        let oubli = OubliRejouable::depuis_intention(&intent, "db");
-        assert!(rejouer(&c, &ARejouer::Registre(&oubli)).is_err());
-        // Table absente : rien à faire.
-        let intent = kindmother::intent::TypedWriteIntent::forget("autre").key("id", "c");
-        let oubli = OubliRejouable::depuis_intention(&intent, "db");
-        assert_eq!(rejouer(&c, &ARejouer::Registre(&oubli)).expect("absente"), 0);
-        // Entrée antérieure : empreinte des paramètres seulement.
-        let intent = kindmother::intent::TypedWriteIntent::forget("t").key("id", "c");
-        let h = crate::audit::sha256_hex(&intent.canonical_params());
-        assert_eq!(rejouer(&c, &ARejouer::Ancien { table: "t", params_hash: &h }).expect("ancien"), 1);
-        let n: i64 = c.query_row("SELECT count(*) FROM t", [], |r| r.get(0)).expect("count");
-        assert_eq!(n, 0);
+        // Journal et registre en désaccord sur le nombre de lignes : refus.
+        assert!(rejouer(&copie, &entree(&oubli, Some(2)), NON).is_err());
+    }
+
+    #[test]
+    fn identite_absente_de_la_copie_refusee_sauf_preuve_de_posteriorite() {
+        let live = base("CREATE TABLE t (id TEXT PRIMARY KEY, v TEXT); INSERT INTO t VALUES ('a', 'x'), ('n', 'neuf');");
+        let copie = base("CREATE TABLE t (id TEXT PRIMARY KEY, v TEXT); INSERT INTO t VALUES ('a', 'x');");
+        let oubli = oubli_identifie(&live, &TypedWriteIntent::forget("t").key("id", "n"));
+        // 0 ligne retrouvée n'est plus un succès.
+        let err = rejouer(&copie, &entree(&oubli, Some(1)), NON).expect_err("refus");
+        assert!(err.contains("without proof"), "{err}");
+        // Prouvée créée après la sauvegarde : acceptée.
+        let b = rejouer(&copie, &entree(&oubli, Some(1)), OUI).expect("posterieure");
+        assert_eq!((b.retrouvees, b.posterieures, b.lignes), (0, 1, 0));
+        assert_eq!(compte(&copie, "t"), 1);
+        // Copie dont la colonne d'identité a un autre type déclaré : l'absence peut n'être
+        // qu'une différence de normalisation ⇒ refus même avec preuve.
+        let autre = base("CREATE TABLE t (id INTEGER PRIMARY KEY, v TEXT);");
+        assert!(rejouer(&autre, &entree(&oubli, Some(1)), OUI).expect_err("types").contains("differ"));
+        // Table absente : refus sans preuve, accepté avec.
+        let vide = base("CREATE TABLE autre (x TEXT);");
+        assert!(rejouer(&vide, &entree(&oubli, Some(1)), NON).is_err());
+        assert_eq!(rejouer(&vide, &entree(&oubli, Some(1)), OUI).expect("table absente").posterieures, 1);
+        // Erreur de la preuve : refus.
+        let echec: &dyn Fn(&str, &str, i64) -> Result<bool, String> = &|_, _, _| Err("registre altéré".into());
+        assert!(rejouer(&copie, &entree(&oubli, Some(1)), echec).is_err());
+    }
+
+    #[test]
+    fn identite_de_meme_valeur_logique_mais_autre_stockage_non_confondue() {
+        // Colonne sans affinité : '7' (texte) dans la copie, 7 (entier) à l'oubli.
+        let live = base("CREATE TABLE t (id PRIMARY KEY, v); INSERT INTO t VALUES (7, 'x');");
+        let copie = base("CREATE TABLE t (id PRIMARY KEY, v); INSERT INTO t VALUES ('7', 'x');");
+        let oubli = oubli_identifie(&live, &TypedWriteIntent::forget("t").key("id", 7_i64));
+        let err = rejouer(&copie, &entree(&oubli, Some(1)), NON).expect_err("refus");
+        assert!(err.contains("without proof"), "{err}");
+    }
+
+    #[test]
+    fn filet_par_empreinte_de_cle() {
+        // Oubli sans ligne au moment de l'oubli (0 identité) ; la copie porte encore la clé.
+        let live = base("CREATE TABLE t (id TEXT PRIMARY KEY, v TEXT);");
+        let copie = base("CREATE TABLE t (id TEXT PRIMARY KEY, v TEXT); INSERT INTO t VALUES ('z', 'x');");
+        let oubli = oubli_identifie(&live, &TypedWriteIntent::forget("t").key("id", "z"));
+        let b = rejouer(&copie, &entree(&oubli, Some(0)), NON).expect("filet");
+        assert_eq!((b.retrouvees, b.filet), (0, 1));
+        assert_eq!(compte(&copie, "t"), 0);
+    }
+
+    #[test]
+    fn entree_sans_identite_rejouee_seulement_si_prouvee_exacte() {
+        let schema = "CREATE TABLE t (id TEXT PRIMARY KEY, n INTEGER, v TEXT);
+                      INSERT INTO t VALUES ('a', 1, 'x'), ('b', 2, 'y');";
+        // Registre antérieur à A-025 (sans identité) : nombre du journal égal ⇒ accepté.
+        let c = base(schema);
+        let intent = TypedWriteIntent::forget("t").key("id", "a");
+        let v1 = OubliRejouable::depuis_intention(&intent, "db");
+        assert_eq!(rejouer(&c, &entree(&v1, Some(1)), OUI).expect("v1 exact").lignes, 1);
+        // Plus rien à retrouver alors que le journal dit 1 ligne : refus (0 ≠ succès).
+        assert!(rejouer(&c, &entree(&v1, Some(1)), OUI).is_err());
+        // Nombre de lignes inconnu : refus.
+        assert!(rejouer(&base(schema), &entree(&v1, None), OUI).is_err());
+        // Variante de type non devinée ('07' sur colonne entière) : refus au lieu d'un
+        // faux succès.
+        let intent = TypedWriteIntent::forget("t").key("n", "02");
+        let v1 = OubliRejouable::depuis_intention(&intent, "db");
+        assert!(rejouer(&base(schema), &entree(&v1, Some(1)), OUI).is_err());
+
+        // Entrée `Ancien` : empreinte des paramètres seulement.
+        let c = base(schema);
+        let h = crate::audit::sha256_hex(&TypedWriteIntent::forget("t").key("id", "b").canonical_params());
+        let ancien = |lignes| EntreeRejeu { oubli: ARejouer::Ancien { table: "t", params_hash: &h }, seq: 3, lignes_journal: lignes };
+        // (Un refus laisse l'appelant annuler sa transaction : copie neuve à chaque refus.)
+        assert!(rejouer(&base(schema), &ancien(None), OUI).is_err(), "nombre inconnu");
+        assert!(rejouer(&base(schema), &ancien(Some(2)), OUI).is_err(), "nombre différent");
+        assert_eq!(rejouer(&c, &ancien(Some(1)), OUI).expect("exact").lignes, 1);
+        assert_eq!(compte(&c, "t"), 1);
+        // Jeu de colonnes non déterminable (clé de trois colonnes, hors recherche) : refus.
+        let h3 = crate::audit::sha256_hex(
+            &TypedWriteIntent::forget("t").key("id", "a").key("n", 1_i64).key("v", "x").canonical_params(),
+        );
+        let ambigu = EntreeRejeu { oubli: ARejouer::Ancien { table: "t", params_hash: &h3 }, seq: 3, lignes_journal: Some(1) };
+        assert!(rejouer(&base(schema), &ambigu, OUI).expect_err("ambigu").contains("not provable"));
+        // Table absente : accepté seulement si l'oubli n'avait touché aucune ligne.
+        let vide = base("CREATE TABLE autre (x TEXT);");
+        assert!(rejouer(&vide, &ancien(Some(1)), OUI).is_err());
+        assert_eq!(rejouer(&vide, &ancien(Some(0)), OUI).expect("0 ligne").lignes, 0);
+    }
+
+    #[test]
+    fn lignes_lues_dans_le_detail() {
+        assert_eq!(lignes_du_detail("3 rows; secure_delete=on; rejeu=ab"), Some(3));
+        assert_eq!(lignes_du_detail("0 rows"), Some(0));
+        assert_eq!(lignes_du_detail("altere"), None);
     }
 }
