@@ -26,7 +26,8 @@ use crate::base::Qualite;
 use crate::erreurs::ErreurFederee;
 use crate::etiquettes::{MAX_ATTESTATIONS_PAR_PERIODE, PERIODE_ATTESTATIONS_SECS};
 use crate::fiche::{reprises_distinctes, verifier_fiche, Audience, FicheVerifiee, Reprise, TypeFiche};
-use crate::marquage::{autoriser, Effet, Provenance, ValidationUtilisateur};
+use crate::marquage::{autoriser, AutoriteConfirmation, Effet, Provenance, ValidationUtilisateur};
+use crate::reprise::verifier_derivation_reprise;
 use crate::normalisation::{cle_comparaison, normaliser_ligne};
 
 /// Requêtes au plus par demandeur et par période.
@@ -259,8 +260,9 @@ pub struct ServiceRequete {
 }
 
 impl ServiceRequete {
-    /// Service vide du COG `cog_local` : il ne publie que des Fiches signées
-    /// par la clé d'identité de ce COG.
+    /// Service vide du COG `cog_local` : il ne publie que des Fiches de ce COG
+    /// (émetteur = son identité ; signées par sa clé `fiches` déléguée, ou par
+    /// l'identité pendant la transition).
     pub fn new(cog_local: CogId) -> Self {
         Self { cog_local, publiees: Vec::new(), demandes: BTreeMap::new(), attestations: BTreeMap::new() }
     }
@@ -348,7 +350,8 @@ impl ServiceRequete {
     ///   confirmée par TAMR liée aux octets exacts ; champ `reprises` égal,
     ///   en tant qu'ensemble sans doublon, à `{Reprise::de(s)}` des sources
     ///   (sans doublon) ; licence identique à chaque source ; audience au plus
-    ///   aussi large que chaque source. Elle ne compte jamais pour *k*.
+    ///   aussi large que chaque source ; contenu **dérivé** de ses sources
+    ///   ([`crate::reprise::deriver_reprise`]). Elle ne compte jamais pour *k*.
     ///
     /// Jamais la mémoire de MAIA (`nationale`, qui n'a pas d'étiquette
     /// `publiable`). Une version plus récente remplace la précédente ; une
@@ -388,6 +391,31 @@ impl ServiceRequete {
             return Err(ErreurFederee::ChampInvalide("instant de publication dans le futur"));
         }
         self.consommer_attestation(&fiche.fiche().id, publiee_a);
+        self.inserer(fiche, octets)
+    }
+
+    /// Restauration d'une Fiche **republiée** déjà publiée (A-009), relue du
+    /// stockage durable de l'appelant au démarrage, dans l'ordre des versions :
+    /// réservée au détenteur de l'[`AutoriteConfirmation`] (chemin TAMR), qui
+    /// seul a pu la faire publier. Revérifiée : signature du COG local,
+    /// `reprises` présent, version = dernière restaurée + 1. Les sources ne sont
+    /// pas relues (la dérivation a été contrôlée à la publication).
+    pub fn restaurer_reprise(
+        &mut self,
+        _autorite: &AutoriteConfirmation,
+        octets: Vec<u8>,
+        maintenant: u64,
+    ) -> Result<(), ErreurFederee> {
+        let fiche = verifier_fiche(&octets, maintenant)?;
+        if fiche.cog() != &self.cog_local {
+            return Err(ErreurFederee::FicheNonLocale);
+        }
+        if !fiche.est_reprise() {
+            return Err(ErreurFederee::ChampInvalide("restauration d'une originale par le chemin TAMR"));
+        }
+        if self.derniere_version(&fiche.fiche().id).checked_add(1) != Some(fiche.fiche().version) {
+            return Err(ErreurFederee::VersionObsolete);
+        }
         self.inserer(fiche, octets)
     }
 
@@ -437,7 +465,8 @@ impl ServiceRequete {
                 return Err(ErreurFederee::ChampInvalide("audience plus large que la source"));
             }
         }
-        Ok(())
+        // Contenu, identifiant et champs structurels dérivés des sources (A-009).
+        verifier_derivation_reprise(fiche, sources)
     }
 
     fn inserer(&mut self, fiche: FicheVerifiee, octets: Vec<u8>) -> Result<(), ErreurFederee> {
@@ -604,7 +633,14 @@ mod tests {
         let locale = CleSignature::generer();
         let source = verifier_fiche(&sceller_fiche(&fiche(&etrangere, "geo.paris", "Paris est la capitale.", &[]), &etrangere).unwrap(), T).unwrap();
         let reprise = |f: crate::fiche::Fiche| sceller_fiche(&f, &locale).unwrap();
-        let base = crate::fiche::Fiche { reprises: vec![Reprise::de(&source)], ..fiche(&locale, "geo.paris.reprise", "Paris est la capitale.", &[]) };
+        let base = crate::reprise::deriver_reprise(
+            std::slice::from_ref(&source),
+            locale.cle_publique(),
+            &crate::reprise::ChoixReprise::default(),
+            1,
+            T,
+        )
+        .unwrap();
         let octets = reprise(base.clone());
         let desc = ServiceRequete::description_republication(&octets);
         let tamr = ValidationUtilisateur::construire(true, "c1", &desc);
@@ -628,6 +664,10 @@ mod tests {
             let v = ValidationUtilisateur::construire(true, "c1", &ServiceRequete::description_republication(&o));
             assert!(matches!(s.publier(o, Publication::Reprise { sources, validation: &v }, T), Err(ErreurFederee::ChampInvalide(_))));
         }
+        // Contenu non dérivé de la source (texte ajouté) : refus même validé.
+        let o = reprise(crate::fiche::Fiche { texte: "Paris est la capitale. Code 1234.".into(), ..base.clone() });
+        let v = ValidationUtilisateur::construire(true, "c1", &ServiceRequete::description_republication(&o));
+        assert!(matches!(s.publier(o, Publication::Reprise { sources, validation: &v }, T), Err(ErreurFederee::NonDerivee(_))));
         s.publier(octets.clone(), Publication::Reprise { sources, validation: &tamr }, T).unwrap();
         let q = RequeteTypee::nouvelle("capitale", &[], None, 5).unwrap().encoder().unwrap();
         let rendu = s.repondre(&cog(1), Qualite::Membre, &q, T).unwrap();
@@ -642,10 +682,14 @@ mod tests {
         let locale = CleSignature::generer();
         let s1 = verifier_fiche(&sceller_fiche(&fiche(&etrangere, "geo.paris", "Paris.", &[]), &etrangere).unwrap(), T).unwrap();
         let fantome = verifier_fiche(&sceller_fiche(&fiche(&etrangere, "geo.piege", "Piège.", &[]), &etrangere).unwrap(), T).unwrap();
-        let f = crate::fiche::Fiche {
-            reprises: vec![Reprise::de(&s1), Reprise::de(&fantome)],
-            ..fiche(&locale, "geo.reprise", "Paris.", &[])
-        };
+        let f = crate::reprise::deriver_reprise(
+            &[s1.clone(), fantome.clone()],
+            locale.cle_publique(),
+            &crate::reprise::ChoixReprise::default(),
+            1,
+            T,
+        )
+        .unwrap();
         let octets = sceller_fiche(&f, &locale).unwrap();
         let v = ValidationUtilisateur::construire(true, "c1", &ServiceRequete::description_republication(&octets));
         let mut s = ServiceRequete::new(cog_cle(&locale));

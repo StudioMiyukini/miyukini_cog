@@ -227,6 +227,37 @@ rule = "data.sensibilite != 'ordinaire' || data.provenance != 'locale' || data.r
 [policy.target]
 origins = ["maia"]
 
+# ── Republication d'une donnée étrangère (A-009, A7) ──
+# Intention « federee.republier » (apps/miou-llm-bridge/src/routes_federee.rs) : Fiche republiée
+# calculée par le serveur depuis des Fiches étrangères vérifiées (chaîne de signature, émetteur
+# admis par la vue fédérale), octets exacts approuvés par l'utilisateur propriétaire via TAMR
+# (règle « maia-tamr-approbation » ci-dessus, requête signée d'usage « maia/tamr-approbation »),
+# puis contrôlés par maia-federee (reprises, licence identique, audience au plus aussi large,
+# dérivation stricte). Champs : utilisateur, canal, usage_signe, provenance (etranger), sensibilite,
+# tamr (APPROVAL), intervention_id, regle_tamr, empreinte_tamr, cle_approbation, reprises (nombre),
+# licence_identique, audience_incluse, derivee, fiche, version, empreinte, donnee (ensemble des
+# sources), type, langue, licence, audience.
+[[policy]]
+id = "maia-federee-republier"
+type = "permission"
+effect = "authorize"
+condition = "data.operation == 'federee.republier'"
+rule = "data.canal == 'utilisateur_signe' && data.usage_signe == 'maia/federee' && data.tamr == 'APPROVAL' && data.intervention_id != '' && data.cle_approbation != '' && data.provenance == 'etranger' && data.sensibilite == 'ordinaire' && data.reprises != '0' && data.licence_identique == 'true' && data.audience_incluse == 'true' && data.derivee == 'true' && data.empreinte != '' && data.fiche != ''"
+[policy.target]
+actions = ["creation"]
+origins = ["maia"]
+
+# Jamais sans approbation TAMR, sans reprises, ni pour une donnée nationale (mémoire de MAIA).
+[[policy]]
+id = "maia-federee-republier-sans-tamr"
+type = "permission"
+effect = "deny"
+priority = "critical"
+condition = "data.operation == 'federee.republier'"
+rule = "data.tamr != 'APPROVAL' || data.reprises == '0' || data.sensibilite != 'ordinaire' || data.licence_identique != 'true' || data.audience_incluse != 'true'"
+[policy.target]
+origins = ["maia"]
+
 # F6 : un tour dont un résultat d'outil n'est pas « locale » (etranger / inconnue) ne
 # peut jamais mener à une écriture directe en mémoire (candidat seulement).
 [[policy]]

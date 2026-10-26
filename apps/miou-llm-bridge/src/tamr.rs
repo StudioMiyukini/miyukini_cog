@@ -15,7 +15,8 @@
 //! Déroulé (deux requêtes séparées de l'utilisateur authentifié) :
 //!
 //! 1. [`RegistreApprobations::demander`] fige l'**action exacte** (candidat
-//!    complet, ou octets exacts d'une Fiche à republier) et rend une demande
+//!    complet, ou octets exacts d'une Fiche à republier, demandée par
+//!    `POST /v1/federee/{u}/republier`, voir [`crate::routes_federee`]) et rend une demande
 //!    `EN_ATTENTE` : identifiant d'intervention, empreinte SHA-256 de l'action,
 //!    description, durée de vie ([`DUREE_VIE_SECS`]) ;
 //! 2. [`RegistreApprobations::approuver`] consomme la demande (une seule
@@ -51,6 +52,17 @@
 //! provenance, importance, liens, sources) est figée dans l'action, affichée
 //! et liée à l'empreinte ; `maia-memoire` refuse la validation si la cible a
 //! changé depuis la demande (`ConfirmationTamr::version_cible`).
+//!
+//! ## Republication (A-009, A7)
+//!
+//! La description d'une republication cite l'empreinte des octets exacts
+//! **et** le contenu de la Fiche (sujet, texte, licence, audience, reprises) ;
+//! l'empreinte de l'action ne couvre que les octets (`republier <sha256>`).
+//! L'approbation accordée n'ouvre que l'étape suivante : la publication passe
+//! encore la porte StrongFather `federee.republier`
+//! ([`crate::routes_federee`]). Au démarrage, les Fiches republiées relues de
+//! l'état durable sont restaurées par [`restaurer_republication`] (autorité
+//! de confirmation de ce module).
 //!
 //! ## Intention StrongFather
 //!
@@ -273,7 +285,7 @@ impl ActionTamr {
                     sources
                 )
             }
-            Self::Republier { octets, .. } => ServiceRequete::description_republication(octets),
+            Self::Republier { octets, .. } => description_republication(octets),
         }
     }
 
@@ -292,6 +304,51 @@ impl ActionTamr {
             Self::Republier { .. } => "maia.federee.republication".to_string(),
         }
     }
+}
+
+/// Description d'une republication : empreinte des octets exacts (liée à
+/// l'approbation), puis, si la Fiche se vérifie, son contenu tel qu'il sera
+/// publié (valeurs citées entre « », données étrangères non fiables).
+fn description_republication(octets: &[u8]) -> String {
+    let base = ServiceRequete::description_republication(octets);
+    let Ok(v) = maia_federee::verifier_fiche(octets, unix()) else {
+        return base;
+    };
+    let f = v.fiche();
+    let reprises = f
+        .reprises
+        .iter()
+        .map(|r| format!("{}/{} v{}", r.cog.as_str(), r.id, r.version))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let audience = match &f.audience {
+        maia_federee::Audience::Membres => "membres".to_string(),
+        maia_federee::Audience::Invites => "invités".to_string(),
+        maia_federee::Audience::Nommes(c) => format!(
+            "COG nommés ({})",
+            c.iter()
+                .map(miyauth::CogId::as_str)
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
+    };
+    format!(
+        "{base} — Fiche {} version {} : sujet « {} », texte « {} », licence {}, audience {}, reprises : {}",
+        f.id, f.version, f.sujet, f.texte, f.licence, audience, reprises
+    )
+}
+
+/// Restaure une Fiche **republiée** relue de l'état durable (démarrage) :
+/// seul ce module détient l'autorité de confirmation qui l'autorise.
+pub(crate) fn restaurer_republication(
+    service: &mut ServiceRequete,
+    octets: Vec<u8>,
+    maintenant: u64,
+) -> Result<(), String> {
+    let a = autorites().ok_or_else(|| RefusTamr::AutoriteIndisponible.to_string())?;
+    service
+        .restaurer_reprise(&a.confirmation, octets, maintenant)
+        .map_err(|e| e.to_string())
 }
 
 /// Demande d'approbation présentée à l'utilisateur (état `EN_ATTENTE`).

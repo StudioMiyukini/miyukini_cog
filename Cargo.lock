@@ -6097,6 +6097,7 @@ dependencies = [
 name = "maia-federee"
 version = "0.9.0-beta.1"
 dependencies = [
+ "ed25519-dalek",
  "miyauth",
  "miyufederation",
  "miyuracine",

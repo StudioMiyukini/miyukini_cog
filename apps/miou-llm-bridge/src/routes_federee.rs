@@ -2,16 +2,77 @@
 //! @do     publier_fiche_derivee_d_une_donnee_etiquetee
 //! @role   security
 //! @layer  app
-//! @human  MAIA — route de publication des Fiches fédérées originales (EX-47, EX-57, A-016, A-017) :
-//! @human  une Fiche proposée n'est publiée que si elle dérive strictement d'une donnée que
-//! @human  l'utilisateur a lui-même étiquetée `publiable` dans KindMother ; le serveur calcule les
-//! @human  champs structurels, StrongFather tranche, l'état de publication est durable (KindMother).
+//! @human  MAIA — routes de publication des Fiches fédérées (EX-47, EX-57, A-009, A-016, A-017, A-022 §4) :
+//! @human  Fiche originale dérivée d'une donnée que l'utilisateur a étiquetée `publiable` ; republication
+//! @human  d'une Fiche étrangère seulement après approbation TAMR des octets exacts ; Fiches signées par
+//! @human  la clé `fiches` déléguée (0x45) ; StrongFather tranche ; état durable dans KindMother.
 
-//! # Publication d'une Fiche originale (EX-47, A-015, A-016, A-017)
+//! # Publication des Fiches (EX-47, A-009, A-015 à A-018, A-022 §4, A-024)
 //!
-//! | Méthode | Chemin | Effet |
-//! |---|---|---|
-//! | POST | `/v1/federee/{u}/publier` | propose une Fiche dérivée d'une donnée étiquetée ; publiée si tout passe |
+//! | Méthode | Chemin | Signée par | Effet |
+//! |---|---|---|---|
+//! | POST | `/v1/federee/{u}/publier` | clé de l'utilisateur | propose une Fiche dérivée d'une donnée étiquetée ; publiée si tout passe |
+//! | POST | `/v1/federee/{u}/republier` | clé de l'utilisateur | republication d'une donnée étrangère : Fiche calculée, **202** + demande d'approbation TAMR |
+//! | POST | `/v1/federee/{u}/republier/{iv}` | clé d'**approbation** TAMR | approbation (`{"empreinte"}`) ⇒ StrongFather ⇒ publication |
+//! | DELETE | `/v1/federee/{u}/republier/{iv}` | clé de l'utilisateur | refus de l'utilisateur, demande close |
+//!
+//! ## Clé des Fiches (A-022 §4, A-024)
+//!
+//! Les Fiches originales et republiées sont signées par la **clé d'usage
+//! `fiches`** (indice 6) et portent sa délégation `0x45` signée par
+//! l'identité du COG ([`SignataireFiches::deleguee`] ; vérification de chaîne
+//! dans `maia_federee::fiche`). Configuration : [`ENV_CLE_FICHES`] (graine,
+//! `0600`), [`ENV_DELEGATION_FICHES`] (sceau `0x45`, ≤ 1 Kio, fichier
+//! régulier), [`ENV_IDENTITE_PUBLIQUE`] (clé publique d'identité) ; la
+//! délégation doit être valide au démarrage et à chaque signature (sinon 503
+//! `delegation_fiches_invalide` : la renouveler par la cérémonie
+//! `miyuracine deleguer --usage fiches`, puis redémarrer le pont).
+//!
+//! **Transition** : sans clé `fiches`, [`ENV_CLE_IDENTITE`] (clé d'identité
+//! dans le pont, A-017) signe encore, journalisé comme transitoire ; une clé
+//! `fiches` configurée mais invalide désactive la route (jamais de repli sur
+//! l'identité) et rend [`ENV_CLE_IDENTITE`] ignorée. Les Fiches déjà publiées
+//! sous l'identité restent lisibles et rechargées ; changer d'**identité**
+//! bloque la route (état incohérent, 503), changer de clé ou de génération
+//! `fiches` non.
+//!
+//! ## Republication d'une donnée étrangère (A-009, chemin TAMR)
+//!
+//! 1. `POST …/republier` `{"fiches":[base64…], "sujet"?, "audience"?, "licence"?}` :
+//!    débit (même plafond horaire que les propositions, compteur distinct) ;
+//!    chaque source (1 à 16) est vérifiée (chaîne de signature), **étrangère**
+//!    (jamais une Fiche du COG local) et son émetteur **admis** par la vue
+//!    fédérale ([`EtatPublicationHttp::avec_vue_federale`] ; absente ⇒ 503
+//!    `vue_federale_indisponible`) ; aucune donnée KindMother n'est lue (champ
+//!    `donnee` refusé : jamais `maia-*`). Le serveur calcule la Fiche
+//!    ([`maia_federee::deriver_reprise`] : contenu des sources, `reprises`,
+//!    licence identique, audience au plus aussi large, `id` = `rp.` + 32 hex
+//!    de l'ensemble des sources, version = dernière + 1), la scelle, puis fige
+//!    ses **octets exacts** dans une demande TAMR ([`ActionTamr::Republier`]) ;
+//!    réponse 202 `{"approbation":{intervention_id, empreinte, description…},
+//!    "fiche":{id, version, date, empreinte, reprises, fiche}}`. Rien n'est publié.
+//! 2. `POST …/republier/{iv}` `{"empreinte"}`, signée par une clé de
+//!    `MAIA_TAMR_CLES_APPROBATION` (usage `maia/tamr-approbation/<instance>/<u>`,
+//!    distincte des clés de l'utilisateur, F7) : la demande est consommée
+//!    (usage unique) ; délai ([`DUREE_VIE_SECS`]), empreinte, approbateur =
+//!    propriétaire, puis StrongFather `tamr.approbation` ; les sources sont
+//!    **revérifiées** (vue fédérale comprise), [`ServiceRequete::controler`]
+//!    revérifie la validation TAMR des octets exacts, les `reprises`, la licence,
+//!    l'audience, la dérivation et la version ; puis la porte
+//!    `federee.republier` (politiques `maia-federee-republier`,
+//!    `maia-federee-republier-sans-tamr`) ; sur ALLOW seulement : écriture
+//!    durable (même table qu'A-018 ; `donnee` = empreinte hex de l'ensemble des
+//!    sources) puis inscription. Une Fiche republiée est citée mais ne compte
+//!    jamais pour la corroboration.
+//!
+//! Codes propres : 202 demande ; 400 `sources_invalides`, `corps_invalide` ;
+//! 401 `signature_approbation_requise` ; 403 `source_locale`,
+//! `source_non_admise`, `audience_elargie`, `empreinte_differente`,
+//! `approbation_expiree`, `approbateur_invalide`, `refus_tamr`, `refus_porte`,
+//! `autre_utilisateur` ; 404 `approbation_inconnue` ; 409
+//! `version_deja_publiee` ; 422 `source_invalide`, `licence_differente`,
+//! `non_derivee` ; 429 ; 503 `vue_federale_indisponible`,
+//! `approbations_desactivees`, `tamr_indisponible`, `delegation_fiches_invalide`.
 //!
 //! ## Principe : MAIA propose, le serveur décide
 //!
@@ -26,7 +87,7 @@
 //! - `date` = horloge du serveur ;
 //! - `type`, `langue`, `licence`, `audience` = paramètres **signés par
 //!   l'utilisateur** avec la pose de l'étiquette (intention v2) ;
-//! - émetteur = clé d'identité du COG, signature par le serveur.
+//! - émetteur = clé d'identité du COG, signature par le serveur (clé `fiches`).
 //!
 //! Si la proposition **annonce** l'un de ces champs, il est comparé à la
 //! valeur calculée : écart ⇒ refus `champ_structurel_falsifie` (date : hors de
@@ -104,8 +165,7 @@
 //! - base de l'état de publication ⇒ `base_reservee` ;
 //! - `provenance` autre que `locale`, ou champ `reprises` présent ⇒
 //!   `republication_tamr_requise` : une donnée étrangère ne se republie que par
-//!   le chemin TAMR (A-009 ; [`crate::tamr::ActionTamr::Republier`]), jamais
-//!   par cette route.
+//!   `…/republier` (chemin TAMR, ci-dessus), jamais par `…/publier`.
 //!
 //! ## Authentification et débit
 //!
@@ -121,8 +181,9 @@
 //! ## Activation (désactivée par défaut, 503)
 //!
 //! - `MAIA_MEMOIRE_UTILISATEUR` et `MAIA_MEMOIRE_CLES_UTILISATEUR` (comme la mémoire) ;
-//! - `MAIA_FEDEREE_CLE_IDENTITE` : graine de la clé d'identité du COG (32 octets,
-//!   fichier régulier `0600`, jamais créé ici) ;
+//! - clé des Fiches : [`ENV_CLE_FICHES`], [`ENV_DELEGATION_FICHES`],
+//!   [`ENV_IDENTITE_PUBLIQUE`] ; à défaut (transitoire) [`ENV_CLE_IDENTITE`] ;
+//! - republication : `MAIA_TAMR_CLES_APPROBATION` et une vue fédérale ;
 //! - `MAIA_FEDEREE_OPERATEUR` : opérateur KindMother qui lit les étiquettes
 //!   (justificatif à l'emplacement standard, droit de lecture sur les bases
 //!   publiables) ; `KINDMOTHER_ADDR` (défaut `127.0.0.1:50051`) ;
@@ -136,7 +197,12 @@
 //!   désactivée ;
 //! - le journal des décisions reste en mémoire (la trace durable est le
 //!   journal `maia::federee::audit` et la table des publications) ;
-//! - la clé d'identité du COG est lue par le pont (détenteur à confirmer) ;
+//! - la vue fédérale n'est pas encore câblée dans le pont : en production la
+//!   republication répond 503 `vue_federale_indisponible` ;
+//! - demandes de republication en attente gardées **en mémoire** (perdues au
+//!   redémarrage : l'utilisateur redemande) ;
+//! - aucune révocation de délégation `0x45` ; délégation renouvelée ⇒
+//!   redémarrage du pont ;
 //! - aucun transport vers les autres COG (lot 7 : reste à faire).
 
 use std::collections::VecDeque;
@@ -161,10 +227,13 @@ use kindmother::etiquette::{
 };
 use kindmother::intent::{SchemaMigration, SqlValue, TypedSelect, TypedWriteIntent};
 use kindmother_client::{ClientError, KindMotherClient, OperatorCredential};
+use maia_federee::fiche::MAX_REPRISES;
 use maia_federee::{
-    cog_de_cle, id_fiche_derivee, sceller_fiche, verifier_fiche, Audience, AutoriteEtiquettes,
-    ErreurFederee, EtiquetteLue, Fiche, LecteurEtiquettes, ParametresLus, Publication,
-    PublieurOriginal, Relation, ServiceRequete, TypeFiche, FENETRE_DATE_SECS,
+    deriver_reprise, empreinte_ensemble, id_fiche_derivee, id_fiche_reprise,
+    verifier_derivation_reprise, verifier_fiche, Audience, AutoriteEtiquettes, ChoixReprise,
+    ErreurFederee, EtiquetteLue, Fiche, FicheVerifiee, LecteurEtiquettes, ParametresLus,
+    Publication, PublieurOriginal, Relation, ServiceRequete, SignataireFiches, TypeFiche,
+    VueFederale, FENETRE_DATE_SECS, MAX_DELEGATION,
 };
 use miyauth::http::service::{maintenant_unix, GardeSignee};
 use miyauth::http::{ENTETE_HORODATAGE, ENTETE_NONCE, ENTETE_SIGNATAIRE, ENTETE_SIGNATURE};
@@ -176,12 +245,27 @@ use crate::config::SecurityConfig;
 use crate::gouvernance::{GouvernanceMaia, ORIGINE_MAIA};
 use crate::routes_memoire::{UtilisateurAuthentifie, ENTETE_INSTANCE, ENV_CLES_UTILISATEUR};
 use crate::security::{RateLimitConfig, RateLimiter};
+use crate::tamr::{
+    ActionTamr, RefusTamr, RegistreApprobations, SignatureApprobation, CAPACITE_MAX,
+    DUREE_VIE_SECS, ENV_CLES_APPROBATION, TYPE_INTERVENTION, USAGE_APPROBATION,
+};
 
 /// Usage signé (préfixe) des requêtes de publication ; usage complet :
 /// `maia/federee/<instance>/<utilisateur>`.
 pub const USAGE_FEDEREE: &str = "maia/federee";
-/// Graine de la clé d'identité du COG (chemin d'un fichier de 32 octets, `0600`).
+/// **Transitoire** (A-022 §4) : graine de la clé d'identité du COG (chemin
+/// d'un fichier de 32 octets, `0600`), utilisée seulement si la clé `fiches`
+/// n'est pas configurée ; ignorée sinon.
 pub const ENV_CLE_IDENTITE: &str = "MAIA_FEDEREE_CLE_IDENTITE";
+/// Graine de la clé d'usage `fiches` (indice 6, A-022 §4) : chemin d'un
+/// fichier de 32 octets, `0600` (`miyuracine deriver --exporter-graine-usage fiches`).
+pub const ENV_CLE_FICHES: &str = "MAIA_FEDEREE_CLE_FICHES";
+/// Délégation `0x45` de la clé `fiches` (chemin du sceau écrit par
+/// `miyuracine deleguer --usage fiches`).
+pub const ENV_DELEGATION_FICHES: &str = "MAIA_FEDEREE_DELEGATION_FICHES";
+/// Clé publique d'identité du COG (hex ou base64 URL, 32 octets) : émetteur
+/// des Fiches et signataire attendu de la délégation.
+pub const ENV_IDENTITE_PUBLIQUE: &str = "MAIA_FEDEREE_IDENTITE_PUBLIQUE";
 /// Opérateur KindMother qui lit les étiquettes `publiable`.
 pub const ENV_OPERATEUR: &str = "MAIA_FEDEREE_OPERATEUR";
 /// Opérateur KindMother (et base homonyme) de l'état de publication.
@@ -206,6 +290,8 @@ pub const PUBLICATIONS_PAR_HEURE: u32 = 30;
 pub const CAPACITE_JOURNAL: usize = 1_024;
 /// Valeur de `data.operation` de l'intention StrongFather.
 pub const OPERATION_PUBLIER: &str = "federee.publier";
+/// Valeur de `data.operation` de l'intention StrongFather d'une republication.
+pub const OPERATION_REPUBLIER: &str = "federee.republier";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Autorité des étiquettes (jeton unique du processus)
@@ -680,10 +766,27 @@ struct Actif<S, M> {
     utilisateur: String,
     source: S,
     magasin: M,
-    identite: CleSignature,
+    /// Clé `fiches` déléguée (ou identité, transitoire) : signe les Fiches.
+    signataire: SignataireFiches,
     cog: CogId,
     /// Verrou unique de publication ; `None` : état à (re)charger de KindMother.
     publication: tokio::sync::Mutex<Option<ServiceRequete>>,
+}
+
+/// Vue fédérale partagée (admission des émetteurs des Fiches republiées).
+pub type VuePartagee = Arc<dyn VueFederale + Send + Sync>;
+
+/// Republication en attente d'approbation TAMR : octets exacts figés et
+/// sources (octets signés) à revérifier au moment de publier.
+struct RepublicationEnAttente {
+    utilisateur: String,
+    octets: Vec<u8>,
+    sources: Vec<Vec<u8>>,
+    id: String,
+    version: u64,
+    ensemble: String,
+    empreinte: String,
+    demandee: std::time::Instant,
 }
 
 /// État de la route de publication.
@@ -691,12 +794,20 @@ pub struct EtatPublicationHttp<S: SourceEtiquettes, M: MagasinPublications = Pub
 {
     actif: Option<Actif<S, M>>,
     garde: GardeSignee,
+    /// Clés d'approbation TAMR (F7), distinctes des clés de l'utilisateur.
+    garde_approbation: GardeSignee,
     instance: String,
     limiteur_ip: RateLimiter,
     limiteur_utilisateur: RateLimiter,
     gouvernance: Arc<GouvernanceMaia>,
     securite: SecurityConfig,
     journal: Mutex<VecDeque<EntreeJournal>>,
+    /// Registre TAMR des republications (usage unique, expiration).
+    approbations: RegistreApprobations,
+    duree_approbation: std::time::Duration,
+    republications: Mutex<std::collections::HashMap<String, RepublicationEnAttente>>,
+    /// Vue fédérale ; absente ⇒ republication refusée (503).
+    vue: Option<VuePartagee>,
 }
 
 fn indisponible(detail: impl Into<String>) -> Refus {
@@ -708,7 +819,9 @@ fn indisponible(detail: impl Into<String>) -> Refus {
 }
 
 /// Reconstruit le service depuis les versions enregistrées (ordre `(fiche,
-/// version)`) : chaque Fiche est revérifiée et doit concorder avec sa ligne.
+/// version)`) : chaque Fiche est revérifiée (chaîne de la clé `fiches`, ou
+/// identité pour les Fiches de la transition) et doit concorder avec sa ligne ;
+/// une Fiche republiée est restaurée par le chemin TAMR.
 fn restaurer(
     publieur: &PublieurOriginal,
     cog: &CogId,
@@ -726,28 +839,40 @@ fn restaurer(
         {
             return Err(format!("{} v{} : ligne discordante", l.fiche, l.version));
         }
-        publieur
-            .restaurer(&mut service, l.octets, l.publiee_a, maintenant)
-            .map_err(|e| format!("{} v{} : {e}", l.fiche, l.version))?;
+        if f.est_reprise() {
+            if !l.fiche.ends_with(l.donnee.get(..32).unwrap_or("-")) {
+                return Err(format!(
+                    "{} v{} : ensemble de sources discordant",
+                    l.fiche, l.version
+                ));
+            }
+            crate::tamr::restaurer_republication(&mut service, l.octets, maintenant)
+        } else {
+            publieur
+                .restaurer(&mut service, l.octets, l.publiee_a, maintenant)
+                .map_err(|e| e.to_string())
+        }
+        .map_err(|e| format!("{} v{} : {e}", l.fiche, l.version))?;
     }
     Ok(service)
 }
 
 impl<S: SourceEtiquettes, M: MagasinPublications> EtatPublicationHttp<S, M> {
     /// Route active pour `actif` = (utilisateur, lecteur d'étiquettes, état
-    /// durable, clé d'identité du COG) et les clés de l'utilisateur ; sans
+    /// durable, signataire des Fiches) et les clés de l'utilisateur ; sans
     /// l'un d'eux : désactivée. `instance` : identifiant lié dans l'usage signé
     /// (celui des routes mémoire). L'état durable est chargé par
-    /// [`Self::precharger`] ou à la première proposition.
+    /// [`Self::precharger`] ou à la première proposition. Republication :
+    /// [`Self::avec_cles_approbation`], [`Self::avec_vue_federale`].
     pub fn new(
-        actif: Option<(String, S, M, CleSignature)>,
+        actif: Option<(String, S, M, SignataireFiches)>,
         cles_utilisateur: Vec<[u8; 32]>,
         instance: String,
         gouvernance: Arc<GouvernanceMaia>,
         securite: SecurityConfig,
     ) -> Self {
-        let actif = actif.and_then(|(utilisateur, source, magasin, identite)| {
-            let Some(cog) = cog_de_cle(&identite.cle_publique()) else {
+        let actif = actif.and_then(|(utilisateur, source, magasin, signataire)| {
+            let Some(cog) = signataire.cog() else {
                 tracing::error!(target: "maia::federee", "clé d'identité sans cog_id valide : publication désactivée");
                 return None;
             };
@@ -759,14 +884,16 @@ impl<S: SourceEtiquettes, M: MagasinPublications> EtatPublicationHttp<S, M> {
                 utilisateur,
                 source,
                 magasin,
-                identite,
+                signataire,
                 cog,
                 publication: tokio::sync::Mutex::new(None),
             })
         });
+        let duree_approbation = std::time::Duration::from_secs(DUREE_VIE_SECS);
         Self {
             actif,
             garde: GardeSignee::new(cles_utilisateur),
+            garde_approbation: GardeSignee::new(Vec::new()),
             instance,
             limiteur_ip: RateLimiter::new(RateLimitConfig {
                 max_requests: DEBIT_IP_PAR_MINUTE,
@@ -779,7 +906,45 @@ impl<S: SourceEtiquettes, M: MagasinPublications> EtatPublicationHttp<S, M> {
             gouvernance,
             securite,
             journal: Mutex::new(VecDeque::new()),
+            approbations: RegistreApprobations::avec_duree(duree_approbation),
+            duree_approbation,
+            republications: Mutex::new(std::collections::HashMap::new()),
+            vue: None,
         }
+    }
+
+    /// Clés d'approbation TAMR (F7) : `cles` doivent être **distinctes** des
+    /// clés de l'utilisateur (`cles_utilisateur`), sinon aucune approbation.
+    #[must_use]
+    pub fn avec_cles_approbation(
+        mut self,
+        cles: Vec<[u8; 32]>,
+        cles_utilisateur: &[[u8; 32]],
+    ) -> Self {
+        let cles = if cles.iter().any(|c| cles_utilisateur.contains(c)) {
+            tracing::error!(target: "maia::federee", "{ENV_CLES_APPROBATION} : clé aussi épinglée pour « {USAGE_FEDEREE} » — republications refusées");
+            Vec::new()
+        } else {
+            cles
+        };
+        self.garde_approbation = GardeSignee::new(cles);
+        self
+    }
+
+    /// Vue fédérale qui admet les émetteurs des Fiches republiées.
+    #[must_use]
+    pub fn avec_vue_federale(mut self, vue: VuePartagee) -> Self {
+        self.vue = Some(vue);
+        self
+    }
+
+    /// Durée de vie des demandes d'approbation (essais).
+    #[cfg(test)]
+    #[must_use]
+    fn avec_duree_approbation(mut self, duree: std::time::Duration) -> Self {
+        self.approbations = RegistreApprobations::avec_duree(duree);
+        self.duree_approbation = duree;
+        self
     }
 
     /// Vrai si la route est servie.
@@ -862,10 +1027,10 @@ impl<S: SourceEtiquettes, M: MagasinPublications> EtatPublicationHttp<S, M> {
     }
 
     fn tracer(&self, e: EntreeJournal) {
-        if e.verdict == "publiee" {
-            tracing::info!(target: "maia::federee::audit", utilisateur = %e.utilisateur, fiche = ?e.fiche, version = ?e.version, empreinte = ?e.empreinte, detail = %e.detail, "Fiche originale publiée");
-        } else {
+        if e.verdict == "refusee" {
             tracing::warn!(target: "maia::federee::audit", utilisateur = %e.utilisateur, motif = e.motif, detail = %e.detail, fiche = ?e.fiche, version = ?e.version, "publication refusée");
+        } else {
+            tracing::info!(target: "maia::federee::audit", utilisateur = %e.utilisateur, motif = e.motif, fiche = ?e.fiche, version = ?e.version, empreinte = ?e.empreinte, detail = %e.detail, "Fiche publiée ou demande d'approbation");
         }
         match self.journal.lock() {
             Ok(mut j) => {
@@ -890,12 +1055,18 @@ impl EtatPublicationHttp<EtiquettesKindMother, PublicationsKindMother> {
         securite: SecurityConfig,
     ) -> Self {
         let cles = crate::routes_memoire::analyser_env(ENV_CLES_UTILISATEUR);
+        let approbation = crate::routes_memoire::analyser_env(ENV_CLES_APPROBATION);
         let actif = actif_depuis_env();
-        let etat = Self::new(actif, cles, instance, gouvernance, securite);
+        let etat = Self::new(actif, cles.clone(), instance, gouvernance, securite)
+            .avec_cles_approbation(approbation, &cles);
         if etat.est_active() {
             tracing::info!("route de publication fédérée active (requêtes signées « {USAGE_FEDEREE}/<instance>/<utilisateur> »)");
+            // Aucune vue fédérale n'est encore câblée dans le pont : republication en 503.
+            tracing::info!(
+                "republication fédérée désactivée (vue fédérale non câblée dans le pont)"
+            );
         } else {
-            tracing::info!("route de publication fédérée désactivée ({ENV_UTILISATEUR}, {ENV_CLES_UTILISATEUR}, {ENV_CLE_IDENTITE}, {ENV_OPERATEUR} ou justificatif de l'état de publication absent)");
+            tracing::info!("route de publication fédérée désactivée ({ENV_UTILISATEUR}, {ENV_CLES_UTILISATEUR}, {ENV_CLE_FICHES} + {ENV_DELEGATION_FICHES} + {ENV_IDENTITE_PUBLIQUE} (ou, transitoire, {ENV_CLE_IDENTITE}), {ENV_OPERATEUR} ou justificatif de l'état de publication absent)");
         }
         etat
     }
@@ -908,22 +1079,83 @@ fn env_non_vide(nom: &str) -> Option<String> {
         .filter(|v| !v.is_empty())
 }
 
+/// Lit le sceau de délégation : fichier régulier (lien symbolique refusé),
+/// au plus [`MAX_DELEGATION`] octets.
+fn lire_delegation(chemin: &Path) -> Result<Vec<u8>, String> {
+    let meta = std::fs::symlink_metadata(chemin).map_err(|e| e.to_string())?;
+    if !meta.file_type().is_file() {
+        return Err("fichier de délégation non régulier".into());
+    }
+    if meta.len() == 0 || meta.len() > MAX_DELEGATION as u64 {
+        return Err(format!(
+            "taille de la délégation hors bornes (1..={MAX_DELEGATION} octets)"
+        ));
+    }
+    std::fs::read(chemin).map_err(|e| e.to_string())
+}
+
+/// Signataire des Fiches (A-022 §4, A-024) : clé `fiches` + délégation `0x45`
+/// et identité publique ; à défaut, **transitoire**, la clé d'identité
+/// ([`ENV_CLE_IDENTITE`]). Clé `fiches` configurée mais invalide ⇒ aucune
+/// (jamais de repli silencieux sur l'identité).
+fn signataire_depuis_env(maintenant: u64) -> Option<SignataireFiches> {
+    if let Some(chemin) = env_non_vide(ENV_CLE_FICHES) {
+        if env_non_vide(ENV_CLE_IDENTITE).is_some() {
+            tracing::warn!(target: "maia::federee", "{ENV_CLE_IDENTITE} ignorée : la clé « fiches » est configurée (A-022 §4)");
+        }
+        let resultat = (|| {
+            let cle = miyauth::http::service::charger_cle(Path::new(&chemin))
+                .map_err(|e| format!("{ENV_CLE_FICHES} ({chemin}) : {e}"))?;
+            let delegation = env_non_vide(ENV_DELEGATION_FICHES)
+                .ok_or_else(|| format!("{ENV_DELEGATION_FICHES} absent"))
+                .and_then(|c| {
+                    lire_delegation(Path::new(&c))
+                        .map_err(|e| format!("{ENV_DELEGATION_FICHES} ({c}) : {e}"))
+                })?;
+            let identite = env_non_vide(ENV_IDENTITE_PUBLIQUE)
+                .ok_or_else(|| format!("{ENV_IDENTITE_PUBLIQUE} absent"))
+                .and_then(|t| {
+                    miyauth::http::service::analyser_cles_publiques(&[t])
+                        .ok()
+                        .and_then(|v| v.first().copied())
+                        .ok_or_else(|| format!("{ENV_IDENTITE_PUBLIQUE} mal formée"))
+                })?;
+            SignataireFiches::deleguee(cle, identite, delegation, maintenant)
+                .map_err(|e| e.to_string())
+        })();
+        return match resultat {
+            Ok(s) => {
+                tracing::info!(target: "maia::federee", fin = ?s.fin_delegation(), "Fiches signées par la clé « fiches » déléguée (0x45)");
+                Some(s)
+            }
+            Err(e) => {
+                tracing::error!(target: "maia::federee", "clé « fiches » : {e} — publication désactivée");
+                None
+            }
+        };
+    }
+    let chemin = env_non_vide(ENV_CLE_IDENTITE)?;
+    match miyauth::http::service::charger_cle(Path::new(&chemin)) {
+        Ok(c) => {
+            tracing::warn!(target: "maia::federee", "{ENV_CLE_IDENTITE} : Fiches signées par la clé d'identité (TRANSITOIRE, A-022 §4) — configurer {ENV_CLE_FICHES}, {ENV_DELEGATION_FICHES}, {ENV_IDENTITE_PUBLIQUE}");
+            Some(SignataireFiches::identite(c))
+        }
+        Err(e) => {
+            tracing::error!(target: "maia::federee", "{ENV_CLE_IDENTITE} ({chemin}) : {e} — publication désactivée");
+            None
+        }
+    }
+}
+
 fn actif_depuis_env() -> Option<(
     String,
     EtiquettesKindMother,
     PublicationsKindMother,
-    CleSignature,
+    SignataireFiches,
 )> {
     let utilisateur = env_non_vide(ENV_UTILISATEUR)?;
-    let chemin = env_non_vide(ENV_CLE_IDENTITE)?;
     let operateur = env_non_vide(ENV_OPERATEUR)?;
-    let identite = match miyauth::http::service::charger_cle(Path::new(&chemin)) {
-        Ok(c) => c,
-        Err(e) => {
-            tracing::error!(target: "maia::federee", "{ENV_CLE_IDENTITE} ({chemin}) : {e} — publication désactivée");
-            return None;
-        }
-    };
+    let signataire = signataire_depuis_env(maintenant_unix())?;
     let adresse = env_non_vide(ENV_KINDMOTHER).unwrap_or_else(|| KINDMOTHER_DEFAUT.to_string());
     let source = match EtiquettesKindMother::charger(&adresse, &operateur, None) {
         Ok(s) => s,
@@ -935,7 +1167,7 @@ fn actif_depuis_env() -> Option<(
     let base =
         env_non_vide(ENV_PUBLICATIONS).unwrap_or_else(|| BASE_PUBLICATIONS_DEFAUT.to_string());
     match PublicationsKindMother::charger(&adresse, &base, None) {
-        Ok(magasin) => Some((utilisateur, source, magasin, identite)),
+        Ok(magasin) => Some((utilisateur, source, magasin, signataire)),
         Err(e) => {
             tracing::error!(target: "maia::federee", "état de publication « {base} » : {e} — publication désactivée");
             None
@@ -953,6 +1185,14 @@ pub fn routeur<S: SourceEtiquettes, M: MagasinPublications>(
 ) -> Router {
     Router::new()
         .route("/v1/federee/{utilisateur}/publier", post(publier::<S, M>))
+        .route(
+            "/v1/federee/{utilisateur}/republier",
+            post(demander_republication::<S, M>),
+        )
+        .route(
+            "/v1/federee/{utilisateur}/republier/{intervention}",
+            post(approuver_republication::<S, M>).delete(refuser_republication::<S, M>),
+        )
         .layer(axum::middleware::from_fn_with_state(
             Arc::clone(&etat),
             garde::<S, M>,
@@ -980,8 +1220,17 @@ async fn garde<S: SourceEtiquettes, M: MagasinPublications>(
     reponse
 }
 
+/// `POST /v1/federee/{u}/republier/{iv}` : approbation TAMR (F7).
+fn est_approbation(methode: &axum::http::Method, chemin: &str) -> bool {
+    let segments: Vec<&str> = chemin.split('/').collect();
+    methode == axum::http::Method::POST
+        && matches!(segments.as_slice(), ["", "v1", "federee", u, "republier", iv] if !u.is_empty() && !iv.is_empty())
+}
+
 /// Débit par IP, route active, pas de cookie, origine, requête signée par une
-/// clé de l'utilisateur avec l'usage de publication lié à l'instance.
+/// clé de l'utilisateur avec l'usage de publication lié à l'instance — ou,
+/// pour une approbation de republication, par une clé d'approbation TAMR avec
+/// l'usage `maia/tamr-approbation/<instance>/<utilisateur>` (F7).
 async fn garder<S: SourceEtiquettes, M: MagasinPublications>(
     etat: &EtatPublicationHttp<S, M>,
     req: Request,
@@ -1012,11 +1261,30 @@ async fn garder<S: SourceEtiquettes, M: MagasinPublications>(
     {
         return refus_http(StatusCode::FORBIDDEN, "origin_blocked");
     }
-    let usage = etat.usage(&actif.utilisateur);
+    let approbation = est_approbation(req.method(), req.uri().path());
+    let (garde, usage) = if approbation {
+        if !etat.garde_approbation.est_configuree() {
+            return refus_http(StatusCode::SERVICE_UNAVAILABLE, "approbations_desactivees");
+        }
+        (
+            &etat.garde_approbation,
+            format!(
+                "{USAGE_APPROBATION}/{}/{}",
+                etat.instance, actif.utilisateur
+            ),
+        )
+    } else {
+        (&etat.garde, etat.usage(&actif.utilisateur))
+    };
+    let requise = if approbation {
+        "signature_approbation_requise"
+    } else {
+        "signature_utilisateur_requise"
+    };
     let maintenant = maintenant_unix();
     let h = req.headers();
     let v = |n: &str| h.get(n).and_then(|x| x.to_str().ok());
-    let entetes = match etat.garde.controler_entetes(
+    let entetes = match garde.controler_entetes(
         v(ENTETE_SIGNATAIRE),
         v(ENTETE_HORODATAGE),
         v(ENTETE_NONCE),
@@ -1025,8 +1293,8 @@ async fn garder<S: SourceEtiquettes, M: MagasinPublications>(
     ) {
         Ok(e) => e,
         Err(r) => {
-            tracing::warn!(target: "maia::federee", refus = ?r, "requête de publication refusée");
-            return refus_http(StatusCode::UNAUTHORIZED, "signature_utilisateur_requise");
+            tracing::warn!(target: "maia::federee", refus = ?r, approbation, "requête de publication refusée");
+            return refus_http(StatusCode::UNAUTHORIZED, requise);
         }
     };
     let (parts, corps) = req.into_parts();
@@ -1037,7 +1305,7 @@ async fn garder<S: SourceEtiquettes, M: MagasinPublications>(
         .uri
         .path_and_query()
         .map_or_else(|| parts.uri.path(), |pq| pq.as_str());
-    if let Err(r) = etat.garde.verifier(
+    if let Err(r) = garde.verifier(
         &entetes,
         &usage,
         parts.method.as_str(),
@@ -1045,13 +1313,18 @@ async fn garder<S: SourceEtiquettes, M: MagasinPublications>(
         &corps,
         maintenant,
     ) {
-        tracing::warn!(target: "maia::federee", refus = ?r, "requête de publication refusée");
-        return refus_http(StatusCode::UNAUTHORIZED, "signature_utilisateur_requise");
+        tracing::warn!(target: "maia::federee", refus = ?r, approbation, "requête de publication refusée");
+        return refus_http(StatusCode::UNAUTHORIZED, requise);
     }
     let mut parts = parts;
     parts
         .extensions
         .insert(UtilisateurAuthentifie(actif.utilisateur.clone()));
+    if approbation {
+        parts
+            .extensions
+            .insert(SignatureApprobation::verifiee(&entetes.signataire));
+    }
     next.run(Request::from_parts(parts, Body::from(corps)))
         .await
 }
@@ -1193,6 +1466,10 @@ fn refus_federee(e: &ErreurFederee) -> Refus {
         ErreurFederee::Quota => (StatusCode::TOO_MANY_REQUESTS, "plafond_attestations"),
         ErreurFederee::VersionObsolete => (StatusCode::CONFLICT, "version_deja_publiee"),
         ErreurFederee::FicheNonLocale => (StatusCode::FORBIDDEN, "fiche_non_locale"),
+        ErreurFederee::Delegation(_) => (
+            StatusCode::SERVICE_UNAVAILABLE,
+            "delegation_fiches_invalide",
+        ),
         _ => (StatusCode::UNPROCESSABLE_ENTITY, "fiche_invalide"),
     };
     Refus::new(statut, code, e.to_string())
@@ -1420,7 +1697,7 @@ async fn traiter<S: SourceEtiquettes, M: MagasinPublications>(
 
     let fiche = Fiche {
         id: id.clone(),
-        emetteur: actif.identite.cle_publique(),
+        emetteur: actif.signataire.emetteur(),
         sujet: p.sujet,
         type_fiche: parametres.type_fiche,
         texte: p.texte,
@@ -1441,8 +1718,10 @@ async fn traiter<S: SourceEtiquettes, M: MagasinPublications>(
         audience: parametres.audience,
         reprises: Vec::new(),
     };
-    let octets =
-        sceller_fiche(&fiche, &actif.identite).map_err(|e| refus_federee(&e).pour(&id, version))?;
+    let octets = actif
+        .signataire
+        .sceller(&fiche, maintenant)
+        .map_err(|e| refus_federee(&e).pour(&id, version))?;
     // Empreinte de publication (celle des `reprises`), relue sur la Fiche scellée.
     let empreinte = hex::encode(
         verifier_fiche(&octets, maintenant)
@@ -1612,6 +1891,648 @@ async fn publier<S: SourceEtiquettes, M: MagasinPublications>(
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Republication d'une donnée étrangère (A-009, chemin TAMR, A7)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Demande de republication : Fiches étrangères (octets signés) et les deux
+/// seuls choix de l'utilisateur (sujet, audience) ; la licence annoncée n'est
+/// que comparée. Tout autre champ (dont `donnee` : aucune donnée KindMother,
+/// jamais `maia-*`) ⇒ 400.
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PropositionReprise {
+    /// Fiches étrangères à republier : octets signés, base64 standard (1 à 16).
+    fiches: Vec<String>,
+    #[serde(default)]
+    sujet: Option<String>,
+    #[serde(default)]
+    audience: Option<AudienceProposee>,
+    #[serde(default)]
+    licence: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CorpsApprobation {
+    empreinte: String,
+}
+
+fn audience_choisie(a: &AudienceProposee) -> Result<Audience, Refus> {
+    Ok(match a {
+        AudienceProposee::Membres => Audience::Membres,
+        AudienceProposee::Invites => Audience::Invites,
+        AudienceProposee::Nommes(c) => Audience::Nommes(
+            c.iter()
+                .map(|x| CogId::new(x))
+                .collect::<Option<Vec<_>>>()
+                .ok_or_else(|| {
+                    Refus::new(
+                        StatusCode::BAD_REQUEST,
+                        "corps_invalide",
+                        "COG nommé invalide",
+                    )
+                })?,
+        ),
+    })
+}
+
+/// Refus d'une republication (dérivation, contrôle du service).
+fn refus_reprise(e: &ErreurFederee) -> Refus {
+    let (statut, code) = match e {
+        ErreurFederee::ChampInvalide("licence différente de la source") => {
+            (StatusCode::UNPROCESSABLE_ENTITY, "licence_differente")
+        }
+        ErreurFederee::ChampInvalide("audience plus large que la source") => {
+            (StatusCode::FORBIDDEN, "audience_elargie")
+        }
+        ErreurFederee::ValidationRequise => (StatusCode::FORBIDDEN, "republication_tamr_requise"),
+        ErreurFederee::VersionObsolete => (StatusCode::CONFLICT, "version_deja_publiee"),
+        ErreurFederee::FicheNonLocale => (StatusCode::FORBIDDEN, "fiche_non_locale"),
+        ErreurFederee::Delegation(_) => (
+            StatusCode::SERVICE_UNAVAILABLE,
+            "delegation_fiches_invalide",
+        ),
+        _ => (StatusCode::UNPROCESSABLE_ENTITY, "non_derivee"),
+    };
+    Refus::new(statut, code, e.to_string())
+}
+
+/// Refus du chemin TAMR.
+fn refus_tamr(r: &RefusTamr) -> Refus {
+    let (statut, code) = match r {
+        RefusTamr::Inconnue => (StatusCode::NOT_FOUND, "approbation_inconnue"),
+        RefusTamr::Expiree => (StatusCode::FORBIDDEN, "approbation_expiree"),
+        RefusTamr::EmpreinteDifferente => (StatusCode::FORBIDDEN, "empreinte_differente"),
+        RefusTamr::ApprobateurInvalide => (StatusCode::FORBIDDEN, "approbateur_invalide"),
+        RefusTamr::SignatureRequise => (StatusCode::UNAUTHORIZED, "signature_approbation_requise"),
+        RefusTamr::StrongFather(_) | RefusTamr::HorsPortee => (StatusCode::FORBIDDEN, "refus_tamr"),
+        RefusTamr::RegistrePlein
+        | RefusTamr::Indisponible
+        | RefusTamr::AutoriteIndisponible
+        | RefusTamr::Serialisation => (StatusCode::SERVICE_UNAVAILABLE, "tamr_indisponible"),
+    };
+    Refus::new(statut, code, r.to_string())
+}
+
+/// Fiches sources : décodées, vérifiées (chaîne de signature), étrangères au
+/// COG local, émetteur admis **maintenant** par la vue fédérale.
+fn verifier_sources(
+    vue: &dyn VueFederale,
+    cog_local: &CogId,
+    brutes: &[Vec<u8>],
+    maintenant: u64,
+) -> Result<Vec<FicheVerifiee>, Refus> {
+    if brutes.is_empty() || brutes.len() > MAX_REPRISES {
+        return Err(Refus::new(
+            StatusCode::BAD_REQUEST,
+            "sources_invalides",
+            format!("1 à {MAX_REPRISES} Fiches sources"),
+        ));
+    }
+    brutes
+        .iter()
+        .map(|b| {
+            let v = verifier_fiche(b, maintenant).map_err(|e| {
+                Refus::new(
+                    StatusCode::UNPROCESSABLE_ENTITY,
+                    "source_invalide",
+                    e.to_string(),
+                )
+            })?;
+            if v.cog() == cog_local {
+                return Err(Refus::new(
+                    StatusCode::FORBIDDEN,
+                    "source_locale",
+                    "une Fiche du COG local n'est pas une donnée étrangère",
+                ));
+            }
+            vue.qualifier(v.cog(), maintenant).map_err(|m| {
+                Refus::new(
+                    StatusCode::FORBIDDEN,
+                    "source_non_admise",
+                    format!("{} : {m}", v.cog().as_str()),
+                )
+            })?;
+            Ok(v)
+        })
+        .collect()
+}
+
+/// Contexte de l'approbation TAMR porté par l'intention de publication.
+struct ContexteTamr {
+    intervention: String,
+    regle: String,
+    empreinte: String,
+    cle: String,
+}
+
+/// Intention StrongFather d'une republication approuvée par TAMR.
+fn intention_republication(
+    utilisateur: &str,
+    fiche: &Fiche,
+    empreinte: &str,
+    ensemble: &str,
+    tamr: &ContexteTamr,
+) -> Intent {
+    let mut data = std::collections::HashMap::new();
+    for (k, v) in [
+        ("operation", OPERATION_REPUBLIER.to_string()),
+        ("utilisateur", utilisateur.to_string()),
+        ("canal", crate::tamr::CANAL_UTILISATEUR.to_string()),
+        ("usage_signe", USAGE_FEDEREE.to_string()),
+        ("provenance", "etranger".to_string()),
+        ("sensibilite", "ordinaire".to_string()),
+        ("tamr", TYPE_INTERVENTION.to_string()),
+        ("intervention_id", tamr.intervention.clone()),
+        ("regle_tamr", tamr.regle.clone()),
+        ("empreinte_tamr", tamr.empreinte.clone()),
+        ("cle_approbation", tamr.cle.clone()),
+        ("reprises", fiche.reprises.len().to_string()),
+        // Posés après `ServiceRequete::controler` (défense en profondeur).
+        ("licence_identique", "true".to_string()),
+        ("audience_incluse", "true".to_string()),
+        ("derivee", "true".to_string()),
+        ("fiche", fiche.id.clone()),
+        ("version", fiche.version.to_string()),
+        ("empreinte", empreinte.to_string()),
+        ("donnee", ensemble.to_string()),
+        ("type", (fiche.type_fiche as u8).to_string()),
+        ("langue", fiche.langue.clone()),
+        ("licence", fiche.licence.clone()),
+        ("audience", nom_audience(&fiche.audience).to_string()),
+    ] {
+        data.insert(k.to_string(), v);
+    }
+    let mut i = Intent::new(
+        format!(
+            "maia-federee-reprise-{}",
+            crate::garde_etranger::identifiant_aleatoire()
+        ),
+        ActionType::Creation,
+        "maia.federee.republication".to_string(),
+        CallContext {
+            caller_identity: utilisateur.to_string(),
+            origin: ORIGINE_MAIA.to_string(),
+            instance: "local".to_string(),
+        },
+        IntentData { content: data },
+    );
+    i.metadata
+        .insert("requested_at".into(), maintenant_unix().to_string());
+    i
+}
+
+/// Demande acceptée : approbation TAMR à présenter à l'utilisateur.
+struct DemandeReprise {
+    demande: crate::tamr::DemandeApprobation,
+    id: String,
+    version: u64,
+    date: u64,
+    empreinte: String,
+    reprises: usize,
+    octets: Vec<u8>,
+}
+
+/// Étape 1 : Fiche republiée calculée, scellée, figée dans une demande TAMR.
+async fn traiter_demande<S: SourceEtiquettes, M: MagasinPublications>(
+    etat: &EtatPublicationHttp<S, M>,
+    actif: &Actif<S, M>,
+    corps: &[u8],
+) -> Result<DemandeReprise, Refus> {
+    let u = &actif.utilisateur;
+    if etat
+        .limiteur_utilisateur
+        .check(&format!("republier:{u}"))
+        .is_err()
+    {
+        return Err(Refus::new(
+            StatusCode::TOO_MANY_REQUESTS,
+            "debit_utilisateur_depasse",
+            format!("{PUBLICATIONS_PAR_HEURE} demandes de republication par heure au plus"),
+        ));
+    }
+    let p: PropositionReprise = serde_json::from_slice(corps)
+        .map_err(|e| Refus::new(StatusCode::BAD_REQUEST, "corps_invalide", e.to_string()))?;
+    let vue = etat.vue.as_ref().ok_or_else(|| {
+        Refus::new(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "vue_federale_indisponible",
+            "aucune vue fédérale : émetteurs des sources non vérifiables",
+        )
+    })?;
+    let brutes = p
+        .fiches
+        .iter()
+        .map(|b| base64::engine::general_purpose::STANDARD.decode(b))
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| Refus::new(StatusCode::BAD_REQUEST, "corps_invalide", e.to_string()))?;
+    let maintenant = maintenant_unix();
+    let sources = verifier_sources(vue.as_ref(), &actif.cog, &brutes, maintenant)?;
+    if let Some(l) = &p.licence {
+        if sources.iter().any(|s| &s.fiche().licence != l) {
+            return Err(refus_reprise(&ErreurFederee::ChampInvalide(
+                "licence différente de la source",
+            )));
+        }
+    }
+    let choix = ChoixReprise {
+        sujet: p.sujet.clone(),
+        audience: p.audience.as_ref().map(audience_choisie).transpose()?,
+    };
+    let ensemble = empreinte_ensemble(&sources);
+    let id = id_fiche_reprise(&ensemble);
+
+    // Section critique : version calculée sur l'état durable.
+    let mut garde = actif.publication.lock().await;
+    EtatPublicationHttp::<S, M>::charger(actif, &mut garde).await?;
+    let Some(service) = garde.as_ref() else {
+        return Err(indisponible("état de publication non chargé"));
+    };
+    let version = service
+        .derniere_version(&id)
+        .checked_add(1)
+        .ok_or_else(|| {
+            Refus::new(
+                StatusCode::CONFLICT,
+                "version_deja_publiee",
+                "version maximale",
+            )
+        })?;
+    let fiche = deriver_reprise(
+        &sources,
+        actif.signataire.emetteur(),
+        &choix,
+        version,
+        maintenant,
+    )
+    .map_err(|e| refus_reprise(&e).pour(&id, version))?;
+    let octets = actif
+        .signataire
+        .sceller(&fiche, maintenant)
+        .map_err(|e| refus_reprise(&e).pour(&id, version))?;
+    let v =
+        verifier_fiche(&octets, maintenant).map_err(|e| refus_reprise(&e).pour(&id, version))?;
+    verifier_derivation_reprise(&v, &sources).map_err(|e| refus_reprise(&e).pour(&id, version))?;
+    drop(garde);
+
+    // Action TAMR figée : octets exacts de la Fiche à publier.
+    let empreinte = hex::encode(v.empreinte());
+    let mut attente = etat
+        .republications
+        .lock()
+        .map_err(|_| refus_tamr(&RefusTamr::Indisponible))?;
+    let duree = etat.duree_approbation;
+    attente.retain(|_, a| a.demandee.elapsed() <= duree);
+    if attente.len() >= CAPACITE_MAX {
+        return Err(refus_tamr(&RefusTamr::RegistrePlein).pour(&id, version));
+    }
+    let demande = etat
+        .approbations
+        .demander(ActionTamr::Republier {
+            proprietaire: u.clone(),
+            octets: octets.clone(),
+        })
+        .map_err(|r| refus_tamr(&r).pour(&id, version))?;
+    attente.insert(
+        demande.intervention_id.clone(),
+        RepublicationEnAttente {
+            utilisateur: u.clone(),
+            octets: octets.clone(),
+            sources: brutes,
+            id: id.clone(),
+            version,
+            ensemble: hex::encode(ensemble),
+            empreinte: empreinte.clone(),
+            demandee: std::time::Instant::now(),
+        },
+    );
+    Ok(DemandeReprise {
+        demande,
+        id,
+        version,
+        date: maintenant,
+        empreinte,
+        reprises: fiche.reprises.len(),
+        octets,
+    })
+}
+
+/// Étape 2 : approbation TAMR (StrongFather `tamr.approbation`), sources
+/// revérifiées, contrôle du service, porte `federee.republier`, puis
+/// écriture durable et inscription.
+async fn traiter_approbation<S: SourceEtiquettes, M: MagasinPublications>(
+    etat: &EtatPublicationHttp<S, M>,
+    actif: &Actif<S, M>,
+    signature: Option<SignatureApprobation>,
+    intervention: &str,
+    empreinte_vue: &str,
+) -> Result<Publiee, Refus> {
+    let u = &actif.utilisateur;
+    let signature = signature.ok_or_else(|| refus_tamr(&RefusTamr::SignatureRequise))?;
+    // Usage unique : l'attente est retirée quelle que soit l'issue.
+    let attente = etat
+        .republications
+        .lock()
+        .map_err(|_| refus_tamr(&RefusTamr::Indisponible))?
+        .remove(intervention);
+    let ok = etat
+        .approbations
+        .approuver(
+            intervention,
+            u,
+            empreinte_vue,
+            &signature,
+            &etat.gouvernance,
+        )
+        .map_err(|r| refus_tamr(&r))?;
+    let Some(attente) = attente.filter(|a| &a.utilisateur == u) else {
+        return Err(refus_tamr(&RefusTamr::HorsPortee));
+    };
+    let (id, version) = (attente.id.clone(), attente.version);
+    let avec = |r: Refus| Refus {
+        empreinte: Some(attente.empreinte.clone()),
+        ..r.pour(&id, version)
+    };
+    let tamr = ContexteTamr {
+        intervention: ok.intervention().to_string(),
+        regle: ok.regle().to_string(),
+        empreinte: ok.empreinte().to_string(),
+        cle: signature.cle().to_string(),
+    };
+    let validation = ok
+        .validation_republication(&attente.octets)
+        .map_err(|r| avec(refus_tamr(&r)))?;
+    let maintenant = maintenant_unix();
+    let vue = etat.vue.as_ref().ok_or_else(|| {
+        avec(Refus::new(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "vue_federale_indisponible",
+            "aucune vue fédérale",
+        ))
+    })?;
+    let sources =
+        verifier_sources(vue.as_ref(), &actif.cog, &attente.sources, maintenant).map_err(avec)?;
+
+    let mut garde = actif.publication.lock().await;
+    EtatPublicationHttp::<S, M>::charger(actif, &mut garde)
+        .await
+        .map_err(avec)?;
+    let Some(service) = garde.as_ref() else {
+        return Err(avec(indisponible("état de publication non chargé")));
+    };
+    // Contrôle sans effet : TAMR (octets exacts), reprises, licence, audience, dérivation, version.
+    let v = service
+        .controler(
+            &attente.octets,
+            &Publication::Reprise {
+                sources: &sources,
+                validation: &validation,
+            },
+            maintenant,
+        )
+        .map_err(|e| avec(refus_reprise(&e)))?;
+    let intent =
+        intention_republication(u, v.fiche(), &attente.empreinte, &attente.ensemble, &tamr);
+    let durable = PublicationDurable {
+        fiche: id.clone(),
+        version,
+        donnee: attente.ensemble.clone(),
+        empreinte: attente.empreinte.clone(),
+        utilisateur: u.clone(),
+        publiee_a: maintenant,
+        octets: attente.octets.clone(),
+    };
+    let magasin = &actif.magasin;
+    let a_publier = attente.octets.clone();
+    let (sources_ref, validation_ref) = (&sources, &validation);
+    let effet = etat.gouvernance.executer(&intent, |jeton| {
+        let regle = jeton.regle().to_string();
+        let garde = &mut garde;
+        async move {
+            if let Err(e) = magasin.enregistrer(&durable).await {
+                **garde = None;
+                tracing::error!(target: "maia::federee::audit", fiche = %durable.fiche, version = durable.version, erreur = %e, "republication non enregistrée (issue inconnue) : état à recharger");
+                return Err(Refus::new(
+                    StatusCode::SERVICE_UNAVAILABLE,
+                    "persistance_indisponible",
+                    "écriture de l'état de publication impossible",
+                ));
+            }
+            let publication = Publication::Reprise {
+                sources: sources_ref,
+                validation: validation_ref,
+            };
+            let inscrite = match garde.as_mut() {
+                Some(s) => s.publier(a_publier, publication, maintenant),
+                None => Err(ErreurFederee::Interdit("état de publication non chargé")),
+            };
+            if let Err(e) = inscrite {
+                **garde = None;
+                tracing::error!(target: "maia::federee::audit", fiche = %durable.fiche, version = durable.version, erreur = %e, "republication durable non inscrite en mémoire : état à recharger");
+                return Err(refus_reprise(&e));
+            }
+            Ok(regle)
+        }
+    });
+    let resultat = match effet {
+        Ok(f) => f.await,
+        Err(motif) => {
+            return Err(avec(Refus::new(
+                StatusCode::FORBIDDEN,
+                "refus_porte",
+                motif,
+            )))
+        }
+    };
+    match resultat {
+        Ok(regle) => Ok(Publiee {
+            id: id.clone(),
+            version,
+            date: v.fiche().date,
+            empreinte: attente.empreinte.clone(),
+            octets: attente.octets.clone(),
+            regle: format!(
+                "{regle} (TAMR : {}, intervention {})",
+                tamr.regle, tamr.intervention
+            ),
+        }),
+        Err(r) => Err(avec(r)),
+    }
+}
+
+impl<S: SourceEtiquettes, M: MagasinPublications> EtatPublicationHttp<S, M> {
+    /// Trace un refus et rend la réponse JSON correspondante.
+    fn repondre_refus(&self, instant: u64, utilisateur: &str, r: Refus) -> Response {
+        self.tracer(EntreeJournal {
+            instant,
+            utilisateur: utilisateur.to_string(),
+            verdict: "refusee",
+            motif: r.code,
+            detail: r.detail.clone(),
+            fiche: r.fiche.clone(),
+            version: r.version,
+            empreinte: r.empreinte.clone(),
+        });
+        (
+            r.statut,
+            Json(serde_json::json!({
+                "error": "publication refusée",
+                "reason": r.code,
+                "detail": r.detail,
+            })),
+        )
+            .into_response()
+    }
+
+    /// Actif si `u` est l'utilisateur de l'instance et l'authentifié ; sinon refus tracé.
+    fn actif_pour(
+        &self,
+        auth: &UtilisateurAuthentifie,
+        u: &str,
+    ) -> Result<&Actif<S, M>, Box<Response>> {
+        let Some(actif) = self.actif.as_ref() else {
+            return Err(Box::new(refus_http(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "publication_desactivee",
+            )));
+        };
+        if u != actif.utilisateur || auth.0 != u {
+            return Err(Box::new(self.repondre_refus(
+                maintenant_unix(),
+                &auth.0,
+                Refus::new(
+                    StatusCode::FORBIDDEN,
+                    "autre_utilisateur",
+                    format!("chemin pour {u}"),
+                ),
+            )));
+        }
+        Ok(actif)
+    }
+}
+
+/// `POST /v1/federee/{u}/republier` : demande ⇒ 202 et approbation TAMR à donner.
+async fn demander_republication<S: SourceEtiquettes, M: MagasinPublications>(
+    State(etat): State<Arc<EtatPublicationHttp<S, M>>>,
+    Extension(auth): Extension<UtilisateurAuthentifie>,
+    Chemin(u): Chemin<String>,
+    corps: Bytes,
+) -> Response {
+    let actif = match etat.actif_pour(&auth, &u) {
+        Ok(a) => a,
+        Err(r) => return *r,
+    };
+    let instant = maintenant_unix();
+    match traiter_demande(&etat, actif, &corps).await {
+        Ok(d) => {
+            etat.tracer(EntreeJournal {
+                instant,
+                utilisateur: u,
+                verdict: "en_attente",
+                motif: "approbation_tamr_demandee",
+                detail: format!("intervention {}", d.demande.intervention_id),
+                fiche: Some(d.id.clone()),
+                version: Some(d.version),
+                empreinte: Some(d.empreinte.clone()),
+            });
+            (
+                StatusCode::ACCEPTED,
+                Json(serde_json::json!({
+                    "approbation": d.demande,
+                    "fiche": {
+                        "id": d.id,
+                        "version": d.version,
+                        "date": d.date,
+                        "empreinte": d.empreinte,
+                        "reprises": d.reprises,
+                        "fiche": base64::engine::general_purpose::STANDARD.encode(&d.octets),
+                    }
+                })),
+            )
+                .into_response()
+        }
+        Err(r) => etat.repondre_refus(instant, &u, r),
+    }
+}
+
+/// `POST /v1/federee/{u}/republier/{iv}` : approbation TAMR (`{"empreinte"}`) ⇒ publication.
+async fn approuver_republication<S: SourceEtiquettes, M: MagasinPublications>(
+    State(etat): State<Arc<EtatPublicationHttp<S, M>>>,
+    Extension(auth): Extension<UtilisateurAuthentifie>,
+    signature: Option<Extension<SignatureApprobation>>,
+    Chemin((u, intervention)): Chemin<(String, String)>,
+    corps: Bytes,
+) -> Response {
+    let actif = match etat.actif_pour(&auth, &u) {
+        Ok(a) => a,
+        Err(r) => return *r,
+    };
+    let instant = maintenant_unix();
+    let c: CorpsApprobation = match serde_json::from_slice(&corps) {
+        Ok(c) => c,
+        Err(e) => {
+            return etat.repondre_refus(
+                instant,
+                &u,
+                Refus::new(StatusCode::BAD_REQUEST, "corps_invalide", e.to_string()),
+            )
+        }
+    };
+    match traiter_approbation(
+        &etat,
+        actif,
+        signature.map(|e| e.0),
+        &intervention,
+        &c.empreinte,
+    )
+    .await
+    {
+        Ok(p) => {
+            etat.tracer(EntreeJournal {
+                instant,
+                utilisateur: u,
+                verdict: "publiee",
+                motif: "republiee",
+                detail: format!("règle {}", p.regle),
+                fiche: Some(p.id.clone()),
+                version: Some(p.version),
+                empreinte: Some(p.empreinte.clone()),
+            });
+            Json(serde_json::json!({
+                "publiee": {
+                    "id": p.id,
+                    "version": p.version,
+                    "date": p.date,
+                    "empreinte": p.empreinte,
+                    "fiche": base64::engine::general_purpose::STANDARD.encode(&p.octets),
+                },
+                "tamr": "approuve",
+            }))
+            .into_response()
+        }
+        Err(r) => etat.repondre_refus(instant, &u, r),
+    }
+}
+
+/// `DELETE /v1/federee/{u}/republier/{iv}` : refus de l'utilisateur (clé de l'utilisateur).
+async fn refuser_republication<S: SourceEtiquettes, M: MagasinPublications>(
+    State(etat): State<Arc<EtatPublicationHttp<S, M>>>,
+    Extension(auth): Extension<UtilisateurAuthentifie>,
+    Chemin((u, intervention)): Chemin<(String, String)>,
+) -> Response {
+    if let Err(r) = etat.actif_pour(&auth, &u) {
+        return *r;
+    }
+    if let Ok(mut a) = etat.republications.lock() {
+        a.remove(&intervention);
+    }
+    match etat.approbations.refuser(&intervention, &auth.0) {
+        Ok(()) => Json(serde_json::json!({ "tamr": "refuse" })).into_response(),
+        Err(r) => etat.repondre_refus(maintenant_unix(), &u, refus_tamr(&r)),
+    }
+}
+
 #[cfg(test)]
 #[allow(clippy::too_many_lines, clippy::many_single_char_names)]
 mod tests {
@@ -1623,7 +2544,9 @@ mod tests {
         VERSION_INTENTION,
     };
     use kindmother::intent::{SchemaMigration, TypedWriteIntent};
+    use maia_federee::cog_de_cle;
     use miyauth::http::service::entetes_signees;
+    use miyusceau::DelegationCle;
     use sha2::{Digest, Sha256};
     use std::path::PathBuf;
     use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
@@ -1640,6 +2563,65 @@ mod tests {
     /// Clé HTTP de l'utilisateur (requêtes signées).
     fn alice_http() -> CleSignature {
         CleSignature::depuis_graine(&[7_u8; 32])
+    }
+
+    /// Clé d'approbation TAMR de l'utilisateur (distincte de sa clé HTTP, F7).
+    fn alice_approbation() -> CleSignature {
+        CleSignature::depuis_graine(&[8_u8; 32])
+    }
+
+    fn usage_approbation() -> String {
+        format!("{USAGE_APPROBATION}/{INSTANCE}/alice")
+    }
+
+    /// Signataire des Fiches du COG d'identité `graine` : clé `fiches`
+    /// dérivée de la graine, délégation `0x45` de l'identité (A-024).
+    fn signataire(graine: &[u8; 32]) -> SignataireFiches {
+        let identite = CleSignature::depuis_graine(graine);
+        let g: [u8; 32] = Sha256::digest([graine.as_slice(), b"fiches"].concat()).into();
+        let fiches = CleSignature::depuis_graine(&g);
+        let t = maintenant_unix();
+        let cog = cog_de_cle(&identite.cle_publique()).expect("cog");
+        let d = DelegationCle::nouvelle(
+            cog.as_str(),
+            maia_federee::INDICE_FICHES,
+            0,
+            fiches.cle_publique(),
+            t - 86_400,
+            t + 30 * 86_400,
+        )
+        .expect("délégation")
+        .sceller(&identite)
+        .expect("sceau");
+        SignataireFiches::deleguee(fiches, identite.cle_publique(), d, t).expect("signataire")
+    }
+
+    /// Vue fédérale d'essai : tout COG est membre, sauf ceux de `refuses`.
+    #[derive(Default)]
+    struct VueEssai {
+        refuses: Vec<CogId>,
+    }
+
+    impl VueFederale for VueEssai {
+        fn qualifier(&self, cog: &CogId, _: u64) -> Result<maia_federee::Qualite, String> {
+            if self.refuses.contains(cog) {
+                Err("statut Revoque".into())
+            } else {
+                Ok(maia_federee::Qualite::Membre)
+            }
+        }
+    }
+
+    /// Graine d'un COG étranger révoqué (refusé par la vue d'essai).
+    const GRAINE_REVOQUEE: u8 = 66;
+
+    fn vue_essai() -> VuePartagee {
+        Arc::new(VueEssai {
+            refuses: vec![cog_de_cle(
+                &CleSignature::depuis_graine(&[GRAINE_REVOQUEE; 32]).cle_publique(),
+            )
+            .expect("cog")],
+        })
     }
 
     /// Clé d'étiquette de l'utilisateur (intentions KindMother).
@@ -1703,15 +2685,29 @@ mod tests {
 
     fn etat_de<S: SourceEtiquettes, M: MagasinPublications>(
         gouvernance: GouvernanceMaia,
-        actif: Option<(String, S, M, CleSignature)>,
+        actif: Option<(String, S, M, SignataireFiches)>,
     ) -> (Arc<EtatPublicationHttp<S, M>>, Router) {
-        let etat = Arc::new(EtatPublicationHttp::new(
+        etat_regle(gouvernance, actif, |e| e)
+    }
+
+    /// État de la route (clés d'approbation d'Alice, vue d'essai), ajusté par `f`.
+    fn etat_regle<S: SourceEtiquettes, M: MagasinPublications>(
+        gouvernance: GouvernanceMaia,
+        actif: Option<(String, S, M, SignataireFiches)>,
+        f: impl FnOnce(EtatPublicationHttp<S, M>) -> EtatPublicationHttp<S, M>,
+    ) -> (Arc<EtatPublicationHttp<S, M>>, Router) {
+        let etat = Arc::new(f(EtatPublicationHttp::new(
             actif,
             vec![alice_http().cle_publique()],
             INSTANCE.to_string(),
             Arc::new(gouvernance),
             SecurityConfig::default(),
-        ));
+        )
+        .avec_cles_approbation(
+            vec![alice_approbation().cle_publique()],
+            &[alice_http().cle_publique()],
+        )
+        .avec_vue_federale(vue_essai())));
         let app = routeur(Arc::clone(&etat));
         (etat, app)
     }
@@ -1768,7 +2764,7 @@ mod tests {
                 "alice".to_string(),
                 f_source(source(&addr, &dir)),
                 f_magasin(magasin(&addr, &dir)),
-                CleSignature::depuis_graine(&graine),
+                signataire(&graine),
             )
         });
         let (etat, app) = etat_de(gouvernance, actif);
@@ -1789,6 +2785,37 @@ mod tests {
 
     async fn banc() -> Banc {
         banc_avec(crate::gouvernance::tests::gouvernance_de_base(), true).await
+    }
+
+    /// Requête `methode` signée par `cle` pour `usage` (ou non signée).
+    async fn envoyer_avec(
+        app: Router,
+        methode: &str,
+        chemin: &str,
+        corps: &str,
+        signature: Option<(&CleSignature, &str)>,
+    ) -> (StatusCode, serde_json::Value) {
+        let mut b = axum::http::Request::builder()
+            .method(methode)
+            .uri(chemin)
+            .header(header::CONTENT_TYPE, "application/json");
+        if let Some((cle, usage)) = signature {
+            for (n, v) in entetes_signees(cle, usage, methode, chemin, corps.as_bytes()) {
+                b = b.header(n, v);
+            }
+        }
+        let mut r = b.body(Body::from(corps.to_string())).expect("requête");
+        r.extensions_mut()
+            .insert(ConnectInfo(SocketAddr::from(([127, 0, 0, 1], 40003))));
+        let rep = app.oneshot(r).await.expect("réponse");
+        let s = rep.status();
+        let o = axum::body::to_bytes(rep.into_body(), 1 << 20)
+            .await
+            .expect("corps");
+        (
+            s,
+            serde_json::from_slice(&o).unwrap_or(serde_json::Value::Null),
+        )
     }
 
     /// Requête signée par la clé HTTP d'Alice (ou non signée).
@@ -1911,7 +2938,7 @@ mod tests {
                     "alice".to_string(),
                     source(&self.addr, &self.dir),
                     magasin(&self.addr, &self.dir),
-                    CleSignature::depuis_graine(&self.graine),
+                    signataire(&self.graine),
                 )),
             )
         }
@@ -1962,6 +2989,16 @@ mod tests {
             .decode(v["publiee"]["fiche"].as_str().expect("fiche"))
             .expect("base64");
         let f = maia_federee::verifier_fiche(&octets, maintenant_unix()).expect("fiche");
+        // A-022 §4 : signée par la clé `fiches` déléguée, émetteur = identité du COG.
+        assert!(matches!(
+            f.signature(),
+            maia_federee::SignatureFiche::Deleguee { generation: 0, .. }
+        ));
+        assert!(maia_federee::verifier_fiche_deleguee(&octets, maintenant_unix()).is_ok());
+        assert_eq!(
+            f.fiche().emetteur,
+            CleSignature::depuis_graine(&b.graine).cle_publique()
+        );
         assert_eq!(f.fiche().id, id);
         assert_eq!(f.fiche().texte, TEXTE);
         assert_eq!(f.fiche().licence, "CC-BY-4.0");
@@ -2446,7 +3483,7 @@ mod tests {
                 source(&b.addr, &b.dir),
                 PublicationsKindMother::charger(&mort, OPERATEUR_PUBLICATIONS, Some(&cred(&b.dir)))
                     .expect("magasin"),
-                CleSignature::depuis_graine(&b.graine),
+                signataire(&b.graine),
             )),
         );
         assert!(!etat.precharger().await);
@@ -2732,5 +3769,552 @@ mod tests {
             2
         );
         assert_eq!(b.lignes().await, Vec::new());
+    }
+    // ── A-009 / A7 : republication d'une donnée étrangère (chemin TAMR) ──
+
+    const CHEMIN_REPRISE: &str = "/v1/federee/alice/republier";
+
+    /// Fiche étrangère du COG de graine `g` (signée par son identité : format
+    /// de la transition, encore lisible).
+    fn source_etrangere(g: u8, id: &str, licence: &str, audience: Audience) -> Vec<u8> {
+        let cle = CleSignature::depuis_graine(&[g; 32]);
+        let f = Fiche {
+            id: id.into(),
+            emetteur: cle.cle_publique(),
+            sujet: "capitale de la France".into(),
+            type_fiche: TypeFiche::Fait,
+            texte: TEXTE.into(),
+            relations: vec![Relation {
+                sujet: "Paris".into(),
+                predicat: "capitale de".into(),
+                objet: "France".into(),
+            }],
+            sources: vec!["https://exemple.org/geo".into()],
+            date: maintenant_unix() - 60,
+            version: 1,
+            langue: "fr".into(),
+            licence: licence.into(),
+            audience,
+            reprises: Vec::new(),
+        };
+        maia_federee::sceller_fiche(&f, &cle).expect("source")
+    }
+
+    fn b64(o: &[u8]) -> String {
+        base64::engine::general_purpose::STANDARD.encode(o)
+    }
+
+    fn reprise(sources: &[&[u8]]) -> serde_json::Value {
+        serde_json::json!({ "fiches": sources.iter().map(|o| b64(o)).collect::<Vec<_>>() })
+    }
+
+    async fn demander(app: &Router, corps: &serde_json::Value) -> (StatusCode, serde_json::Value) {
+        let u = usage();
+        envoyer_avec(
+            app.clone(),
+            "POST",
+            CHEMIN_REPRISE,
+            &corps.to_string(),
+            Some((&alice_http(), &u)),
+        )
+        .await
+    }
+
+    async fn approuver(
+        app: &Router,
+        chemin: &str,
+        empreinte: &str,
+    ) -> (StatusCode, serde_json::Value) {
+        let u = usage_approbation();
+        let corps = serde_json::json!({ "empreinte": empreinte }).to_string();
+        envoyer_avec(
+            app.clone(),
+            "POST",
+            chemin,
+            &corps,
+            Some((&alice_approbation(), &u)),
+        )
+        .await
+    }
+
+    fn chemin_approbation(v: &serde_json::Value) -> String {
+        format!(
+            "{CHEMIN_REPRISE}/{}",
+            v["approbation"]["intervention_id"].as_str().expect("iv")
+        )
+    }
+
+    fn empreinte_tamr(v: &serde_json::Value) -> String {
+        v["approbation"]["empreinte"]
+            .as_str()
+            .expect("empreinte")
+            .to_string()
+    }
+
+    #[tokio::test]
+    async fn republication_approuvee_publiee_persistee_rechargee() {
+        let b = banc().await;
+        let src = source_etrangere(31, "geo.paris", "CC-BY-4.0", Audience::Membres);
+        // 1. Demande : Fiche calculée par le serveur, figée dans une demande TAMR ; rien n'est publié.
+        let (s, v) = demander(&b.app, &reprise(&[&src])).await;
+        assert_eq!(s, StatusCode::ACCEPTED, "{v}");
+        assert_eq!(v["approbation"]["type_intervention"], "APPROVAL");
+        assert_eq!(v["approbation"]["objet"], "federee.republier");
+        let description = v["approbation"]["description"]
+            .as_str()
+            .expect("description");
+        let octets = base64::engine::general_purpose::STANDARD
+            .decode(v["fiche"]["fiche"].as_str().expect("fiche"))
+            .expect("b64");
+        assert!(description.starts_with(&ServiceRequete::description_republication(&octets)));
+        assert!(
+            description.contains(TEXTE) && description.contains("CC-BY-4.0"),
+            "{description}"
+        );
+        let id = v["fiche"]["id"].as_str().expect("id").to_string();
+        assert!(id.starts_with(maia_federee::PREFIXE_ID_REPRISE));
+        assert_eq!(b.lignes().await, Vec::new());
+        assert_eq!(b.dernier_motif(), "approbation_tamr_demandee");
+
+        // 2. Approbation signée par la clé d'approbation, sur l'empreinte vue : publiée.
+        let chemin = chemin_approbation(&v);
+        let (s, r) = approuver(&b.app, &chemin, &empreinte_tamr(&v)).await;
+        assert_eq!(s, StatusCode::OK, "{r}");
+        assert_eq!(r["tamr"], "approuve");
+        assert_eq!(r["publiee"]["id"], id.as_str());
+        assert_eq!(
+            r["publiee"]["fiche"], v["fiche"]["fiche"],
+            "octets exacts approuvés"
+        );
+        let f = verifier_fiche(&octets, maintenant_unix()).expect("fiche");
+        assert!(f.est_reprise());
+        assert!(matches!(
+            f.signature(),
+            maia_federee::SignatureFiche::Deleguee { .. }
+        ));
+        let source = verifier_fiche(&src, maintenant_unix()).expect("source");
+        assert_eq!(f.fiche().reprises, vec![maia_federee::Reprise::de(&source)]);
+        assert_eq!(
+            (f.fiche().licence.as_str(), &f.fiche().audience),
+            ("CC-BY-4.0", &Audience::Membres)
+        );
+        let j = b.etat.journal();
+        let e = j.last().expect("entrée");
+        assert_eq!((e.verdict, e.motif), ("publiee", "republiee"));
+        assert!(
+            e.detail.contains("maia-federee-republier")
+                && e.detail.contains("maia-tamr-approbation"),
+            "{}",
+            e.detail
+        );
+        // Persistée comme A-018 : une ligne, ensemble des sources dans `donnee`.
+        let l = b.lignes().await;
+        assert_eq!(l.len(), 1);
+        assert_eq!((l[0].fiche.as_str(), l[0].version), (id.as_str(), 1));
+        assert_eq!(
+            l[0].donnee,
+            hex::encode(maia_federee::empreinte_ensemble(&[source]))
+        );
+        // Usage unique.
+        let (s, r) = approuver(&b.app, &chemin, &empreinte_tamr(&v)).await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (StatusCode::NOT_FOUND, Some("approbation_inconnue"))
+        );
+
+        // 3. Redémarrage : la republication est rechargée (chemin TAMR), version suivante = 2.
+        let (etat2, app2) = b.redemarrer(crate::gouvernance::tests::gouvernance_de_base());
+        assert!(etat2.precharger().await);
+        assert_eq!(etat2.derniere_version(&id).await, 1);
+        let (s, v) = demander(&app2, &reprise(&[&src])).await;
+        assert_eq!(
+            (s, v["fiche"]["version"].as_u64()),
+            (StatusCode::ACCEPTED, Some(2)),
+            "{v}"
+        );
+        let (s, r) = approuver(&app2, &chemin_approbation(&v), &empreinte_tamr(&v)).await;
+        assert_eq!(
+            (s, r["publiee"]["version"].as_u64()),
+            (StatusCode::OK, Some(2)),
+            "{r}"
+        );
+        // Jamais comptée pour la corroboration (A-009).
+        assert!(verifier_fiche(&octets, maintenant_unix())
+            .expect("f")
+            .est_reprise());
+    }
+
+    #[tokio::test]
+    async fn republication_refusee_sans_approbation_autre_empreinte_refus_expiree() {
+        let b = banc().await;
+        let src = source_etrangere(32, "geo.paris", "CC-BY-4.0", Audience::Invites);
+        // Sans approbation : rien n'est publié ; la route ordinaire refuse les reprises.
+        let (s, v) = demander(&b.app, &reprise(&[&src])).await;
+        assert_eq!(s, StatusCode::ACCEPTED, "{v}");
+        assert_eq!(b.lignes().await, Vec::new());
+        let d = b.donnee(TEXTE).await;
+        let (s, r) = b
+            .proposer(avec(
+                proposition(&d),
+                "reprises",
+                serde_json::json!([b64(&src)]),
+            ))
+            .await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (StatusCode::FORBIDDEN, Some("republication_tamr_requise"))
+        );
+        // Autre empreinte : refus, et la demande est consommée.
+        let chemin = chemin_approbation(&v);
+        let (s, r) = approuver(&b.app, &chemin, &"00".repeat(32)).await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (StatusCode::FORBIDDEN, Some("empreinte_differente")),
+            "{r}"
+        );
+        let (s, r) = approuver(&b.app, &chemin, &empreinte_tamr(&v)).await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (StatusCode::NOT_FOUND, Some("approbation_inconnue"))
+        );
+        // Refus explicite de l'utilisateur (clé de l'utilisateur) : close la demande.
+        let (_, v) = demander(&b.app, &reprise(&[&src])).await;
+        let chemin = chemin_approbation(&v);
+        let u = usage();
+        let (s, r) = envoyer_avec(
+            b.app.clone(),
+            "DELETE",
+            &chemin,
+            "",
+            Some((&alice_http(), &u)),
+        )
+        .await;
+        assert_eq!(
+            (s, r["tamr"].as_str()),
+            (StatusCode::OK, Some("refuse")),
+            "{r}"
+        );
+        let (s, _) = approuver(&b.app, &chemin, &empreinte_tamr(&v)).await;
+        assert_eq!(s, StatusCode::NOT_FOUND);
+        assert_eq!(b.lignes().await, Vec::new());
+
+        // Délai expiré (R-APPR-4) : refus par défaut.
+        let (_, app) = etat_regle(
+            crate::gouvernance::tests::gouvernance_de_base(),
+            Some((
+                "alice".to_string(),
+                source(&b.addr, &b.dir),
+                magasin(&b.addr, &b.dir),
+                signataire(&b.graine),
+            )),
+            |e| e.avec_duree_approbation(std::time::Duration::ZERO),
+        );
+        let (s, v) = demander(&app, &reprise(&[&src])).await;
+        assert_eq!(s, StatusCode::ACCEPTED, "{v}");
+        tokio::time::sleep(std::time::Duration::from_millis(5)).await;
+        let (s, r) = approuver(&app, &chemin_approbation(&v), &empreinte_tamr(&v)).await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (StatusCode::FORBIDDEN, Some("approbation_expiree")),
+            "{r}"
+        );
+        assert_eq!(b.lignes().await, Vec::new());
+    }
+
+    #[tokio::test]
+    async fn republication_refus_licence_audience_et_sources() {
+        let b = banc().await;
+        let src = source_etrangere(33, "geo.paris", "CC-BY-4.0", Audience::Membres);
+        let mit = source_etrangere(34, "geo.lyon", "MIT", Audience::Membres);
+        let attendu = |s: StatusCode, r: &serde_json::Value, statut: StatusCode, code: &str| {
+            assert_eq!((s, r["reason"].as_str()), (statut, Some(code)), "{r}");
+        };
+        // Licence différente entre les sources, ou annoncée différente de la source.
+        let (s, r) = demander(&b.app, &reprise(&[&src, &mit])).await;
+        attendu(
+            s,
+            &r,
+            StatusCode::UNPROCESSABLE_ENTITY,
+            "licence_differente",
+        );
+        let (s, r) = demander(&b.app, &avec(reprise(&[&src]), "licence", "MIT".into())).await;
+        attendu(
+            s,
+            &r,
+            StatusCode::UNPROCESSABLE_ENTITY,
+            "licence_differente",
+        );
+        // Audience élargie (membres ⇒ invités).
+        let (s, r) = demander(
+            &b.app,
+            &avec(reprise(&[&src]), "audience", "invites".into()),
+        )
+        .await;
+        attendu(s, &r, StatusCode::FORBIDDEN, "audience_elargie");
+        // Sujet absent des sources.
+        let (s, r) = demander(
+            &b.app,
+            &avec(reprise(&[&src]), "sujet", "code d'accès 1234".into()),
+        )
+        .await;
+        attendu(s, &r, StatusCode::UNPROCESSABLE_ENTITY, "non_derivee");
+        // Jamais de données KindMother (donc jamais `maia-*`) : champ refusé.
+        let donnee = serde_json::json!({ "base": "maia-alice", "table": "notes", "colonne": "body", "cle": { "id": "n1" } });
+        let (s, r) = demander(&b.app, &avec(reprise(&[&src]), "donnee", donnee)).await;
+        attendu(s, &r, StatusCode::BAD_REQUEST, "corps_invalide");
+        // Fiche du COG local présentée comme étrangère.
+        let identite = CleSignature::depuis_graine(&b.graine).cle_publique();
+        let mut locale = verifier_fiche(&src, maintenant_unix())
+            .expect("f")
+            .fiche()
+            .clone();
+        locale.emetteur = identite;
+        let locale = signataire(&b.graine)
+            .sceller(&locale, maintenant_unix())
+            .expect("locale");
+        let (s, r) = demander(&b.app, &reprise(&[&locale])).await;
+        attendu(s, &r, StatusCode::FORBIDDEN, "source_locale");
+        // Émetteur non admis par la vue fédérale.
+        let revoque =
+            source_etrangere(GRAINE_REVOQUEE, "geo.paris", "CC-BY-4.0", Audience::Membres);
+        let (s, r) = demander(&b.app, &reprise(&[&revoque])).await;
+        attendu(s, &r, StatusCode::FORBIDDEN, "source_non_admise");
+        // Source altérée, ou aucune source.
+        let mut alteree = src.clone();
+        if let Some(o) = alteree.last_mut() {
+            *o ^= 1;
+        }
+        let (s, r) = demander(&b.app, &reprise(&[&alteree])).await;
+        attendu(s, &r, StatusCode::UNPROCESSABLE_ENTITY, "source_invalide");
+        let (s, r) = demander(&b.app, &reprise(&[])).await;
+        attendu(s, &r, StatusCode::BAD_REQUEST, "sources_invalides");
+        assert_eq!(b.lignes().await, Vec::new());
+        // Audience restreinte : COG nommés ⊂ invités admis ; ⊄ membres (un nommé peut être invité).
+        let nomme = serde_json::json!({ "nommes": [cog_de_cle(&[9; 32]).expect("cog").as_str()] });
+        let (s, r) = demander(&b.app, &avec(reprise(&[&src]), "audience", nomme.clone())).await;
+        attendu(s, &r, StatusCode::FORBIDDEN, "audience_elargie");
+        let invites = source_etrangere(37, "geo.paris", "CC-BY-4.0", Audience::Invites);
+        let (s, v) = demander(&b.app, &avec(reprise(&[&invites]), "audience", nomme)).await;
+        assert_eq!(s, StatusCode::ACCEPTED, "{v}");
+    }
+
+    #[tokio::test]
+    async fn republication_autre_utilisateur_cles_vue_et_debit() {
+        let b = banc().await;
+        let src = source_etrangere(35, "geo.paris", "CC-BY-4.0", Audience::Membres);
+        let corps = reprise(&[&src]).to_string();
+        let u = usage();
+        // Autre utilisateur dans le chemin : 403.
+        let (s, r) = envoyer_avec(
+            b.app.clone(),
+            "POST",
+            "/v1/federee/bob/republier",
+            &corps,
+            Some((&alice_http(), &u)),
+        )
+        .await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (StatusCode::FORBIDDEN, Some("autre_utilisateur"))
+        );
+        let (_, v) = demander(&b.app, &reprise(&[&src])).await;
+        let iv = v["approbation"]["intervention_id"]
+            .as_str()
+            .expect("iv")
+            .to_string();
+        let corps_a = serde_json::json!({ "empreinte": empreinte_tamr(&v) }).to_string();
+        // Approbation signée par la clé ordinaire de l'utilisateur (pas d'approbation) : 401.
+        let (s, r) = envoyer_avec(
+            b.app.clone(),
+            "POST",
+            &chemin_approbation(&v),
+            &corps_a,
+            Some((&alice_http(), &u)),
+        )
+        .await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (
+                StatusCode::UNAUTHORIZED,
+                Some("signature_approbation_requise")
+            )
+        );
+        // Approbation pour un autre utilisateur : 403, rien n'est publié.
+        let ua = usage_approbation();
+        let (s, r) = envoyer_avec(
+            b.app.clone(),
+            "POST",
+            &format!("/v1/federee/bob/republier/{iv}"),
+            &corps_a,
+            Some((&alice_approbation(), &ua)),
+        )
+        .await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (StatusCode::FORBIDDEN, Some("autre_utilisateur"))
+        );
+        // TAMR : l'approbateur doit être le propriétaire de l'action.
+        let d = b
+            .etat
+            .approbations
+            .demander(ActionTamr::Republier {
+                proprietaire: "alice".into(),
+                octets: src.clone(),
+            })
+            .expect("d");
+        let sig = SignatureApprobation::verifiee(&alice_approbation().cle_publique());
+        assert_eq!(
+            b.etat
+                .approbations
+                .approuver(
+                    &d.intervention_id,
+                    "bob",
+                    &d.empreinte,
+                    &sig,
+                    &b.etat.gouvernance
+                )
+                .unwrap_err(),
+            RefusTamr::ApprobateurInvalide
+        );
+        assert_eq!(b.lignes().await, Vec::new());
+        // Clé d'approbation = clé de l'utilisateur : approbations désactivées.
+        let (_, app) = etat_regle(
+            crate::gouvernance::tests::gouvernance_de_base(),
+            Some((
+                "alice".to_string(),
+                source(&b.addr, &b.dir),
+                magasin(&b.addr, &b.dir),
+                signataire(&b.graine),
+            )),
+            |e| {
+                e.avec_cles_approbation(
+                    vec![alice_http().cle_publique()],
+                    &[alice_http().cle_publique()],
+                )
+            },
+        );
+        let (s, r) = envoyer_avec(
+            app,
+            "POST",
+            &chemin_approbation(&v),
+            &corps_a,
+            Some((&alice_http(), &ua)),
+        )
+        .await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Some("approbations_desactivees")
+            )
+        );
+        // Sans vue fédérale : émetteurs non vérifiables, 503.
+        let sans_vue = Arc::new(EtatPublicationHttp::new(
+            Some((
+                "alice".to_string(),
+                source(&b.addr, &b.dir),
+                magasin(&b.addr, &b.dir),
+                signataire(&b.graine),
+            )),
+            vec![alice_http().cle_publique()],
+            INSTANCE.to_string(),
+            Arc::new(crate::gouvernance::tests::gouvernance_de_base()),
+            SecurityConfig::default(),
+        ));
+        let (s, r) = demander(&routeur(sans_vue), &reprise(&[&src])).await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Some("vue_federale_indisponible")
+            )
+        );
+        // Débit par utilisateur : au-delà de PUBLICATIONS_PAR_HEURE demandes, 429.
+        for _ in 1..PUBLICATIONS_PAR_HEURE {
+            let (s, _) = demander(&b.app, &serde_json::json!({})).await;
+            assert_eq!(s, StatusCode::BAD_REQUEST);
+        }
+        let (s, r) = demander(&b.app, &reprise(&[&src])).await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (
+                StatusCode::TOO_MANY_REQUESTS,
+                Some("debit_utilisateur_depasse")
+            )
+        );
+    }
+
+    #[tokio::test]
+    async fn republication_refusee_par_la_porte_malgre_tamr() {
+        // TAMR autorisé, mais aucune règle `federee.republier` : refus par défaut.
+        let b = banc_avec(
+            crate::tamr::tests::gouvernance(crate::tamr::tests::POLITIQUE_TAMR),
+            true,
+        )
+        .await;
+        let src = source_etrangere(36, "geo.paris", "CC-BY-4.0", Audience::Membres);
+        let (s, v) = demander(&b.app, &reprise(&[&src])).await;
+        assert_eq!(s, StatusCode::ACCEPTED, "{v}");
+        let (s, r) = approuver(&b.app, &chemin_approbation(&v), &empreinte_tamr(&v)).await;
+        assert_eq!(
+            (s, r["reason"].as_str()),
+            (StatusCode::FORBIDDEN, Some("refus_porte")),
+            "{r}"
+        );
+        assert_eq!(b.lignes().await, Vec::new());
+    }
+
+    #[tokio::test]
+    async fn transition_fiches_signees_par_l_identite_relues_puis_cle_fiches() {
+        let b = banc().await;
+        let d = b.donnee(TEXTE).await;
+        b.poser(&d).await;
+        // Configuration transitoire (A-017) : la clé d'identité signe.
+        let (_, app_identite) = etat_de(
+            crate::gouvernance::tests::gouvernance_de_base(),
+            Some((
+                "alice".to_string(),
+                source(&b.addr, &b.dir),
+                magasin(&b.addr, &b.dir),
+                SignataireFiches::identite(CleSignature::depuis_graine(&b.graine)),
+            )),
+        );
+        let (s, r) = envoyer(app_identite, CHEMIN, &proposition(&d).to_string(), true).await;
+        assert_eq!(s, StatusCode::OK, "{r}");
+        let id = id_attendu(&d);
+        let l = b.lignes().await;
+        assert_eq!(
+            verifier_fiche(&l[0].octets, maintenant_unix())
+                .expect("v1")
+                .signature(),
+            &maia_federee::SignatureFiche::Identite
+        );
+        // Clé `fiches` configurée (même identité) : l'état ancien se recharge, la suite est déléguée.
+        let (s, r) = b.proposer(proposition(&d)).await;
+        assert_eq!(
+            (s, r["publiee"]["version"].as_u64()),
+            (StatusCode::OK, Some(2)),
+            "{r}"
+        );
+        verifier_lignes(&b, &id, 2).await;
+        let l = b.lignes().await;
+        let v2 = l.iter().find(|x| x.version == 2).expect("v2");
+        assert!(matches!(
+            verifier_fiche(&v2.octets, maintenant_unix())
+                .expect("v2")
+                .signature(),
+            maia_federee::SignatureFiche::Deleguee { .. }
+        ));
+        // Autre identité (changement de clé d'identité du COG) : état incohérent, 503.
+        let (etat, _) = etat_de(
+            crate::gouvernance::tests::gouvernance_de_base(),
+            Some((
+                "alice".to_string(),
+                source(&b.addr, &b.dir),
+                magasin(&b.addr, &b.dir),
+                signataire(&[99; 32]),
+            )),
+        );
+        assert!(!etat.precharger().await);
     }
 }

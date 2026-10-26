@@ -56,6 +56,11 @@ pub enum ErreurFederee {
     /// Effet interdit quelle que soit la validation (EX-60, EX-63).
     #[error("interdit : {0}")]
     Interdit(&'static str),
+    /// Chaîne de signature de la clé `fiches` refusée (délégation `0x45`
+    /// absente du mode strict, invalide, expirée, d'un autre usage ou d'un
+    /// autre émetteur ; A-022 §4, A-024).
+    #[error("délégation de la clé « fiches » refusée : {0}")]
+    Delegation(&'static str),
     /// Politique invalide.
     #[error("paramètre invalide : {0}")]
     ParametreInvalide(&'static str),
