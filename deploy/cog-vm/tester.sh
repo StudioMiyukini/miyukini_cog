@@ -58,12 +58,12 @@ code_http() { curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$@"; }
 
 # ------------------------------------------------------------------ services
 
-for u in postgresql miyukini-douane-cog miyukini-attente-kindmother miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal \
-	miyukini-portail-entree miyukini-portail-sortie; do
+for u in postgresql miyukini-douane-cog miyukini-douane-externe miyukini-attente-kindmother miyukini-kindmother miyukini-maia-llm \
+	miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-entree miyukini-portail-sortie; do
 	controle "$u actif" systemctl is-active --quiet "$u"
 done
 
-for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
+for u in miyukini-kindmother miyukini-maia-llm miyukini-maia miyukini-miyucloud miyukini-cog-web-portal; do
 	controle "$u : pas de redémarrage en boucle" \
 		test "$(systemctl show -p NRestarts --value "$u")" = 0
 done
@@ -71,7 +71,7 @@ done
 # ------------------------------------------------------------------ écoute réseau
 
 ecoute_sur() { ss -ltnH | awk -v a="$1" '$4 == a { f = 1 } END { exit !f }'; }
-for pair in "KindMother:127.0.0.1:50051" "MAIA:127.0.0.1:11435" "MiyuCloud:127.0.0.1:8086" \
+for pair in "KindMother:127.0.0.1:50051" "MAIA:127.0.0.1:11435" "maia-llm:127.0.0.1:11436" "MiyuCloud:127.0.0.1:8086" \
 	"portail:127.0.0.1:8090" "PostgreSQL:127.0.0.1:5432"; do
 	nom=${pair%%:*}
 	adresse=${pair#*:}
@@ -95,18 +95,18 @@ controle "Douane : unité de zone rechargeable (ExecReload = nft -f du rendu miy
 	bash -c "systemctl show -p ExecReload --value miyukini-douane-cog | grep -q '/etc/miyukini/douane-cog.nft'"
 controle "Douane : minuteur de contrôle périodique de la zone actif (fail-closed)" \
 	systemctl is-active --quiet miyukini-douane-cog-controle.timer
-for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-entree miyukini-portail-sortie; do
+for u in miyukini-kindmother miyukini-maia-llm miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-entree miyukini-portail-sortie; do
 	controle "COG $u : lié à la zone (BindsTo=miyukini-douane-cog.service)" \
 		bash -c "systemctl show -p BindsTo --value $u | grep -qw miyukini-douane-cog.service"
 done
-controle "Douane : description de zone générée (miyudouane-hote 2, flux boucle par compte)" \
-	bash -c "sudo -n head -c 4096 /etc/miyukini/douane-hote.desc | grep -q '^miyudouane-hote 2' && sudo -n grep -c '^boucle ' /etc/miyukini/douane-hote.desc | grep -qx 2"
+controle "Douane : description de zone générée (miyudouane-hote 2, flux boucle par compte : 3, dont maia -> maia-llm)" \
+	bash -c "sudo -n head -c 4096 /etc/miyukini/douane-hote.desc | grep -q '^miyudouane-hote 2' && sudo -n grep -c '^boucle ' /etc/miyukini/douane-hote.desc | grep -qx 3 && sudo -n grep -qx 'boucle miyukini-maia tcp 127.0.0.1 11436' /etc/miyukini/douane-hote.desc && sudo -n grep -qx 'compte miyukini-maia-llm' /etc/miyukini/douane-hote.desc"
 
 # Contrôle positif : le compte cog (non COG) atteint Internet ; sans cela l'isolement ne prouve rien.
 controle "contrôle : un compte non COG atteint Internet (NAT de la VM)" \
 	test "$(curl -s -m 10 -o /dev/null -w '%{http_code}' http://1.1.1.1/)" != 000
 
-for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-portail; do
+for u in miyukini-kindmother miyukini-maia miyukini-maia-llm miyukini-miyucloud miyukini-portail; do
 	controle "COG $u : sortie vers Internet impossible (1.1.1.1:80 injoignable)" \
 		test "$(sudo -n -u "$u" curl -s -m 5 -o /dev/null -w '%{http_code}' http://1.1.1.1/)" = 000
 done
@@ -119,6 +119,7 @@ controle "Douane : flux de boucle déclarés par compte (maia -> 50051, miyuclou
 	m="(\"?miyukini-maia\"?|$(id -u miyukini-maia))"; c="(\"?miyukini-miyucloud\"?|$(id -u miyukini-miyucloud))"
 	grep -qE "meta skuid $m oifname \"lo\" ip daddr 127.0.0.1 tcp dport 50051 accept" <<<"$t" &&
 	grep -qE "meta skuid $c oifname \"lo\" ip daddr 127.0.0.1 tcp dport 5432 accept" <<<"$t" &&
+	grep -qE "meta skuid $m oifname \"lo\" ip daddr 127.0.0.1 tcp dport 11436 accept" <<<"$t" &&
 	! grep -qE "^[[:space:]]*oifname \"lo\" accept" <<<"$t"'
 controle "Douane : rejet des comptes COG journalisé (MDOU|zone-cog|sortie|SORTIE-COG|, NFLOG 110) puis compté" bash -c '
 	t=$(sudo -n nft list chain inet miyudouane_hote sortie)
@@ -156,6 +157,63 @@ controle "COG miyukini-miyucloud : PostgreSQL 127.0.0.1:5432 joignable (flux dé
 	sudo -n -u miyukini-miyucloud bash -c 'exec 3<>/dev/tcp/127.0.0.1/5432'
 controle "COG miyukini-maia : KindMother joignable en boucle locale depuis son compte" \
 	sudo -n -u miyukini-maia bash -c 'exec 3<>/dev/tcp/127.0.0.1/50051'
+controle "COG miyukini-maia : maia-llm 127.0.0.1:11436 joignable (flux déclaré, A-026)" \
+	sudo -n -u miyukini-maia bash -c 'exec 3<>/dev/tcp/127.0.0.1/11436'
+controle "COG miyukini-maia-llm : aucun flux local (KindMother 127.0.0.1:50051 refusé, compteur rejets)" bash -c '
+	avant=$(rejets_zone)
+	sudo -n -u miyukini-maia-llm timeout 4 bash -c "exec 3<>/dev/tcp/127.0.0.1/50051" 2>/dev/null
+	apres=$(rejets_zone)
+	[ -n "$avant" ] && [ "$apres" -gt "$avant" ]'
+
+# ------------------------------------------------------------------ Douane : frontière externe, débit tc (A-023, A-025)
+
+NSX=mcog-f-externe
+DX=$VAR/douane/externe
+SBX=(--sandbox cog:voie-a --sandbox cog:voie-b --sandbox franche:voie-a --sandbox franche:voie-b --sandbox cog:capteur --sandbox locale:capteur)
+controle "frontière externe : unité miyukini-douane-externe activée au démarrage" systemctl is-enabled --quiet miyukini-douane-externe
+controle "frontière externe : état « filet » (règles strictes, puis tc, puis filet)" \
+	bash -c "sudo -n /opt/miyukini/libexec/douane-externe.sh etat | grep -q '^filet '"
+controle "frontière externe : espace $NSX avec ext-franche, ext0, wg-fed" bash -c \
+	"for i in ext-franche ext0 wg-fed; do sudo -n ip -n $NSX link show \$i >/dev/null || exit 1; done"
+controle "tc : modules sch_htb, sch_fq_codel, cls_fw chargés et déclarés au démarrage (modules-load.d)" bash -c \
+	"for m in sch_htb sch_fq_codel cls_fw; do grep -q \"^\$m \" /proc/modules || exit 1; grep -qx \$m /etc/modules-load.d/miyukini-douane.conf || exit 1; done"
+controle "tc : description miyudouane-tc 1, capacités ext0 122070 et wg-fed 12207 Kio/s" bash -c \
+	"grep -qx 'miyudouane-tc 1' $ETC/douane-tc.desc && grep -qx 'capacite ext0 122070' $ETC/douane-tc.desc && grep -qx 'capacite wg-fed 12207' $ETC/douane-tc.desc"
+for i in ext-franche ext0 wg-fed; do
+	controle "tc : $i porte la racine htb 4d44: de la Douane (défaut ffff, file 4d45: fq_codel)" bash -c \
+		"q=\$(sudo -n ip netns exec $NSX tc qdisc show dev $i) && grep -q '^qdisc htb 4d44: root .*default 0xffff' <<<\"\$q\" && grep -q '^qdisc fq_codel 4d45: parent 4d44:ffff' <<<\"\$q\""
+done
+for i in ext-franche ext0; do
+	controle "tc : $i classe de voie 4d44:1000, feuille du flux 4d44:1 (512 Kio/s), filtre fw 0x1 -> 4d44:1" bash -c \
+		"c=\$(sudo -n ip netns exec $NSX tc class show dev $i) && f=\$(sudo -n ip netns exec $NSX tc filter show dev $i) && grep -q 'class htb 4d44:1000 parent 4d44:f000' <<<\"\$c\" && grep -q 'class htb 4d44:1 parent 4d44:1000 .*rate 4194Kbit ceil 4194Kbit' <<<\"\$c\" && grep -q 'fw.*handle 0x1 classid 4d44:1' <<<\"\$f\""
+done
+# Audit : le texte appliqué est exactement le rendu audité de la Douane (arrêté signé en vigueur,
+# description), et le noyau porte autant de classes, files et filtres que ce rendu, par interface.
+controle "tc : texte appliqué = rendu audité de miyudouane tc (arrêté signé, description)" bash -c "
+	a=\$(sudo -n cat $VAR/douane/arretes/ancre.hex | tr -d '\n')
+	c=(); while read -r v; do c+=(--couper \"\$v\"); done < <(sudo -n cat $DX/coupees 2>/dev/null)
+	diff <(sudo -n $BIN/miyudouane tc --description $ETC/douane-tc.desc --arrete $VAR/douane/arretes/externe.arrete --ancre \"\$a\" ${SBX[*]} \"\${c[@]}\") <(sudo -n cat $DX/$NSX.tc)"
+controle "tc : état du noyau conforme au rendu (nombre de classes, files et filtres par interface)" bash -c "
+	t=\$(sudo -n cat $DX/$NSX.tc)
+	for i in ext-franche ext0 wg-fed; do
+		[ \"\$(grep -c \"^class add dev \$i \" <<<\"\$t\")\" = \"\$(sudo -n ip netns exec $NSX tc class show dev \$i | grep -c '^class htb 4d44:')\" ] || exit 1
+		[ \"\$(grep -c \"^qdisc add dev \$i \" <<<\"\$t\")\" = \"\$(sudo -n ip netns exec $NSX tc qdisc show dev \$i | grep -cE '^qdisc (htb|fq_codel) ')\" ] || exit 1
+		[ \"\$(grep -c \"^filter add dev \$i \" <<<\"\$t\")\" = \"\$(sudo -n ip netns exec $NSX tc filter show dev \$i | grep -c 'fw.*classid')\" ] || exit 1
+	done"
+controle "tc : rendu sans del, replace, change ni action (qdisc add, class add, filter add seulement)" bash -c \
+	"! sudo -n grep -vE '^(#|$|qdisc add dev |class add dev |filter add dev )' $DX/$NSX.tc | grep -q ."
+# Filet seulement après tc : règle DEBIT par sens (5/4, rafale) en place, plus aucune règle stricte ;
+# journal de l'unité : (a) puis (b) puis (c), dans cet ordre, au dernier démarrage de l'espace.
+controle "nftables $NSX : filet 5/4 par sens (640 Kio/s, rafale 6843 o), aucune règle DEBIT stricte" bash -c "
+	r=\$(sudo -n ip netns exec $NSX nft list table inet miyudouane)
+	grep -q 'ct direction original limit rate over 640 kbytes/second burst 6843 bytes' <<<\"\$r\" &&
+	grep -q 'ct direction reply limit rate over 640 kbytes/second burst 6843 bytes' <<<\"\$r\" &&
+	! grep -E 'limit rate over 512 kbytes/second' <<<\"\$r\" | grep -q ."
+controle "ordre au démarrage de l'espace : (a) règles strictes, puis (b) tc, puis (c) filet" bash -c "
+	j=\$(sudo -n journalctl -o cat _SYSTEMD_INVOCATION_ID=\$(systemctl show -p InvocationID --value miyukini-douane-externe) | grep -oE '^\[douane-externe\] \((a|b|c)\) [^ ]+ [^ ]+' | cut -d' ' -f2 | tr -d '()' | tr -d '\n')
+	[ \"\$j\" = abc ]"
+controle "frontière externe : fichiers de la Douane hors /etc/miyukini/douane (réservé au banc), 0600" bash -c \
+	"test ! -e $ETC/douane && test \"\$(sudo -n stat -c %a $DX/$NSX.tc)\" = 600 && test \"\$(sudo -n stat -c %a $DX/$NSX.nft)\" = 600"
 
 # ------------------------------------------------------------------ KindMother
 
@@ -250,6 +308,66 @@ refus_maia() {
 }
 controle "MAIA refuse de démarrer hors boucle locale sans appelant épinglé (démarrage jetable)" refus_maia
 
+# ------------------------------------------------------------------ maia-llm et mini modèle (A-026)
+
+# Requêtes signées (miyauth : Ed25519 par openssl) avec une graine brute de 32 octets.
+cat >"$TMP/signe.py" <<'PY'
+import base64, hashlib, os, struct, subprocess, sys, tempfile, time
+PKCS8 = bytes.fromhex("302e020100300506032b657004220420")
+def b64u(o): return base64.urlsafe_b64encode(o).rstrip(b"=").decode()
+def lp(o): return struct.pack(">H", len(o)) + o
+graine = bytes.fromhex(open(sys.argv[1]).read().strip())
+usage, methode, chemin, corps = sys.argv[2], sys.argv[3], sys.argv[4], open(sys.argv[5], "rb").read()
+ts, nonce = int(time.time()), os.urandom(16)
+m = (b"miyukini/requete-signee/v1\0" + lp(usage.encode()) + lp(methode.encode()) + lp(chemin.encode())
+     + struct.pack(">Q", ts) + lp(nonce) + hashlib.sha256(corps).digest())
+d = tempfile.mkdtemp()
+try:
+    open(d + "/k.der", "wb").write(PKCS8 + graine)
+    subprocess.run(["openssl", "pkey", "-inform", "DER", "-in", d + "/k.der", "-out", d + "/k.pem"], check=True, capture_output=True)
+    pub = subprocess.run(["openssl", "pkey", "-inform", "DER", "-in", d + "/k.der", "-pubout", "-outform", "DER"], check=True, capture_output=True).stdout[-32:]
+    open(d + "/m", "wb").write(m)
+    sig = subprocess.run(["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", d + "/k.pem", "-in", d + "/m"], check=True, capture_output=True).stdout
+finally:
+    subprocess.run(["rm", "-rf", d])
+for k, v in (("x-miyu-signataire", b64u(pub)), ("x-miyu-horodatage", str(ts)), ("x-miyu-nonce", b64u(nonce)), ("x-miyu-signature", b64u(sig))):
+    print("-H"); print(f"{k}: {v}")
+PY
+LLM=http://127.0.0.1:11436
+controle "maia-llm : modèle Qwen2.5-1.5B chargé, licence Apache-2.0, CPU (gpu_layers 0)" bash -c \
+	"h=\$(curl -fsS --max-time 10 $LLM/maia/llm/health) && grep -q '\"model_loaded\":true' <<<\"\$h\" && grep -q '\"licence\":\"Apache-2.0\"' <<<\"\$h\" && grep -q '\"gpu_layers\":0' <<<\"\$h\" && grep -qi 'qwen2.5-1.5b-instruct' <<<\"\$h\""
+controle "maia-llm : modèle du canal conforme (root 0644, SHA-256 consigné A-026, manifeste signé présent)" bash -c \
+	"f=$VAR/modeles/qwen2.5-1.5b-instruct-q4_k_m.gguf && test \"\$(stat -c '%U %a %s' \$f)\" = 'root 644 1117320736' && test -f \$f.sceau && test \"\$(stat -c '%U %a' $VAR/modeles)\" = 'root 755' && sha256sum \$f | grep -q '^6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e '"
+controle "maia-llm : /v1/chat/completions sans signature refusé (401)" \
+	test "$(code_http -X POST -H 'content-type: application/json' -d '{}' $LLM/v1/chat/completions)" = 401
+controle "maia-llm : /maia/llm/models sans signature refusé (401)" test "$(code_http $LLM/maia/llm/models)" = 401
+controle "maia-llm : configuration root 0644 (/etc/miyukini/maia-llm.toml), liée en lecture seule, port 11436, ancre de développement" bash -c \
+	"test \"\$(stat -c '%a %U' $ETC/maia-llm.toml)\" = '644 root' && systemctl show -p BindReadOnlyPaths --value miyukini-maia-llm | grep -qF '$ETC/maia-llm.toml:$VAR/maia-llm/maia-llm.toml' && grep -qx 'bind_addr = \"127.0.0.1:11436\"' $ETC/maia-llm.toml && grep -q '^model_trust_anchors = \[\"fb9d57a05cf97bb2cdce1fa58d17e5a8d4ac1ecc38e67c906f92853e7474611a\"\]' $ETC/maia-llm.toml && grep -qx 'gpu_layers = 0' $ETC/maia-llm.toml"
+controle "maia-llm : modèles en lecture seule dans le service (ReadOnlyPaths), aucun périphérique, MemoryMax 3G" bash -c \
+	"systemctl show -p ReadOnlyPaths --value miyukini-maia-llm | grep -qw $VAR/modeles && test \"\$(systemctl show -p PrivateDevices --value miyukini-maia-llm)\" = yes && test \"\$(systemctl show -p MemoryMax --value miyukini-maia-llm)\" = 3221225472"
+controle "MAIA : MAIA_LLM_URL vers maia-llm (11436), après et avec miyukini-maia-llm" bash -c \
+	"systemctl show -p Environment --value miyukini-maia | grep -q 'MAIA_LLM_URL=http://127.0.0.1:11436' && systemctl show -p After --value miyukini-maia | grep -qw miyukini-maia-llm.service && systemctl show -p Wants --value miyukini-maia | grep -qw miyukini-maia-llm.service"
+controle "MAIA : clé de service 0600 au compte miyukini-maia, épinglée par maia-llm (inférence et modèles)" bash -c \
+	"f=$VAR/maia/keys/maia.seed && test \"\$(sudo -n stat -c '%a %U %s' \$f)\" = '600 miyukini-maia 32' && p=\$(sudo -n cat \$f | { printf '\x30\x2e\x02\x01\x00\x30\x05\x06\x03\x2b\x65\x70\x04\x22\x04\x20'; cat; } | openssl pkey -inform DER -pubout -outform DER | tail -c 32 | od -An -tx1 | tr -d ' \n') && grep -q \"^appelants_inference = \[\\\"\$p\\\"\" $ETC/maia-llm.toml && grep -qx \"appelants_modeles = \[\\\"\$p\\\"\]\" $ETC/maia-llm.toml"
+# Réponse réelle du modèle en CPU, à une requête signée par la clé de MAIA (lue par root) : texte
+# non vide, marqué généré par IA.
+llm_repond() {
+	local g=$TMP/maia.hex corps=$TMP/llm.json h r
+	sudo -n od -An -tx1 "$VAR/maia/keys/maia.seed" | tr -d ' \n' >"$g"
+	printf '%s' '{"messages":[{"role":"user","content":"Dis bonjour en un mot."}],"max_tokens":12,"temperature":0,"seed":7}' >"$corps"
+	mapfile -t h < <(python3 -I "$TMP/signe.py" "$g" maia-llm/inference POST /v1/chat/completions "$corps")
+	rm -f "$g"
+	r=$(curl -sS --max-time 120 -X POST -H 'content-type: application/json' "${h[@]}" --data-binary @"$corps" $LLM/v1/chat/completions) || return 1
+	printf '%s\n' "$r" >"$TMP/llm.out"
+	grep -q '"genere_par_ia":true' <<<"$r" && grep -q '"moteur":"maia-llm"' <<<"$r" &&
+		python3 -I -c 'import json,sys; c=json.load(sys.stdin)["choices"][0]["message"]["content"]; sys.exit(0 if len(c.strip())>0 else 1)' <<<"$r"
+}
+controle "maia-llm : réponse réelle du modèle (CPU) à une requête signée par MAIA, marquée IA (x_miyukini)" llm_repond
+controle "MAIA : /maia/presentation (mention IA, AI Act art. 50) : « intelligence artificielle »" bash -c \
+	"curl -fsS --max-time 10 http://127.0.0.1:11435/maia/presentation | grep -q '\"nature\":\"intelligence artificielle\"'"
+controle "Alicia : [moteur_ia] url = maia-llm (http://127.0.0.1:11436) dans $ETC/alicia.toml" bash -c \
+	"grep -qx 'url = \"http://127.0.0.1:11436\"' $ETC/alicia.toml && grep -qx '\[moteur_ia\]' $ETC/alicia.toml"
+
 # ------------------------------------------------------------------ MiyuCloud et PostgreSQL
 
 controle "MiyuCloud /api/auth/status répond 200" bash -c \
@@ -271,27 +389,27 @@ controle "portail : chemin inconnu sans erreur serveur (< 500)" bash -c \
 # ------------------------------------------------------------------ AppArmor (enforce)
 
 # Les cinq profils sont chargés en mode enforce (aucun en complain).
-for p in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-sas \
+for p in miyukini-kindmother miyukini-maia miyukini-maia-llm miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-sas \
 	miyukini-portail-entree miyukini-portail-sortie; do
 	controle "AppArmor : profil $p chargé en enforce" \
 		sudo -n grep -q "^$p (enforce)\$" /sys/kernel/security/apparmor/profiles
 done
 controle "AppArmor : aucun profil miyukini-* en complain" \
 	bash -c "! sudo -n grep -q '^miyukini-.* (complain)\$' /sys/kernel/security/apparmor/profiles"
-for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-entree miyukini-portail-sortie; do
+for u in miyukini-kindmother miyukini-maia-llm miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-entree miyukini-portail-sortie; do
 	controle "$u : processus principal confiné par son profil (enforce)" bash -c \
 		"pid=\$(systemctl show -p MainPID --value $u) && sudo -n cat /proc/\$pid/attr/current | grep -qE '^$u(//&unconfined)? \\(enforce\\)\$'"
 done
 
 # ------------------------------------------------------------------ durcissement et permissions
 
-for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-portail miyukini-portail-entree miyukini-portail-sortie \
-	miyukini-facade miyukini-moteur; do
+for u in miyukini-kindmother miyukini-maia miyukini-maia-llm miyukini-miyucloud miyukini-portail miyukini-portail-entree \
+	miyukini-portail-sortie miyukini-facade miyukini-moteur; do
 	controle "compte de service $u : UID système, shell nologin" bash -c \
 		"e=\$(getent passwd $u) && uid=\$(echo \"\$e\" | cut -d: -f3) && sh=\$(echo \"\$e\" | cut -d: -f7) && test \"\$uid\" -lt 1000 && test \"\$sh\" = /usr/sbin/nologin"
 done
 
-for svc in kindmother:miyukini-kindmother maia:miyukini-maia miyucloud:miyukini-miyucloud cog-web-portal:miyukini-portail; do
+for svc in kindmother:miyukini-kindmother maia:miyukini-maia maia-llm:miyukini-maia-llm miyucloud:miyukini-miyucloud cog-web-portal:miyukini-portail; do
 	dir=$VAR/${svc%%:*}
 	usr=${svc#*:}
 	controle "$dir : 0700, propriété de $usr" bash -c \
@@ -320,7 +438,7 @@ controle "binaires installés conformes à /opt/miyukini/MANIFESTE" bash -c \
 	"cd /opt/miyukini && grep -v '^#' MANIFESTE | grep '  \\./bin/' | grep -v 'bin/arretes_essai$' | sha256sum --check --strict --quiet -"
 
 propriete_egale() { [[ "$(systemctl show -p "$2" --value "$1")" == "$3" ]]; }
-for u in miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-entree miyukini-portail-sortie; do
+for u in miyukini-kindmother miyukini-maia-llm miyukini-maia miyukini-miyucloud miyukini-cog-web-portal miyukini-portail-entree miyukini-portail-sortie; do
 	controle "$u : NoNewPrivileges=yes" propriete_egale "$u" NoNewPrivileges yes
 	controle "$u : ProtectSystem=strict" propriete_egale "$u" ProtectSystem strict
 	controle "$u : PrivateTmp=yes" propriete_egale "$u" PrivateTmp yes
@@ -383,9 +501,15 @@ if ((BANC)); then
 	banc_sortie=$TMP/banc.tap
 	# Répertoire de travail du banc : créé en root par le banc (mktemp), conservé pour
 	# inspection ; le testeur ne le supprime pas (fichiers root).
+	# Le banc exige qu'aucun espace mcog-* n'existe : la frontière externe installée est arrêtée
+	# (ExecStop retire ses espaces) pendant le banc, puis redémarrée (règles strictes → tc → filet).
+	sudo -n systemctl stop miyukini-douane-externe
 	sudo -n "$PAQUET/banc/tests/intrusion-lot3/lancer.sh" --vm-jetable --sans-construction \
 		--cible "$PAQUET/banc/cible" >"$banc_sortie" 2>&1
 	rc_banc=$?
+	sudo -n systemctl start miyukini-douane-externe
+	controle "frontière externe redémarrée après le banc (état filet)" bash -c \
+		"systemctl is-active --quiet miyukini-douane-externe && sudo -n /opt/miyukini/libexec/douane-externe.sh etat | grep -q '^filet '"
 	ok_banc=$(grep -c '^ok ' "$banc_sortie")
 	nok_banc=$(grep -c '^not ok ' "$banc_sortie")
 	if ((rc_banc == 0 && nok_banc == 0 && ok_banc > 0)); then

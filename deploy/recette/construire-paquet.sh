@@ -6,11 +6,14 @@
 #         [--source DIR] [--sans-compilation] [--autoriser-arbre-modifie] [--verifier-reproductible]
 #
 # Produit cog-<version>-<commit12>[-<suffixe>].tar.zst (+ .sha256) :
-#   bin/        binaires serveur (kindmother-server, maia, miyucloud-server, cog-web-portal,
-#               portail-sas, portail-entree, portail-sortie, miyudouane, miyurelais,
+#   bin/        binaires serveur (kindmother-server, maia, maia-llm SANS CUDA, miyucloud-server,
+#               cog-web-portal, portail-sas, portail-entree, portail-sortie, miyudouane, miyurelais,
 #               miyuregistre-publier), exemple arretes_essai,
 #               outil-sceau. miyuracine N'EST PAS inclus (cérémonie hors ligne).
-#   config/     bridge.toml et strongfather/*.toml (défauts fail-closed du dépôt)
+#   config/     bridge.toml, strongfather/*.toml (défauts fail-closed du dépôt), maia/maia-llm.toml
+# Le mini modèle (artefact MMIA, ≈ 1,1 Go, A-026) N'EST PAS dans ce paquet : paquet modèle séparé
+# (l'artefact lui-même), authentifié par sa signature de canal (ancre épinglée dans commun.sh) et
+# l'empreinte consignée ; passé à installer.sh par --modele.
 #   static/     statiques MiyuCloud (version de production et source)
 #   apparmor/   profils miyukini-* (mode enforce à l'installation)
 #   systemd/    unités générées par commun.sh (couvertes par le MANIFESTE)
@@ -228,9 +231,13 @@ if ((SANS_COMPILATION == 0)); then
 		--bin kindmother-server --bin maia --bin miyucloud-server --bin cog-web-portal \
 		--bin portail-sas --bin portail-entree --bin portail-sortie --bin miyudouane --bin miyurelais --bin miyuregistre-publier \
 		--example arretes_essai) || die "compilation release"
+	# maia-llm : CPU (sans la fonctionnalité cuda, par défaut) ; llama.cpp compilé par cmake (C/C++ :
+	# chemins non remappés, binaire non couvert par --verifier-reproductible).
+	(cd "$SRC" && CARGO_TARGET_DIR="$CIBLE" cargo_repro build --release --locked -p maia-llm --no-default-features) ||
+		die "compilation release de maia-llm (CPU)"
 fi
 
-for b in kindmother-server maia miyucloud-server cog-web-portal portail-sas portail-entree portail-sortie miyudouane miyurelais miyuregistre-publier; do
+for b in kindmother-server maia maia-llm miyucloud-server cog-web-portal portail-sas portail-entree portail-sortie miyudouane miyurelais miyuregistre-publier; do
 	[[ -x $REL/$b ]] || die "binaire absent : $REL/$b"
 done
 [[ -x $REL/examples/arretes_essai ]] || die "exemple absent : $REL/examples/arretes_essai"
@@ -256,20 +263,26 @@ trap 'rm -rf "$STAGE_PARENT"' EXIT
 P="$STAGE_PARENT/$NOM"
 mkdir -p "$P/bin" "$P/config" "$P/static" "$P/apparmor" "$P/systemd" "$P/exploitation" "$P/tests"
 
-for b in kindmother-server maia miyucloud-server cog-web-portal portail-sas portail-entree portail-sortie miyudouane miyurelais miyuregistre-publier; do
+for b in kindmother-server maia maia-llm miyucloud-server cog-web-portal portail-sas portail-entree portail-sortie miyudouane miyurelais miyuregistre-publier; do
 	cp "$REL/$b" "$P/bin/$b"
 done
+if ldd "$P/bin/maia-llm" 2>/dev/null | grep -qE 'libcuda|libcudart|libcublas'; then
+	die "maia-llm lié à CUDA : le paquet de recette exige le binaire CPU (--no-default-features)"
+fi
 cp "$REL/examples/arretes_essai" "$P/bin/arretes_essai"
 cp "$OUTIL" "$P/bin/outil-sceau"
 [[ ! -e $P/bin/miyuracine ]] || die "miyuracine ne doit jamais figurer dans un paquet de recette"
 
 cp "$SRC/bridge.toml" "$P/config/bridge.toml"
 cp -r "$SRC/config/strongfather" "$P/config/strongfather"
+mkdir -p "$P/config/maia"
+cp "$SRC/config/maia/maia-llm.toml" "$P/config/maia/maia-llm.toml"
 cp -r "$SRC/apps/miyucloud/static" "$P/static/static"
 [[ -d $SRC/apps/miyucloud/static-dist ]] ||
 	die "static-dist absent de l'export (produit par build.rs de miyucloud à la compilation : retirez --sans-compilation)"
 cp -r "$SRC/apps/miyucloud/static-dist" "$P/static/static-dist"
 cp "$SRC"/deploy/apparmor/miyukini-* "$P/apparmor/"
+cp "$SRC/config/maia/apparmor-miyukini-maia-llm" "$P/apparmor/miyukini-maia-llm"
 
 # Unités : générées par la logique commune, donc identiques à celles de l'installateur.
 cp "$VMD/commun.sh" "$P/commun.sh"

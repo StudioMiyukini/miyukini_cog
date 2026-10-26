@@ -1,6 +1,6 @@
 # AppArmor — MAIA (orchestrateur d'agents, 127.0.0.1:11435). Installé par deploy/cog-vm/installer.sh.
 # Données : /var/lib/miyukini/maia (0700). bridge.toml y est présenté en lecture seule (BindReadOnlyPaths).
-# Réseau : TCP (écoute loopback, connexion à KindMother en loopback). Pas de processus fils :
+# Réseau : TCP (écoute loopback, connexions à KindMother et à maia-llm en loopback). Pas de processus fils :
 # l'attente de KindMother est une unité distincte (miyukini-attente-kindmother), sans profil.
 #include <tunables/global>
 
@@ -20,6 +20,9 @@ profile miyukini-maia /opt/miyukini/bin/maia flags=(enforce) {
   # /sys/class/drm/card*/device/{vendor,mem_info_vram_total} : liens résolus vers le périphérique PCI.
   /sys/devices/pci[0-9]*/**/vendor r,
   /sys/devices/pci[0-9]*/**/mem_info_vram_total r,
+  # GPU NVIDIA (A-026) : détection par le pilote, jamais par l'outil SMI (aucune exécution).
+  @{PROC}/driver/nvidia/gpus/ r,
+  @{PROC}/driver/nvidia/gpus/*/information r,
   # La détection matérielle (apps/miou-llm-bridge/src/hardware.rs, sysinfo System::new_all +
   # refresh_all) parcourt aussi tous les processus (/proc/N/task/, /proc/N/stat) : lecture inutile
   # (seuls CPU et mémoire servent) et refusée ; « deny » la rend silencieuse (refus déjà effectif,

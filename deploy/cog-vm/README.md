@@ -17,21 +17,47 @@ Installation de test des services COG dans la VM jetable `cog-essai` (Ubuntu 26.
 
 | Fichier | Où il s'exécute | Rôle |
 |---|---|---|
-| `pousser.sh` | hôte de développement | prépare un paquet hors dépôt (binaires de `target/release`, config, statiques, banc), écrit son `MANIFESTE` (SHA-256 lié au commit), le copie dans la VM, l'y vérifie et lance l'installateur |
-| `installer.sh` | VM jetable, root | vérifie le paquet contre son `MANIFESTE`, puis installation idempotente : utilisateurs, `/opt/miyukini`, `/etc/miyukini`, `/var/lib/miyukini/<svc>` (0700), PostgreSQL, profils AppArmor, zone COG de la Douane, unités systemd durcies |
+| `pousser.sh` | hôte de développement | prépare un paquet hors dépôt (binaires de `target/release`, config, statiques, banc), écrit son `MANIFESTE` (SHA-256 lié au commit), le copie dans la VM, l'y vérifie, envoie à part l'artefact MMIA du mini modèle (s'il n'y est pas déjà) et lance l'installateur |
+| `installer.sh` | VM jetable, root | vérifie le paquet contre son `MANIFESTE`, puis installation idempotente : utilisateurs, `/opt/miyukini`, `/etc/miyukini`, `/var/lib/miyukini/<svc>` (0700), PostgreSQL, profils AppArmor, zone COG et frontière externe de la Douane (débit `tc`), maia-llm et mini modèle, unités systemd durcies |
+| `commun.sh` | sourcé | logique commune aux deux installateurs (VM et recette), dont le script de la frontière externe (`/opt/miyukini/libexec/douane-externe.sh`, écrit depuis `commun.sh`, donc couvert par le `MANIFESTE`) |
 | `tester.sh` | VM | tests de fumée, sortie TAP ; `--banc` ajoute le banc d'intrusion lot 3 |
+| `scenarios.sh` | hôte (`--distant`) ou VM | scénarios LIVE (voir plus bas) |
 
 ## Utilisation
 
 ```sh
-deploy/cog-vm/pousser.sh          # construit le paquet, pousse, installe
+deploy/cog-vm/pousser.sh [--modele X.mmia]   # paquet, pousse, (artefact MMIA), installe
 # dans la VM :
-/home/cog/cog-paquet/tester.sh          # tests de fumée (141 contrôles)
-/home/cog/cog-paquet/tester.sh --banc   # + banc d'intrusion lot 3 (root, ~2 min ; 142 contrôles, dont le banc)
+/home/cog/cog-paquet/tester.sh          # tests de fumée (183 contrôles)
+/home/cog/cog-paquet/tester.sh --banc   # + banc d'intrusion lot 3 (root, ~2 min ; 185 contrôles, dont le banc)
 ```
 
-Les binaires doivent être construits au préalable (`cargo build --release -p <paquet>`).
+Les binaires doivent être construits au préalable (`cargo build --release -p <paquet>`) ; **maia-llm
+sans CUDA** (la VM n'a pas de GPU ; `pousser.sh` refuse un binaire lié à CUDA) :
+`cargo build --release -p maia-llm --no-default-features`. Outils d'essai : `--example portail_essai`
+(miyuportail), `--example proposer_essai` (maia-memoire), et l'essai d'intégration d'Alicia
+`cargo test --release -p miyualicia --test proposition_ia --no-run` (copié en `outils/alicia_proposition_ia`).
 `pousser.sh --sans-installation` ne fait que déposer et vérifier le paquet.
+
+### Mini modèle : paquet séparé (artefact MMIA)
+
+Le modèle (Qwen2.5-1.5B-Instruct Q4_K_M, 1 117 320 736 octets, Apache-2.0, A-026) n'est **pas** dans le
+paquet : l'artefact `MMIA` du canal (≈ 1,1 Go) est livré à part, pour quatre raisons : il est
+incompressible et rendrait chaque paquet de code 60 fois plus lourd ; il change au rythme du canal,
+pas des commits ; il s'authentifie lui-même (manifeste signé, ancre épinglée dans `commun.sh`, donc
+couverte par le `MANIFESTE` et, en recette, par la signature du paquet ; SHA-256 du modèle consigné) ;
+les sauvegardes de la recette l'excluent (reproductible depuis l'artefact).
+
+```sh
+# poste de signature (hors COG, jamais dans le dépôt) :
+maia-llm emballer-modele --modele qwen2.5-1.5b-instruct-q4_k_m.gguf --ancre <ancre> --sortie qwen2.5-1.5b-instruct-q4_k_m.mmia
+```
+
+L'installateur (`--modele X.mmia`) le passe à `maia-llm installer-modele` (signature contre l'ancre,
+nom imposé, taille, licence, empreinte vérifiée **avant** toute écriture), puis revérifie le SHA-256
+installé contre `6a1a2eb6…407e`. Déjà installé à cette version : rien n'est refait. **Signature de
+développement** : ancre `fb9d57a0…611a` (graine hors dépôt `/srv/app/models/cle-dev-maia.hex`), en
+attendant la re-signature par la clé du canal officiel (A-026 « Reste »).
 
 ## Intégrité du paquet (manifeste)
 
@@ -60,7 +86,9 @@ Dans la VM, avant toute installation :
 | Unité | Utilisateur | Écoute | Données | Notes |
 |---|---|---|---|---|
 | `miyukini-kindmother` | `miyukini-kindmother` | 127.0.0.1:50051 | `/var/lib/miyukini/kindmother` | identité et clé de base générées au premier démarrage (0600 / 0700) |
-| `miyukini-maia` | `miyukini-maia` | 127.0.0.1:11435 | `/var/lib/miyukini/maia` | sans modèle GGUF ni appelant épinglé : API protégée en 503 |
+| `miyukini-maia-llm` | `miyukini-maia-llm` | 127.0.0.1:11436 | `/var/lib/miyukini/maia-llm` (config. liée en lecture seule) ; modèles `/var/lib/miyukini/modeles` (root, lecture seule) | moteur llama.cpp de MAIA et d'Alicia, CPU (`gpu_layers = 0`), `MemoryMax=3G`, aucun périphérique ; appelants épinglés : MAIA (et Alicia si `/etc/miyukini/alicia-cle-voix.pub`) |
+| `miyukini-maia` | `miyukini-maia` | 127.0.0.1:11435 | `/var/lib/miyukini/maia` | `MAIA_LLM_URL=http://127.0.0.1:11436` ; clé de service `keys/maia.seed` (0600) créée par l'installateur ; sans appelant épinglé : API protégée en 503 |
+| `miyukini-douane-externe` | root (oneshot) | aucune | `/var/lib/miyukini/douane/externe` (0700) | frontière externe : espace `mcog-f-externe`, règles strictes → `tc` → filet |
 | `miyukini-miyucloud` | `miyukini-miyucloud` | 127.0.0.1:8086 | `/var/lib/miyukini/miyucloud` | PostgreSQL local (rôle et base `miyucloud`), chiffrement au repos activé |
 | `miyukini-cog-web-portal` | `miyukini-portail` | 127.0.0.1:8090 | `/var/lib/miyukini/cog-web-portal` | aucun service PortalContract raccordé pour l'instant |
 | `miyukini-portail-entree` | `miyukini-portail-entree` | aucune (`PrivateNetwork`) | `/var/lib/miyukini/portail-entree` | Portail, sens Franche → zone COG : relève seule (A-022 §3) |
@@ -76,7 +104,13 @@ Arborescence de configuration :
   seule (`BindReadOnlyPaths`). MAIA, propriétaire de son répertoire de données, ne peut donc ni
   réécrire sa configuration ni la remplacer ;
 - `/etc/miyukini/{cog-web-portal,miyucloud}.env` : secrets (0600), générés une seule fois ;
-- `/etc/miyukini/maia.env` : variables non secrètes de MAIA.
+- `/etc/miyukini/maia.env` : variables non secrètes de MAIA ; `bridge.toml` installé avec `upstream_url = ""` (aucun moteur hors COG) ;
+- `/etc/miyukini/maia-llm.toml` (root, 0644) : rendu de `config/maia/maia-llm.toml` (clé publique de MAIA, ancre des
+  modèles, `gpu_layers = 0`), lié en lecture seule sur `/var/lib/miyukini/maia-llm/maia-llm.toml` ;
+- `/etc/miyukini/alicia.toml` : `[moteur_ia] url = "http://127.0.0.1:11436"`, `timeout_ms = 20000` (Alicia tourne
+  dans Central, hors de ces installateurs : sa clé publique est à déposer dans `/etc/miyukini/alicia-cle-voix.pub`) ;
+- `/etc/miyukini/douane-tc.desc` : description `miyudouane-tc 1` (capacités `ext0` 122 070 Kio/s ≈ 1 Gbit/s,
+  `wg-fed` 12 207 Kio/s ≈ 100 Mbit/s ; `ext-franche` au défaut de la Douane).
 
 Aucun secret n'est commité : le jeton CSRF du portail, la clé de chiffrement MiyuCloud et le mot de passe
 PostgreSQL sont tirés au hasard à la première installation et conservés aux exécutions suivantes.
@@ -129,9 +163,10 @@ pour eux dans la VM ; `scenarios.sh` les emploie via `outils/portail_essai`). É
   le fichier rendu est rechargé par `miyukini-douane-cog.service`, dont dépendent les quatre services COG :
   - chaîne `sortie` : les comptes COG (`miyukini-kindmother`, `-maia`, `-miyucloud`, `-portail`) n'envoient rien
     hors boucle locale, et en boucle locale seulement leurs flux déclarés (`boucle`) :
-    `miyukini-maia → 127.0.0.1:50051`, `miyukini-miyucloud → 127.0.0.1:5432` ; le reste (résolveur 127.0.0.53,
+    `miyukini-maia → 127.0.0.1:50051`, `miyukini-maia → 127.0.0.1:11436` (maia-llm), `miyukini-miyucloud → 127.0.0.1:5432`
+    (et `miyukini-alicia → 127.0.0.1:11436` si ce compte existe) ; `miyukini-maia-llm` n'a aucun flux ; le reste (résolveur 127.0.0.53,
     autre port, autre compte) est journalisé `MDOU|zone-cog|sortie|SORTIE-COG|` (NFLOG 110) et rejeté (compteur `rejets`) ;
-  - chaîne `entree` : entrée non locale refusée sur les ports COG (50051, 11435, 8086, 8090, 5432) ;
+  - chaîne `entree` : entrée non locale refusée sur les ports COG (50051, 11435, 11436, 8086, 8090, 5432) ;
   - SSH d'administration et les autres comptes non touchés ; aucun `flush ruleset` (autres tables intactes).
 - Rattachement : la zone suit `nftables.service` (`PartOf=`), les services la suivent (`BindsTo=`) ; minuteur
   `miyukini-douane-cog-controle.timer` (chaque minute) : table absente ⇒ rechargée, sinon services COG arrêtés.
@@ -139,16 +174,37 @@ pour eux dans la VM ; `scenarios.sh` les emploie via `outils/portail_essai`). É
 - **Limite** : les arrêtés sont des arrêtés d'essai valides un jour (`pas_apres`) : leur vérification a lieu à
   l'installation seulement.
 
+### Frontière externe et débit `tc` (A-023, A-025)
+
+- Unité `miyukini-douane-externe` (oneshot, au démarrage et à chaque installation, donc à chaque nouvel arrêté
+  externe) : `douane-externe.sh demarrer` crée l'espace `mcog-f-externe` (et le pont `mcog-z-franche`) depuis le
+  rendu `miyudouane mise-en-place`, filtré à ces deux espaces (aucune sandbox, aucune règle de `/etc/miyukini/douane`) ;
+  `ext0` et `wg-fed`, sans carte ni WireGuard, sont des interfaces **factices** (dummy) qui portent la même mise en forme.
+- Ordre sûr, chaque étape **seulement si la précédente a réussi** : (a) `miyudouane regles --frontiere externe
+  --appliquer` (règle `DEBIT` stricte) ; (b) `miyudouane tc --description /etc/miyukini/douane-tc.desc --appliquer`
+  (racine `htb 4d44:`, classe par voie, feuille `fq_codel` par flux, filtre `fw`, audité) ; (c) `regles
+  --mise-en-forme-appliquee --appliquer` (filet 5/4 par sens). Échec de (a) : frontière fermée (`miyudouane fermeture`),
+  code 1 ; de (b) : règle stricte maintenue, aucun filet, code 3 ; de (c) : code 4. État dans
+  `/var/lib/miyukini/douane/externe/etat` (`strict`, `tc`, `filet`, `ferme`) ; journal `miyukini-douane-externe`.
+- Exploitation : `douane-externe.sh couper|retablir <voie>` (EX-49), `arrete <fichier>` (arrêté vérifié avant
+  d'être retenu ; refusé ⇒ l'ancien reste), `appliquer` (= `systemctl reload`), `etat`.
+- Modules `sch_htb`, `sch_fq_codel`, `cls_fw` chargés au démarrage (`/etc/modules-load.d/miyukini-douane.conf`).
+- Fichiers dans `/var/lib/miyukini/douane/externe` (0600), jamais `/etc/miyukini/douane` (réservé au banc). Le banc
+  exige qu'aucun espace `mcog-*` n'existe : `tester.sh --banc` arrête l'unité pendant le banc puis la redémarre.
+- **Limite** : arrêtés d'essai valides un jour (comme la zone COG) ; au-delà, (a) échoue et la frontière est fermée
+  au démarrage suivant (fail-closed).
+
 ### Profils AppArmor (`deploy/apparmor/`, mode enforce)
 
 | Profil | Binaire | Accès retenus (observés en journal `DENIED` pendant `scenarios.sh`) |
 |---|---|---|
 | `miyukini-kindmother` | `/opt/miyukini/bin/kindmother-server` | `/var/lib/miyukini/kindmother/` rw (chmod des droits 0700 par le service), TCP, `/etc/machine-id` r, `cpu.max` et `/proc/PID/cgroup` r |
-| `miyukini-maia` | `/opt/miyukini/bin/maia` | `/var/lib/miyukini/maia/**` rwk (`bridge.toml` en lecture seule), `/etc/miyukini/strongfather/**` r, TCP, sondes `/proc/uptime`, `/proc/`, `/sys/class/drm/**` r (et `vendor` / `mem_info_vram_total` du périphérique PCI) ; `/proc/N/stat` et `/proc/N/task/` refusés en silence (`deny` : parcours des processus par `sysinfo`, inutile) ; aucun exec |
+| `miyukini-maia` | `/opt/miyukini/bin/maia` | `/var/lib/miyukini/maia/**` rwk (`bridge.toml` en lecture seule), `/etc/miyukini/strongfather/**` r, TCP, sondes `/proc/uptime`, `/proc/`, `/sys/class/drm/**` r (et `vendor` / `mem_info_vram_total` du périphérique PCI), `/proc/driver/nvidia/gpus/*/information` r ; `/proc/N/stat` et `/proc/N/task/` refusés en silence (`deny` : parcours des processus par `sysinfo`, inutile) ; aucun exec |
 | `miyukini-miyucloud` | `/opt/miyukini/bin/miyucloud-server` | `/var/lib/miyukini/miyucloud/**` rwk, `/opt/miyukini/share/miyucloud/**` r, `/tmp` (fichiers temporaires), TCP (PostgreSQL et écoute), NSS `passwd`/`group`/`nsswitch.conf` r |
 | `miyukini-cog-web-portal` | `/opt/miyukini/bin/cog-web-portal` | `/var/lib/miyukini/cog-web-portal/**` rwk, TCP, `cpu.max` et `/proc/PID/cgroup` r |
 | `miyukini-portail-entree` | `/opt/miyukini/bin/portail-entree` | descripteurs de l'entrée r, état propre rw, `depot/` r + retrait, `admises/*` w ; lance `portail-sas` **sous ce profil** (`ix` : `NoNewPrivileges` interdit toute transition, même en pile — refus « no new privs » observé) ; refus **audités** sur `reponses/`, `publication/`, état et configuration de la sortie ; aucun réseau |
 | `miyukini-portail-sortie` | `/opt/miyukini/bin/portail-sortie` | descripteurs de la sortie r, état propre rw, `reponses/` r + retrait, `publication/*` w ; refus **audités** sur `depot/`, `admises/`, état et configuration de l'entrée ; aucun réseau, aucun exec |
+| `miyukini-maia-llm` | `/opt/miyukini/bin/maia-llm` | source `config/maia/apparmor-miyukini-maia-llm` : configuration et `/var/lib/miyukini/modeles/*.gguf` en lecture seule (écriture refusée), TCP, sondes CPU et mémoire ; règles GPU inertes pour le binaire CPU ; `nvidia-smi` interdit ; aucun exec |
 | `miyukini-portail-sas` | `/opt/miyukini/bin/portail-sas` | aucun réseau (`deny network`), aucun fichier hors bibliothèques ; `/proc/PID/fd/` r (fermeture des descripteurs). Second niveau derrière Landlock et seccomp du sas |
 
 - Chaque profil refuse explicitement l'écriture dans les répertoires des autres services et dans `/etc/miyukini`, `/opt/miyukini`.
@@ -156,7 +212,7 @@ pour eux dans la VM ; `scenarios.sh` les emploie via `outils/portail_essai`). É
   profil avec `apparmor_parser -r -W` (échec = arrêt). Les unités portent `AppArmorProfile=`.
 - L'attente de KindMother par MAIA est une unité distincte (`miyukini-attente-kindmother`, sans profil) : systemd
   applique `AppArmorProfile=` à chaque commande de l'unité, et MAIA ne doit pas pouvoir exécuter `bash`.
-- `tester.sh` vérifie que les sept profils sont chargés en enforce (`/sys/kernel/security/apparmor/profiles`) et que
+- `tester.sh` vérifie que les huit profils sont chargés en enforce (`/sys/kernel/security/apparmor/profiles`) et que
   le processus principal de chaque service est confiné. `scenarios.sh` échoue à la section 12 si le journal noyau
   contient un `DENIED` d'un profil `miyukini-*` depuis le début du passage.
 - Les refus hors boucle locale (`tester.sh`) s'exécutent sur une copie du binaire placée hors de son chemin de profil :
@@ -164,9 +220,11 @@ pour eux dans la VM ; `scenarios.sh` les emploie via `outils/portail_essai`). É
 
 ## Non installés (et pourquoi)
 
-- **Douane (`miyudouane`)** : pas de démon. C'est un outil de génération et de mise en place de règles
-  nftables, appliqué par script sur les interfaces. Il est exercé par le banc `tests/intrusion-lot3/`
-  dans des espaces de noms jetables, qui exige en outre que `/etc/miyukini/douane` soit absent.
+- **Douane (`miyudouane`)** : pas de démon ; outil appliqué par l'installateur (zone COG sur l'hôte) et par
+  l'unité de la frontière externe. Les autres frontières (portails) et les zones restent exercées par le banc
+  `tests/intrusion-lot3/` dans des espaces de noms jetables (il exige que `/etc/miyukini/douane` soit absent).
+- **Alicia** : pas de service ici (elle tourne dans Central) ; `scenarios.sh` exerce son code réel par l'essai
+  d'intégration `proposition_ia` contre le maia-llm installé.
 - **Sas (`portail-sas`)** : pas de service ; lancé par lot par `portail-entree` (confiné par
   le profil de l’entrée, `NoNewPrivileges` interdisant la transition ; son propre profil ne s’applique qu’à un lancement hors entrée). Le testeur vérifie aussi son refus sans argument.
 - **Stub Central (`miyukini-central-stub`)** : binaire qui attend une entrée standard puis quitte ; sans
@@ -184,8 +242,16 @@ pour eux dans la VM ; `scenarios.sh` les emploie via `outils/portail_essai`). É
 - `bridge.toml` de MAIA : `/etc/miyukini`, root, `0444`, monté en lecture seule dans le service ;
 - binaires installés conformes au `MANIFESTE` du paquet ;
 - zone COG de la Douane : unité activée, table `miyudouane_hote` chargée, sortie refusée aux comptes COG (1.1.1.1
-  injoignable), contrôle positif (un compte non COG sort), services joignables en boucle locale depuis leur compte ;
-- profils AppArmor en enforce (cinq) et processus principaux confinés ;
+  injoignable), contrôle positif (un compte non COG sort), services joignables en boucle locale depuis leur compte,
+  `maia → maia-llm` admis, `maia-llm` sans aucun flux ;
+- frontière externe : état `filet`, racine `htb 4d44:` sur `ext-franche`, `ext0`, `wg-fed`, classe de voie et feuille
+  de flux (512 Kio/s), filtre `fw` ; texte appliqué **égal** au rendu audité de `miyudouane tc` (arrêté signé, description)
+  et état du noyau conforme (nombre de classes, files, filtres) ; filet 5/4 par sens et plus aucune règle stricte ; ordre
+  (a) → (b) → (c) lu dans le journal du dernier démarrage ; modules `tc` chargés ;
+- maia-llm : modèle chargé (Apache-2.0, `gpu_layers 0`), fichier du canal conforme (root 0644, SHA-256 A-026), refus sans
+  signature (401), réponse **réelle** du modèle à une requête signée par la clé de MAIA, marquée IA ; configuration liée en
+  lecture seule ; `MAIA_LLM_URL` = 11436 ; mention IA de MAIA (`/maia/presentation`) ; `[moteur_ia]` d'Alicia ;
+- profils AppArmor en enforce (huit) et processus principaux confinés ;
 - banc d'intrusion lot 3 (option `--banc`).
 
 ## Scénarios LIVE (`scenarios.sh`)
@@ -210,6 +276,14 @@ sortie TAP, code de retour = nombre de « not ok ». Le script :
   processus sans arrêt de l'autre, reprise des marques et des jetons après relance, refus AppArmor de l'écriture
   croisée (sonde exécutée par le **propriétaire** de la file visée, témoin non confiné qui y écrit), coupure et
   rotation de clé, suppression sans résidu ;
+- IA locale (section 13) : MAIA (appelant d'essai épinglé par un drop-in retiré en fin de section) répond par
+  maia-llm (`backend native`, sans repli, `genere_par_ia`, `mention_ia`) ; Alicia (clé d'essai épinglée puis retirée) :
+  essai `proposition_ia` avec le vrai modèle (18 phrases françaises, taux ≥ 75 %), « déverrouille la porte » proposé
+  comme commande de serrure, et commande de serrure proposée par l'IA refusée par les Cores sous la politique
+  **installée** (confirmation exigée), présentée au chemin compilé dans l'essai par un espace de montage privé ;
+- frontière externe (section 14) : coupure et rétablissement de voie, échec de `tc` provoqué (racine étrangère sur
+  `wg-fed` : code 3, règle stricte, **aucun** filet, racine étrangère intacte), reprise, arrêté altéré refusé,
+  redémarrage de l'espace (ordre a → b → c) ;
 - contrôle final (section 12) : aucun refus AppArmor `DENIED` d'un profil `miyukini-*` pendant le passage (hors
   sondes voulues `.sonde-cloisonnement-*` de la section 11 bis) ;
 - configure les routes mémoire de MAIA **dans la VM seulement** : déclaration de `alice` dans
@@ -242,8 +316,11 @@ de MAIA ; `tester.sh` contrôle désormais cet ordre.
 - **Défaut de MAIA (à corriger côté code)** : l'entrepôt mémoire ne se reconnecte pas à KindMother après une
   coupure (« Broken pipe », 503 jusqu'au redémarrage de MAIA) ; KindMother ferme les connexions inactives. Le
   scénario redémarre MAIA avant la section 10 ; le défaut lui-même reste ouvert.
-- **Débit (`tc`)** : non produit. `miyudouane` ne fait que du rejet nftables (`limit rate over N kbytes/second`
-  par marque de connexion, `debit_max_kio_s`) et un contrôle de débit dans l'IPS. Aucune mise en forme (files,
-  `tc qdisc`) n'est générée ; le format n'est pas défini dans le dépôt et n'a pas été inventé.
+- **Débit (`tc`)** : produit et appliqué par la Douane sur la frontière externe (voir « Frontière externe et débit
+  `tc` ») ; les interfaces `ext0` et `wg-fed` de la VM sont factices (aucun trafic réel n'y est mis en forme).
+- **Opérations de root dans les dossiers des services** : un compte de service maître de son dossier pourrait y poser
+  un lien. L'installateur n'y écrit, ne lit ni ne change de droits à travers un lien : création en tant que le compte
+  (`setpriv`, graine de MAIA, `miyucloud/storage`), fichiers root posés par renommage depuis un dossier root
+  (`bridge.toml`, `maia-llm.toml`), `chown -h` et refus des liens ailleurs (aussi dans `restaurer.sh`).
 - Un profil AppArmor peut laisser un profil `null-` en mode complain après une session de mise au point ;
   il disparaît au redémarrage de la VM (`tester.sh` le signale).

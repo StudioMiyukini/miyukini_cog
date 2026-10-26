@@ -9,7 +9,7 @@
 #   Z3 table supprimée, fichier de zone absent : le minuteur arrête les services COG (fail-closed).
 # Le journal système (logger -t miyukini-douane) trace les rechargements et les arrêts.
 set -u
-SERVICES=(miyukini-kindmother miyukini-maia miyukini-miyucloud miyukini-cog-web-portal)
+SERVICES=(miyukini-kindmother miyukini-maia-llm miyukini-maia miyukini-miyucloud miyukini-cog-web-portal)
 NOF=/etc/miyukini/douane-cog.nft
 n=0
 ko=0

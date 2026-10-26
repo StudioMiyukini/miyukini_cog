@@ -23,7 +23,7 @@
 | S1 | Cores réels, KindMother seul écrivain, refus par défaut | fait (lot C) |
 | S2 | Zone COG sans sortie, Douane générée et auditée, Vigies, relais NFLOG | fait (lots 3, A-015, A-016) |
 | S3 | AppArmor enforce pour chaque service, flux locaux par compte | fait (A-016) |
-| S4 | Débit `tc` généré par la Douane | fait en bibliothèque (A-023) ; intégration aux installateurs à faire |
+| S4 | Débit `tc` généré par la Douane | fait (A-023, A-025) ; intégré aux installateurs (unité `miyukini-douane-externe`, ordre strict → tc → filet), vérifié en VM (interfaces factices) |
 | S5 | Portail scindé entrée / sortie | fait (A-027, vérifié en VM) ; CDR et descripteurs par les Cores réels à brancher |
 | S6 | Façade Franche réelle : image signée, sandbox, réseau, quotas disque et sessions, révocations rafraîchies | à faire |
 
@@ -50,10 +50,10 @@
 
 | # | Point | État |
 |---|---|---|
-| A1 | **Mini modèle réel via llama.cpp** (licence Apache-2.0 / MIT, C-72), livré par le canal `MMIA`, empreinte vérifiée | fait (A-026) ; re-signature canal à faire |
-| A2 | MAIA répond avec ce modèle, sous la porte des Cores, mémoire et Fiches branchées | fait (A-026) |
-| A3 | **Alicia** utilise le même moteur local (aucun service externe) | fait (A-026) |
-| A4 | Mention IA (AI Act art. 50) dans MAIA et Alicia | fait (A-026) |
+| A1 | **Mini modèle réel via llama.cpp** (licence Apache-2.0 / MIT, C-72), livré par le canal `MMIA`, empreinte vérifiée | fait (A-026) ; paquet modèle séparé installé et vérifié par les installateurs ; re-signature canal à faire |
+| A2 | MAIA répond avec ce modèle, sous la porte des Cores, mémoire et Fiches branchées | fait (A-026) ; installé (`miyukini-maia-llm`, 11436) et vérifié en VM |
+| A3 | **Alicia** utilise le même moteur local (aucun service externe) | fait (A-026) ; installé (`miyukini-maia-llm`, 11436) et vérifié en VM |
+| A4 | Mention IA (AI Act art. 50) dans MAIA et Alicia | fait (A-026) ; installé (`miyukini-maia-llm`, 11436) et vérifié en VM |
 | A5 | Interface de la mémoire (voir, corriger, exporter, oublier, valider) | à faire (après I4) |
 | A6 | Publication des Fiches, état persistant | fait (A-017, A-018) |
 | A7 | TAMR branché sur la republication d'une donnée étrangère | fait (A-028) ; vue fédérale à câbler au pont (avec F2) |
@@ -74,7 +74,7 @@
 | L2 | Signalement des vulnérabilités (CRA) : SECURITY.md, security.txt, processus 24 h / 72 h | partiel : documents rédigés ([processus](../securite/PROCESSUS-SIGNALEMENT-CRA.md)) ; attend contact de sécurité, clé éventuelle, rôles, compte ENISA et route `/.well-known/security.txt` (propriétaire) |
 | L3 | Aucun `unwrap` hors tests hors P0/P1 (432 restants, surtout MiyuCloud et MAIA) | à faire |
 | L4 | Couverture ≥ 80 % mesurée sur les crates de sécurité | fait : 23/23 crates ≥ 80 % des lignes, total 89,4 % (COUVERTURE-SECURITE.md v1.1) |
-| L5 | Installation complète en VM : tous les points ci-dessus, de bout en bout | à faire (en dernier) |
+| L5 | Installation complète en VM : tous les points ci-dessus, de bout en bout | partiel : VM 183/183 contrôles, 134/134 scénarios (S4, A1–A4) ; paquet de recette reconstruit non revalidé |
 
 ---
 

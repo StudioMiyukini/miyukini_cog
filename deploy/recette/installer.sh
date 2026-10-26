@@ -3,6 +3,9 @@
 #
 #   sudo ./installer.sh --confirme-machine-de-recette --cle-publique-pem FICHIER.pem
 #   sudo ./installer.sh --confirme-machine-de-recette --empreinte-cle-pem <sha256 du PEM publié>
+#   … [--modele <artefact.mmia>]   mini modèle (paquet modèle séparé, A-026), installé par le canal
+#        de maia-llm : signature contre l'ancre épinglée dans commun.sh (paquet signé), empreinte
+#        SHA-256 du modèle comparée à celle consignée ; absent : modèle déjà installé conservé
 #
 # Exécuté depuis le paquet cog-<version>-<commit>.tar.zst extrait. Ordre strict :
 #   1. refus si la machine ressemble à une production (heuristique ci-dessous) ;
@@ -34,6 +37,7 @@ BUNDLE=""
 PEM_OPTION=""
 EMPREINTE_PEM=""
 CONFIRME=0
+MODELE_ARTEFACT=""
 AUTH_DIR=""
 PRIVE=""
 trap 'if [[ -n $AUTH_DIR ]]; then rm -rf "$AUTH_DIR"; fi; if [[ -n $PRIVE ]]; then rm -rf "$PRIVE"; fi' EXIT
@@ -51,6 +55,7 @@ while (($#)); do
 		--cle-publique-pem) PEM_OPTION=${2:?--cle-publique-pem : valeur attendue}; shift ;;
 		--empreinte-cle-pem) EMPREINTE_PEM=${2:?--empreinte-cle-pem : valeur attendue}; shift ;;
 		--confirme-machine-de-recette) CONFIRME=1 ;;
+		--modele) MODELE_ARTEFACT=${2:?--modele : fichier attendu}; shift ;;
 		-h | --help) usage; exit 0 ;;
 		*) usage >&2; die "option inconnue : $1" ;;
 	esac
@@ -202,13 +207,14 @@ log "sceau de l'éditeur vérifié (outil-sceau)"
 
 # shellcheck source=commun.sh
 . "$BUNDLE/commun.sh"
-export BUNDLE AVEC_BANC=0
+export BUNDLE AVEC_BANC=0 MODELE_ARTEFACT
 verifier_paquet
 
 for b in "${BINAIRES[@]}"; do
 	[[ -x $BUNDLE/bin/$b ]] || die "binaire absent du paquet : bin/$b"
 done
 [[ -f $BUNDLE/config/bridge.toml ]] || die "config/bridge.toml absent du paquet"
+[[ -f $BUNDLE/config/maia/maia-llm.toml ]] || die "config/maia/maia-llm.toml absent du paquet"
 [[ -d $BUNDLE/config/strongfather ]] || die "config/strongfather absent du paquet"
 [[ -d $BUNDLE/static/static-dist ]] || die "static/static-dist absent du paquet"
 [[ ! -e $BUNDLE/bin/miyuracine ]] || die "paquet interdit : bin/miyuracine présent (racine hors ligne)"
@@ -224,11 +230,15 @@ binaires
 verifier_binaires_installes
 politiques_et_statiques
 environnements
+cle_maia
+configurer_maia_llm
+modele_ia
 cle_sauvegarde_locale
 postgres
 apparmor_profils
 douane_arretes
 douane_cog
+douane_externe
 unites
 installer_exploitation
 # Exporte la fonction d'authentification pour mettre-a-jour.sh (source unique : ce script).

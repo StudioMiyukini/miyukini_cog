@@ -151,7 +151,10 @@ if ((REINSTALLER)); then
 	install -m 0644 /dev/null "$JOURNAL"
 	attendu_commun=$(sha_manifeste "$r" commun.sh)
 	attendu_etat=$(sha_manifeste "$r" exploitation/etat.sh)
-	attendu_bridge=$(sha_manifeste "$r" config/bridge.toml)
+	# bridge.toml installé = rendu par l'installateur (upstream_url vidé, A-026) du fichier SIGNÉ.
+	[[ $(sha256sum "$r/config/bridge.toml" | cut -d' ' -f1) == "$(sha_manifeste "$r" config/bridge.toml)" ]] ||
+		{ echo "I7 : bridge.toml extrait différent du MANIFESTE" >&2; exit 2; }
+	attendu_bridge=$(sed 's|^upstream_url[[:space:]]*=.*$|upstream_url = ""|' "$r/config/bridge.toml" | sha256sum | cut -d' ' -f1)
 	attendu_outil=$(sha_manifeste "$r" bin/outil-sceau)
 	# Attaquant (nobody) : attend la copie privée, puis réécrit en place (même inode) les fichiers
 	# que l'installateur exécute, source ou installe, et remplace bridge.toml par un lien.
@@ -181,7 +184,7 @@ touch $marq"
 	[[ $(sha256sum "$EXPL/commun.sh" | cut -d' ' -f1) == "$attendu_commun" ]] && ok "I7 : commun.sh installé = MANIFESTE signé" || nok "I7 : commun.sh installé = MANIFESTE signé"
 	[[ $(sha256sum "$EXPL/etat.sh" | cut -d' ' -f1) == "$attendu_etat" ]] && ok "I7 : exploitation/etat.sh installé = MANIFESTE signé" || nok "I7 : exploitation/etat.sh installé = MANIFESTE signé"
 	[[ -f /etc/miyukini/bridge.toml && ! -L /etc/miyukini/bridge.toml && $(sha256sum /etc/miyukini/bridge.toml | cut -d' ' -f1) == "$attendu_bridge" ]] &&
-		ok "I7 : bridge.toml installé = MANIFESTE signé (lien vers /etc/shadow ignoré)" || nok "I7 : bridge.toml installé = MANIFESTE signé (lien vers /etc/shadow ignoré)"
+		ok "I7 : bridge.toml installé = rendu du MANIFESTE signé (lien vers /etc/shadow ignoré)" || nok "I7 : bridge.toml installé = rendu du MANIFESTE signé (lien vers /etc/shadow ignoré)"
 	[[ $(sha256sum /opt/miyukini/bin/outil-sceau | cut -d' ' -f1) == "$attendu_outil" ]] && ok "I7 : outil-sceau installé = MANIFESTE signé" || nok "I7 : outil-sceau installé = MANIFESTE signé"
 	verifie "I7 : services COG actifs et sains" sante
 	(($(copies_privees) == 0)) && ok "I7 : copie privée effacée à la sortie" || nok "I7 : copie privée effacée à la sortie"

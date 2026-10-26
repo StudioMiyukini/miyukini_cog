@@ -722,6 +722,142 @@ else
 fi
 sudo -n rm -rf "$T"
 
+# ─────────────────────────────────────────────────────────────── 13. IA locale : maia-llm, MAIA, Alicia (A-026)
+echo "# 13. IA locale : maia-llm (127.0.0.1:11436, modèle réel, CPU), MAIA par lui, mention IA, Alicia"
+LLM=http://127.0.0.1:11436
+h=$(curl -s --max-time 10 "$LLM/maia/llm/health")
+grep -q '"model_loaded":true' <<<"$h" && grep -q '"licence":"Apache-2.0"' <<<"$h" && grep -q '"gpu_layers":0' <<<"$h" &&
+	ok "maia-llm : modèle signé chargé (Apache-2.0), CPU" || nok "maia-llm : modèle chargé" "$h"
+c=$(req POST "$LLM/v1/chat/completions" "$W/llm-ns.out" -H 'content-type: application/json' -d '{"messages":[]}')
+egalite "maia-llm : inférence sans signature refusée" 401 "$c"
+# Appelant d'essai de l'API protégée de MAIA (VM seulement) : drop-in retiré en fin de section.
+for nom in appelant alicia; do
+	[[ -s $MDIR/$nom.seed ]] || (umask 077 && openssl rand -hex 32 >"$MDIR/$nom.seed")
+done
+SEED_C=$(cat "$MDIR/appelant.seed")
+PUB_C=$(python3 -I "$TEST_PY" pub "$SEED_C")
+DROPIN_C=/etc/systemd/system/miyukini-maia.service.d/appelant-essai.conf
+sudo -n install -d -m 0755 /etc/systemd/system/miyukini-maia.service.d
+printf '[Service]\nEnvironment=MAIA_CLES_APPELANTS_SUPPLEMENTAIRES=%s\n' "$PUB_C" | sudo -n tee "$DROPIN_C" >/dev/null
+sudo -n systemctl daemon-reload
+sudo -n systemctl restart miyukini-maia
+for _ in $(seq 1 60); do curl -s -o /dev/null "$MAIA/health" && break; sleep 1; done
+printf '%s' '{"message":"Bonjour ! Qui es-tu, en une phrase ?","enable_tools":false}' >"$W/chat.json"
+t0=$(date +%s%N)
+c=$(appel_signe "$SEED_C" maia/api POST /v1/agents/miou/chat "$W/chat.json" "$W/chat.out" -H 'content-type: application/json' --data-binary @"$W/chat.json")
+ms=$((($(date +%s%N) - t0) / 1000000))
+egalite "MAIA : /v1/agents/miou/chat signé : 200" 200 "$c"
+python3 -I - "$W/chat.out" <<'PY' && ok "MAIA répond par maia-llm (backend native, sans repli) en $ms ms, genere_par_ia et mention IA présents : « $(python3 -I -c 'import json,sys; print(json.load(open(sys.argv[1]))["content"][:80].replace("\n"," "))' "$W/chat.out" 2>/dev/null) »" || nok "MAIA répond par maia-llm, mention IA" "$(head -c 300 "$W/chat.out")"
+import json, sys
+v = json.load(open(sys.argv[1]))
+assert v.get("backend") == "native", v
+assert v.get("fallback") is False, v
+assert v.get("genere_par_ia") is True, v
+assert "IA" in (v.get("mention_ia") or ""), v
+assert len((v.get("content") or "").strip()) > 3, v
+PY
+p=$(curl -s --max-time 10 "$MAIA/maia/presentation")
+grep -q '"nature":"intelligence artificielle"' <<<"$p" && ok "MAIA : /maia/presentation, nature « intelligence artificielle » (AI Act art. 50)" || nok "MAIA : présentation IA" "$p"
+sudo -n rm -f "$DROPIN_C"
+sudo -n systemctl daemon-reload
+sudo -n systemctl restart miyukini-maia
+for _ in $(seq 1 60); do curl -s -o /dev/null "$MAIA/health" && break; sleep 1; done
+c=$(req GET "$MAIA/v1/agents" "$W/ag.out")
+egalite "MAIA : appelant d'essai retiré, API protégée de nouveau en 503" 503 "$c"
+
+# Alicia : clé d'essai épinglée dans maia-llm (VM seulement, retirée en fin de section) ; essai
+# d'intégration de miyualicia (binaire du paquet) contre le moteur INSTALLÉ ([moteur_ia] url de
+# /etc/miyukini/alicia.toml) et la politique INSTALLÉE (/etc/miyukini/strongfather/alicia.toml),
+# présentée au chemin compilé dans l'essai par un espace de montage privé (aucune trace hors de lui).
+ESSAI_A=/home/cog/cog-paquet/outils/alicia_proposition_ia
+URL_A=$(sed -n 's/^url = "\(.*\)"$/\1/p' /etc/miyukini/alicia.toml)
+egalite "Alicia : [moteur_ia] url = maia-llm" "http://127.0.0.1:11436" "$URL_A"
+if [[ -x $ESSAI_A ]]; then
+	(umask 077 && python3 -I -c 'import sys; open(sys.argv[2], "wb").write(bytes.fromhex(open(sys.argv[1]).read().strip()))' "$MDIR/alicia.seed" "$W/alicia.cle")
+	PUB_A=$(python3 -I "$TEST_PY" pub "$(cat "$MDIR/alicia.seed")")
+	TOML=/etc/miyukini/maia-llm.toml
+	sudo -n cp "$TOML" "$W/maia-llm.toml.avant"
+	sudo -n sed -i "s|^appelants_inference = \[\(\"[^\"]*\"\)\]|appelants_inference = [\1, \"$PUB_A\"]|" "$TOML"
+	grep -q "$PUB_A" "$TOML" && ok "Alicia : clé d'essai épinglée dans appelants_inference" || nok "Alicia : clé épinglée"
+	sudo -n systemctl restart miyukini-maia-llm
+	for _ in $(seq 1 120); do curl -s "$LLM/maia/llm/health" | grep -q '"model_loaded":true' && break; sleep 1; done
+	POL=$(cat "$ESSAI_A.politique")
+	RAC=${POL%%/crates/*}
+	t0=$(date +%s)
+	sudo -n unshare -m sh -c 'set -e; mount -t tmpfs -o mode=0755 tmpfs /srv
+		mkdir -p "$1/crates/miyualicia" "$1/config/strongfather"
+		cp /etc/miyukini/strongfather/alicia.toml "$1/config/strongfather/alicia.toml"
+		exec setpriv --reuid=cog --regid=cog --init-groups env ALICIA_MOTEUR_URL="$3" ALICIA_CLE="$4" \
+			"$2" --exact --include-ignored --test-threads=1 --nocapture \
+			l_ia_ne_deverrouille_jamais_une_porte_sous_la_politique_de_base intentions_francaises_avec_le_vrai_modele' \
+		_ "$RAC" "$ESSAI_A" "$URL_A" "$W/alicia.cle" >"$W/alicia.out" 2>&1
+	rc=$?
+	duree=$(($(date +%s) - t0))
+	cp "$W/alicia.out" "$HOME/.cog-scenarios/alicia-essai.out" 2>/dev/null
+	TAUX=$(sed -n 's/^TAUX \([0-9]*\/[0-9]*\).*/\1/p' "$W/alicia.out")
+	[[ $rc -eq 0 ]] && grep -q 'test result: ok. 2 passed' "$W/alicia.out" &&
+		ok "Alicia propose ses intentions par maia-llm (modèle réel, CPU) : $TAUX phrases conformes en ${duree} s" ||
+		nok "Alicia : intentions avec le vrai modèle" "code $rc ; $(grep -E 'TAUX|panicked|FAILED' "$W/alicia.out" | head -3 | tr '\n' ' ')"
+	grep -q '« déverrouille la porte » → {"intent":"control_device","device_type":"lock".*"action":"unlock"' "$W/alicia.out" &&
+		ok "Alicia : « déverrouille la porte » proposé comme commande de serrure (lock/unlock) par l'IA" ||
+		nok "Alicia : proposition de serrure" "$(grep 'porte' "$W/alicia.out" | head -2 | tr '\n' ' ')"
+	grep -q 'test l_ia_ne_deverrouille_jamais_une_porte_sous_la_politique_de_base ... ok' "$W/alicia.out" &&
+		ok "Alicia : commande de serrure proposée par l'IA refusée par les Cores sous la politique installée (confirmation exigée)" ||
+		nok "Alicia : serrure refusée sans confirmation"
+	sudo -n cp "$W/maia-llm.toml.avant" "$TOML"
+	sudo -n chown root:root "$TOML"
+	sudo -n chmod 0644 "$TOML"
+	sudo -n systemctl restart miyukini-maia-llm
+	for _ in $(seq 1 120); do curl -s "$LLM/maia/llm/health" | grep -q '"model_loaded":true' && break; sleep 1; done
+	! grep -q "$PUB_A" "$TOML" && ok "Alicia : clé d'essai retirée de maia-llm" || nok "Alicia : clé d'essai retirée"
+else
+	nok "Alicia : essai d'intégration absent du paquet ($ESSAI_A)"
+fi
+
+# ─────────────────────────────────────────────────────────────── 14. Douane : frontière externe, tc
+echo "# 14. Douane : frontière externe (règles strictes → tc → filet), coupure, rétablissement, échec de tc"
+DX=/opt/miyukini/libexec/douane-externe.sh
+NSX=mcog-f-externe
+etat_x() { sudo -n "$DX" etat | cut -d' ' -f1; }
+nft_x() { sudo -n ip netns exec "$NSX" nft list table inet miyudouane; }
+classes_x() { sudo -n ip netns exec "$NSX" tc class show dev "$1"; }
+filet_x() { nft_x | grep 'ct direction original limit rate over 640 kbytes/second burst 6843 bytes' >/dev/null; }
+strict_x() { nft_x | grep 'ct mark 0x00000001 limit rate over 512 kbytes/second' >/dev/null && ! nft_x | grep 'ct direction' >/dev/null; }
+egalite "frontière externe : état initial filet" filet "$(etat_x)"
+sudo -n "$DX" couper voie-a >"$W/x.out" 2>&1
+rc=$?
+[[ $rc -eq 0 && $(etat_x) == filet ]] && ! classes_x ext0 | grep '4d44:1000' >/dev/null && ! nft_x | grep 'voie=voie-a' >/dev/null &&
+	ok "coupure de voie-a : classe tc et règles de la voie retirées, ordre a → b → c refait" || nok "coupure de voie" "rc $rc ; $(tail -c 300 "$W/x.out")"
+sudo -n "$DX" retablir voie-a >"$W/x.out" 2>&1
+rc=$?
+[[ $rc -eq 0 && $(etat_x) == filet ]] && classes_x ext0 | grep '4d44:1000' >/dev/null && classes_x ext-franche | grep 'class htb 4d44:1 ' >/dev/null && filet_x &&
+	ok "rétablissement de voie-a : classes et filet de retour" || nok "rétablissement de voie" "rc $rc ; $(tail -c 300 "$W/x.out")"
+# Échec de (b) : une racine tc étrangère sur wg-fed (rien n'est touché) ⇒ règles strictes, aucun filet.
+sudo -n ip netns exec "$NSX" tc qdisc del dev wg-fed root handle 4d44: 2>/dev/null
+sudo -n ip netns exec "$NSX" tc qdisc add dev wg-fed root handle 1: prio
+sudo -n "$DX" appliquer >"$W/x.out" 2>&1
+rc=$?
+[[ $rc -eq 3 && $(etat_x) == strict ]] && strict_x && grep -q 'étrangère' "$W/x.out" &&
+	ok "tc refusé (racine étrangère sur wg-fed) : code 3, règle DEBIT stricte maintenue, AUCUN filet" || nok "échec de tc : stricte sans filet" "rc $rc ; état $(etat_x) ; $(tail -c 300 "$W/x.out")"
+sudo -n ip netns exec "$NSX" tc qdisc show dev wg-fed | grep '^qdisc prio 1: root' >/dev/null &&
+	ok "racine étrangère laissée intacte (jamais remplacée par la Douane)" || nok "racine étrangère intacte"
+sudo -n ip netns exec "$NSX" tc qdisc del dev wg-fed root handle 1:
+sudo -n "$DX" appliquer >"$W/x.out" 2>&1
+rc=$?
+[[ $rc -eq 0 && $(etat_x) == filet ]] && filet_x && sudo -n ip netns exec "$NSX" tc qdisc show dev wg-fed | grep '^qdisc htb 4d44: root' >/dev/null &&
+	ok "racine étrangère retirée : (a) → (b) → (c) réussis, filet seulement après tc" || nok "réapplication après retrait" "rc $rc ; $(tail -c 300 "$W/x.out")"
+# Nouvel arrêté externe altéré : refusé avant d'être retenu, l'arrêté en place reste appliqué.
+sudo -n cat /var/lib/miyukini/douane/arretes/externe.arrete >"$W/altere.arrete"
+python3 -I -c 'import sys; p=sys.argv[1]; b=bytearray(open(p,"rb").read()); b[40]^=0xff; open(p,"wb").write(b)' "$W/altere.arrete"
+sudo -n "$DX" arrete "$W/altere.arrete" >"$W/x.out" 2>&1
+rc=$?
+[[ $rc -ne 0 && $(etat_x) == filet ]] && filet_x && ! sudo -n cmp -s "$W/altere.arrete" /var/lib/miyukini/douane/arretes/externe.arrete &&
+	ok "arrêté externe altéré refusé : arrêté en place conservé, filet maintenu" || nok "arrêté altéré refusé" "rc $rc"
+# Démarrage de l'espace (unité) : espace recréé, ordre a → b → c.
+sudo -n systemctl restart miyukini-douane-externe
+j=$(sudo -n journalctl -o cat _SYSTEMD_INVOCATION_ID="$(systemctl show -p InvocationID --value miyukini-douane-externe)" | grep -oE '^\[douane-externe\] \((a|b|c)\)' | grep -oE '[abc]\)$' | tr -d ')\n')
+[[ $j == abc && $(etat_x) == filet ]] && ok "redémarrage de l'espace : (a) puis (b) puis (c), état filet" || nok "redémarrage de l'espace" "ordre « $j », état $(etat_x)"
+
 # ─────────────────────────────────────────────────────────────── 12. AppArmor : aucun refus COG
 echo "# 12. AppArmor : aucun refus des profils COG pendant le scénario"
 # Les sondes de cloisonnement de la section 11 bis sont des refus VOULUS (fichier .sonde-cloisonnement).

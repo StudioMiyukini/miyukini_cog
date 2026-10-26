@@ -3,6 +3,7 @@
 #
 # A exécuter DANS la VM, en root (sudo), depuis le paquet déposé par pousser.sh :
 #   sudo ./installer.sh --vm-jetable --bundle <rép. paquet> [--avec-banc] [--manifeste-sha256 <hex>]
+#        [--modele <artefact.mmia>]
 #
 # INTERDIT sur un hôte réel (production, serveur personnel, poste de travail) : VM jetable
 # cog-essai uniquement (voir README.md). Refus sans --vm-jetable et sur un hôte non virtualisé
@@ -28,6 +29,7 @@ BUNDLE=""
 AVEC_BANC=0
 MANIFESTE_ATTENDU=""
 VM_JETABLE=0
+MODELE_ARTEFACT=""
 
 usage() {
 	cat <<'FIN'
@@ -37,6 +39,7 @@ Usage : sudo installer.sh --vm-jetable --bundle <répertoire> [--avec-banc] [--m
   --bundle <rép>             paquet déposé par pousser.sh (bin/, config/, static/, banc/, MANIFESTE)
   --avec-banc                installe aussi les outils du banc d'intrusion lot 3
   --manifeste-sha256 <hex>   empreinte du MANIFESTE affichée par pousser.sh (vérifiée)
+  --modele <artefact.mmia>   mini modèle (paquet modèle séparé) installé par le canal de maia-llm
 
 VM jetable uniquement : refus sans --vm-jetable et sur un hôte non virtualisé.
 FIN
@@ -51,6 +54,7 @@ while (($#)); do
 		--avec-banc) AVEC_BANC=1 ;;
 		--vm-jetable) VM_JETABLE=1 ;;
 		--manifeste-sha256) MANIFESTE_ATTENDU=${2:?--manifeste-sha256 : valeur attendue}; shift ;;
+		--modele) MODELE_ARTEFACT=${2:?--modele : fichier attendu}; shift ;;
 		-h | --help) usage; exit 0 ;;
 		*) usage >&2; die "option inconnue : $1" ;;
 	esac
@@ -96,7 +100,7 @@ fi
 # Logique commune (copie privée vérifiée).
 # shellcheck source=commun.sh
 . "$BUNDLE/commun.sh"
-export BUNDLE AVEC_BANC MANIFESTE_ATTENDU
+export BUNDLE AVEC_BANC MANIFESTE_ATTENDU MODELE_ARTEFACT
 
 verifier_paquet
 
@@ -104,6 +108,7 @@ for b in "${BINAIRES[@]}"; do
 	[[ -x $BUNDLE/bin/$b ]] || die "binaire absent du paquet : bin/$b"
 done
 [[ -f $BUNDLE/config/bridge.toml ]] || die "config/bridge.toml absent du paquet"
+[[ -f $BUNDLE/config/maia/maia-llm.toml ]] || die "config/maia/maia-llm.toml absent du paquet"
 [[ -d $BUNDLE/config/strongfather ]] || die "config/strongfather absent du paquet"
 [[ -d $BUNDLE/static/static-dist ]] || die "static/static-dist absent du paquet"
 
@@ -115,13 +120,17 @@ binaires
 verifier_binaires_installes
 politiques_et_statiques
 environnements
+cle_maia
+configurer_maia_llm
+modele_ia
 cle_sauvegarde_locale
 postgres
 apparmor_profils
 douane_arretes
 douane_cog
+douane_externe
 unites
 demarrage
 controle_sante || log "ATTENTION : contrôle de santé en échec (voir ci-dessus)"
 
-log "installation terminée (Douane non installée comme service : voir README.md)"
+log "installation terminée (zone COG, frontière externe et services : voir README.md)"

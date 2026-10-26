@@ -9,6 +9,15 @@
 Préparé sans modifier `deploy/` (autre propriétaire). Fichiers fournis ici : `maia-llm.toml`,
 `apparmor-miyukini-maia-llm`, `catalogue-modeles.toml`.
 
+**État (2026-10-26) : intégré** aux installateurs `deploy/cog-vm/` et `deploy/recette/` (logique dans
+`deploy/cog-vm/commun.sh` : `cle_maia`, `configurer_maia_llm`, `modele_ia`, unité `miyukini-maia-llm`) et
+vérifié en VM (`tester.sh`, `scenarios.sh` section 13). Écarts à ce qui suit : pas de `ReadWritePaths` pour
+`/var/lib/miyukini/maia-llm` (rien n'y est écrit, le profil le refuse) ; `PrivateDevices=yes` vient du
+durcissement commun ; `MemoryDenyWriteExecute=yes` conservé (binaire CPU) ; Alicia n'étant pas un service de ces
+installateurs, sa clé est épinglée seulement si l'exploitant dépose `/etc/miyukini/alicia-cle-voix.pub` ;
+`[moteur_ia]` écrit dans `/etc/miyukini/alicia.toml` ; profil AppArmor installé tel quel (règles GPU inertes
+pour le binaire CPU) ; modèle livré en paquet séparé (artefact `MMIA`, option `--modele` des installateurs).
+
 ## 1. Paquet
 
 - Construire `maia-llm` **CPU** pour la VM : `cargo build -p maia-llm --release --no-default-features`
