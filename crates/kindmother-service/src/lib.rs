@@ -48,6 +48,9 @@
 //! - Écoute uniquement sur la boucle locale (sauf configuration explicite), trames
 //!   bornées, poignées de main non authentifiées bornées à part (éviction des plus
 //!   anciennes), emplacement principal pris après authentification, délai d'inactivité
+//! - Sauvegardes d'avant migration chiffrées (clé de la base), gardées 30 jours puis
+//!   effacées de façon sûre ; restauration qui réapplique les oublis (A-022 §5,
+//!   `sauvegardes`)
 
 // C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
 #![cfg_attr(
@@ -69,6 +72,7 @@ mod database;
 mod errors;
 pub mod etiquettes;
 mod protocol;
+pub mod sauvegardes;
 mod server;
 mod sql_guard;
 mod typed;
@@ -80,11 +84,13 @@ pub use credentials::{
 };
 pub use sql_guard::SqlPolicy;
 pub use database::{
-    is_plaintext_sqlite, EncryptedDatabase, MigrationReport, ENV_DEV_PLAINTEXT,
+    is_plaintext_sqlite, EncryptedDatabase, MigrationReport, RapportPurge, RapportRestauration,
+    ENV_DEV_PLAINTEXT,
     SQLITE_PLAINTEXT_HEADER, SECURE_VACUUM_DONE, SECURE_VACUUM_KEY, VACUUM_SPACE_MARGIN,
     check_vacuum_space, vacuum_space_needed,
 };
 pub use errors::ServiceError;
+pub use sauvegardes::RetentionSauvegardes;
 #[cfg(feature = "db-encryption")]
 pub use kindmother_db_key::{DatabaseKeyStore, KeyDerivation};
 pub use protocol::{Request, Response};

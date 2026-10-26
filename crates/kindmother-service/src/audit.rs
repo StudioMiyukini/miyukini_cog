@@ -26,11 +26,19 @@
 //!   le dernier événement `posee` / `retiree` de la donnée (`params_hash` = empreinte de
 //!   la donnée) — dérivé du journal chaîné lui-même, sans table modifiable à part
 //!   (voir `crate::etiquettes`).
+//! - **Registre des oublis rejouables** (A-022 §5, table `oublis` du même fichier) : pour
+//!   chaque entrée `effacement` d'une intention d'oubli, une ligne à numéro égal (`seq`)
+//!   donne la table, l'opération, les **noms** des colonnes de clé, l'empreinte de la clé
+//!   ([`empreinte_cle`], jamais la valeur) et, pour un caviardage (`Update`/`Upsert` +
+//!   `erasure`), les valeurs de remplacement. Le détail de l'entrée chaînée porte
+//!   `rejeu=<SHA-256 de la ligne>` : la chaîne couvre le registre. Ajout seul
+//!   (déclencheurs). Sert à réappliquer les oublis à toute restauration de sauvegarde.
 
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
-use kindmother::intent::push_len_prefixed;
+use kindmother::intent::{push_len_prefixed, IntentOperation, SqlValue, TypedWriteIntent};
 use rusqlite::{params, Connection, OpenFlags, OptionalExtension};
 use sha2::{Digest, Sha256};
 
@@ -151,6 +159,103 @@ fn entry_hash(seq: i64, timestamp: &str, rec: &AuditRecord, prev_hash: &str) -> 
     sha256_hex(&buf)
 }
 
+/// Domaine de l'empreinte de clé d'un oubli rejouable.
+const DOMAINE_CLE_OUBLI: &[u8] = b"kindmother/oubli/cle/v1";
+
+/// Domaine de l'empreinte d'une ligne du registre des oublis.
+const DOMAINE_REGISTRE_OUBLI: &[u8] = b"kindmother/oubli/registre/v1";
+
+/// Préfixe, dans le détail d'une entrée `effacement`, de l'empreinte de la ligne du
+/// registre des oublis qui la rend rejouable.
+pub const MARQUE_REJEU: &str = "rejeu=";
+
+/// Empreinte (SHA-256 hex) d'une clé d'oubli : noms et valeurs des colonnes de clé, en
+/// ordre, encodés sans ambiguïté sous un domaine propre. Ne révèle pas la valeur (au
+/// même titre que l'empreinte des paramètres déjà journalisée).
+pub fn empreinte_cle(cle: &BTreeMap<String, SqlValue>) -> String {
+    let mut buf = Vec::with_capacity(64);
+    push_len_prefixed(&mut buf, DOMAINE_CLE_OUBLI);
+    buf.extend_from_slice(&(cle.len() as u64).to_be_bytes());
+    for (colonne, valeur) in cle {
+        push_len_prefixed(&mut buf, colonne.as_bytes());
+        valeur.canonical_bytes(&mut buf);
+    }
+    sha256_hex(&buf)
+}
+
+/// Oubli rejouable (A-022 §5) : de quoi réappliquer un oubli à une copie restaurée,
+/// sans la valeur oubliée.
+#[derive(Debug, Clone, PartialEq)]
+pub struct OubliRejouable {
+    /// Base.
+    pub database: String,
+    /// Table.
+    pub table: String,
+    /// `Delete` (oubli) ou `Update`/`Upsert` (caviardage).
+    pub operation: IntentOperation,
+    /// Noms des colonnes de clé, dans l'ordre de l'intention.
+    pub cle_colonnes: Vec<String>,
+    /// [`empreinte_cle`] de la clé.
+    pub cle_empreinte: String,
+    /// Valeurs de remplacement (caviardage) ; vide pour un oubli par suppression.
+    pub valeurs: BTreeMap<String, SqlValue>,
+}
+
+impl OubliRejouable {
+    /// Oubli rejouable d'une intention d'effacement.
+    pub fn depuis_intention(intent: &TypedWriteIntent, database: &str) -> Self {
+        Self {
+            database: database.to_string(),
+            table: intent.table.clone(),
+            operation: intent.operation,
+            cle_colonnes: intent.key.keys().cloned().collect(),
+            cle_empreinte: empreinte_cle(&intent.key),
+            valeurs: if intent.operation == IntentOperation::Delete {
+                BTreeMap::new()
+            } else {
+                intent.values.clone()
+            },
+        }
+    }
+
+    fn valeurs_json(&self) -> Result<String, ServiceError> {
+        serde_json::to_string(&self.valeurs)
+            .map_err(|e| ServiceError::Internal(format!("Cannot encode erasure values: {e}")))
+    }
+
+    fn colonnes_json(&self) -> Result<String, ServiceError> {
+        serde_json::to_string(&self.cle_colonnes)
+            .map_err(|e| ServiceError::Internal(format!("Cannot encode erasure key columns: {e}")))
+    }
+
+    /// Empreinte de la ligne du registre (portée par le détail de l'entrée chaînée).
+    pub fn empreinte(&self) -> Result<String, ServiceError> {
+        let mut buf = Vec::with_capacity(256);
+        push_len_prefixed(&mut buf, DOMAINE_REGISTRE_OUBLI);
+        for champ in [
+            self.database.as_str(),
+            self.table.as_str(),
+            self.operation.as_str(),
+            self.colonnes_json()?.as_str(),
+            self.cle_empreinte.as_str(),
+            self.valeurs_json()?.as_str(),
+        ] {
+            push_len_prefixed(&mut buf, champ.as_bytes());
+        }
+        Ok(sha256_hex(&buf))
+    }
+}
+
+fn operation_from_str(s: &str) -> Option<IntentOperation> {
+    Some(match s {
+        "insert" => IntentOperation::Insert,
+        "update" => IntentOperation::Update,
+        "delete" => IntentOperation::Delete,
+        "upsert" => IntentOperation::Upsert,
+        _ => return None,
+    })
+}
+
 fn kind_from_str(s: &str) -> Option<AuditKind> {
     Some(match s {
         "intent" => AuditKind::Intent,
@@ -234,6 +339,18 @@ impl AuditJournal {
         records: &[AuditRecord],
         fresh_intents: bool,
     ) -> Result<(), ServiceError> {
+        self.append_all_avec_oublis(records, fresh_intents, &[])
+    }
+
+    /// Comme [`Self::append_all`], et inscrit au registre des oublis, dans la même
+    /// transaction, chaque `(indice de l'entrée dans records, oubli)` : la ligne prend le
+    /// numéro de l'entrée.
+    pub fn append_all_avec_oublis(
+        &self,
+        records: &[AuditRecord],
+        fresh_intents: bool,
+        oublis: &[(usize, OubliRejouable)],
+    ) -> Result<(), ServiceError> {
         let mut inner = self.lock()?;
         if fresh_intents {
             let mut seen = std::collections::HashSet::new();
@@ -253,8 +370,17 @@ impl AuditJournal {
             .conn
             .execute_batch("BEGIN IMMEDIATE")
             .map_err(|e| ServiceError::Internal(format!("Audit begin failed: {e}")))?;
-        for rec in records {
-            if let Err(e) = append_locked(&mut inner, rec) {
+        for (i, rec) in records.iter().enumerate() {
+            let mut result = append_locked(&mut inner, rec).map(|_| ());
+            if result.is_ok() {
+                for (_, oubli) in oublis.iter().filter(|(j, _)| *j == i) {
+                    result = insert_oubli(&inner.conn, inner.head_seq, oubli);
+                    if result.is_err() {
+                        break;
+                    }
+                }
+            }
+            if let Err(e) = result {
                 let _ = inner.conn.execute_batch("ROLLBACK");
                 inner.head_seq = saved_seq;
                 inner.head_hash = saved_hash;
@@ -338,6 +464,76 @@ impl AuditJournal {
         let inner = self.lock()?;
         read_entries(&inner.conn)
     }
+
+    /// Vérifie toute la chaîne et rend ses entrées (même verrou : rien ne s'intercale).
+    pub fn verified_entries(&self) -> Result<Vec<AuditEntry>, ServiceError> {
+        let inner = self.lock()?;
+        let (seq, hash) = verify_chain_on(&inner.conn)?;
+        if seq != inner.head_seq || hash != inner.head_hash {
+            return Err(ServiceError::Internal(
+                "audit chain head mismatch (journal altered)".to_string(),
+            ));
+        }
+        read_entries(&inner.conn)
+    }
+
+    /// Ligne du registre des oublis attachée à l'entrée `seq`, si elle existe.
+    pub fn oubli(&self, seq: i64) -> Result<Option<OubliRejouable>, ServiceError> {
+        let inner = self.lock()?;
+        read_oubli(&inner.conn, seq)
+    }
+}
+
+fn insert_oubli(conn: &Connection, seq: i64, oubli: &OubliRejouable) -> Result<(), ServiceError> {
+    conn.execute(
+        r"INSERT INTO oublis (seq, database_name, table_name, operation, cle_colonnes,
+              cle_empreinte, valeurs)
+          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+        params![
+            seq,
+            oubli.database,
+            oubli.table,
+            oubli.operation.as_str(),
+            oubli.colonnes_json()?,
+            oubli.cle_empreinte,
+            oubli.valeurs_json()?,
+        ],
+    )
+    .map(|_| ())
+    .map_err(|e| ServiceError::Internal(format!("Erasure registry append failed: {e}")))
+}
+
+fn read_oubli(conn: &Connection, seq: i64) -> Result<Option<OubliRejouable>, ServiceError> {
+    let corrupt = |what: &str| ServiceError::Internal(format!("erasure registry corrupt: {what}"));
+    let row = conn
+        .query_row(
+            r"SELECT database_name, table_name, operation, cle_colonnes, cle_empreinte, valeurs
+              FROM oublis WHERE seq = ?1",
+            [seq],
+            |r| {
+                Ok((
+                    r.get::<_, String>(0)?,
+                    r.get::<_, String>(1)?,
+                    r.get::<_, String>(2)?,
+                    r.get::<_, String>(3)?,
+                    r.get::<_, String>(4)?,
+                    r.get::<_, String>(5)?,
+                ))
+            },
+        )
+        .optional()
+        .map_err(|e| ServiceError::Internal(format!("Erasure registry read failed: {e}")))?;
+    let Some((database, table, operation, colonnes, cle_empreinte, valeurs)) = row else {
+        return Ok(None);
+    };
+    Ok(Some(OubliRejouable {
+        database,
+        table,
+        operation: operation_from_str(&operation).ok_or_else(|| corrupt("unknown operation"))?,
+        cle_colonnes: serde_json::from_str(&colonnes).map_err(|_| corrupt("key columns"))?,
+        cle_empreinte,
+        valeurs: serde_json::from_str(&valeurs).map_err(|_| corrupt("values"))?,
+    }))
 }
 
 /// Vérifie la chaîne d'un fichier de journal (outil d'inspection hors service).
@@ -396,6 +592,21 @@ fn open_journal(path: &Path, pragma_key: Option<&str>) -> Result<Connection, Ser
         CREATE TRIGGER IF NOT EXISTS journal_append_only_delete
             BEFORE DELETE ON journal
             BEGIN SELECT RAISE(ABORT, 'audit journal is append-only'); END;
+        CREATE TABLE IF NOT EXISTS oublis (
+            seq INTEGER PRIMARY KEY,
+            database_name TEXT NOT NULL,
+            table_name TEXT NOT NULL,
+            operation TEXT NOT NULL,
+            cle_colonnes TEXT NOT NULL,
+            cle_empreinte TEXT NOT NULL,
+            valeurs TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS oublis_append_only_update
+            BEFORE UPDATE ON oublis
+            BEGIN SELECT RAISE(ABORT, 'erasure registry is append-only'); END;
+        CREATE TRIGGER IF NOT EXISTS oublis_append_only_delete
+            BEFORE DELETE ON oublis
+            BEGIN SELECT RAISE(ABORT, 'erasure registry is append-only'); END;
         ",
     )
     .map_err(|e| ServiceError::Internal(format!("Cannot initialise audit journal: {e}")))?;

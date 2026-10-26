@@ -52,6 +52,11 @@
 //!   espace insuffisant, audit) ⇒ base refusée à l'ouverture, marqueur non posé,
 //!   nouvelle tentative à l'ouverture suivante (fail-closed). Une base neuve reçoit le
 //!   marqueur sans VACUUM.
+//! - **Sauvegardes** (A-022 §5, module `sauvegardes`) : copies d'avant migration et
+//!   d'avant restauration dans `_backups/`, chiffrées par SQLCipher avec la clé de la
+//!   base, gardées 30 jours puis effacées de façon sûre (au démarrage et
+//!   périodiquement) ; toute restauration réapplique les oublis du journal avant de
+//!   rendre la base disponible (fail-closed).
 
 use rusqlite::types::Value;
 use rusqlite::{params_from_iter, Connection, OpenFlags, OptionalExtension, Statement};
@@ -66,8 +71,12 @@ use kindmother::intent::{
     TypedWriteIntent, MAX_INTENTS_PER_BATCH,
 };
 
-use crate::audit::{sha256_hex, AuditJournal, AuditKind, AuditRecord};
+use crate::audit::{sha256_hex, AuditJournal, AuditKind, AuditRecord, OubliRejouable, MARQUE_REJEU};
 use crate::errors::ServiceError;
+use crate::sauvegardes::{
+    analyser_nom, date_effective, effacer_fichier_sur, empreinte_sauvegarde, fichiers_de,
+    ARejouer, RetentionSauvegardes, BACKUP_DIR, RESTORE_DIR,
+};
 use crate::sql_guard::{map_prepare_error, prepare_single, AuthorizerGuard, SqlPolicy};
 use crate::typed;
 
@@ -82,9 +91,6 @@ pub const SQLITE_PLAINTEXT_HEADER: &[u8; 16] = b"SQLite format 3\0";
 
 /// Clé de `_kindmother_meta` portant la version du schéma de l'opérateur.
 const APP_SCHEMA_VERSION_KEY: &str = "app_schema_version";
-
-/// Sous-répertoire des sauvegardes avant migration.
-const BACKUP_DIR: &str = "_backups";
 
 /// Clé de `_kindmother_meta` : VACUUM de reprise A-020 fait (pages libérées avant
 /// `secure_delete` réécrites). Valeur [`SECURE_VACUUM_DONE`].
@@ -241,6 +247,34 @@ fn wal_file(db_path: &Path) -> PathBuf {
     PathBuf::from(format!("{}-wal", db_path.display()))
 }
 
+/// Copie `src` vers `dst` (créé, 0600) et la synchronise.
+fn copier_prive(src: &Path, dst: &Path) -> Result<(), ServiceError> {
+    let echec = |e: std::io::Error| {
+        ServiceError::Internal(format!("Cannot copy {} to {}: {e}", src.display(), dst.display()))
+    };
+    let mut entree = std::fs::File::open(src).map_err(echec)?;
+    let mut options = std::fs::OpenOptions::new();
+    options.write(true).create_new(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    let mut sortie = options.open(dst).map_err(echec)?;
+    std::io::copy(&mut entree, &mut sortie).map_err(echec)?;
+    sortie.sync_all().map_err(echec)
+}
+
+/// Connexion de remplacement pendant la bascule d'une restauration : base vide en
+/// mémoire, en lecture seule (toute opération d'un appelant en attente échoue).
+fn connexion_fermee() -> Result<Connection, ServiceError> {
+    let c = Connection::open_in_memory()
+        .map_err(|e| ServiceError::Internal(format!("Cannot open placeholder connection: {e}")))?;
+    c.execute_batch("PRAGMA query_only = ON;")
+        .map_err(|e| ServiceError::Internal(format!("Cannot configure placeholder connection: {e}")))?;
+    Ok(c)
+}
+
 fn read_meta(conn: &Connection, key: &str) -> Result<Option<String>, ServiceError> {
     conn.query_row("SELECT value FROM _kindmother_meta WHERE key = ?1", [key], |r| r.get(0))
         .optional()
@@ -275,6 +309,11 @@ pub struct EncryptedDatabase {
     connections: Arc<RwLock<HashMap<String, Arc<Mutex<Connection>>>>>,
     /// Cache des connexions en lecture seule (chemin Query)
     ro_connections: Arc<RwLock<HashMap<String, Arc<Mutex<Connection>>>>>,
+    /// Durée de conservation des sauvegardes (A-022 §5)
+    retention: RetentionSauvegardes,
+    /// Exclusion mutuelle des opérations sur `_backups/` (copie, purge, restauration).
+    /// Ordre des verrous : connexion de la base, puis celui-ci.
+    sauvegardes_verrou: std::sync::Mutex<()>,
 }
 
 impl EncryptedDatabase {
@@ -320,13 +359,47 @@ impl EncryptedDatabase {
             journal.path()
         );
 
-        Ok(Self {
+        // Configuration invalide de la conservation ⇒ refus de démarrer (fail-closed).
+        let retention = RetentionSauvegardes::depuis_env()?;
+        let db = Self {
             data_dir,
             mode,
             journal,
             connections: Arc::new(RwLock::new(HashMap::new())),
             ro_connections: Arc::new(RwLock::new(HashMap::new())),
-        })
+            retention,
+            sauvegardes_verrou: std::sync::Mutex::new(()),
+        };
+        // Purge des sauvegardes expirées au démarrage (puis périodique, côté serveur).
+        match db.purger_sauvegardes_expirees() {
+            Ok(r) if !r.echecs.is_empty() => {
+                error!("Backup purge at startup: {} failure(s): {:?}", r.echecs.len(), r.echecs);
+            }
+            Ok(r) => info!(
+                "Backup retention {} days: {} backup(s) kept, {} purged",
+                db.retention.jours(),
+                r.conservees,
+                r.purgees.len()
+            ),
+            Err(e) => error!("Backup purge at startup failed: {e}"),
+        }
+        Ok(db)
+    }
+
+    /// Durée de conservation des sauvegardes.
+    pub fn retention_sauvegardes(&self) -> RetentionSauvegardes {
+        self.retention
+    }
+
+    /// Répertoire des sauvegardes.
+    pub fn backup_dir(&self) -> PathBuf {
+        self.data_dir.join(BACKUP_DIR)
+    }
+
+    fn lock_sauvegardes(&self) -> Result<std::sync::MutexGuard<'_, ()>, ServiceError> {
+        self.sauvegardes_verrou
+            .lock()
+            .map_err(|_| ServiceError::Internal("backup lock poisoned".to_string()))
     }
 
     #[cfg(feature = "db-encryption")]
@@ -372,10 +445,22 @@ impl EncryptedDatabase {
 
     /// Applique la clé (mode chiffré) et vérifie qu'elle ouvre la base.
     fn apply_key(&self, conn: &Connection, database: &str, existed: bool) -> Result<(), ServiceError> {
+        self.apply_key_at(conn, database, &self.database_path(database), existed)
+    }
+
+    /// Comme [`Self::apply_key`] pour un fichier de la base `database` situé en `path`
+    /// (copie en cours de restauration).
+    fn apply_key_at(
+        &self,
+        conn: &Connection,
+        database: &str,
+        path: &Path,
+        existed: bool,
+    ) -> Result<(), ServiceError> {
         match &self.mode {
             #[cfg(feature = "db-encryption")]
             StorageMode::Encrypted(store) => {
-                if existed && is_plaintext_sqlite(&self.database_path(database)) {
+                if existed && is_plaintext_sqlite(path) {
                     error!(
                         "Database '{database}' is a PLAINTEXT SQLite file: refused (K-06). \
                          Import it into an encrypted database."
@@ -394,7 +479,7 @@ impl EncryptedDatabase {
                     .map_err(|e| ServiceError::Encryption(format!("Cannot set encryption key: {e}")))?;
             }
             StorageMode::PlaintextDev => {
-                let _ = (database, existed);
+                let _ = (database, path, existed);
             }
         }
         conn.query_row("SELECT count(*) FROM sqlite_master", [], |r| r.get::<_, i64>(0))
@@ -439,8 +524,14 @@ impl EncryptedDatabase {
             }
         }
 
-        // Garantit l'existence du fichier et du schéma système.
-        self.get_connection(database).await?;
+        // Garantit l'existence du fichier et du schéma système. Ouverture et mise en
+        // cache sous le verrou de la connexion d'écriture : une restauration (qui le
+        // tient) ne peut pas laisser en cache une lecture ouverte sur l'ancien fichier.
+        let rw = self.get_connection(database).await?;
+        let _rw = rw.lock().await;
+        if let Some(conn) = self.ro_connections.read().await.get(database) {
+            return Ok(conn.clone());
+        }
 
         let conn = self.open_database_read_only(database)?;
         let conn = Arc::new(Mutex::new(conn));
@@ -924,12 +1015,16 @@ impl EncryptedDatabase {
         // 4. Issue, journal terminal, archivage.
         let mut outcomes = Vec::with_capacity(intents.len());
         let mut records = Vec::with_capacity(intents.len());
-        let mut erasures = Vec::new();
+        let mut erasures: Vec<(AuditRecord, OubliRejouable)> = Vec::new();
         for (i, (intent, mut lc)) in intents.iter().zip(lifecycles).enumerate() {
             let (state, rows, last_id, reason) = match &applied {
                 Ok(results) => {
                     let reason = if intent.erasure {
-                        erasures.push(erasure_record(intent, operator_id, database, results[i].0, wal_clean));
+                        let oubli = OubliRejouable::depuis_intention(intent, database);
+                        match erasure_record(intent, operator_id, database, results[i].0, wal_clean, &oubli) {
+                            Ok(rec) => erasures.push((rec, oubli)),
+                            Err(e) => error!("Cannot build erasure record on '{database}': {e}"),
+                        }
                         (!wal_clean).then(|| ERASURE_RESIDUE_REASON.to_string())
                     } else {
                         None
@@ -961,8 +1056,13 @@ impl EncryptedDatabase {
                 reason,
             }));
         }
-        records.extend(erasures);
-        let archived = match self.journal.append_all(&records, false) {
+        let base = records.len();
+        let mut oublis = Vec::with_capacity(erasures.len());
+        for (i, (rec, oubli)) in erasures.into_iter().enumerate() {
+            records.push(rec);
+            oublis.push((base + i, oubli));
+        }
+        let archived = match self.journal.append_all_avec_oublis(&records, false, &oublis) {
             Ok(()) => true,
             Err(e) => {
                 error!("AUDIT FAILURE after typed write on '{database}' (outcome not archived): {e}");
@@ -1153,7 +1253,8 @@ impl EncryptedDatabase {
         let backup = if snapshot.is_empty() {
             None
         } else {
-            Some(self.backup_database(&conn, database, before)?)
+            let _verrou = self.lock_sauvegardes()?;
+            Some(self.backup_database_locked(&conn, database, before, "avant migration")?)
         };
 
         let tx = conn
@@ -1204,39 +1305,551 @@ impl EncryptedDatabase {
         })
     }
 
-    /// Copie de sauvegarde (base + WAL après point de contrôle) avant migration.
-    fn backup_database(
+    // ------------------------------------------------------------------
+    // Sauvegardes (A-022 §5) — voir le module `sauvegardes`.
+    // ------------------------------------------------------------------
+
+    /// Copie de sauvegarde (base, et `-wal` s'il n'est pas vide après le point de
+    /// contrôle) dans `_backups/`, sous le verrou des sauvegardes (tenu par l'appelant).
+    ///
+    /// La copie est le fichier SQLCipher : chiffrée avec la clé de la base. Elle est
+    /// vérifiée non lisible en clair (mode chiffré), synchronisée, puis inscrite au
+    /// journal (`migration` / `sauvegarde`, empreinte du contenu). Tout échec ⇒ copie
+    /// effacée de façon sûre et erreur (l'opération qui l'exigeait est refusée).
+    fn backup_database_locked(
         &self,
         conn: &Connection,
         database: &str,
         version: u32,
+        motif: &str,
     ) -> Result<PathBuf, ServiceError> {
         let _ = conn.query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |_| Ok(()));
-        let dir = self.data_dir.join(BACKUP_DIR);
-        std::fs::create_dir_all(&dir)
-            .map_err(|e| ServiceError::Internal(format!("Cannot create backup dir: {e}")))?;
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            let _ = std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o700));
-        }
-        let stamp = chrono::Utc::now().format("%Y%m%dT%H%M%S%.f");
-        let target = dir.join(format!("{database}.v{version}-{stamp}.bak"));
+        let dir = self.backup_dir();
+        crate::sauvegardes::dossier_prive(&dir)?;
+        let nom = crate::sauvegardes::nom_sauvegarde(database, version, chrono::Utc::now());
+        let target = dir.join(&nom);
         let source = self.database_path(database);
-        std::fs::copy(&source, &target)
-            .map_err(|e| ServiceError::Internal(format!("Backup before migration failed: {e}")))?;
-        let wal = PathBuf::from(format!("{}-wal", source.display()));
-        if wal.exists() {
-            std::fs::copy(&wal, PathBuf::from(format!("{}-wal", target.display())))
-                .map_err(|e| ServiceError::Internal(format!("Backup of WAL failed: {e}")))?;
+        let result = (|| -> Result<(), ServiceError> {
+            copier_prive(&source, &target)?;
+            let wal = wal_file(&source);
+            let avec_wal = file_len(&wal) > 0;
+            if avec_wal {
+                copier_prive(&wal, &wal_file(&target))?;
+            }
+            let chiffrement = if self.is_encrypted() {
+                if is_plaintext_sqlite(&target) {
+                    error!("Backup of '{database}' is readable in plaintext: refused and erased");
+                    return Err(ServiceError::Encryption(format!(
+                        "backup of '{database}' is not encrypted: refused"
+                    )));
+                }
+                "sqlcipher-cle-de-la-base"
+            } else {
+                warn!("Backup of '{database}' in PLAINTEXT (development mode only)");
+                "clair-developpement"
+            };
+            crate::sauvegardes::sync_dossier(&dir)?;
+            self.journal.append(&AuditRecord {
+                kind: AuditKind::Migration,
+                intent_id: None,
+                operator_id: SYSTEM_OPERATOR.to_string(),
+                database: database.to_string(),
+                operation: "sauvegarde".to_string(),
+                table: None,
+                verdict: "appliquee".to_string(),
+                decision_digest: None,
+                params_hash: empreinte_sauvegarde(&target)?,
+                detail: format!(
+                    "fichier={nom}; motif={motif}; chiffrement={chiffrement}; wal={}; retention={} j",
+                    u8::from(avec_wal),
+                    self.retention.jours()
+                ),
+            })?;
+            Ok(())
+        })();
+        if let Err(e) = result {
+            for f in fichiers_de(&target) {
+                if let Err(err) = effacer_fichier_sur(&f) {
+                    error!("Cannot erase failed backup {}: {err}", f.display());
+                }
+            }
+            return Err(e);
         }
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            let _ = std::fs::set_permissions(&target, std::fs::Permissions::from_mode(0o600));
-        }
-        info!("Database '{database}' backed up to {:?} before migration", target);
+        info!("Database '{database}' backed up to {:?} ({motif})", target);
         Ok(target)
+    }
+
+    /// Sauvegardes présentes pour `database` (noms de fichiers, de la plus ancienne à la
+    /// plus récente).
+    pub fn lister_sauvegardes(&self, database: &str) -> Result<Vec<String>, ServiceError> {
+        let mut out: Vec<(chrono::DateTime<chrono::Utc>, String)> = Vec::new();
+        let entries = match std::fs::read_dir(self.backup_dir()) {
+            Ok(e) => e,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
+            Err(e) => return Err(ServiceError::Internal(format!("Cannot list backups: {e}"))),
+        };
+        for entry in entries {
+            let entry = entry.map_err(|e| ServiceError::Internal(format!("Cannot list backups: {e}")))?;
+            let Some(nom) = entry.file_name().to_str().map(str::to_string) else {
+                continue;
+            };
+            if let Some(n) = analyser_nom(&nom).filter(|n| n.database == database) {
+                out.push((n.horodatage, nom));
+            }
+        }
+        out.sort();
+        Ok(out.into_iter().map(|(_, n)| n).collect())
+    }
+
+    /// Purge les sauvegardes plus âgées que la durée de conservation (effacement sûr,
+    /// une entrée d'audit `effacement` / `purge-sauvegarde` par sauvegarde).
+    pub fn purger_sauvegardes_expirees(&self) -> Result<RapportPurge, ServiceError> {
+        self.purger_sauvegardes_au(chrono::Utc::now())
+    }
+
+    /// Comme [`Self::purger_sauvegardes_expirees`], l'âge étant mesuré à `maintenant`.
+    pub fn purger_sauvegardes_au(
+        &self,
+        maintenant: chrono::DateTime<chrono::Utc>,
+    ) -> Result<RapportPurge, ServiceError> {
+        let _verrou = self.lock_sauvegardes()?;
+        let dir = self.backup_dir();
+        let mut rapport = RapportPurge::default();
+        let entries = match std::fs::read_dir(&dir) {
+            Ok(e) => e,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(rapport),
+            Err(e) => return Err(ServiceError::Internal(format!("Cannot list backups: {e}"))),
+        };
+        // Une sauvegarde = son fichier principal et ses annexes `-wal` / `-shm`.
+        let mut groupes = std::collections::BTreeSet::new();
+        for entry in entries {
+            let entry = entry.map_err(|e| ServiceError::Internal(format!("Cannot list backups: {e}")))?;
+            let Some(nom) = entry.file_name().to_str().map(str::to_string) else {
+                warn!("Backup directory: non UTF-8 file name ignored");
+                continue;
+            };
+            let principal = nom
+                .strip_suffix("-wal")
+                .or_else(|| nom.strip_suffix("-shm"))
+                .unwrap_or(&nom)
+                .to_string();
+            groupes.insert(principal);
+        }
+        for principal in groupes {
+            let chemin = dir.join(&principal);
+            if std::fs::symlink_metadata(&chemin).is_ok_and(|m| m.is_dir()) {
+                continue;
+            }
+            let analyse = analyser_nom(&principal);
+            let modifie = fichiers_de(&chemin)
+                .iter()
+                .filter_map(|f| std::fs::symlink_metadata(f).ok())
+                .filter_map(|m| m.modified().ok())
+                .map(chrono::DateTime::<chrono::Utc>::from)
+                .min();
+            let Some(date) = date_effective(analyse.as_ref(), modifie) else {
+                continue;
+            };
+            let age = maintenant.signed_duration_since(date);
+            if age <= self.retention.duree() {
+                rapport.conservees += 1;
+                continue;
+            }
+            let mut effaces = Vec::new();
+            let mut erreur: Option<String> = None;
+            for (f, etiquette) in fichiers_de(&chemin).iter().zip(["bak", "wal", "shm"]) {
+                match effacer_fichier_sur(f) {
+                    Ok(true) => effaces.push(etiquette),
+                    Ok(false) => {}
+                    Err(e) => {
+                        erreur.get_or_insert_with(|| e.to_string());
+                    }
+                }
+            }
+            if let Err(e) = crate::sauvegardes::sync_dossier(&dir) {
+                erreur.get_or_insert_with(|| e.to_string());
+            }
+            let detail = format!(
+                "fichier={principal}; age={} j; retention={} j; effaces={}{}",
+                age.num_days(),
+                self.retention.jours(),
+                effaces.join(","),
+                erreur.as_deref().map(|e| format!("; erreur={e}")).unwrap_or_default()
+            );
+            // Purge non journalisée = erreur : la purge s'arrête (reprise au tour suivant).
+            self.journal.append(&AuditRecord {
+                kind: AuditKind::Effacement,
+                intent_id: None,
+                operator_id: SYSTEM_OPERATOR.to_string(),
+                database: analyse.map_or_else(|| BACKUP_DIR.to_string(), |n| n.database),
+                operation: "purge-sauvegarde".to_string(),
+                table: None,
+                verdict: if erreur.is_none() { "effacee" } else { "echouee" }.to_string(),
+                decision_digest: None,
+                params_hash: sha256_hex(principal.as_bytes()),
+                detail,
+            })?;
+            match erreur {
+                None => {
+                    info!("Backup {principal} purged ({} days old)", age.num_days());
+                    rapport.purgees.push(principal);
+                }
+                Some(e) => {
+                    error!("Backup {principal} expired but not erased: {e}");
+                    rapport.echecs.push(format!("{principal}: {e}"));
+                }
+            }
+        }
+        Ok(rapport)
+    }
+
+    /// **Restaure** la sauvegarde `fichier` (nom dans `_backups/`) de `database`.
+    ///
+    /// Avant que la base ne soit rendue disponible : journal d'audit vérifié (chaîne
+    /// complète), empreinte de la sauvegarde comparée à celle inscrite, copie ouverte
+    /// avec la clé de la base et contrôlée, **oublis rejoués** (toutes les entrées
+    /// `effacement` d'intentions postérieures à la sauvegarde ; toutes celles de la base
+    /// si la sauvegarde n'est pas inscrite), point de contrôle `TRUNCATE` complet,
+    /// journalisation (`effacement` / `rejeu` par oubli, `migration` / `restauration`).
+    /// L'état remplacé est d'abord sauvegardé (`avant restauration`). Les connexions en
+    /// cache sont remplacées sous leur verrou : aucune opération ne voit d'état
+    /// intermédiaire. Tout échec avant la bascule laisse la base courante inchangée ;
+    /// un échec après la bascule laisse la base **indisponible** (jamais la copie non
+    /// purgée de ses oublis).
+    pub async fn restaurer_sauvegarde(
+        &self,
+        database: &str,
+        fichier: &str,
+        operator_id: &str,
+    ) -> Result<RapportRestauration, ServiceError> {
+        if !Self::is_valid_database_name(database) {
+            return Err(ServiceError::Validation(format!("Invalid database name: {database}")));
+        }
+        let conn_arc = self.get_connection(database).await?;
+        let mut conn = conn_arc.lock().await;
+        let ro_arc = self.ro_connections.read().await.get(database).cloned();
+        let mut ro = match &ro_arc {
+            Some(a) => Some(a.lock().await),
+            None => None,
+        };
+        let result =
+            self.restaurer_verrouille(database, fichier, operator_id, &mut conn, ro.as_deref_mut());
+        if let Err((e, fermee)) = &result {
+            if let Err(err) = self.journal.append(&AuditRecord {
+                kind: AuditKind::Migration,
+                intent_id: None,
+                operator_id: operator_id.to_string(),
+                database: database.to_string(),
+                operation: "restauration".to_string(),
+                table: None,
+                verdict: refusal_or_failure(e).to_string(),
+                decision_digest: None,
+                params_hash: sha256_hex(fichier.as_bytes()),
+                detail: format!("fichier={fichier}; base_indisponible={}; {e}", u8::from(*fermee)),
+            }) {
+                error!("AUDIT FAILURE while recording a refused restoration of '{database}': {err}");
+            }
+        }
+        drop(ro);
+        drop(conn);
+        match result {
+            Ok(rapport) => Ok(rapport),
+            Err((e, fermee)) => {
+                if fermee {
+                    // Base indisponible : la prochaine ouverture repart du fichier.
+                    self.connections.write().await.remove(database);
+                    self.ro_connections.write().await.remove(database);
+                    error!("Database '{database}' unavailable after a failed restoration: {e}");
+                }
+                Err(e)
+            }
+        }
+    }
+
+    /// Corps de la restauration, connexions verrouillées. `Err((e, true))` : la base
+    /// courante a été fermée (indisponible).
+    fn restaurer_verrouille(
+        &self,
+        database: &str,
+        fichier: &str,
+        operator_id: &str,
+        conn: &mut Connection,
+        mut ro: Option<&mut Connection>,
+    ) -> Result<RapportRestauration, (ServiceError, bool)> {
+        let ouverte = |e: ServiceError| (e, false);
+        let _verrou = self.lock_sauvegardes().map_err(ouverte)?;
+
+        // 1. Journal : chaîne complète, sinon aucun oubli n'est sûr de pouvoir être rejoué.
+        let entries = self.journal.verified_entries().map_err(|e| {
+            ouverte(ServiceError::PermissionDenied(format!(
+                "restoration refused: erasure journal unreadable or broken ({e})"
+            )))
+        })?;
+
+        // 2. Sauvegarde : nom de cette base, fichier ordinaire de `_backups/`.
+        if analyser_nom(fichier).is_none_or(|n| n.database != database) {
+            return Err(ouverte(ServiceError::Validation(format!(
+                "not a backup of '{database}': {fichier:?}"
+            ))));
+        }
+        let chemin = self.backup_dir().join(fichier);
+        match std::fs::symlink_metadata(&chemin) {
+            Ok(m) if m.is_file() => {}
+            Ok(_) => {
+                return Err(ouverte(ServiceError::PermissionDenied(format!(
+                    "backup {fichier} is not a regular file"
+                ))))
+            }
+            Err(_) => return Err(ouverte(ServiceError::Validation(format!("backup not found: {fichier}")))),
+        }
+        let empreinte = empreinte_sauvegarde(&chemin).map_err(ouverte)?;
+        let champ = format!("fichier={fichier}");
+        let inscrite = entries.iter().rev().find(|e| {
+            e.record.kind == AuditKind::Migration
+                && e.record.operation == "sauvegarde"
+                && e.record.database == database
+                && e.record.detail.split("; ").any(|p| p == champ)
+        });
+        let depuis = match inscrite {
+            Some(e) if e.record.params_hash == empreinte => e.seq,
+            Some(e) => {
+                return Err(ouverte(ServiceError::PermissionDenied(format!(
+                    "restoration refused: backup {fichier} differs from the copy recorded in entry #{}",
+                    e.seq
+                ))))
+            }
+            None => {
+                warn!(
+                    "Backup {fichier} not recorded in the journal (older version): \
+                     replaying every erasure of '{database}'"
+                );
+                0
+            }
+        };
+
+        // 3. Oublis à rejouer (ordre du journal).
+        let mut a_rejouer: Vec<(&crate::audit::AuditEntry, Option<OubliRejouable>)> = Vec::new();
+        for e in entries.iter().filter(|e| {
+            e.seq > depuis
+                && e.record.kind == AuditKind::Effacement
+                && e.record.database == database
+                && matches!(e.record.operation.as_str(), "delete" | "update" | "upsert")
+        }) {
+            let marque = e.record.detail.split("; ").find_map(|p| p.strip_prefix(MARQUE_REJEU));
+            let oubli = match marque {
+                Some(attendue) => {
+                    let oubli = self.journal.oubli(e.seq).map_err(ouverte)?.ok_or_else(|| {
+                        ouverte(ServiceError::PermissionDenied(format!(
+                            "restoration refused: erasure registry entry #{} missing",
+                            e.seq
+                        )))
+                    })?;
+                    let conforme = oubli.empreinte().map_err(ouverte)? == attendue
+                        && oubli.database == database
+                        && e.record.table.as_deref() == Some(oubli.table.as_str());
+                    if !conforme {
+                        return Err(ouverte(ServiceError::PermissionDenied(format!(
+                            "restoration refused: erasure registry entry #{} altered",
+                            e.seq
+                        ))));
+                    }
+                    Some(oubli)
+                }
+                None if e.record.operation == "delete" => None,
+                None => {
+                    return Err(ouverte(ServiceError::PermissionDenied(format!(
+                        "restoration refused: erasure #{} ({}) predates the erasure registry \
+                         and cannot be replayed",
+                        e.seq, e.record.operation
+                    ))))
+                }
+            };
+            a_rejouer.push((e, oubli));
+        }
+
+        // 4. Copie de l'état remplacé.
+        let version = read_schema_version(conn).map_err(ouverte)?;
+        let avant = self
+            .backup_database_locked(conn, database, version, "avant restauration")
+            .map_err(ouverte)?;
+
+        // 5. Préparation hors de portée des opérateurs, oublis rejoués.
+        let dossier = self.data_dir.join(RESTORE_DIR);
+        crate::sauvegardes::dossier_prive(&dossier).map_err(ouverte)?;
+        let staging = dossier.join(format!("{database}.db"));
+        let effacer_staging = || {
+            for f in fichiers_de(&staging) {
+                if let Err(err) = effacer_fichier_sur(&f) {
+                    error!("Cannot erase restoration staging {}: {err}", f.display());
+                }
+            }
+        };
+        effacer_staging();
+        let prep = (|| -> Result<Vec<(i64, u64)>, ServiceError> {
+            copier_prive(&chemin, &staging)?;
+            let wal = wal_file(&chemin);
+            if file_len(&wal) > 0 {
+                copier_prive(&wal, &wal_file(&staging))?;
+            }
+            let mut sc = Connection::open_with_flags(
+                &staging,
+                OpenFlags::SQLITE_OPEN_READ_WRITE | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+            )
+            .map_err(|e| ServiceError::Database(format!("Cannot open backup copy: {e}")))?;
+            self.apply_key_at(&sc, database, &staging, true)?;
+            enforce_secure_delete(&sc)?;
+            sc.execute_batch("PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;")
+                .map_err(|e| ServiceError::Database(format!("Cannot configure backup copy: {e}")))?;
+            let controle: String = sc
+                .query_row("PRAGMA quick_check", [], |r| r.get(0))
+                .map_err(|e| ServiceError::Database(format!("Backup check failed: {e}")))?;
+            if controle != "ok" {
+                return Err(ServiceError::Database(format!("backup {fichier} is damaged: {controle}")));
+            }
+            let tx = sc
+                .transaction()
+                .map_err(|e| ServiceError::Database(format!("Cannot begin replay: {e}")))?;
+            let mut rejoues = Vec::with_capacity(a_rejouer.len());
+            for (e, oubli) in &a_rejouer {
+                let cible = match oubli {
+                    Some(o) => ARejouer::Registre(o),
+                    None => ARejouer::Ancien {
+                        table: e.record.table.as_deref().unwrap_or_default(),
+                        params_hash: &e.record.params_hash,
+                    },
+                };
+                let n = crate::sauvegardes::rejouer(&tx, &cible).map_err(|m| {
+                    ServiceError::PermissionDenied(format!(
+                        "restoration refused: erasure #{} cannot be replayed ({m})",
+                        e.seq
+                    ))
+                })?;
+                rejoues.push((e.seq, n));
+            }
+            tx.commit()
+                .map_err(|e| ServiceError::Database(format!("Cannot commit replay: {e}")))?;
+            if !truncate_wal_after_erasure(&sc, database) {
+                return Err(ServiceError::Database(
+                    "WAL checkpoint after replay incomplete: restoration refused".to_string(),
+                ));
+            }
+            drop(sc);
+            // Dernière connexion fermée : `-wal`/`-shm` retirés par SQLite ; reste éventuel effacé.
+            for f in &fichiers_de(&staging)[1..] {
+                effacer_fichier_sur(f)?;
+            }
+            Ok(rejoues)
+        })();
+        let rejoues = match prep {
+            Ok(r) => r,
+            Err(e) => {
+                effacer_staging();
+                return Err(ouverte(e));
+            }
+        };
+        let lignes: u64 = rejoues.iter().map(|(_, n)| n).sum();
+
+        // 6. Journal avant toute mise à disposition (fail-closed).
+        let mut records: Vec<AuditRecord> = a_rejouer
+            .iter()
+            .zip(&rejoues)
+            .map(|((e, _), (seq, n))| AuditRecord {
+                kind: AuditKind::Effacement,
+                intent_id: None,
+                operator_id: operator_id.to_string(),
+                database: database.to_string(),
+                operation: "rejeu".to_string(),
+                table: e.record.table.clone(),
+                verdict: "effacee".to_string(),
+                decision_digest: None,
+                params_hash: e.record.params_hash.clone(),
+                detail: format!("restauration de {fichier}; entree #{seq}; {n} rows"),
+            })
+            .collect();
+        let nom_avant = avant
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or_default()
+            .to_string();
+        records.push(AuditRecord {
+            kind: AuditKind::Migration,
+            intent_id: None,
+            operator_id: operator_id.to_string(),
+            database: database.to_string(),
+            operation: "restauration".to_string(),
+            table: None,
+            verdict: "appliquee".to_string(),
+            decision_digest: None,
+            params_hash: empreinte,
+            detail: format!(
+                "fichier={fichier}; inscrite={}; depuis=#{depuis}; oublis_rejoues={}; lignes={lignes}; \
+                 sauvegarde_avant={nom_avant}",
+                u8::from(inscrite.is_some()),
+                rejoues.len()
+            ),
+        });
+        if let Err(e) = self.journal.append_all(&records, false) {
+            effacer_staging();
+            return Err(ouverte(e));
+        }
+
+        // 7. Bascule : fermeture des connexions (remplacées sous leur verrou), échange des
+        //    fichiers, ouverture de la base restaurée.
+        let (attente_rw, attente_ro) = match (connexion_fermee(), connexion_fermee()) {
+            (Ok(a), Ok(b)) => (a, b),
+            (Err(e), _) | (_, Err(e)) => {
+                effacer_staging();
+                return Err(ouverte(e));
+            }
+        };
+        if let Some(ro) = ro.as_deref_mut() {
+            drop(std::mem::replace(ro, attente_ro));
+        }
+        drop(std::mem::replace(conn, attente_rw));
+        let fermee = |e: ServiceError| (e, true);
+        let live = self.database_path(database);
+        let ancien = dossier.join(format!("{database}.ancien"));
+        for f in fichiers_de(&ancien) {
+            effacer_fichier_sur(&f).map_err(fermee)?;
+        }
+        if let Err(e) = std::fs::rename(&live, &ancien) {
+            effacer_staging();
+            return Err(fermee(ServiceError::Internal(format!("Cannot move the replaced database: {e}"))));
+        }
+        // Annexes de l'ancienne base (normalement retirées à la fermeture) : jamais
+        // appliquées à la base restaurée.
+        for f in &fichiers_de(&live)[1..] {
+            effacer_fichier_sur(f).map_err(fermee)?;
+        }
+        if let Err(e) = std::fs::rename(&staging, &live) {
+            let retour = std::fs::rename(&ancien, &live);
+            error!("Cannot install the restored copy of '{database}': {e} (rollback: {retour:?})");
+            effacer_staging();
+            return Err(fermee(ServiceError::Internal(format!("Cannot install the restored copy: {e}"))));
+        }
+        crate::sauvegardes::sync_dossier(&self.data_dir).map_err(fermee)?;
+        for f in fichiers_de(&ancien) {
+            // Son contenu est dans la sauvegarde « avant restauration ».
+            if let Err(e) = effacer_fichier_sur(&f) {
+                error!("Cannot erase the replaced database file {}: {e}", f.display());
+            }
+        }
+        *conn = self.open_database(database).map_err(fermee)?;
+        if let Some(ro) = ro {
+            *ro = self.open_database_read_only(database).map_err(fermee)?;
+        }
+        warn!(
+            "Database '{database}' restored from {fichier}: {} erasure(s) replayed, {lignes} row(s)",
+            rejoues.len()
+        );
+        Ok(RapportRestauration {
+            sauvegarde: fichier.to_string(),
+            inscrite: inscrite.is_some(),
+            depuis_entree: depuis,
+            oublis_rejoues: rejoues.len(),
+            lignes_effacees: lignes,
+            sauvegarde_avant_restauration: nom_avant,
+        })
     }
 
     /// Obtient les informations sur une base de données.
@@ -1267,6 +1880,38 @@ impl EncryptedDatabase {
             encrypted: self.is_encrypted(),
         })
     }
+}
+
+/// Rapport d'une purge des sauvegardes expirées.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct RapportPurge {
+    /// Sauvegardes conservées (plus jeunes que la durée de conservation).
+    pub conservees: usize,
+    /// Sauvegardes effacées (noms de fichiers).
+    pub purgees: Vec<String>,
+    /// Sauvegardes expirées dont l'effacement a échoué (nom et motif) ; retentées à la
+    /// purge suivante.
+    pub echecs: Vec<String>,
+}
+
+/// Rapport d'une restauration.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RapportRestauration {
+    /// Sauvegarde restaurée (nom de fichier dans `_backups/`).
+    pub sauvegarde: String,
+    /// La sauvegarde était inscrite au journal et son contenu y correspondait. Faux
+    /// pour une sauvegarde antérieure à l'inscription : tous les oublis de la base sont
+    /// alors rejoués.
+    pub inscrite: bool,
+    /// Numéro de l'entrée de journal de la sauvegarde (0 si non inscrite) : les oublis
+    /// d'entrées postérieures ont été rejoués.
+    pub depuis_entree: i64,
+    /// Oublis rejoués (entrées `effacement` postérieures à la sauvegarde).
+    pub oublis_rejoues: usize,
+    /// Lignes effacées ou caviardées par le rejeu.
+    pub lignes_effacees: u64,
+    /// Copie de l'état remplacé (dans `_backups/`, soumise à la même conservation).
+    pub sauvegarde_avant_restauration: String,
 }
 
 /// Rapport d'application de migrations.
@@ -1347,9 +1992,10 @@ fn erasure_record(
     database: &str,
     rows: u64,
     wal_clean: bool,
-) -> AuditRecord {
+    oubli: &OubliRejouable,
+) -> Result<AuditRecord, ServiceError> {
     let checkpoint = if wal_clean { "ok" } else { "incomplete" };
-    AuditRecord {
+    Ok(AuditRecord {
         kind: AuditKind::Effacement,
         intent_id: Some(intent.intent_id.clone()),
         operator_id: operator_id.to_string(),
@@ -1359,8 +2005,11 @@ fn erasure_record(
         verdict: if wal_clean { "effacee" } else { "residu_wal" }.to_string(),
         decision_digest: intent.decision_digest.clone(),
         params_hash: sha256_hex(&intent.canonical_params()),
-        detail: format!("{rows} rows; secure_delete=on; wal_checkpoint(truncate)={checkpoint}"),
-    }
+        detail: format!(
+            "{rows} rows; secure_delete=on; wal_checkpoint(truncate)={checkpoint}; {MARQUE_REJEU}{}",
+            oubli.empreinte()?
+        ),
+    })
 }
 
 /// Exécute une instruction préparée et convertit les lignes en JSON.

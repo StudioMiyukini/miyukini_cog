@@ -27,6 +27,11 @@ use std::path::PathBuf;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 /// Configuration du serveur.
+///
+/// Autres variables lues par la bibliothèque :
+/// - `KINDMOTHER_BACKUP_RETENTION_DAYS` : conservation des sauvegardes `_backups/`
+///   (défaut 30 jours, 1 à 30) ; au-delà de 30 jours, `KINDMOTHER_BACKUP_RETENTION_BEYOND_30_DAYS=1`
+///   est exigé en plus (A-022 §5), sinon le serveur refuse de démarrer.
 struct Config {
     /// Répertoire de données
     data_dir: PathBuf,

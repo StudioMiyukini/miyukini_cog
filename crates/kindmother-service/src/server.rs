@@ -300,6 +300,7 @@ impl KindMotherServer {
         let slots = Arc::new(Semaphore::new(self.limits.max_connections));
         let preauth = Arc::new(Mutex::new(PreAuthTable::default()));
         let server = Arc::new(self);
+        spawn_backup_purge(Arc::downgrade(&server.database));
 
         loop {
             match listener.accept().await {
@@ -978,6 +979,31 @@ impl KindMotherServer {
             },
         }
     }
+}
+
+/// Purge périodique des sauvegardes expirées (A-022 §5), en plus de celle du démarrage.
+/// La tâche s'arrête quand le gestionnaire de bases n'existe plus.
+fn spawn_backup_purge(database: std::sync::Weak<EncryptedDatabase>) {
+    let periode = crate::sauvegardes::INTERVALLE_PURGE;
+    tokio::spawn(async move {
+        let mut ticker = tokio::time::interval_at(tokio::time::Instant::now() + periode, periode);
+        loop {
+            ticker.tick().await;
+            let Some(db) = database.upgrade() else {
+                break;
+            };
+            match tokio::task::spawn_blocking(move || db.purger_sauvegardes_expirees()).await {
+                Ok(Ok(r)) if r.echecs.is_empty() => {
+                    if !r.purgees.is_empty() {
+                        info!("Periodic backup purge: {} backup(s) erased", r.purgees.len());
+                    }
+                }
+                Ok(Ok(r)) => error!("Periodic backup purge: {} failure(s): {:?}", r.echecs.len(), r.echecs),
+                Ok(Err(e)) => error!("Periodic backup purge failed: {e}"),
+                Err(e) => error!("Periodic backup purge task failed: {e}"),
+            }
+        }
+    });
 }
 
 /// Démarre un serveur éphémère sur `127.0.0.1:0` (tests d'intégration des services).
