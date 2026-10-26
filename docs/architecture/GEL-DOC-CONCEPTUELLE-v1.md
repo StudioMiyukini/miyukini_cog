@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.26 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`, `doc-conceptuelle-v1.24`, `doc-conceptuelle-v1.25`, `doc-conceptuelle-v1.26`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.27 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`, `doc-conceptuelle-v1.24`, `doc-conceptuelle-v1.25`, `doc-conceptuelle-v1.26`, `doc-conceptuelle-v1.27`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -85,6 +85,7 @@
 | A-024 | 2026-10-26 | Délégation de clé d'usage `0x45` (disposition des tags), clés `visas` (5) et `fiches` (6), vérification de chaîne des passeports et visas, transition | 1.24 |
 | A-025 | 2026-10-26 | Sauvegardes de KindMother (chiffrées, 30 j, purge sûre, restauration qui rejoue les oublis, registre `oublis`) ; correction d'A-023 : règle de débit stricte par défaut, filet 5/4 seulement en externe après `tc` | 1.25 |
 | A-026 | 2026-10-26 | Modèle local réel pour MAIA et Alicia (Qwen2.5-1.5B-Instruct Apache-2.0, `maia-llm` CPU sur 11436, canal MMIA), Alicia contrainte par grammaire, serrure toujours confirmée, mention IA (AI Act art. 50) | 1.26 |
+| A-027 | 2026-10-26 | Portail scindé : processus `portail-entree` / `portail-sortie`, files à groupe propre (`3730`), formats `MJR1` `MPA1` `MPR1` `MPP1` `MPV1` `MPM1` `MPK1` `MPJ1`, jeton de réponse éphémère, écarts (compteurs, sas sous le profil d'entrée) | 1.27 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -822,3 +823,19 @@
 - **Mention IA (AI Act art. 50)** : route `GET /maia/presentation` ; consigne d'identité d'IA placée avant celle de chaque agent, non levable ; champs `genere_par_ia` et `mention_ia` sur chaque réponse de MAIA ; `PRESENTATION_ALICIA`, `MENTION_IA_ALICIA` et `genere_par_ia` sur chaque proposition d'Alicia
 - **Reste** : unité, compte, profil AppArmor (`config/maia/apparmor-miyukini-maia-llm`) et configuration à intégrer aux installateurs (`config/maia/INSTALLATEUR.md`) ; re-signature du modèle par la clé du canal ; build CUDA (édition de liens `cudart_static`) ; réutilisation du cache de l'invite pour la latence d'Alicia
 - **Impact** : EX-50..63 ; AI Act art. 50 ; C-72 ; plan lot 7
+
+### A-027 — Portail scindé : processus, files, jeton de réponse
+
+<!-- @id arch.gel.a027 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a027 -->
+
+- **Date** : 2026-10-26 · **version** 1.27 · consignation de l'implémenté d'A-022 §3 et de ses écarts (`crates/miyuportail` : `entree.rs`, `sortie.rs`, `jeton.rs`, `files.rs`, `demon.rs`)
+- **Processus** : `portail-entree` (compte `miyukini-portail-entree`) relève les trames MSCE du **dépôt** et écrit les déclarations admises (`MPI1` + jeton) dans **admises** ; `portail-sortie` (compte `miyukini-portail-sortie`) relève les **réponses** à jeton et les publications H1, et écrit les trames signées par la clé de la voie dans **publication** ; aucun fichier, groupe ni socket commun ; les types l'imposent aussi (`PortailEntree` sans `publier`/`repondre`, `PortailSortie` sans `relever`/`deposer`)
+- **Files** sous `/var/lib/miyukini/portail-files/` : chaque dossier appartient à son lecteur, mode `3730`, groupe propre à la file réunissant seulement son écrivain et son lecteur (`miyukini-q-depot`, `-admises`, `-reponses`, `-publication`) ; éléments `0640`, `UMask=0027` ; comptes d'extrémité `miyukini-facade` et `miyukini-moteur` ; démarrage refusé si un dossier est ouvert aux « autres », n'appartient pas au compte attendu, ou si le processus peut écrire dans une file de l'autre sens ; état propre de chaque processus en `0700`
+- **Formats** : jeton `MJR1` ; enveloppes `MPA1` (admise), `MPR1` (réponse), `MPP1` (publication) ; descripteur de voie `MPV1` ; état `MPM1` (marques anti-rejeu), `MPK1` (clé de publication), `MPJ1` (jetons consommés) ; nommage des éléments de file (détail dans les fichiers source cités)
+- **Jeton de réponse** : par session, les Cores tirent une paire Ed25519 éphémère : la graine va à l'entrée (fichier `0600`), la clé publique à la sortie ; la sortie exige un jeton valide et non consommé sur toute voie H2/H3 ; jetons consommés et marques anti-rejeu enregistrés **avant** toute remise à l'aval (aucun rejeu ni double usage après redémarrage) ; une entrée compromise peut signer des jetons mais ne peut rien publier (seul le moteur écrit dans **réponses**)
+- **Écarts à la spécification d'A-022 §3** : (1) la façade ne voit plus les compteurs de l'entrée (sinon un canal d'écriture vers la Franche) : acquittement par disparition de l'élément déposé ; (2) avec `NoNewPrivileges`, le noyau refuse toute transition AppArmor : le **sas** tourne sous le profil de l'entrée (`ix`) en plus de son Landlock, seccomp et rlimits, et l'unité de l'entrée reçoit `SystemCallFilter=@sandbox` ; (3) `PortailInterne` (composition des deux moitiés) est conservé pour les essais et l'intégration, son `publier` sans jeton par compatibilité — les processus, eux, exigent le jeton
+- **Limites** : CDR non branché dans les processus (`RefusParDefaut` : tout document refusé) ; journal local par processus, pas le registre Merkle ; descripteurs de voie écrits seulement par l'outil d'essai, pas encore par les Cores réels ; files interrogées toutes les 200 ms
+- **Vérifié en VM** : chemin complet façade → entrée → moteur → sortie → façade ; jeton, trame ou réponse rejoués refusés ; arrêt ou `kill -9` d'un processus sans effet sur l'autre ; AppArmor refuse l'écriture croisée ; coupure et rétablissement de voie
+- **Impact** : INV-H3, INV-H4, INV-Z1 ; EX-12, EX-24 ; plan lots 3, 5

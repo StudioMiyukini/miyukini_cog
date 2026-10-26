@@ -24,7 +24,7 @@
 | S2 | Zone COG sans sortie, Douane générée et auditée, Vigies, relais NFLOG | fait (lots 3, A-015, A-016) |
 | S3 | AppArmor enforce pour chaque service, flux locaux par compte | fait (A-016) |
 | S4 | Débit `tc` généré par la Douane | fait en bibliothèque (A-023) ; intégration aux installateurs à faire |
-| S5 | Portail scindé entrée / sortie | en cours (A-022 §3) |
+| S5 | Portail scindé entrée / sortie | fait (A-027, vérifié en VM) ; CDR et descripteurs par les Cores réels à brancher |
 | S6 | Façade Franche réelle : image signée, sandbox, réseau, quotas disque et sessions, révocations rafraîchies | à faire |
 
 ## 2. Identité
