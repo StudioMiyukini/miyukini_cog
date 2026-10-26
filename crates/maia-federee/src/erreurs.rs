@@ -32,6 +32,14 @@ pub enum ErreurFederee {
     /// Fiche datée dans le futur.
     #[error("fiche datée dans le futur")]
     DateFuture,
+    /// Fiche signée par la clé `fiches` plus ancienne que la borne de
+    /// fraîcheur d'admission ([`crate::fiche::FRAICHEUR_ADMISSION_SECS`]).
+    #[error("fiche trop ancienne pour être admise (à republier)")]
+    FichePerimee,
+    /// Relecture d'une Fiche absente de la base étrangère (ou d'un autre
+    /// contenu) : une relecture n'admet rien de neuf.
+    #[error("fiche non admise : relecture refusée")]
+    NonAdmise,
     /// Base étrangère pleine pour cet émetteur (anti-inondation).
     #[error("quota de fiches de l'émetteur atteint")]
     BasePleine,

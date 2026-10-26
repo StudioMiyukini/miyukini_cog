@@ -229,7 +229,7 @@ use kindmother::intent::{SchemaMigration, SqlValue, TypedSelect, TypedWriteInten
 use kindmother_client::{ClientError, KindMotherClient, OperatorCredential};
 use maia_federee::fiche::MAX_REPRISES;
 use maia_federee::{
-    deriver_reprise, empreinte_ensemble, id_fiche_derivee, id_fiche_reprise,
+    deriver_reprise, empreinte_ensemble, id_fiche_derivee, id_fiche_reprise, relire_fiche,
     verifier_derivation_reprise, verifier_fiche, Audience, AutoriteEtiquettes, ChoixReprise,
     ErreurFederee, EtiquetteLue, Fiche, FicheVerifiee, LecteurEtiquettes, ParametresLus,
     Publication, PublieurOriginal, Relation, ServiceRequete, SignataireFiches, TypeFiche,
@@ -819,8 +819,10 @@ fn indisponible(detail: impl Into<String>) -> Refus {
 }
 
 /// Reconstruit le service depuis les versions enregistrées (ordre `(fiche,
-/// version)`) : chaque Fiche est revérifiée (chaîne de la clé `fiches`, ou
-/// identité pour les Fiches de la transition) et doit concorder avec sa ligne ;
+/// version)`) : chaque Fiche est **relue** (`relire_fiche` : chaîne de la clé
+/// `fiches` couvrant la date de la Fiche — une Fiche publiée reste rechargeable
+/// après l'expiration de sa délégation —, ou identité pour les Fiches de la
+/// transition ; une relecture n'est pas une admission) et doit concorder avec sa ligne ;
 /// une Fiche republiée est restaurée par le chemin TAMR.
 fn restaurer(
     publieur: &PublieurOriginal,
@@ -831,7 +833,7 @@ fn restaurer(
     lignes.sort_by(|a, b| a.fiche.cmp(&b.fiche).then(a.version.cmp(&b.version)));
     let mut service = ServiceRequete::new(cog.clone());
     for l in lignes {
-        let f = verifier_fiche(&l.octets, maintenant)
+        let f = relire_fiche(&l.octets, maintenant)
             .map_err(|e| format!("{} v{} : {e}", l.fiche, l.version))?;
         if f.fiche().id != l.fiche
             || f.fiche().version != l.version

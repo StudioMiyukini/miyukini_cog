@@ -16,7 +16,9 @@
 //!   champs typés, aucun champ de consignes, tout champ inconnu refusé (EX-57) ;
 //!   signé par la clé d'usage `fiches` (indice 6) qui porte sa délégation
 //!   `0x45` ([`SignataireFiches`], A-022 §4, A-024), Fiches signées par
-//!   l'identité encore lisibles (transition)
+//!   l'identité encore lisibles (transition) ; **admission** ([`verifier_fiche`] :
+//!   délégation valide maintenant, fraîcheur bornée) distincte de la
+//!   **relecture** d'une Fiche déjà admise ([`relire_fiche`])
 //! - [`normalisation`] : invisibles, contrôles bidi, homoglyphes, balisage,
 //!   sauts de mise en forme (EX-57)
 //! - [`base`] : base de connaissances **étrangère**, séparée de la mémoire de
@@ -60,8 +62,9 @@ pub use etiquettes::{
     PublieurOriginal, FENETRE_DATE_SECS, MAX_ATTESTATIONS_PAR_PERIODE, PERIODE_ATTESTATIONS_SECS, PREFIXE_ID_FICHE,
 };
 pub use fiche::{
-    cog_de_cle, sceller_fiche, verifier_fiche, verifier_fiche_deleguee, Audience, Fiche, FicheVerifiee, Relation, Reprise,
-    SignataireFiches, SignatureFiche, TypeFiche, INDICE_FICHES, MAX_DELEGATION, TYPE_FICHE,
+    cog_de_cle, relire_fiche, sceller_fiche, verifier_fiche, verifier_fiche_deleguee, Audience, Fiche, FicheVerifiee,
+    Relation, Reprise, SignataireFiches, SignatureFiche, TypeFiche, FRAICHEUR_ADMISSION_SECS, INDICE_FICHES,
+    MAX_DELEGATION, TYPE_FICHE,
 };
 pub use lecteur::{extraire, Ancrage, ExtraitType, ModeleLecteur};
 pub use marquage::{autoriser, AutoriteConfirmation, Effet, Etranger, Provenance, ValidationUtilisateur};

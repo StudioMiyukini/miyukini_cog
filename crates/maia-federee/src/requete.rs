@@ -25,7 +25,7 @@ use miyusceau::{EcrivainTlv, LecteurTlv};
 use crate::base::Qualite;
 use crate::erreurs::ErreurFederee;
 use crate::etiquettes::{MAX_ATTESTATIONS_PAR_PERIODE, PERIODE_ATTESTATIONS_SECS};
-use crate::fiche::{reprises_distinctes, verifier_fiche, Audience, FicheVerifiee, Reprise, TypeFiche};
+use crate::fiche::{relire_fiche, reprises_distinctes, verifier_fiche, Audience, FicheVerifiee, Reprise, TypeFiche};
 use crate::marquage::{autoriser, AutoriteConfirmation, Effet, Provenance, ValidationUtilisateur};
 use crate::reprise::verifier_derivation_reprise;
 use crate::normalisation::{cle_comparaison, normaliser_ligne};
@@ -377,7 +377,7 @@ impl ServiceRequete {
         publiee_a: u64,
         maintenant: u64,
     ) -> Result<(), ErreurFederee> {
-        let fiche = verifier_fiche(&octets, maintenant)?;
+        let fiche = relire_fiche(&octets, maintenant)?;
         if fiche.cog() != &self.cog_local {
             return Err(ErreurFederee::FicheNonLocale);
         }
@@ -406,7 +406,7 @@ impl ServiceRequete {
         octets: Vec<u8>,
         maintenant: u64,
     ) -> Result<(), ErreurFederee> {
-        let fiche = verifier_fiche(&octets, maintenant)?;
+        let fiche = relire_fiche(&octets, maintenant)?;
         if fiche.cog() != &self.cog_local {
             return Err(ErreurFederee::FicheNonLocale);
         }

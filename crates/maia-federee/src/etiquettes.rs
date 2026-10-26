@@ -712,4 +712,33 @@ mod tests {
         let etrangere = sceller_fiche(&derivee(&autre, "notes.n1", 1), &autre).unwrap();
         assert_eq!(p.restaurer(&mut ServiceRequete::new(cog(&cle)), etrangere, T, T), Err(ErreurFederee::FicheNonLocale));
     }
+
+    /// Redémarrage après l'expiration de la délégation `fiches` : la Fiche
+    /// publiée se **relit** (pas une admission) ; une nouvelle publication
+    /// avec la même délégation est, elle, refusée.
+    #[test]
+    fn restauration_deleguee_apres_expiration_de_la_delegation() {
+        use crate::fiche::{verifier_fiche, SignataireFiches, INDICE_FICHES};
+        const JOUR: u64 = 86_400;
+        let identite_cog = CleSignature::generer();
+        let fiches = CleSignature::generer();
+        let id_cog = miyuracine::cog_id_depuis_cle(&identite_cog.cle_publique());
+        let d = miyusceau::DelegationCle::nouvelle(&id_cog, INDICE_FICHES, 0, fiches.cle_publique(), T - JOUR, T + 10 * JOUR)
+            .unwrap()
+            .sceller(&identite_cog)
+            .unwrap();
+        let s = SignataireFiches::deleguee(fiches, identite_cog.cle_publique(), d, T).unwrap();
+        let v1 = s.sceller(&derivee(&identite_cog, "notes.n1", 1), T).unwrap();
+        let v2 = s.sceller(&derivee(&identite_cog, "notes.n1", 2), T).unwrap();
+        let apres = T + 200 * JOUR;
+        assert!(verifier_fiche(&v1, apres).is_err());
+        let p = publieur();
+        let mut serv = ServiceRequete::new(cog(&identite_cog));
+        p.restaurer(&mut serv, v1, T, apres).unwrap();
+        assert_eq!(serv.derniere_version(&fiche_derivee(&identite_cog).id), 1);
+        // Publication d'une version signée sous la délégation expirée : refusée (admission).
+        let km = KindMotherFactice(Mutex::new(Vec::new()));
+        km.poser("notes.n1", TEXTE);
+        assert!(matches!(bloquer(p.attester(&km, "notes.n1", "alice", &v2, 1, apres)), Err(ErreurFederee::Delegation(_))));
+    }
 }

@@ -22,11 +22,25 @@
 //! - délégation = sceau `0x06`/`0x45` signé par `emetteur` seul
 //!   ([`miyusceau::verifier_delegation`]), même `cog_id`, indice
 //!   [`INDICE_FICHES`] (une clé de passeports, de visas… est refusée) ;
-//! - la fenêtre de la délégation couvre la **date** de la Fiche (instant de la
-//!   signature, lui-même non futur) : une Fiche reste lisible après
-//!   l'expiration de la délégation qui l'a signée (90 j au plus) ; le
-//!   signataire refuse, lui, de signer hors de la fenêtre ([`SignataireFiches`]) ;
-//! - la Fiche est signée par la clé déléguée, **seul** signataire compté.
+//! - la Fiche est signée par la clé déléguée, **seul** signataire compté ;
+//! - fenêtre de validité, selon le contrôle :
+//!   - **admission** ([`verifier_fiche`] : Fiche reçue d'un pair, source
+//!     d'une décision, Fiche locale à publier) : la délégation couvre
+//!     l'**instant de vérification** `maintenant` (horloge de confiance de
+//!     l'appelant) **et** la date de la Fiche, et la Fiche a au plus
+//!     [`FRAICHEUR_ADMISSION_SECS`] (`maintenant − date`). La date est choisie
+//!     par le signataire : sans ces deux conditions, une clé `fiches`
+//!     compromise après l'expiration de sa délégation signerait encore des
+//!     Fiches antidatées dans l'ancienne fenêtre, admises indéfiniment ;
+//!   - **relecture** ([`relire_fiche`] : Fiche **déjà admise** ou déjà publiée
+//!     par le COG local, relue du stockage durable) : la délégation couvre la
+//!     seule date de la Fiche ; une relecture n'admet rien de neuf, elle garde
+//!     le verdict de l'admission (la Fiche reste lisible après l'expiration de
+//!     sa délégation, 90 j au plus) ;
+//! - le **plancher de génération** par émetteur (plus haute génération de clé
+//!   `fiches` vue : une génération inférieure est refusée après rotation) est
+//!   tenu par la base étrangère ([`crate::BaseEtrangere`]) ;
+//! - le signataire refuse de signer hors de la fenêtre ([`SignataireFiches`]).
 //!
 //! **Transition** : une Fiche **sans** tag `0x0E` doit être signée par
 //! `emetteur` lui-même (format d'A-009, clé d'identité, configuration
@@ -36,8 +50,11 @@
 //! est signée par la clé `fiches` dès qu'elle est configurée.
 //!
 //! Limites : aucune révocation de délégation (A-024, reste) ; une clé `fiches`
-//! compromise après l'expiration de sa délégation peut encore signer des
-//! Fiches datées dans l'ancienne fenêtre.
+//! compromise **pendant** la fenêtre de sa délégation signe des Fiches
+//! admissibles jusqu'à la fin de cette fenêtre (ou jusqu'à la rotation, dès
+//! qu'une génération supérieure a été vue par le récepteur) ; une Fiche plus
+//! ancienne que [`FRAICHEUR_ADMISSION_SECS`] doit être republiée (nouvelle
+//! version, nouvelle signature) pour être admise par un nouveau récepteur.
 //!
 //! ## Charge TLV
 //!
@@ -97,6 +114,13 @@ pub const MAX_REPRISES: usize = 16;
 pub const INDICE_FICHES: u32 = miyuracine::Usage::Fiches.indice();
 /// Taille maximale du sceau de délégation porté par une Fiche (octets).
 pub const MAX_DELEGATION: usize = 1_024;
+/// Âge maximal (`maintenant − date`, secondes) d'une Fiche signée par la clé
+/// `fiches` à son **admission** : 7 jours. Borne l'antidatage dans la fenêtre
+/// d'une délégation (date choisie par le signataire) ; assez large pour une
+/// propagation entre COG peu connectés, bien plus courte que la fenêtre d'une
+/// délégation (90 j au plus). Une Fiche plus ancienne se republie (nouvelle
+/// version) ; une Fiche déjà admise se relit ([`relire_fiche`]).
+pub const FRAICHEUR_ADMISSION_SECS: u64 = 7 * 86_400;
 
 const TAG_ID: u8 = 0x01;
 const TAG_EMETTEUR: u8 = 0x02;
@@ -757,14 +781,45 @@ fn normaliser_fiche(mut f: Fiche) -> Result<Fiche, ErreurFederee> {
     Ok(f)
 }
 
-/// Vérifie une Fiche reçue (fail-closed) : format strict, type `0x09`,
-/// chaîne de signature (voir l'en-tête du module : identité → délégation
-/// `0x45` → clé `fiches`, ou identité seule en transition), `cog_id` dérivé
-/// de l'identité, date non future, puis normalisation de tous les textes.
+/// Contrôle de la fenêtre de validité d'une Fiche déléguée.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Controle {
+    /// Fiche nouvellement reçue ou décisive : délégation valide à
+    /// `maintenant` et à la date de la Fiche, fraîcheur bornée.
+    Admission,
+    /// Fiche déjà admise (ou publiée localement) relue : délégation valide à
+    /// la date de la Fiche.
+    Relecture,
+}
+
+/// Vérifie une Fiche à son **admission** (fail-closed) : Fiche reçue d'un
+/// pair, source d'une décision (republication), Fiche locale à publier.
+/// Format strict, type `0x09`, chaîne de signature (voir l'en-tête du module :
+/// identité → délégation `0x45` → clé `fiches`, ou identité seule en
+/// transition), `cog_id` dérivé de l'identité, date non future, puis
+/// normalisation de tous les textes. Avec la clé `fiches`, la délégation doit
+/// couvrir `maintenant` **et** la date de la Fiche, et la Fiche avoir au plus
+/// [`FRAICHEUR_ADMISSION_SECS`].
 ///
-/// L'**admission** de l'émetteur (statut fédéral) relève de la base
-/// étrangère ([`crate::BaseEtrangere`]).
+/// L'admission de l'émetteur (statut fédéral) et le plancher de génération
+/// relèvent de la base étrangère ([`crate::BaseEtrangere`]).
 pub fn verifier_fiche(octets: &[u8], maintenant: u64) -> Result<FicheVerifiee, ErreurFederee> {
+    verifier_fiche_selon(octets, maintenant, Controle::Admission)
+}
+
+/// **Relit** une Fiche déjà admise (base étrangère) ou déjà publiée par le
+/// COG local (restauration au démarrage) : mêmes contrôles que
+/// [`verifier_fiche`], sauf la fenêtre — la délégation doit couvrir la seule
+/// **date** de la Fiche, sans borne de fraîcheur.
+///
+/// Ne jamais l'employer pour une Fiche nouvellement reçue : une relecture ne
+/// réadmet rien, elle s'appuie sur le verdict d'une admission antérieure
+/// (voir [`crate::BaseEtrangere::relire`]).
+pub fn relire_fiche(octets: &[u8], maintenant: u64) -> Result<FicheVerifiee, ErreurFederee> {
+    verifier_fiche_selon(octets, maintenant, Controle::Relecture)
+}
+
+fn verifier_fiche_selon(octets: &[u8], maintenant: u64, controle: Controle) -> Result<FicheVerifiee, ErreurFederee> {
     let sceau = Sceau::decoder(octets)?;
     if sceau.type_sceau != TypeSceau::Fiche {
         return Err(ErreurSceau::TypeInattendu { attendu: TYPE_FICHE, trouve: sceau.type_sceau as u8 }.into());
@@ -777,7 +832,20 @@ pub fn verifier_fiche(octets: &[u8], maintenant: u64) -> Result<FicheVerifiee, E
     let (signataire, signature) = match &brute.delegation {
         None => (emetteur, SignatureFiche::Identite),
         Some(d) => {
-            let d = delegation_fiches(d, &emetteur, brute.fiche.date)?;
+            let date = brute.fiche.date;
+            let d = match controle {
+                Controle::Relecture => delegation_fiches(d, &emetteur, date)?,
+                Controle::Admission => {
+                    let d = delegation_fiches(d, &emetteur, maintenant)?;
+                    if !d.couvre(date) {
+                        return Err(ErreurFederee::Delegation("date de la Fiche hors de la fenêtre de sa délégation"));
+                    }
+                    if maintenant.saturating_sub(date) > FRAICHEUR_ADMISSION_SECS {
+                        return Err(ErreurFederee::FichePerimee);
+                    }
+                    d
+                }
+            };
             let signature = SignatureFiche::Deleguee {
                 generation: d.generation(),
                 cle: *d.cle_publique(),
@@ -801,7 +869,7 @@ pub fn verifier_fiche(octets: &[u8], maintenant: u64) -> Result<FicheVerifiee, E
     Ok(FicheVerifiee { fiche: normalisee, cog, empreinte, canonique, signature })
 }
 
-/// Comme [`verifier_fiche`], en **mode strict** : une Fiche signée par
+/// Comme [`verifier_fiche`] (admission), en **mode strict** : une Fiche signée par
 /// l'identité (format de transition) est refusée.
 pub fn verifier_fiche_deleguee(octets: &[u8], maintenant: u64) -> Result<FicheVerifiee, ErreurFederee> {
     let f = verifier_fiche(octets, maintenant)?;
@@ -1025,8 +1093,56 @@ mod tests {
         assert_eq!(v.cog().as_str(), miyuracine::cog_id_depuis_cle(&identite.cle_publique()));
         assert!(matches!(v.signature(), SignatureFiche::Deleguee { generation: 0, .. }));
         assert!(verifier_fiche_deleguee(&octets, T).is_ok());
-        // Toujours lisible après l'expiration de la délégation (date de la Fiche couverte).
-        assert!(verifier_fiche(&octets, T + 200 * JOUR).is_ok());
+        // Après l'expiration de la délégation : plus admissible, toujours relisible.
+        assert!(matches!(verifier_fiche(&octets, T + 200 * JOUR), Err(ErreurFederee::Delegation(_))));
+        assert!(relire_fiche(&octets, T + 200 * JOUR).is_ok());
+    }
+
+    #[test]
+    fn admission_fiche_antidatee_dans_une_fenetre_expiree_refusee() {
+        // Clé `fiches` compromise après l'expiration de sa délégation [T-30j, T-10j] :
+        // la Fiche antidatée dans l'ancienne fenêtre se signe, mais n'est pas admise.
+        let identite = CleSignature::generer();
+        let fiches = CleSignature::generer();
+        let d = deleguer(&identite, &fiches, INDICE_FICHES, T - 30 * JOUR, T - 10 * JOUR);
+        let antidatee = Fiche { date: T - 20 * JOUR, ..fiche(&identite, "a", "t", &[]) };
+        let octets = forger(&antidatee, &fiches, d.clone());
+        assert!(matches!(verifier_fiche(&octets, T), Err(ErreurFederee::Delegation(_))));
+        assert!(matches!(verifier_fiche_deleguee(&octets, T), Err(ErreurFederee::Delegation(_))));
+        // La relecture (Fiche déjà admise) ne regarde que la date : à réserver aux Fiches admises.
+        assert!(relire_fiche(&octets, T).is_ok());
+        // Le signataire honnête refuse, lui, d'être configuré avec une délégation expirée.
+        assert!(SignataireFiches::deleguee(fiches, identite.cle_publique(), d, T).is_err());
+    }
+
+    #[test]
+    fn admission_fiche_plus_ancienne_que_la_borne_refusee() {
+        // Délégation valide maintenant (90 j), Fiche antidatée dans sa fenêtre au-delà de la borne.
+        let identite = CleSignature::generer();
+        let fiches = CleSignature::generer();
+        let d = deleguer(&identite, &fiches, INDICE_FICHES, T - 60 * JOUR, T + 30 * JOUR);
+        let base = fiche(&identite, "a", "t", &[]);
+        let vieille = Fiche { date: T - FRAICHEUR_ADMISSION_SECS - 1, ..base.clone() };
+        let octets = forger(&vieille, &fiches, d.clone());
+        assert_eq!(verifier_fiche(&octets, T).unwrap_err(), ErreurFederee::FichePerimee);
+        assert!(relire_fiche(&octets, T).is_ok());
+        // À la borne exacte : admise.
+        let limite = Fiche { date: T - FRAICHEUR_ADMISSION_SECS, ..base };
+        assert!(verifier_fiche(&forger(&limite, &fiches, d), T).is_ok());
+    }
+
+    #[test]
+    fn relecture_garde_les_autres_controles() {
+        let identite = CleSignature::generer();
+        let fiches = CleSignature::generer();
+        let autre = CleSignature::generer();
+        let d = deleguer(&identite, &fiches, INDICE_FICHES, T - JOUR, T + JOUR);
+        let f = fiche(&identite, "a", "t", &[]);
+        // Date hors fenêtre, signataire inconnu, date future : refus aussi en relecture.
+        assert!(relire_fiche(&forger(&Fiche { date: T - 10 * JOUR, ..f.clone() }, &fiches, d.clone()), T).is_err());
+        assert!(relire_fiche(&forger(&f, &autre, d.clone()), T).is_err());
+        let future = Fiche { date: T + 10_000, ..f };
+        assert_eq!(relire_fiche(&forger(&future, &fiches, d), T).unwrap_err(), ErreurFederee::DateFuture);
     }
 
     #[test]
