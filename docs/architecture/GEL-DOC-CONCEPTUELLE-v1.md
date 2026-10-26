@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.21 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.22 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -69,17 +69,18 @@
 | A-008 | 2026-10-25 | Lot 2 §4.1, §10.1 · Services hybrides §3.1, §4.1 : nature `0x44` du recours accepté (encodage prévu par A-007) ; règles de suspension et de levée ; alignements consignés (recours, témoins membres, séquence par auteur) | 1.8 |
 | A-009 | 2026-10-25 | IA fédérée §2–§5, §7 · Mémoire MAIA §4, §9, §10, §12 · Lot 2 §4.1 : choix du lot 7 (Fiche `0x09`, *k* = 3, quotas, identifiants et budgets mémoire, une base `maia-<utilisateur>`) ; **deux décisions** : republication d'une donnée étrangère après validation TAMR, notes ordinaires écrites par MAIA | 1.9 |
 | A-010 | 2026-10-25 | Mémoire MAIA §9 : « note ordinaire » écrite par MAIA = note des strates N2 / N3 seulement (jamais N0 ni N1) ; précision fail-closed d'A-009 | 1.10 |
-| A-011 | 2026-10-25 | Lot 2 §5 · Zones §16 · Services hybrides §4.1 · Mémoire MAIA §9 : formats et choix consignés tels qu'implémentés — fichier de clé racine `MYRC`, durcissement du processus, état fédéral `MFED`, quotas et révocations de la façade, chemin TAMR et routes de la mémoire ; **à valider par le propriétaire** | 1.11 |
-| A-012 | 2026-10-25 | Lot 2 §6, §8 · Services hybrides §3 · Zones §7 : choix consignés tels qu'implémentés — clé d'appareil par COG de destination, transport des registres de révocation vers Origin et MiyuCloud, fichiers MiyuCloud `inconnu`, Landlock du sas, installateur de modèles de Central ; **à valider par le propriétaire** | 1.12 |
-| A-013 | 2026-10-25 | Corrections de la revue de sécurité du 2026-10-25 : formats révisés (liaison d'appareil v2, synchro par morceaux, `MFED` v2, sas code 7), chiffrement des blobs MiyuCloud `MIYUCENC` v1, garde-fous MAIA (provenance `Inconnue`, compétence `memoire`, clé d'approbation TAMR distincte, publication par capacité) ; **à valider par le propriétaire** | 1.13 |
-| A-014 | 2026-10-25 | Synchro des révocations vers Origin : chaque envoi (morceau ou tête) signé par la clé de journal du COG, débit par COG après authentification, budget global ; **à valider par le propriétaire** | 1.14 |
-| A-015 | 2026-10-25 | Éditeur du registre de révocation côté COG (dépôt et envois Origin) ; étiquette `publiable` de KindMother (EX-47) et règle de dérivation des Fiches ; relais NFLOG des Vigies (format de ligne, témoin) ; **à valider par le propriétaire** | 1.15 |
-| A-016 | 2026-10-25 | Table hôte de la Douane (description v2, flux de boucle locale par compte, aucun DNS), journalisation bornée, règle EX-12 des Vigies, relais (panne immédiate, ligne sans ports), étiquette `publiable` v2 (paramètres signés, propriété des bases), dérivation stricte des Fiches ; **à valider par le propriétaire** | 1.16 |
-| A-017 | 2026-10-25 | Route de publication des Fiches depuis MAIA : requête signée par l'utilisateur, champs structurels calculés par le serveur, porte des Cores, débits ; clé d'identité dans le pont (à trancher) ; **à valider par le propriétaire** | 1.17 |
-| A-018 | 2026-10-25 | État de publication persistant dans KindMother (base réservée `cog-federee`, une insertion par version, rechargement fail-closed), plafond décompté après ALLOW, contrôle du propriétaire de l'étiquette ; **à valider par le propriétaire** | 1.18 |
-| A-019 | 2026-10-25 | État fédéral persistant (`MFED` v3 avec carnet de pairs, support KindMother `miyufederation`, rechargement revérifié, 72 h à travers les arrêts), fuzzing ; mémoire d'Alicia dans KindMother (`maia-_alicia`, `nationale`), import unique ; **à valider par le propriétaire** | 1.19 |
-| A-020 | 2026-10-25 | Effacement physique dans KindMother (`secure_delete` relu, WAL vidé après suppression), effacement de l'ancienne base d'Alicia, anti-retour de l'état fédéral (`MFED` v4, compteur `MFFR`), encodage canonique du Sceau ; **à valider par le propriétaire** | 1.20 |
-| A-021 | 2026-10-25 | Oubli typé (`erasure`, entrée d'audit `effacement`), nettoyage unique des bases antérieures (`VACUUM`, marqueur `a020_secure_vacuum`), point de contrôle après toute écriture SQL modifiante ; **à valider par le propriétaire** | 1.21 |
+| A-011 | 2026-10-25 | Lot 2 §5 · Zones §16 · Services hybrides §4.1 · Mémoire MAIA §9 : formats et choix consignés tels qu'implémentés — fichier de clé racine `MYRC`, durcissement du processus, état fédéral `MFED`, quotas et révocations de la façade, chemin TAMR et routes de la mémoire ; **validé par le propriétaire (2026-10-26)** | 1.11 |
+| A-012 | 2026-10-25 | Lot 2 §6, §8 · Services hybrides §3 · Zones §7 : choix consignés tels qu'implémentés — clé d'appareil par COG de destination, transport des registres de révocation vers Origin et MiyuCloud, fichiers MiyuCloud `inconnu`, Landlock du sas, installateur de modèles de Central ; **validé par le propriétaire (2026-10-26)** | 1.12 |
+| A-013 | 2026-10-25 | Corrections de la revue de sécurité du 2026-10-25 : formats révisés (liaison d'appareil v2, synchro par morceaux, `MFED` v2, sas code 7), chiffrement des blobs MiyuCloud `MIYUCENC` v1, garde-fous MAIA (provenance `Inconnue`, compétence `memoire`, clé d'approbation TAMR distincte, publication par capacité) ; **validé par le propriétaire (2026-10-26)** | 1.13 |
+| A-014 | 2026-10-25 | Synchro des révocations vers Origin : chaque envoi (morceau ou tête) signé par la clé de journal du COG, débit par COG après authentification, budget global ; **validé par le propriétaire (2026-10-26)** | 1.14 |
+| A-015 | 2026-10-25 | Éditeur du registre de révocation côté COG (dépôt et envois Origin) ; étiquette `publiable` de KindMother (EX-47) et règle de dérivation des Fiches ; relais NFLOG des Vigies (format de ligne, témoin) ; **validé par le propriétaire (2026-10-26)** | 1.15 |
+| A-016 | 2026-10-25 | Table hôte de la Douane (description v2, flux de boucle locale par compte, aucun DNS), journalisation bornée, règle EX-12 des Vigies, relais (panne immédiate, ligne sans ports), étiquette `publiable` v2 (paramètres signés, propriété des bases), dérivation stricte des Fiches ; **validé par le propriétaire (2026-10-26)** | 1.16 |
+| A-017 | 2026-10-25 | Route de publication des Fiches depuis MAIA : requête signée par l'utilisateur, champs structurels calculés par le serveur, porte des Cores, débits ; clé d'identité dans le pont (à trancher) ; **validé par le propriétaire (2026-10-26)** | 1.17 |
+| A-018 | 2026-10-25 | État de publication persistant dans KindMother (base réservée `cog-federee`, une insertion par version, rechargement fail-closed), plafond décompté après ALLOW, contrôle du propriétaire de l'étiquette ; **validé par le propriétaire (2026-10-26)** | 1.18 |
+| A-019 | 2026-10-25 | État fédéral persistant (`MFED` v3 avec carnet de pairs, support KindMother `miyufederation`, rechargement revérifié, 72 h à travers les arrêts), fuzzing ; mémoire d'Alicia dans KindMother (`maia-_alicia`, `nationale`), import unique ; **validé par le propriétaire (2026-10-26)** | 1.19 |
+| A-020 | 2026-10-25 | Effacement physique dans KindMother (`secure_delete` relu, WAL vidé après suppression), effacement de l'ancienne base d'Alicia, anti-retour de l'état fédéral (`MFED` v4, compteur `MFFR`), encodage canonique du Sceau ; **validé par le propriétaire (2026-10-26)** | 1.20 |
+| A-021 | 2026-10-25 | Oubli typé (`erasure`, entrée d'audit `effacement`), nettoyage unique des bases antérieures (`VACUUM`, marqueur `a020_secure_vacuum`), point de contrôle après toute écriture SQL modifiante ; **validé par le propriétaire (2026-10-26)** | 1.21 |
+| A-022 | 2026-10-26 | **Décisions du propriétaire** : guichet des visas en zone COG (clé d'usage `visas`, indice 5, visa ≤ 15 min), délégation de clé d'usage (nature `0x45`), Portail scindé entrée / sortie, clé `fiches` (indice 6), sauvegardes 30 j et oublis réappliqués à la restauration, NFQUEUE écarté, `tc` généré par la Douane ; validation en bloc d'A-010 à A-021 | 1.22 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -446,7 +447,7 @@
 <!-- @role amendment -->
 <!-- @do record_amendment_a011 -->
 
-- **Date** : 2026-10-25 · **version** 1.11 · consignation de l'implémenté (restes des lots 2, 5, 6, 7) ; **validation du propriétaire attendue** — tout point refusé sera retiré du code
+- **Date** : 2026-10-25 · **version** 1.11 · consignation de l'implémenté (restes des lots 2, 5, 6, 7) ; **validé par le propriétaire le 2026-10-26** — tout point refusé sera retiré du code
 - **Documents touchés** : ce registre seulement ; les docs gelées renvoient ici pour le détail (Lot 2 §5 racine, Zones §16 fédération, Services hybrides §4.1, Mémoire MAIA §9)
 - **Clé racine sur support amovible** (`crates/miyuracine`, NC-ANSSI-25)
   - Fichier **`MYRC` v1**, 122 octets exactement, gros-boutiste : magie `MYRC` (4) · version `0x0001` (2) · Argon2id `m` en Kio (4, 262 144..=4 194 304) · `t` (4, 3..=64) · `p` (4, 1..=16) · sel (32) · nonce XChaCha20 (24) · secret chiffré (32) · étiquette Poly1305 (16)
@@ -478,7 +479,7 @@
 <!-- @role amendment -->
 <!-- @do record_amendment_a012 -->
 
-- **Date** : 2026-10-25 · **version** 1.12 · consignation de l'implémenté (restes des lots 2, 3, 4) ; **validation du propriétaire attendue** — tout point refusé sera retiré du code
+- **Date** : 2026-10-25 · **version** 1.12 · consignation de l'implémenté (restes des lots 2, 3, 4) ; **validé par le propriétaire le 2026-10-26** — tout point refusé sera retiré du code
 - **Clé d'appareil par COG de destination** (`miyauth::appareil`, EX-14 non-corrélation)
   - Clé = graine Ed25519 issue de HKDF-SHA256 (sel `miyukini/miyauth/cle-appareil/v1`, ikm = graine d'appareil, info = `"cog:" || cog_id de destination`)
   - Liaison au COG d'origine : message `"miyukini/miyauth/liaison-appareil/v1" || 0x00 || origine || destination || clé de destination`, signé par la clé principale appairée (autorisation) **et** par la clé de destination (possession), `verify_strict` ; clé de destination égale à la clé principale refusée
@@ -507,7 +508,7 @@
 <!-- @role amendment -->
 <!-- @do record_amendment_a013 -->
 
-- **Date** : 2026-10-25 · **version** 1.13 · formats et règles **révisés** après une revue de sécurité en quatre parties ; remplace les points correspondants d'A-011 et A-012 ; **validation du propriétaire attendue**
+- **Date** : 2026-10-25 · **version** 1.13 · formats et règles **révisés** après une revue de sécurité en quatre parties ; remplace les points correspondants d'A-011 et A-012 ; **validé par le propriétaire le 2026-10-26**
 - **Identité et révocations** (remplace A-012 sur ces points)
   - Liaison d'appareil **v2** : domaine `miyukini/miyauth/liaison-appareil/v2`, message `0x00 || origine || destination || clé de destination || pas_apres (u64 BE)` ; échéance ≤ 5 min ; la clé principale doit être non révoquée ; registre des liaisons : révoquer un appareil = un geste unique qui révoque toutes ses clés de destination
   - Suivi d'un registre de révocation : **un seul type** (`miyuregistre::SuiviRevocationsRegistre`) partagé par Origin, MiyuCloud et la façade ; ancre de journal au niveau `Reconnu`, seuil 1 ; fraîcheur de 15 min imposée par le type ; chevauchement toléré ; ≤ 1 048 576 entrées et ≤ 256 Mio
@@ -535,7 +536,7 @@
 <!-- @role amendment -->
 <!-- @do record_amendment_a014 -->
 
-- **Date** : 2026-10-25 · **version** 1.14 · complète A-013 après une revue de sécurité : la synchro par morceaux non authentifiée permettait à un tiers de purger l'attente d'un COG ou d'épuiser son débit (déni de la fraîcheur des révocations) ; **validation du propriétaire attendue**
+- **Date** : 2026-10-25 · **version** 1.14 · complète A-013 après une revue de sécurité : la synchro par morceaux non authentifiée permettait à un tiers de purger l'attente d'un COG ou d'épuiser son débit (déni de la fraîcheur des révocations) ; **validé par le propriétaire le 2026-10-26**
 - **Enveloppe** : corps `{cog_id, depuis, tete?, entrees, echeance, signature}` ; signature Ed25519 (`verify_strict`) par la **clé de journal épinglée** du COG sur `"miyukini/origin/revocations/morceau/v1" || 0x00 || len(cog_id) u16 || cog_id || depuis u64 || nombre d'entrées u64 || SHA-256(entrées préfixées de leur longueur u32) || tête présente u8 || SHA-256(tête) ou 32 × 0 || echeance u64` ; exigée sur **chaque** envoi, tête comprise ; `maintenant ≤ echeance ≤ maintenant + 15 min + 120 s`
 - **Comportement** : signature vérifiée avant toute lecture ou modification d'état ; non authentifié ⇒ 401 **sans purge** ; mauvaise position authentifiée ⇒ 409 sans purge ; purge seulement sur tête authentifiée refusée, bornes du COG dépassées ou attente de plus de 15 min ; enveloppe rejouée sans effet (mémorisée jusqu'à son échéance, ≤ 8 192 par COG)
 - **Débit et budget** : limite par IP avant analyse, limite par COG **après** authentification ; budget global de l'attente 2 097 152 entrées et 512 Mio, en plus des bornes par COG
@@ -547,7 +548,7 @@
 <!-- @role amendment -->
 <!-- @do record_amendment_a015 -->
 
-- **Date** : 2026-10-25 · **version** 1.15 · consignation de l'implémenté (restes des lots 2, 3, 7) ; **validation du propriétaire attendue**
+- **Date** : 2026-10-25 · **version** 1.15 · consignation de l'implémenté (restes des lots 2, 3, 7) ; **validé par le propriétaire le 2026-10-26**
 - **Éditeur du registre de révocation** (`miyuregistre::editeur`, binaire `miyuregistre-publier`)
   - Format de l'enveloppe A-014 défini une seule fois (`miyuregistre::enveloppe`), utilisé par Origin et par l'éditeur
   - **Dépôt** pour MiyuCloud : entrées écrites d'abord, tête ensuite (le lecteur lit la tête puis les entrées) ; chaque fichier par temporaire exclusif, `fsync`, renommage, `fsync` du dossier ; fichiers 0640, dossier 0750 appartenant à l'éditeur, aucun lien suivi, verrou exclusif ; bornes de MiyuCloud
@@ -572,7 +573,7 @@
 <!-- @role amendment -->
 <!-- @do record_amendment_a016 -->
 
-- **Date** : 2026-10-25 · **version** 1.16 · consignation de l'implémenté après la revue de sécurité du lot 3 / lot 7 (constats H1, H2, M1, M3..M6, B1..B6) ; **validation du propriétaire attendue**
+- **Date** : 2026-10-25 · **version** 1.16 · consignation de l'implémenté après la revue de sécurité du lot 3 / lot 7 (constats H1, H2, M1, M3..M6, B1..B6) ; **validé par le propriétaire le 2026-10-26**
 - **Table hôte `inet miyudouane_hote`** (`miyudouane hote`, `crates/miyudouane/src/hote.rs`)
   - En déploiement réel, la zone COG sans sortie (INV-Z1, INV-Z4, EX-12) est portée sur l'hôte par une table propre à la Douane, générée depuis une **description** bornée ; remplacement atomique de cette seule table ; plus aucune table écrite à la main par les installateurs
   - Description **version 2** (`miyudouane-hote 2` ; v1 refusée explicitement) : `groupe`, `compte`, `uid`, `port tcp|udp`, `exception <voie>` (liée à un arrêté signé), **`boucle <compte> <tcp|udp> <127.0.0.1|::1> <port>`** (port 53 refusé, ≤ 128 lignes, doublons refusés)
@@ -601,7 +602,7 @@
 <!-- @role amendment -->
 <!-- @do record_amendment_a017 -->
 
-- **Date** : 2026-10-25 · **version** 1.17 · consignation de l'implémenté (reste du lot 7 signalé par A-015) ; **validation du propriétaire attendue**, en particulier sur la garde de la clé d'identité (dernier point)
+- **Date** : 2026-10-25 · **version** 1.17 · consignation de l'implémenté (reste du lot 7 signalé par A-015) ; **validé par le propriétaire le 2026-10-26** ; garde de la clé : clé d'usage `fiches` (A-022)
 - **Route** `POST /v1/federee/{utilisateur}/publier` (pont `maia`, `apps/miou-llm-bridge/src/routes_federee.rs`)
   - Requête signée par une clé de l'utilisateur épinglée (`MAIA_MEMOIRE_CLES_UTILISATEUR`), usage propre `maia/federee/<instance>/<utilisateur>` : une requête de la mémoire n'est pas rejouable ici ; POST seulement, aucun cookie, aucun CORS, origine vérifiée ; corps JSON ≤ 64 Kio, champs inconnus refusés
   - Entrée : `donnee` (référence exacte de la cellule KindMother), `sujet`, `texte` ; facultatifs `relations`, `sources` ; champs structurels **déclarés** (`id`, `version`, `date`, `type`, `langue`, `licence`, `audience`, `provenance`, `reprises`) seulement **comparés**, jamais utilisés
@@ -626,7 +627,7 @@
 <!-- @role amendment -->
 <!-- @do record_amendment_a018 -->
 
-- **Date** : 2026-10-25 · **version** 1.18 · complète A-017 : lève la limite « état en mémoire » et corrige un constat de revue (publication d'une donnée étiquetée par un autre utilisateur) ; **validation du propriétaire attendue**
+- **Date** : 2026-10-25 · **version** 1.18 · complète A-017 : lève la limite « état en mémoire » et corrige un constat de revue (publication d'une donnée étiquetée par un autre utilisateur) ; **validé par le propriétaire le 2026-10-26**
 - **Persistance** : base KindMother **`cog-federee`** (opérateur propriétaire du même nom, par défaut ; `MAIA_FEDEREE_PUBLICATIONS_OPERATEUR` ; nom `maia-*` ou invalide refusé au démarrage) ; base **réservée** : jamais dans un fichier `.bases`, et une proposition dont `donnee.base` est cette base est refusée (`base_reservee`)
   - Table `fiches_publiees`, clé primaire `(fiche, version)` : `fiche`, `version` ≥ 1, `donnee` (empreinte hex de la référence), `empreinte` (empreinte hex des octets signés), `utilisateur`, `publiee_a` (horodatage = attestation consommée), `octets` (base64)
 - **Ordre et garantie en cas d'arrêt brutal**
@@ -645,7 +646,7 @@
 <!-- @role amendment -->
 <!-- @do record_amendment_a019 -->
 
-- **Date** : 2026-10-25 · **version** 1.19 · consignation de l'implémenté (restes des lots 6 et 7) ; **validation du propriétaire attendue**
+- **Date** : 2026-10-25 · **version** 1.19 · consignation de l'implémenté (restes des lots 6 et 7) ; **validé par le propriétaire le 2026-10-26**
 - **État fédéral persistant** (`crates/miyufederation`)
   - L'état scellé `MFED` (HMAC du secret local, titres signés) est stocké tel quel, en octets opaques, derrière un trait `SupportEtat` : fichier (`etat.mfed`, existant), mémoire (tests), **KindMother** (fonctionnalité `kindmother`, facultative ; la crate reste sans réseau par défaut)
   - **`MFED` v3** : champ final « carnet de pairs », `compte ≤ 4 096 × (cog_id | bloc réseau 1..64 | premier_contact u64)`, identifiants strictement croissants ; v2 lue (carnet vide) puis réécrite en v3 ; v1 refusée. Carnet plein : un nouveau venu n'évince qu'un pair inéligible, jamais un pair éligible
@@ -668,7 +669,7 @@
 <!-- @role amendment -->
 <!-- @do record_amendment_a020 -->
 
-- **Date** : 2026-10-25 · **version** 1.20 · corrections après revue de sécurité de l'implémenté d'A-019 et constat du fuzzing ; **validation du propriétaire attendue**
+- **Date** : 2026-10-25 · **version** 1.20 · corrections après revue de sécurité de l'implémenté d'A-019 et constat du fuzzing ; **validé par le propriétaire le 2026-10-26**
 - **Effacement physique dans KindMother** (toutes bases)
   - `PRAGMA secure_delete = ON` posé et **relu** sur chaque connexion (lecture-écriture, lecture seule, journal d'audit) ; valeur relue ≠ 1 ⇒ connexion refusée
   - Tout lot comportant une suppression effective (`Delete` typé, ou `DELETE` en SQL de transition) est suivi de `wal_checkpoint(TRUNCATE)` sous le verrou d'écriture ; point de contrôle incomplet ⇒ suppression maintenue, entrée d'audit annotée, résidu vidé au prochain effacement réussi ; coût ≈ 10 ms par lot qui supprime
@@ -694,7 +695,7 @@
 <!-- @role amendment -->
 <!-- @do record_amendment_a021 -->
 
-- **Date** : 2026-10-25 · **version** 1.21 · complète A-020 (limites « bases antérieures » et « oubli reconnu par texte libre ») et corrige un constat de revue (décision du point de contrôle d'après le texte SQL) ; **validation du propriétaire attendue**
+- **Date** : 2026-10-25 · **version** 1.21 · complète A-020 (limites « bases antérieures » et « oubli reconnu par texte libre ») et corrige un constat de revue (décision du point de contrôle d'après le texte SQL) ; **validé par le propriétaire le 2026-10-26**
 - **Oubli typé** : `TypedWriteIntent::forget(table)` = `Delete` avec le champ filaire **`erasure: true`** (absent quand faux : les anciennes intentions restent valides) ; `.erasure()` admis sur `Update`/`Upsert` (écraser une valeur à oublier), refusé sur `Insert` ; octet `'e'` ajouté à l'empreinte canonique **seulement** si vrai
   - Un lot contenant un effacement déclenche toujours `wal_checkpoint(TRUNCATE)`, même sans ligne touchée ; chaque effacement ajoute une entrée d'audit de type **`effacement`** (verdict `effacee` ou `residu_wal`, empreinte de la clé, nombre de lignes, jamais la valeur) ; point de contrôle incomplet ⇒ issue `Appliquee` avec motif signalé à l'appelant
   - Les oublis de MAIA (`maia-memoire`) et d'Alicia (`miyualicia-memory`) utilisent `forget`
@@ -702,5 +703,33 @@
 - **Nettoyage unique des bases antérieures** : à la première ouverture en écriture par cette version, `VACUUM` sous `secure_delete`, puis `wal_checkpoint(TRUNCATE)` complet, entrée d'audit `effacement` / `secure-vacuum`, puis marqueur **`a020_secure_vacuum = "1"`** dans `_kindmother_meta` ; base neuve marquée sans `VACUUM` ; espace libre exigé = taille + `-wal` + 4 Mio, sinon refus (`QuotaExceeded`) ; tout échec ⇒ base refusée, marqueur non posé, reprise à l'ouverture suivante (fail-closed) ; mémoire de l'ordre de la taille de la base pendant l'opération
 - **Chemin SQL brut (transition)** : le point de contrôle `TRUNCATE` suit **toute écriture qui a modifié des lignes** (`total_changes()`), y compris `REPLACE`, upsert, `UPDATE` et déclencheurs, et chaque migration de schéma ; la détection par mot-clé est supprimée ; `DROP TABLE` reste refusé par l'autorisateur ; coût ≈ 10 ms par écriture brute modifiante
 - **Inchangé** : `Update`/`Upsert` ordinaires sans `erasure` ne déclenchent pas de point de contrôle (ce ne sont pas des oublis)
-- **Reste ouvert** : sauvegardes `_backups/` antérieures (règle de conservation à décider par le propriétaire)
+- **Reste ouvert** : ~~sauvegardes `_backups/` antérieures~~ (décidé, A-022 §5)
 - **Impact** : EX-50..56 ; RGPD art. 17 ; plan lots C, 7
+
+### A-022 — Décisions du propriétaire : guichet des visas, délégation de clé d'usage, Portail scindé, sauvegardes, débit
+
+<!-- @id arch.gel.a022 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a022 -->
+
+- **Date** : 2026-10-26 · **version** 1.22 · **décisions du propriétaire** (recommandations retenues) ; valide en bloc A-010 à A-021 ; spécifie avant le code (C-82)
+- **1. Guichet des visas** (lève « à décider » d'A-007 et A-011)
+  - Le guichet vit **en zone COG** (INV-H2 : aucun secret durable en Franche) ; la façade ne fait que transmettre la demande par un **guichet typé du Portail** et renvoyer le visa signé
+  - Clé d'émission des visas = **nouvelle clé d'usage `visas`, indice SLIP-10 5** (`m/1296256839'/5'/g'`), rotation 90 j ; l'indice 1 `emission` ne signe plus que les **passeports**
+  - Visa **≤ 15 min** (fraîcheur des révocations), lié au passeport, à la clé d'appareil, au service (portée) et à la preuve de possession
+- **2. Délégation de clé d'usage** (lève « certificat racine → clé d'émission / journal » d'A-003)
+  - Sceau `0x06`, nature **`0x45` « délégation de clé d'usage »** : `cog_id`, indice d'usage, génération, clé publique, début et fin de validité (**≤ 90 j**)
+  - Signé par la **clé d'identité** (indice 0) pendant la cérémonie hors ligne de la racine ; tout vérificateur remonte à la racine épinglée ; valable pour tout indice ≥ 1 (passeports, visas, journal, éditeur, arrêtés, Fiches) ; une clé d'usage sans délégation valide ⇒ refus
+  - Disposition exacte des champs (tags) fixée à l'implémentation et consignée par amendement de suite, dans le même style que les natures `0x41`–`0x44`
+- **3. Portail scindé en deux processus** (spécification préalable au code)
+  - **Entrée** (Franche → zone COG) : relève les déclarations admises, typées, et les dépose pour le moteur ; **aucune capacité de publier**
+  - **Sortie** (zone COG → Franche) : publie seulement des réponses portant un jeton à usage unique et des publications H1
+  - Deux comptes, deux profils AppArmor, deux sandboxes ; **aucun état partagé** ; files à sens unique au format existant (codecs `message_traite!`) ; la panne de l'un n'arrête pas l'autre ; une compromission de l'entrée ne donne aucun moyen de publier
+- **4. Clé des Fiches** (complète A-017) : clé d'usage dédiée **`fiches`, indice 6**, certifiée par `0x45`, détenue par le pont MAIA (fichier 0600, compte de MAIA) ; la clé d'identité ne quitte plus la cérémonie ; **transitoire** jusqu'à l'implémentation de `0x45` : configuration A-017 inchangée
+- **5. Sauvegardes de KindMother**
+  - Sauvegardes d'avant migration (`_backups/`) gardées **30 jours**, puis effacées de façon sûre
+  - Toute **restauration réapplique les oublis** (pierres tombales, journal `effacement`) avant que la base ne soit rendue disponible
+  - Nouvelles sauvegardes chiffrées pour le propriétaire
+- **6. NFQUEUE** : **non implémenté** (décision d'architecture confirmée) : la Douane bloque par règles, les Vigies observent et coupent la voie
+- **7. Débit par `tc`** : la Douane **génère** les règles `tc` à partir des débits déjà déclarés au manifeste (« entrées externes », Kio/s) : une classe HTB par voie, `fq_codel`, dépassement ⇒ mise en file, jamais refus ; auditées comme les tables nftables ; format consigné par amendement de suite
+- **Impact** : EX-01, EX-02, EX-09, EX-24, EX-47, EX-50..56 ; INV-H2 ; plan lots 2, 3, 5, 7
