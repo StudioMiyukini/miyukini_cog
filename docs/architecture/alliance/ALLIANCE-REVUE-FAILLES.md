@@ -28,10 +28,10 @@
 | AL-F04 | haute | Perte définitive du quorum : lecture seule, mais aucune refondation ni procédure de bris de glace | **traitée : AL-D45** |
 | AL-F05 | haute | Connexion des utilisateurs quand le CC est en lecture seule : non tranchée | **traitée : AL-D46** |
 | AL-F06 | haute | Portable volé ou salarié licencié hors ligne : vérificateur local 7 jours et données sur le poste | **traitée : AL-D47** |
-| AL-F07 | haute | Le coût d'entrée (6 à 7 COG au CC, modèle IA sur chacun) contredit le marché d'entrée (TPE, PME) | [AL-Q51](ALLIANCE-DECISIONS.md) |
-| AL-F08 | moyenne | Surveillance des salariés : journaux de navigation, santé des postes, journal du CC, sans cadre droit du travail | [AL-Q48](ALLIANCE-DECISIONS.md) |
+| AL-F07 | haute | Le coût d'entrée (6 à 7 COG au CC, modèle IA sur chacun) contredit le marché d'entrée (TPE, PME) | **traitée : AL-D50** |
+| AL-F08 | moyenne | Surveillance des salariés : journaux de navigation, santé des postes, journal du CC, sans cadre droit du travail | **traitée : AL-D51** |
 | AL-F09 | moyenne | Une révocation urgente la nuit peut attendre un humain TAMR | **traitée : AL-D48** |
-| AL-F10 | moyenne | Source de temps de l'Alliance non définie (Kerberos, Median-Time-Past, délai de 2 ans) | [AL-Q50](ALLIANCE-DECISIONS.md) |
+| AL-F10 | moyenne | Source de temps de l'Alliance non définie (Kerberos, Median-Time-Past, délai de 2 ans) | **traitée : AL-D49** |
 | AL-F11 | moyenne | Injection indirecte par Alliance-MAIA ou Alliance-Files : un initié piège un contenu que MAIA lit | proposé §3 |
 | AL-F12 | moyenne | Une seule COG-Gateway : sa panne coupe télétravail et Internet | proposé §3 |
 | AL-F13 | moyenne | Obligations déjà en vigueur (CRA, AI Act art. 50) non couvertes : elles bloquent tout pilote, HECTOR compris | proposé §3 |

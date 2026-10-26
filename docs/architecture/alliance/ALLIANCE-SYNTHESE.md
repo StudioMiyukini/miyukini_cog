@@ -109,9 +109,9 @@
 
 ## 6. État des questions
 
-- **Tranchées** : 48 décisions (AL-D01..AL-D48)
-- **Ouvertes, en attente d'accord** : AL-Q07 (poste partagé), AL-Q32 (sauvegarde MAIA au CC)
-- **Ouvertes, issues de la revue** : AL-Q48, AL-Q50, AL-Q51 ([revue](ALLIANCE-REVUE-FAILLES.md))
+- **Tranchées** : 53 décisions (AL-D01..AL-D53)
+- **Ouvertes, en attente d'accord** : aucune
+- **Ouvertes, issues de la revue** : aucune (AL-D49 à AL-D51) ([revue](ALLIANCE-REVUE-FAILLES.md))
 - **Ouvertes, autres** : AL-Q06, Q08, Q11, Q12, Q13, Q15, Q16, Q17, Q18, Q21, Q33 (juridique), Q19 (moment du gel)
 
 ## 7. Chemin vers le gel v2

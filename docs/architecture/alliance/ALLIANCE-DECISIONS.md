@@ -73,6 +73,11 @@
 | AL-D46 | 2026-10-25 | **Visa hors journal ordonné** : tout membre sain du CC émet un visa court (≤ 8 h) après vérification du passeport et des révocations, trace versée ensuite au journal ; abus détecté par l'intégrité collective, membre suspendu ; en lecture seule, connexions possibles, aucune écriture d'annuaire hors bris de glace ([Alliance-Admin §3](ALLIANCE-ADMIN.md)) (recommandation retenue, tranche AL-Q46) | propriétaire |
 | AL-D47 | 2026-10-25 | Poste perdu ou départ hors ligne : **chiffrement intégral** scellé par TPM et lié au compte (sans TPM, phrase de démarrage) ; vérificateur local Argon2id, **effacé dès qu'une révocation est connue** ; hors ligne 24 h au plus pour les comptes sensibles, **0** pour les privilégiés ; **restitution du matériel** ajoutée au départ (AL-D40), poste non restitué exclu (recommandation retenue, tranche AL-Q47) | propriétaire |
 | AL-D48 | 2026-10-25 | **Asymétrie** : restreindre (révoquer, suspendre, isoler) est au plus classe 2, déclenchable automatiquement sur alerte WorrySentinel T3 ou plus et confirmé ensuite ; élargir garde sa classe ; **HECTOR ne restreint jamais seul** ([COG-CC §5](COG-CC.md)) (recommandation retenue, tranche AL-Q49) | propriétaire |
+| AL-D49 | 2026-10-26 | **Horloge** : le CC sert l'heure aux postes par NTS (RFC 8915), membres croisés, alerte sur dérive ; décisions datées par la médiane des horodatages récents du journal, jamais par un seul membre (recommandation retenue, tranche AL-Q50) | propriétaire |
+| AL-D50 | 2026-10-26 | **Seuil d'Alliance** : à partir de ≈ 25 postes ou 2 sites ; en dessous, COG seul multi-utilisateurs ; HECTOR facultatif ; CC jamais sous 6 membres (recommandation retenue, tranche AL-Q51) | propriétaire |
+| AL-D51 | 2026-10-26 | **Surveillance des salariés** : registre des collectes généré depuis les politiques ; AIPD de l'Alliance avant le pilote ; information des salariés et du CSE, validée par un juriste (recommandation retenue, tranche AL-Q48) | propriétaire |
+| AL-D52 | 2026-10-26 | **Poste partagé** : base locale par compte, chiffrée sous sa clé ; à la réaffectation rien n'est effacé à distance, rien n'est lisible sans le compte (recommandation retenue, tranche AL-Q07) | propriétaire |
+| AL-D53 | 2026-10-26 | **Sauvegarde MAIA au CC** (si l'Alliance l'autorise, AL-D37) : politique de classe 3 et accord de l'utilisateur ; clé de recouvrement à seuil des membres du CC, qui refusent leur part avant 2 ans ; domaines sensibles chiffrés pour le compte seul ; magasin séparé, hors de portée de HECTOR (recommandation retenue, tranche AL-Q32) | propriétaire |
 
 ## 2. Questions ouvertes
 
@@ -106,7 +111,7 @@
   - **Recommandation**
     - **Fichiers** : (b) — chiffrés pour le compte, stockés par JayCloud, illisibles par l'Alliance ; restauration par la procédure d'export (classe 2) ; **ou**, pour les fichiers placés dans un espace Alliance-Files (AL-D28), les copies chiffrées des COG de stockage (AL-D29)
     - **Mémoire MAIA** : tranché par **AL-D24** et **AL-D25** — jamais MiyuCloud ; sauvegarde dans le **COG-CC** si l'Alliance le permet explicitement, sinon **procédure USB** ; JayCloud non retenu pour la mémoire MAIA
-- **AL-Q32 · Sauvegarde de la mémoire MAIA dans le COG-CC** (issue d'AL-D25)
+- ~~**AL-Q32 · Sauvegarde de la mémoire MAIA dans le COG-CC**~~ → **AL-D53** (issue d'AL-D25)
   - Depuis **AL-D37**, la question ne porte sur des données personnelles que dans une Alliance qui les a permises explicitement
   - (a) Forme de la permission explicite · (b) qui peut déchiffrer · (c) où dans le CC · (d) durée d'archivage
   - **Recommandation**
@@ -152,7 +157,7 @@
 - ~~**AL-Q36 · Copies locales après retrait de droits**~~ → **AL-D31**
   - Retenu : plus de synchronisation, nouvelle clé d'espace ; copies locales jamais effacées à distance (INV-Z11), illisibles hors du compte ; cérémonie locale par l'organisation si nécessaire
 - ~~**AL-Q05 · Politiques élargissantes**~~ → **AL-D21** : dans l'enveloppe de l'enrôlement ; au-delà, classe 3 (quorum et TAMR)
-- **AL-Q07 · Poste partagé : données locales du précédent utilisateur ?**
+- ~~**AL-Q07 · Poste partagé : données locales du précédent utilisateur ?**~~ → **AL-D52**
   - **Recommandation** : base locale par compte chiffrée sous sa clé ; à la réaffectation, rien n'est effacé à distance (INV-Z11) mais rien n'est lisible sans le compte
 - **AL-Q11 · Un ou plusieurs COG-CC par Alliance ?** (sites, filiales)
   - **Recommandation** : un CC par Alliance au départ ; plusieurs CC = plus tard, avec une délégation d'unités signée au quorum
@@ -203,10 +208,10 @@
 - ~~**AL-Q45 · Refondation et bris de glace**~~ → **AL-D45** (AL-F04) — **Recommandation** : refondation par la racine à partir de la dernière tête attestée par `f + 1` membres ; en lecture seule, la racine peut seulement restreindre
 - ~~**AL-Q46 · Connexion en lecture seule**~~ → **AL-D46** (AL-F05) — **Recommandation** : visa émis par tout membre sain, court (≤ 8 h), hors journal ordonné, versé ensuite ; abus détecté par l'intégrité collective
 - ~~**AL-Q47 · Poste volé, départ hors ligne**~~ → **AL-D47** (AL-F06) — **Recommandation** : chiffrement intégral scellé par TPM, vérificateur Argon2id effacé à la révocation, 24 h hors ligne pour les comptes sensibles, 0 pour les privilégiés ; restitution du matériel dans AL-D40
-- **AL-Q48 · Surveillance des salariés** (AL-F08) — **Recommandation** : registre des collectes produit depuis les politiques, AIPD de l'Alliance avant le pilote, information des salariés et du CSE (à vérifier)
+- ~~**AL-Q48 · Surveillance des salariés**~~ → **AL-D51** (AL-F08) — **Recommandation** : registre des collectes produit depuis les politiques, AIPD de l'Alliance avant le pilote, information des salariés et du CSE (à vérifier)
 - ~~**AL-Q49 · Asymétrie restreindre / élargir**~~ → **AL-D48** (AL-F09) — **Recommandation** : restreindre au plus en classe 2, déclenchable automatiquement sur alerte T3 ou plus ; HECTOR ne restreint jamais seul
-- **AL-Q50 · Temps de l'Alliance** (AL-F10) — **Recommandation** : NTS servi par le CC, membres croisés, décisions datées par le Median-Time-Past du journal
-- **AL-Q51 · Coût d'entrée et seuil d'Alliance** (AL-F07) — **Recommandation** : Alliance à partir de ≈ 25 postes ou 2 sites ; en dessous, COG seul multi-utilisateurs ; HECTOR facultatif ; `n` jamais sous 6
+- ~~**AL-Q50 · Temps de l'Alliance**~~ → **AL-D49** (AL-F10) — **Recommandation** : NTS servi par le CC, membres croisés, décisions datées par le Median-Time-Past du journal
+- ~~**AL-Q51 · Coût d'entrée et seuil d'Alliance**~~ → **AL-D50** (AL-F07) — **Recommandation** : Alliance à partir de ≈ 25 postes ou 2 sites ; en dessous, COG seul multi-utilisateurs ; HECTOR facultatif ; `n` jamais sous 6
 
 ### Chemin vers la normativité
 
