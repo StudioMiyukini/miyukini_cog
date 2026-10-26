@@ -35,8 +35,8 @@
 | I2 | Délégation de clé d'usage `0x45`, clés `visas` (5) et `fiches` (6) | fait (A-024) ; migration des émetteurs et mode strict avec I3 |
 | I3 | Guichet des visas en zone COG (visa ≤ 15 min) | fait (A-029) ; placement des délégations par l'installateur à faire |
 | I4 | Routes mémoire MAIA authentifiées par passeport et visa | à faire (après I3) |
-| I5 | Défis et nonces persistants (plusieurs instances) ; preuve de possession liée au canal TLS | fait (A-029) ; liaison TLS fournie, non branchée (aucun vérificateur ne termine TLS) ; MiyuCloud encore en mémoire |
-| I6 | Liaison d'identité et de clé d'appareil dans MiyuCloud ; régénération d'identité mobile | à faire |
+| I5 | Défis et nonces persistants (plusieurs instances) ; preuve de possession liée au canal TLS | fait (A-029, A-030) ; liaison TLS fournie, non branchée (aucun vérificateur ne termine TLS) |
+| I6 | Liaison d'identité et de clé d'appareil dans MiyuCloud ; régénération d'identité mobile | fait (A-030) ; PostgreSQL et Android non testés ; rotation côté central-remote à faire |
 
 ## 3. Données
 

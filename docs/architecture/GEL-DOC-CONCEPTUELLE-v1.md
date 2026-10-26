@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.29 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`, `doc-conceptuelle-v1.24`, `doc-conceptuelle-v1.25`, `doc-conceptuelle-v1.26`, `doc-conceptuelle-v1.27`, `doc-conceptuelle-v1.28`, `doc-conceptuelle-v1.29`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.30 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`, `doc-conceptuelle-v1.24`, `doc-conceptuelle-v1.25`, `doc-conceptuelle-v1.26`, `doc-conceptuelle-v1.27`, `doc-conceptuelle-v1.28`, `doc-conceptuelle-v1.29`, `doc-conceptuelle-v1.30`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -88,6 +88,7 @@
 | A-027 | 2026-10-26 | Portail scindé : processus `portail-entree` / `portail-sortie`, files à groupe propre (`3730`), formats `MJR1` `MPA1` `MPR1` `MPP1` `MPV1` `MPM1` `MPK1` `MPJ1`, jeton de réponse éphémère, écarts (compteurs, sas sous le profil d'entrée) | 1.27 |
 | A-028 | 2026-10-26 | Republication d'une Fiche étrangère sous TAMR (route en deux temps, dérivation `rp.`), clé `fiches` dans les Fiches (tag `0x0E`), transition | 1.28 |
 | A-029 | 2026-10-26 | Guichet des visas en zone COG (voie `miyukini.visas`, clé d'usage 5), en-tête `X-Miyu-Delegations`, mode strict (jayrdv-facade, central-remote, MiyuCloud), nonces persistants ; état du Portail fail-closed (sessions closes) | 1.29 |
+| A-030 | 2026-10-26 | MiyuCloud : délégations et nonces persistants, liaison et rotation des appareils (`MLA2`), retrait effectif ; régénération d'identité dans l'application mobile | 1.30 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -876,3 +877,18 @@
 - **État du Portail fail-closed (corrige A-027)** : répertoire des descripteurs illisible ⇒ voies actuelles conservées ; descripteur présent mais illisible ⇒ sa voie est gardée ; seule l'**absence** du fichier retire une voie ; registre des **sessions closes** `_sessions.closes` (`MPC1`, `0600`, ≤ 65 536) : une session quittée y est inscrite avant toute suppression de son état et ne se rouvre jamais ; marques (`.rejeu`) et jetons (`.jetons`) vides seulement si le fichier est **absent** (créé dès l'ouverture) ; fichier illisible ou mal formé ⇒ session refusée ; fin déchirée ⇒ seul l'enregistrement partiel est retiré
 - **Reste** : délégations `emission` et `visas` et graine `visas` produites en cérémonie et placées par l'installateur (renouvellement avant 90 j) ; guichet lancé en zone COG avec descripteurs `miyukini.visas` écrits par les Cores réels ; middleware MiyuCloud à passer à `verifier_visa_avec_delegations`, et ses défis et nonces encore en mémoire ; rejeu en VM des scénarios du Portail
 - **Impact** : EX-01, EX-02, EX-09, EX-24 ; INV-H2 ; plan lots 2, 5
+
+### A-030 — MiyuCloud : liaison des appareils, délégations, nonces persistants ; identité mobile
+
+<!-- @id arch.gel.a030 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a030 -->
+
+- **Date** : 2026-10-26 · **version** 1.30 · consignation de l'implémenté (reste du lot 2 ; restes MiyuCloud d'A-029)
+- **Middleware MiyuCloud** : lit `X-Miyu-Delegations`, vérifié contre la racine épinglée dès le contrôle préalable (avant lecture du corps) et dans la preuve complète ; défis et nonces persistants (`miyauth::http::persistant`, dossier `MIYUCLOUD_MIYU_ETAT_DIR`, défaut `<STORAGE_PATH>/.miyauth-etat`, démarrage refusé si lien ou ouvert aux « autres ») ; un visa dont la clé d'appareil a été retirée du compte est refusé
+- **Liaison d'appareil `MLA2`** (message de liaison v2 d'A-013, COG épinglé par MiyuCloud comme origine **et** destination) : transport base64url `"MLA2" ‖ nouvelle clé ‖ échéance (8 o) ‖ signature de la nouvelle clé` (108 o) ; **rotation** : `‖ ancienne clé ‖ signature de l'ancienne clé` (204 o) ; échéance ≤ 5 min, usage unique
+- **Routes** `/api/auth/miyu` : `GET /liaison-appareil` (public : `cog_id` à signer, format) ; `GET`/`POST /appareils` et `DELETE /appareils/{id}` (session navigateur seulement, CSRF et contrôle de même origine `Sec-Fetch-Site` / `Origin` = `Host`) ; `POST /appareils/rotation` (requête signée par l'ancienne clé seulement ; nouvelle clé reprend nom et portées, ancienne révoquée dans la même transaction) ; `/liaisons` accepte les délégations
+- **Retrait d'un appareil** : dès la requête suivante, requêtes signées par cette clé, visas portant cette clé et nouvelle liaison d'identité par cette clé sont refusés (aucun cache)
+- **Application mobile** (`apps/central-mobile`, Rust + Dioxus) : régénération en trois temps — préparer (nouvelle clé dans un fichier `0600` séparé, reprise après interruption), lier (rotation signée par l'ancienne clé si lisible, sinon demande à coller depuis un appareil de confiance), confirmer (renommage atomique, connexion COG oubliée, nouvel appairage) ; vecteur de référence partagé entre mobile et MiyuCloud
+- **Limites** : requêtes PostgreSQL (`device_key_revoked`, rotation transactionnelle) non testées faute de base ; aucune construction Android (cible absente) ; clé mobile dans le dossier privé `0600`, pas dans l'Android Keystore (JNI requis) ; central-remote n'accepte pas encore la rotation signée (repli : nouvel appairage et révocation manuelle de l'ancienne clé sur Central)
+- **Impact** : EX-01, EX-02 ; plan lot 2
