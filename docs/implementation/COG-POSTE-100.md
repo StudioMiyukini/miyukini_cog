@@ -71,7 +71,7 @@
 | # | Point | État |
 |---|---|---|
 | L1 | Paquet signé, reproductible, installation et mise à jour vérifiées | fait (beta.1) |
-| L2 | Signalement des vulnérabilités (CRA) : SECURITY.md, security.txt, processus 24 h / 72 h | à vérifier |
+| L2 | Signalement des vulnérabilités (CRA) : SECURITY.md, security.txt, processus 24 h / 72 h | partiel : documents rédigés ([processus](../securite/PROCESSUS-SIGNALEMENT-CRA.md)) ; attend contact de sécurité, clé éventuelle, rôles, compte ENISA et route `/.well-known/security.txt` (propriétaire) |
 | L3 | Aucun `unwrap` hors tests hors P0/P1 (432 restants, surtout MiyuCloud et MAIA) | à faire |
 | L4 | Couverture ≥ 80 % mesurée sur les crates de sécurité | à faire |
 | L5 | Installation complète en VM : tous les points ci-dessus, de bout en bout | à faire (en dernier) |

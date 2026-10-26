@@ -18,7 +18,7 @@
 
 | Échéance | Obligation | Concerne | Statut COG |
 |---|---|---|---|
-| **en vigueur** (11/09/2026) | CRA : signalement ENISA des vulnérabilités activement exploitées et incidents graves (24 h / 72 h / rapport final), y compris produits déjà diffusés | éditeur | **absent** : pas de SECURITY.md, security.txt, processus |
+| **en vigueur** (11/09/2026) | CRA : signalement ENISA des vulnérabilités activement exploitées et incidents graves (24 h / 72 h / rapport final), y compris produits déjà diffusés | éditeur | **partiel** (26/10) : [SECURITY.md](../../SECURITY.md), `security.txt` et [processus](../securite/PROCESSUS-SIGNALEMENT-CRA.md) rédigés ; manquent contact de sécurité, clé, rôles et astreinte, compte ENISA, route `/.well-known/` |
 | **en vigueur** (02/08/2026) | AI Act art. 50 : MAIA et Alicia se déclarent IA, marquage des contenus générés | MAIA, Alicia | absent |
 | **en vigueur** | RGPD : AIPD (Origin, Market, notation des pairs, voix), registre, privacy by design | Origin, services | partiel |
 | **en vigueur** | LCEN / DSA : obligations d'hébergeur pour Origin et le Market (signalement, retrait) | Origin, Market | absent |
@@ -70,7 +70,7 @@
 <!-- @role plan-integration -->
 <!-- @do integrate_compliance_plan -->
 
-- **Lot 0 bis (en cours)** : SECURITY.md, security.txt, processus de signalement CRA (24 h / 72 h) ; mention IA (AI Act art. 50) dans MAIA et Alicia ; actions CI épinglées par empreinte
+- **Lot 0 bis (en cours)** : SECURITY.md, security.txt, processus de signalement CRA (24 h / 72 h) — rédigés le 26/10, en attente du contact du propriétaire ; mention IA (AI Act art. 50) dans MAIA et Alicia ; actions CI épinglées par empreinte
 - **Lot C** : journalisation conforme ANSSI des décisions des Cores (traçabilité RGPD et CRA)
 - **Lot 2** : inventaire crypto et C-24 révisée ; identifiant d'algorithme dans Sceau ; préparation post-quantique ; `rust-toolchain.toml`, `overflow-checks`, `cargo vet`
 - **Lot 3** : EN 303 645 / IEC 62443 pour Douane et Alicia ; isolement en processus séparé des bindings C/C++ (llama.cpp, whisper.cpp)

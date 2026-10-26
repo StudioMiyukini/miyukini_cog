@@ -1,0 +1,17 @@
+# security.txt — Miyukini COG (Studio Miyukini) — RFC 9116
+#
+# NE PAS PUBLIER EN L'ÉTAT : les champs marqués <À DÉFINIR PAR LE PROPRIÉTAIRE>
+# doivent être remplacés par une URI valide (mailto:, https:) avant diffusion.
+# À la publication : vérifier Expires (au plus 1 an), puis signer le fichier
+# (OpenPGP en clair, RFC 9116 §2.3) si une clé de sécurité existe.
+#
+# Servir à : https://miyukini.com/.well-known/security.txt
+# (Content-Type: text/plain; charset=utf-8, HTTPS uniquement)
+
+Contact: <À DÉFINIR PAR LE PROPRIÉTAIRE>
+Expires: 2027-10-25T23:59:59.000Z
+# Encryption: <À DÉFINIR PAR LE PROPRIÉTAIRE — URI de la clé publique, si une clé est créée>
+# Acknowledgments: <À DÉFINIR PAR LE PROPRIÉTAIRE — page publique de remerciements>
+Policy: https://github.com/StudioMiyukini/miyukini_cog/blob/main/SECURITY.md
+Preferred-Languages: fr, en
+Canonical: https://miyukini.com/.well-known/security.txt
