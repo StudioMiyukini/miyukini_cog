@@ -56,7 +56,7 @@
 | A4 | Mention IA (AI Act art. 50) dans MAIA et Alicia | fait (A-026) |
 | A5 | Interface de la mémoire (voir, corriger, exporter, oublier, valider) | à faire (après I4) |
 | A6 | Publication des Fiches, état persistant | fait (A-017, A-018) |
-| A7 | TAMR branché sur la republication d'une donnée étrangère | à faire |
+| A7 | TAMR branché sur la republication d'une donnée étrangère | fait (A-028) ; vue fédérale à câbler au pont (avec F2) |
 
 ## 5. Fédération et échanges
 

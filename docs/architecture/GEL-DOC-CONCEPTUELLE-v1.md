@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.27 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`, `doc-conceptuelle-v1.24`, `doc-conceptuelle-v1.25`, `doc-conceptuelle-v1.26`, `doc-conceptuelle-v1.27`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.28 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`, `doc-conceptuelle-v1.24`, `doc-conceptuelle-v1.25`, `doc-conceptuelle-v1.26`, `doc-conceptuelle-v1.27`, `doc-conceptuelle-v1.28`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -86,6 +86,7 @@
 | A-025 | 2026-10-26 | Sauvegardes de KindMother (chiffrées, 30 j, purge sûre, restauration qui rejoue les oublis, registre `oublis`) ; correction d'A-023 : règle de débit stricte par défaut, filet 5/4 seulement en externe après `tc` | 1.25 |
 | A-026 | 2026-10-26 | Modèle local réel pour MAIA et Alicia (Qwen2.5-1.5B-Instruct Apache-2.0, `maia-llm` CPU sur 11436, canal MMIA), Alicia contrainte par grammaire, serrure toujours confirmée, mention IA (AI Act art. 50) | 1.26 |
 | A-027 | 2026-10-26 | Portail scindé : processus `portail-entree` / `portail-sortie`, files à groupe propre (`3730`), formats `MJR1` `MPA1` `MPR1` `MPP1` `MPV1` `MPM1` `MPK1` `MPJ1`, jeton de réponse éphémère, écarts (compteurs, sas sous le profil d'entrée) | 1.27 |
+| A-028 | 2026-10-26 | Republication d'une Fiche étrangère sous TAMR (route en deux temps, dérivation `rp.`), clé `fiches` dans les Fiches (tag `0x0E`), transition | 1.28 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -839,3 +840,20 @@
 - **Limites** : CDR non branché dans les processus (`RefusParDefaut` : tout document refusé) ; journal local par processus, pas le registre Merkle ; descripteurs de voie écrits seulement par l'outil d'essai, pas encore par les Cores réels ; files interrogées toutes les 200 ms
 - **Vérifié en VM** : chemin complet façade → entrée → moteur → sortie → façade ; jeton, trame ou réponse rejoués refusés ; arrêt ou `kill -9` d'un processus sans effet sur l'autre ; AppArmor refuse l'écriture croisée ; coupure et rétablissement de voie
 - **Impact** : INV-H3, INV-H4, INV-Z1 ; EX-12, EX-24 ; plan lots 3, 5
+
+### A-028 — Republication sous TAMR, clé `fiches` dans les Fiches
+
+<!-- @id arch.gel.a028 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a028 -->
+
+- **Date** : 2026-10-26 · **version** 1.28 · consignation de l'implémenté (A-009 republication, A-022 §4, A-024)
+- **Route en deux temps** (pont `maia`) :
+  1. `POST /v1/federee/{u}/republier` signé par la clé de l'utilisateur, corps `{"fiches":[base64, 1..16], "sujet"?, "audience"?, "licence"?}` ; chaque source vérifiée, **étrangère** au COG, émetteur admis par la vue fédérale ; champ `donnee` refusé (aucune donnée KindMother lue, donc jamais `maia-*`) ; le serveur calcule et signe la Fiche et fige ses octets exacts dans une demande TAMR ⇒ 202, rien n'est publié
+  2. `POST /v1/federee/{u}/republier/{iv}` `{"empreinte"}` signé par une clé d'**approbation TAMR** (`MAIA_TAMR_CLES_APPROBATION`, distincte de la clé ordinaire) : usage unique, délai, empreinte exacte, approbateur = propriétaire, décision StrongFather `tamr.approbation`, sources revérifiées, `ServiceRequete::controler`, porte `federee.republier` ; seulement sur ALLOW : persistance (table d'A-018, colonne `donnee` = hex de l'ensemble des sources) puis publication
+  3. `DELETE /v1/federee/{u}/republier/{iv}` : refus de l'utilisateur, demande close
+  - politiques `maia-federee-republier` et `maia-federee-republier-sans-tamr` (refus critique) ; débit horaire séparé de `publier`
+- **Dérivation d'une republication** (`maia_federee::reprise`) : `id` = `rp.` + 32 hex de `SHA-256("miyukini/maia-federee/reprise/ensemble/v1\0" || Σ trié (cog_id\0id\0))` ; texte = textes des sources séparés par une ligne vide (≤ 8 000 car.) ; relations et sources = unions sans doublon ; type, langue, licence identiques entre sources ; sujet (pris dans les sources ou dérivable de leur texte) et audience (incluse dans chaque source) au choix de l'utilisateur ; une source déjà republiée est refusée ; `reprises` ≤ 16 ; jamais comptée pour la corroboration
+- **Clé `fiches`** : tag optionnel **`0x0E delegation`** de la Fiche (sceau `0x45` de la clé `fiches`, indice 6, ≤ 1 024 o) ; `emetteur` reste la clé d'identité ; vérification identité → délégation → clé `fiches`, la délégation devant couvrir la **date de la Fiche** (une Fiche reste lisible après expiration de la délégation) ; le pont refuse de signer hors fenêtre ; sans `0x0E`, la Fiche doit être signée par l'identité (transition ; `verifier_fiche_deleguee` pour un mode strict futur) ; configuration `MAIA_FEDEREE_CLE_FICHES`, `MAIA_FEDEREE_DELEGATION_FICHES`, `MAIA_FEDEREE_IDENTITE_PUBLIQUE` ; `MAIA_FEDEREE_CLE_IDENTITE` transitoire ; clé `fiches` mal configurée ⇒ route désactivée, sans repli sur l'identité
+- **Limites** : republication en 503 `vue_federale_indisponible` tant que la vue fédérale n'est pas câblée au pont ; demandes TAMR en attente gardées en mémoire ; redémarrage du pont après renouvellement d'une délégation ; aucune révocation de délégation ; une clé `fiches` compromise après expiration peut encore signer des Fiches datées dans son ancienne fenêtre
+- **Impact** : EX-57, EX-60 ; plan lot 7
