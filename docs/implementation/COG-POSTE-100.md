@@ -43,7 +43,7 @@
 | # | Point | État |
 |---|---|---|
 | D1 | Bases chiffrées, oubli réel (secure_delete, WAL, oubli typé), nettoyage des bases antérieures | fait (A-020, A-021) |
-| D2 | Sauvegardes : 30 j, oublis réappliqués à la restauration, chiffrées | en cours (A-022 §5) |
+| D2 | Sauvegardes : 30 j, oublis réappliqués à la restauration, chiffrées | fait (A-025) ; restauration à exposer à MiyukiniAdmin |
 | D3 | Mémoire d'Alicia dans KindMother | fait (A-019) |
 
 ## 4. IA locale

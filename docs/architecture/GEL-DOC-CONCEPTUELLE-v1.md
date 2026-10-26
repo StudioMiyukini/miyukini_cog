@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.24 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`, `doc-conceptuelle-v1.24`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.25 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`, `doc-conceptuelle-v1.24`, `doc-conceptuelle-v1.25`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -83,6 +83,7 @@
 | A-022 | 2026-10-26 | **Décisions du propriétaire** : guichet des visas en zone COG (clé d'usage `visas`, indice 5, visa ≤ 15 min), délégation de clé d'usage (nature `0x45`), Portail scindé entrée / sortie, clé `fiches` (indice 6), sauvegardes 30 j et oublis réappliqués à la restauration, NFQUEUE écarté, `tc` généré par la Douane ; validation en bloc d'A-010 à A-021 | 1.22 |
 | A-023 | 2026-10-26 | Mise en forme du trafic par la Douane : `tc` HTB + `fq_codel` par voie et par flux depuis l'arrêté signé, filet nftables par sens à 5/4, application et audit | 1.23 |
 | A-024 | 2026-10-26 | Délégation de clé d'usage `0x45` (disposition des tags), clés `visas` (5) et `fiches` (6), vérification de chaîne des passeports et visas, transition | 1.24 |
+| A-025 | 2026-10-26 | Sauvegardes de KindMother (chiffrées, 30 j, purge sûre, restauration qui rejoue les oublis, registre `oublis`) ; correction d'A-023 : règle de débit stricte par défaut, filet 5/4 seulement en externe après `tc` | 1.25 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -746,7 +747,7 @@
 - **Source des débits** : l'**arrêté signé** de la frontière externe (qui reprend le champ 8 du manifeste) ; la description ne porte aucun débit, seulement la capacité des interfaces : un débit non signé ne peut pas être injecté
 - **Description `miyudouane-tc 1`** : ASCII, analyse stricte ; `capacite <interface> <Kio/s>` (facultatif, défaut 1 250 000, plage 1..=4 000 000) ; interface hors de la frontière, doublon, ou somme des débits ≥ capacité ⇒ refus
 - **Rendu** (`tc -batch`, espace de noms de la frontière externe) : par interface, racine HTB `4d44:`, classe de capacité `4d44:f000`, classe par défaut `4d44:ffff` (file `4d45:`) ; une classe par voie `4d44:(1000+rang)` (débit = plafond = somme de ses flux) ; une feuille par flux `4d44:<marque>` (débit = plafond = débit déclaré, `fq_codel`, cible adaptée aux bas débits) ; aller mis en forme sur l'interface de sortie, réponses sur l'interface d'entrée ; classification **par marque seulement** (filtre `fw`) ; le texte ne contient que `qdisc add`, `class add`, `filter add`
-- **nftables** : la marque est copiée dans le paquet (`meta mark set ct mark` sur les connexions établies, `meta mark set m` sur les nouvelles) ; le filet `DEBIT` devient **par sens** : `ct direction original|reply limit rate over ⌈D×5/4⌉ kbytes/second burst B bytes`, B = ⌈D×1024/100⌉ + 1 600 octets, égal à la rafale HTB : le filet ne coupe que du trafic non mis en forme
+- **nftables** (**corrigé par A-025** : filet seulement en externe après `tc` appliqué) : la marque est copiée dans le paquet (`meta mark set ct mark` sur les connexions établies, `meta mark set m` sur les nouvelles) ; le filet `DEBIT` devient **par sens** : `ct direction original|reply limit rate over ⌈D×5/4⌉ kbytes/second burst B bytes`, B = ⌈D×1024/100⌉ + 1 600 octets, égal à la rafale HTB : le filet ne coupe que du trafic non mis en forme
 - **Application** (`miyudouane tc … --appliquer`) : audit ; refus avant toute modification si une racine étrangère existe sur une interface ; fichier 0600 ; retrait de la seule racine `4d44:` (avec `handle`) ; un seul `tc -batch` ; échec ⇒ racine retirée, filet nftables en place ; fenêtre de quelques millisecondes sans mise en forme couverte par le filet
 - **Audit** : tout écart au rendu attendu (classe modifiée, plafond relevé, filtre détourné, classe ajoutée, `del`/`replace`, interface ou racine étrangère, action) ⇒ refus
 - **Reste** : intégration aux installateurs (règles nftables d'abord, puis `tc` après chaque arrêté externe, coupure ou rétablissement de voie, et au démarrage de l'espace de noms) ; l'IPS compte encore aller et retour confondus (sans effet tant qu'il ne voit que les rejets)
@@ -777,3 +778,24 @@
 - **Transition** : pour un COG dont la racine est épinglée, un visa signé par l'indice 1 ou sans délégation est **refusé immédiatement** (aucune donnée stockée ne l'exige : un visa vit ≤ 15 min) ; les anciennes clés épinglées directement restent acceptées pour un COG **sans** racine épinglée, tant que le mode strict (`exiger_delegations`) n'est pas activé ; épingler la racine d'un COG écarte ses clés directes
 - **Reste** : guichet des visas (émission par l'indice 5, transport de la délégation avec le visa) ; migration de central-remote, Origin (qui n'a pas de racine COG : décision à prendre), MiyuCloud et jayrdv-facade vers les délégations, puis mode strict partout ; clé `fiches` dans `maia-federee` ; retrait d'une racine épinglée ; révocation d'une délégation
 - **Impact** : EX-01, EX-02, EX-09 ; plan lot 2
+
+### A-025 — Sauvegardes de KindMother, correction du filet de débit
+
+<!-- @id arch.gel.a025 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a025 -->
+
+- **Date** : 2026-10-26 · **version** 1.25 · consignation de l'implémenté d'A-022 §5 ; correction d'A-023 après revue de sécurité (régression de contrôle)
+- **Sauvegardes** (`kindmother-service/src/sauvegardes.rs`)
+  - `<data_dir>/_backups/<base>.v<version>-<AAAAMMJJTHHMMSS.f>.bak` (+ `-wal`), dossier 0700, fichiers 0600 ; faites avant toute migration et avant toute restauration ; entrée d'audit `migration` / `sauvegarde` (nom, SHA-256, chiffrement)
+  - **Chiffrement** : le fichier SQLCipher lui-même, sous la clé de la base ; une sauvegarde lisible en clair est refusée et effacée ; la perte de `keys/<base>.secret` rend toutes ses sauvegardes illisibles ; pas de clé d'enveloppe hors machine (à décider)
+  - **Rétention 30 j** : âge = le plus ancien entre la date du nom et la date de modification ; `KINDMOTHER_BACKUP_RETENTION_DAYS` 1..30, au-delà seulement avec `KINDMOTHER_BACKUP_RETENTION_BEYOND_30_DAYS=1` (≤ 3 650 j) ; valeur invalide ⇒ refus de démarrer ; purge au démarrage et toutes les 6 h ; effacement sûr (zéros, `fsync`, retrait, `fsync` du dossier ; `-wal`/`-shm` compris ; un lien est retiré sans toucher sa cible) ; entrée `effacement` / `purge-sauvegarde` sans contenu
+  - **Restauration** (`EncryptedDatabase::restaurer_sauvegarde`, bibliothèque seulement, **non exposée** au protocole) : chaîne du journal vérifiée, empreinte de la sauvegarde comparée au journal, copie dans `_restauration/`, ouverture avec la clé et `quick_check`, **rejeu en une transaction de tous les effacements postérieurs**, `wal_checkpoint(TRUNCATE)` complet, entrées `rejeu` et `restauration`, puis seulement bascule des connexions ; tout échec avant la bascule laisse la base intacte, après elle la base indisponible, jamais la copie non purgée
+  - **Registre rejouable des oublis** : table `oublis` en ajout seul dans le fichier du journal (table, colonnes de clé, empreinte de la clé — jamais la valeur —, valeurs de remplacement d'une rédaction) ; chaque entrée `effacement` porte `rejeu=<sha256>` couvert par la chaîne ; anciennes entrées sans ligne : `delete` rejoué par colonnes, `update`/`upsert` ⇒ restauration refusée
+  - Limites : pierres tombales applicatives écrites dans le même lot (p.ex. `tombes` de MAIA) non recréées (la donnée reste effacée) ; écritures par SQL brut de transition non rejouables ; sauvegarde antérieure à une recléfication v1→v2 : ancienne clé requise
+- **Filet de débit (corrige A-023)**
+  - Par défaut et sur **toute** frontière : règle **stricte** `ct mark M limit rate over D kbytes/second`, identique à celle d'avant A-023
+  - Filet par sens `⌈D×5/4⌉` avec rafale **seulement** en frontière externe **et** après application réussie de `tc` (`MiseEnForme::Appliquee`, `--mise-en-forme-appliquee`, refusé ailleurs) ; copie de marque en externe seulement
+  - **Ordre** : (a) règles strictes ; (b) `tc` (refusé si les règles strictes ne sont pas en place ; échec ⇒ racine retirée, règle stricte maintenue) ; (c) règles avec filet (refusé si une interface ne porte pas la racine `htb 4d44:`) ; à refaire à chaque arrêté externe, coupure ou rétablissement de voie et au démarrage de l'espace de noms
+  - L'audit n'accepte que la forme correspondant à l'état déclaré
+- **Impact** : EX-14, EX-24, EX-50..56 ; plan lots 3, C
