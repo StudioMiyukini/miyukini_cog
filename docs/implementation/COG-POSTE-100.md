@@ -32,7 +32,7 @@
 | # | Point | État |
 |---|---|---|
 | I1 | Racine hors ligne, passeports, preuve de possession | fait (lot 2) |
-| I2 | Délégation de clé d'usage `0x45`, clés `visas` (5) et `fiches` (6) | en cours (A-022 §2) |
+| I2 | Délégation de clé d'usage `0x45`, clés `visas` (5) et `fiches` (6) | fait (A-024) ; migration des émetteurs et mode strict avec I3 |
 | I3 | Guichet des visas en zone COG (visa ≤ 15 min) | à faire (après I2, S5) |
 | I4 | Routes mémoire MAIA authentifiées par passeport et visa | à faire (après I3) |
 | I5 | Défis et nonces persistants (plusieurs instances) ; preuve de possession liée au canal TLS | à faire |

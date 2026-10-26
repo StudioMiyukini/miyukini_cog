@@ -6,7 +6,7 @@
 <!-- @human Périmètre, empreintes et règles d'amendement de la doc conceptuelle COG gelée le 2026-10-24 -->
 <!-- @do freeze_conceptual_docs -->
 
-- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.23 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`
+- **Date** : 2026-10-24 (amendé le 2026-10-25) · **Version** : 1.24 · **Étiquettes git** : `doc-conceptuelle-v1.0`, `doc-conceptuelle-v1.1`, `doc-conceptuelle-v1.2`, `doc-conceptuelle-v1.3`, `doc-conceptuelle-v1.4`, `doc-conceptuelle-v1.5`, `doc-conceptuelle-v1.6`, `doc-conceptuelle-v1.7`, `doc-conceptuelle-v1.8`, `doc-conceptuelle-v1.9`, `doc-conceptuelle-v1.10`, `doc-conceptuelle-v1.11`, `doc-conceptuelle-v1.12`, `doc-conceptuelle-v1.13`, `doc-conceptuelle-v1.14`, `doc-conceptuelle-v1.15`, `doc-conceptuelle-v1.16`, `doc-conceptuelle-v1.17`, `doc-conceptuelle-v1.18`, `doc-conceptuelle-v1.19`, `doc-conceptuelle-v1.20`, `doc-conceptuelle-v1.21`, `doc-conceptuelle-v1.22`, `doc-conceptuelle-v1.23`, `doc-conceptuelle-v1.24`
 - **Empreintes** : [`GEL-DOC-CONCEPTUELLE-v1.sha256`](GEL-DOC-CONCEPTUELLE-v1.sha256) — contrôle : `sha256sum -c docs/architecture/GEL-DOC-CONCEPTUELLE-v1.sha256`
 - **Suite** : [contraintes](../implementation/CONTRAINTES-IMPLEMENTATION.md) · [revue de code](../implementation/REVUE-CODE-PREPARATION.md) · [plan d'implémentation](../implementation/PLAN-IMPLEMENTATION.md)
 
@@ -82,6 +82,7 @@
 | A-021 | 2026-10-25 | Oubli typé (`erasure`, entrée d'audit `effacement`), nettoyage unique des bases antérieures (`VACUUM`, marqueur `a020_secure_vacuum`), point de contrôle après toute écriture SQL modifiante ; **validé par le propriétaire (2026-10-26)** | 1.21 |
 | A-022 | 2026-10-26 | **Décisions du propriétaire** : guichet des visas en zone COG (clé d'usage `visas`, indice 5, visa ≤ 15 min), délégation de clé d'usage (nature `0x45`), Portail scindé entrée / sortie, clé `fiches` (indice 6), sauvegardes 30 j et oublis réappliqués à la restauration, NFQUEUE écarté, `tc` généré par la Douane ; validation en bloc d'A-010 à A-021 | 1.22 |
 | A-023 | 2026-10-26 | Mise en forme du trafic par la Douane : `tc` HTB + `fq_codel` par voie et par flux depuis l'arrêté signé, filet nftables par sens à 5/4, application et audit | 1.23 |
+| A-024 | 2026-10-26 | Délégation de clé d'usage `0x45` (disposition des tags), clés `visas` (5) et `fiches` (6), vérification de chaîne des passeports et visas, transition | 1.24 |
 
 ### A-002 — Sceau v1.1 : algorithme et multi-signature
 
@@ -750,3 +751,29 @@
 - **Audit** : tout écart au rendu attendu (classe modifiée, plafond relevé, filtre détourné, classe ajoutée, `del`/`replace`, interface ou racine étrangère, action) ⇒ refus
 - **Reste** : intégration aux installateurs (règles nftables d'abord, puis `tc` après chaque arrêté externe, coupure ou rétablissement de voie, et au démarrage de l'espace de noms) ; l'IPS compte encore aller et retour confondus (sans effet tant qu'il ne voit que les rejets)
 - **Impact** : EX-14, EX-24 ; plan lot 3
+
+### A-024 — Délégation de clé d'usage `0x45`, clés `visas` et `fiches`
+
+<!-- @id arch.gel.a024 -->
+<!-- @role amendment -->
+<!-- @do record_amendment_a024 -->
+
+- **Date** : 2026-10-26 · **version** 1.24 · consignation de l'implémenté d'A-022 §2 et §4 (`miyusceau::delegation`, `miyuracine`, `miyauth::passeport`)
+- **Nature `0x45`** (Sceau `0x06`), tous les tags requis, croissants, tout autre tag refusé ; signée par la **clé d'identité** seule :
+
+| Tag | Champ | Valeur |
+|---|---|---|
+| 0x01 | `nature` | 1 o, `0x45` |
+| 0x02 | `cog_id` | 26 caractères base32 minuscules, égal au `cog_id` de la clé signataire |
+| 0x03 | `indice` | `u64`, 1 ≤ indice < 2³¹ |
+| 0x04 | `generation` | `u64`, < 2³¹ |
+| 0x05 | `cle` | Ed25519 32 o, point valide non faible, différente de l'identité |
+| 0x06 | `pas_avant` | secondes Unix |
+| 0x07 | `pas_apres` | `pas_avant < pas_apres ≤ pas_avant + 90 j` |
+
+- Constructeur, encodeur et décodeur partagent une seule fonction de contrôle (encodage canonique, A-020)
+- **Usages** : `visas` = indice 5, `fiches` = indice 6 ; l'identité ne peut pas se déléguer elle-même ; cérémonie : `miyuracine deleguer --usage … --generation … [--duree-jours ≤ 90]`
+- **Vérification de chaîne** (`verifier_passeport`, `verifier_visa`) : délégation signée par la racine épinglée, même `cog_id`, bon indice (passeport = 1, visa = 5), fenêtre couvrant l'instant **et** toute la fenêtre du titre ; une clé par (COG, indice, génération) ; la délégation peut accompagner le titre
+- **Transition** : pour un COG dont la racine est épinglée, un visa signé par l'indice 1 ou sans délégation est **refusé immédiatement** (aucune donnée stockée ne l'exige : un visa vit ≤ 15 min) ; les anciennes clés épinglées directement restent acceptées pour un COG **sans** racine épinglée, tant que le mode strict (`exiger_delegations`) n'est pas activé ; épingler la racine d'un COG écarte ses clés directes
+- **Reste** : guichet des visas (émission par l'indice 5, transport de la délégation avec le visa) ; migration de central-remote, Origin (qui n'a pas de racine COG : décision à prendre), MiyuCloud et jayrdv-facade vers les délégations, puis mode strict partout ; clé `fiches` dans `maia-federee` ; retrait d'une racine épinglée ; révocation d'une délégation
+- **Impact** : EX-01, EX-02, EX-09 ; plan lot 2
