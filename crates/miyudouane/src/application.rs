@@ -15,6 +15,28 @@
 //!
 //! Mise en forme `tc` : [`appliquer_tc`] (audit, refus de toute racine
 //! étrangère avant modification, `tc -batch` dans l'espace de la frontière).
+//!
+//! ## Ordre sûr (frontière externe, A-023)
+//!
+//! Le filet `DEBIT` 5/4 par sens ([`crate::nft::MiseEnForme::Appliquee`])
+//! relève le plafond nftables de 25 % : il n'est sûr que si `tc` met
+//! effectivement le trafic en forme. L'installateur procède donc toujours,
+//! à la première installation comme à chaque mise à jour :
+//!
+//! 1. **(a)** règles **strictes** ([`appliquer`], `miyudouane regles …
+//!    --appliquer`) — `limit rate over D`, sans rafale ajoutée ;
+//! 2. **(b)** mise en forme ([`appliquer_tc`], `miyudouane tc … --appliquer`) ;
+//!    refusée si la table `inet miyudouane` de l'espace est absente ou porte
+//!    déjà un filet (l'étape (a) n'a pas été faite) ; en cas d'échec, la
+//!    racine de la Douane est retirée et **les règles strictes restent** ;
+//! 3. **(c)** seulement si (b) a réussi : règles avec filet
+//!    ([`appliquer_avec_filet`], `miyudouane regles --frontiere externe
+//!    --mise-en-forme-appliquee --appliquer`) ; refusées si une interface de la
+//!    frontière ne porte pas la racine `tc` de la Douane.
+//!
+//! Aucune étape n'est automatique : un échec en (b) ou en (c) laisse la
+//! frontière sous la règle stricte. Retirer la mise en forme impose de
+//! ré-appliquer d'abord (a).
 
 use std::collections::BTreeSet;
 use std::fs;
@@ -24,7 +46,7 @@ use std::path::Path;
 use std::process::Command;
 
 use crate::hote::auditer_hote;
-use crate::nft::auditer;
+use crate::nft::{auditer, auditer_selon, porte_filet, MiseEnForme, TABLE_FRONTIERE};
 use crate::tc::{auditer_tc, classer_racine, PlanTc, RacineTc, POIGNEE_RACINE};
 
 /// Échec de l'application.
@@ -43,6 +65,8 @@ pub enum ErreurApplication {
     /// Une interface porte une configuration `tc` qui n'est pas celle de la
     /// Douane : rien n'est touché.
     TcEtranger(String),
+    /// Ordre (a) strict → (b) `tc` → (c) filet non respecté : rien n'est touché.
+    Ordre(String),
 }
 
 impl std::fmt::Display for ErreurApplication {
@@ -54,6 +78,7 @@ impl std::fmt::Display for ErreurApplication {
             Self::Nft(etape, err) => write!(f, "nft ({etape}) : {err}"),
             Self::Tc(etape, err) => write!(f, "tc ({etape}) : {err}"),
             Self::TcEtranger(e) => write!(f, "configuration tc étrangère, rien n'est touché : {e}"),
+            Self::Ordre(e) => write!(f, "ordre d'application (règles strictes → tc → filet) : {e}"),
         }
     }
 }
@@ -102,6 +127,45 @@ pub fn appliquer(
     ecrire_controler_appliquer(texte, netns, fichier)
 }
 
+/// Étape (c) de l'ordre sûr : règles de la frontière externe avec filet 5/4
+/// ([`MiseEnForme::Appliquee`]). Audit selon cette forme ([`auditer_selon`]),
+/// puis vérification que **chaque** interface de `interfaces` porte la racine
+/// `tc` de la Douane (`htb 4d44:`) ; sinon refus avant toute modification
+/// ([`ErreurApplication::Ordre`]) et les règles en place (strictes) restent.
+pub fn appliquer_avec_filet(
+    texte: &str,
+    voies_declarees: &BTreeSet<String>,
+    netns: &str,
+    interfaces: &BTreeSet<String>,
+    fichier: &Path,
+) -> Result<(), ErreurApplication> {
+    let ecarts = auditer_selon(texte, voies_declarees, MiseEnForme::Appliquee);
+    if !ecarts.is_empty() {
+        return Err(ErreurApplication::Audit(ecarts));
+    }
+    if !netns_valide(netns) {
+        return Err(ErreurApplication::NetnsInvalide);
+    }
+    if interfaces.is_empty() {
+        return Err(ErreurApplication::Ordre("aucune interface de frontière".into()));
+    }
+    let mut sans = Vec::new();
+    for dev in interfaces {
+        match classer_racine(&sortie_tc(tc(netns, &["qdisc", "show", "dev", dev, "root"]), "lecture")?) {
+            RacineTc::Douane => {}
+            RacineTc::Defaut => sans.push(format!("{dev} : file par défaut")),
+            RacineTc::Etrangere(e) => sans.push(format!("{dev} : {e}")),
+        }
+    }
+    if !sans.is_empty() {
+        return Err(ErreurApplication::Ordre(format!(
+            "mise en forme tc absente ({}) : appliquer d'abord `miyudouane tc … --appliquer`",
+            sans.join(" ; ")
+        )));
+    }
+    ecrire_controler_appliquer(texte, Some(netns), fichier)
+}
+
 fn netns_valide(ns: &str) -> bool {
     !ns.is_empty() && ns.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
 }
@@ -123,9 +187,14 @@ fn sortie_tc(c: Command, etape: &'static str) -> Result<String, ErreurApplicatio
     }
 }
 
-/// Mise en forme `tc` ([`crate::tc`]) dans l'espace de noms de la frontière :
+/// Mise en forme `tc` ([`crate::tc`]) dans l'espace de noms de la frontière
+/// (étape (b) de l'ordre sûr, voir le module) :
 ///
 /// 1. audit ([`auditer_tc`] : écart au rendu attendu ⇒ refus) ;
+///    puis ordre : la table `inet miyudouane` de l'espace doit exister et
+///    **ne porter aucun filet** (`nft list table`, [`porte_filet`]) — les
+///    règles strictes (a) sont en place ; sinon refus avant toute
+///    modification ([`ErreurApplication::Ordre`]) ;
 /// 2. lecture de la racine de **chaque** interface du plan ; une racine qui
 ///    n'est ni celle de la Douane (`htb 4d44:`) ni la file par défaut du noyau
 ///    ⇒ refus **avant toute modification** ([`ErreurApplication::TcEtranger`]) ;
@@ -135,8 +204,8 @@ fn sortie_tc(c: Command, etape: &'static str) -> Result<String, ErreurApplicatio
 ///    add … root` échoue si une racine étrangère est apparue entre temps).
 ///
 /// En cas d'échec en 4 ou 5, la racine de la Douane est retirée des
-/// interfaces où elle se trouve (retour à la file par défaut ; le filet
-/// nftables reste en place) et l'erreur est rendue.
+/// interfaces où elle se trouve (retour à la file par défaut ; les règles
+/// **strictes** vérifiées en 1 restent en place) et l'erreur est rendue.
 pub fn appliquer_tc(texte: &str, attendu: &PlanTc, fichier: &Path) -> Result<(), ErreurApplication> {
     let ecarts = auditer_tc(texte, attendu);
     if !ecarts.is_empty() {
@@ -145,6 +214,19 @@ pub fn appliquer_tc(texte: &str, attendu: &PlanTc, fichier: &Path) -> Result<(),
     let ns = attendu.netns.as_str();
     if !netns_valide(ns) {
         return Err(ErreurApplication::NetnsInvalide);
+    }
+    let mut lister = Command::new("ip");
+    lister.args(["netns", "exec", ns, "nft", "list", "table", "inet", TABLE_FRONTIERE]);
+    let en_place = lister.output().map_err(ErreurApplication::Es)?;
+    if !en_place.status.success() {
+        return Err(ErreurApplication::Ordre(format!(
+            "table inet {TABLE_FRONTIERE} absente de {ns} : appliquer d'abord les règles strictes"
+        )));
+    }
+    if porte_filet(&String::from_utf8_lossy(&en_place.stdout)) {
+        return Err(ErreurApplication::Ordre(format!(
+            "filet 5/4 en place dans {ns} : ré-appliquer d'abord les règles strictes"
+        )));
     }
     let mut a_retirer = Vec::new();
     let mut etrangeres = Vec::new();

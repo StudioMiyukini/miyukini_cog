@@ -10,7 +10,7 @@
 //! miyudouane regles --frontiere <externe|portail-interne|portail-local> --arrete <fichier>
 //!            --ancre <clé publique hex> [--maintenant <secs>] [--dernier <n°>]
 //!            [--sandbox <zone>:<service>]… [--appliquer --fichier <chemin>]
-//!            [--couper <voie>]…
+//!            [--couper <voie>]… [--mise-en-forme-appliquee]
 //! miyudouane fermeture --frontiere <f> [--appliquer --fichier <chemin>]
 //! miyudouane zone --zone <cog|franche|locale> --arrete <frontière>=<fichier>…
 //!            --ancre <clé publique hex> [--maintenant <secs>] [--sandbox <zone>:<service>]…
@@ -27,6 +27,11 @@
 //! ```
 //!
 //! - `regles` : règles d'une frontière ; `--couper` omet une voie (EX-49).
+//!   Règle `DEBIT` **stricte** par défaut (`limit rate over D`).
+//!   `--mise-en-forme-appliquee` (frontière **externe** seulement, refusée
+//!   ailleurs) : filet 5/4 par sens, à n'utiliser **qu'après** un
+//!   `miyudouane tc … --appliquer` réussi ; avec `--appliquer`, refus si une
+//!   interface de la frontière ne porte pas la racine `tc` de la Douane.
 //! - `zone` : règles du pont filtré d'une zone (segmentation par service),
 //!   compilées depuis les arrêtés de **toutes** les frontières qui touchent la
 //!   zone (chacun vérifié contre l'ancre) ; `--couper` omet une voie.
@@ -41,8 +46,18 @@
 //!   de la frontière externe (en vigueur), capacités d'interfaces lues de la
 //!   description (`miyudouane-tc 1`) ; `--couper` omet une voie comme
 //!   `regles`. Avec `--appliquer` : audit, refus de toute racine `tc`
-//!   étrangère, puis `tc -batch` dans l'espace de la frontière (défaut
-//!   `--fichier` : `/etc/miyukini/douane/<netns>.tc`).
+//!   étrangère, refus si les règles strictes ne sont pas en place, puis
+//!   `tc -batch` dans l'espace de la frontière (défaut `--fichier` :
+//!   `/etc/miyukini/douane/<netns>.tc`).
+//!
+//! Ordre de l'installateur pour la frontière externe (chaque étape seulement
+//! si la précédente a réussi ; un échec laisse les règles strictes) :
+//!
+//! ```text
+//! miyudouane regles --frontiere externe … --appliquer                      # (a) stricte
+//! miyudouane tc … --appliquer                                             # (b) mise en forme
+//! miyudouane regles --frontiere externe … --mise-en-forme-appliquee --appliquer   # (c) filet
+//! ```
 //! - `zones` : script de mise en place + unités systemd ; `mise-en-place` et
 //!   `retrait` : le script seul (pour un banc d'essai).
 //!
@@ -73,6 +88,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use borderguard::{verifier_arrete, ArreteVerifie, Constitution, Frontiere, Zone};
 use miyudouane::hote::{self, DescriptionHote};
+use miyudouane::nft::MiseEnForme;
 use miyudouane::tc::{self, DescriptionTc};
 use miyudouane::{application, compiler, nft, zones, InstanceDouane, PlanReseau};
 use miyusceau::{AncresDeConfiance, NiveauConfiance};
@@ -90,6 +106,7 @@ struct Options {
     appliquer: bool,
     fichier: Option<PathBuf>,
     description: Option<PathBuf>,
+    mise_en_forme: MiseEnForme,
 }
 
 fn hex32(s: &str) -> Result<[u8; 32], String> {
@@ -124,6 +141,7 @@ fn lire_options() -> Result<Options, String> {
         appliquer: false,
         fichier: None,
         description: None,
+        mise_en_forme: MiseEnForme::Absente,
     };
     while let Some(a) = args.next() {
         let mut valeur = || args.next().ok_or_else(|| format!("{a} : valeur attendue"));
@@ -149,6 +167,7 @@ fn lire_options() -> Result<Options, String> {
             "--appliquer" => o.appliquer = true,
             "--fichier" => o.fichier = Some(PathBuf::from(valeur()?)),
             "--description" => o.description = Some(PathBuf::from(valeur()?)),
+            "--mise-en-forme-appliquee" => o.mise_en_forme = MiseEnForme::Appliquee,
             autre => return Err(format!("option inconnue « {autre} »")),
         }
     }
@@ -275,8 +294,39 @@ fn appliquer_ou_imprimer(
     Ok(())
 }
 
+/// Règles de la frontière externe avec filet 5/4 (étape (c) de l'ordre sûr).
+fn appliquer_ou_imprimer_filet(
+    texte: &str,
+    voies: &BTreeSet<String>,
+    appliquer: bool,
+    def: &miyudouane::plan::DefinitionFrontiere,
+    fichier: Option<PathBuf>,
+) -> Result<(), String> {
+    if appliquer {
+        let fichier = fichier.unwrap_or_else(|| PathBuf::from(zones::chemin_regles(&def.netns)));
+        application::appliquer_avec_filet(texte, voies, &def.netns, &tc::interfaces_frontiere(def), &fichier)
+            .map_err(|e| e.to_string())?;
+        eprintln!("appliqué (filet, mise en forme tc en place) : {} ({})", def.netns, fichier.display());
+    } else {
+        let ecarts = nft::auditer_selon(texte, voies, MiseEnForme::Appliquee);
+        if !ecarts.is_empty() {
+            return Err(format!("audit : {}", ecarts.join(" ; ")));
+        }
+        print!("{texte}");
+    }
+    Ok(())
+}
+
 fn executer() -> Result<(), String> {
     let o = lire_options()?;
+    if o.mise_en_forme == MiseEnForme::Appliquee {
+        if o.commande != "regles" {
+            return Err(format!("--mise-en-forme-appliquee sans objet pour « {} »", o.commande));
+        }
+        if o.frontiere.is_some_and(|f| !o.mise_en_forme.admise(f)) {
+            return Err("--mise-en-forme-appliquee : frontière externe seulement (seule à avoir une mise en forme tc)".into());
+        }
+    }
     let services: Vec<(Zone, &str)> = o.sandboxes.iter().map(|(z, s)| (*z, s.as_str())).collect();
     let plan = PlanReseau::reference(&services).map_err(|e| e.to_string())?;
     let maintenant = o.maintenant.unwrap_or_else(|| {
@@ -315,9 +365,13 @@ fn executer() -> Result<(), String> {
             } else if !o.coupees.is_empty() {
                 return Err("--couper sans objet pour une fermeture".into());
             }
-            let texte = instance.ruleset(maintenant, &o.coupees);
+            let texte = instance.ruleset_selon(maintenant, &o.coupees, o.mise_en_forme).map_err(|e| e.to_string())?;
             let def = plan.frontiere(frontiere).ok_or("frontière hors plan")?;
-            appliquer_ou_imprimer(&texte, &voies, o.appliquer, &def.netns, o.fichier)
+            if o.mise_en_forme == MiseEnForme::Appliquee {
+                appliquer_ou_imprimer_filet(&texte, &voies, o.appliquer, def, o.fichier)
+            } else {
+                appliquer_ou_imprimer(&texte, &voies, o.appliquer, &def.netns, o.fichier)
+            }
         }
         "zone" => {
             let z = o.zone.ok_or("--zone attendu")?;

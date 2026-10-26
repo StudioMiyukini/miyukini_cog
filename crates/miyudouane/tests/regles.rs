@@ -58,6 +58,27 @@ fn reference_externe() {
     reference("externe.nft", &sans_empreinte(&ruleset(&arrete_externe(1))));
 }
 
+/// Frontières sans mise en forme : règle `DEBIT` stricte d'avant A-023,
+/// texte sans copie de marque de paquet.
+#[test]
+fn frontiere_interne_regle_stricte_inchangee() {
+    for a in [arrete_portail(1), arrete_local(1)] {
+        let t = ruleset(&a);
+        let debit: Vec<&str> = t.lines().filter(|l| l.contains("limit rate over")).collect();
+        assert!(!debit.is_empty());
+        for l in debit {
+            let mots: Vec<&str> = l.split_whitespace().collect();
+            assert_eq!(&mots[..2], ["ct", "mark"], "{l}");
+            assert_eq!(&mots[3..8], ["limit", "rate", "over", "512", "kbytes/second"], "{l}");
+        }
+        assert!(!t.contains("ct direction"));
+        assert!(!t.contains(" bytes "), "aucune rafale en octets");
+        assert!(!t.contains("meta mark"));
+        assert!(!nft::porte_filet(&t));
+        assert!(nft::auditer(&t, &voies(&a)).is_empty());
+    }
+}
+
 #[test]
 fn reference_zone_cog() {
     let p = plan();

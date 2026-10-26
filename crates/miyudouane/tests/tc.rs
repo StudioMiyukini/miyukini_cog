@@ -18,7 +18,8 @@ use miyudouane::tc::{
     auditer_tc, classer_racine, codel_us, filet_kio_s, generer_tc, planifier, rafale_octets, DescriptionTc, PlanTc,
     RacineTc, Sens, CAPACITE_DEFAUT_KIO_S,
 };
-use miyudouane::{nft, InstanceDouane};
+use miyudouane::nft::MiseEnForme;
+use miyudouane::{nft, ErreurDouane, InstanceDouane};
 
 const DESCRIPTION: &str = "\
 # Frontiere externe de la VM d'essai
@@ -196,7 +197,7 @@ fn filet_nftables_coherent_avec_la_mise_en_forme() {
     let a = arrete_essai();
     let mut i = InstanceDouane::nouvelle(Frontiere::Externe, plan(), 0).unwrap();
     i.charger(verifie(&a), T0 + 1).unwrap();
-    let r = i.ruleset(T0 + 1, &BTreeSet::new());
+    let r = i.ruleset_selon(T0 + 1, &BTreeSet::new(), MiseEnForme::Appliquee).unwrap();
     // Filet par sens, au-delà de 125 %, même rafale que la feuille HTB.
     for sens in ["original", "reply"] {
         assert!(r.contains(&format!(
@@ -210,7 +211,115 @@ fn filet_nftables_coherent_avec_la_mise_en_forme() {
     assert!(r.contains(nft::COPIE_MARQUE));
     assert!(r.contains("ct mark set 0x00000003 meta mark set 0x00000003 counter accept"));
     let voies: BTreeSet<String> = a.voies.iter().map(|v| v.id.clone()).collect();
+    assert!(nft::auditer_selon(&r, &voies, MiseEnForme::Appliquee).is_empty());
+    assert!(r.contains(&format!("# {}", nft::INFO_FILET)));
+    // Le même texte, sans mise en forme déclarée : écart (filet non admis).
+    assert!(!nft::auditer(&r, &voies).is_empty());
+}
+
+/// Sans mise en forme déclarée (défaut), la frontière externe garde la règle
+/// stricte d'avant A-023 : plafond `D`, sans rafale, sans `ct direction`.
+#[test]
+fn externe_sans_mise_en_forme_regle_stricte() {
+    let a = arrete_essai();
+    let mut i = InstanceDouane::nouvelle(Frontiere::Externe, plan(), 0).unwrap();
+    i.charger(verifie(&a), T0 + 1).unwrap();
+    let r = i.ruleset(T0 + 1, &BTreeSet::new());
+    assert_eq!(r, i.ruleset_selon(T0 + 1, &BTreeSet::new(), MiseEnForme::Absente).unwrap());
+    for (m, d) in [(1, 256), (2, 512), (3, 2048)] {
+        assert!(r.contains(&format!(
+            "ct mark 0x{m:08x} limit rate over {d} kbytes/second counter name \"rejets\" drop"
+        )));
+    }
+    assert!(!r.contains("ct direction"));
+    assert!(!r.contains(" bytes "), "aucune rafale en octets");
+    assert!(!r.contains(nft::INFO_FILET));
+    assert!(!nft::porte_filet(&r));
+    // Copie de marque conservée en externe (sans effet de sécurité) : `tc`
+    // classe dès l'étape (b), sous la règle stricte.
+    assert!(r.contains(nft::COPIE_MARQUE));
+    let voies: BTreeSet<String> = a.voies.iter().map(|v| v.id.clone()).collect();
     assert!(nft::auditer(&r, &voies).is_empty());
+    // Forme stricte présentée comme « mise en forme appliquée » : écart.
+    let e = nft::auditer_selon(&r, &voies, MiseEnForme::Appliquee);
+    assert!(e.iter().any(|e| e.contains("stricte")), "{e:?}");
+}
+
+/// Filet demandé hors frontière externe : refusé (aucun texte).
+#[test]
+fn filet_refuse_hors_externe() {
+    for a in [arrete_portail(1), arrete_local(1)] {
+        let mut i = InstanceDouane::nouvelle(a.frontiere, plan(), 0).unwrap();
+        i.charger(verifie(&a), T0 + 1).unwrap();
+        assert_eq!(
+            i.ruleset_selon(T0 + 1, &BTreeSet::new(), MiseEnForme::Appliquee),
+            Err(ErreurDouane::MiseEnFormeHorsExterne(a.frontiere))
+        );
+        let regles = miyudouane::compiler(&verifie(&a), &plan()).unwrap();
+        assert!(nft::generer_frontiere(&verifie(&a), &regles, &plan(), &BTreeSet::new(), MiseEnForme::Appliquee).is_none());
+        assert!(nft::generer_frontiere(&verifie(&a), &regles, &plan(), &BTreeSet::new(), MiseEnForme::Absente).is_some());
+    }
+    assert!(!MiseEnForme::Appliquee.admise(Frontiere::PortailInterne));
+    assert!(MiseEnForme::Appliquee.admise(Frontiere::Externe));
+    assert!(MiseEnForme::Absente.admise(Frontiere::PortailLocal));
+    assert_eq!(MiseEnForme::default(), MiseEnForme::Absente);
+}
+
+/// Audit croisé : chaque forme n'est admise que sous l'état déclaré, et un
+/// filet altéré est refusé même sous mise en forme déclarée.
+#[test]
+fn audit_croise_forme_et_etat_declare() {
+    let a = arrete_essai();
+    let voies: BTreeSet<String> = a.voies.iter().map(|v| v.id.clone()).collect();
+    let mut i = InstanceDouane::nouvelle(Frontiere::Externe, plan(), 0).unwrap();
+    i.charger(verifie(&a), T0 + 1).unwrap();
+    let strict = i.ruleset_selon(T0 + 1, &BTreeSet::new(), MiseEnForme::Absente).unwrap();
+    let filet = i.ruleset_selon(T0 + 1, &BTreeSet::new(), MiseEnForme::Appliquee).unwrap();
+    assert!(nft::porte_filet(&filet));
+
+    assert!(nft::auditer_selon(&strict, &voies, MiseEnForme::Absente).is_empty());
+    assert!(nft::auditer_selon(&filet, &voies, MiseEnForme::Appliquee).is_empty());
+    let e = nft::auditer_selon(&filet, &voies, MiseEnForme::Absente);
+    assert!(e.iter().any(|e| e.contains("sans mise en forme tc déclarée")), "{e:?}");
+    assert!(!nft::auditer_selon(&strict, &voies, MiseEnForme::Appliquee).is_empty());
+
+    // Une seule ligne de filet glissée dans un texte strict : écart.
+    let glisse = strict.replacen(
+        "ct mark 0x00000003 limit rate over 2048 kbytes/second",
+        "ct mark 0x00000003 ct direction original limit rate over 2560 kbytes/second burst 22572 bytes",
+        1,
+    );
+    assert_ne!(glisse, strict);
+    assert!(!nft::auditer(&glisse, &voies).is_empty());
+    // Rafale ajoutée à la règle stricte : forme inconnue.
+    let rafale = strict.replacen("2048 kbytes/second", "2048 kbytes/second burst 9999 bytes", 1);
+    assert!(!nft::auditer(&rafale, &voies).is_empty());
+    // Filet relevé (ne dérive plus du débit déclaré via la rafale) : écart.
+    let releve = filet.replace("over 2560 kbytes/second", "over 4096 kbytes/second");
+    assert!(nft::auditer_selon(&releve, &voies, MiseEnForme::Appliquee).iter().any(|e| e.contains("même débit")));
+    // Un sens manquant : écart.
+    let un_sens: String = filet.lines().filter(|l| !l.contains("ct direction reply")).map(|l| format!("{l}\n")).collect();
+    assert!(nft::auditer_selon(&un_sens, &voies, MiseEnForme::Appliquee).iter().any(|e| e.contains("un sens")));
+    // En-tête d'une autre frontière : écart.
+    let ailleurs = filet.replace("# frontiere=externe ", "# frontiere=portail-interne ");
+    assert!(!nft::auditer_selon(&ailleurs, &voies, MiseEnForme::Appliquee).is_empty());
+    // Sans déclaration de mise en forme dans l'en-tête : écart.
+    let sans_info = filet.replace(&format!("# {}\n", nft::INFO_FILET), "");
+    assert!(!nft::auditer_selon(&sans_info, &voies, MiseEnForme::Appliquee).is_empty());
+    // Fermeture : aucune règle de débit, admise sous les deux états.
+    let ferme = InstanceDouane::nouvelle(Frontiere::Externe, plan(), 0).unwrap();
+    let f = ferme.ruleset_selon(T0, &BTreeSet::new(), MiseEnForme::Appliquee).unwrap();
+    assert!(f.contains("|FERME|"));
+    assert!(nft::auditer_selon(&f, &BTreeSet::new(), MiseEnForme::Appliquee).is_empty());
+    assert!(nft::auditer(&f, &BTreeSet::new()).is_empty());
+}
+
+#[test]
+fn reference_externe_mise_en_forme() {
+    let mut i = InstanceDouane::nouvelle(Frontiere::Externe, plan(), 0).unwrap();
+    i.charger(verifie(&arrete_externe(1)), T0 + 1).unwrap();
+    let r = i.ruleset_selon(T0 + 1, &BTreeSet::new(), MiseEnForme::Appliquee).unwrap();
+    reference("externe-mise-en-forme.nft", &sans_empreinte(&r));
 }
 
 #[test]
@@ -399,6 +508,31 @@ fn cli_tc_a_blanc() {
         let (ok, _, err) = lancer(&args);
         assert!(!ok && err.contains(motif), "{args:?} : {err}");
     }
+    // `regles` : stricte par défaut ; filet seulement sur déclaration, en externe.
+    let base = ["regles", "--frontiere", "externe", "--arrete", externe.as_str(), "--ancre", ancre.as_str()];
+    let (ok, strict, err) = lancer(&base);
+    assert!(ok, "{err}");
+    assert!(strict.contains("ct mark 0x00000003 limit rate over 2048 kbytes/second") && !nft::porte_filet(&strict));
+    let (ok, filet, err) = lancer(&[&base[..], &["--mise-en-forme-appliquee"]].concat());
+    assert!(ok, "{err}");
+    assert!(nft::porte_filet(&filet) && !filet.contains("limit rate over 2048 kbytes/second"));
+    let (ok, _, err) = lancer(&[
+        "regles",
+        "--frontiere",
+        "portail-interne",
+        "--arrete",
+        &portail,
+        "--ancre",
+        &ancre,
+        "--mise-en-forme-appliquee",
+    ]);
+    assert!(!ok && err.contains("externe seulement"), "{err}");
+    let (ok, _, err) = lancer(&["fermeture", "--frontiere", "externe", "--mise-en-forme-appliquee"]);
+    assert!(!ok && err.contains("sans objet"), "{err}");
+    let (ok, _, err) =
+        lancer(&["tc", "--description", &desc, "--arrete", &externe, "--ancre", &ancre, "--mise-en-forme-appliquee"]);
+    assert!(!ok && err.contains("sans objet"), "{err}");
+
     // Ancre étrangère : arrêté refusé (fail-closed).
     let autre = "11".repeat(32);
     let (ok, _, _) = lancer(&["tc", "--description", &desc, "--arrete", &externe, "--ancre", &autre]);

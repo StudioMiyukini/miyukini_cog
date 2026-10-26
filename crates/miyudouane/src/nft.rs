@@ -15,17 +15,35 @@
 //!
 //! 1. bouclage (`lo`) accepté (entrée et sortie seulement) ;
 //! 2. `ct state invalid` → journal `INVALIDE` + rejet ;
-//! 3. pour chaque flux (marque conntrack `m`) : paquet trop grand → `TAILLE`,
-//!    débit au-delà du **filet** → `DEBIT` : `ct direction original|reply
-//!    limit rate over ⌈D × 5/4⌉ kbytes/second burst B bytes`, une limite par
-//!    sens et par chaîne. Le débit déclaré `D` est tenu par la mise en forme
-//!    `tc` ([`crate::tc`] : dépassement mis en file) ; la règle `DEBIT` n'est
-//!    qu'un filet au-delà de 125 % (rapport documenté dans [`crate::tc`]) ;
-//! 4. `meta mark set ct mark` (marque du paquet = marque du flux, lue par le
-//!    filtre `fw` de `tc`) puis `ct state established,related` accepté
-//!    (réponses des seules connexions admises) ;
-//! 5. connexions nouvelles **déclarées** : `ct state new`, marques posées
-//!    (`ct mark set m meta mark set m`),
+//! 3. pour chaque flux (marque conntrack `m`, débit déclaré `D`) : paquet
+//!    trop grand → `TAILLE`, puis débit → `DEBIT`, sous l'une de deux formes
+//!    choisies **explicitement** par l'appelant ([`MiseEnForme`]) :
+//!    - [`MiseEnForme::Absente`] (défaut, toutes frontières) : règle **stricte**
+//!      `ct mark m limit rate over D kbytes/second` (une limite par chaîne,
+//!      sans rafale ajoutée) — le débit déclaré est tenu par nftables seul ;
+//!    - [`MiseEnForme::Appliquee`] (frontière **externe** seulement, et
+//!      seulement une fois la mise en forme `tc` appliquée avec succès,
+//!      [`crate::tc`]) : **filet** `ct direction original|reply limit rate
+//!      over ⌈D × 5/4⌉ kbytes/second burst B bytes`, une limite par sens et
+//!      par chaîne ; `D` est alors tenu par `tc` (dépassement mis en file) et
+//!      la règle `DEBIT` ne mord qu'au-delà de 125 % (rapport documenté dans
+//!      [`crate::tc`]). Demandée pour une autre frontière ⇒ refus (aucun texte).
+//!
+//!    Sans mise en forme appliquée, relever le plafond de 25 % et ajouter une
+//!    rafale serait une régression de contrôle : la forme stricte est donc la
+//!    seule rendue tant que l'appelant ne déclare pas `tc` en place, et
+//!    l'audit ([`auditer_selon`]) refuse toute forme qui ne correspond pas à
+//!    l'état déclaré ;
+//! 4. frontière **externe** seulement : [`COPIE_MARQUE`] (`meta mark set ct
+//!    mark`, marque du paquet = marque du flux, lue par le filtre `fw` de
+//!    `tc`), dans les deux formes — elle n'accepte ni ne rejette rien (aucun
+//!    effet de sécurité) et permet à `tc` de classer dès qu'il est appliqué,
+//!    avant le passage au filet. Les autres frontières n'ont pas de mise en
+//!    forme : leur texte est inchangé (aucune marque de paquet). Puis
+//!    `ct state established,related` accepté (réponses des seules connexions
+//!    admises) ;
+//! 5. connexions nouvelles **déclarées** : `ct state new`, marque posée
+//!    (`ct mark set m`, plus `meta mark set m` sur la frontière externe),
 //!    `comment "voie=<id> service=<s> flux=<n>"` ;
 //! 6. toute source dans la zone COG → `SORTIE-COG` ; toute destination dans
 //!    la zone COG → `ENTREE-COG` (INV-Z1, INV-Z2 : incidents critiques) ;
@@ -67,8 +85,35 @@ use crate::compilation::{Crochet, RegleCompilee};
 use crate::plan::{DefinitionFrontiere, PlanReseau};
 use crate::tc::{filet_kio_s, rafale_octets, Sens};
 
-/// Copie de la marque conntrack dans la marque du paquet (classification `tc`).
+/// Copie de la marque conntrack dans la marque du paquet (classification `tc`,
+/// frontière externe seulement ; sans effet de sécurité).
 pub const COPIE_MARQUE: &str = "meta mark set ct mark";
+
+/// Ligne d'information de l'en-tête quand le filet est rendu.
+pub const INFO_FILET: &str = "debit : filet x5/4 par sens (mise en forme tc appliquee)";
+
+/// État de la mise en forme `tc` **déclaré par l'appelant** ; fixe la forme
+/// de la règle `DEBIT` (voir le module). Défaut : [`MiseEnForme::Absente`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum MiseEnForme {
+    /// `tc` n'est pas (ou pas encore) appliqué : règle stricte
+    /// `limit rate over D kbytes/second`, sans rafale ajoutée.
+    #[default]
+    Absente,
+    /// `tc` a été appliqué **avec succès** sur la frontière externe : filet
+    /// par sens à `⌈D × 5/4⌉` avec rafale `B`. Refusé ailleurs qu'en externe.
+    Appliquee,
+}
+
+impl MiseEnForme {
+    /// La forme est-elle admise pour cette frontière ? (`Appliquee` : externe seulement.)
+    pub fn admise(self, frontiere: Frontiere) -> bool {
+        self == Self::Absente || frontiere == Frontiere::Externe
+    }
+}
+
+/// Table nftables d'une frontière (dans son espace de noms).
+pub const TABLE_FRONTIERE: &str = "miyudouane";
 
 /// Préfixe commun des journaux Douane.
 pub const PREFIXE_JOURNAL: &str = "MDOU";
@@ -190,7 +235,18 @@ fn commentaire(r: &RegleCompilee) -> String {
     format!("comment \"voie={} service={} flux={}\"", r.voie, r.service, r.index_flux)
 }
 
-fn regle_nouvelle(r: &RegleCompilee, iif: Option<&str>, oif: Option<&str>, poser_marque: bool) -> Vec<String> {
+/// Marque posée sur une connexion nouvelle.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Marque {
+    /// Aucune (pont de zone).
+    Aucune,
+    /// `ct mark set m`.
+    Flux,
+    /// `ct mark set m meta mark set m` (frontière externe : classification `tc`).
+    FluxEtPaquet,
+}
+
+fn regle_nouvelle(r: &RegleCompilee, iif: Option<&str>, oif: Option<&str>, poser: Marque) -> Vec<String> {
     let mut prefixe = String::new();
     if let Some(i) = iif {
         let _ = write!(prefixe, "iifname \"{i}\" ");
@@ -198,10 +254,10 @@ fn regle_nouvelle(r: &RegleCompilee, iif: Option<&str>, oif: Option<&str>, poser
     if let Some(o) = oif {
         let _ = write!(prefixe, "oifname \"{o}\" ");
     }
-    let marque = if poser_marque {
-        format!("ct mark set 0x{m:08x} meta mark set 0x{m:08x} ", m = r.marque)
-    } else {
-        String::new()
+    let marque = match poser {
+        Marque::Aucune => String::new(),
+        Marque::Flux => format!("ct mark set 0x{:08x} ", r.marque),
+        Marque::FluxEtPaquet => format!("ct mark set 0x{m:08x} meta mark set 0x{m:08x} ", m = r.marque),
     };
     selecteurs_adresses(&r.sources, &r.destinations)
         .into_iter()
@@ -246,14 +302,22 @@ fn chaine(texte: &mut String, nom: &str, crochet: &str, regles: &[String]) {
 
 /// Génère les règles d'une frontière depuis un arrêté vérifié et ses règles
 /// compilées. Les voies de `voies_coupees` sont omises (coupure de voie, EX-49).
+/// `mise_en_forme` fixe la forme de la règle `DEBIT` (voir le module) ;
+/// `None` si la frontière est hors plan ou si [`MiseEnForme::Appliquee`] est
+/// demandée pour une frontière autre qu'externe.
 pub fn generer_frontiere(
     arrete: &ArreteVerifie,
     regles: &[RegleCompilee],
     plan: &PlanReseau,
     voies_coupees: &BTreeSet<String>,
+    mise_en_forme: MiseEnForme,
 ) -> Option<String> {
     let a = arrete.arrete();
+    if !mise_en_forme.admise(a.frontiere) {
+        return None;
+    }
     let def = plan.frontiere(a.frontiere)?;
+    let externe = a.frontiere == Frontiere::Externe;
     let cog = plan.zone(Zone::Cog).map(|z| z.reseau);
     let lieu = a.frontiere.nom();
     let g = def.groupe_nflog;
@@ -267,6 +331,9 @@ pub fn generer_frontiere(
     ];
     if !voies_coupees.is_empty() {
         infos.push(format!("voies coupees : {}", voies_coupees.iter().cloned().collect::<Vec<_>>().join(",")));
+    }
+    if mise_en_forme == MiseEnForme::Appliquee {
+        infos.push(INFO_FILET.to_string());
     }
     entete(&mut texte, "Douane — règles de frontière (refus par défaut)", &infos);
     let _ = writeln!(texte, "table inet miyudouane {{");
@@ -297,29 +364,44 @@ pub fn generer_frontiere(
                 "TAILLE",
                 g,
             ));
-            // Filet de sécurité au-delà de la mise en forme `tc` (crate::tc) :
-            // plafond × 5/4, par sens, même rafale que la feuille HTB.
-            for sens in [Sens::Original, Sens::Reponse] {
-                lignes.extend(rejet(
-                    &format!(
-                        "ct mark 0x{:08x} ct direction {} limit rate over {} kbytes/second burst {} bytes",
-                        m.marque,
-                        sens.nom(),
-                        filet_kio_s(m.debit_max_kio_s),
-                        rafale_octets(m.debit_max_kio_s)
-                    ),
+            match mise_en_forme {
+                // Règle stricte : le débit déclaré, tenu par nftables seul.
+                MiseEnForme::Absente => lignes.extend(rejet(
+                    &format!("ct mark 0x{:08x} limit rate over {} kbytes/second", m.marque, m.debit_max_kio_s),
                     lieu,
                     nom,
                     "DEBIT",
                     g,
-                ));
+                )),
+                // Filet de sécurité au-delà de la mise en forme `tc` (crate::tc) :
+                // plafond × 5/4, par sens, même rafale que la feuille HTB.
+                MiseEnForme::Appliquee => {
+                    for sens in [Sens::Original, Sens::Reponse] {
+                        lignes.extend(rejet(
+                            &format!(
+                                "ct mark 0x{:08x} ct direction {} limit rate over {} kbytes/second burst {} bytes",
+                                m.marque,
+                                sens.nom(),
+                                filet_kio_s(m.debit_max_kio_s),
+                                rafale_octets(m.debit_max_kio_s)
+                            ),
+                            lieu,
+                            nom,
+                            "DEBIT",
+                            g,
+                        ));
+                    }
+                }
             }
         }
-        // Marque du paquet = marque du flux : classification `tc` (filtre `fw`).
-        lignes.push(COPIE_MARQUE.to_string());
+        if externe {
+            // Marque du paquet = marque du flux : classification `tc` (filtre `fw`).
+            lignes.push(COPIE_MARQUE.to_string());
+        }
         lignes.push("ct state established,related counter accept".to_string());
+        let marque = if externe { Marque::FluxEtPaquet } else { Marque::Flux };
         for r in actives.iter().filter(|r| r.crochet == crochet) {
-            lignes.extend(regle_nouvelle(r, r.iif.as_deref(), r.oif.as_deref(), true));
+            lignes.extend(regle_nouvelle(r, r.iif.as_deref(), r.oif.as_deref(), marque));
         }
         if let Some(cog) = cog {
             let mot = if cog.est_v4() { "ip" } else { "ip6" };
@@ -390,7 +472,7 @@ pub fn generer_zone(zone: Zone, frontieres: &[(Frontiere, Vec<RegleCompilee>)], 
             let sandbox = port_zone(plan, def, zone, r, true)?;
             let frontiere = port_zone(plan, def, zone, r, false)?;
             let (iif, oif) = if sandbox_emet { (sandbox, frontiere) } else { (frontiere, sandbox) };
-            declarees.extend(regle_nouvelle(r, Some(&iif), Some(&oif), false));
+            declarees.extend(regle_nouvelle(r, Some(&iif), Some(&oif), Marque::Aucune));
         }
     }
     let mut texte = String::new();
@@ -438,8 +520,115 @@ pub fn generer_zone(zone: Zone, frontieres: &[(Frontiere, Vec<RegleCompilee>)], 
 ///   `comment "voie=<id> …"` avec `<id>` dans `voies_declarees`.
 ///
 /// Renvoie la liste des écarts (vide = conforme).
+///
+/// Mise en forme `tc` **non déclarée** ([`MiseEnForme::Absente`]) : seule la
+/// règle `DEBIT` stricte est admise, un filet 5/4 est un écart. Voir
+/// [`auditer_selon`].
 pub fn auditer(texte: &str, voies_declarees: &BTreeSet<String>) -> Vec<String> {
+    auditer_selon(texte, voies_declarees, MiseEnForme::Absente)
+}
+
+/// Forme d'une règle `limit rate over` (règle `DEBIT`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum FormeDebit {
+    /// `ct mark M limit rate over D kbytes/second` (sans rafale).
+    Stricte,
+    /// `ct mark M ct direction S limit rate over N kbytes/second burst B bytes`,
+    /// avec `N = ⌈D × 5/4⌉` et `B` = rafale de `D` pour un même `D`.
+    Filet { marque: u32, reponse: bool },
+}
+
+/// Classe une règle portant `limit rate over` ; `Err` = forme inconnue ou
+/// incohérente (filet et rafale ne dérivent pas d'un même débit).
+fn forme_debit(mots: &[&str]) -> Result<FormeDebit, String> {
+    let hex = |m: &str| m.strip_prefix("0x").filter(|h| h.len() == 8).and_then(|h| u32::from_str_radix(h, 16).ok());
+    let entier = |m: &str| m.parse::<u64>().ok().filter(|_| m.bytes().all(|b| b.is_ascii_digit()));
+    match mots {
+        ["ct", "mark", m, "limit", "rate", "over", d, "kbytes/second", reste @ ..]
+            if hex(m).is_some() && entier(d).is_some() && reste.first() != Some(&"burst") =>
+        {
+            Ok(FormeDebit::Stricte)
+        }
+        ["ct", "mark", m, "ct", "direction", sens @ ("original" | "reply"), "limit", "rate", "over", n, "kbytes/second", "burst", b, "bytes", ..] =>
+        {
+            let (Some(marque), Some(n), Some(b)) = (hex(m), entier(n), entier(b)) else {
+                return Err("filet mal formé".into());
+            };
+            // `⌈5D/4⌉` est strictement croissant : un seul `D` candidat.
+            let d = n * FILET_DEN / FILET_NUM;
+            let coherent = u32::try_from(d).is_ok_and(|d| filet_kio_s(d) == n && rafale_octets(d) == b);
+            if coherent {
+                Ok(FormeDebit::Filet { marque, reponse: *sens == "reply" })
+            } else {
+                Err(format!("filet {n} Kio/s, rafale {b} o : ne dérivent pas d'un même débit déclaré"))
+            }
+        }
+        _ => Err("forme de limite de débit inconnue".into()),
+    }
+}
+
+const FILET_NUM: u64 = crate::tc::FILET_NUMERATEUR;
+const FILET_DEN: u64 = crate::tc::FILET_DENOMINATEUR;
+
+/// Le texte (rendu ou `nft list` d'une table en place) porte-t-il un filet
+/// par sens (`ct direction … limit rate over`) ? Sert à l'étape privilégiée
+/// pour vérifier l'ordre d'application ([`crate::application`]).
+pub fn porte_filet(texte: &str) -> bool {
+    texte.lines().any(|l| l.contains("ct direction") && l.contains("limit rate over"))
+}
+
+/// Audit de [`auditer`], avec l'état de mise en forme **déclaré** :
+///
+/// - [`MiseEnForme::Absente`] : toute règle `limit rate over` doit être la
+///   forme stricte (`ct mark M limit rate over D kbytes/second`, sans `burst`
+///   ni `ct direction`) ; un filet ⇒ écart ;
+/// - [`MiseEnForme::Appliquee`] : le texte doit être celui de la frontière
+///   externe (`# frontiere=externe …`, [`INFO_FILET`]) ; toute règle `limit
+///   rate over` doit être un filet cohérent (`N = ⌈D × 5/4⌉`, `B` = rafale de
+///   `D`), présent pour **les deux** sens de chaque marque ; une règle stricte
+///   ⇒ écart.
+pub fn auditer_selon(texte: &str, voies_declarees: &BTreeSet<String>, mise_en_forme: MiseEnForme) -> Vec<String> {
     let mut ecarts = Vec::new();
+    let mut sens_par_marque: std::collections::BTreeMap<u32, (bool, bool)> = std::collections::BTreeMap::new();
+    for (n, brute) in texte.lines().enumerate() {
+        let l = brute.trim();
+        if !l.contains("limit rate over") {
+            continue;
+        }
+        let mots: Vec<&str> = l.split_whitespace().collect();
+        match (forme_debit(&mots), mise_en_forme) {
+            (Err(e), _) => ecarts.push(format!("ligne {} : {e}", n + 1)),
+            (Ok(FormeDebit::Stricte), MiseEnForme::Absente) => {}
+            (Ok(FormeDebit::Stricte), MiseEnForme::Appliquee) => {
+                ecarts.push(format!("ligne {} : règle de débit stricte alors que la mise en forme tc est déclarée", n + 1));
+            }
+            (Ok(FormeDebit::Filet { .. }), MiseEnForme::Absente) => {
+                ecarts.push(format!("ligne {} : filet 5/4 sans mise en forme tc déclarée", n + 1));
+            }
+            (Ok(FormeDebit::Filet { marque, reponse }), MiseEnForme::Appliquee) => {
+                let s = sens_par_marque.entry(marque).or_default();
+                if reponse {
+                    s.1 = true;
+                } else {
+                    s.0 = true;
+                }
+            }
+        }
+    }
+    if mise_en_forme == MiseEnForme::Appliquee {
+        let lignes: Vec<&str> = texte.lines().collect();
+        if !lignes.iter().any(|l| l.starts_with("# frontiere=externe ")) {
+            ecarts.push("filet 5/4 hors frontière externe".into());
+        }
+        if !sens_par_marque.is_empty() && !lignes.iter().any(|l| l.strip_prefix("# ") == Some(INFO_FILET)) {
+            ecarts.push("filet 5/4 sans déclaration de mise en forme dans l'en-tête".into());
+        }
+        for (m, &(original, reponse)) in &sens_par_marque {
+            if !(original && reponse) {
+                ecarts.push(format!("marque {m:#x} : filet absent pour un sens"));
+            }
+        }
+    }
     let mut dans_chaine = false;
     let mut politique_drop = false;
     let mut derniere = String::new();

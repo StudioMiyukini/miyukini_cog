@@ -3,7 +3,7 @@
 # frontiere=externe arrete=7 empreinte=<sha256>
 # validite=1800000000..1802592000 emetteur=borderguard
 # une classe HTB par voie, une feuille fq_codel par flux (marque conntrack -> meta mark -> fw) ;
-# depassement = mise en file ; filet nftables DEBIT = plafond x 5/4 par sens.
+# depassement = mise en file ; nftables DEBIT strict, puis (apres succes) filet x 5/4 par sens.
 
 # interface ext-franche capacite 1250000 KiB/s, garanti aux voies 2816 KiB/s
 qdisc add dev ext-franche root handle 4d44: htb default ffff

@@ -18,12 +18,21 @@
 //! ## Dépassement : mise en file, jamais refus
 //!
 //! Chaque flux a une feuille HTB `rate = ceil = débit déclaré` et une file
-//! `fq_codel` : au-delà du débit, les paquets **attendent** dans la file. La
-//! règle nftables `DEBIT` (`limit rate over`) reste un **filet de sécurité**
-//! au-delà d'une marge, jamais atteint par du trafic mis en forme :
+//! `fq_codel` : au-delà du débit, les paquets **attendent** dans la file.
+//!
+//! **Une fois cette mise en forme appliquée avec succès** (et seulement
+//! alors, sur la frontière externe seule), la règle nftables `DEBIT` peut
+//! passer de la forme stricte (`limit rate over D`, [`crate::nft`]) à un
+//! **filet de sécurité** au-delà d'une marge, jamais atteint par du trafic mis
+//! en forme ([`crate::nft::MiseEnForme::Appliquee`], ordre sûr :
+//! [`crate::application`]). Tant que `tc` n'est pas déclaré appliqué, et sur
+//! toute autre frontière, la règle reste **stricte** (aucune marge, aucune
+//! rafale ajoutée) : un plafond relevé sans mise en forme serait une
+//! régression de contrôle.
 //!
 //! | | valeur | unité de compte |
 //! |---|---|---|
+//! | règle nftables stricte (`DEBIT`, sans `tc` déclaré) | `D` Kio/s par chaîne, sans rafale ajoutée | octets IP |
 //! | plafond `tc` (feuille HTB) | `D` | octets de trame (en-tête L2 compris) |
 //! | rafale `tc` (`burst` = `cburst`) | `B = ⌈D × 1024 / 100⌉ + 1600` o (10 ms de débit + une trame) | |
 //! | filet nftables (`DEBIT`) | `⌈D × 5 / 4⌉` Kio/s **par sens**, rafale `B` o | octets IP |
@@ -82,9 +91,11 @@
 //!   texte en **un** `tc -batch`. Le premier `qdisc add … root handle 4d44:`
 //!   échoue (`EEXIST`) si une racine explicite étrangère est apparue entre
 //!   temps : une configuration qui n'est pas la sienne n'est jamais remplacée.
-//!   Pendant le remplacement (quelques millisecondes), le trafic passe par la
-//!   file par défaut et reste sous le filet nftables ; en cas d'échec, la
-//!   racine de la Douane est retirée (retour à la file par défaut + filet).
+//!   Elle exige aussi que les règles **strictes** soient en place (table
+//!   `inet miyudouane` présente, aucun filet) : pendant le remplacement
+//!   (quelques millisecondes) le trafic passe par la file par défaut sous la
+//!   règle stricte ; en cas d'échec, la racine de la Douane est retirée
+//!   (retour à la file par défaut, règle stricte conservée).
 //! - [`auditer_tc`] refuse tout écart au rendu attendu (comparaison ligne à
 //!   ligne) et vérifie aussi la structure sans dépendre du générateur.
 //!
@@ -112,7 +123,7 @@ use borderguard::{ArreteVerifie, Frontiere};
 
 use crate::compilation::{compiler, Crochet};
 use crate::hote::ErreurDescription;
-use crate::plan::{ModeFrontiere, PlanReseau, LONGUEUR_MAX_INTERFACE};
+use crate::plan::{DefinitionFrontiere, ModeFrontiere, PlanReseau, LONGUEUR_MAX_INTERFACE};
 
 /// En-tête de la description.
 pub const ENTETE_DESCRIPTION: &str = "miyudouane-tc 1";
@@ -341,6 +352,15 @@ pub struct PlanTc {
     pub interfaces: Vec<InterfaceTc>,
 }
 
+/// Interfaces d'une frontière (liens et interfaces extérieures) : toutes
+/// reçoivent l'arbre `tc`, et toutes doivent le porter avant le filet
+/// ([`crate::application::appliquer_avec_filet`]).
+pub fn interfaces_frontiere(def: &DefinitionFrontiere) -> BTreeSet<String> {
+    let mut noms: BTreeSet<String> = def.liens.iter().map(|l| l.interface.clone()).collect();
+    noms.extend(def.exterieures.iter().map(|e| e.interface.clone()));
+    noms
+}
+
 /// Planifie la mise en forme de la frontière externe depuis un arrêté vérifié
 /// (débits et marques) et une description (capacités). Les voies de `coupees`
 /// sont omises (EX-49).
@@ -361,8 +381,7 @@ pub fn planifier(
     if def.mode != ModeFrontiere::Routage {
         return Err(ErreurTc("frontière externe hors mode routage".into()));
     }
-    let mut noms: BTreeSet<String> = def.liens.iter().map(|l| l.interface.clone()).collect();
-    noms.extend(def.exterieures.iter().map(|e| e.interface.clone()));
+    let noms = interfaces_frontiere(def);
     if let Some(i) = description.capacites.keys().find(|i| !noms.contains(*i)) {
         return Err(ErreurTc(format!("capacité pour « {i} » : interface absente de la frontière externe")));
     }
@@ -484,7 +503,7 @@ pub fn generer_tc(p: &PlanTc) -> String {
     let _ = writeln!(t, "# une classe HTB par voie, une feuille fq_codel par flux (marque conntrack -> meta mark -> fw) ;");
     let _ = writeln!(
         t,
-        "# depassement = mise en file ; filet nftables DEBIT = plafond x {FILET_NUMERATEUR}/{FILET_DENOMINATEUR} par sens."
+        "# depassement = mise en file ; nftables DEBIT strict, puis (apres succes) filet x {FILET_NUMERATEUR}/{FILET_DENOMINATEUR} par sens."
     );
     let racine = format!("{POIGNEE_RACINE:x}:{CLASSE_RACINE:x}");
     for i in &p.interfaces {

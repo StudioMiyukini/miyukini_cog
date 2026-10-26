@@ -19,7 +19,7 @@ use borderguard::{ArreteVerifie, Frontiere};
 
 use crate::compilation::{compiler, ErreurCompilation, RegleCompilee};
 use crate::ips::{EvenementDouane, MoteurIps};
-use crate::nft;
+use crate::nft::{self, MiseEnForme};
 use crate::plan::PlanReseau;
 
 /// Refus de chargement d'un arrêté.
@@ -47,6 +47,9 @@ pub enum ErreurDouane {
     Compilation(ErreurCompilation),
     /// Audit des règles générées en échec (ne doit jamais arriver).
     Audit(Vec<String>),
+    /// Filet 5/4 demandé pour une frontière autre qu'externe (seule la
+    /// frontière externe a une mise en forme `tc`).
+    MiseEnFormeHorsExterne(Frontiere),
 }
 
 impl fmt::Display for ErreurDouane {
@@ -60,6 +63,9 @@ impl fmt::Display for ErreurDouane {
             Self::FrontiereHorsPlan => f.write_str("frontière absente du plan réseau"),
             Self::Compilation(e) => write!(f, "{e}"),
             Self::Audit(e) => write!(f, "audit des règles en échec : {}", e.join(" ; ")),
+            Self::MiseEnFormeHorsExterne(fr) => {
+                write!(f, "mise en forme tc déclarée pour la frontière {fr} : seule la frontière externe en a une")
+            }
         }
     }
 }
@@ -120,7 +126,7 @@ impl InstanceDouane {
             return Err(ErreurDouane::HorsVigueur);
         }
         let regles = compiler(&arrete, &self.plan).map_err(ErreurDouane::Compilation)?;
-        let texte = nft::generer_frontiere(&arrete, &regles, &self.plan, &BTreeSet::new())
+        let texte = nft::generer_frontiere(&arrete, &regles, &self.plan, &BTreeSet::new(), MiseEnForme::Absente)
             .ok_or(ErreurDouane::FrontiereHorsPlan)?;
         let voies: BTreeSet<String> = a.voies.iter().map(|v| v.id.clone()).collect();
         let ecarts = nft::auditer(&texte, &voies);
@@ -134,17 +140,36 @@ impl InstanceDouane {
     }
 
     /// Règles nftables à appliquer à `maintenant_secs` : celles de l'arrêté
-    /// s'il est en vigueur, sinon fermeture.
+    /// s'il est en vigueur, sinon fermeture. Règle `DEBIT` **stricte**
+    /// (mise en forme `tc` non déclarée) : voir [`Self::ruleset_selon`].
     pub fn ruleset(&self, maintenant_secs: u64, voies_coupees: &BTreeSet<String>) -> String {
+        self.ruleset_selon(maintenant_secs, voies_coupees, MiseEnForme::Absente).unwrap_or_default()
+    }
+
+    /// Comme [`Self::ruleset`], avec l'état de mise en forme `tc` déclaré par
+    /// l'appelant : [`MiseEnForme::Appliquee`] (filet 5/4 par sens) n'est
+    /// admis que pour la frontière externe **et** seulement après une
+    /// application `tc` réussie (ordre : [`crate::application`]) ; ailleurs ⇒
+    /// [`ErreurDouane::MiseEnFormeHorsExterne`]. Ne refuse jamais
+    /// [`MiseEnForme::Absente`].
+    pub fn ruleset_selon(
+        &self,
+        maintenant_secs: u64,
+        voies_coupees: &BTreeSet<String>,
+        mise_en_forme: MiseEnForme,
+    ) -> Result<String, ErreurDouane> {
+        if !mise_en_forme.admise(self.frontiere) {
+            return Err(ErreurDouane::MiseEnFormeHorsExterne(self.frontiere));
+        }
         let def = self.plan.frontiere(self.frontiere);
-        match (&self.arrete, def) {
+        Ok(match (&self.arrete, def) {
             (Some(a), Some(_)) if a.en_vigueur(maintenant_secs) => {
-                nft::generer_frontiere(a, &self.regles, &self.plan, voies_coupees).unwrap_or_default()
+                nft::generer_frontiere(a, &self.regles, &self.plan, voies_coupees, mise_en_forme).unwrap_or_default()
             }
             (Some(_), Some(d)) => nft::generer_fermeture(self.frontiere, d, "arrete hors vigueur"),
             (None, Some(d)) => nft::generer_fermeture(self.frontiere, d, "aucun arrete"),
             (_, None) => String::new(),
-        }
+        })
     }
 
     /// Moteur IPS sur l'arrêté en cours (`None` sans arrêté : tout est fermé).
