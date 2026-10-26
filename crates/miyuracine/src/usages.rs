@@ -14,17 +14,27 @@
 //!
 //! | Usage       | Rôle (doc §3)                                   | Chemin SLIP-10              | Rotation |
 //! |-------------|-------------------------------------------------|-----------------------------|----------|
-//! | `identite`  | clé publique racine (`cog_id`), passation, reconnaissances, certificats | `m/1296256839'/0'`          | nouvelle racine (passation) |
-//! | `emission`  | signe passeports et visas                       | `m/1296256839'/1'/g'`       | 90 j (g = génération) |
+//! | `identite`  | clé publique racine (`cog_id`), passation, reconnaissances, certificats, **délégations `0x45`** | `m/1296256839'/0'`          | nouvelle racine (passation) |
+//! | `emission`  | signe les **passeports** (seulement, A-022 §1)  | `m/1296256839'/1'/g'`       | 90 j (g = génération) |
 //! | `journal`   | signe les têtes du registre                     | `m/1296256839'/2'/g'`       | 90 j |
 //! | `editeur`   | certificats éditeur / paquets publiés par le COG | `m/1296256839'/3'/g'`       | par génération |
 //! | `arretes`   | arrêtés de frontière de BorderGuard (A-004)     | `m/1296256839'/4'/g'`       | par génération |
+//! | `visas`     | signe les **visas** (guichet en zone COG, A-022 §1) | `m/1296256839'/5'/g'`   | 90 j |
+//! | `fiches`    | signe les Fiches (pont MAIA, A-022 §4)          | `m/1296256839'/6'/g'`       | 90 j |
 //!
 //! `1296256839` = `0x4D434F47` = « MCOG » en ASCII (but, inférieur à 2³¹).
 //! L'indice 4 « arrêtés » est fixé par l'amendement A-004 (doc v1.4) ; les
-//! indices 5 et suivants sont réservés ; un indice d'usage n'est jamais
-//! réattribué. `g` (génération) est un entier < 2³¹ incrémenté à chaque
-//! rotation de la clé d'usage.
+//! indices 5 « visas » et 6 « fiches » par A-022 (doc v1.22) ; les indices 7
+//! et suivants sont réservés ; un indice d'usage n'est jamais réattribué.
+//! `g` (génération) est un entier < 2³¹ incrémenté à chaque rotation de la
+//! clé d'usage.
+//!
+//! Depuis A-022 §1, l'indice 1 `emission` ne signe plus les visas : un visa
+//! signé par une clé déléguée d'indice 1 est refusé par `miyauth` (aucune
+//! transition pour les clés déléguées : un visa vit au plus 15 min et aucune
+//! délégation `0x45` n'existait avant A-022). Chaque clé d'usage est
+//! certifiée par une délégation `0x45` signée par l'identité
+//! ([`crate::Racine::deleguer`], sous-commande `deleguer` du CLI).
 
 use std::fmt;
 use std::str::FromStr;
@@ -43,7 +53,7 @@ const _: () = assert!(BUT_MIYUKINI_COG < DURCI);
 pub enum Usage {
     /// Clé publique racine du COG : `cog_id`, passation, reconnaissances, certificats.
     Identite,
-    /// Clé d'émission : passeports et visas (rotation 90 j).
+    /// Clé d'émission : passeports seulement depuis A-022 §1 (rotation 90 j).
     Emission,
     /// Clé de journal : têtes du registre Merkle (rotation 90 j).
     Journal,
@@ -51,11 +61,23 @@ pub enum Usage {
     Editeur,
     /// Clé des arrêtés : arrêtés de frontière signés par BorderGuard (A-004, indice 4).
     Arretes,
+    /// Clé des visas : visas émis par le guichet en zone COG (A-022 §1, indice 5, rotation 90 j).
+    Visas,
+    /// Clé des Fiches : Fiches signées par le pont MAIA (A-022 §4, indice 6).
+    Fiches,
 }
 
 impl Usage {
     /// Tous les usages, dans l'ordre des indices.
-    pub const TOUS: [Self; 5] = [Self::Identite, Self::Emission, Self::Journal, Self::Editeur, Self::Arretes];
+    pub const TOUS: [Self; 7] = [
+        Self::Identite,
+        Self::Emission,
+        Self::Journal,
+        Self::Editeur,
+        Self::Arretes,
+        Self::Visas,
+        Self::Fiches,
+    ];
 
     /// Indice d'usage dans le chemin (jamais réattribué).
     pub const fn indice(self) -> u32 {
@@ -65,6 +87,8 @@ impl Usage {
             Self::Journal => 2,
             Self::Editeur => 3,
             Self::Arretes => 4,
+            Self::Visas => 5,
+            Self::Fiches => 6,
         }
     }
 
@@ -76,6 +100,8 @@ impl Usage {
             Self::Journal => "journal",
             Self::Editeur => "editeur",
             Self::Arretes => "arretes",
+            Self::Visas => "visas",
+            Self::Fiches => "fiches",
         }
     }
 
@@ -166,7 +192,7 @@ mod tests {
             "m/1296256839'/4'/2'"
         );
         let indices: Vec<u32> = Usage::TOUS.iter().map(|u| u.indice()).collect();
-        assert_eq!(indices, vec![0, 1, 2, 3, 4]);
+        assert_eq!(indices, vec![0, 1, 2, 3, 4, 5, 6]);
     }
 
     /// A-004 : indice 4 = arrêtés ; les indices existants ne bougent pas.
@@ -185,10 +211,22 @@ mod tests {
             (Usage::Journal, 2),
             (Usage::Editeur, 3),
             (Usage::Arretes, 4),
+            (Usage::Visas, 5),
+            (Usage::Fiches, 6),
         ];
         for (u, i) in attendus {
             assert_eq!(u.indice(), i, "{u}");
         }
+    }
+
+    /// A-022 : indice 5 = visas, indice 6 = fiches (rotation par générations).
+    #[test]
+    fn indices_visas_fiches_a022() {
+        assert_eq!(Usage::Visas.chemin_texte(0).unwrap(), "m/1296256839'/5'/0'");
+        assert_eq!(Usage::Fiches.chemin_texte(3).unwrap(), "m/1296256839'/6'/3'");
+        assert!(Usage::Visas.a_generations() && Usage::Fiches.a_generations());
+        assert_eq!("visas".parse::<Usage>().unwrap(), Usage::Visas);
+        assert_eq!("fiches".parse::<Usage>().unwrap(), Usage::Fiches);
     }
 
     #[test]

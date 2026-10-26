@@ -20,6 +20,8 @@
 //! - Registre (EX-03) : tête signée `TeteRegistre`, fraîcheur obligatoire
 //!   (anti-gel), monotonie et détection d'équivoque (`EtatRegistre`), arbre
 //!   de Merkle RFC 9162 et preuves d'inclusion / cohérence.
+//! - Délégation de clé d'usage (certificat `0x06`, nature `0x45`, A-022 §2) :
+//!   la clé d'identité d'un COG certifie ses clés d'usage d'indice ≥ 1.
 //! - Fail-closed : tout écart au format, signataire inconnu ou titre hors de sa
 //!   fenêtre de validité est un refus.
 //!
@@ -40,6 +42,7 @@
 
 pub mod ancres;
 pub mod cles;
+pub mod delegation;
 pub mod erreurs;
 pub mod format;
 pub mod merkle;
@@ -49,6 +52,9 @@ pub mod tlv;
 
 pub use ancres::{AncresDeConfiance, NiveauConfiance};
 pub use cles::{empreinte_cle, CleSignature, Kid};
+pub use delegation::{
+    cog_id_depuis_cle, verifier_delegation, DelegationCle, DUREE_MAX_DELEGATION_SECS, NATURE_DELEGATION,
+};
 pub use erreurs::{ErreurRegistre, ErreurSceau, PreuveEquivoque};
 pub use format::{
     cosigner, decoder_titre, sceller, sceller_multi, verifier, verifier_seuil, Algorithme, Sceau, SignatureSceau, TypeSceau,

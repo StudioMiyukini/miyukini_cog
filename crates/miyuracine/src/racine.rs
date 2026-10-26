@@ -12,7 +12,6 @@
 //! le registre de [`crate::usages`].
 
 use rand_core::{OsRng, RngCore};
-use sha2::{Digest, Sha256};
 use zeroize::Zeroizing;
 
 use crate::erreurs::ErreurRacine;
@@ -31,6 +30,7 @@ pub const EXPOSANT_DEFAUT: u8 = 5;
 /// Longueur d'un `cog_id` (26 caractères base32 = 130 bits).
 pub const LONGUEUR_COG_ID: usize = 26;
 
+#[cfg(test)]
 const ALPHABET_BASE32: &[u8; 32] = b"abcdefghijklmnopqrstuvwxyz234567";
 
 /// Les trois parts mnémoniques de la racine (effacées à la destruction).
@@ -72,26 +72,11 @@ impl std::fmt::Debug for Racine {
 
 /// Calcule le `cog_id` d'une clé publique : `base32(SHA-256(clé))[0..26]`
 /// (RFC 4648, minuscules, sans remplissage), comme `miyuwebway_participant`.
+///
+/// Même calcul que [`miyusceau::cog_id_depuis_cle`] (délégations `0x45`),
+/// auquel il délègue : une seule implémentation.
 pub fn cog_id_depuis_cle(cle_publique: &[u8; 32]) -> String {
-    let empreinte: [u8; 32] = Sha256::digest(cle_publique).into();
-    let mut sortie = String::with_capacity(LONGUEUR_COG_ID);
-    let mut tampon: u32 = 0;
-    let mut bits: u32 = 0;
-    for octet in empreinte {
-        tampon = (tampon << 8) | u32::from(octet);
-        bits += 8;
-        while bits >= 5 && sortie.len() < LONGUEUR_COG_ID {
-            bits -= 5;
-            sortie.push(char::from(
-                ALPHABET_BASE32[((tampon >> bits) & 0x1f) as usize],
-            ));
-        }
-        tampon &= (1 << bits) - 1;
-        if sortie.len() >= LONGUEUR_COG_ID {
-            break;
-        }
-    }
-    sortie
+    miyusceau::cog_id_depuis_cle(cle_publique)
 }
 
 impl Racine {
@@ -256,6 +241,7 @@ impl Racine {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use sha2::{Digest, Sha256};
 
     #[test]
     fn cog_id_vecteur_connu() {

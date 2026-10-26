@@ -8,16 +8,40 @@
 //!
 //! Chaîne de vérification d'un accès (fail-closed, premier refus = fin) :
 //!
-//! 1. Passeport : sceau v1.1 (`verify_strict`), clé d'émission épinglée dans
+//! 1. Passeport : sceau v1.1 (`verify_strict`), clé signataire connue de
 //!    l'[`AnnuaireEmetteurs`], fenêtre de validité (tolérance d'horloge bornée du
 //!    format, 120 s), durée ≤ 30 j, signataire = `emetteur_kid` déclaré, `cog_id`
 //!    émetteur = celui de l'ancre, niveau cohérent (son COG ⇔ `Souverain`),
 //!    destination = COG local (EX-36), non révoqué (série, appareil, clé d'émission).
-//! 2. Visa : sceau v1.1 signé par une ancre **souveraine du COG local**, durée
+//! 2. Visa : sceau v1.1 signé par une clé **souveraine du COG local**, durée
 //!    ≤ 15 min, contenu dans la fenêtre du passeport, lié au passeport (empreinte),
-//!    au sujet par paire et à la clé d'appareil, rôle cohérent, audience attendue,
-//!    non révoqué.
+//!    au sujet par paire et à la clé d'appareil, rôle cohérent, audience attendue
+//!    (le service), portées ⊆ passeport, non révoqué.
 //! 3. Preuve de possession (§7) par la clé d'appareil.
+//!
+//! ## Chaîne racine → clé d'usage (A-022 §2)
+//!
+//! Pour un COG dont la **racine** (clé d'identité, indice 0) est épinglée
+//! ([`AnnuaireEmetteurs::epingler_racine`]), une signature n'est acceptée que
+//! si la clé signataire est certifiée par une délégation `0x45`
+//! ([`miyusceau::DelegationCle`]) connue de l'annuaire
+//! ([`AnnuaireEmetteurs::ajouter_delegation`]) ou présentée avec le titre
+//! ([`AnnuaireEmetteurs::avec_delegations`]) : signée par l'identité épinglée,
+//! même `cog_id`, **indice attendu** ([`INDICE_USAGE_EMISSION`] = 1 pour un
+//! passeport, [`INDICE_USAGE_VISAS`] = 5 pour un visa), fenêtre couvrant
+//! l'instant **et** la fenêtre du titre, génération cohérente (une seule clé
+//! par `(cog, indice, génération)`, une clé pour un seul usage). Sinon refus.
+//!
+//! Un visa signé par la clé d'indice 1 est refusé sans transition : aucune
+//! délégation n'existait avant A-022 et un visa vit au plus 15 min.
+//!
+//! **Transition (ancres directes)** : une clé épinglée par
+//! [`AnnuaireEmetteurs::ajouter`] (mode antérieur à A-022 : la même clé, sans
+//! indice connu, signe passeports et visas) reste acceptée **uniquement** pour
+//! un COG sans racine épinglée et tant que l'annuaire n'est pas passé en mode
+//! strict ([`AnnuaireEmetteurs::exiger_delegations`]). Épingler la racine d'un
+//! COG interdit ses ancres directes. Fin de transition : guichet des visas en
+//! zone COG (A-022 §1), puis mode strict partout.
 //!
 //! Les types [`PasseportVerifie`], [`PossessionProuvee`], [`AccesVerifie`] et [`AccesProuve`] ont des
 //! champs privés : les détenir prouve que les contrôles ont eu lieu.
@@ -27,8 +51,8 @@ use std::fmt;
 
 use ed25519_dalek::{Signature, VerifyingKey};
 use miyusceau::{
-    empreinte_cle, sceller, verifier, AncresDeConfiance, CleSignature, ErreurSceau, Kid, NiveauConfiance, Sceau,
-    Verifie,
+    cog_id_depuis_cle, decoder_titre, empreinte_cle, sceller, verifier, verifier_delegation, AncresDeConfiance,
+    CleSignature, DelegationCle, ErreurSceau, Kid, NiveauConfiance, Sceau, Verifie,
 };
 use rand_core::{OsRng, RngCore};
 use sha2::{Digest, Sha256};
@@ -40,6 +64,12 @@ use crate::types::IdentityRole;
 
 /// Domaine de séparation de la preuve de possession (doc §7).
 pub const DOMAINE_POSSESSION: &[u8] = b"miyukini/pop/v1";
+/// Indice d'usage SLIP-10 de la clé qui signe les **passeports** (`emission`,
+/// `m/1296256839'/1'/g'`) ; depuis A-022 §1, elle ne signe plus les visas.
+pub const INDICE_USAGE_EMISSION: u32 = 1;
+/// Indice d'usage SLIP-10 de la clé qui signe les **visas** (`visas`,
+/// `m/1296256839'/5'/g'`, A-022 §1).
+pub const INDICE_USAGE_VISAS: u32 = 5;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Refus
@@ -82,6 +112,23 @@ pub enum RefusIdentite {
     ParametreInvalide(&'static str),
     /// Artefact (passeport ou visa) absent.
     ArtefactManquant,
+    /// Clé d'usage sans délégation `0x45` valide (COG à racine épinglée ou mode strict).
+    SansDelegation,
+    /// Clé déléguée pour un autre usage que celui du titre (ex. visa signé par l'indice 1).
+    UsageIncorrect {
+        /// Indice attendu pour ce titre.
+        attendu: u32,
+        /// Indice certifié par la délégation.
+        delegue: u32,
+    },
+    /// Fenêtre de la délégation ne couvrant pas l'instant ou la fenêtre du titre.
+    DelegationHorsFenetre,
+    /// Délégation incohérente avec l'annuaire (génération déjà certifiée pour une
+    /// autre clé, clé déjà déléguée pour un autre usage, COG sans racine épinglée…).
+    DelegationIncoherente,
+    /// Racine incohérente (`cog_id` ≠ empreinte de la clé d'identité) ou mélange
+    /// d'ancres directes et de racine pour un même COG.
+    RacineIncoherente,
 }
 
 impl fmt::Display for RefusIdentite {
@@ -104,6 +151,13 @@ impl fmt::Display for RefusIdentite {
             Self::PossessionInvalide => write!(f, "preuve de possession invalide"),
             Self::ParametreInvalide(p) => write!(f, "paramètre d'émission invalide : {p}"),
             Self::ArtefactManquant => write!(f, "passeport ou visa manquant"),
+            Self::SansDelegation => write!(f, "clé d'usage sans délégation valide"),
+            Self::UsageIncorrect { attendu, delegue } => {
+                write!(f, "clé déléguée pour l'usage {delegue}, usage {attendu} attendu")
+            }
+            Self::DelegationHorsFenetre => write!(f, "délégation hors de sa fenêtre de validité"),
+            Self::DelegationIncoherente => write!(f, "délégation incohérente avec l'annuaire"),
+            Self::RacineIncoherente => write!(f, "racine incohérente"),
         }
     }
 }
@@ -120,18 +174,33 @@ impl From<ErreurSceau> for RefusIdentite {
 // Annuaire et politique
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// Clés d'émission épinglées, chacune rattachée à son `cog_id`.
+/// Clé d'usage certifiée par une délégation `0x45` vérifiée.
+#[derive(Debug, Clone)]
+struct CleDeleguee {
+    cog: CogId,
+    niveau: NiveauConfiance,
+    delegation: DelegationCle,
+}
+
+/// Clés signataires de passeports et de visas, chacune rattachée à son `cog_id`.
 ///
-/// Seul mode admis : clés d'émission **explicitement épinglées** (ancres directes).
-/// La chaîne racine → clé d'émission (certificat `0x06`) n'est pas implémentée :
-/// la doc gelée ne définit ni la `nature` d'un certificat d'émission (table du
-/// lot 2 §4.1 : `0x01`, `0x41`–`0x44` seulement, tout autre code refusé) ni ses
-/// champs TLV (A-003, « à décider ultérieurement »). Une clé non épinglée est
-/// refusée (`EmetteurIncoherent` ou signataire inconnu).
+/// Deux modes, par COG :
+///
+/// - **Chaîne (A-022 §2)** : racine épinglée ([`Self::epingler_racine`]) et
+///   clés d'usage certifiées par délégation `0x45` ([`Self::ajouter_delegation`]).
+///   Une clé n'est acceptée que pour l'indice que sa délégation certifie
+///   (1 passeports, 5 visas) et dans la fenêtre de celle-ci.
+/// - **Ancre directe (transition)** : clé épinglée sans délégation
+///   ([`Self::ajouter`]), acceptée pour passeports et visas tant que le COG n'a
+///   pas de racine épinglée et que le mode strict ([`Self::exiger_delegations`])
+///   n'est pas actif.
 #[derive(Debug, Clone, Default)]
 pub struct AnnuaireEmetteurs {
     ancres: AncresDeConfiance,
     cogs: HashMap<Kid, (CogId, NiveauConfiance)>,
+    racines: HashMap<CogId, ([u8; 32], NiveauConfiance)>,
+    deleguees: HashMap<Kid, CleDeleguee>,
+    strict: bool,
 }
 
 impl AnnuaireEmetteurs {
@@ -140,22 +209,131 @@ impl AnnuaireEmetteurs {
         Self::default()
     }
 
-    /// Épingle la clé d'émission `cle_publique` du COG `cog`. `Souverain` pour son
-    /// propre COG, `Reconnu` pour un COG reconnu. Refuse les clés faibles.
+    /// **Transition** : épingle directement la clé `cle_publique` du COG `cog`
+    /// (mode antérieur à A-022 : passeports et visas). `Souverain` pour son
+    /// propre COG, `Reconnu` pour un COG reconnu. Refuse les clés faibles, et
+    /// (`ErreurSceau::CleInvalide`) toute clé d'un COG dont la racine est
+    /// épinglée, une clé déjà déléguée, ou tout ajout en mode strict.
     pub fn ajouter(&mut self, cog: CogId, cle_publique: &[u8; 32], niveau: NiveauConfiance) -> Result<Kid, ErreurSceau> {
+        let kid = empreinte_cle(cle_publique);
+        if self.strict || self.racines.contains_key(&cog) || self.deleguees.contains_key(&kid) {
+            return Err(ErreurSceau::CleInvalide);
+        }
         let kid = self.ancres.ajouter(cle_publique, niveau)?;
         self.cogs.insert(kid, (cog, niveau));
         Ok(kid)
     }
 
-    /// Retire une clé (rotation ou compromission).
+    /// Mode strict : toute ancre directe est refusée (à l'ajout comme à la
+    /// vérification) ; seules les clés déléguées par une racine épinglée signent.
+    pub fn exiger_delegations(&mut self) {
+        self.strict = true;
+    }
+
+    /// Épingle la clé d'**identité** (indice 0) du COG `cog`. Exige
+    /// `cog = cog_id(cle_identite)` et aucune ancre directe pour ce COG. La clé
+    /// d'identité ne signe ni passeport ni visa : elle n'est pas une ancre de
+    /// titres, seulement de délégations.
+    pub fn epingler_racine(
+        &mut self,
+        cog: CogId,
+        cle_identite: &[u8; 32],
+        niveau: NiveauConfiance,
+    ) -> Result<Kid, RefusIdentite> {
+        if cog_id_depuis_cle(cle_identite) != cog.as_str() {
+            return Err(RefusIdentite::RacineIncoherente);
+        }
+        // Clé valide et non faible (même contrôle que les ancres).
+        let kid = AncresDeConfiance::new().ajouter(cle_identite, niveau)?;
+        if self.cogs.values().any(|(c, _)| c == &cog) || self.cogs.contains_key(&kid) {
+            return Err(RefusIdentite::RacineIncoherente);
+        }
+        if let Some((existante, _)) = self.racines.get(&cog) {
+            if existante != cle_identite {
+                return Err(RefusIdentite::RacineIncoherente);
+            }
+        }
+        self.racines.insert(cog, (*cle_identite, niveau));
+        Ok(kid)
+    }
+
+    /// Vérifie et enregistre une délégation `0x45` (sceau complet) d'un COG
+    /// dont la racine est épinglée. Contrôles : signature de l'identité
+    /// épinglée, `cog_id`, fenêtre couvrant `maintenant`, puis cohérence avec
+    /// l'annuaire (une clé par `(cog, indice, génération)` ; une clé déléguée
+    /// pour un seul `(cog, indice, génération)` ; jamais une ancre directe ni
+    /// une clé d'identité). Rend le `kid` de la clé déléguée.
+    pub fn ajouter_delegation(&mut self, octets: &[u8], maintenant: u64) -> Result<Kid, RefusIdentite> {
+        let annoncee = decoder_titre::<DelegationCle>(&Sceau::decoder(octets)?.charge)?;
+        let cog = CogId::new(annoncee.cog_id()).ok_or(RefusIdentite::DelegationIncoherente)?;
+        let (cle_identite, niveau) = *self.racines.get(&cog).ok_or(RefusIdentite::DelegationIncoherente)?;
+        let delegation = verifier_delegation(octets, &cle_identite, niveau, maintenant)?.into_titre();
+        let kid = delegation.kid();
+        if self.cogs.contains_key(&kid) || self.racines.values().any(|(r, _)| r == delegation.cle_publique()) {
+            return Err(RefusIdentite::DelegationIncoherente);
+        }
+        if let Some(existante) = self.deleguees.get(&kid) {
+            let d = &existante.delegation;
+            if existante.cog != cog || d.indice() != delegation.indice() || d.generation() != delegation.generation() {
+                return Err(RefusIdentite::DelegationIncoherente);
+            }
+        }
+        let meme_generation_autre_cle = self.deleguees.iter().any(|(k, e)| {
+            k != &kid
+                && e.cog == cog
+                && e.delegation.indice() == delegation.indice()
+                && e.delegation.generation() == delegation.generation()
+        });
+        if meme_generation_autre_cle {
+            return Err(RefusIdentite::DelegationIncoherente);
+        }
+        self.ancres.ajouter(delegation.cle_publique(), niveau)?;
+        self.deleguees.insert(kid, CleDeleguee { cog, niveau, delegation });
+        Ok(kid)
+    }
+
+    /// Copie de l'annuaire augmentée des délégations **présentées avec un
+    /// titre** (mêmes contrôles que [`Self::ajouter_delegation`]) ; l'annuaire
+    /// d'origine n'est pas modifié.
+    pub fn avec_delegations(&self, delegations: &[&[u8]], maintenant: u64) -> Result<Self, RefusIdentite> {
+        let mut copie = self.clone();
+        for d in delegations {
+            copie.ajouter_delegation(d, maintenant)?;
+        }
+        Ok(copie)
+    }
+
+    /// Retire une clé (rotation ou compromission), directe ou déléguée.
     pub fn retirer(&mut self, kid: &Kid) -> bool {
         self.cogs.remove(kid);
+        self.deleguees.remove(kid);
         self.ancres.retirer(kid)
     }
 
-    fn cog_de(&self, kid: &Kid) -> Option<&(CogId, NiveauConfiance)> {
-        self.cogs.get(kid)
+    /// COG et niveau du signataire `kid` d'un titre d'usage `indice`
+    /// (fenêtre `fenetre`), à `maintenant` ; refus si la chaîne ne tient pas.
+    fn resoudre(
+        &self,
+        kid: &Kid,
+        indice: u32,
+        fenetre: (u64, u64),
+        maintenant: u64,
+    ) -> Result<(&CogId, NiveauConfiance), RefusIdentite> {
+        if let Some(e) = self.deleguees.get(kid) {
+            let d = &e.delegation;
+            if d.indice() != indice {
+                return Err(RefusIdentite::UsageIncorrect { attendu: indice, delegue: d.indice() });
+            }
+            if !d.couvre(maintenant) || fenetre.0 < d.pas_avant() || fenetre.1 > d.pas_apres() {
+                return Err(RefusIdentite::DelegationHorsFenetre);
+            }
+            return Ok((&e.cog, e.niveau));
+        }
+        let (cog, niveau) = self.cogs.get(kid).ok_or(RefusIdentite::EmetteurIncoherent)?;
+        if self.strict || self.racines.contains_key(cog) {
+            return Err(RefusIdentite::SansDelegation);
+        }
+        Ok((cog, *niveau))
     }
 }
 
@@ -227,7 +405,8 @@ pub struct DemandePasseport<'a> {
     pub pas_apres: u64,
 }
 
-/// Émet (scelle) un passeport avec la clé d'émission du COG d'origine `emetteur`.
+/// Émet (scelle) un passeport avec la clé d'émission du COG d'origine `emetteur`
+/// (clé d'usage `emission`, indice 1, déléguée par `0x45` en mode chaîné).
 pub fn emettre_passeport(
     emetteur: &CogId,
     cle_emission: &CleSignature,
@@ -287,12 +466,17 @@ pub fn verifier_passeport(
     if verifie.signataires() != [p.emetteur_kid] {
         return Err(RefusIdentite::EmetteurIncoherent);
     }
-    let (cog_ancre, niveau) = politique.annuaire.cog_de(&p.emetteur_kid).ok_or(RefusIdentite::EmetteurIncoherent)?;
+    let (cog_ancre, niveau) = politique.annuaire.resoudre(
+        &p.emetteur_kid,
+        INDICE_USAGE_EMISSION,
+        (p.pas_avant, p.pas_apres),
+        maintenant,
+    )?;
     if cog_ancre != &p.emetteur_cog {
         return Err(RefusIdentite::EmetteurIncoherent);
     }
     let local = p.emetteur_cog == politique.cog_local;
-    if local != (*niveau == NiveauConfiance::Souverain) {
+    if local != (niveau == NiveauConfiance::Souverain) {
         return Err(RefusIdentite::NiveauIncoherent);
     }
     if p.destination != politique.cog_local {
@@ -311,7 +495,6 @@ pub fn verifier_passeport(
         // Le COG hôte peut aussi bannir localement un passeport ou un appareil étranger.
         controler_revocation(politique.revocations, &politique.cog_local, &cibles[..2], maintenant)?;
     }
-    let niveau = *niveau;
     let empreinte = empreinte_titre(octets)?;
     Ok(PasseportVerifie { verifie, empreinte, niveau })
 }
@@ -400,7 +583,12 @@ fn role_attendu(passeport: &Passeport, cog_local: &CogId) -> IdentityRole {
 }
 
 /// Émet un visa pour un passeport dont la possession a été prouvée. `cog_local`
-/// est le COG hôte, `cle_emission` sa clé d'émission.
+/// est le COG hôte, `cle_emission` sa clé de visas : clé d'usage `visas`
+/// (indice 5, déléguée par `0x45`) en mode chaîné, ou ancre directe pendant la
+/// transition (voir l'en-tête du module). Le visa dure au plus 15 min, est
+/// contenu dans la fenêtre du passeport, lié à son empreinte, au sujet, à la
+/// clé d'appareil, à l'audience (service) et n'est émis qu'après preuve de
+/// possession ([`PossessionProuvee`]).
 pub fn emettre_visa(
     cog_local: &CogId,
     cle_emission: &CleSignature,
@@ -524,8 +712,9 @@ pub fn verifier_visa(
     let [signataire] = visa.signataires() else {
         return Err(RefusIdentite::EmetteurIncoherent);
     };
-    let (cog_ancre, niveau) = politique.annuaire.cog_de(signataire).ok_or(RefusIdentite::EmetteurIncoherent)?;
-    if cog_ancre != &politique.cog_local || *niveau != NiveauConfiance::Souverain || v.emetteur_cog != politique.cog_local {
+    let (cog_ancre, niveau) =
+        politique.annuaire.resoudre(signataire, INDICE_USAGE_VISAS, (v.pas_avant, v.pas_apres), maintenant)?;
+    if cog_ancre != &politique.cog_local || niveau != NiveauConfiance::Souverain || v.emetteur_cog != politique.cog_local {
         return Err(RefusIdentite::VisaEtranger);
     }
     let p = passeport.passeport();

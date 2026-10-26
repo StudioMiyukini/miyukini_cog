@@ -11,6 +11,8 @@
 //! `0600` ou sortie standard) et, sur demande explicite, la graine d'**un**
 //! usage (`--exporter-graine-usage`, fichier `0600` neuf) quittent la mémoire,
 //! ainsi que le fichier de clé chiffré (`exporter-cle`, format `MYRC` v1).
+//! `deleguer` produit les délégations `0x45` (A-022 §2) : certificats publics
+//! signés par l'identité, qui rattachent chaque clé d'usage à la racine.
 //!
 //! Avant toute lecture de secret, le processus est durci
 //! ([`miyuracine::durcir_processus`]) : core dumps désactivés, mémoire
@@ -73,6 +75,15 @@ UTILISATION
       Passation : nouvelle racine + 3 nouvelles parts, et sceau « l'ancienne racine se
       porte garante de la nouvelle » signé par les deux identités (fichier neuf).
 
+  miyuracine deleguer --part <f> --part <f> --usage <u> [--usage <u>…] --generation <n>
+                       (--sortie <fichier> | --dossier <rép>) [--debut <secondes Unix>]
+                       [--duree-jours <1-90>] [--phrase-fichier <f>]
+      Délégation de clé d'usage (certificat 0x06, nature 0x45, A-022 §2) signée par
+      l'identité : cog_id, indice, génération, clé publique, validité (défaut : maintenant,
+      90 jours). --sortie : un seul usage ; --dossier : fichiers delegation-<u>-g<n>.sceau.
+      Fichiers neufs en 0644 (certificats publics) ; refus si l'un existe. L'identité ne se
+      délègue pas.
+
   miyuracine exporter-cle --part <f> --part <f> --sortie <fichier> --mot-de-passe-fichier <f>
                        [--phrase-fichier <f>] [--argon2-memoire-mio <256-4096>] [--argon2-iterations <3-64>]
                        [--nouveau-mot-de-passe-fichier <f>]
@@ -95,7 +106,8 @@ DURCISSEMENT
   --sans-mlock lève ce refus (avertissement, à éviter hors essais).
 
 USAGES
-  identite (génération 0 uniquement), emission, journal, editeur, arretes
+  identite (0, génération 0 uniquement), emission (1, passeports), journal (2), editeur (3),
+  arretes (4), visas (5, A-022), fiches (6, A-022)
 
 PHRASE SECRÈTE
   Facultative (ASCII imprimable), lue dans un fichier ; vide par défaut. Sans
@@ -112,6 +124,9 @@ struct Options {
     phrase_fichier: Option<PathBuf>,
     nouvelle_phrase_fichier: Option<PathBuf>,
     usage: Option<Usage>,
+    usages: Vec<Usage>,
+    debut: Option<u64>,
+    duree_jours: Option<u64>,
     exporter: Option<Usage>,
     generation: Option<u32>,
     sortie: Option<PathBuf>,
@@ -135,7 +150,7 @@ fn definir<T>(champ: &mut Option<T>, valeur: T, nom: &str) -> Result<(), String>
     Ok(())
 }
 
-fn analyser(arguments: &[String], autorisees: &[&str]) -> Result<Options, String> {
+fn analyser(arguments: &[String], autorisees: &[&str], usage_multiple: bool) -> Result<Options, String> {
     let mut o = Options::default();
     let mut iter = arguments.iter();
     while let Some(nom) = iter.next() {
@@ -163,11 +178,28 @@ fn analyser(arguments: &[String], autorisees: &[&str]) -> Result<Options, String
             "--nouvelle-phrase-fichier" => {
                 definir(&mut o.nouvelle_phrase_fichier, PathBuf::from(valeur), nom)?;
             }
-            "--usage" => definir(
-                &mut o.usage,
-                valeur.parse().map_err(|_| erreur("usage inconnu"))?,
-                nom,
-            )?,
+            "--usage" => {
+                let u: Usage = valeur.parse().map_err(|_| erreur("usage inconnu"))?;
+                if usage_multiple {
+                    if o.usages.contains(&u) {
+                        return Err(erreur(format!("usage {u} répété")));
+                    }
+                    o.usages.push(u);
+                } else {
+                    definir(&mut o.usage, u, nom)?;
+                }
+            }
+            "--debut" => {
+                let d: u64 = valeur.parse().map_err(|_| erreur("début invalide (secondes Unix)"))?;
+                definir(&mut o.debut, d, nom)?;
+            }
+            "--duree-jours" => {
+                let j: u64 = valeur.parse().map_err(|_| erreur("durée invalide (1 à 90 jours)"))?;
+                if !(1..=90).contains(&j) {
+                    return Err(erreur("durée invalide (1 à 90 jours)"));
+                }
+                definir(&mut o.duree_jours, j, nom)?;
+            }
             "--exporter-graine-usage" => {
                 definir(
                     &mut o.exporter,
@@ -493,10 +525,7 @@ fn rotation(o: &Options) -> Result<(), String> {
     let parts = nouvelle
         .partager(&nouvelle_phrase, o.exposant.unwrap_or(EXPOSANT_DEFAUT))
         .map_err(|e| e.to_string())?;
-    let maintenant = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map_err(|_| erreur("horloge système antérieure à 1970 : refus"))?
-        .as_secs();
+    let maintenant = maintenant_secs()?;
     let passation = Passation {
         ancienne_racine: ancienne.cle_publique_identite(),
         nouvelle_racine: nouvelle.cle_publique_identite(),
@@ -535,6 +564,80 @@ fn rotation(o: &Options) -> Result<(), String> {
         hex(&Sha256::digest(&sceau))
     );
     eprintln!("Détruisez les anciennes parts une fois la passation publiée et les nouvelles parts rangées.");
+    Ok(())
+}
+
+fn maintenant_secs() -> Result<u64, String> {
+    Ok(SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|_| erreur("horloge système antérieure à 1970 : refus"))?
+        .as_secs())
+}
+
+/// Destinations des délégations, contrôlées **avant** toute lecture de secret.
+fn destinations_delegations(o: &Options, generation: u32) -> Result<Vec<(Usage, PathBuf)>, String> {
+    if o.usages.is_empty() {
+        return Err(erreur("au moins un --usage est requis"));
+    }
+    if o.usages.contains(&Usage::Identite) {
+        return Err(erreur("l'identité (indice 0) ne se délègue pas"));
+    }
+    let destinations: Vec<(Usage, PathBuf)> = match (o.sortie.as_deref(), o.dossier.as_deref()) {
+        (Some(sortie), None) => match o.usages.as_slice() {
+            [u] => vec![(*u, sortie.to_path_buf())],
+            _ => return Err(erreur("--sortie n'accepte qu'un usage ; utiliser --dossier")),
+        },
+        (None, Some(dossier)) => {
+            if !dossier.is_dir() {
+                return Err(erreur(format!("{} n'est pas un répertoire", dossier.display())));
+            }
+            o.usages
+                .iter()
+                .map(|u| (*u, dossier.join(format!("delegation-{u}-g{generation}.sceau"))))
+                .collect()
+        }
+        _ => return Err(erreur("préciser exactement une option : --sortie ou --dossier")),
+    };
+    if let Some((_, existant)) = destinations.iter().find(|(_, c)| fs::symlink_metadata(c).is_ok()) {
+        return Err(erreur(format!("{} existe déjà : refus", existant.display())));
+    }
+    Ok(destinations)
+}
+
+fn deleguer(o: &Options) -> Result<(), String> {
+    let generation = o
+        .generation
+        .ok_or_else(|| erreur("--generation est requis pour une délégation"))?;
+    let destinations = destinations_delegations(o, generation)?;
+    let pas_avant = match o.debut {
+        Some(d) => d,
+        None => maintenant_secs()?,
+    };
+    let pas_apres = pas_avant
+        .checked_add(o.duree_jours.unwrap_or(90) * 86_400)
+        .ok_or_else(|| erreur("fin de validité hors plage"))?;
+    let racine = recuperer_racine(o)?;
+    // Toutes les délégations sont produites et vérifiées avant toute écriture.
+    let sceaux = destinations
+        .iter()
+        .map(|(u, _)| {
+            racine
+                .deleguer(*u, generation, pas_avant, pas_apres)
+                .map_err(|e| erreur(format!("délégation {u} refusée : {e}")))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    afficher_identite(&racine)?;
+    for ((usage, chemin), sceau) in destinations.iter().zip(&sceaux) {
+        ecrire_neuf(chemin, 0o644, sceau)?;
+        afficher_cle(&racine, *usage, generation)?;
+        println!(
+            "délégation 0x45 écrite : {} (indice {}, g{generation}, {pas_avant} → {pas_apres}, {} octets, SHA-256 {})",
+            chemin.display(),
+            usage.indice(),
+            sceau.len(),
+            hex(&Sha256::digest(sceau))
+        );
+    }
     Ok(())
 }
 
@@ -643,6 +746,18 @@ fn executer(arguments: &[String]) -> Result<(), String> {
             "--exposant",
             "--passation",
         ],
+        "deleguer" => &[
+            "--part",
+            PHRASE,
+            CLE,
+            MDP,
+            "--usage",
+            "--generation",
+            "--sortie",
+            "--dossier",
+            "--debut",
+            "--duree-jours",
+        ],
         "exporter-cle" => &[
             "--part",
             PHRASE,
@@ -663,7 +778,7 @@ fn executer(arguments: &[String]) -> Result<(), String> {
             )))
         }
     };
-    let o = analyser(reste, autorisees)?;
+    let o = analyser(reste, autorisees, commande == "deleguer")?;
     // Durcissement AVANT toute lecture de part, phrase ou mot de passe.
     durcir(commande, &o, politique)?;
     match commande.as_str() {
@@ -672,7 +787,8 @@ fn executer(arguments: &[String]) -> Result<(), String> {
         "deriver" => deriver(&o),
         "rotation" => rotation(&o),
         "exporter-cle" => exporter_cle(&o),
-        _ => unreachable!("commande filtrée ci-dessus"),
+        "deleguer" => deleguer(&o),
+        autre => Err(erreur(format!("commande inconnue : {autre}"))),
     }
 }
 

@@ -57,7 +57,7 @@ pub use pairwise::{identifiant_pairwise, SecretTitulaire};
 pub use passeport::{
     emettre_passeport, emettre_visa, empreinte_titre, message_possession, prouver_possession, verifier_passeport,
     verifier_visa, AccesProuve, AccesVerifie, AnnuaireEmetteurs, DemandePasseport, DemandeVisa, PasseportVerifie,
-    PolitiqueIdentite, PossessionProuvee, RefusIdentite,
+    PolitiqueIdentite, PossessionProuvee, RefusIdentite, INDICE_USAGE_EMISSION, INDICE_USAGE_VISAS,
 };
 pub use resolve::resolve as identity_resolve;
 pub use revocation::{

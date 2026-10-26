@@ -207,7 +207,7 @@ fn cles_par_usage_stables_et_distinctes() {
             assert!(vues.insert(pk), "clé distincte : {usage} g{g}");
         }
     }
-    assert_eq!(vues.len(), 13);
+    assert_eq!(vues.len(), 1 + 3 * (Usage::TOUS.len() - 1)); // identité + 3 générations × 6 usages (A-022)
     // Le chemin est bien m/MCOG'/1'/0' depuis le maître SLIP-10 du secret.
     let secret: [u8; 32] = core::array::from_fn(|i| i as u8);
     let attendu = NoeudSlip10::maitre(&secret)

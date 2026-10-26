@@ -84,6 +84,8 @@ pub enum ErreurRacine {
     Durcissement(&'static str),
     /// Mémoire non verrouillable (`mlockall` refusé ou `RLIMIT_MEMLOCK` insuffisant).
     VerrouillageMemoire,
+    /// Délégation `0x45` demandée pour l'identité (indice 0), qui ne se délègue pas.
+    DelegationIdentite,
 }
 
 impl fmt::Display for ErreurRacine {
@@ -138,6 +140,9 @@ impl fmt::Display for ErreurRacine {
             Self::VerrouillageMemoire => f.write_str(
                 "mémoire non verrouillable (mlockall) : exécuter en root, accorder CAP_IPC_LOCK ou relever RLIMIT_MEMLOCK (ulimit -l)",
             ),
+            Self::DelegationIdentite => {
+                f.write_str("délégation refusée : la clé d'identité (indice 0) ne se délègue pas")
+            }
         }
     }
 }

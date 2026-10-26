@@ -11,7 +11,7 @@ use std::fs;
 use std::path::Path;
 
 use miyusceau::{
-    hacher_feuille, racine, sceller, sceller_multi, CleSignature, EcrivainTlv, Empreinte, PreuveCoherence,
+    cog_id_depuis_cle, hacher_feuille, racine, DelegationCle, sceller, sceller_multi, CleSignature, EcrivainTlv, Empreinte, PreuveCoherence,
     PreuveInclusion, TeteRegistre, Titre, AGE_MAX_TETE_DEFAUT_SECS,
 };
 
@@ -56,6 +56,22 @@ fn main() {
     let mut e = EcrivainTlv::new();
     tete.encoder(&mut e).expect("charge");
     ecrire("decoder_titres", "tete", &e.finir());
+
+    // Délégation 0x45 : charge TLV seule, puis sceau complet (identité 0x5a).
+    let identite = CleSignature::depuis_graine(&[0x5a; 32]);
+    let delegation = DelegationCle::nouvelle(
+        &cog_id_depuis_cle(&identite.cle_publique()),
+        5,
+        0,
+        cles[0].cle_publique(),
+        T0,
+        T0 + 90 * 86_400,
+    )
+    .expect("délégation");
+    let mut e = EcrivainTlv::new();
+    delegation.encoder(&mut e).expect("charge de délégation");
+    ecrire("decoder_delegation", "charge", &e.finir());
+    ecrire("decoder_delegation", "sceau", &sceller(&delegation, &cles[1]).expect("sceau de délégation"));
 
     let inclusion = PreuveInclusion::generer(&feuilles, 5).expect("inclusion").encoder().expect("inclusion encodable");
     let coherence = PreuveCoherence::generer(&feuilles, 3).expect("cohérence").encoder().expect("cohérence encodable");

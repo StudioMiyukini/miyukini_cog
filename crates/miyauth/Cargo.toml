@@ -26,6 +26,8 @@ rand_core = { version = "0.6", features = ["getrandom"] }
 http = []
 
 [dev-dependencies]
+# Dérivation réelle des clés d'usage et délégations 0x45 (tests de chaîne, A-022).
+miyuracine = { path = "../miyuracine" }
 
 [lints.rust]
 unsafe_code = "forbid"

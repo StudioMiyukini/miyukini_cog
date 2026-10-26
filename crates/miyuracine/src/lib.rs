@@ -20,6 +20,8 @@
 //!   XChaCha20-Poly1305, format `MYRC` v1) pour le support amovible.
 //! - [`durcir_processus`] : core dumps désactivés, mémoire verrouillée
 //!   (`mlockall`), NC-ANSSI-25.
+//! - [`Racine::deleguer`] : délégation `0x45` d'une clé d'usage, signée par
+//!   l'identité (A-022 §2) ; usages `visas` (5) et `fiches` (6) ajoutés par A-022.
 //! - [`Passation`] : « l'ancienne racine se porte garante de la nouvelle »,
 //!   scellée par les deux clés d'identité ([`verifier_passation`]).
 //!
@@ -35,6 +37,7 @@
 #![forbid(unsafe_code)]
 
 mod chiffrement;
+pub mod delegation;
 pub mod durcissement;
 pub mod erreurs;
 pub mod fichier_cle;

@@ -55,3 +55,10 @@ path = "fuzz_targets/aller_retour.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "decoder_delegation"
+path = "fuzz_targets/decoder_delegation.rs"
+test = false
+doc = false
+bench = false

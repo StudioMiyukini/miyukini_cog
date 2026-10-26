@@ -694,3 +694,84 @@ fn exporter_cle_change_de_mot_de_passe() {
         "option inattendue",
     );
 }
+
+// ─── Délégations 0x45 (A-022 §2) ───────────────────────────────────────────
+
+#[test]
+fn deleguer_produit_des_delegations_verifiables() {
+    use miyusceau::{verifier_delegation, NiveauConfiance};
+
+    let (d, parts) = generer();
+    let p0 = chemin(&parts[0]).to_string();
+    let p1 = chemin(&parts[1]).to_string();
+    let base = ["deleguer", "--part", &p0, "--part", &p1];
+    let racine = racine_de(&parts);
+    let identite = racine.cle_publique_identite();
+    let debut = "1800000000";
+
+    // Plusieurs usages dans un dossier.
+    let sortie = dossier();
+    let sortie_std = succes(
+        &[
+            &base[..],
+            &[
+                "--usage", "visas", "--usage", "emission", "--usage", "fiches", "--generation", "3", "--dossier",
+                chemin(&sortie), "--debut", debut,
+            ],
+        ]
+        .concat(),
+    );
+    assert_eq!(sortie_std.matches("délégation 0x45 écrite").count(), 3, "{sortie_std}");
+    for (usage, nom) in [
+        (miyuracine::Usage::Visas, "visas"),
+        (miyuracine::Usage::Emission, "emission"),
+        (miyuracine::Usage::Fiches, "fiches"),
+    ] {
+        let fichier = sortie.join(format!("delegation-{nom}-g3.sceau"));
+        assert_eq!(fs::metadata(&fichier).unwrap().permissions().mode() & 0o777, 0o644);
+        let lue = verifier_delegation(&fs::read(&fichier).unwrap(), &identite, NiveauConfiance::Souverain, 1_800_000_000)
+            .unwrap();
+        let t = lue.titre();
+        assert_eq!(t.indice(), usage.indice());
+        assert_eq!(t.generation(), 3);
+        assert_eq!(t.cle_publique(), &racine.cle_publique(usage, 3).unwrap());
+        assert_eq!(t.cog_id(), racine.cog_id());
+        assert_eq!(t.pas_apres() - t.pas_avant(), 90 * 86_400);
+    }
+    // Refus d'écraser.
+    refus(
+        &[&base[..], &["--usage", "visas", "--generation", "3", "--dossier", chemin(&sortie)]].concat(),
+        "existe déjà",
+    );
+
+    // Un seul usage vers --sortie, durée 30 j.
+    let unique = d.join("visas.sceau");
+    succes(
+        &[
+            &base[..],
+            &["--usage", "visas", "--generation", "0", "--sortie", chemin(&unique), "--debut", debut, "--duree-jours", "30"],
+        ]
+        .concat(),
+    );
+    let verifiee = verifier_delegation(&fs::read(&unique).unwrap(), &identite, NiveauConfiance::Souverain, 1_800_000_000).unwrap();
+    assert_eq!(verifiee.titre().pas_apres() - verifiee.titre().pas_avant(), 30 * 86_400);
+
+    // Refus : identité, durée > 90 j, sans génération, deux usages vers --sortie, aucun usage.
+    let autre = d.join("autre.sceau");
+    refus(
+        &[&base[..], &["--usage", "identite", "--generation", "0", "--sortie", chemin(&autre)]].concat(),
+        "ne se délègue pas",
+    );
+    refus(
+        &[&base[..], &["--usage", "visas", "--generation", "0", "--sortie", chemin(&autre), "--duree-jours", "91"]].concat(),
+        "durée invalide",
+    );
+    refus(&[&base[..], &["--usage", "visas", "--sortie", chemin(&autre)]].concat(), "--generation est requis");
+    refus(
+        &[&base[..], &["--usage", "visas", "--usage", "fiches", "--generation", "0", "--sortie", chemin(&autre)]].concat(),
+        "--sortie n'accepte qu'un usage",
+    );
+    refus(&[&base[..], &["--usage", "visas", "--usage", "visas", "--generation", "0"]].concat(), "répété");
+    refus(&[&base[..], &["--generation", "0", "--sortie", chemin(&autre)]].concat(), "au moins un --usage");
+    assert!(!autre.exists());
+}
