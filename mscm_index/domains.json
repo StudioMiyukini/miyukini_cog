@@ -80,6 +80,18 @@
   "KMC_R_003": [
     "KMC_R_003"
   ],
+  "MAUTH_CAD_001": [
+    "MAUTH_CAD_001"
+  ],
+  "MAUTH_CAD_002": [
+    "MAUTH_CAD_002"
+  ],
+  "MAUTH_CAD_003": [
+    "MAUTH_CAD_003"
+  ],
+  "MAUTH_CAD_004": [
+    "MAUTH_CAD_004"
+  ],
   "MAUTH_CTX_001": [
     "MAUTH_CTX_001"
   ],
@@ -107,6 +119,54 @@
   "MAUTH_E_003": [
     "MAUTH_E_003"
   ],
+  "MAUTH_PV_001": [
+    "MAUTH_PV_001"
+  ],
+  "MAUTH_PV_002": [
+    "MAUTH_PV_002"
+  ],
+  "MAUTH_PV_010": [
+    "MAUTH_PV_010"
+  ],
+  "MAUTH_PV_011": [
+    "MAUTH_PV_011"
+  ],
+  "MAUTH_PV_020": [
+    "MAUTH_PV_020"
+  ],
+  "MAUTH_PV_021": [
+    "MAUTH_PV_021"
+  ],
+  "MAUTH_PV_030": [
+    "MAUTH_PV_030"
+  ],
+  "MAUTH_PV_031": [
+    "MAUTH_PV_031"
+  ],
+  "MAUTH_PV_040": [
+    "MAUTH_PV_040"
+  ],
+  "MAUTH_PV_041": [
+    "MAUTH_PV_041"
+  ],
+  "MAUTH_PV_050": [
+    "MAUTH_PV_050"
+  ],
+  "MAUTH_PV_051": [
+    "MAUTH_PV_051"
+  ],
+  "MAUTH_PV_052": [
+    "MAUTH_PV_052"
+  ],
+  "MAUTH_PV_060": [
+    "MAUTH_PV_060"
+  ],
+  "MAUTH_PV_061": [
+    "MAUTH_PV_061"
+  ],
+  "MAUTH_PV_070": [
+    "MAUTH_PV_070"
+  ],
   "MAUTH_R_001": [
     "MAUTH_R_001"
   ],
@@ -115,6 +175,21 @@
   ],
   "MAUTH_R_003": [
     "MAUTH_R_003"
+  ],
+  "MAUTH_SEC_001": [
+    "MAUTH_SEC_001"
+  ],
+  "MAUTH_SEC_002": [
+    "MAUTH_SEC_002"
+  ],
+  "MAUTH_SEC_003": [
+    "MAUTH_SEC_003"
+  ],
+  "MAUTH_SEC_004": [
+    "MAUTH_SEC_004"
+  ],
+  "MAUTH_SEC_005": [
+    "MAUTH_SEC_005"
   ],
   "MAUTH_TOOL_001": [
     "MAUTH_TOOL_001"
@@ -170,11 +245,20 @@
   "MSQL_Q_002": [
     "MSQL_Q_002"
   ],
+  "MSQL_Q_002B": [
+    "MSQL_Q_002B"
+  ],
   "MSQL_Q_003": [
     "MSQL_Q_003"
   ],
   "MSQL_Q_004": [
     "MSQL_Q_004"
+  ],
+  "MSQL_Q_005": [
+    "MSQL_Q_005"
+  ],
+  "MSQL_Q_006": [
+    "MSQL_Q_006"
   ],
   "MSQL_S_001": [
     "MSQL_S_001"
@@ -344,165 +428,6 @@
   "MUID-Tooltip": [
     "MUID-Tooltip"
   ],
-  "MUIE-AtomsIndex": [
-    "MUIE-AtomsIndex"
-  ],
-  "MUIE-BeltCol": [
-    "MUIE-BeltCol"
-  ],
-  "MUIE-BeltSlot": [
-    "MUIE-BeltSlot"
-  ],
-  "MUIE-CharSelect": [
-    "MUIE-CharSelect"
-  ],
-  "MUIE-CharSheet": [
-    "MUIE-CharSheet"
-  ],
-  "MUIE-ChatMsg": [
-    "MUIE-ChatMsg"
-  ],
-  "MUIE-ChatPanel": [
-    "MUIE-ChatPanel"
-  ],
-  "MUIE-Convert": [
-    "MUIE-Convert"
-  ],
-  "MUIE-Cube": [
-    "MUIE-Cube"
-  ],
-  "MUIE-D2Button": [
-    "MUIE-D2Button"
-  ],
-  "MUIE-D2Label": [
-    "MUIE-D2Label"
-  ],
-  "MUIE-EquipSlot": [
-    "MUIE-EquipSlot"
-  ],
-  "MUIE-GoldSep": [
-    "MUIE-GoldSep"
-  ],
-  "MUIE-HudBar": [
-    "MUIE-HudBar"
-  ],
-  "MUIE-InvPanel": [
-    "MUIE-InvPanel"
-  ],
-  "MUIE-InvSlot": [
-    "MUIE-InvSlot"
-  ],
-  "MUIE-ItemIcon": [
-    "MUIE-ItemIcon"
-  ],
-  "MUIE-ItemTooltip": [
-    "MUIE-ItemTooltip"
-  ],
-  "MUIE-Lib": [
-    "MUIE-Lib"
-  ],
-  "MUIE-MainMenu": [
-    "MUIE-MainMenu"
-  ],
-  "MUIE-MercPanel": [
-    "MUIE-MercPanel"
-  ],
-  "MUIE-Minimap": [
-    "MUIE-Minimap"
-  ],
-  "MUIE-MinimapMarker": [
-    "MUIE-MinimapMarker"
-  ],
-  "MUIE-MolsIndex": [
-    "MUIE-MolsIndex"
-  ],
-  "MUIE-NpcDialog": [
-    "MUIE-NpcDialog"
-  ],
-  "MUIE-NpcOpt": [
-    "MUIE-NpcOpt"
-  ],
-  "MUIE-Orb": [
-    "MUIE-Orb"
-  ],
-  "MUIE-OrgsIndex": [
-    "MUIE-OrgsIndex"
-  ],
-  "MUIE-PartyMem": [
-    "MUIE-PartyMem"
-  ],
-  "MUIE-PartyPanel": [
-    "MUIE-PartyPanel"
-  ],
-  "MUIE-PauseMenu": [
-    "MUIE-PauseMenu"
-  ],
-  "MUIE-ProgressBar": [
-    "MUIE-ProgressBar"
-  ],
-  "MUIE-QualityText": [
-    "MUIE-QualityText"
-  ],
-  "MUIE-QuestEntry": [
-    "MUIE-QuestEntry"
-  ],
-  "MUIE-QuestLog": [
-    "MUIE-QuestLog"
-  ],
-  "MUIE-ResNum": [
-    "MUIE-ResNum"
-  ],
-  "MUIE-SkillIcon": [
-    "MUIE-SkillIcon"
-  ],
-  "MUIE-SkillNode": [
-    "MUIE-SkillNode"
-  ],
-  "MUIE-SkillTree": [
-    "MUIE-SkillTree"
-  ],
-  "MUIE-SlotFrame": [
-    "MUIE-SlotFrame"
-  ],
-  "MUIE-Stash": [
-    "MUIE-Stash"
-  ],
-  "MUIE-StatRow": [
-    "MUIE-StatRow"
-  ],
-  "MUIE-Theme": [
-    "MUIE-Theme"
-  ],
-  "MUIE-TmplCharSelect": [
-    "MUIE-TmplCharSelect"
-  ],
-  "MUIE-TmplDialog": [
-    "MUIE-TmplDialog"
-  ],
-  "MUIE-TmplGameplay": [
-    "MUIE-TmplGameplay"
-  ],
-  "MUIE-TmplIndex": [
-    "MUIE-TmplIndex"
-  ],
-  "MUIE-TmplLoading": [
-    "MUIE-TmplLoading"
-  ],
-  "MUIE-TmplLobby": [
-    "MUIE-TmplLobby"
-  ],
-  "MUIE-TmplMenu": [
-    "MUIE-TmplMenu"
-  ],
-  "MUIE-Trade": [
-    "MUIE-Trade"
-  ],
-  "MUIE-WPEntry": [
-    "MUIE-WPEntry"
-  ],
-  "MUIE-WPMap": [
-    "MUIE-WPMap"
-  ],
   "MUIT-Animation": [
     "MUIT-Animation"
   ],
@@ -517,9 +442,6 @@
   ],
   "MUIT-PaletteCog": [
     "MUIT-PaletteCog"
-  ],
-  "MUIT-PaletteD2": [
-    "MUIT-PaletteD2"
   ],
   "MUIT-Radius": [
     "MUIT-Radius"
@@ -536,9 +458,6 @@
   "MUIT-ThemeCog": [
     "MUIT-ThemeCog"
   ],
-  "MUIT-ThemeD2": [
-    "MUIT-ThemeD2"
-  ],
   "MUIT-Themes": [
     "MUIT-Themes"
   ],
@@ -547,6 +466,12 @@
   ],
   "MUIT-ZIndex": [
     "MUIT-ZIndex"
+  ],
+  "`jayrdv_domain`": [
+    "`jayrdv_domain`"
+  ],
+  "`jayrdv_lib`": [
+    "`jayrdv_lib`"
   ],
   "accounting": [
     "toolkit.accounting",
@@ -558,10 +483,6 @@
   ],
   "adminTheme": [
     "cog.adminTheme"
-  ],
-  "ai": [
-    "lifegame.ai",
-    "lifegame.ai.decide_action"
   ],
   "alicia": [
     "service.alicia",
@@ -579,6 +500,7 @@
     "service.alicia.api.handlers.rooms",
     "service.alicia.api.handlers.state",
     "service.alicia.api.router",
+    "service.alicia.api.security",
     "service.alicia.api.server",
     "service.alicia.capabilities_runtime",
     "service.alicia.command",
@@ -586,22 +508,38 @@
     "service.alicia.cores_gate",
     "service.alicia.cores_gate.lib",
     "service.alicia.dispatcher",
+    "service.alicia.dispatcher.chemin_politiques",
     "service.alicia.dispatcher.core_gate",
     "service.alicia.dispatcher.dispatcher",
+    "service.alicia.dispatcher.enrichisseur_intention",
     "service.alicia.dispatcher.errors",
+    "service.alicia.dispatcher.intention_alicia",
     "service.alicia.dispatcher.lib",
     "service.alicia.dispatcher.service_client",
+    "service.alicia.dispatcher.strongfather_core_gate",
+    "service.alicia.dispatcher.tests.strongfather_gate",
     "service.alicia.errors",
     "service.alicia.intent",
     "service.alicia.memory",
+    "service.alicia.memory.bin.import",
+    "service.alicia.memory.copie_heritee",
+    "service.alicia.memory.entrepot",
     "service.alicia.memory.errors",
+    "service.alicia.memory.heritage",
+    "service.alicia.memory.kindmother",
     "service.alicia.memory.learning",
     "service.alicia.memory.lib",
     "service.alicia.memory.prompt",
+    "service.alicia.memory.recherche",
+    "service.alicia.memory.schema",
     "service.alicia.memory.store",
+    "service.alicia.memory.tests.fact_versions",
+    "service.alicia.memory.tests.kindmother",
     "service.alicia.memory.types",
+    "service.alicia.memory.vif",
     "service.alicia.nlu-bridge",
     "service.alicia.nlu-fallback",
+    "service.alicia.nlu-local",
     "service.alicia.orchestrator",
     "service.alicia.orchestrator.admin",
     "service.alicia.rest-api",
@@ -617,6 +555,7 @@
     "service.alicia.skills.tooling",
     "service.alicia.skills.watcher",
     "service.alicia.snapshot",
+    "service.alicia.tests.strongfather_runtime",
     "toolkit.alicia",
     "toolkit.alicia.automations",
     "toolkit.alicia.automations.admin",
@@ -746,6 +685,9 @@
   "bondingbrother_connection_error_already_connected": [
     "bondingbrother_connection_error_already_connected"
   ],
+  "bondingbrother_connection_error_not_implemented": [
+    "bondingbrother_connection_error_not_implemented"
+  ],
   "bondingbrother_connection_id": [
     "bondingbrother_connection_id"
   ],
@@ -761,14 +703,68 @@
   "bondingbrother_connection_test_creation": [
     "bondingbrother_connection_test_creation"
   ],
+  "bondingbrother_connection_test_stub_refuse": [
+    "bondingbrother_connection_test_stub_refuse"
+  ],
+  "bondingbrother_decision_autorisee": [
+    "bondingbrother_decision_autorisee"
+  ],
+  "bondingbrother_decision_autorisee_couvre": [
+    "bondingbrother_decision_autorisee_couvre"
+  ],
+  "bondingbrother_decision_autorisee_decision": [
+    "bondingbrother_decision_autorisee_decision"
+  ],
+  "bondingbrother_decision_autorisee_empreinte": [
+    "bondingbrother_decision_autorisee_empreinte"
+  ],
+  "bondingbrother_decision_autorisee_regle": [
+    "bondingbrother_decision_autorisee_regle"
+  ],
+  "bondingbrother_executer_si_autorise": [
+    "bondingbrother_executer_si_autorise"
+  ],
+  "bondingbrother_gate": [
+    "bondingbrother_gate"
+  ],
+  "bondingbrother_gate_autoriser": [
+    "bondingbrother_gate_autoriser"
+  ],
+  "bondingbrother_gate_test_allow_deny": [
+    "bondingbrother_gate_test_allow_deny"
+  ],
+  "bondingbrother_gate_test_seal": [
+    "bondingbrother_gate_test_seal"
+  ],
+  "bondingbrother_gate_trait": [
+    "bondingbrother_gate_trait"
+  ],
   "bondingbrother_lib": [
     "bondingbrother_lib"
+  ],
+  "bondingbrother_porte_strongfather": [
+    "bondingbrother_porte_strongfather"
+  ],
+  "bondingbrother_porte_strongfather_from_file": [
+    "bondingbrother_porte_strongfather_from_file"
+  ],
+  "bondingbrother_porte_strongfather_from_policies": [
+    "bondingbrother_porte_strongfather_from_policies"
+  ],
+  "bondingbrother_porte_strongfather_new": [
+    "bondingbrother_porte_strongfather_new"
+  ],
+  "bondingbrother_refus": [
+    "bondingbrother_refus"
   ],
   "bondingbrother_sync_error": [
     "bondingbrother_sync_error"
   ],
   "bondingbrother_sync_error_failed": [
     "bondingbrother_sync_error_failed"
+  ],
+  "bondingbrother_sync_error_not_implemented": [
+    "bondingbrother_sync_error_not_implemented"
   ],
   "bondingbrother_sync_manager_sync": [
     "bondingbrother_sync_manager_sync"
@@ -787,6 +783,24 @@
   ],
   "bondingbrother_sync_test_strategy": [
     "bondingbrother_sync_test_strategy"
+  ],
+  "bondingbrother_sync_test_stub_refuse": [
+    "bondingbrother_sync_test_stub_refuse"
+  ],
+  "bondingbrother_test_autorise_execute_une_fois": [
+    "bondingbrother_test_autorise_execute_une_fois"
+  ],
+  "bondingbrother_test_fichier_invalide": [
+    "bondingbrother_test_fichier_invalide"
+  ],
+  "bondingbrother_test_porte_bout_en_bout": [
+    "bondingbrother_test_porte_bout_en_bout"
+  ],
+  "bondingbrother_test_porte_partagee": [
+    "bondingbrother_test_porte_partagee"
+  ],
+  "bondingbrother_test_refus_n_execute_pas": [
+    "bondingbrother_test_refus_n_execute_pas"
   ],
   "bondingbrother_translation": [
     "bondingbrother_translation"
@@ -811,6 +825,9 @@
   ],
   "bondingbrother_translator_translate": [
     "bondingbrother_translator_translate"
+  ],
+  "borderguard_arrete": [
+    "borderguard_arrete"
   ],
   "borderguard_boundary": [
     "borderguard_boundary"
@@ -875,8 +892,17 @@
   "borderguard_crossing_test_rule_creation": [
     "borderguard_crossing_test_rule_creation"
   ],
+  "borderguard_fuzz_arrete": [
+    "borderguard_fuzz_arrete"
+  ],
+  "borderguard_fuzz_generer_graines": [
+    "borderguard_fuzz_generer_graines"
+  ],
   "borderguard_metadata": [
     "borderguard_metadata"
+  ],
+  "borderguard_module_arrete": [
+    "borderguard_module_arrete"
   ],
   "borderguard_module_boundary": [
     "borderguard_module_boundary"
@@ -893,8 +919,14 @@
   "borderguard_module_trust_level": [
     "borderguard_module_trust_level"
   ],
+  "borderguard_module_zone": [
+    "borderguard_module_zone"
+  ],
   "borderguard_registry": [
     "borderguard_registry"
+  ],
+  "borderguard_tests_arretes": [
+    "borderguard_tests_arretes"
   ],
   "borderguard_trust_level": [
     "borderguard_trust_level"
@@ -920,6 +952,9 @@
   "borderguard_trust_level_verified": [
     "borderguard_trust_level_verified"
   ],
+  "borderguard_zone": [
+    "borderguard_zone"
+  ],
   "calc": [
     "toolkit.calc",
     "toolkit.calc.miyucalc"
@@ -939,8 +974,17 @@
   "caringnanny_health_status_healthy": [
     "caringnanny_health_status_healthy"
   ],
+  "caringnanny_health_status_inconnu": [
+    "caringnanny_health_status_inconnu"
+  ],
+  "caringnanny_health_status_rang_gravite": [
+    "caringnanny_health_status_rang_gravite"
+  ],
   "caringnanny_health_status_unhealthy": [
     "caringnanny_health_status_unhealthy"
+  ],
+  "caringnanny_health_test_composant_inconnu": [
+    "caringnanny_health_test_composant_inconnu"
   ],
   "caringnanny_health_test_status_equality": [
     "caringnanny_health_test_status_equality"
@@ -999,6 +1043,12 @@
   "caringnanny_observer_trait": [
     "caringnanny_observer_trait"
   ],
+  "caringnanny_vigies": [
+    "caringnanny_vigies"
+  ],
+  "caringnanny_vigies_test_capteur_perime_inconnu": [
+    "caringnanny_vigies_test_capteur_perime_inconnu"
+  ],
   "central": [
     "central"
   ],
@@ -1008,8 +1058,29 @@
   "central_audio": [
     "central_audio"
   ],
+  "central_auth_import_heritage": [
+    "central_auth_import_heritage"
+  ],
   "central_auth_kindmother_client_db": [
     "central_auth_kindmother_client_db"
+  ],
+  "central_canal_officiel": [
+    "central_canal_officiel"
+  ],
+  "central_canal_officiel_alertes": [
+    "central_canal_officiel_alertes"
+  ],
+  "central_canal_officiel_installateur": [
+    "central_canal_officiel_installateur"
+  ],
+  "central_canal_officiel_modeles": [
+    "central_canal_officiel_modeles"
+  ],
+  "central_canal_officiel_persistance": [
+    "central_canal_officiel_persistance"
+  ],
+  "central_cle_service": [
+    "central_cle_service"
   ],
   "central_components_header": [
     "central_components_header"
@@ -1029,11 +1100,26 @@
   "central_data": [
     "central_data"
   ],
+  "central_fuzz_etat_mcce": [
+    "central_fuzz_etat_mcce"
+  ],
+  "central_fuzz_generer_graines": [
+    "central_fuzz_generer_graines"
+  ],
   "central_kindmother_launcher": [
     "central_kindmother_launcher"
   ],
   "central_llm_client": [
     "central_llm_client"
+  ],
+  "central_maia_memoire": [
+    "central_maia_memoire"
+  ],
+  "central_maia_memoire_client": [
+    "central_maia_memoire_client"
+  ],
+  "central_maia_memoire_modele": [
+    "central_maia_memoire_modele"
   ],
   "central_market_client": [
     "central_market_client"
@@ -1071,6 +1157,12 @@
   "central_mobile_components_service_card": [
     "central_mobile_components_service_card"
   ],
+  "central_mobile_identite": [
+    "central_mobile_identite"
+  ],
+  "central_mobile_login": [
+    "central_mobile_login"
+  ],
   "central_mobile_main": [
     "central_mobile_main"
   ],
@@ -1079,6 +1171,9 @@
   ],
   "central_mobile_screens_connexion": [
     "central_mobile_screens_connexion"
+  ],
+  "central_mobile_screens_identite": [
+    "central_mobile_screens_identite"
   ],
   "central_mobile_screens_pairing": [
     "central_mobile_screens_pairing"
@@ -1110,11 +1205,20 @@
   "central_remote_discovery": [
     "central_remote_discovery"
   ],
+  "central_remote_e2e": [
+    "central_remote_e2e"
+  ],
+  "central_remote_identite": [
+    "central_remote_identite"
+  ],
   "central_remote_lib": [
     "central_remote_lib"
   ],
   "central_remote_module": [
     "central_remote_module"
+  ],
+  "central_remote_paired_store": [
+    "central_remote_paired_store"
   ],
   "central_remote_pairing": [
     "central_remote_pairing"
@@ -1122,14 +1226,17 @@
   "central_remote_protocol": [
     "central_remote_protocol"
   ],
+  "central_remote_protocol_identite": [
+    "central_remote_protocol_identite"
+  ],
   "central_remote_protocol_lib": [
     "central_remote_protocol_lib"
   ],
+  "central_remote_protocol_pairing": [
+    "central_remote_protocol_pairing"
+  ],
   "central_remote_server": [
     "central_remote_server"
-  ],
-  "central_remote_session": [
-    "central_remote_session"
   ],
   "central_screens_connexion": [
     "central_screens_connexion"
@@ -1142,6 +1249,12 @@
   ],
   "central_screens_rite_entree": [
     "central_screens_rite_entree"
+  ],
+  "central_service_manager_confiance": [
+    "central_service_manager_confiance"
+  ],
+  "central_service_manager_gouvernance": [
+    "central_service_manager_gouvernance"
   ],
   "central_service_manager_installer": [
     "central_service_manager_installer"
@@ -1176,122 +1289,8 @@
   "central_services_external_service_view": [
     "central_services_external_service_view"
   ],
-  "central_services_game_view": [
-    "central_services_game_view"
-  ],
   "central_services_home": [
     "central_services_home"
-  ],
-  "central_services_jay1tribu_mod": [
-    "central_services_jay1tribu_mod"
-  ],
-  "central_services_jaykoa_calendar_view": [
-    "central_services_jaykoa_calendar_view"
-  ],
-  "central_services_jaykoa_components": [
-    "central_services_jaykoa_components"
-  ],
-  "central_services_jaykoa_day_view": [
-    "central_services_jaykoa_day_view"
-  ],
-  "central_services_jaykoa_event_form": [
-    "central_services_jaykoa_event_form"
-  ],
-  "central_services_jaykoa_mod": [
-    "central_services_jaykoa_mod"
-  ],
-  "central_services_jaykoa_month_view": [
-    "central_services_jaykoa_month_view"
-  ],
-  "central_services_jaykoa_schedule_view": [
-    "central_services_jaykoa_schedule_view"
-  ],
-  "central_services_jaykoa_sidebar": [
-    "central_services_jaykoa_sidebar"
-  ],
-  "central_services_jaykoa_week_view": [
-    "central_services_jaykoa_week_view"
-  ],
-  "central_services_jaykonta_components": [
-    "central_services_jaykonta_components"
-  ],
-  "central_services_jaykonta_entry_point": [
-    "central_services_jaykonta_entry_point"
-  ],
-  "central_services_jaykonta_mod": [
-    "central_services_jaykonta_mod"
-  ],
-  "central_services_jaykonta_purse_dashboard": [
-    "central_services_jaykonta_purse_dashboard"
-  ],
-  "central_services_jaykonta_purse_forecast": [
-    "central_services_jaykonta_purse_forecast"
-  ],
-  "central_services_jaykonta_purse_movement_form": [
-    "central_services_jaykonta_purse_movement_form"
-  ],
-  "central_services_jaykonta_purse_movements": [
-    "central_services_jaykonta_purse_movements"
-  ],
-  "central_services_jaykonta_purse_recurring": [
-    "central_services_jaykonta_purse_recurring"
-  ],
-  "central_services_jaykonta_sidebar": [
-    "central_services_jaykonta_sidebar"
-  ],
-  "central_services_jaykonta_view": [
-    "central_services_jaykonta_view"
-  ],
-  "central_services_jaymanga_aggregation": [
-    "central_services_jaymanga_aggregation"
-  ],
-  "central_services_jaymanga_boutique": [
-    "central_services_jaymanga_boutique"
-  ],
-  "central_services_jaymanga_catalogue": [
-    "central_services_jaymanga_catalogue"
-  ],
-  "central_services_jaymanga_chapters": [
-    "central_services_jaymanga_chapters"
-  ],
-  "central_services_jaymanga_components": [
-    "central_services_jaymanga_components"
-  ],
-  "central_services_jaymanga_dashboard": [
-    "central_services_jaymanga_dashboard"
-  ],
-  "central_services_jaymanga_library": [
-    "central_services_jaymanga_library"
-  ],
-  "central_services_jaymanga_mod": [
-    "central_services_jaymanga_mod"
-  ],
-  "central_services_jaymanga_onboarding": [
-    "central_services_jaymanga_onboarding"
-  ],
-  "central_services_jaymanga_profile": [
-    "central_services_jaymanga_profile"
-  ],
-  "central_services_jaymanga_promotions": [
-    "central_services_jaymanga_promotions"
-  ],
-  "central_services_jaymanga_reader": [
-    "central_services_jaymanga_reader"
-  ],
-  "central_services_jaymanga_reader_stats": [
-    "central_services_jaymanga_reader_stats"
-  ],
-  "central_services_jaymanga_sales": [
-    "central_services_jaymanga_sales"
-  ],
-  "central_services_jaymanga_series": [
-    "central_services_jaymanga_series"
-  ],
-  "central_services_jaymanga_sidebar": [
-    "central_services_jaymanga_sidebar"
-  ],
-  "central_services_jaymanga_work_form": [
-    "central_services_jaymanga_work_form"
   ],
   "central_services_market_catalog": [
     "central_services_market_catalog"
@@ -1314,29 +1313,11 @@
   "central_services_miyukini_whisper_mod": [
     "central_services_miyukini_whisper_mod"
   ],
-  "central_services_miyukiniwatch_audit": [
-    "central_services_miyukiniwatch_audit"
-  ],
-  "central_services_miyukiniwatch_dashboard": [
-    "central_services_miyukiniwatch_dashboard"
-  ],
-  "central_services_miyukiniwatch_detail": [
-    "central_services_miyukiniwatch_detail"
-  ],
-  "central_services_miyukiniwatch_mod": [
-    "central_services_miyukiniwatch_mod"
-  ],
-  "central_services_miyukiniwatch_params": [
-    "central_services_miyukiniwatch_params"
-  ],
   "central_services_mws_settings": [
     "central_services_mws_settings"
   ],
   "central_services_mws_view": [
     "central_services_mws_view"
-  ],
-  "central_services_service_view": [
-    "central_services_service_view"
   ],
   "central_state": [
     "central_state"
@@ -1578,9 +1559,15 @@
     "cog.cloudViewProfile.changePassword",
     "cog.cloudViewProfile.createAppPassword",
     "cog.cloudViewProfile.init",
+    "cog.cloudViewProfile.linkMiyuDevice",
+    "cog.cloudViewProfile.linkMiyuIdentity",
     "cog.cloudViewProfile.loadAppPasswords",
+    "cog.cloudViewProfile.loadMiyuDevices",
+    "cog.cloudViewProfile.loadMiyuIdentities",
+    "cog.cloudViewProfile.removeMiyuDevice",
     "cog.cloudViewProfile.revokeAppPassword",
-    "cog.cloudViewProfile.t"
+    "cog.cloudViewProfile.t",
+    "cog.cloudViewProfile.unlinkMiyuIdentity"
   ],
   "cloudViewShared": [
     "cog.cloudViewShared"
@@ -1678,288 +1665,6 @@
   "crate_miyucloud_lib": [
     "crate_miyucloud_lib"
   ],
-  "crates_mge_audio_lib": [
-    "crates_mge_audio_lib"
-  ],
-  "crates_mge_content_lib": [
-    "crates_mge_content_lib"
-  ],
-  "crates_mge_core_lib": [
-    "crates_mge_core_lib"
-  ],
-  "crates_mge_gameplay_actions": [
-    "crates_mge_gameplay_actions"
-  ],
-  "crates_mge_gameplay_character": [
-    "crates_mge_gameplay_character"
-  ],
-  "crates_mge_gameplay_combat": [
-    "crates_mge_gameplay_combat"
-  ],
-  "crates_mge_gameplay_effects": [
-    "crates_mge_gameplay_effects"
-  ],
-  "crates_mge_gameplay_lib": [
-    "crates_mge_gameplay_lib"
-  ],
-  "crates_mge_gameplay_progression": [
-    "crates_mge_gameplay_progression"
-  ],
-  "crates_mge_gameplay_skills": [
-    "crates_mge_gameplay_skills"
-  ],
-  "crates_mge_gameplay_stats": [
-    "crates_mge_gameplay_stats"
-  ],
-  "crates_mge_input_lib": [
-    "crates_mge_input_lib"
-  ],
-  "crates_mge_items_affixes": [
-    "crates_mge_items_affixes"
-  ],
-  "crates_mge_items_charms": [
-    "crates_mge_items_charms"
-  ],
-  "crates_mge_items_crafting": [
-    "crates_mge_items_crafting"
-  ],
-  "crates_mge_items_economy": [
-    "crates_mge_items_economy"
-  ],
-  "crates_mge_items_item": [
-    "crates_mge_items_item"
-  ],
-  "crates_mge_items_lib": [
-    "crates_mge_items_lib"
-  ],
-  "crates_mge_items_loot": [
-    "crates_mge_items_loot"
-  ],
-  "crates_mge_items_rarity": [
-    "crates_mge_items_rarity"
-  ],
-  "crates_mge_items_runewords": [
-    "crates_mge_items_runewords"
-  ],
-  "crates_mge_items_simulator": [
-    "crates_mge_items_simulator"
-  ],
-  "crates_mge_items_socketables": [
-    "crates_mge_items_socketables"
-  ],
-  "crates_mge_items_sockets": [
-    "crates_mge_items_sockets"
-  ],
-  "crates_mge_items_uniques": [
-    "crates_mge_items_uniques"
-  ],
-  "crates_mge_items_vendors": [
-    "crates_mge_items_vendors"
-  ],
-  "crates_mge_meta_hardcore": [
-    "crates_mge_meta_hardcore"
-  ],
-  "crates_mge_meta_harness": [
-    "crates_mge_meta_harness"
-  ],
-  "crates_mge_meta_ladder": [
-    "crates_mge_meta_ladder"
-  ],
-  "crates_mge_meta_lib": [
-    "crates_mge_meta_lib"
-  ],
-  "crates_mge_meta_mercenary": [
-    "crates_mge_meta_mercenary"
-  ],
-  "crates_mge_meta_party": [
-    "crates_mge_meta_party"
-  ],
-  "crates_mge_meta_pvp": [
-    "crates_mge_meta_pvp"
-  ],
-  "crates_mge_meta_services": [
-    "crates_mge_meta_services"
-  ],
-  "crates_mge_monsters_ai": [
-    "crates_mge_monsters_ai"
-  ],
-  "crates_mge_monsters_lib": [
-    "crates_mge_monsters_lib"
-  ],
-  "crates_mge_monsters_roster": [
-    "crates_mge_monsters_roster"
-  ],
-  "crates_mge_monsters_scripts": [
-    "crates_mge_monsters_scripts"
-  ],
-  "crates_mge_monsters_variants": [
-    "crates_mge_monsters_variants"
-  ],
-  "crates_mge_nav_lib": [
-    "crates_mge_nav_lib"
-  ],
-  "crates_mge_net_lib": [
-    "crates_mge_net_lib"
-  ],
-  "crates_mge_proto_lib": [
-    "crates_mge_proto_lib"
-  ],
-  "crates_mge_render_animation": [
-    "crates_mge_render_animation"
-  ],
-  "crates_mge_render_atlas": [
-    "crates_mge_render_atlas"
-  ],
-  "crates_mge_render_batch": [
-    "crates_mge_render_batch"
-  ],
-  "crates_mge_render_camera": [
-    "crates_mge_render_camera"
-  ],
-  "crates_mge_render_lib": [
-    "crates_mge_render_lib"
-  ],
-  "crates_mge_render_lighting": [
-    "crates_mge_render_lighting"
-  ],
-  "crates_mge_render_pass": [
-    "crates_mge_render_pass"
-  ],
-  "crates_mge_render_pipeline": [
-    "crates_mge_render_pipeline"
-  ],
-  "crates_mge_render_quality": [
-    "crates_mge_render_quality"
-  ],
-  "crates_mge_render_telemetry": [
-    "crates_mge_render_telemetry"
-  ],
-  "crates_mge_render_vfx": [
-    "crates_mge_render_vfx"
-  ],
-  "crates_mge_replication_lib": [
-    "crates_mge_replication_lib"
-  ],
-  "crates_mge_save_lib": [
-    "crates_mge_save_lib"
-  ],
-  "crates_mge_sim_civil_skills": [
-    "crates_mge_sim_civil_skills"
-  ],
-  "crates_mge_sim_constants": [
-    "crates_mge_sim_constants"
-  ],
-  "crates_mge_sim_entity": [
-    "crates_mge_sim_entity"
-  ],
-  "crates_mge_sim_gather_node": [
-    "crates_mge_sim_gather_node"
-  ],
-  "crates_mge_sim_inventory": [
-    "crates_mge_sim_inventory"
-  ],
-  "crates_mge_sim_lib": [
-    "crates_mge_sim_lib"
-  ],
-  "crates_mge_sim_player_state": [
-    "crates_mge_sim_player_state"
-  ],
-  "crates_mge_sim_sim_tick": [
-    "crates_mge_sim_sim_tick"
-  ],
-  "crates_mge_sim_skill_disk": [
-    "crates_mge_sim_skill_disk"
-  ],
-  "crates_mge_sim_spatial": [
-    "crates_mge_sim_spatial"
-  ],
-  "crates_mge_sim_world_map": [
-    "crates_mge_sim_world_map"
-  ],
-  "crates_mge_sim_zone_state": [
-    "crates_mge_sim_zone_state"
-  ],
-  "crates_mge_ui_charsheet": [
-    "crates_mge_ui_charsheet"
-  ],
-  "crates_mge_ui_debug": [
-    "crates_mge_ui_debug"
-  ],
-  "crates_mge_ui_feedback": [
-    "crates_mge_ui_feedback"
-  ],
-  "crates_mge_ui_hud": [
-    "crates_mge_ui_hud"
-  ],
-  "crates_mge_ui_input_map": [
-    "crates_mge_ui_input_map"
-  ],
-  "crates_mge_ui_inventory": [
-    "crates_mge_ui_inventory"
-  ],
-  "crates_mge_ui_lib": [
-    "crates_mge_ui_lib"
-  ],
-  "crates_mge_ui_menu": [
-    "crates_mge_ui_menu"
-  ],
-  "crates_mge_ui_quest": [
-    "crates_mge_ui_quest"
-  ],
-  "crates_mge_ui_shell": [
-    "crates_mge_ui_shell"
-  ],
-  "crates_mge_ui_stash": [
-    "crates_mge_ui_stash"
-  ],
-  "crates_mge_ui_tooltip": [
-    "crates_mge_ui_tooltip"
-  ],
-  "crates_mge_ui_vendor": [
-    "crates_mge_ui_vendor"
-  ],
-  "crates_mge_ui_visual_state": [
-    "crates_mge_ui_visual_state"
-  ],
-  "crates_mge_world_boss": [
-    "crates_mge_world_boss"
-  ],
-  "crates_mge_world_camp": [
-    "crates_mge_world_camp"
-  ],
-  "crates_mge_world_chunks": [
-    "crates_mge_world_chunks"
-  ],
-  "crates_mge_world_events": [
-    "crates_mge_world_events"
-  ],
-  "crates_mge_world_lib": [
-    "crates_mge_world_lib"
-  ],
-  "crates_mge_world_progression": [
-    "crates_mge_world_progression"
-  ],
-  "crates_mge_world_quests": [
-    "crates_mge_world_quests"
-  ],
-  "crates_mge_world_randomize": [
-    "crates_mge_world_randomize"
-  ],
-  "crates_mge_world_runner": [
-    "crates_mge_world_runner"
-  ],
-  "crates_mge_world_secondary": [
-    "crates_mge_world_secondary"
-  ],
-  "crates_mge_world_transition": [
-    "crates_mge_world_transition"
-  ],
-  "crates_mge_world_waypoints": [
-    "crates_mge_world_waypoints"
-  ],
-  "crates_mge_world_zone": [
-    "crates_mge_world_zone"
-  ],
   "data": [
     "toolkit.data",
     "toolkit.data.miyusql"
@@ -1986,18 +1691,14 @@
     "toolkit.discovery",
     "toolkit.discovery.miyudiscovery"
   ],
-  "entities": [
-    "lifegame.entities",
-    "lifegame.entities.building",
-    "lifegame.entities.building_struct",
-    "lifegame.entities.building_type",
-    "lifegame.entities.creature",
-    "lifegame.entities.creature_struct",
-    "lifegame.entities.creature_type",
-    "lifegame.entities.manager",
-    "lifegame.entities.race",
-    "lifegame.entities.unit",
-    "lifegame.entities.unit_struct"
+  "docsComponent": [
+    "cog.docsComponent"
+  ],
+  "docsDoc": [
+    "cog.docsDoc"
+  ],
+  "docsList": [
+    "cog.docsList"
   ],
   "envconfig_from_env": [
     "envconfig_from_env"
@@ -2039,6 +1740,7 @@
     "everbuddy_lib"
   ],
   "everbuddy_migration": [
+    "everbuddy_migration",
     "everbuddy_migration"
   ],
   "everbuddy_migration_error": [
@@ -2046,6 +1748,9 @@
   ],
   "everbuddy_migration_error_failed": [
     "everbuddy_migration_error_failed"
+  ],
+  "everbuddy_migration_error_non_implemente": [
+    "everbuddy_migration_error_non_implemente"
   ],
   "everbuddy_migration_executor_execute": [
     "everbuddy_migration_executor_execute"
@@ -2058,6 +1763,9 @@
   ],
   "everbuddy_migration_test_creation": [
     "everbuddy_migration_test_creation"
+  ],
+  "everbuddy_migration_test_refus_explicite": [
+    "everbuddy_migration_test_refus_explicite"
   ],
   "everbuddy_migration_to_version": [
     "everbuddy_migration_to_version"
@@ -2090,342 +1798,6 @@
     "toolkit.export",
     "toolkit.export.miyuexport"
   ],
-  "gameAllumina": [
-    "cog.gameAllumina"
-  ],
-  "games_allumina_app": [
-    "games_allumina_app"
-  ],
-  "games_allumina_build": [
-    "games_allumina_build"
-  ],
-  "games_allumina_components_cc": [
-    "games_allumina_components_cc"
-  ],
-  "games_allumina_components_equipment": [
-    "games_allumina_components_equipment"
-  ],
-  "games_allumina_components_item": [
-    "games_allumina_components_item"
-  ],
-  "games_allumina_components_mercenary": [
-    "games_allumina_components_mercenary"
-  ],
-  "games_allumina_components_mob": [
-    "games_allumina_components_mob"
-  ],
-  "games_allumina_components_mod": [
-    "games_allumina_components_mod"
-  ],
-  "games_allumina_components_npc": [
-    "games_allumina_components_npc"
-  ],
-  "games_allumina_components_player": [
-    "games_allumina_components_player"
-  ],
-  "games_allumina_components_projectile": [
-    "games_allumina_components_projectile"
-  ],
-  "games_allumina_components_quest": [
-    "games_allumina_components_quest"
-  ],
-  "games_allumina_components_skill": [
-    "games_allumina_components_skill"
-  ],
-  "games_allumina_components_summon": [
-    "games_allumina_components_summon"
-  ],
-  "games_allumina_components_world": [
-    "games_allumina_components_world"
-  ],
-  "games_allumina_data_affixes": [
-    "games_allumina_data_affixes"
-  ],
-  "games_allumina_data_classes": [
-    "games_allumina_data_classes"
-  ],
-  "games_allumina_data_items": [
-    "games_allumina_data_items"
-  ],
-  "games_allumina_data_mercenary": [
-    "games_allumina_data_mercenary"
-  ],
-  "games_allumina_data_mobs": [
-    "games_allumina_data_mobs"
-  ],
-  "games_allumina_data_mod": [
-    "games_allumina_data_mod"
-  ],
-  "games_allumina_data_skills": [
-    "games_allumina_data_skills"
-  ],
-  "games_allumina_data_summon": [
-    "games_allumina_data_summon"
-  ],
-  "games_allumina_data_uniques": [
-    "games_allumina_data_uniques"
-  ],
-  "games_allumina_ecs": [
-    "games_allumina_ecs"
-  ],
-  "games_allumina_lib": [
-    "games_allumina_lib"
-  ],
-  "games_allumina_main": [
-    "games_allumina_main"
-  ],
-  "games_allumina_network_interpolation": [
-    "games_allumina_network_interpolation"
-  ],
-  "games_allumina_network_lobby_client": [
-    "games_allumina_network_lobby_client"
-  ],
-  "games_allumina_network_prediction": [
-    "games_allumina_network_prediction"
-  ],
-  "games_allumina_network_snapshot_renderer": [
-    "games_allumina_network_snapshot_renderer"
-  ],
-  "games_allumina_plugins_camera": [
-    "games_allumina_plugins_camera"
-  ],
-  "games_allumina_plugins_cc": [
-    "games_allumina_plugins_cc"
-  ],
-  "games_allumina_plugins_combat": [
-    "games_allumina_plugins_combat"
-  ],
-  "games_allumina_plugins_content": [
-    "games_allumina_plugins_content"
-  ],
-  "games_allumina_plugins_inventory": [
-    "games_allumina_plugins_inventory"
-  ],
-  "games_allumina_plugins_isometric": [
-    "games_allumina_plugins_isometric"
-  ],
-  "games_allumina_plugins_loot": [
-    "games_allumina_plugins_loot"
-  ],
-  "games_allumina_plugins_mercenary": [
-    "games_allumina_plugins_mercenary"
-  ],
-  "games_allumina_plugins_mob_ai": [
-    "games_allumina_plugins_mob_ai"
-  ],
-  "games_allumina_plugins_mod": [
-    "games_allumina_plugins_mod"
-  ],
-  "games_allumina_plugins_network": [
-    "games_allumina_plugins_network"
-  ],
-  "games_allumina_plugins_skills": [
-    "games_allumina_plugins_skills"
-  ],
-  "games_allumina_plugins_summon": [
-    "games_allumina_plugins_summon"
-  ],
-  "games_allumina_plugins_tilemap": [
-    "games_allumina_plugins_tilemap"
-  ],
-  "games_allumina_render_animation": [
-    "games_allumina_render_animation"
-  ],
-  "games_allumina_render_camera": [
-    "games_allumina_render_camera"
-  ],
-  "games_allumina_render_feedback": [
-    "games_allumina_render_feedback"
-  ],
-  "games_allumina_render_figures": [
-    "games_allumina_render_figures"
-  ],
-  "games_allumina_render_font": [
-    "games_allumina_render_font"
-  ],
-  "games_allumina_render_item_icon": [
-    "games_allumina_render_item_icon"
-  ],
-  "games_allumina_render_mod": [
-    "games_allumina_render_mod"
-  ],
-  "games_allumina_render_particles": [
-    "games_allumina_render_particles"
-  ],
-  "games_allumina_render_pixel_sprite": [
-    "games_allumina_render_pixel_sprite"
-  ],
-  "games_allumina_render_renderer": [
-    "games_allumina_render_renderer"
-  ],
-  "games_allumina_render_renderer_input": [
-    "games_allumina_render_renderer_input"
-  ],
-  "games_allumina_render_renderer_online": [
-    "games_allumina_render_renderer_online"
-  ],
-  "games_allumina_render_shapes": [
-    "games_allumina_render_shapes"
-  ],
-  "games_allumina_render_skill_fx": [
-    "games_allumina_render_skill_fx"
-  ],
-  "games_allumina_render_skill_icon": [
-    "games_allumina_render_skill_icon"
-  ],
-  "games_allumina_render_sprite": [
-    "games_allumina_render_sprite"
-  ],
-  "games_allumina_render_sprites_data": [
-    "games_allumina_render_sprites_data"
-  ],
-  "games_allumina_render_tilemap_renderer": [
-    "games_allumina_render_tilemap_renderer"
-  ],
-  "games_allumina_render_vertex": [
-    "games_allumina_render_vertex"
-  ],
-  "games_allumina_rng": [
-    "games_allumina_rng"
-  ],
-  "games_allumina_save": [
-    "games_allumina_save"
-  ],
-  "games_allumina_systems_ai": [
-    "games_allumina_systems_ai"
-  ],
-  "games_allumina_systems_balance": [
-    "games_allumina_systems_balance"
-  ],
-  "games_allumina_systems_boss": [
-    "games_allumina_systems_boss"
-  ],
-  "games_allumina_systems_cc": [
-    "games_allumina_systems_cc"
-  ],
-  "games_allumina_systems_combat": [
-    "games_allumina_systems_combat"
-  ],
-  "games_allumina_systems_craft": [
-    "games_allumina_systems_craft"
-  ],
-  "games_allumina_systems_death": [
-    "games_allumina_systems_death"
-  ],
-  "games_allumina_systems_forge": [
-    "games_allumina_systems_forge"
-  ],
-  "games_allumina_systems_level_up": [
-    "games_allumina_systems_level_up"
-  ],
-  "games_allumina_systems_loot": [
-    "games_allumina_systems_loot"
-  ],
-  "games_allumina_systems_mercenary": [
-    "games_allumina_systems_mercenary"
-  ],
-  "games_allumina_systems_mod": [
-    "games_allumina_systems_mod"
-  ],
-  "games_allumina_systems_movement": [
-    "games_allumina_systems_movement"
-  ],
-  "games_allumina_systems_projectile": [
-    "games_allumina_systems_projectile"
-  ],
-  "games_allumina_systems_quest": [
-    "games_allumina_systems_quest"
-  ],
-  "games_allumina_systems_skill": [
-    "games_allumina_systems_skill"
-  ],
-  "games_allumina_systems_skill_archer": [
-    "games_allumina_systems_skill_archer"
-  ],
-  "games_allumina_systems_skill_clerc": [
-    "games_allumina_systems_skill_clerc"
-  ],
-  "games_allumina_systems_skill_fields": [
-    "games_allumina_systems_skill_fields"
-  ],
-  "games_allumina_systems_skill_mage": [
-    "games_allumina_systems_skill_mage"
-  ],
-  "games_allumina_systems_skill_soldat": [
-    "games_allumina_systems_skill_soldat"
-  ],
-  "games_allumina_systems_spatial": [
-    "games_allumina_systems_spatial"
-  ],
-  "games_allumina_systems_stats": [
-    "games_allumina_systems_stats"
-  ],
-  "games_allumina_systems_summon": [
-    "games_allumina_systems_summon"
-  ],
-  "games_allumina_systems_targeting": [
-    "games_allumina_systems_targeting"
-  ],
-  "games_allumina_systems_vendor": [
-    "games_allumina_systems_vendor"
-  ],
-  "games_allumina_systems_waypoint": [
-    "games_allumina_systems_waypoint"
-  ],
-  "games_allumina_ui_chat": [
-    "games_allumina_ui_chat"
-  ],
-  "games_allumina_ui_class_select": [
-    "games_allumina_ui_class_select"
-  ],
-  "games_allumina_ui_craft": [
-    "games_allumina_ui_craft"
-  ],
-  "games_allumina_ui_equipment_ui": [
-    "games_allumina_ui_equipment_ui"
-  ],
-  "games_allumina_ui_forge": [
-    "games_allumina_ui_forge"
-  ],
-  "games_allumina_ui_hud": [
-    "games_allumina_ui_hud"
-  ],
-  "games_allumina_ui_inventory_ui": [
-    "games_allumina_ui_inventory_ui"
-  ],
-  "games_allumina_ui_lobby": [
-    "games_allumina_ui_lobby"
-  ],
-  "games_allumina_ui_merc_ui": [
-    "games_allumina_ui_merc_ui"
-  ],
-  "games_allumina_ui_minimap": [
-    "games_allumina_ui_minimap"
-  ],
-  "games_allumina_ui_mob_tooltip": [
-    "games_allumina_ui_mob_tooltip"
-  ],
-  "games_allumina_ui_mod": [
-    "games_allumina_ui_mod"
-  ],
-  "games_allumina_ui_quest_log": [
-    "games_allumina_ui_quest_log"
-  ],
-  "games_allumina_ui_skill_tree_ui": [
-    "games_allumina_ui_skill_tree_ui"
-  ],
-  "games_allumina_ui_title_screen": [
-    "games_allumina_ui_title_screen"
-  ],
-  "games_allumina_ui_tooltip": [
-    "games_allumina_ui_tooltip"
-  ],
-  "games_allumina_ui_vendor": [
-    "games_allumina_ui_vendor"
-  ],
-  "games_allumina_ui_waypoint_ui": [
-    "games_allumina_ui_waypoint_ui"
-  ],
   "hr": [
     "toolkit.hr",
     "toolkit.hr.miyuhr"
@@ -2443,6 +1815,9 @@
   "jay1tribu_domain_types": [
     "jay1tribu_domain_types"
   ],
+  "jay1tribu_import_heritage": [
+    "jay1tribu_import_heritage"
+  ],
   "jay1tribu_kindmother_client_db": [
     "jay1tribu_kindmother_client_db"
   ],
@@ -2455,6 +1830,12 @@
   "jay1tribu_main": [
     "jay1tribu_main"
   ],
+  "jay1tribu_schema_kindmother": [
+    "jay1tribu_schema_kindmother"
+  ],
+  "jay1tribu_tests_import_heritage": [
+    "jay1tribu_tests_import_heritage"
+  ],
   "jay1tribu_transport": [
     "jay1tribu_transport"
   ],
@@ -2466,6 +1847,9 @@
   ],
   "jaybureau_suite_jay_club_main": [
     "jaybureau_suite_jay_club_main"
+  ],
+  "jaybureau_suite_jay_collab_auth": [
+    "jaybureau_suite_jay_collab_auth"
   ],
   "jaybureau_suite_jay_collab_client": [
     "jaybureau_suite_jay_collab_client"
@@ -2711,20 +2095,23 @@
   "jaykoa_export_module": [
     "jaykoa_export_module"
   ],
+  "jaykoa_import_heritage": [
+    "jaykoa_import_heritage"
+  ],
   "jaykoa_jayrdv_adapter": [
     "jaykoa_jayrdv_adapter"
   ],
   "jaykoa_kindmother_client_db": [
     "jaykoa_kindmother_client_db"
   ],
-  "jaykoa_kindmother_db": [
-    "jaykoa_kindmother_db"
-  ],
   "jaykoa_lib": [
     "jaykoa_lib"
   ],
   "jaykoa_main": [
     "jaykoa_main"
+  ],
+  "jaykoa_schema_kindmother": [
+    "jaykoa_schema_kindmother"
   ],
   "jaykoa_services_jayrdv_mod": [
     "jaykoa_services_jayrdv_mod"
@@ -2734,6 +2121,9 @@
   ],
   "jaykoa_test_runner": [
     "jaykoa_test_runner"
+  ],
+  "jaykoa_tests_import_heritage": [
+    "jaykoa_tests_import_heritage"
   ],
   "jaykoa_views_calendar_view": [
     "jaykoa_views_calendar_view"
@@ -2775,6 +2165,9 @@
   "jaykonta_data_kindmother_db": [
     "jaykonta_data_kindmother_db"
   ],
+  "jaykonta_data_migrations": [
+    "jaykonta_data_migrations"
+  ],
   "jaykonta_data_mod": [
     "jaykonta_data_mod"
   ],
@@ -2792,6 +2185,9 @@
   ],
   "jaykonta_domain_purse": [
     "jaykonta_domain_purse"
+  ],
+  "jaykonta_import_heritage": [
+    "jaykonta_import_heritage"
   ],
   "jaykonta_integrations_contracts": [
     "jaykonta_integrations_contracts"
@@ -2814,6 +2210,9 @@
   "jaykonta_main": [
     "jaykonta_main"
   ],
+  "jaykonta_schema_kindmother": [
+    "jaykonta_schema_kindmother"
+  ],
   "jaykonta_services_audit_service": [
     "jaykonta_services_audit_service"
   ],
@@ -2822,6 +2221,12 @@
   ],
   "jaykonta_services_purse_service": [
     "jaykonta_services_purse_service"
+  ],
+  "jaykonta_tests_import_heritage": [
+    "jaykonta_tests_import_heritage"
+  ],
+  "jaykonta_tests_kindmother_only": [
+    "jaykonta_tests_kindmother_only"
   ],
   "jaykonta_theme": [
     "jaykonta_theme"
@@ -3055,17 +2460,41 @@
   "jayrdv_data_types": [
     "jayrdv_data_types"
   ],
-  "jayrdv_domain": [
-    "jayrdv_domain"
+  "jayrdv_facade_api": [
+    "jayrdv_facade_api"
+  ],
+  "jayrdv_facade_client": [
+    "jayrdv_facade_client"
+  ],
+  "jayrdv_facade_facade": [
+    "jayrdv_facade_facade"
+  ],
+  "jayrdv_facade_lib": [
+    "jayrdv_facade_lib"
+  ],
+  "jayrdv_facade_tests_architecture": [
+    "jayrdv_facade_tests_architecture"
+  ],
+  "jayrdv_facade_tests_guichet_visas": [
+    "jayrdv_facade_tests_guichet_visas"
+  ],
+  "jayrdv_facade_tests_quotas_revocations": [
+    "jayrdv_facade_tests_quotas_revocations"
+  ],
+  "jayrdv_hybride": [
+    "jayrdv_hybride"
   ],
   "jayrdv_kindmother_client_db": [
     "jayrdv_kindmother_client_db"
   ],
-  "jayrdv_lib": [
-    "jayrdv_lib"
-  ],
   "jayrdv_memory_store": [
     "jayrdv_memory_store"
+  ],
+  "jayrdv_tests_sortie_lot5": [
+    "jayrdv_tests_sortie_lot5"
+  ],
+  "jayrdv_traite_lib": [
+    "jayrdv_traite_lib"
   ],
   "jaysheets": [
     "service.jaysheets",
@@ -3238,8 +2667,14 @@
   "kindmother_api_write_operation_update": [
     "kindmother_api_write_operation_update"
   ],
+  "kindmother_client_credential": [
+    "kindmother_client_credential"
+  ],
   "kindmother_client_errors": [
     "kindmother_client_errors"
+  ],
+  "kindmother_client_heritage": [
+    "kindmother_client_heritage"
   ],
   "kindmother_client_impl": [
     "kindmother_client_impl"
@@ -3253,14 +2688,38 @@
   "kindmother_client_unit_tests": [
     "kindmother_client_unit_tests"
   ],
-  "kindmother_db_adapter_lib": [
-    "kindmother_db_adapter_lib"
-  ],
   "kindmother_db_key": [
     "kindmother_db_key"
   ],
   "kindmother_db_key_derivation": [
     "kindmother_db_key_derivation"
+  ],
+  "kindmother_db_key_store": [
+    "kindmother_db_key_store"
+  ],
+  "kindmother_etiquette": [
+    "kindmother_etiquette"
+  ],
+  "kindmother_heritage_fabrique": [
+    "kindmother_heritage_fabrique"
+  ],
+  "kindmother_heritage_import": [
+    "kindmother_heritage_import"
+  ],
+  "kindmother_heritage_lecture": [
+    "kindmother_heritage_lecture"
+  ],
+  "kindmother_heritage_lib": [
+    "kindmother_heritage_lib"
+  ],
+  "kindmother_heritage_tests_moteur": [
+    "kindmother_heritage_tests_moteur"
+  ],
+  "kindmother_import_main": [
+    "kindmother_import_main"
+  ],
+  "kindmother_import_tests_cli": [
+    "kindmother_import_tests_cli"
   ],
   "kindmother_instance_identity": [
     "kindmother_instance_identity"
@@ -3310,6 +2769,9 @@
   "kindmother_instance_type_mother": [
     "kindmother_instance_type_mother"
   ],
+  "kindmother_intent": [
+    "kindmother_intent"
+  ],
   "kindmother_miyusql_bridge_impl": [
     "kindmother_miyusql_bridge_impl"
   ],
@@ -3318,6 +2780,12 @@
   ],
   "kindmother_module_api": [
     "kindmother_module_api"
+  ],
+  "kindmother_module_etiquette": [
+    "kindmother_module_etiquette"
+  ],
+  "kindmother_module_intent": [
+    "kindmother_module_intent"
   ],
   "kindmother_module_miyusql_bridge": [
     "kindmother_module_miyusql_bridge"
@@ -3358,6 +2826,9 @@
   "kindmother_observability_health_unhealthy": [
     "kindmother_observability_health_unhealthy"
   ],
+  "kindmother_observability_health_unknown": [
+    "kindmother_observability_health_unknown"
+  ],
   "kindmother_observability_metrics": [
     "kindmother_observability_metrics"
   ],
@@ -3382,6 +2853,9 @@
   "kindmother_reexport_api": [
     "kindmother_reexport_api"
   ],
+  "kindmother_reexport_intent": [
+    "kindmother_reexport_intent"
+  ],
   "kindmother_reexport_observability": [
     "kindmother_reexport_observability"
   ],
@@ -3400,8 +2874,14 @@
   "kindmother_service_arbitration": [
     "kindmother_service_arbitration"
   ],
+  "kindmother_service_audit": [
+    "kindmother_service_audit"
+  ],
   "kindmother_service_bin_kindmother_server": [
     "kindmother_service_bin_kindmother_server"
+  ],
+  "kindmother_service_credentials": [
+    "kindmother_service_credentials"
   ],
   "kindmother_service_database": [
     "kindmother_service_database"
@@ -3409,14 +2889,53 @@
   "kindmother_service_errors": [
     "kindmother_service_errors"
   ],
+  "kindmother_service_etiquettes": [
+    "kindmother_service_etiquettes"
+  ],
+  "kindmother_service_identite": [
+    "kindmother_service_identite"
+  ],
   "kindmother_service_lib": [
     "kindmother_service_lib"
   ],
   "kindmother_service_protocol": [
     "kindmother_service_protocol"
   ],
+  "kindmother_service_sauvegardes": [
+    "kindmother_service_sauvegardes"
+  ],
   "kindmother_service_server": [
     "kindmother_service_server"
+  ],
+  "kindmother_service_sql_guard": [
+    "kindmother_service_sql_guard"
+  ],
+  "kindmother_service_tests_commun": [
+    "kindmother_service_tests_commun"
+  ],
+  "kindmother_service_tests_demarrage_sans_chiffrement": [
+    "kindmother_service_tests_demarrage_sans_chiffrement"
+  ],
+  "kindmother_service_tests_effacement_physique": [
+    "kindmother_service_tests_effacement_physique"
+  ],
+  "kindmother_service_tests_etiquette_publiable": [
+    "kindmother_service_tests_etiquette_publiable"
+  ],
+  "kindmother_service_tests_lot_c": [
+    "kindmother_service_tests_lot_c"
+  ],
+  "kindmother_service_tests_rejeu_oublis_a025": [
+    "kindmother_service_tests_rejeu_oublis_a025"
+  ],
+  "kindmother_service_tests_sauvegardes_a022": [
+    "kindmother_service_tests_sauvegardes_a022"
+  ],
+  "kindmother_service_tests_securite_k04_k05": [
+    "kindmother_service_tests_securite_k04_k05"
+  ],
+  "kindmother_service_typed": [
+    "kindmother_service_typed"
   ],
   "kindmother_storage_delete": [
     "kindmother_storage_delete"
@@ -3505,6 +3024,9 @@
   "kindmother_sync_trait": [
     "kindmother_sync_trait"
   ],
+  "kindmother_tests_refus": [
+    "kindmother_tests_refus"
+  ],
   "kindmother_threat_detector_check_anomalies": [
     "kindmother_threat_detector_check_anomalies"
   ],
@@ -3537,9 +3059,6 @@
   ],
   "kindmother_threat_test_detector_default": [
     "kindmother_threat_test_detector_default"
-  ],
-  "lifegame": [
-    "lifegame"
   ],
   "locale": [
     "toolkit.locale",
@@ -3620,6 +3139,75 @@
   "logisticssteward_resource_type_memory": [
     "logisticssteward_resource_type_memory"
   ],
+  "maia_auth_memoire": [
+    "maia_auth_memoire"
+  ],
+  "maia_confirmations": [
+    "maia_confirmations"
+  ],
+  "maia_federee_base": [
+    "maia_federee_base"
+  ],
+  "maia_federee_consultation": [
+    "maia_federee_consultation"
+  ],
+  "maia_federee_corroboration": [
+    "maia_federee_corroboration"
+  ],
+  "maia_federee_erreurs": [
+    "maia_federee_erreurs"
+  ],
+  "maia_federee_etiquettes": [
+    "maia_federee_etiquettes"
+  ],
+  "maia_federee_fiche": [
+    "maia_federee_fiche"
+  ],
+  "maia_federee_fuzz_commun": [
+    "maia_federee_fuzz_commun"
+  ],
+  "maia_federee_fuzz_fiche": [
+    "maia_federee_fuzz_fiche"
+  ],
+  "maia_federee_fuzz_generer_graines": [
+    "maia_federee_fuzz_generer_graines"
+  ],
+  "maia_federee_fuzz_lecteur": [
+    "maia_federee_fuzz_lecteur"
+  ],
+  "maia_federee_fuzz_requete": [
+    "maia_federee_fuzz_requete"
+  ],
+  "maia_federee_lecteur": [
+    "maia_federee_lecteur"
+  ],
+  "maia_federee_lib": [
+    "maia_federee_lib"
+  ],
+  "maia_federee_marquage": [
+    "maia_federee_marquage"
+  ],
+  "maia_federee_normalisation": [
+    "maia_federee_normalisation"
+  ],
+  "maia_federee_plongement": [
+    "maia_federee_plongement"
+  ],
+  "maia_federee_reprise": [
+    "maia_federee_reprise"
+  ],
+  "maia_federee_requete": [
+    "maia_federee_requete"
+  ],
+  "maia_federee_test_sortie_lot7": [
+    "maia_federee_test_sortie_lot7"
+  ],
+  "maia_garde_etranger": [
+    "maia_garde_etranger"
+  ],
+  "maia_gouvernance": [
+    "maia_gouvernance"
+  ],
   "maia_llm_api_chat": [
     "maia_llm_api_chat"
   ],
@@ -3635,17 +3223,113 @@
   "maia_llm_auth": [
     "maia_llm_auth"
   ],
+  "maia_llm_banc": [
+    "maia_llm_banc"
+  ],
   "maia_llm_config": [
     "maia_llm_config"
   ],
   "maia_llm_engine": [
     "maia_llm_engine"
   ],
+  "maia_llm_fuzz_artefact_mmia": [
+    "maia_llm_fuzz_artefact_mmia"
+  ],
+  "maia_llm_fuzz_generer_graines": [
+    "maia_llm_fuzz_generer_graines"
+  ],
   "maia_llm_main": [
     "maia_llm_main"
   ],
+  "maia_llm_materiel": [
+    "maia_llm_materiel"
+  ],
   "maia_llm_store": [
     "maia_llm_store"
+  ],
+  "maia_memoire_assemblage": [
+    "maia_memoire_assemblage"
+  ],
+  "maia_memoire_entrepot": [
+    "maia_memoire_entrepot"
+  ],
+  "maia_memoire_erreurs": [
+    "maia_memoire_erreurs"
+  ],
+  "maia_memoire_exemple_proposer_essai": [
+    "maia_memoire_exemple_proposer_essai"
+  ],
+  "maia_memoire_fuzz_export": [
+    "maia_memoire_fuzz_export"
+  ],
+  "maia_memoire_fuzz_generer_graines": [
+    "maia_memoire_fuzz_generer_graines"
+  ],
+  "maia_memoire_fuzz_ident": [
+    "maia_memoire_fuzz_ident"
+  ],
+  "maia_memoire_ident": [
+    "maia_memoire_ident"
+  ],
+  "maia_memoire_jetons": [
+    "maia_memoire_jetons"
+  ],
+  "maia_memoire_kindmother": [
+    "maia_memoire_kindmother"
+  ],
+  "maia_memoire_lib": [
+    "maia_memoire_lib"
+  ],
+  "maia_memoire_memoire": [
+    "maia_memoire_memoire"
+  ],
+  "maia_memoire_pont_alicia": [
+    "maia_memoire_pont_alicia"
+  ],
+  "maia_memoire_tests_ex50_56": [
+    "maia_memoire_tests_ex50_56"
+  ],
+  "maia_memoire_tests_kindmother": [
+    "maia_memoire_tests_kindmother"
+  ],
+  "maia_memoire_tests_kindmother_reprise": [
+    "maia_memoire_tests_kindmother_reprise"
+  ],
+  "maia_memoire_types": [
+    "maia_memoire_types"
+  ],
+  "maia_modeles_artefact": [
+    "maia_modeles_artefact"
+  ],
+  "maia_modeles_canal": [
+    "maia_modeles_canal"
+  ],
+  "maia_modeles_fichier": [
+    "maia_modeles_fichier"
+  ],
+  "maia_modeles_lib": [
+    "maia_modeles_lib"
+  ],
+  "maia_modeles_manifeste": [
+    "maia_modeles_manifeste"
+  ],
+  "maia_modeles_outillage": [
+    "maia_modeles_outillage"
+  ],
+  "maia_modeles_politique": [
+    "maia_modeles_politique"
+  ],
+  "maia_outil_memoire": [
+    "maia_outil_memoire"
+  ],
+  "maia_revocations_memoire": [
+    "maia_revocations_memoire"
+  ],
+  "maia_routes_federee": [
+    "maia_routes_federee"
+  ],
+  "maia_routes_memoire": [
+    "maia_routes_memoire"
   ],
   "maia_stt_confidence": [
     "maia_stt_confidence"
@@ -3662,11 +3346,29 @@
   "maia_stt_whisper": [
     "maia_stt_whisper"
   ],
+  "maia_tamr": [
+    "maia_tamr"
+  ],
   "masterbutler_lib": [
     "masterbutler_lib"
   ],
+  "masterbutler_orchestration_error": [
+    "masterbutler_orchestration_error"
+  ],
+  "masterbutler_orchestration_error_non_implemente": [
+    "masterbutler_orchestration_error_non_implemente"
+  ],
+  "masterbutler_orchestrator": [
+    "masterbutler_orchestrator"
+  ],
   "masterbutler_orchestrator_execute": [
     "masterbutler_orchestrator_execute"
+  ],
+  "masterbutler_orchestrator_test_refus_explicite": [
+    "masterbutler_orchestrator_test_refus_explicite"
+  ],
+  "masterbutler_orchestrator_test_refus_workflow_vide": [
+    "masterbutler_orchestrator_test_refus_workflow_vide"
   ],
   "masterbutler_orchestrator_test_workflow_execution": [
     "masterbutler_orchestrator_test_workflow_execution"
@@ -3735,6 +3437,9 @@
   "miou_llm_bridge_context": [
     "miou_llm_bridge_context"
   ],
+  "miou_llm_bridge_essai_reel": [
+    "miou_llm_bridge_essai_reel"
+  ],
   "miou_llm_bridge_fallback": [
     "miou_llm_bridge_fallback"
   ],
@@ -3753,6 +3458,12 @@
   "miou_llm_bridge_main": [
     "miou_llm_bridge_main"
   ],
+  "miou_llm_bridge_memoire": [
+    "miou_llm_bridge_memoire"
+  ],
+  "miou_llm_bridge_mention_ia": [
+    "miou_llm_bridge_mention_ia"
+  ],
   "miou_llm_bridge_mode": [
     "miou_llm_bridge_mode"
   ],
@@ -3770,6 +3481,9 @@
   ],
   "miou_llm_bridge_security": [
     "miou_llm_bridge_security"
+  ],
+  "miou_llm_bridge_signature": [
+    "miou_llm_bridge_signature"
   ],
   "miou_llm_bridge_skills_cog_services": [
     "miou_llm_bridge_skills_cog_services"
@@ -3840,14 +3554,65 @@
   "miyauth_admin_cell": [
     "miyauth_admin_cell"
   ],
+  "miyauth_appareil": [
+    "miyauth_appareil"
+  ],
+  "miyauth_cle_appareil_destination_tests": [
+    "miyauth_cle_appareil_destination_tests"
+  ],
   "miyauth_context": [
     "miyauth_context"
+  ],
+  "miyauth_delegation_chaine_tests": [
+    "miyauth_delegation_chaine_tests"
   ],
   "miyauth_errors": [
     "miyauth_errors"
   ],
+  "miyauth_fuzz_commun": [
+    "miyauth_fuzz_commun"
+  ],
+  "miyauth_fuzz_entetes_http": [
+    "miyauth_fuzz_entetes_http"
+  ],
+  "miyauth_fuzz_generer_graines": [
+    "miyauth_fuzz_generer_graines"
+  ],
+  "miyauth_fuzz_titres": [
+    "miyauth_fuzz_titres"
+  ],
+  "miyauth_http": [
+    "miyauth_http"
+  ],
+  "miyauth_http_persistant": [
+    "miyauth_http_persistant"
+  ],
+  "miyauth_http_service": [
+    "miyauth_http_service"
+  ],
+  "miyauth_http_visa_tests": [
+    "miyauth_http_visa_tests"
+  ],
   "miyauth_lib": [
     "miyauth_lib"
+  ],
+  "miyauth_pairwise": [
+    "miyauth_pairwise"
+  ],
+  "miyauth_passeport": [
+    "miyauth_passeport"
+  ],
+  "miyauth_passeport_visa_tests": [
+    "miyauth_passeport_visa_tests"
+  ],
+  "miyauth_resolve": [
+    "miyauth_resolve"
+  ],
+  "miyauth_revocation": [
+    "miyauth_revocation"
+  ],
+  "miyauth_titres": [
+    "miyauth_titres"
   ],
   "miyauth_tool_identity_attest": [
     "miyauth_tool_identity_attest"
@@ -3866,6 +3631,18 @@
   ],
   "miyauth_unit_tests": [
     "miyauth_unit_tests"
+  ],
+  "miyauth_verify": [
+    "miyauth_verify"
+  ],
+  "miyualicia_skills_test_policy_bypass_persiste_ignore": [
+    "miyualicia_skills_test_policy_bypass_persiste_ignore"
+  ],
+  "miyualicia_skills_test_policy_defaut_gate_active": [
+    "miyualicia_skills_test_policy_defaut_gate_active"
+  ],
+  "miyualicia_skills_test_policy_sans_bypass": [
+    "miyualicia_skills_test_policy_sans_bypass"
   ],
   "miyuantispam_admin_cell": [
     "miyuantispam_admin_cell"
@@ -4029,14 +3806,74 @@
   "miyucalc_tool_unit_convert": [
     "miyucalc_tool_unit_convert"
   ],
-  "miyuclicker_lib": [
-    "miyuclicker_lib"
+  "miyucanal_annonce": [
+    "miyucanal_annonce"
   ],
-  "miyuclicker_main": [
-    "miyuclicker_main"
+  "miyucanal_banc": [
+    "miyucanal_banc"
   ],
-  "miyuclicker_views_mod": [
-    "miyuclicker_views_mod"
+  "miyucanal_erreurs": [
+    "miyucanal_erreurs"
+  ],
+  "miyucanal_fuzz_generer_graines": [
+    "miyucanal_fuzz_generer_graines"
+  ],
+  "miyucanal_fuzz_mcan": [
+    "miyucanal_fuzz_mcan"
+  ],
+  "miyucanal_fuzz_quarantaine": [
+    "miyucanal_fuzz_quarantaine"
+  ],
+  "miyucanal_lib": [
+    "miyucanal_lib"
+  ],
+  "miyucanal_quarantaine": [
+    "miyucanal_quarantaine"
+  ],
+  "miyucanal_releveur": [
+    "miyucanal_releveur"
+  ],
+  "miyucanal_tests_sortie_lot4": [
+    "miyucanal_tests_sortie_lot4"
+  ],
+  "miyucanal_transport": [
+    "miyucanal_transport"
+  ],
+  "miyucdr_detection": [
+    "miyucdr_detection"
+  ],
+  "miyucdr_fuzz_commun": [
+    "miyucdr_fuzz_commun"
+  ],
+  "miyucdr_fuzz_desarmer_image": [
+    "miyucdr_fuzz_desarmer_image"
+  ],
+  "miyucdr_fuzz_desarmer_texte": [
+    "miyucdr_fuzz_desarmer_texte"
+  ],
+  "miyucdr_fuzz_generer_graines": [
+    "miyucdr_fuzz_generer_graines"
+  ],
+  "miyucdr_images": [
+    "miyucdr_images"
+  ],
+  "miyucdr_json": [
+    "miyucdr_json"
+  ],
+  "miyucdr_lib": [
+    "miyucdr_lib"
+  ],
+  "miyucdr_tableur": [
+    "miyucdr_tableur"
+  ],
+  "miyucdr_tests_desarmement": [
+    "miyucdr_tests_desarmement"
+  ],
+  "miyucdr_tests_saturation": [
+    "miyucdr_tests_saturation"
+  ],
+  "miyucdr_texte": [
+    "miyucdr_texte"
   ],
   "miyuclock_admin_cell": [
     "miyuclock_admin_cell"
@@ -4158,9 +3995,6 @@
   "miyucloud_application_ports_dedup_ports": [
     "miyucloud_application_ports_dedup_ports"
   ],
-  "miyucloud_application_ports_encryption_ports": [
-    "miyucloud_application_ports_encryption_ports"
-  ],
   "miyucloud_application_ports_favorites_ports": [
     "miyucloud_application_ports_favorites_ports"
   ],
@@ -4221,6 +4055,9 @@
   "miyucloud_application_services_contact_service": [
     "miyucloud_application_services_contact_service"
   ],
+  "miyucloud_application_services_desarmement_service": [
+    "miyucloud_application_services_desarmement_service"
+  ],
   "miyucloud_application_services_device_auth_service": [
     "miyucloud_application_services_device_auth_service"
   ],
@@ -4260,6 +4097,12 @@
   "miyucloud_application_services_recent_service": [
     "miyucloud_application_services_recent_service"
   ],
+  "miyucloud_application_services_reclassement_cdr_service": [
+    "miyucloud_application_services_reclassement_cdr_service"
+  ],
+  "miyucloud_application_services_reconciliation_references_service": [
+    "miyucloud_application_services_reconciliation_references_service"
+  ],
   "miyucloud_application_services_search_service": [
     "miyucloud_application_services_search_service"
   ],
@@ -4268,6 +4111,9 @@
   ],
   "miyucloud_application_services_storage_usage_service": [
     "miyucloud_application_services_storage_usage_service"
+  ],
+  "miyucloud_application_services_supervision": [
+    "miyucloud_application_services_supervision"
   ],
   "miyucloud_application_services_trash_service": [
     "miyucloud_application_services_trash_service"
@@ -4461,6 +4307,9 @@
   "miyucloud_domain_entities_calendar": [
     "miyucloud_domain_entities_calendar"
   ],
+  "miyucloud_domain_entities_calendar_access": [
+    "miyucloud_domain_entities_calendar_access"
+  ],
   "miyucloud_domain_entities_calendar_event": [
     "miyucloud_domain_entities_calendar_event"
   ],
@@ -4472,6 +4321,9 @@
   ],
   "miyucloud_domain_entities_entity_errors": [
     "miyucloud_domain_entities_entity_errors"
+  ],
+  "miyucloud_domain_entities_etat_cdr": [
+    "miyucloud_domain_entities_etat_cdr"
   ],
   "miyucloud_domain_entities_file": [
     "miyucloud_domain_entities_file"
@@ -4554,6 +4406,9 @@
   "miyucloud_domain_repositories_user_repository": [
     "miyucloud_domain_repositories_user_repository"
   ],
+  "miyucloud_domain_services_home_folder": [
+    "miyucloud_domain_services_home_folder"
+  ],
   "miyucloud_domain_services_i18n_service": [
     "miyucloud_domain_services_i18n_service"
   ],
@@ -4632,6 +4487,9 @@
   "miyucloud_infrastructure_repositories_pg_calendar_pg_repository": [
     "miyucloud_infrastructure_repositories_pg_calendar_pg_repository"
   ],
+  "miyucloud_infrastructure_repositories_pg_cdr_reclassement_pg_repository": [
+    "miyucloud_infrastructure_repositories_pg_cdr_reclassement_pg_repository"
+  ],
   "miyucloud_infrastructure_repositories_pg_contact_group_pg_repository": [
     "miyucloud_infrastructure_repositories_pg_contact_group_pg_repository"
   ],
@@ -4658,6 +4516,9 @@
   ],
   "miyucloud_infrastructure_repositories_pg_folder_db_repository": [
     "miyucloud_infrastructure_repositories_pg_folder_db_repository"
+  ],
+  "miyucloud_infrastructure_repositories_pg_miyu_identity_pg_repository": [
+    "miyucloud_infrastructure_repositories_pg_miyu_identity_pg_repository"
   ],
   "miyucloud_infrastructure_repositories_pg_mod": [
     "miyucloud_infrastructure_repositories_pg_mod"
@@ -4686,8 +4547,8 @@
   "miyucloud_infrastructure_repositories_pg_user_pg_repository": [
     "miyucloud_infrastructure_repositories_pg_user_pg_repository"
   ],
-  "miyucloud_infrastructure_services_blob_encryption_service": [
-    "miyucloud_infrastructure_services_blob_encryption_service"
+  "miyucloud_infrastructure_services_blob_cipher": [
+    "miyucloud_infrastructure_services_blob_cipher"
   ],
   "miyucloud_infrastructure_services_central_client_service": [
     "miyucloud_infrastructure_services_central_client_service"
@@ -4719,11 +4580,17 @@
   "miyucloud_infrastructure_services_image_transcode_service": [
     "miyucloud_infrastructure_services_image_transcode_service"
   ],
-  "miyucloud_infrastructure_services_jwt_service": [
-    "miyucloud_infrastructure_services_jwt_service"
-  ],
   "miyucloud_infrastructure_services_login_lockout_service": [
     "miyucloud_infrastructure_services_login_lockout_service"
+  ],
+  "miyucloud_infrastructure_services_miyu_auth_service": [
+    "miyucloud_infrastructure_services_miyu_auth_service"
+  ],
+  "miyucloud_infrastructure_services_miyu_liaison_appareil": [
+    "miyucloud_infrastructure_services_miyu_liaison_appareil"
+  ],
+  "miyucloud_infrastructure_services_miyu_revocations": [
+    "miyucloud_infrastructure_services_miyu_revocations"
   ],
   "miyucloud_infrastructure_services_mod": [
     "miyucloud_infrastructure_services_mod"
@@ -4748,6 +4615,9 @@
   ],
   "miyucloud_infrastructure_services_session_timeout_service": [
     "miyucloud_infrastructure_services_session_timeout_service"
+  ],
+  "miyucloud_infrastructure_services_session_token_service": [
+    "miyucloud_infrastructure_services_session_token_service"
   ],
   "miyucloud_infrastructure_services_thumbnail_service": [
     "miyucloud_infrastructure_services_thumbnail_service"
@@ -4821,6 +4691,9 @@
   "miyucloud_interfaces_api_handlers_i18n_handler": [
     "miyucloud_interfaces_api_handlers_i18n_handler"
   ],
+  "miyucloud_interfaces_api_handlers_miyu_auth_handler": [
+    "miyucloud_interfaces_api_handlers_miyu_auth_handler"
+  ],
   "miyucloud_interfaces_api_handlers_mod": [
     "miyucloud_interfaces_api_handlers_mod"
   ],
@@ -4860,6 +4733,9 @@
   "miyucloud_interfaces_middleware_bandwidth": [
     "miyucloud_interfaces_middleware_bandwidth"
   ],
+  "miyucloud_interfaces_middleware_basic_policy": [
+    "miyucloud_interfaces_middleware_basic_policy"
+  ],
   "miyucloud_interfaces_middleware_csrf": [
     "miyucloud_interfaces_middleware_csrf"
   ],
@@ -4887,6 +4763,9 @@
   "miyucloud_interfaces_nextcloud_ocs_handler": [
     "miyucloud_interfaces_nextcloud_ocs_handler"
   ],
+  "miyucloud_interfaces_nextcloud_owned_paths": [
+    "miyucloud_interfaces_nextcloud_owned_paths"
+  ],
   "miyucloud_interfaces_nextcloud_preview_handler": [
     "miyucloud_interfaces_nextcloud_preview_handler"
   ],
@@ -4907,6 +4786,9 @@
   ],
   "miyucloud_interfaces_nextcloud_webdav_handler": [
     "miyucloud_interfaces_nextcloud_webdav_handler"
+  ],
+  "miyucloud_interfaces_upload_spool": [
+    "miyucloud_interfaces_upload_spool"
   ],
   "miyucloud_interfaces_web_mod": [
     "miyucloud_interfaces_web_mod"
@@ -5211,6 +5093,60 @@
   "miyudiscovery_tool_trending_list": [
     "miyudiscovery_tool_trending_list"
   ],
+  "miyudouane_application": [
+    "miyudouane_application"
+  ],
+  "miyudouane_cli": [
+    "miyudouane_cli"
+  ],
+  "miyudouane_compilation": [
+    "miyudouane_compilation"
+  ],
+  "miyudouane_exemple_arretes_essai": [
+    "miyudouane_exemple_arretes_essai"
+  ],
+  "miyudouane_hote": [
+    "miyudouane_hote"
+  ],
+  "miyudouane_instance": [
+    "miyudouane_instance"
+  ],
+  "miyudouane_ips": [
+    "miyudouane_ips"
+  ],
+  "miyudouane_lib": [
+    "miyudouane_lib"
+  ],
+  "miyudouane_nft": [
+    "miyudouane_nft"
+  ],
+  "miyudouane_plan": [
+    "miyudouane_plan"
+  ],
+  "miyudouane_tc": [
+    "miyudouane_tc"
+  ],
+  "miyudouane_tests_cli": [
+    "miyudouane_tests_cli"
+  ],
+  "miyudouane_tests_commun": [
+    "miyudouane_tests_commun"
+  ],
+  "miyudouane_tests_hote": [
+    "miyudouane_tests_hote"
+  ],
+  "miyudouane_tests_ips": [
+    "miyudouane_tests_ips"
+  ],
+  "miyudouane_tests_regles": [
+    "miyudouane_tests_regles"
+  ],
+  "miyudouane_tests_tc": [
+    "miyudouane_tests_tc"
+  ],
+  "miyudouane_zones": [
+    "miyudouane_zones"
+  ],
   "miyuexpense_admin_cell": [
     "miyuexpense_admin_cell"
   ],
@@ -5267,6 +5203,93 @@
   ],
   "miyuexport_tool_xlsx_generate": [
     "miyuexport_tool_xlsx_generate"
+  ],
+  "miyufederation_calcul": [
+    "miyufederation_calcul"
+  ],
+  "miyufederation_eclipse": [
+    "miyufederation_eclipse"
+  ],
+  "miyufederation_erreurs": [
+    "miyufederation_erreurs"
+  ],
+  "miyufederation_federation": [
+    "miyufederation_federation"
+  ],
+  "miyufederation_federation_etat": [
+    "miyufederation_federation_etat"
+  ],
+  "miyufederation_fraicheur": [
+    "miyufederation_fraicheur"
+  ],
+  "miyufederation_fuzz_commun": [
+    "miyufederation_fuzz_commun"
+  ],
+  "miyufederation_fuzz_etat": [
+    "miyufederation_fuzz_etat"
+  ],
+  "miyufederation_fuzz_generer_graines": [
+    "miyufederation_fuzz_generer_graines"
+  ],
+  "miyufederation_fuzz_preuve": [
+    "miyufederation_fuzz_preuve"
+  ],
+  "miyufederation_fuzz_titres": [
+    "miyufederation_fuzz_titres"
+  ],
+  "miyufederation_fuzz_vue": [
+    "miyufederation_fuzz_vue"
+  ],
+  "miyufederation_kindmother": [
+    "miyufederation_kindmother"
+  ],
+  "miyufederation_lib": [
+    "miyufederation_lib"
+  ],
+  "miyufederation_note": [
+    "miyufederation_note"
+  ],
+  "miyufederation_persistance": [
+    "miyufederation_persistance"
+  ],
+  "miyufederation_persistante": [
+    "miyufederation_persistante"
+  ],
+  "miyufederation_preuve": [
+    "miyufederation_preuve"
+  ],
+  "miyufederation_statut": [
+    "miyufederation_statut"
+  ],
+  "miyufederation_support": [
+    "miyufederation_support"
+  ],
+  "miyufederation_test_contestation": [
+    "miyufederation_test_contestation"
+  ],
+  "miyufederation_test_kindmother": [
+    "miyufederation_test_kindmother"
+  ],
+  "miyufederation_test_persistance": [
+    "miyufederation_test_persistance"
+  ],
+  "miyufederation_test_persistante": [
+    "miyufederation_test_persistante"
+  ],
+  "miyufederation_test_regles": [
+    "miyufederation_test_regles"
+  ],
+  "miyufederation_test_sortie_lot6": [
+    "miyufederation_test_sortie_lot6"
+  ],
+  "miyufederation_tests_commun": [
+    "miyufederation_tests_commun"
+  ],
+  "miyufederation_tests_scenarios_redemarrage": [
+    "miyufederation_tests_scenarios_redemarrage"
+  ],
+  "miyufederation_titres": [
+    "miyufederation_titres"
   ],
   "miyufeeds_admin_cell": [
     "miyufeeds_admin_cell"
@@ -5364,6 +5387,21 @@
   "miyuforum_tool_forum_topic_update": [
     "miyuforum_tool_forum_topic_update"
   ],
+  "miyufrontiere_cdr": [
+    "miyufrontiere_cdr"
+  ],
+  "miyufrontiere_coupure": [
+    "miyufrontiere_coupure"
+  ],
+  "miyufrontiere_douane_vigies": [
+    "miyufrontiere_douane_vigies"
+  ],
+  "miyufrontiere_lib": [
+    "miyufrontiere_lib"
+  ],
+  "miyufrontiere_test_bout_en_bout": [
+    "miyufrontiere_test_bout_en_bout"
+  ],
   "miyuhr_admin_cell": [
     "miyuhr_admin_cell"
   ],
@@ -5381,6 +5419,54 @@
   ],
   "miyuhr_tool_time_clock_out": [
     "miyuhr_tool_time_clock_out"
+  ],
+  "miyuhybride_db_secondaire": [
+    "miyuhybride_db_secondaire"
+  ],
+  "miyuhybride_douane": [
+    "miyuhybride_douane"
+  ],
+  "miyuhybride_erreurs": [
+    "miyuhybride_erreurs"
+  ],
+  "miyuhybride_fuzz_contrat": [
+    "miyuhybride_fuzz_contrat"
+  ],
+  "miyuhybride_fuzz_generer_graines": [
+    "miyuhybride_fuzz_generer_graines"
+  ],
+  "miyuhybride_guichets": [
+    "miyuhybride_guichets"
+  ],
+  "miyuhybride_lib": [
+    "miyuhybride_lib"
+  ],
+  "miyuhybride_manifeste": [
+    "miyuhybride_manifeste"
+  ],
+  "miyuhybride_message": [
+    "miyuhybride_message"
+  ],
+  "miyuhybride_quotas": [
+    "miyuhybride_quotas"
+  ],
+  "miyuhybride_revocations": [
+    "miyuhybride_revocations"
+  ],
+  "miyuhybride_service": [
+    "miyuhybride_service"
+  ],
+  "miyuhybride_tests_cycle": [
+    "miyuhybride_tests_cycle"
+  ],
+  "miyuhybride_tests_manifeste": [
+    "miyuhybride_tests_manifeste"
+  ],
+  "miyuhybride_tests_quotas": [
+    "miyuhybride_tests_quotas"
+  ],
+  "miyuhybride_visas": [
+    "miyuhybride_visas"
   ],
   "miyuinvoice_admin_cell": [
     "miyuinvoice_admin_cell"
@@ -5475,11 +5561,17 @@
   "miyukini_central_catalog": [
     "miyukini_central_catalog"
   ],
+  "miyukini_central_chemins": [
+    "miyukini_central_chemins"
+  ],
   "miyukini_central_config": [
     "miyukini_central_config"
   ],
   "miyukini_central_db_mod": [
     "miyukini_central_db_mod"
+  ],
+  "miyukini_central_fichiers_secrets": [
+    "miyukini_central_fichiers_secrets"
   ],
   "miyukini_central_lib": [
     "miyukini_central_lib"
@@ -5487,17 +5579,23 @@
   "miyukini_central_main": [
     "miyukini_central_main"
   ],
+  "miyukini_central_mws_home": [
+    "miyukini_central_mws_home"
+  ],
   "miyukini_central_mws_mod": [
     "miyukini_central_mws_mod"
   ],
-  "miyukini_central_services_miyuclicker": [
-    "miyukini_central_services_miyuclicker"
+  "miyukini_central_schema_kindmother": [
+    "miyukini_central_schema_kindmother"
   ],
   "miyukini_central_services_mod": [
     "miyukini_central_services_mod"
   ],
-  "miyukini_cog_bridge_apikey": [
-    "miyukini_cog_bridge_apikey"
+  "miyukini_central_tests_auth_kindmother": [
+    "miyukini_central_tests_auth_kindmother"
+  ],
+  "miyukini_central_tests_import_heritage": [
+    "miyukini_central_tests_import_heritage"
   ],
   "miyukini_cog_bridge_bridge": [
     "miyukini_cog_bridge_bridge"
@@ -5508,8 +5606,14 @@
   "miyukini_cog_bridge_e2e": [
     "miyukini_cog_bridge_e2e"
   ],
+  "miyukini_cog_bridge_identite": [
+    "miyukini_cog_bridge_identite"
+  ],
   "miyukini_cog_bridge_lib": [
     "miyukini_cog_bridge_lib"
+  ],
+  "miyukini_cog_bridge_pairing": [
+    "miyukini_cog_bridge_pairing"
   ],
   "miyukini_cog_bridge_reconnect": [
     "miyukini_cog_bridge_reconnect"
@@ -5793,6 +5897,9 @@
   "miyukiniadmin_backend_app_state": [
     "miyukiniadmin_backend_app_state"
   ],
+  "miyukiniadmin_backend_gouverner_requete_layer": [
+    "miyukiniadmin_backend_gouverner_requete_layer"
+  ],
   "miyukiniadmin_backend_health": [
     "miyukiniadmin_backend_health"
   ],
@@ -6036,6 +6143,21 @@
   "miyukiniadmin_environment_state_service": [
     "miyukiniadmin_environment_state_service"
   ],
+  "miyukiniadmin_gouvernance": [
+    "miyukiniadmin_gouvernance"
+  ],
+  "miyukiniadmin_gouvernance_action": [
+    "miyukiniadmin_gouvernance_action"
+  ],
+  "miyukiniadmin_gouvernance_porte": [
+    "miyukiniadmin_gouvernance_porte"
+  ],
+  "miyukiniadmin_gouvernance_principal": [
+    "miyukiniadmin_gouvernance_principal"
+  ],
+  "miyukiniadmin_gouvernance_refus": [
+    "miyukiniadmin_gouvernance_refus"
+  ],
   "miyukiniadmin_migration_impl_applied": [
     "miyukiniadmin_migration_impl_applied"
   ],
@@ -6137,6 +6259,9 @@
   ],
   "miyukiniadmin_module_db_unit_tests": [
     "miyukiniadmin_module_db_unit_tests"
+  ],
+  "miyukiniadmin_module_gouvernance": [
+    "miyukiniadmin_module_gouvernance"
   ],
   "miyukiniadmin_module_migration_service": [
     "miyukiniadmin_module_migration_service"
@@ -6264,6 +6389,9 @@
   "miyukiniadmin_session_user_agent": [
     "miyukiniadmin_session_user_agent"
   ],
+  "miyukiniadmin_setup_guard": [
+    "miyukiniadmin_setup_guard"
+  ],
   "miyukiniadmin_testing_service_run_tests": [
     "miyukiniadmin_testing_service_run_tests"
   ],
@@ -6327,6 +6455,9 @@
   "miyukiniwatch_data_db": [
     "miyukiniwatch_data_db"
   ],
+  "miyukiniwatch_data_kindmother_client_db": [
+    "miyukiniwatch_data_kindmother_client_db"
+  ],
   "miyukiniwatch_data_mod": [
     "miyukiniwatch_data_mod"
   ],
@@ -6335,6 +6466,9 @@
   ],
   "miyukiniwatch_errors": [
     "miyukiniwatch_errors"
+  ],
+  "miyukiniwatch_import_heritage": [
+    "miyukiniwatch_import_heritage"
   ],
   "miyukiniwatch_lib": [
     "miyukiniwatch_lib"
@@ -6347,6 +6481,12 @@
   ],
   "miyukiniwatch_presenter": [
     "miyukiniwatch_presenter"
+  ],
+  "miyukiniwatch_schema_kindmother": [
+    "miyukiniwatch_schema_kindmother"
+  ],
+  "miyukiniwatch_tests_import_heritage": [
+    "miyukiniwatch_tests_import_heritage"
   ],
   "miyukiniwatch_views_audit": [
     "miyukiniwatch_views_audit"
@@ -6392,6 +6532,12 @@
   ],
   "miyumarket_protocol": [
     "miyumarket_protocol"
+  ],
+  "miyumarket_signature": [
+    "miyumarket_signature"
+  ],
+  "miyumarket_signer_cli": [
+    "miyumarket_signer_cli"
   ],
   "miyumedia_admin_cell": [
     "miyumedia_admin_cell"
@@ -6572,6 +6718,102 @@
   ],
   "miyupolls_tool_poll_vote": [
     "miyupolls_tool_poll_vote"
+  ],
+  "miyuportail_bac_a_sable": [
+    "miyuportail_bac_a_sable"
+  ],
+  "miyuportail_bin_entree": [
+    "miyuportail_bin_entree"
+  ],
+  "miyuportail_bin_sas": [
+    "miyuportail_bin_sas"
+  ],
+  "miyuportail_bin_sortie": [
+    "miyuportail_bin_sortie"
+  ],
+  "miyuportail_cdr": [
+    "miyuportail_cdr"
+  ],
+  "miyuportail_demon": [
+    "miyuportail_demon"
+  ],
+  "miyuportail_entree": [
+    "miyuportail_entree"
+  ],
+  "miyuportail_erreurs": [
+    "miyuportail_erreurs"
+  ],
+  "miyuportail_exemple_portail_essai": [
+    "miyuportail_exemple_portail_essai"
+  ],
+  "miyuportail_files": [
+    "miyuportail_files"
+  ],
+  "miyuportail_fuzz_commun": [
+    "miyuportail_fuzz_commun"
+  ],
+  "miyuportail_fuzz_cosignature": [
+    "miyuportail_fuzz_cosignature"
+  ],
+  "miyuportail_fuzz_decoder_trame": [
+    "miyuportail_fuzz_decoder_trame"
+  ],
+  "miyuportail_fuzz_generer_graines": [
+    "miyuportail_fuzz_generer_graines"
+  ],
+  "miyuportail_fuzz_portail": [
+    "miyuportail_fuzz_portail"
+  ],
+  "miyuportail_fuzz_reponse_sas": [
+    "miyuportail_fuzz_reponse_sas"
+  ],
+  "miyuportail_fuzz_requete_sas": [
+    "miyuportail_fuzz_requete_sas"
+  ],
+  "miyuportail_fuzz_validation2": [
+    "miyuportail_fuzz_validation2"
+  ],
+  "miyuportail_jeton": [
+    "miyuportail_jeton"
+  ],
+  "miyuportail_lib": [
+    "miyuportail_lib"
+  ],
+  "miyuportail_msce": [
+    "miyuportail_msce"
+  ],
+  "miyuportail_portail": [
+    "miyuportail_portail"
+  ],
+  "miyuportail_registre": [
+    "miyuportail_registre"
+  ],
+  "miyuportail_sas": [
+    "miyuportail_sas"
+  ],
+  "miyuportail_sortie": [
+    "miyuportail_sortie"
+  ],
+  "miyuportail_tests_commun": [
+    "miyuportail_tests_commun"
+  ],
+  "miyuportail_tests_descripteurs": [
+    "miyuportail_tests_descripteurs"
+  ],
+  "miyuportail_tests_msce": [
+    "miyuportail_tests_msce"
+  ],
+  "miyuportail_tests_portail": [
+    "miyuportail_tests_portail"
+  ],
+  "miyuportail_tests_scission": [
+    "miyuportail_tests_scission"
+  ],
+  "miyuportail_traite": [
+    "miyuportail_traite"
+  ],
+  "miyuportail_validation2": [
+    "miyuportail_validation2"
   ],
   "miyuposanalytics_admin_cell": [
     "miyuposanalytics_admin_cell"
@@ -6924,6 +7166,234 @@
   "miyuprofile_vault": [
     "miyuprofile_vault"
   ],
+  "miyuracine_chiffrement": [
+    "miyuracine_chiffrement"
+  ],
+  "miyuracine_cli": [
+    "miyuracine_cli"
+  ],
+  "miyuracine_delegation": [
+    "miyuracine_delegation"
+  ],
+  "miyuracine_durcissement": [
+    "miyuracine_durcissement"
+  ],
+  "miyuracine_erreurs": [
+    "miyuracine_erreurs"
+  ],
+  "miyuracine_fichier_cle": [
+    "miyuracine_fichier_cle"
+  ],
+  "miyuracine_gf256": [
+    "miyuracine_gf256"
+  ],
+  "miyuracine_lib": [
+    "miyuracine_lib"
+  ],
+  "miyuracine_mots": [
+    "miyuracine_mots"
+  ],
+  "miyuracine_passation": [
+    "miyuracine_passation"
+  ],
+  "miyuracine_racine": [
+    "miyuracine_racine"
+  ],
+  "miyuracine_rs1024": [
+    "miyuracine_rs1024"
+  ],
+  "miyuracine_shamir": [
+    "miyuracine_shamir"
+  ],
+  "miyuracine_slip10": [
+    "miyuracine_slip10"
+  ],
+  "miyuracine_slip39": [
+    "miyuracine_slip39"
+  ],
+  "miyuracine_tests_cli": [
+    "miyuracine_tests_cli"
+  ],
+  "miyuracine_tests_delegation": [
+    "miyuracine_tests_delegation"
+  ],
+  "miyuracine_tests_durcissement": [
+    "miyuracine_tests_durcissement"
+  ],
+  "miyuracine_tests_erreurs": [
+    "miyuracine_tests_erreurs"
+  ],
+  "miyuracine_tests_hors_reseau": [
+    "miyuracine_tests_hors_reseau"
+  ],
+  "miyuracine_tests_racine": [
+    "miyuracine_tests_racine"
+  ],
+  "miyuracine_tests_vecteurs_slip10": [
+    "miyuracine_tests_vecteurs_slip10"
+  ],
+  "miyuracine_tests_vecteurs_slip39": [
+    "miyuracine_tests_vecteurs_slip39"
+  ],
+  "miyuracine_usages": [
+    "miyuracine_usages"
+  ],
+  "miyuregistre_bin_publier": [
+    "miyuregistre_bin_publier"
+  ],
+  "miyuregistre_editeur": [
+    "miyuregistre_editeur"
+  ],
+  "miyuregistre_editeur_cle": [
+    "miyuregistre_editeur_cle"
+  ],
+  "miyuregistre_editeur_depot": [
+    "miyuregistre_editeur_depot"
+  ],
+  "miyuregistre_editeur_http": [
+    "miyuregistre_editeur_http"
+  ],
+  "miyuregistre_editeur_origin": [
+    "miyuregistre_editeur_origin"
+  ],
+  "miyuregistre_editeur_verrou": [
+    "miyuregistre_editeur_verrou"
+  ],
+  "miyuregistre_entree": [
+    "miyuregistre_entree"
+  ],
+  "miyuregistre_enveloppe": [
+    "miyuregistre_enveloppe"
+  ],
+  "miyuregistre_erreurs": [
+    "miyuregistre_erreurs"
+  ],
+  "miyuregistre_federal": [
+    "miyuregistre_federal"
+  ],
+  "miyuregistre_fuzz_entree": [
+    "miyuregistre_fuzz_entree"
+  ],
+  "miyuregistre_fuzz_generer_graines": [
+    "miyuregistre_fuzz_generer_graines"
+  ],
+  "miyuregistre_fuzz_miroir": [
+    "miyuregistre_fuzz_miroir"
+  ],
+  "miyuregistre_fuzz_stockage_fichier": [
+    "miyuregistre_fuzz_stockage_fichier"
+  ],
+  "miyuregistre_journal": [
+    "miyuregistre_journal"
+  ],
+  "miyuregistre_lib": [
+    "miyuregistre_lib"
+  ],
+  "miyuregistre_revocation": [
+    "miyuregistre_revocation"
+  ],
+  "miyuregistre_stockage": [
+    "miyuregistre_stockage"
+  ],
+  "miyuregistre_suivi": [
+    "miyuregistre_suivi"
+  ],
+  "miyuregistre_suivi_revocations": [
+    "miyuregistre_suivi_revocations"
+  ],
+  "miyuregistre_temps": [
+    "miyuregistre_temps"
+  ],
+  "miyurelais_bin": [
+    "miyurelais_bin"
+  ],
+  "miyurelais_exemple_essai_vm": [
+    "miyurelais_exemple_essai_vm"
+  ],
+  "miyurelais_fuzz_trame_nflog": [
+    "miyurelais_fuzz_trame_nflog"
+  ],
+  "miyurelais_ip": [
+    "miyurelais_ip"
+  ],
+  "miyurelais_lib": [
+    "miyurelais_lib"
+  ],
+  "miyurelais_ligne": [
+    "miyurelais_ligne"
+  ],
+  "miyurelais_netlink": [
+    "miyurelais_netlink"
+  ],
+  "miyurelais_relais": [
+    "miyurelais_relais"
+  ],
+  "miyurelais_socket": [
+    "miyurelais_socket"
+  ],
+  "miyurelais_test_binaire": [
+    "miyurelais_test_binaire"
+  ],
+  "miyurelais_test_chaine": [
+    "miyurelais_test_chaine"
+  ],
+  "miyurelais_test_refus": [
+    "miyurelais_test_refus"
+  ],
+  "miyurelais_veille": [
+    "miyurelais_veille"
+  ],
+  "miyusceau_ancres": [
+    "miyusceau_ancres"
+  ],
+  "miyusceau_cles": [
+    "miyusceau_cles"
+  ],
+  "miyusceau_delegation": [
+    "miyusceau_delegation"
+  ],
+  "miyusceau_erreurs": [
+    "miyusceau_erreurs"
+  ],
+  "miyusceau_format": [
+    "miyusceau_format"
+  ],
+  "miyusceau_fuzz_aller_retour": [
+    "miyusceau_fuzz_aller_retour"
+  ],
+  "miyusceau_fuzz_decoder_delegation": [
+    "miyusceau_fuzz_decoder_delegation"
+  ],
+  "miyusceau_fuzz_decoder_sceau": [
+    "miyusceau_fuzz_decoder_sceau"
+  ],
+  "miyusceau_fuzz_decoder_titres": [
+    "miyusceau_fuzz_decoder_titres"
+  ],
+  "miyusceau_fuzz_generer_graines": [
+    "miyusceau_fuzz_generer_graines"
+  ],
+  "miyusceau_fuzz_preuves_merkle": [
+    "miyusceau_fuzz_preuves_merkle"
+  ],
+  "miyusceau_fuzz_verifier_seuil": [
+    "miyusceau_fuzz_verifier_seuil"
+  ],
+  "miyusceau_lib": [
+    "miyusceau_lib"
+  ],
+  "miyusceau_merkle": [
+    "miyusceau_merkle"
+  ],
+  "miyusceau_registre": [
+    "miyusceau_registre"
+  ],
+  "miyusceau_titre": [
+    "miyusceau_titre"
+  ],
+  "miyusceau_tlv": [
+    "miyusceau_tlv"
+  ],
   "miyusearch_admin_cell": [
     "miyusearch_admin_cell"
   ],
@@ -7167,6 +7637,12 @@
   "miyusql_cache_set_impl": [
     "miyusql_cache_set_impl"
   ],
+  "miyusql_context": [
+    "miyusql_context"
+  ],
+  "miyusql_context_avec_signature": [
+    "miyusql_context_avec_signature"
+  ],
   "miyusql_context_has_mandate": [
     "miyusql_context_has_mandate"
   ],
@@ -7178,6 +7654,18 @@
   ],
   "miyusql_context_security_level": [
     "miyusql_context_security_level"
+  ],
+  "miyusql_context_test_mandat_non_signe": [
+    "miyusql_context_test_mandat_non_signe"
+  ],
+  "miyusql_context_test_mandat_signe": [
+    "miyusql_context_test_mandat_signe"
+  ],
+  "miyusql_context_test_mandat_vide": [
+    "miyusql_context_test_mandat_vide"
+  ],
+  "miyusql_context_verifier_mandat": [
+    "miyusql_context_verifier_mandat"
   ],
   "miyusql_cycle_test_miyukinisqltest": [
     "miyusql_cycle_test_miyukinisqltest"
@@ -7194,8 +7682,14 @@
   "miyusql_error_execution": [
     "miyusql_error_execution"
   ],
+  "miyusql_error_mandat_non_signe": [
+    "miyusql_error_mandat_non_signe"
+  ],
   "miyusql_error_no_mandate": [
     "miyusql_error_no_mandate"
+  ],
+  "miyusql_error_non_implemente": [
+    "miyusql_error_non_implemente"
   ],
   "miyusql_error_syntax": [
     "miyusql_error_syntax"
@@ -7218,8 +7712,41 @@
   "miyusql_governed_context_struct": [
     "miyusql_governed_context_struct"
   ],
+  "miyusql_memory": [
+    "miyusql_memory"
+  ],
   "miyusql_memory_executor": [
     "miyusql_memory_executor"
+  ],
+  "miyusql_memory_test_cache_ttl": [
+    "miyusql_memory_test_cache_ttl"
+  ],
+  "miyusql_memory_test_delete_where_refuse": [
+    "miyusql_memory_test_delete_where_refuse"
+  ],
+  "miyusql_memory_test_insert_incoherent": [
+    "miyusql_memory_test_insert_incoherent"
+  ],
+  "miyusql_memory_test_insert_valeurs": [
+    "miyusql_memory_test_insert_valeurs"
+  ],
+  "miyusql_memory_test_instruction_inconnue": [
+    "miyusql_memory_test_instruction_inconnue"
+  ],
+  "miyusql_memory_test_mandat_non_signe": [
+    "miyusql_memory_test_mandat_non_signe"
+  ],
+  "miyusql_memory_test_rollback": [
+    "miyusql_memory_test_rollback"
+  ],
+  "miyusql_memory_test_select_where_refuse": [
+    "miyusql_memory_test_select_where_refuse"
+  ],
+  "miyusql_memory_test_tables_inexistantes": [
+    "miyusql_memory_test_tables_inexistantes"
+  ],
+  "miyusql_memory_test_transactions_inconnues": [
+    "miyusql_memory_test_transactions_inconnues"
   ],
   "miyusql_query_executor_trait": [
     "miyusql_query_executor_trait"
@@ -7265,6 +7792,12 @@
   ],
   "miyusql_schema_tables": [
     "miyusql_schema_tables"
+  ],
+  "miyusql_signature_mandat": [
+    "miyusql_signature_mandat"
+  ],
+  "miyusql_signature_mandat_pour_tests": [
+    "miyusql_signature_mandat_pour_tests"
   ],
   "miyusql_tool_cache_get": [
     "miyusql_tool_cache_get"
@@ -7410,6 +7943,9 @@
   "miyustt_lib": [
     "miyustt_lib"
   ],
+  "miyustt_securite": [
+    "miyustt_securite"
+  ],
   "miyutext_admin_cell": [
     "miyutext_admin_cell"
   ],
@@ -7455,6 +7991,9 @@
   "miyutts_lib": [
     "miyutts_lib"
   ],
+  "miyutts_securite": [
+    "miyutts_securite"
+  ],
   "miyuvalidate_admin_cell": [
     "miyuvalidate_admin_cell"
   ],
@@ -7469,6 +8008,54 @@
   ],
   "miyuvalidate_tool_schema_check": [
     "miyuvalidate_tool_schema_check"
+  ],
+  "miyuvigie_dedup": [
+    "miyuvigie_dedup"
+  ],
+  "miyuvigie_evenement": [
+    "miyuvigie_evenement"
+  ],
+  "miyuvigie_fuzz_commun": [
+    "miyuvigie_fuzz_commun"
+  ],
+  "miyuvigie_fuzz_generer_graines": [
+    "miyuvigie_fuzz_generer_graines"
+  ],
+  "miyuvigie_fuzz_journal_douane": [
+    "miyuvigie_fuzz_journal_douane"
+  ],
+  "miyuvigie_fuzz_proc_net_tcp": [
+    "miyuvigie_fuzz_proc_net_tcp"
+  ],
+  "miyuvigie_fuzz_regles": [
+    "miyuvigie_fuzz_regles"
+  ],
+  "miyuvigie_lib": [
+    "miyuvigie_lib"
+  ],
+  "miyuvigie_nftables": [
+    "miyuvigie_nftables"
+  ],
+  "miyuvigie_regles": [
+    "miyuvigie_regles"
+  ],
+  "miyuvigie_signal": [
+    "miyuvigie_signal"
+  ],
+  "miyuvigie_sortie": [
+    "miyuvigie_sortie"
+  ],
+  "miyuvigie_test_journaux_douane": [
+    "miyuvigie_test_journaux_douane"
+  ],
+  "miyuvigie_test_vigie": [
+    "miyuvigie_test_vigie"
+  ],
+  "miyuvigie_vigie": [
+    "miyuvigie_vigie"
+  ],
+  "miyuvigie_zone": [
+    "miyuvigie_zone"
   ],
   "miyuweb_admin_cell": [
     "miyuweb_admin_cell"
@@ -7517,6 +8104,9 @@
   ],
   "miyuwebway_participant_errors": [
     "miyuwebway_participant_errors"
+  ],
+  "miyuwebway_participant_identite": [
+    "miyuwebway_participant_identite"
   ],
   "miyuwebway_participant_lib": [
     "miyuwebway_participant_lib"
@@ -7599,8 +8189,8 @@
   "miyuwebway_tracker_mws_cog_list_update": [
     "miyuwebway_tracker_mws_cog_list_update"
   ],
-  "miyuwebway_tracker_mws_declaration_validate_validate_2": [
-    "miyuwebway_tracker_mws_declaration_validate_validate_2"
+  "miyuwebway_tracker_mws_declaration_validate": [
+    "miyuwebway_tracker_mws_declaration_validate"
   ],
   "miyuwebway_tracker_mws_declaration_verify": [
     "miyuwebway_tracker_mws_declaration_verify"
@@ -7673,15 +8263,11 @@
     "toolkit.narrative",
     "toolkit.narrative.miyustory"
   ],
-  "operator": [
-    "lifegame.operator",
-    "lifegame.operator.entities",
-    "lifegame.operator.powers",
-    "lifegame.operator.simulation",
-    "lifegame.operator.world"
-  ],
   "origin": [
     "origin"
+  ],
+  "origin_admin_acces": [
+    "origin_admin_acces"
   ],
   "origin_admin_mod": [
     "origin_admin_mod"
@@ -7691,6 +8277,9 @@
   ],
   "origin_config": [
     "origin_config"
+  ],
+  "origin_garde_reseau": [
+    "origin_garde_reseau"
   ],
   "origin_main": [
     "origin_main"
@@ -7767,6 +8356,12 @@
   "origin_web_mod": [
     "origin_web_mod"
   ],
+  "origin_web_presentation": [
+    "origin_web_presentation"
+  ],
+  "origin_web_revocations": [
+    "origin_web_revocations"
+  ],
   "origin_web_server": [
     "origin_web_server"
   ],
@@ -7812,15 +8407,13 @@
     "toolkit.pos.miyupospayment",
     "toolkit.pos.miyupossales"
   ],
-  "powers": [
-    "lifegame.powers",
-    "lifegame.powers.creation",
-    "lifegame.powers.destruction",
-    "lifegame.powers.manager"
-  ],
   "relay": [
     "origin.relay",
+    "origin.relay.identites",
     "origin.relay.permis_registry"
+  ],
+  "script_verifier_regle_rusqlite": [
+    "script_verifier_regle_rusqlite"
   ],
   "security": [
     "toolkit.security",
@@ -7830,19 +8423,7 @@
     "service"
   ],
   "services": [
-    "central.services",
-    "central.services.lifegame",
-    "central.services.lifegame.canvas",
-    "central.services.lifegame.sidebar",
-    "central.services.lifegame.stats_bar",
-    "central.services.ui_assets",
-    "central.services.ui_builder"
-  ],
-  "simulation": [
-    "lifegame.simulation",
-    "lifegame.simulation.ai",
-    "lifegame.simulation.tick_world_fn",
-    "lifegame.simulation.world_tick"
+    "central.services"
   ],
   "siteApp": [
     "cog.siteApp"
@@ -7867,6 +8448,9 @@
   "strongfather_decision_ambiguous_missing_information": [
     "strongfather_decision_ambiguous_missing_information"
   ],
+  "strongfather_decision_deciding_rule": [
+    "strongfather_decision_deciding_rule"
+  ],
   "strongfather_decision_deferred_context_required": [
     "strongfather_decision_deferred_context_required"
   ],
@@ -7890,6 +8474,9 @@
   ],
   "strongfather_decision_evaluation_context_evaluation_context_2": [
     "strongfather_decision_evaluation_context_evaluation_context_2"
+  ],
+  "strongfather_decision_intent_digest": [
+    "strongfather_decision_intent_digest"
   ],
   "strongfather_decision_intent_id": [
     "strongfather_decision_intent_id"
@@ -7927,6 +8514,9 @@
   "strongfather_decision_justification_with_reasoning": [
     "strongfather_decision_justification_with_reasoning"
   ],
+  "strongfather_decision_matches_intent": [
+    "strongfather_decision_matches_intent"
+  ],
   "strongfather_decision_metadata": [
     "strongfather_decision_metadata"
   ],
@@ -7950,6 +8540,9 @@
   ],
   "strongfather_decision_policies_applied": [
     "strongfather_decision_policies_applied"
+  ],
+  "strongfather_decision_reason": [
+    "strongfather_decision_reason"
   ],
   "strongfather_decision_refused_reason": [
     "strongfather_decision_refused_reason"
@@ -7990,14 +8583,47 @@
   "strongfather_decision_type_refused": [
     "strongfather_decision_type_refused"
   ],
+  "strongfather_decision_verdict": [
+    "strongfather_decision_verdict"
+  ],
   "strongfather_decision_with_evaluation_context": [
     "strongfather_decision_with_evaluation_context"
   ],
   "strongfather_decision_with_metadata": [
     "strongfather_decision_with_metadata"
   ],
+  "strongfather_expr": [
+    "strongfather_expr"
+  ],
+  "strongfather_expr_compiled": [
+    "strongfather_expr_compiled"
+  ],
+  "strongfather_expr_error": [
+    "strongfather_expr_error"
+  ],
+  "strongfather_expr_eval": [
+    "strongfather_expr_eval"
+  ],
+  "strongfather_expr_parse": [
+    "strongfather_expr_parse"
+  ],
+  "strongfather_expr_test_bounds": [
+    "strongfather_expr_test_bounds"
+  ],
+  "strongfather_expr_test_errors": [
+    "strongfather_expr_test_errors"
+  ],
+  "strongfather_expr_test_no_substring": [
+    "strongfather_expr_test_no_substring"
+  ],
+  "strongfather_expr_test_true_false": [
+    "strongfather_expr_test_true_false"
+  ],
   "strongfather_intent": [
     "strongfather_intent"
+  ],
+  "strongfather_intent_action_as_str": [
+    "strongfather_intent_action_as_str"
   ],
   "strongfather_intent_action_creation": [
     "strongfather_intent_action_creation"
@@ -8053,6 +8679,9 @@
   "strongfather_intent_data_data_2": [
     "strongfather_intent_data_data_2"
   ],
+  "strongfather_intent_digest": [
+    "strongfather_intent_digest"
+  ],
   "strongfather_intent_id": [
     "strongfather_intent_id"
   ],
@@ -8080,6 +8709,9 @@
   "strongfather_intent_subject": [
     "strongfather_intent_subject"
   ],
+  "strongfather_intent_test_action_from_str": [
+    "strongfather_intent_test_action_from_str"
+  ],
   "strongfather_intent_test_all_action_types": [
     "strongfather_intent_test_all_action_types"
   ],
@@ -8091,6 +8723,9 @@
   ],
   "strongfather_intent_test_create_with_priority": [
     "strongfather_intent_test_create_with_priority"
+  ],
+  "strongfather_intent_test_digest_stable": [
+    "strongfather_intent_test_digest_stable"
   ],
   "strongfather_intent_type": [
     "strongfather_intent_type"
@@ -8119,11 +8754,32 @@
   "strongfather_intent_with_priority": [
     "strongfather_intent_with_priority"
   ],
+  "strongfather_loader": [
+    "strongfather_loader"
+  ],
+  "strongfather_loader_test_fail_closed": [
+    "strongfather_loader_test_fail_closed"
+  ],
+  "strongfather_loader_test_file": [
+    "strongfather_loader_test_file"
+  ],
+  "strongfather_loader_test_valid_json": [
+    "strongfather_loader_test_valid_json"
+  ],
+  "strongfather_loader_test_valid_toml": [
+    "strongfather_loader_test_valid_toml"
+  ],
   "strongfather_module_decision": [
     "strongfather_module_decision"
   ],
+  "strongfather_module_expr": [
+    "strongfather_module_expr"
+  ],
   "strongfather_module_intent": [
     "strongfather_module_intent"
+  ],
+  "strongfather_module_loader": [
+    "strongfather_module_loader"
   ],
   "strongfather_module_policy": [
     "strongfather_module_policy"
@@ -8139,6 +8795,9 @@
   ],
   "strongfather_policy": [
     "strongfather_policy"
+  ],
+  "strongfather_policy_check_coherence": [
+    "strongfather_policy_check_coherence"
   ],
   "strongfather_policy_composite_policies": [
     "strongfather_policy_composite_policies"
@@ -8179,6 +8838,9 @@
   "strongfather_policy_engine_apply": [
     "strongfather_policy_engine_apply"
   ],
+  "strongfather_policy_engine_decide": [
+    "strongfather_policy_engine_decide"
+  ],
   "strongfather_policy_engine_error": [
     "strongfather_policy_engine_error"
   ],
@@ -8194,8 +8856,8 @@
   "strongfather_policy_engine_error_reason": [
     "strongfather_policy_engine_error_reason"
   ],
-  "strongfather_policy_engine_evaluate_policy": [
-    "strongfather_policy_engine_evaluate_policy"
+  "strongfather_policy_engine_load_file": [
+    "strongfather_policy_engine_load_file"
   ],
   "strongfather_policy_engine_new": [
     "strongfather_policy_engine_new"
@@ -8203,17 +8865,50 @@
   "strongfather_policy_engine_policies": [
     "strongfather_policy_engine_policies"
   ],
-  "strongfather_policy_engine_select_applicable": [
-    "strongfather_policy_engine_select_applicable"
+  "strongfather_policy_engine_test_allow": [
+    "strongfather_policy_engine_test_allow"
   ],
-  "strongfather_policy_engine_test_apply_permission": [
-    "strongfather_policy_engine_test_apply_permission"
+  "strongfather_policy_engine_test_apply": [
+    "strongfather_policy_engine_test_apply"
   ],
-  "strongfather_policy_engine_test_create": [
-    "strongfather_policy_engine_test_create"
+  "strongfather_policy_engine_test_composite": [
+    "strongfather_policy_engine_test_composite"
   ],
-  "strongfather_policy_engine_test_priority_order": [
-    "strongfather_policy_engine_test_priority_order"
+  "strongfather_policy_engine_test_condition": [
+    "strongfather_policy_engine_test_condition"
+  ],
+  "strongfather_policy_engine_test_constraint": [
+    "strongfather_policy_engine_test_constraint"
+  ],
+  "strongfather_policy_engine_test_default_deny": [
+    "strongfather_policy_engine_test_default_deny"
+  ],
+  "strongfather_policy_engine_test_deny_over_allow": [
+    "strongfather_policy_engine_test_deny_over_allow"
+  ],
+  "strongfather_policy_engine_test_digest": [
+    "strongfather_policy_engine_test_digest"
+  ],
+  "strongfather_policy_engine_test_incoherent": [
+    "strongfather_policy_engine_test_incoherent"
+  ],
+  "strongfather_policy_engine_test_invalid_intent": [
+    "strongfather_policy_engine_test_invalid_intent"
+  ],
+  "strongfather_policy_engine_test_malformed": [
+    "strongfather_policy_engine_test_malformed"
+  ],
+  "strongfather_policy_engine_test_no_substring": [
+    "strongfather_policy_engine_test_no_substring"
+  ],
+  "strongfather_policy_engine_test_priority": [
+    "strongfather_policy_engine_test_priority"
+  ],
+  "strongfather_policy_engine_try_new": [
+    "strongfather_policy_engine_try_new"
+  ],
+  "strongfather_policy_engine_validate": [
+    "strongfather_policy_engine_validate"
   ],
   "strongfather_policy_id": [
     "strongfather_policy_id"
@@ -8223,6 +8918,9 @@
   ],
   "strongfather_policy_is_critical": [
     "strongfather_policy_is_critical"
+  ],
+  "strongfather_policy_load_error": [
+    "strongfather_policy_load_error"
   ],
   "strongfather_policy_metadata": [
     "strongfather_policy_metadata"
@@ -8296,6 +8994,12 @@
   "strongfather_policy_set_default": [
     "strongfather_policy_set_default"
   ],
+  "strongfather_policy_set_from_json": [
+    "strongfather_policy_set_from_json"
+  ],
+  "strongfather_policy_set_from_toml": [
+    "strongfather_policy_set_from_toml"
+  ],
   "strongfather_policy_set_get": [
     "strongfather_policy_set_get"
   ],
@@ -8308,11 +9012,26 @@
   "strongfather_policy_set_len": [
     "strongfather_policy_set_len"
   ],
+  "strongfather_policy_set_load_file": [
+    "strongfather_policy_set_load_file"
+  ],
   "strongfather_policy_set_new": [
     "strongfather_policy_set_new"
   ],
   "strongfather_policy_set_policies": [
     "strongfather_policy_set_policies"
+  ],
+  "strongfather_policy_target": [
+    "strongfather_policy_target"
+  ],
+  "strongfather_policy_target_any": [
+    "strongfather_policy_target_any"
+  ],
+  "strongfather_policy_target_field": [
+    "strongfather_policy_target_field"
+  ],
+  "strongfather_policy_target_matches": [
+    "strongfather_policy_target_matches"
   ],
   "strongfather_policy_test_all_types": [
     "strongfather_policy_test_all_types"
@@ -8355,6 +9074,9 @@
   ],
   "strongfather_policy_with_priority": [
     "strongfather_policy_with_priority"
+  ],
+  "strongfather_policy_with_target": [
+    "strongfather_policy_with_target"
   ],
   "strongfather_priority_calculator": [
     "strongfather_priority_calculator"
@@ -8407,6 +9129,9 @@
   "strongfather_reexport_decision": [
     "strongfather_reexport_decision"
   ],
+  "strongfather_reexport_expr_loader": [
+    "strongfather_reexport_expr_loader"
+  ],
   "strongfather_reexport_intent": [
     "strongfather_reexport_intent"
   ],
@@ -8451,6 +9176,9 @@
   ],
   "strongfather_validator_test_valid_intent": [
     "strongfather_validator_test_valid_intent"
+  ],
+  "strongfather_verdict": [
+    "strongfather_verdict"
   ],
   "tamr_classification": [
     "tamr_classification"
@@ -8517,6 +9245,12 @@
   ],
   "team_api": [
     "team_api"
+  ],
+  "team_app": [
+    "team_app"
+  ],
+  "team_auth": [
+    "team_auth"
   ],
   "team_config": [
     "team_config"
@@ -8732,40 +9466,14 @@
   "toolkit": [
     "toolkit"
   ],
-  "tools_mge_asset_baker_main": [
-    "tools_mge_asset_baker_main"
-  ],
   "tracker": [
     "origin.tracker",
+    "origin.tracker.authentification",
     "origin.tracker.visit_tracker"
-  ],
-  "ui_builder_main": [
-    "ui_builder_main"
-  ],
-  "ui_builder_services_mod": [
-    "ui_builder_services_mod"
-  ],
-  "ui_builder_state": [
-    "ui_builder_state"
-  ],
-  "ui_builder_theme": [
-    "ui_builder_theme"
   ],
   "validate": [
     "toolkit.validate",
     "toolkit.validate.miyuvalidate"
-  ],
-  "world": [
-    "lifegame.world",
-    "lifegame.world.biome",
-    "lifegame.world.biome_struct",
-    "lifegame.world.biome_type",
-    "lifegame.world.generation",
-    "lifegame.world.generator",
-    "lifegame.world.terrain",
-    "lifegame.world.terrain_grid",
-    "lifegame.world.terrain_type",
-    "lifegame.world.tile"
   ],
   "worrysentinel_degradation": [
     "worrysentinel_degradation"
@@ -8830,6 +9538,9 @@
   "worrysentinel_security_test_level_ordering": [
     "worrysentinel_security_test_level_ordering"
   ],
+  "worrysentinel_test_chaine_vigies": [
+    "worrysentinel_test_chaine_vigies"
+  ],
   "worrysentinel_threat_detector_detect": [
     "worrysentinel_threat_detector_detect"
   ],
@@ -8856,5 +9567,8 @@
   ],
   "worrysentinel_threat_test_level_ordering": [
     "worrysentinel_threat_test_level_ordering"
+  ],
+  "worrysentinel_voies": [
+    "worrysentinel_voies"
   ]
 }

@@ -56,6 +56,12 @@
   "apps/central-mobile/src/components/service_card.rs": [
     "central_mobile_components_service_card"
   ],
+  "apps/central-mobile/src/identite.rs": [
+    "central_mobile_identite"
+  ],
+  "apps/central-mobile/src/login.rs": [
+    "central_mobile_login"
+  ],
   "apps/central-mobile/src/main.rs": [
     "central_mobile_main"
   ],
@@ -64,6 +70,9 @@
   ],
   "apps/central-mobile/src/screens/connexion.rs": [
     "central_mobile_screens_connexion"
+  ],
+  "apps/central-mobile/src/screens/identite.rs": [
+    "central_mobile_screens_identite"
   ],
   "apps/central-mobile/src/screens/pairing.rs": [
     "central_mobile_screens_pairing"
@@ -89,11 +98,35 @@
   "apps/central-mobile/src/theme.rs": [
     "central_mobile_theme"
   ],
+  "apps/central/fuzz/examples/generer_graines.rs": [
+    "central_fuzz_generer_graines"
+  ],
+  "apps/central/fuzz/fuzz_targets/etat_mcce.rs": [
+    "central_fuzz_etat_mcce"
+  ],
   "apps/central/src/app.rs": [
     "central_app"
   ],
   "apps/central/src/audio.rs": [
     "central_audio"
+  ],
+  "apps/central/src/canal_officiel/alertes.rs": [
+    "central_canal_officiel_alertes"
+  ],
+  "apps/central/src/canal_officiel/installateur.rs": [
+    "central_canal_officiel_installateur"
+  ],
+  "apps/central/src/canal_officiel/mod.rs": [
+    "central_canal_officiel"
+  ],
+  "apps/central/src/canal_officiel/modeles.rs": [
+    "central_canal_officiel_modeles"
+  ],
+  "apps/central/src/canal_officiel/persistance.rs": [
+    "central_canal_officiel_persistance"
+  ],
+  "apps/central/src/cle_service.rs": [
+    "central_cle_service"
   ],
   "apps/central/src/components/calendar/agenda_list.rs": [
     "central.components.calendar.agenda_list"
@@ -188,6 +221,12 @@
   "apps/central/src/screens/rite_entree.rs": [
     "central_screens_rite_entree"
   ],
+  "apps/central/src/service_manager/confiance.rs": [
+    "central_service_manager_confiance"
+  ],
+  "apps/central/src/service_manager/gouvernance.rs": [
+    "central_service_manager_gouvernance"
+  ],
   "apps/central/src/service_manager/installer.rs": [
     "central_service_manager_installer"
   ],
@@ -221,134 +260,17 @@
   "apps/central/src/services/external_service_view.rs": [
     "central_services_external_service_view"
   ],
-  "apps/central/src/services/game_view.rs": [
-    "central_services_game_view"
-  ],
   "apps/central/src/services/home.rs": [
     "central_services_home"
   ],
-  "apps/central/src/services/jay1tribu/mod.rs": [
-    "central_services_jay1tribu_mod"
+  "apps/central/src/services/maia_memoire/client.rs": [
+    "central_maia_memoire_client"
   ],
-  "apps/central/src/services/jaykoa/calendar_view.rs": [
-    "central_services_jaykoa_calendar_view"
+  "apps/central/src/services/maia_memoire/mod.rs": [
+    "central_maia_memoire"
   ],
-  "apps/central/src/services/jaykoa/components.rs": [
-    "central_services_jaykoa_components"
-  ],
-  "apps/central/src/services/jaykoa/day_view.rs": [
-    "central_services_jaykoa_day_view"
-  ],
-  "apps/central/src/services/jaykoa/event_form.rs": [
-    "central_services_jaykoa_event_form"
-  ],
-  "apps/central/src/services/jaykoa/mod.rs": [
-    "central_services_jaykoa_mod"
-  ],
-  "apps/central/src/services/jaykoa/month_view.rs": [
-    "central_services_jaykoa_month_view"
-  ],
-  "apps/central/src/services/jaykoa/schedule_view.rs": [
-    "central_services_jaykoa_schedule_view"
-  ],
-  "apps/central/src/services/jaykoa/sidebar.rs": [
-    "central_services_jaykoa_sidebar"
-  ],
-  "apps/central/src/services/jaykoa/week_view.rs": [
-    "central_services_jaykoa_week_view"
-  ],
-  "apps/central/src/services/jaykonta/components.rs": [
-    "central_services_jaykonta_components"
-  ],
-  "apps/central/src/services/jaykonta/entry_point.rs": [
-    "central_services_jaykonta_entry_point"
-  ],
-  "apps/central/src/services/jaykonta/mod.rs": [
-    "central_services_jaykonta_mod"
-  ],
-  "apps/central/src/services/jaykonta/purse_dashboard.rs": [
-    "central_services_jaykonta_purse_dashboard"
-  ],
-  "apps/central/src/services/jaykonta/purse_forecast.rs": [
-    "central_services_jaykonta_purse_forecast"
-  ],
-  "apps/central/src/services/jaykonta/purse_movement_form.rs": [
-    "central_services_jaykonta_purse_movement_form"
-  ],
-  "apps/central/src/services/jaykonta/purse_movements.rs": [
-    "central_services_jaykonta_purse_movements"
-  ],
-  "apps/central/src/services/jaykonta/purse_recurring.rs": [
-    "central_services_jaykonta_purse_recurring"
-  ],
-  "apps/central/src/services/jaykonta/sidebar.rs": [
-    "central_services_jaykonta_sidebar"
-  ],
-  "apps/central/src/services/jaykonta_view.rs": [
-    "central_services_jaykonta_view"
-  ],
-  "apps/central/src/services/jaymanga/aggregation.rs": [
-    "central_services_jaymanga_aggregation"
-  ],
-  "apps/central/src/services/jaymanga/boutique.rs": [
-    "central_services_jaymanga_boutique"
-  ],
-  "apps/central/src/services/jaymanga/catalogue.rs": [
-    "central_services_jaymanga_catalogue"
-  ],
-  "apps/central/src/services/jaymanga/chapters.rs": [
-    "central_services_jaymanga_chapters"
-  ],
-  "apps/central/src/services/jaymanga/components.rs": [
-    "central_services_jaymanga_components"
-  ],
-  "apps/central/src/services/jaymanga/dashboard.rs": [
-    "central_services_jaymanga_dashboard"
-  ],
-  "apps/central/src/services/jaymanga/library.rs": [
-    "central_services_jaymanga_library"
-  ],
-  "apps/central/src/services/jaymanga/mod.rs": [
-    "central_services_jaymanga_mod"
-  ],
-  "apps/central/src/services/jaymanga/onboarding.rs": [
-    "central_services_jaymanga_onboarding"
-  ],
-  "apps/central/src/services/jaymanga/profile.rs": [
-    "central_services_jaymanga_profile"
-  ],
-  "apps/central/src/services/jaymanga/promotions.rs": [
-    "central_services_jaymanga_promotions"
-  ],
-  "apps/central/src/services/jaymanga/reader.rs": [
-    "central_services_jaymanga_reader"
-  ],
-  "apps/central/src/services/jaymanga/reader_stats.rs": [
-    "central_services_jaymanga_reader_stats"
-  ],
-  "apps/central/src/services/jaymanga/sales.rs": [
-    "central_services_jaymanga_sales"
-  ],
-  "apps/central/src/services/jaymanga/series.rs": [
-    "central_services_jaymanga_series"
-  ],
-  "apps/central/src/services/jaymanga/sidebar.rs": [
-    "central_services_jaymanga_sidebar"
-  ],
-  "apps/central/src/services/jaymanga/work_form.rs": [
-    "central_services_jaymanga_work_form"
-  ],
-  "apps/central/src/services/lifegame/canvas.rs": [
-    "central.services.lifegame.canvas"
-  ],
-  "apps/central/src/services/lifegame/mod.rs": [
-    "central.services.lifegame"
-  ],
-  "apps/central/src/services/lifegame/sidebar.rs": [
-    "central.services.lifegame.sidebar"
-  ],
-  "apps/central/src/services/lifegame/stats_bar.rs": [
-    "central.services.lifegame.stats_bar"
+  "apps/central/src/services/maia_memoire/modele.rs": [
+    "central_maia_memoire_modele"
   ],
   "apps/central/src/services/market/catalog.rs": [
     "central_services_market_catalog"
@@ -416,21 +338,6 @@
   "apps/central/src/services/miyukini_whisper/mod.rs": [
     "central_services_miyukini_whisper_mod"
   ],
-  "apps/central/src/services/miyukiniwatch/audit.rs": [
-    "central_services_miyukiniwatch_audit"
-  ],
-  "apps/central/src/services/miyukiniwatch/dashboard.rs": [
-    "central_services_miyukiniwatch_dashboard"
-  ],
-  "apps/central/src/services/miyukiniwatch/detail.rs": [
-    "central_services_miyukiniwatch_detail"
-  ],
-  "apps/central/src/services/miyukiniwatch/mod.rs": [
-    "central_services_miyukiniwatch_mod"
-  ],
-  "apps/central/src/services/miyukiniwatch/params.rs": [
-    "central_services_miyukiniwatch_params"
-  ],
   "apps/central/src/services/mod.rs": [
     "central.services"
   ],
@@ -439,15 +346,6 @@
   ],
   "apps/central/src/services/mws_view.rs": [
     "central_services_mws_view"
-  ],
-  "apps/central/src/services/service_view.rs": [
-    "central_services_service_view"
-  ],
-  "apps/central/src/services/ui_assets.rs": [
-    "central.services.ui_assets"
-  ],
-  "apps/central/src/services/ui_builder.rs": [
-    "central.services.ui_builder"
   ],
   "apps/central/src/state.rs": [
     "central_state"
@@ -650,6 +548,12 @@
   "apps/jaymanga/src/views/work_form.rs": [
     "jaymanga_views_work_form"
   ],
+  "apps/maia-llm/fuzz/examples/generer_graines.rs": [
+    "maia_llm_fuzz_generer_graines"
+  ],
+  "apps/maia-llm/fuzz/fuzz_targets/artefact_mmia.rs": [
+    "maia_llm_fuzz_artefact_mmia"
+  ],
   "apps/maia-llm/src/api/chat.rs": [
     "maia_llm_api_chat"
   ],
@@ -665,6 +569,9 @@
   "apps/maia-llm/src/auth.rs": [
     "maia_llm_auth"
   ],
+  "apps/maia-llm/src/banc.rs": [
+    "maia_llm_banc"
+  ],
   "apps/maia-llm/src/config.rs": [
     "maia_llm_config"
   ],
@@ -673,6 +580,9 @@
   ],
   "apps/maia-llm/src/main.rs": [
     "maia_llm_main"
+  ],
+  "apps/maia-llm/src/materiel.rs": [
+    "maia_llm_materiel"
   ],
   "apps/maia-llm/src/store.rs": [
     "maia_llm_store"
@@ -686,17 +596,32 @@
   "apps/miou-llm-bridge/src/agents/mod.rs": [
     "miou_llm_bridge_agents_mod"
   ],
+  "apps/miou-llm-bridge/src/auth_memoire.rs": [
+    "maia_auth_memoire"
+  ],
   "apps/miou-llm-bridge/src/catalog.rs": [
     "miou_llm_bridge_catalog"
   ],
   "apps/miou-llm-bridge/src/config.rs": [
     "miou_llm_bridge_config"
   ],
+  "apps/miou-llm-bridge/src/confirmations.rs": [
+    "maia_confirmations"
+  ],
   "apps/miou-llm-bridge/src/context.rs": [
     "miou_llm_bridge_context"
   ],
+  "apps/miou-llm-bridge/src/essai_reel.rs": [
+    "miou_llm_bridge_essai_reel"
+  ],
   "apps/miou-llm-bridge/src/fallback.rs": [
     "miou_llm_bridge_fallback"
+  ],
+  "apps/miou-llm-bridge/src/garde_etranger.rs": [
+    "maia_garde_etranger"
+  ],
+  "apps/miou-llm-bridge/src/gouvernance.rs": [
+    "maia_gouvernance"
   ],
   "apps/miou-llm-bridge/src/hardware.rs": [
     "miou_llm_bridge_hardware"
@@ -713,11 +638,20 @@
   "apps/miou-llm-bridge/src/main.rs": [
     "miou_llm_bridge_main"
   ],
+  "apps/miou-llm-bridge/src/memoire.rs": [
+    "miou_llm_bridge_memoire"
+  ],
+  "apps/miou-llm-bridge/src/mention_ia.rs": [
+    "miou_llm_bridge_mention_ia"
+  ],
   "apps/miou-llm-bridge/src/mode.rs": [
     "miou_llm_bridge_mode"
   ],
   "apps/miou-llm-bridge/src/model_manager.rs": [
     "miou_llm_bridge_model_manager"
+  ],
+  "apps/miou-llm-bridge/src/outil_memoire.rs": [
+    "maia_outil_memoire"
   ],
   "apps/miou-llm-bridge/src/persona/mod.rs": [
     "miou_llm_bridge_persona_mod"
@@ -728,8 +662,20 @@
   "apps/miou-llm-bridge/src/recommend.rs": [
     "miou_llm_bridge_recommend"
   ],
+  "apps/miou-llm-bridge/src/revocations_memoire.rs": [
+    "maia_revocations_memoire"
+  ],
+  "apps/miou-llm-bridge/src/routes_federee.rs": [
+    "maia_routes_federee"
+  ],
+  "apps/miou-llm-bridge/src/routes_memoire.rs": [
+    "maia_routes_memoire"
+  ],
   "apps/miou-llm-bridge/src/security.rs": [
     "miou_llm_bridge_security"
+  ],
+  "apps/miou-llm-bridge/src/signature.rs": [
+    "miou_llm_bridge_signature"
   ],
   "apps/miou-llm-bridge/src/skills/cog_services.rs": [
     "miou_llm_bridge_skills_cog_services"
@@ -745,6 +691,9 @@
   ],
   "apps/miou-llm-bridge/src/skills/web_fetch.rs": [
     "miou_llm_bridge_skills_web_fetch"
+  ],
+  "apps/miou-llm-bridge/src/tamr.rs": [
+    "maia_tamr"
   ],
   "apps/miou-llm-bridge/src/team_client.rs": [
     "miou_llm_bridge_team_client"
@@ -796,15 +745,6 @@
   ],
   "apps/mipower/src/views/starter.rs": [
     "mipower_views_starter"
-  ],
-  "apps/miyuclicker/src/lib.rs": [
-    "miyuclicker_lib"
-  ],
-  "apps/miyuclicker/src/main.rs": [
-    "miyuclicker_main"
-  ],
-  "apps/miyuclicker/src/views/mod.rs": [
-    "miyuclicker_views_mod"
   ],
   "apps/miyucloud/build.rs": [
     "miyucloud_build"
@@ -905,9 +845,6 @@
   "apps/miyucloud/src/application/ports/dedup_ports.rs": [
     "miyucloud_application_ports_dedup_ports"
   ],
-  "apps/miyucloud/src/application/ports/encryption_ports.rs": [
-    "miyucloud_application_ports_encryption_ports"
-  ],
   "apps/miyucloud/src/application/ports/favorites_ports.rs": [
     "miyucloud_application_ports_favorites_ports"
   ],
@@ -968,6 +905,9 @@
   "apps/miyucloud/src/application/services/contact_service.rs": [
     "miyucloud_application_services_contact_service"
   ],
+  "apps/miyucloud/src/application/services/desarmement_service.rs": [
+    "miyucloud_application_services_desarmement_service"
+  ],
   "apps/miyucloud/src/application/services/device_auth_service.rs": [
     "miyucloud_application_services_device_auth_service"
   ],
@@ -1007,6 +947,12 @@
   "apps/miyucloud/src/application/services/recent_service.rs": [
     "miyucloud_application_services_recent_service"
   ],
+  "apps/miyucloud/src/application/services/reclassement_cdr_service.rs": [
+    "miyucloud_application_services_reclassement_cdr_service"
+  ],
+  "apps/miyucloud/src/application/services/reconciliation_references_service.rs": [
+    "miyucloud_application_services_reconciliation_references_service"
+  ],
   "apps/miyucloud/src/application/services/search_service.rs": [
     "miyucloud_application_services_search_service"
   ],
@@ -1015,6 +961,9 @@
   ],
   "apps/miyucloud/src/application/services/storage_usage_service.rs": [
     "miyucloud_application_services_storage_usage_service"
+  ],
+  "apps/miyucloud/src/application/services/supervision.rs": [
+    "miyucloud_application_services_supervision"
   ],
   "apps/miyucloud/src/application/services/trash_service.rs": [
     "miyucloud_application_services_trash_service"
@@ -1052,6 +1001,9 @@
   "apps/miyucloud/src/domain/entities/calendar.rs": [
     "miyucloud_domain_entities_calendar"
   ],
+  "apps/miyucloud/src/domain/entities/calendar_access.rs": [
+    "miyucloud_domain_entities_calendar_access"
+  ],
   "apps/miyucloud/src/domain/entities/calendar_event.rs": [
     "miyucloud_domain_entities_calendar_event"
   ],
@@ -1063,6 +1015,9 @@
   ],
   "apps/miyucloud/src/domain/entities/entity_errors.rs": [
     "miyucloud_domain_entities_entity_errors"
+  ],
+  "apps/miyucloud/src/domain/entities/etat_cdr.rs": [
+    "miyucloud_domain_entities_etat_cdr"
   ],
   "apps/miyucloud/src/domain/entities/file.rs": [
     "miyucloud_domain_entities_file"
@@ -1127,6 +1082,9 @@
   "apps/miyucloud/src/domain/repositories/user_repository.rs": [
     "miyucloud_domain_repositories_user_repository"
   ],
+  "apps/miyucloud/src/domain/services/home_folder.rs": [
+    "miyucloud_domain_services_home_folder"
+  ],
   "apps/miyucloud/src/domain/services/i18n_service.rs": [
     "miyucloud_domain_services_i18n_service"
   ],
@@ -1175,6 +1133,9 @@
   "apps/miyucloud/src/infrastructure/repositories/pg/calendar_pg_repository.rs": [
     "miyucloud_infrastructure_repositories_pg_calendar_pg_repository"
   ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/cdr_reclassement_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_cdr_reclassement_pg_repository"
+  ],
   "apps/miyucloud/src/infrastructure/repositories/pg/contact_group_pg_repository.rs": [
     "miyucloud_infrastructure_repositories_pg_contact_group_pg_repository"
   ],
@@ -1201,6 +1162,9 @@
   ],
   "apps/miyucloud/src/infrastructure/repositories/pg/folder_db_repository.rs": [
     "miyucloud_infrastructure_repositories_pg_folder_db_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/miyu_identity_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_miyu_identity_pg_repository"
   ],
   "apps/miyucloud/src/infrastructure/repositories/pg/mod.rs": [
     "miyucloud_infrastructure_repositories_pg_mod"
@@ -1229,8 +1193,8 @@
   "apps/miyucloud/src/infrastructure/repositories/pg/user_pg_repository.rs": [
     "miyucloud_infrastructure_repositories_pg_user_pg_repository"
   ],
-  "apps/miyucloud/src/infrastructure/services/blob_encryption_service.rs": [
-    "miyucloud_infrastructure_services_blob_encryption_service"
+  "apps/miyucloud/src/infrastructure/services/blob_cipher.rs": [
+    "miyucloud_infrastructure_services_blob_cipher"
   ],
   "apps/miyucloud/src/infrastructure/services/central_client_service.rs": [
     "miyucloud_infrastructure_services_central_client_service"
@@ -1262,11 +1226,17 @@
   "apps/miyucloud/src/infrastructure/services/image_transcode_service.rs": [
     "miyucloud_infrastructure_services_image_transcode_service"
   ],
-  "apps/miyucloud/src/infrastructure/services/jwt_service.rs": [
-    "miyucloud_infrastructure_services_jwt_service"
-  ],
   "apps/miyucloud/src/infrastructure/services/login_lockout_service.rs": [
     "miyucloud_infrastructure_services_login_lockout_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/miyu_auth_service.rs": [
+    "miyucloud_infrastructure_services_miyu_auth_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/miyu_liaison_appareil.rs": [
+    "miyucloud_infrastructure_services_miyu_liaison_appareil"
+  ],
+  "apps/miyucloud/src/infrastructure/services/miyu_revocations.rs": [
+    "miyucloud_infrastructure_services_miyu_revocations"
   ],
   "apps/miyucloud/src/infrastructure/services/mod.rs": [
     "miyucloud_infrastructure_services_mod"
@@ -1291,6 +1261,9 @@
   ],
   "apps/miyucloud/src/infrastructure/services/session_timeout_service.rs": [
     "miyucloud_infrastructure_services_session_timeout_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/session_token_service.rs": [
+    "miyucloud_infrastructure_services_session_token_service"
   ],
   "apps/miyucloud/src/infrastructure/services/thumbnail_service.rs": [
     "miyucloud_infrastructure_services_thumbnail_service"
@@ -1358,6 +1331,9 @@
   "apps/miyucloud/src/interfaces/api/handlers/i18n_handler.rs": [
     "miyucloud_interfaces_api_handlers_i18n_handler"
   ],
+  "apps/miyucloud/src/interfaces/api/handlers/miyu_auth_handler.rs": [
+    "miyucloud_interfaces_api_handlers_miyu_auth_handler"
+  ],
   "apps/miyucloud/src/interfaces/api/handlers/mod.rs": [
     "miyucloud_interfaces_api_handlers_mod"
   ],
@@ -1397,6 +1373,9 @@
   "apps/miyucloud/src/interfaces/middleware/bandwidth.rs": [
     "miyucloud_interfaces_middleware_bandwidth"
   ],
+  "apps/miyucloud/src/interfaces/middleware/basic_policy.rs": [
+    "miyucloud_interfaces_middleware_basic_policy"
+  ],
   "apps/miyucloud/src/interfaces/middleware/csrf.rs": [
     "miyucloud_interfaces_middleware_csrf"
   ],
@@ -1424,6 +1403,9 @@
   "apps/miyucloud/src/interfaces/nextcloud/ocs_handler.rs": [
     "miyucloud_interfaces_nextcloud_ocs_handler"
   ],
+  "apps/miyucloud/src/interfaces/nextcloud/owned_paths.rs": [
+    "miyucloud_interfaces_nextcloud_owned_paths"
+  ],
   "apps/miyucloud/src/interfaces/nextcloud/preview_handler.rs": [
     "miyucloud_interfaces_nextcloud_preview_handler"
   ],
@@ -1444,6 +1426,9 @@
   ],
   "apps/miyucloud/src/interfaces/nextcloud/webdav_handler.rs": [
     "miyucloud_interfaces_nextcloud_webdav_handler"
+  ],
+  "apps/miyucloud/src/interfaces/upload_spool.rs": [
+    "miyucloud_interfaces_upload_spool"
   ],
   "apps/miyucloud/src/interfaces/web/mod.rs": [
     "miyucloud_interfaces_web_mod"
@@ -1688,9 +1673,15 @@
     "cog.cloudViewProfile.changePassword",
     "cog.cloudViewProfile.createAppPassword",
     "cog.cloudViewProfile.init",
+    "cog.cloudViewProfile.linkMiyuDevice",
+    "cog.cloudViewProfile.linkMiyuIdentity",
     "cog.cloudViewProfile.loadAppPasswords",
+    "cog.cloudViewProfile.loadMiyuDevices",
+    "cog.cloudViewProfile.loadMiyuIdentities",
+    "cog.cloudViewProfile.removeMiyuDevice",
     "cog.cloudViewProfile.revokeAppPassword",
-    "cog.cloudViewProfile.t"
+    "cog.cloudViewProfile.t",
+    "cog.cloudViewProfile.unlinkMiyuIdentity"
   ],
   "apps/miyucloud/static/js/views/shared/sharedView.js": [
     "cog.cloudViewShared"
@@ -1725,6 +1716,9 @@
   "apps/miyukiniwatch/src/views/params.rs": [
     "miyukiniwatch_views_params"
   ],
+  "apps/origin/src/admin/acces.rs": [
+    "origin_admin_acces"
+  ],
   "apps/origin/src/admin/mod.rs": [
     "origin_admin_mod"
   ],
@@ -1733,6 +1727,9 @@
   ],
   "apps/origin/src/config.rs": [
     "origin_config"
+  ],
+  "apps/origin/src/garde_reseau.rs": [
+    "origin_garde_reseau"
   ],
   "apps/origin/src/main.rs": [
     "origin_main"
@@ -1748,6 +1745,9 @@
   ],
   "apps/origin/src/protocol/types.rs": [
     "origin_protocol_types"
+  ],
+  "apps/origin/src/relay/identites.rs": [
+    "origin.relay.identites"
   ],
   "apps/origin/src/relay/metrics.rs": [
     "origin_relay_metrics"
@@ -1772,6 +1772,9 @@
   ],
   "apps/origin/src/relay/verification.rs": [
     "origin_relay_verification"
+  ],
+  "apps/origin/src/tracker/authentification.rs": [
+    "origin.tracker.authentification"
   ],
   "apps/origin/src/tracker/catalog.rs": [
     "origin_tracker_catalog"
@@ -1815,11 +1818,23 @@
   "apps/origin/src/web/mod.rs": [
     "origin_web_mod"
   ],
+  "apps/origin/src/web/presentation.rs": [
+    "origin_web_presentation"
+  ],
+  "apps/origin/src/web/revocations.rs": [
+    "origin_web_revocations"
+  ],
   "apps/origin/src/web/server.rs": [
     "origin_web_server"
   ],
   "apps/team/src/api.rs": [
     "team_api"
+  ],
+  "apps/team/src/app.rs": [
+    "team_app"
+  ],
+  "apps/team/src/auth.rs": [
+    "team_auth"
   ],
   "apps/team/src/config.rs": [
     "team_config"
@@ -1863,27 +1878,35 @@
   "apps/team/src/orchestrator/scheduler.rs": [
     "team_orchestrator_scheduler"
   ],
-  "apps/ui-builder/src/main.rs": [
-    "ui_builder_main"
-  ],
-  "apps/ui-builder/src/services/mod.rs": [
-    "ui_builder_services_mod"
-  ],
-  "apps/ui-builder/src/state.rs": [
-    "ui_builder_state"
-  ],
-  "apps/ui-builder/src/theme.rs": [
-    "ui_builder_theme"
-  ],
   "crates/bondingbrother/src/connection.rs": [
     "bondingbrother_connection",
     "bondingbrother_connection_error",
     "bondingbrother_connection_error_already_connected",
+    "bondingbrother_connection_error_not_implemented",
     "bondingbrother_connection_id",
     "bondingbrother_connection_manager_connect",
     "bondingbrother_connection_manager_trait",
     "bondingbrother_connection_operator_id",
-    "bondingbrother_connection_test_creation"
+    "bondingbrother_connection_test_creation",
+    "bondingbrother_connection_test_stub_refuse"
+  ],
+  "crates/bondingbrother/src/gate.rs": [
+    "bondingbrother_decision_autorisee",
+    "bondingbrother_decision_autorisee_couvre",
+    "bondingbrother_decision_autorisee_decision",
+    "bondingbrother_decision_autorisee_empreinte",
+    "bondingbrother_decision_autorisee_regle",
+    "bondingbrother_executer_si_autorise",
+    "bondingbrother_gate",
+    "bondingbrother_gate_autoriser",
+    "bondingbrother_gate_test_allow_deny",
+    "bondingbrother_gate_test_seal",
+    "bondingbrother_gate_trait",
+    "bondingbrother_porte_strongfather",
+    "bondingbrother_porte_strongfather_from_file",
+    "bondingbrother_porte_strongfather_from_policies",
+    "bondingbrother_porte_strongfather_new",
+    "bondingbrother_refus"
   ],
   "crates/bondingbrother/src/lib.rs": [
     "bondingbrother_lib"
@@ -1891,12 +1914,14 @@
   "crates/bondingbrother/src/sync.rs": [
     "bondingbrother_sync_error",
     "bondingbrother_sync_error_failed",
+    "bondingbrother_sync_error_not_implemented",
     "bondingbrother_sync_manager_sync",
     "bondingbrother_sync_manager_trait",
     "bondingbrother_sync_strategy",
     "bondingbrother_sync_strategy_deferred",
     "bondingbrother_sync_strategy_immediate",
-    "bondingbrother_sync_test_strategy"
+    "bondingbrother_sync_test_strategy",
+    "bondingbrother_sync_test_stub_refuse"
   ],
   "crates/bondingbrother/src/translation.rs": [
     "bondingbrother_translation",
@@ -1907,6 +1932,22 @@
     "bondingbrother_translation_test_creation",
     "bondingbrother_translator_trait",
     "bondingbrother_translator_translate"
+  ],
+  "crates/bondingbrother/tests/porte_bout_en_bout.rs": [
+    "bondingbrother_test_autorise_execute_une_fois",
+    "bondingbrother_test_fichier_invalide",
+    "bondingbrother_test_porte_bout_en_bout",
+    "bondingbrother_test_porte_partagee",
+    "bondingbrother_test_refus_n_execute_pas"
+  ],
+  "crates/borderguard/fuzz/examples/generer_graines.rs": [
+    "borderguard_fuzz_generer_graines"
+  ],
+  "crates/borderguard/fuzz/fuzz_targets/arrete.rs": [
+    "borderguard_fuzz_arrete"
+  ],
+  "crates/borderguard/src/arrete.rs": [
+    "borderguard_arrete"
   ],
   "crates/borderguard/src/boundary.rs": [
     "borderguard_boundary",
@@ -1932,11 +1973,13 @@
     "borderguard_crossing_test_rule_creation"
   ],
   "crates/borderguard/src/lib.rs": [
+    "borderguard_module_arrete",
     "borderguard_module_boundary",
     "borderguard_module_crossing",
     "borderguard_module_metadata",
     "borderguard_module_registry",
-    "borderguard_module_trust_level"
+    "borderguard_module_trust_level",
+    "borderguard_module_zone"
   ],
   "crates/borderguard/src/metadata.rs": [
     "borderguard_metadata"
@@ -1956,13 +1999,22 @@
     "borderguard_trust_level_unknown",
     "borderguard_trust_level_verified"
   ],
+  "crates/borderguard/src/zone.rs": [
+    "borderguard_zone"
+  ],
+  "crates/borderguard/tests/arretes.rs": [
+    "borderguard_tests_arretes"
+  ],
   "crates/caringnanny/src/health.rs": [
     "caringnanny_health_checker_check",
     "caringnanny_health_checker_trait",
     "caringnanny_health_status",
     "caringnanny_health_status_degraded",
     "caringnanny_health_status_healthy",
+    "caringnanny_health_status_inconnu",
+    "caringnanny_health_status_rang_gravite",
     "caringnanny_health_status_unhealthy",
+    "caringnanny_health_test_composant_inconnu",
     "caringnanny_health_test_status_equality"
   ],
   "crates/caringnanny/src/lib.rs": [
@@ -1989,8 +2041,18 @@
     "caringnanny_observer_test_event_creation",
     "caringnanny_observer_trait"
   ],
+  "crates/caringnanny/src/vigies.rs": [
+    "caringnanny_vigies",
+    "caringnanny_vigies_test_capteur_perime_inconnu"
+  ],
+  "crates/central-remote-protocol/src/identite.rs": [
+    "central_remote_protocol_identite"
+  ],
   "crates/central-remote-protocol/src/lib.rs": [
     "central_remote_protocol_lib"
+  ],
+  "crates/central-remote-protocol/src/pairing.rs": [
+    "central_remote_protocol_pairing"
   ],
   "crates/central-remote/src/bridge.rs": [
     "central_remote_bridge"
@@ -1998,8 +2060,17 @@
   "crates/central-remote/src/discovery.rs": [
     "central_remote_discovery"
   ],
+  "crates/central-remote/src/e2e.rs": [
+    "central_remote_e2e"
+  ],
+  "crates/central-remote/src/identite.rs": [
+    "central_remote_identite"
+  ],
   "crates/central-remote/src/lib.rs": [
     "central_remote_lib"
+  ],
+  "crates/central-remote/src/paired_store.rs": [
+    "central_remote_paired_store"
   ],
   "crates/central-remote/src/pairing.rs": [
     "central_remote_pairing"
@@ -2009,9 +2080,6 @@
   ],
   "crates/central-remote/src/server.rs": [
     "central_remote_server"
-  ],
-  "crates/central-remote/src/session.rs": [
-    "central_remote_session"
   ],
   "crates/cog-portal-contract/src/lib.rs": [
     "cog_portal_contract_lib"
@@ -2031,12 +2099,15 @@
   ],
   "crates/everbuddy/src/migration.rs": [
     "everbuddy_migration",
+    "everbuddy_migration",
     "everbuddy_migration_error",
     "everbuddy_migration_error_failed",
+    "everbuddy_migration_error_non_implemente",
     "everbuddy_migration_executor_execute",
     "everbuddy_migration_executor_trait",
     "everbuddy_migration_from_version",
     "everbuddy_migration_test_creation",
+    "everbuddy_migration_test_refus_explicite",
     "everbuddy_migration_to_version"
   ],
   "crates/everbuddy/src/version.rs": [
@@ -2049,6 +2120,9 @@
     "everbuddy_version_patch",
     "everbuddy_version_test_creation"
   ],
+  "crates/jay1tribu/src/data/import_heritage.rs": [
+    "jay1tribu_import_heritage"
+  ],
   "crates/jay1tribu/src/data/kindmother_client_db.rs": [
     "jay1tribu_kindmother_client_db"
   ],
@@ -2057,6 +2131,9 @@
   ],
   "crates/jay1tribu/src/data/mod.rs": [
     "jay1tribu_data_module"
+  ],
+  "crates/jay1tribu/src/data/schema_kindmother.rs": [
+    "jay1tribu_schema_kindmother"
   ],
   "crates/jay1tribu/src/data/types.rs": [
     "jay1tribu_domain_types"
@@ -2069,6 +2146,12 @@
   ],
   "crates/jay1tribu/src/transport/mod.rs": [
     "jay1tribu_transport"
+  ],
+  "crates/jay1tribu/tests/import_heritage.rs": [
+    "jay1tribu_tests_import_heritage"
+  ],
+  "crates/jaybureau-suite/jay-collab/src/auth.rs": [
+    "jaybureau_suite_jay_collab_auth"
   ],
   "crates/jaybureau-suite/jay-collab/src/client.rs": [
     "jaybureau_suite_jay_collab_client"
@@ -2274,14 +2357,17 @@
   "crates/jaykoa/src/aggregation.rs": [
     "jaykoa_aggregation"
   ],
+  "crates/jaykoa/src/data/import_heritage.rs": [
+    "jaykoa_import_heritage"
+  ],
   "crates/jaykoa/src/data/kindmother_client_db.rs": [
     "jaykoa_kindmother_client_db"
   ],
-  "crates/jaykoa/src/data/kindmother_db.rs": [
-    "jaykoa_kindmother_db"
-  ],
   "crates/jaykoa/src/data/mod.rs": [
     "jaykoa_data_module"
+  ],
+  "crates/jaykoa/src/data/schema_kindmother.rs": [
+    "jaykoa_schema_kindmother"
   ],
   "crates/jaykoa/src/data/types.rs": [
     "jaykoa_domain_types"
@@ -2307,6 +2393,9 @@
   "crates/jaykoa/src/test_runner.rs": [
     "jaykoa_test_runner"
   ],
+  "crates/jaykoa/tests/import_heritage.rs": [
+    "jaykoa_tests_import_heritage"
+  ],
   "crates/jaykonta-client/src/lib.rs": [
     "service.jaykonta.alicia_client"
   ],
@@ -2316,14 +2405,23 @@
   "crates/jaykonta/src/backend/service.rs": [
     "jaykonta_backend_service"
   ],
+  "crates/jaykonta/src/data/import_heritage.rs": [
+    "jaykonta_import_heritage"
+  ],
   "crates/jaykonta/src/data/kindmother_client_db.rs": [
     "jaykonta_kindmother_client_db"
   ],
   "crates/jaykonta/src/data/kindmother_db.rs": [
     "jaykonta_data_kindmother_db"
   ],
+  "crates/jaykonta/src/data/migrations.rs": [
+    "jaykonta_data_migrations"
+  ],
   "crates/jaykonta/src/data/mod.rs": [
     "jaykonta_data_mod"
+  ],
+  "crates/jaykonta/src/data/schema_kindmother.rs": [
+    "jaykonta_schema_kindmother"
   ],
   "crates/jaykonta/src/data/types.rs": [
     "jaykonta_data_types"
@@ -2363,6 +2461,12 @@
   ],
   "crates/jaykonta/src/theme.rs": [
     "jaykonta_theme"
+  ],
+  "crates/jaykonta/tests/import_heritage.rs": [
+    "jaykonta_tests_import_heritage"
+  ],
+  "crates/jaykonta/tests/kindmother_only.rs": [
+    "jaykonta_tests_kindmother_only"
   ],
   "crates/jaymail-client/src/lib.rs": [
     "service.jaymail.alicia_client"
@@ -2502,6 +2606,30 @@
   "crates/jayrdv-client/src/lib.rs": [
     "service.jayrdv.alicia_client"
   ],
+  "crates/jayrdv-facade/src/api.rs": [
+    "jayrdv_facade_api"
+  ],
+  "crates/jayrdv-facade/src/client.rs": [
+    "jayrdv_facade_client"
+  ],
+  "crates/jayrdv-facade/src/facade.rs": [
+    "jayrdv_facade_facade"
+  ],
+  "crates/jayrdv-facade/src/lib.rs": [
+    "jayrdv_facade_lib"
+  ],
+  "crates/jayrdv-facade/tests/architecture.rs": [
+    "jayrdv_facade_tests_architecture"
+  ],
+  "crates/jayrdv-facade/tests/guichet_visas.rs": [
+    "jayrdv_facade_tests_guichet_visas"
+  ],
+  "crates/jayrdv-facade/tests/quotas_revocations.rs": [
+    "jayrdv_facade_tests_quotas_revocations"
+  ],
+  "crates/jayrdv-traite/src/lib.rs": [
+    "jayrdv_traite_lib"
+  ],
   "crates/jayrdv/src/data/kindmother_client_db.rs": [
     "jayrdv_kindmother_client_db"
   ],
@@ -2515,10 +2643,16 @@
     "jayrdv_data_types"
   ],
   "crates/jayrdv/src/domain/mod.rs": [
-    "jayrdv_domain"
+    "`jayrdv_domain`"
+  ],
+  "crates/jayrdv/src/hybride.rs": [
+    "jayrdv_hybride"
   ],
   "crates/jayrdv/src/lib.rs": [
-    "jayrdv_lib"
+    "`jayrdv_lib`"
+  ],
+  "crates/jayrdv/tests/sortie_lot5.rs": [
+    "jayrdv_tests_sortie_lot5"
   ],
   "crates/jaysheets-client/src/lib.rs": [
     "service.jaysheets.alicia_client"
@@ -2529,8 +2663,14 @@
   "crates/kindmother-client/src/client.rs": [
     "kindmother_client_impl"
   ],
+  "crates/kindmother-client/src/credential.rs": [
+    "kindmother_client_credential"
+  ],
   "crates/kindmother-client/src/errors.rs": [
     "kindmother_client_errors"
+  ],
+  "crates/kindmother-client/src/heritage.rs": [
+    "kindmother_client_heritage"
   ],
   "crates/kindmother-client/src/lib.rs": [
     "kindmother_client_lib"
@@ -2561,20 +2701,47 @@
     "KMC_R_003",
     "kindmother_client_unit_tests"
   ],
-  "crates/kindmother-db-adapter/src/lib.rs": [
-    "kindmother_db_adapter_lib"
-  ],
   "crates/kindmother-db-key/src/key_derivation.rs": [
     "kindmother_db_key_derivation"
+  ],
+  "crates/kindmother-db-key/src/key_store.rs": [
+    "kindmother_db_key_store"
   ],
   "crates/kindmother-db-key/src/lib.rs": [
     "kindmother_db_key"
   ],
+  "crates/kindmother-heritage/src/fabrique.rs": [
+    "kindmother_heritage_fabrique"
+  ],
+  "crates/kindmother-heritage/src/import.rs": [
+    "kindmother_heritage_import"
+  ],
+  "crates/kindmother-heritage/src/lecture.rs": [
+    "kindmother_heritage_lecture"
+  ],
+  "crates/kindmother-heritage/src/lib.rs": [
+    "kindmother_heritage_lib"
+  ],
+  "crates/kindmother-heritage/tests/moteur.rs": [
+    "kindmother_heritage_tests_moteur"
+  ],
+  "crates/kindmother-import/src/main.rs": [
+    "kindmother_import_main"
+  ],
+  "crates/kindmother-import/tests/cli.rs": [
+    "kindmother_import_tests_cli"
+  ],
   "crates/kindmother-service/src/arbitration.rs": [
     "kindmother_service_arbitration"
   ],
+  "crates/kindmother-service/src/audit.rs": [
+    "kindmother_service_audit"
+  ],
   "crates/kindmother-service/src/bin/kindmother_server.rs": [
     "kindmother_service_bin_kindmother_server"
+  ],
+  "crates/kindmother-service/src/credentials.rs": [
+    "kindmother_service_credentials"
   ],
   "crates/kindmother-service/src/database.rs": [
     "kindmother_service_database"
@@ -2582,14 +2749,53 @@
   "crates/kindmother-service/src/errors.rs": [
     "kindmother_service_errors"
   ],
+  "crates/kindmother-service/src/etiquettes.rs": [
+    "kindmother_service_etiquettes"
+  ],
+  "crates/kindmother-service/src/identite.rs": [
+    "kindmother_service_identite"
+  ],
   "crates/kindmother-service/src/lib.rs": [
     "kindmother_service_lib"
   ],
   "crates/kindmother-service/src/protocol.rs": [
     "kindmother_service_protocol"
   ],
+  "crates/kindmother-service/src/sauvegardes.rs": [
+    "kindmother_service_sauvegardes"
+  ],
   "crates/kindmother-service/src/server.rs": [
     "kindmother_service_server"
+  ],
+  "crates/kindmother-service/src/sql_guard.rs": [
+    "kindmother_service_sql_guard"
+  ],
+  "crates/kindmother-service/src/typed.rs": [
+    "kindmother_service_typed"
+  ],
+  "crates/kindmother-service/tests/commun/mod.rs": [
+    "kindmother_service_tests_commun"
+  ],
+  "crates/kindmother-service/tests/demarrage_sans_chiffrement.rs": [
+    "kindmother_service_tests_demarrage_sans_chiffrement"
+  ],
+  "crates/kindmother-service/tests/effacement_physique.rs": [
+    "kindmother_service_tests_effacement_physique"
+  ],
+  "crates/kindmother-service/tests/etiquette_publiable_ex47.rs": [
+    "kindmother_service_tests_etiquette_publiable"
+  ],
+  "crates/kindmother-service/tests/lot_c_intentions_audit_chiffrement.rs": [
+    "kindmother_service_tests_lot_c"
+  ],
+  "crates/kindmother-service/tests/rejeu_oublis_a025.rs": [
+    "kindmother_service_tests_rejeu_oublis_a025"
+  ],
+  "crates/kindmother-service/tests/sauvegardes_a022.rs": [
+    "kindmother_service_tests_sauvegardes_a022"
+  ],
+  "crates/kindmother-service/tests/securite_k04_k05.rs": [
+    "kindmother_service_tests_securite_k04_k05"
   ],
   "crates/kindmother/src/api.rs": [
     "kindmother_api_coredata",
@@ -2610,8 +2816,16 @@
     "kindmother_api_write_operation_delete",
     "kindmother_api_write_operation_update"
   ],
+  "crates/kindmother/src/etiquette.rs": [
+    "kindmother_etiquette"
+  ],
+  "crates/kindmother/src/intent.rs": [
+    "kindmother_intent"
+  ],
   "crates/kindmother/src/lib.rs": [
     "kindmother_module_api",
+    "kindmother_module_etiquette",
+    "kindmother_module_intent",
     "kindmother_module_miyusql_bridge",
     "kindmother_module_observability",
     "kindmother_module_state",
@@ -2619,6 +2833,7 @@
     "kindmother_module_sync",
     "kindmother_module_threat",
     "kindmother_reexport_api",
+    "kindmother_reexport_intent",
     "kindmother_reexport_observability",
     "kindmother_reexport_state",
     "kindmother_reexport_storage",
@@ -2637,6 +2852,7 @@
     "kindmother_observability_health_healthy",
     "kindmother_observability_health_status",
     "kindmother_observability_health_unhealthy",
+    "kindmother_observability_health_unknown",
     "kindmother_observability_metrics",
     "kindmother_observability_metrics_read_count",
     "kindmother_observability_metrics_sync_count",
@@ -2709,63 +2925,8 @@
     "kindmother_threat_level_none",
     "kindmother_threat_test_detector_default"
   ],
-  "crates/lifegame-entities/src/building.rs": [
-    "lifegame.entities.building",
-    "lifegame.entities.building_struct",
-    "lifegame.entities.building_type"
-  ],
-  "crates/lifegame-entities/src/creature.rs": [
-    "lifegame.entities.creature",
-    "lifegame.entities.creature_struct",
-    "lifegame.entities.creature_type"
-  ],
-  "crates/lifegame-entities/src/lib.rs": [
-    "lifegame.entities.manager",
-    "lifegame.operator.entities"
-  ],
-  "crates/lifegame-entities/src/unit.rs": [
-    "lifegame.entities.race",
-    "lifegame.entities.unit",
-    "lifegame.entities.unit_struct"
-  ],
-  "crates/lifegame-powers/src/creation.rs": [
-    "lifegame.powers.creation"
-  ],
-  "crates/lifegame-powers/src/destruction.rs": [
-    "lifegame.powers.destruction"
-  ],
-  "crates/lifegame-powers/src/lib.rs": [
-    "lifegame.operator.powers",
-    "lifegame.powers.manager"
-  ],
-  "crates/lifegame-simulation/src/ai.rs": [
-    "lifegame.ai.decide_action",
-    "lifegame.simulation.ai"
-  ],
-  "crates/lifegame-simulation/src/lib.rs": [
-    "lifegame.operator.simulation"
-  ],
-  "crates/lifegame-simulation/src/world_tick.rs": [
-    "lifegame.simulation.tick_world_fn",
-    "lifegame.simulation.world_tick"
-  ],
-  "crates/lifegame-world/src/biome.rs": [
-    "lifegame.world.biome",
-    "lifegame.world.biome_struct",
-    "lifegame.world.biome_type"
-  ],
-  "crates/lifegame-world/src/generation.rs": [
-    "lifegame.world.generation",
-    "lifegame.world.generator"
-  ],
-  "crates/lifegame-world/src/lib.rs": [
-    "lifegame.operator.world"
-  ],
-  "crates/lifegame-world/src/terrain.rs": [
-    "lifegame.world.terrain",
-    "lifegame.world.terrain_grid",
-    "lifegame.world.terrain_type",
-    "lifegame.world.tile"
+  "crates/kindmother/tests/refus.rs": [
+    "kindmother_tests_refus"
   ],
   "crates/logisticssteward/src/allocation.rs": [
     "logisticssteward_allocation",
@@ -2800,6 +2961,135 @@
     "logisticssteward_resource_type_field",
     "logisticssteward_resource_type_memory"
   ],
+  "crates/maia-federee/fuzz/examples/generer_graines.rs": [
+    "maia_federee_fuzz_generer_graines"
+  ],
+  "crates/maia-federee/fuzz/fuzz_targets/commun.rs": [
+    "maia_federee_fuzz_commun"
+  ],
+  "crates/maia-federee/fuzz/fuzz_targets/fiche.rs": [
+    "maia_federee_fuzz_fiche"
+  ],
+  "crates/maia-federee/fuzz/fuzz_targets/lecteur.rs": [
+    "maia_federee_fuzz_lecteur"
+  ],
+  "crates/maia-federee/fuzz/fuzz_targets/requete.rs": [
+    "maia_federee_fuzz_requete"
+  ],
+  "crates/maia-federee/src/base.rs": [
+    "maia_federee_base"
+  ],
+  "crates/maia-federee/src/consultation.rs": [
+    "maia_federee_consultation"
+  ],
+  "crates/maia-federee/src/corroboration.rs": [
+    "maia_federee_corroboration"
+  ],
+  "crates/maia-federee/src/erreurs.rs": [
+    "maia_federee_erreurs"
+  ],
+  "crates/maia-federee/src/etiquettes.rs": [
+    "maia_federee_etiquettes"
+  ],
+  "crates/maia-federee/src/fiche.rs": [
+    "maia_federee_fiche"
+  ],
+  "crates/maia-federee/src/lecteur.rs": [
+    "maia_federee_lecteur"
+  ],
+  "crates/maia-federee/src/lib.rs": [
+    "maia_federee_lib"
+  ],
+  "crates/maia-federee/src/marquage.rs": [
+    "maia_federee_marquage"
+  ],
+  "crates/maia-federee/src/normalisation.rs": [
+    "maia_federee_normalisation"
+  ],
+  "crates/maia-federee/src/plongement.rs": [
+    "maia_federee_plongement"
+  ],
+  "crates/maia-federee/src/reprise.rs": [
+    "maia_federee_reprise"
+  ],
+  "crates/maia-federee/src/requete.rs": [
+    "maia_federee_requete"
+  ],
+  "crates/maia-federee/tests/sortie_lot7.rs": [
+    "maia_federee_test_sortie_lot7"
+  ],
+  "crates/maia-memoire/examples/proposer_essai.rs": [
+    "maia_memoire_exemple_proposer_essai"
+  ],
+  "crates/maia-memoire/fuzz/examples/generer_graines.rs": [
+    "maia_memoire_fuzz_generer_graines"
+  ],
+  "crates/maia-memoire/fuzz/fuzz_targets/export.rs": [
+    "maia_memoire_fuzz_export"
+  ],
+  "crates/maia-memoire/fuzz/fuzz_targets/ident.rs": [
+    "maia_memoire_fuzz_ident"
+  ],
+  "crates/maia-memoire/src/assemblage.rs": [
+    "maia_memoire_assemblage"
+  ],
+  "crates/maia-memoire/src/entrepot.rs": [
+    "maia_memoire_entrepot"
+  ],
+  "crates/maia-memoire/src/erreurs.rs": [
+    "maia_memoire_erreurs"
+  ],
+  "crates/maia-memoire/src/ident.rs": [
+    "maia_memoire_ident"
+  ],
+  "crates/maia-memoire/src/jetons.rs": [
+    "maia_memoire_jetons"
+  ],
+  "crates/maia-memoire/src/kindmother.rs": [
+    "maia_memoire_kindmother"
+  ],
+  "crates/maia-memoire/src/lib.rs": [
+    "maia_memoire_lib"
+  ],
+  "crates/maia-memoire/src/memoire.rs": [
+    "maia_memoire_memoire"
+  ],
+  "crates/maia-memoire/src/pont_alicia.rs": [
+    "maia_memoire_pont_alicia"
+  ],
+  "crates/maia-memoire/src/types.rs": [
+    "maia_memoire_types"
+  ],
+  "crates/maia-memoire/tests/ex50_56.rs": [
+    "maia_memoire_tests_ex50_56"
+  ],
+  "crates/maia-memoire/tests/kindmother_ex55.rs": [
+    "maia_memoire_tests_kindmother"
+  ],
+  "crates/maia-memoire/tests/kindmother_reprise.rs": [
+    "maia_memoire_tests_kindmother_reprise"
+  ],
+  "crates/maia-modeles/src/artefact.rs": [
+    "maia_modeles_artefact"
+  ],
+  "crates/maia-modeles/src/canal.rs": [
+    "maia_modeles_canal"
+  ],
+  "crates/maia-modeles/src/fichier.rs": [
+    "maia_modeles_fichier"
+  ],
+  "crates/maia-modeles/src/lib.rs": [
+    "maia_modeles_lib"
+  ],
+  "crates/maia-modeles/src/manifeste.rs": [
+    "maia_modeles_manifeste"
+  ],
+  "crates/maia-modeles/src/outillage.rs": [
+    "maia_modeles_outillage"
+  ],
+  "crates/maia-modeles/src/politique.rs": [
+    "maia_modeles_politique"
+  ],
   "crates/maia-stt/src/confidence.rs": [
     "maia_stt_confidence"
   ],
@@ -2819,7 +3109,12 @@
     "masterbutler_lib"
   ],
   "crates/masterbutler/src/orchestrator.rs": [
+    "masterbutler_orchestration_error",
+    "masterbutler_orchestration_error_non_implemente",
+    "masterbutler_orchestrator",
     "masterbutler_orchestrator_execute",
+    "masterbutler_orchestrator_test_refus_explicite",
+    "masterbutler_orchestrator_test_refus_workflow_vide",
     "masterbutler_orchestrator_test_workflow_execution",
     "masterbutler_orchestrator_trait"
   ],
@@ -2840,8 +3135,23 @@
     "masterbutler_workflow_new",
     "masterbutler_workflow_test_creation"
   ],
+  "crates/miyauth/fuzz/examples/generer_graines.rs": [
+    "miyauth_fuzz_generer_graines"
+  ],
+  "crates/miyauth/fuzz/fuzz_targets/commun.rs": [
+    "miyauth_fuzz_commun"
+  ],
+  "crates/miyauth/fuzz/fuzz_targets/entetes_http.rs": [
+    "miyauth_fuzz_entetes_http"
+  ],
+  "crates/miyauth/fuzz/fuzz_targets/titres.rs": [
+    "miyauth_fuzz_titres"
+  ],
   "crates/miyauth/src/admin_cell.rs": [
     "miyauth_admin_cell"
+  ],
+  "crates/miyauth/src/appareil.rs": [
+    "miyauth_appareil"
   ],
   "crates/miyauth/src/attest.rs": [
     "miyauth_tool_identity_attest"
@@ -2852,20 +3162,75 @@
   "crates/miyauth/src/errors.rs": [
     "miyauth_errors"
   ],
+  "crates/miyauth/src/http.rs": [
+    "miyauth_http"
+  ],
+  "crates/miyauth/src/http/persistant.rs": [
+    "miyauth_http_persistant"
+  ],
+  "crates/miyauth/src/http/service.rs": [
+    "miyauth_http_service"
+  ],
   "crates/miyauth/src/lib.rs": [
     "miyauth_lib"
   ],
+  "crates/miyauth/src/pairwise.rs": [
+    "miyauth_pairwise"
+  ],
+  "crates/miyauth/src/passeport.rs": [
+    "miyauth_passeport"
+  ],
   "crates/miyauth/src/resolve.rs": [
+    "miyauth_resolve",
     "miyauth_tool_identity_resolve"
+  ],
+  "crates/miyauth/src/revocation.rs": [
+    "miyauth_revocation"
   ],
   "crates/miyauth/src/role.rs": [
     "miyauth_tool_identity_role"
+  ],
+  "crates/miyauth/src/titres.rs": [
+    "miyauth_titres"
   ],
   "crates/miyauth/src/types.rs": [
     "miyauth_types"
   ],
   "crates/miyauth/src/verify.rs": [
-    "miyauth_tool_identity_verify"
+    "miyauth_tool_identity_verify",
+    "miyauth_verify"
+  ],
+  "crates/miyauth/tests/cle_appareil_destination.rs": [
+    "MAUTH_CAD_001",
+    "MAUTH_CAD_002",
+    "MAUTH_CAD_003",
+    "MAUTH_CAD_004",
+    "miyauth_cle_appareil_destination_tests"
+  ],
+  "crates/miyauth/tests/delegation_chaine.rs": [
+    "miyauth_delegation_chaine_tests"
+  ],
+  "crates/miyauth/tests/http_visa.rs": [
+    "miyauth_http_visa_tests"
+  ],
+  "crates/miyauth/tests/passeport_visa.rs": [
+    "MAUTH_PV_001",
+    "MAUTH_PV_002",
+    "MAUTH_PV_010",
+    "MAUTH_PV_011",
+    "MAUTH_PV_020",
+    "MAUTH_PV_021",
+    "MAUTH_PV_030",
+    "MAUTH_PV_031",
+    "MAUTH_PV_040",
+    "MAUTH_PV_041",
+    "MAUTH_PV_050",
+    "MAUTH_PV_051",
+    "MAUTH_PV_052",
+    "MAUTH_PV_060",
+    "MAUTH_PV_061",
+    "MAUTH_PV_070",
+    "miyauth_passeport_visa_tests"
   ],
   "crates/miyauth/tests/unit_tests.rs": [
     "MAUTH_CTX_001",
@@ -2880,6 +3245,11 @@
     "MAUTH_R_001",
     "MAUTH_R_002",
     "MAUTH_R_003",
+    "MAUTH_SEC_001",
+    "MAUTH_SEC_002",
+    "MAUTH_SEC_003",
+    "MAUTH_SEC_004",
+    "MAUTH_SEC_005",
     "MAUTH_TOOL_001",
     "MAUTH_TOOL_002",
     "MAUTH_TOOL_003",
@@ -2937,6 +3307,9 @@
   "crates/miyualicia-api/src/router.rs": [
     "service.alicia.api.router"
   ],
+  "crates/miyualicia-api/src/security.rs": [
+    "service.alicia.api.security"
+  ],
   "crates/miyualicia-api/src/server.rs": [
     "service.alicia.api.server"
   ],
@@ -2989,7 +3362,11 @@
     "toolkit.alicia.devices.types"
   ],
   "crates/miyualicia-dispatcher/src/core_gate.rs": [
-    "service.alicia.dispatcher.core_gate"
+    "service.alicia.dispatcher.chemin_politiques",
+    "service.alicia.dispatcher.core_gate",
+    "service.alicia.dispatcher.enrichisseur_intention",
+    "service.alicia.dispatcher.intention_alicia",
+    "service.alicia.dispatcher.strongfather_core_gate"
   ],
   "crates/miyualicia-dispatcher/src/dispatcher.rs": [
     "service.alicia.dispatcher.dispatcher"
@@ -3002,6 +3379,9 @@
   ],
   "crates/miyualicia-dispatcher/src/service_client.rs": [
     "service.alicia.dispatcher.service_client"
+  ],
+  "crates/miyualicia-dispatcher/tests/strongfather_gate.rs": [
+    "service.alicia.dispatcher.tests.strongfather_gate"
   ],
   "crates/miyualicia-http/src/adapters/generic.rs": [
     "toolkit.alicia.http.adapters.generic"
@@ -3024,8 +3404,23 @@
   "crates/miyualicia-http/src/lib.rs": [
     "toolkit.alicia.http"
   ],
+  "crates/miyualicia-memory/src/bin/alicia_memoire_import.rs": [
+    "service.alicia.memory.bin.import"
+  ],
+  "crates/miyualicia-memory/src/copie_heritee.rs": [
+    "service.alicia.memory.copie_heritee"
+  ],
+  "crates/miyualicia-memory/src/entrepot.rs": [
+    "service.alicia.memory.entrepot"
+  ],
   "crates/miyualicia-memory/src/errors.rs": [
     "service.alicia.memory.errors"
+  ],
+  "crates/miyualicia-memory/src/heritage.rs": [
+    "service.alicia.memory.heritage"
+  ],
+  "crates/miyualicia-memory/src/kindmother.rs": [
+    "service.alicia.memory.kindmother"
   ],
   "crates/miyualicia-memory/src/learning.rs": [
     "service.alicia.memory.learning"
@@ -3036,11 +3431,26 @@
   "crates/miyualicia-memory/src/prompt.rs": [
     "service.alicia.memory.prompt"
   ],
+  "crates/miyualicia-memory/src/recherche.rs": [
+    "service.alicia.memory.recherche"
+  ],
+  "crates/miyualicia-memory/src/schema.rs": [
+    "service.alicia.memory.schema"
+  ],
   "crates/miyualicia-memory/src/store.rs": [
     "service.alicia.memory.store"
   ],
   "crates/miyualicia-memory/src/types.rs": [
     "service.alicia.memory.types"
+  ],
+  "crates/miyualicia-memory/src/vif.rs": [
+    "service.alicia.memory.vif"
+  ],
+  "crates/miyualicia-memory/tests/fact_versions.rs": [
+    "service.alicia.memory.tests.fact_versions"
+  ],
+  "crates/miyualicia-memory/tests/kindmother.rs": [
+    "service.alicia.memory.tests.kindmother"
   ],
   "crates/miyualicia-mqtt/src/admin_cell.rs": [
     "toolkit.alicia.mqtt.admin"
@@ -3093,6 +3503,11 @@
   "crates/miyualicia-skills/src/watcher.rs": [
     "service.alicia.skills.watcher"
   ],
+  "crates/miyualicia-skills/tests/policy_sans_bypass.rs": [
+    "miyualicia_skills_test_policy_bypass_persiste_ignore",
+    "miyualicia_skills_test_policy_defaut_gate_active",
+    "miyualicia_skills_test_policy_sans_bypass"
+  ],
   "crates/miyualicia/src/admin_cell.rs": [
     "service.alicia.orchestrator.admin"
   ],
@@ -3120,11 +3535,17 @@
   "crates/miyualicia/src/nlu_fallback.rs": [
     "service.alicia.nlu-fallback"
   ],
+  "crates/miyualicia/src/nlu_local.rs": [
+    "service.alicia.nlu-local"
+  ],
   "crates/miyualicia/src/service.rs": [
     "service.alicia.service"
   ],
   "crates/miyualicia/src/snapshot.rs": [
     "service.alicia.snapshot"
+  ],
+  "crates/miyualicia/tests/strongfather_runtime.rs": [
+    "service.alicia.tests.strongfather_runtime"
   ],
   "crates/miyuantispam/src/admin_cell.rs": [
     "miyuantispam_admin_cell"
@@ -3256,6 +3677,75 @@
   ],
   "crates/miyucalc/src/unit.rs": [
     "miyucalc_tool_unit_convert"
+  ],
+  "crates/miyucanal/fuzz/examples/generer_graines.rs": [
+    "miyucanal_fuzz_generer_graines"
+  ],
+  "crates/miyucanal/fuzz/fuzz_targets/mcan.rs": [
+    "miyucanal_fuzz_mcan"
+  ],
+  "crates/miyucanal/fuzz/fuzz_targets/quarantaine.rs": [
+    "miyucanal_fuzz_quarantaine"
+  ],
+  "crates/miyucanal/src/annonce.rs": [
+    "miyucanal_annonce"
+  ],
+  "crates/miyucanal/src/banc.rs": [
+    "miyucanal_banc"
+  ],
+  "crates/miyucanal/src/erreurs.rs": [
+    "miyucanal_erreurs"
+  ],
+  "crates/miyucanal/src/lib.rs": [
+    "miyucanal_lib"
+  ],
+  "crates/miyucanal/src/quarantaine.rs": [
+    "miyucanal_quarantaine"
+  ],
+  "crates/miyucanal/src/releveur.rs": [
+    "miyucanal_releveur"
+  ],
+  "crates/miyucanal/src/transport.rs": [
+    "miyucanal_transport"
+  ],
+  "crates/miyucanal/tests/sortie_lot4.rs": [
+    "miyucanal_tests_sortie_lot4"
+  ],
+  "crates/miyucdr/fuzz/examples/generer_graines.rs": [
+    "miyucdr_fuzz_generer_graines"
+  ],
+  "crates/miyucdr/fuzz/fuzz_targets/commun.rs": [
+    "miyucdr_fuzz_commun"
+  ],
+  "crates/miyucdr/fuzz/fuzz_targets/desarmer_image.rs": [
+    "miyucdr_fuzz_desarmer_image"
+  ],
+  "crates/miyucdr/fuzz/fuzz_targets/desarmer_texte.rs": [
+    "miyucdr_fuzz_desarmer_texte"
+  ],
+  "crates/miyucdr/src/detection.rs": [
+    "miyucdr_detection"
+  ],
+  "crates/miyucdr/src/images.rs": [
+    "miyucdr_images"
+  ],
+  "crates/miyucdr/src/json.rs": [
+    "miyucdr_json"
+  ],
+  "crates/miyucdr/src/lib.rs": [
+    "miyucdr_lib"
+  ],
+  "crates/miyucdr/src/tableur.rs": [
+    "miyucdr_tableur"
+  ],
+  "crates/miyucdr/src/texte.rs": [
+    "miyucdr_texte"
+  ],
+  "crates/miyucdr/tests/desarmement.rs": [
+    "miyucdr_tests_desarmement"
+  ],
+  "crates/miyucdr/tests/saturation.rs": [
+    "miyucdr_tests_saturation"
   ],
   "crates/miyuclock/src/admin_cell.rs": [
     "miyuclock_admin_cell"
@@ -3698,6 +4188,60 @@
   "crates/miyudiscovery/src/trending.rs": [
     "miyudiscovery_tool_trending_list"
   ],
+  "crates/miyudouane/examples/arretes_essai.rs": [
+    "miyudouane_exemple_arretes_essai"
+  ],
+  "crates/miyudouane/src/application.rs": [
+    "miyudouane_application"
+  ],
+  "crates/miyudouane/src/bin/miyudouane.rs": [
+    "miyudouane_cli"
+  ],
+  "crates/miyudouane/src/compilation.rs": [
+    "miyudouane_compilation"
+  ],
+  "crates/miyudouane/src/hote.rs": [
+    "miyudouane_hote"
+  ],
+  "crates/miyudouane/src/instance.rs": [
+    "miyudouane_instance"
+  ],
+  "crates/miyudouane/src/ips.rs": [
+    "miyudouane_ips"
+  ],
+  "crates/miyudouane/src/lib.rs": [
+    "miyudouane_lib"
+  ],
+  "crates/miyudouane/src/nft.rs": [
+    "miyudouane_nft"
+  ],
+  "crates/miyudouane/src/plan.rs": [
+    "miyudouane_plan"
+  ],
+  "crates/miyudouane/src/tc.rs": [
+    "miyudouane_tc"
+  ],
+  "crates/miyudouane/src/zones.rs": [
+    "miyudouane_zones"
+  ],
+  "crates/miyudouane/tests/cli.rs": [
+    "miyudouane_tests_cli"
+  ],
+  "crates/miyudouane/tests/commun/mod.rs": [
+    "miyudouane_tests_commun"
+  ],
+  "crates/miyudouane/tests/hote.rs": [
+    "miyudouane_tests_hote"
+  ],
+  "crates/miyudouane/tests/ips.rs": [
+    "miyudouane_tests_ips"
+  ],
+  "crates/miyudouane/tests/regles.rs": [
+    "miyudouane_tests_regles"
+  ],
+  "crates/miyudouane/tests/tc.rs": [
+    "miyudouane_tests_tc"
+  ],
   "crates/miyuexpense/src/admin_cell.rs": [
     "miyuexpense_admin_cell"
   ],
@@ -3745,6 +4289,93 @@
   ],
   "crates/miyuexport/src/xlsx.rs": [
     "miyuexport_tool_xlsx_generate"
+  ],
+  "crates/miyufederation/fuzz/examples/generer_graines.rs": [
+    "miyufederation_fuzz_generer_graines"
+  ],
+  "crates/miyufederation/fuzz/fuzz_targets/commun.rs": [
+    "miyufederation_fuzz_commun"
+  ],
+  "crates/miyufederation/fuzz/fuzz_targets/etat.rs": [
+    "miyufederation_fuzz_etat"
+  ],
+  "crates/miyufederation/fuzz/fuzz_targets/preuve.rs": [
+    "miyufederation_fuzz_preuve"
+  ],
+  "crates/miyufederation/fuzz/fuzz_targets/titres.rs": [
+    "miyufederation_fuzz_titres"
+  ],
+  "crates/miyufederation/fuzz/fuzz_targets/vue.rs": [
+    "miyufederation_fuzz_vue"
+  ],
+  "crates/miyufederation/src/calcul.rs": [
+    "miyufederation_calcul"
+  ],
+  "crates/miyufederation/src/eclipse.rs": [
+    "miyufederation_eclipse"
+  ],
+  "crates/miyufederation/src/erreurs.rs": [
+    "miyufederation_erreurs"
+  ],
+  "crates/miyufederation/src/federation.rs": [
+    "miyufederation_federation"
+  ],
+  "crates/miyufederation/src/federation/etat.rs": [
+    "miyufederation_federation_etat"
+  ],
+  "crates/miyufederation/src/fraicheur.rs": [
+    "miyufederation_fraicheur"
+  ],
+  "crates/miyufederation/src/kindmother.rs": [
+    "miyufederation_kindmother"
+  ],
+  "crates/miyufederation/src/lib.rs": [
+    "miyufederation_lib"
+  ],
+  "crates/miyufederation/src/note.rs": [
+    "miyufederation_note"
+  ],
+  "crates/miyufederation/src/persistance.rs": [
+    "miyufederation_persistance"
+  ],
+  "crates/miyufederation/src/persistante.rs": [
+    "miyufederation_persistante"
+  ],
+  "crates/miyufederation/src/preuve.rs": [
+    "miyufederation_preuve"
+  ],
+  "crates/miyufederation/src/statut.rs": [
+    "miyufederation_statut"
+  ],
+  "crates/miyufederation/src/support.rs": [
+    "miyufederation_support"
+  ],
+  "crates/miyufederation/src/titres.rs": [
+    "miyufederation_titres"
+  ],
+  "crates/miyufederation/tests/commun/mod.rs": [
+    "miyufederation_tests_commun"
+  ],
+  "crates/miyufederation/tests/commun/scenarios.rs": [
+    "miyufederation_tests_scenarios_redemarrage"
+  ],
+  "crates/miyufederation/tests/contestation.rs": [
+    "miyufederation_test_contestation"
+  ],
+  "crates/miyufederation/tests/kindmother.rs": [
+    "miyufederation_test_kindmother"
+  ],
+  "crates/miyufederation/tests/persistance.rs": [
+    "miyufederation_test_persistance"
+  ],
+  "crates/miyufederation/tests/persistante.rs": [
+    "miyufederation_test_persistante"
+  ],
+  "crates/miyufederation/tests/regles.rs": [
+    "miyufederation_test_regles"
+  ],
+  "crates/miyufederation/tests/sortie_lot6.rs": [
+    "miyufederation_test_sortie_lot6"
   ],
   "crates/miyufeeds/src/admin_cell.rs": [
     "miyufeeds_admin_cell"
@@ -3807,6 +4438,21 @@
     "miyuforum_tool_forum_topic_sticky",
     "miyuforum_tool_forum_topic_update"
   ],
+  "crates/miyufrontiere/src/cdr.rs": [
+    "miyufrontiere_cdr"
+  ],
+  "crates/miyufrontiere/src/coupure.rs": [
+    "miyufrontiere_coupure"
+  ],
+  "crates/miyufrontiere/src/douane_vigies.rs": [
+    "miyufrontiere_douane_vigies"
+  ],
+  "crates/miyufrontiere/src/lib.rs": [
+    "miyufrontiere_lib"
+  ],
+  "crates/miyufrontiere/tests/bout_en_bout.rs": [
+    "miyufrontiere_test_bout_en_bout"
+  ],
   "crates/miyuhr/src/admin_cell.rs": [
     "miyuhr_admin_cell"
   ],
@@ -3825,6 +4471,54 @@
   "crates/miyuhr/src/time_clock.rs": [
     "miyuhr_tool_time_clock_in",
     "miyuhr_tool_time_clock_out"
+  ],
+  "crates/miyuhybride/fuzz/examples/generer_graines.rs": [
+    "miyuhybride_fuzz_generer_graines"
+  ],
+  "crates/miyuhybride/fuzz/fuzz_targets/contrat.rs": [
+    "miyuhybride_fuzz_contrat"
+  ],
+  "crates/miyuhybride/src/db_secondaire.rs": [
+    "miyuhybride_db_secondaire"
+  ],
+  "crates/miyuhybride/src/douane.rs": [
+    "miyuhybride_douane"
+  ],
+  "crates/miyuhybride/src/erreurs.rs": [
+    "miyuhybride_erreurs"
+  ],
+  "crates/miyuhybride/src/guichets.rs": [
+    "miyuhybride_guichets"
+  ],
+  "crates/miyuhybride/src/lib.rs": [
+    "miyuhybride_lib"
+  ],
+  "crates/miyuhybride/src/manifeste.rs": [
+    "miyuhybride_manifeste"
+  ],
+  "crates/miyuhybride/src/message.rs": [
+    "miyuhybride_message"
+  ],
+  "crates/miyuhybride/src/quotas.rs": [
+    "miyuhybride_quotas"
+  ],
+  "crates/miyuhybride/src/revocations.rs": [
+    "miyuhybride_revocations"
+  ],
+  "crates/miyuhybride/src/service.rs": [
+    "miyuhybride_service"
+  ],
+  "crates/miyuhybride/src/visas.rs": [
+    "miyuhybride_visas"
+  ],
+  "crates/miyuhybride/tests/cycle.rs": [
+    "miyuhybride_tests_cycle"
+  ],
+  "crates/miyuhybride/tests/manifeste.rs": [
+    "miyuhybride_tests_manifeste"
+  ],
+  "crates/miyuhybride/tests/quotas.rs": [
+    "miyuhybride_tests_quotas"
   ],
   "crates/miyuinvoice/src/admin_cell.rs": [
     "miyuinvoice_admin_cell"
@@ -4036,165 +4730,6 @@
   "crates/miyuki-ui-dioxus/src/templates/split.rs": [
     "MUID-SplitLayout"
   ],
-  "crates/miyuki-ui-egui/src/atoms/belt_slot.rs": [
-    "MUIE-BeltSlot"
-  ],
-  "crates/miyuki-ui-egui/src/atoms/d2_button.rs": [
-    "MUIE-D2Button"
-  ],
-  "crates/miyuki-ui-egui/src/atoms/d2_label.rs": [
-    "MUIE-D2Label"
-  ],
-  "crates/miyuki-ui-egui/src/atoms/gold_separator.rs": [
-    "MUIE-GoldSep"
-  ],
-  "crates/miyuki-ui-egui/src/atoms/item_icon.rs": [
-    "MUIE-ItemIcon"
-  ],
-  "crates/miyuki-ui-egui/src/atoms/minimap_marker.rs": [
-    "MUIE-MinimapMarker"
-  ],
-  "crates/miyuki-ui-egui/src/atoms/mod.rs": [
-    "MUIE-AtomsIndex"
-  ],
-  "crates/miyuki-ui-egui/src/atoms/orb.rs": [
-    "MUIE-Orb"
-  ],
-  "crates/miyuki-ui-egui/src/atoms/progress_bar.rs": [
-    "MUIE-ProgressBar"
-  ],
-  "crates/miyuki-ui-egui/src/atoms/quality_text.rs": [
-    "MUIE-QualityText"
-  ],
-  "crates/miyuki-ui-egui/src/atoms/resource_number.rs": [
-    "MUIE-ResNum"
-  ],
-  "crates/miyuki-ui-egui/src/atoms/skill_icon.rs": [
-    "MUIE-SkillIcon"
-  ],
-  "crates/miyuki-ui-egui/src/atoms/slot_frame.rs": [
-    "MUIE-SlotFrame"
-  ],
-  "crates/miyuki-ui-egui/src/convert.rs": [
-    "MUIE-Convert"
-  ],
-  "crates/miyuki-ui-egui/src/lib.rs": [
-    "MUIE-Lib"
-  ],
-  "crates/miyuki-ui-egui/src/molecules/belt_column.rs": [
-    "MUIE-BeltCol"
-  ],
-  "crates/miyuki-ui-egui/src/molecules/chat_message.rs": [
-    "MUIE-ChatMsg"
-  ],
-  "crates/miyuki-ui-egui/src/molecules/equip_slot.rs": [
-    "MUIE-EquipSlot"
-  ],
-  "crates/miyuki-ui-egui/src/molecules/inventory_slot.rs": [
-    "MUIE-InvSlot"
-  ],
-  "crates/miyuki-ui-egui/src/molecules/item_tooltip.rs": [
-    "MUIE-ItemTooltip"
-  ],
-  "crates/miyuki-ui-egui/src/molecules/mod.rs": [
-    "MUIE-MolsIndex"
-  ],
-  "crates/miyuki-ui-egui/src/molecules/npc_option.rs": [
-    "MUIE-NpcOpt"
-  ],
-  "crates/miyuki-ui-egui/src/molecules/party_member.rs": [
-    "MUIE-PartyMem"
-  ],
-  "crates/miyuki-ui-egui/src/molecules/quest_entry.rs": [
-    "MUIE-QuestEntry"
-  ],
-  "crates/miyuki-ui-egui/src/molecules/skill_node.rs": [
-    "MUIE-SkillNode"
-  ],
-  "crates/miyuki-ui-egui/src/molecules/stat_row.rs": [
-    "MUIE-StatRow"
-  ],
-  "crates/miyuki-ui-egui/src/molecules/waypoint_entry.rs": [
-    "MUIE-WPEntry"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/character_select.rs": [
-    "MUIE-CharSelect"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/character_sheet.rs": [
-    "MUIE-CharSheet"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/chat_panel.rs": [
-    "MUIE-ChatPanel"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/horadric_cube.rs": [
-    "MUIE-Cube"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/hud_bar.rs": [
-    "MUIE-HudBar"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/inventory_panel.rs": [
-    "MUIE-InvPanel"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/main_menu.rs": [
-    "MUIE-MainMenu"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/mercenary_panel.rs": [
-    "MUIE-MercPanel"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/minimap.rs": [
-    "MUIE-Minimap"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/mod.rs": [
-    "MUIE-OrgsIndex"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/npc_dialog.rs": [
-    "MUIE-NpcDialog"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/party_panel.rs": [
-    "MUIE-PartyPanel"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/pause_menu.rs": [
-    "MUIE-PauseMenu"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/quest_log.rs": [
-    "MUIE-QuestLog"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/skill_tree_panel.rs": [
-    "MUIE-SkillTree"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/stash_panel.rs": [
-    "MUIE-Stash"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/trade_window.rs": [
-    "MUIE-Trade"
-  ],
-  "crates/miyuki-ui-egui/src/organisms/waypoint_map.rs": [
-    "MUIE-WPMap"
-  ],
-  "crates/miyuki-ui-egui/src/templates/character_select.rs": [
-    "MUIE-TmplCharSelect"
-  ],
-  "crates/miyuki-ui-egui/src/templates/dialog.rs": [
-    "MUIE-TmplDialog"
-  ],
-  "crates/miyuki-ui-egui/src/templates/gameplay.rs": [
-    "MUIE-TmplGameplay"
-  ],
-  "crates/miyuki-ui-egui/src/templates/loading.rs": [
-    "MUIE-TmplLoading"
-  ],
-  "crates/miyuki-ui-egui/src/templates/lobby.rs": [
-    "MUIE-TmplLobby"
-  ],
-  "crates/miyuki-ui-egui/src/templates/menu.rs": [
-    "MUIE-TmplMenu"
-  ],
-  "crates/miyuki-ui-egui/src/templates/mod.rs": [
-    "MUIE-TmplIndex"
-  ],
-  "crates/miyuki-ui-egui/src/theme.rs": [
-    "MUIE-Theme"
-  ],
   "crates/miyuki-ui-tokens/src/animation.rs": [
     "MUIT-Animation"
   ],
@@ -4206,9 +4741,6 @@
   ],
   "crates/miyuki-ui-tokens/src/palette/cog.rs": [
     "MUIT-PaletteCog"
-  ],
-  "crates/miyuki-ui-tokens/src/palette/d2.rs": [
-    "MUIT-PaletteD2"
   ],
   "crates/miyuki-ui-tokens/src/palette/mod.rs": [
     "MUIT-Palette"
@@ -4227,9 +4759,6 @@
   ],
   "crates/miyuki-ui-tokens/src/themes/cog.rs": [
     "MUIT-ThemeCog"
-  ],
-  "crates/miyuki-ui-tokens/src/themes/d2.rs": [
-    "MUIT-ThemeD2"
   ],
   "crates/miyuki-ui-tokens/src/themes/mod.rs": [
     "MUIT-Themes"
@@ -4335,6 +4864,13 @@
     "miyukiniadmin_db_unit_tests_run_single",
     "miyukiniadmin_db_unit_tests_run_suite"
   ],
+  "crates/miyukini-admin/src/gouvernance.rs": [
+    "miyukiniadmin_gouvernance",
+    "miyukiniadmin_gouvernance_action",
+    "miyukiniadmin_gouvernance_porte",
+    "miyukiniadmin_gouvernance_principal",
+    "miyukiniadmin_gouvernance_refus"
+  ],
   "crates/miyukini-admin/src/lib.rs": [
     "miyukiniadmin_module_admin_cell",
     "miyukiniadmin_module_api_handlers",
@@ -4347,6 +4883,7 @@
     "miyukiniadmin_module_cycle_tests_runner",
     "miyukiniadmin_module_database_service",
     "miyukiniadmin_module_db_unit_tests",
+    "miyukiniadmin_module_gouvernance",
     "miyukiniadmin_module_migration_service",
     "miyukiniadmin_module_models",
     "miyukiniadmin_module_module_lifecycle_service",
@@ -4387,6 +4924,7 @@
     "miyukiniadmin_backend_api_table_update_row",
     "miyukiniadmin_backend_api_tables_list",
     "miyukiniadmin_backend_app_state",
+    "miyukiniadmin_backend_gouverner_requete_layer",
     "miyukiniadmin_backend_health",
     "miyukiniadmin_backend_main",
     "miyukiniadmin_backend_require_session_layer",
@@ -4548,6 +5086,9 @@
     "miyukiniadmin_pre_destruction_result",
     "miyukiniadmin_pre_destruction_run_if_needed"
   ],
+  "crates/miyukini-admin/src/services/setup_guard.rs": [
+    "miyukiniadmin_setup_guard"
+  ],
   "crates/miyukini-admin/src/testing_service.rs": [
     "miyukiniadmin_testing_service_run_tests",
     "miyukiniadmin_testing_service_trait",
@@ -4572,6 +5113,9 @@
   "crates/miyukini-central/src/auth/db_client.rs": [
     "central_auth_kindmother_client_db"
   ],
+  "crates/miyukini-central/src/auth/import_heritage.rs": [
+    "central_auth_import_heritage"
+  ],
   "crates/miyukini-central/src/auth/mod.rs": [
     "miyukini_central_auth_mod"
   ],
@@ -4581,8 +5125,14 @@
   "crates/miyukini-central/src/auth/password.rs": [
     "miyukini_central_auth_password"
   ],
+  "crates/miyukini-central/src/auth/schema_kindmother.rs": [
+    "miyukini_central_schema_kindmother"
+  ],
   "crates/miyukini-central/src/catalog.rs": [
     "miyukini_central_catalog"
+  ],
+  "crates/miyukini-central/src/chemins.rs": [
+    "miyukini_central_chemins"
   ],
   "crates/miyukini-central/src/config.rs": [
     "miyukini_central_config"
@@ -4593,23 +5143,29 @@
   "crates/miyukini-central/src/db/mod.rs": [
     "miyukini_central_db_mod"
   ],
+  "crates/miyukini-central/src/fichiers_secrets.rs": [
+    "miyukini_central_fichiers_secrets"
+  ],
   "crates/miyukini-central/src/lib.rs": [
     "miyukini_central_lib"
   ],
   "crates/miyukini-central/src/main.rs": [
     "miyukini_central_main"
   ],
+  "crates/miyukini-central/src/mws/home.rs": [
+    "miyukini_central_mws_home"
+  ],
   "crates/miyukini-central/src/mws/mod.rs": [
     "miyukini_central_mws_mod"
-  ],
-  "crates/miyukini-central/src/services/miyuclicker.rs": [
-    "miyukini_central_services_miyuclicker"
   ],
   "crates/miyukini-central/src/services/mod.rs": [
     "miyukini_central_services_mod"
   ],
-  "crates/miyukini-cog-bridge/src/apikey.rs": [
-    "miyukini_cog_bridge_apikey"
+  "crates/miyukini-central/tests/auth_kindmother.rs": [
+    "miyukini_central_tests_auth_kindmother"
+  ],
+  "crates/miyukini-central/tests/import_heritage.rs": [
+    "miyukini_central_tests_import_heritage"
   ],
   "crates/miyukini-cog-bridge/src/bridge.rs": [
     "miyukini_cog_bridge_bridge"
@@ -4620,8 +5176,14 @@
   "crates/miyukini-cog-bridge/src/e2e.rs": [
     "miyukini_cog_bridge_e2e"
   ],
+  "crates/miyukini-cog-bridge/src/identite.rs": [
+    "miyukini_cog_bridge_identite"
+  ],
   "crates/miyukini-cog-bridge/src/lib.rs": [
     "miyukini_cog_bridge_lib"
+  ],
+  "crates/miyukini-cog-bridge/src/pairing.rs": [
+    "miyukini_cog_bridge_pairing"
   ],
   "crates/miyukini-cog-bridge/src/reconnect.rs": [
     "miyukini_cog_bridge_reconnect"
@@ -4807,8 +5369,17 @@
   "crates/miyukiniwatch/src/data/db.rs": [
     "miyukiniwatch_data_db"
   ],
+  "crates/miyukiniwatch/src/data/import_heritage.rs": [
+    "miyukiniwatch_import_heritage"
+  ],
+  "crates/miyukiniwatch/src/data/kindmother_client_db.rs": [
+    "miyukiniwatch_data_kindmother_client_db"
+  ],
   "crates/miyukiniwatch/src/data/mod.rs": [
     "miyukiniwatch_data_mod"
+  ],
+  "crates/miyukiniwatch/src/data/schema_kindmother.rs": [
+    "miyukiniwatch_schema_kindmother"
   ],
   "crates/miyukiniwatch/src/data/types.rs": [
     "miyukiniwatch_data_types"
@@ -4821,6 +5392,9 @@
   ],
   "crates/miyukiniwatch/src/presenter.rs": [
     "miyukiniwatch_presenter"
+  ],
+  "crates/miyukiniwatch/tests/import_heritage.rs": [
+    "miyukiniwatch_tests_import_heritage"
   ],
   "crates/miyulocale/src/admin_cell.rs": [
     "miyulocale_admin_cell"
@@ -4843,6 +5417,9 @@
   "crates/miyulocale/src/translate.rs": [
     "miyulocale_tool_translate"
   ],
+  "crates/miyumarket/src/bin/miyumarket-signer.rs": [
+    "miyumarket_signer_cli"
+  ],
   "crates/miyumarket/src/lib.rs": [
     "miyumarket_lib"
   ],
@@ -4854,6 +5431,9 @@
   ],
   "crates/miyumarket/src/protocol.rs": [
     "miyumarket_protocol"
+  ],
+  "crates/miyumarket/src/signature.rs": [
+    "miyumarket_signature"
   ],
   "crates/miyumedia/src/admin_cell.rs": [
     "miyumedia_admin_cell"
@@ -4992,6 +5572,102 @@
     "miyupolls_tool_poll_list",
     "miyupolls_tool_poll_result",
     "miyupolls_tool_poll_vote"
+  ],
+  "crates/miyuportail/examples/portail_essai.rs": [
+    "miyuportail_exemple_portail_essai"
+  ],
+  "crates/miyuportail/fuzz/examples/generer_graines.rs": [
+    "miyuportail_fuzz_generer_graines"
+  ],
+  "crates/miyuportail/fuzz/fuzz_targets/commun.rs": [
+    "miyuportail_fuzz_commun"
+  ],
+  "crates/miyuportail/fuzz/fuzz_targets/cosignature.rs": [
+    "miyuportail_fuzz_cosignature"
+  ],
+  "crates/miyuportail/fuzz/fuzz_targets/decoder_trame.rs": [
+    "miyuportail_fuzz_decoder_trame"
+  ],
+  "crates/miyuportail/fuzz/fuzz_targets/portail.rs": [
+    "miyuportail_fuzz_portail"
+  ],
+  "crates/miyuportail/fuzz/fuzz_targets/reponse_sas.rs": [
+    "miyuportail_fuzz_reponse_sas"
+  ],
+  "crates/miyuportail/fuzz/fuzz_targets/requete_sas.rs": [
+    "miyuportail_fuzz_requete_sas"
+  ],
+  "crates/miyuportail/fuzz/fuzz_targets/validation2.rs": [
+    "miyuportail_fuzz_validation2"
+  ],
+  "crates/miyuportail/src/bac_a_sable.rs": [
+    "miyuportail_bac_a_sable"
+  ],
+  "crates/miyuportail/src/bin/portail-entree.rs": [
+    "miyuportail_bin_entree"
+  ],
+  "crates/miyuportail/src/bin/portail-sas.rs": [
+    "miyuportail_bin_sas"
+  ],
+  "crates/miyuportail/src/bin/portail-sortie.rs": [
+    "miyuportail_bin_sortie"
+  ],
+  "crates/miyuportail/src/cdr.rs": [
+    "miyuportail_cdr"
+  ],
+  "crates/miyuportail/src/demon.rs": [
+    "miyuportail_demon"
+  ],
+  "crates/miyuportail/src/entree.rs": [
+    "miyuportail_entree"
+  ],
+  "crates/miyuportail/src/erreurs.rs": [
+    "miyuportail_erreurs"
+  ],
+  "crates/miyuportail/src/files.rs": [
+    "miyuportail_files"
+  ],
+  "crates/miyuportail/src/jeton.rs": [
+    "miyuportail_jeton"
+  ],
+  "crates/miyuportail/src/lib.rs": [
+    "miyuportail_lib"
+  ],
+  "crates/miyuportail/src/msce.rs": [
+    "miyuportail_msce"
+  ],
+  "crates/miyuportail/src/portail.rs": [
+    "miyuportail_portail"
+  ],
+  "crates/miyuportail/src/registre.rs": [
+    "miyuportail_registre"
+  ],
+  "crates/miyuportail/src/sas.rs": [
+    "miyuportail_sas"
+  ],
+  "crates/miyuportail/src/sortie.rs": [
+    "miyuportail_sortie"
+  ],
+  "crates/miyuportail/src/traite.rs": [
+    "miyuportail_traite"
+  ],
+  "crates/miyuportail/src/validation2.rs": [
+    "miyuportail_validation2"
+  ],
+  "crates/miyuportail/tests/commun/mod.rs": [
+    "miyuportail_tests_commun"
+  ],
+  "crates/miyuportail/tests/descripteurs.rs": [
+    "miyuportail_tests_descripteurs"
+  ],
+  "crates/miyuportail/tests/msce.rs": [
+    "miyuportail_tests_msce"
+  ],
+  "crates/miyuportail/tests/portail.rs": [
+    "miyuportail_tests_portail"
+  ],
+  "crates/miyuportail/tests/scission.rs": [
+    "miyuportail_tests_scission"
   ],
   "crates/miyuposanalytics/src/admin_cell.rs": [
     "miyuposanalytics_admin_cell"
@@ -5287,6 +5963,234 @@
   "crates/miyuprofile/src/vault.rs": [
     "miyuprofile_vault"
   ],
+  "crates/miyuracine/src/bin/miyuracine.rs": [
+    "miyuracine_cli"
+  ],
+  "crates/miyuracine/src/chiffrement.rs": [
+    "miyuracine_chiffrement"
+  ],
+  "crates/miyuracine/src/delegation.rs": [
+    "miyuracine_delegation"
+  ],
+  "crates/miyuracine/src/durcissement.rs": [
+    "miyuracine_durcissement"
+  ],
+  "crates/miyuracine/src/erreurs.rs": [
+    "miyuracine_erreurs"
+  ],
+  "crates/miyuracine/src/fichier_cle.rs": [
+    "miyuracine_fichier_cle"
+  ],
+  "crates/miyuracine/src/gf256.rs": [
+    "miyuracine_gf256"
+  ],
+  "crates/miyuracine/src/lib.rs": [
+    "miyuracine_lib"
+  ],
+  "crates/miyuracine/src/mots.rs": [
+    "miyuracine_mots"
+  ],
+  "crates/miyuracine/src/passation.rs": [
+    "miyuracine_passation"
+  ],
+  "crates/miyuracine/src/racine.rs": [
+    "miyuracine_racine"
+  ],
+  "crates/miyuracine/src/rs1024.rs": [
+    "miyuracine_rs1024"
+  ],
+  "crates/miyuracine/src/shamir.rs": [
+    "miyuracine_shamir"
+  ],
+  "crates/miyuracine/src/slip10.rs": [
+    "miyuracine_slip10"
+  ],
+  "crates/miyuracine/src/slip39.rs": [
+    "miyuracine_slip39"
+  ],
+  "crates/miyuracine/src/usages.rs": [
+    "miyuracine_usages"
+  ],
+  "crates/miyuracine/tests/cli.rs": [
+    "miyuracine_tests_cli"
+  ],
+  "crates/miyuracine/tests/delegation.rs": [
+    "miyuracine_tests_delegation"
+  ],
+  "crates/miyuracine/tests/durcissement.rs": [
+    "miyuracine_tests_durcissement"
+  ],
+  "crates/miyuracine/tests/erreurs.rs": [
+    "miyuracine_tests_erreurs"
+  ],
+  "crates/miyuracine/tests/hors_reseau.rs": [
+    "miyuracine_tests_hors_reseau"
+  ],
+  "crates/miyuracine/tests/racine.rs": [
+    "miyuracine_tests_racine"
+  ],
+  "crates/miyuracine/tests/vecteurs_slip10.rs": [
+    "miyuracine_tests_vecteurs_slip10"
+  ],
+  "crates/miyuracine/tests/vecteurs_slip39.rs": [
+    "miyuracine_tests_vecteurs_slip39"
+  ],
+  "crates/miyuregistre/fuzz/examples/generer_graines.rs": [
+    "miyuregistre_fuzz_generer_graines"
+  ],
+  "crates/miyuregistre/fuzz/fuzz_targets/entree.rs": [
+    "miyuregistre_fuzz_entree"
+  ],
+  "crates/miyuregistre/fuzz/fuzz_targets/miroir.rs": [
+    "miyuregistre_fuzz_miroir"
+  ],
+  "crates/miyuregistre/fuzz/fuzz_targets/stockage_fichier.rs": [
+    "miyuregistre_fuzz_stockage_fichier"
+  ],
+  "crates/miyuregistre/src/bin/miyuregistre_publier.rs": [
+    "miyuregistre_bin_publier"
+  ],
+  "crates/miyuregistre/src/editeur/cle.rs": [
+    "miyuregistre_editeur_cle"
+  ],
+  "crates/miyuregistre/src/editeur/depot.rs": [
+    "miyuregistre_editeur_depot"
+  ],
+  "crates/miyuregistre/src/editeur/http.rs": [
+    "miyuregistre_editeur_http"
+  ],
+  "crates/miyuregistre/src/editeur/mod.rs": [
+    "miyuregistre_editeur"
+  ],
+  "crates/miyuregistre/src/editeur/origin.rs": [
+    "miyuregistre_editeur_origin"
+  ],
+  "crates/miyuregistre/src/editeur/verrou.rs": [
+    "miyuregistre_editeur_verrou"
+  ],
+  "crates/miyuregistre/src/entree.rs": [
+    "miyuregistre_entree"
+  ],
+  "crates/miyuregistre/src/enveloppe.rs": [
+    "miyuregistre_enveloppe"
+  ],
+  "crates/miyuregistre/src/erreurs.rs": [
+    "miyuregistre_erreurs"
+  ],
+  "crates/miyuregistre/src/federal.rs": [
+    "miyuregistre_federal"
+  ],
+  "crates/miyuregistre/src/journal.rs": [
+    "miyuregistre_journal"
+  ],
+  "crates/miyuregistre/src/lib.rs": [
+    "miyuregistre_lib"
+  ],
+  "crates/miyuregistre/src/revocation.rs": [
+    "miyuregistre_revocation"
+  ],
+  "crates/miyuregistre/src/stockage.rs": [
+    "miyuregistre_stockage"
+  ],
+  "crates/miyuregistre/src/suivi.rs": [
+    "miyuregistre_suivi"
+  ],
+  "crates/miyuregistre/src/suivi_revocations.rs": [
+    "miyuregistre_suivi_revocations"
+  ],
+  "crates/miyuregistre/src/temps.rs": [
+    "miyuregistre_temps"
+  ],
+  "crates/miyurelais/examples/essai_vm.rs": [
+    "miyurelais_exemple_essai_vm"
+  ],
+  "crates/miyurelais/fuzz/fuzz_targets/trame_nflog.rs": [
+    "miyurelais_fuzz_trame_nflog"
+  ],
+  "crates/miyurelais/src/bin/miyurelais.rs": [
+    "miyurelais_bin"
+  ],
+  "crates/miyurelais/src/ip.rs": [
+    "miyurelais_ip"
+  ],
+  "crates/miyurelais/src/lib.rs": [
+    "miyurelais_lib"
+  ],
+  "crates/miyurelais/src/ligne.rs": [
+    "miyurelais_ligne"
+  ],
+  "crates/miyurelais/src/netlink.rs": [
+    "miyurelais_netlink"
+  ],
+  "crates/miyurelais/src/relais.rs": [
+    "miyurelais_relais"
+  ],
+  "crates/miyurelais/src/socket.rs": [
+    "miyurelais_socket"
+  ],
+  "crates/miyurelais/src/veille.rs": [
+    "miyurelais_veille"
+  ],
+  "crates/miyurelais/tests/binaire.rs": [
+    "miyurelais_test_binaire"
+  ],
+  "crates/miyurelais/tests/chaine.rs": [
+    "miyurelais_test_chaine"
+  ],
+  "crates/miyurelais/tests/refus.rs": [
+    "miyurelais_test_refus"
+  ],
+  "crates/miyusceau/fuzz/examples/generer_graines.rs": [
+    "miyusceau_fuzz_generer_graines"
+  ],
+  "crates/miyusceau/fuzz/fuzz_targets/aller_retour.rs": [
+    "miyusceau_fuzz_aller_retour"
+  ],
+  "crates/miyusceau/fuzz/fuzz_targets/decoder_delegation.rs": [
+    "miyusceau_fuzz_decoder_delegation"
+  ],
+  "crates/miyusceau/fuzz/fuzz_targets/decoder_sceau.rs": [
+    "miyusceau_fuzz_decoder_sceau"
+  ],
+  "crates/miyusceau/fuzz/fuzz_targets/decoder_titres.rs": [
+    "miyusceau_fuzz_decoder_titres"
+  ],
+  "crates/miyusceau/fuzz/fuzz_targets/preuves_merkle.rs": [
+    "miyusceau_fuzz_preuves_merkle"
+  ],
+  "crates/miyusceau/fuzz/fuzz_targets/verifier_seuil.rs": [
+    "miyusceau_fuzz_verifier_seuil"
+  ],
+  "crates/miyusceau/src/ancres.rs": [
+    "miyusceau_ancres"
+  ],
+  "crates/miyusceau/src/cles.rs": [
+    "miyusceau_cles"
+  ],
+  "crates/miyusceau/src/delegation.rs": [
+    "miyusceau_delegation"
+  ],
+  "crates/miyusceau/src/erreurs.rs": [
+    "miyusceau_erreurs"
+  ],
+  "crates/miyusceau/src/format.rs": [
+    "miyusceau_format"
+  ],
+  "crates/miyusceau/src/lib.rs": [
+    "miyusceau_lib"
+  ],
+  "crates/miyusceau/src/merkle.rs": [
+    "miyusceau_merkle"
+  ],
+  "crates/miyusceau/src/registre.rs": [
+    "miyusceau_registre"
+  ],
+  "crates/miyusceau/src/titre.rs": [
+    "miyusceau_titre"
+  ],
+  "crates/miyusceau/src/tlv.rs": [
+    "miyusceau_tlv"
+  ],
   "crates/miyusearch/src/admin_cell.rs": [
     "miyusearch_admin_cell"
   ],
@@ -5478,18 +6382,28 @@
     "miyusql_tool_cache_set"
   ],
   "crates/miyusql/src/context.rs": [
+    "miyusql_context",
+    "miyusql_context_avec_signature",
     "miyusql_context_has_mandate",
     "miyusql_context_mandate_id",
     "miyusql_context_new",
     "miyusql_context_security_level",
+    "miyusql_context_test_mandat_non_signe",
+    "miyusql_context_test_mandat_signe",
+    "miyusql_context_test_mandat_vide",
+    "miyusql_context_verifier_mandat",
     "miyusql_governed_context",
-    "miyusql_governed_context_struct"
+    "miyusql_governed_context_struct",
+    "miyusql_signature_mandat",
+    "miyusql_signature_mandat_pour_tests"
   ],
   "crates/miyusql/src/errors.rs": [
     "miyusql_error_connection",
     "miyusql_error_enum",
     "miyusql_error_execution",
+    "miyusql_error_mandat_non_signe",
     "miyusql_error_no_mandate",
+    "miyusql_error_non_implemente",
     "miyusql_error_syntax",
     "miyusql_error_timeout",
     "miyusql_errors"
@@ -5498,7 +6412,18 @@
     "toolkit.data.miyusql"
   ],
   "crates/miyusql/src/memory.rs": [
-    "miyusql_memory_executor"
+    "miyusql_memory",
+    "miyusql_memory_executor",
+    "miyusql_memory_test_cache_ttl",
+    "miyusql_memory_test_delete_where_refuse",
+    "miyusql_memory_test_insert_incoherent",
+    "miyusql_memory_test_insert_valeurs",
+    "miyusql_memory_test_instruction_inconnue",
+    "miyusql_memory_test_mandat_non_signe",
+    "miyusql_memory_test_rollback",
+    "miyusql_memory_test_select_where_refuse",
+    "miyusql_memory_test_tables_inexistantes",
+    "miyusql_memory_test_transactions_inconnues"
   ],
   "crates/miyusql/src/query.rs": [
     "miyusql_executor_execute",
@@ -5544,8 +6469,11 @@
     "MSQL_C_003",
     "MSQL_Q_001",
     "MSQL_Q_002",
+    "MSQL_Q_002B",
     "MSQL_Q_003",
     "MSQL_Q_004",
+    "MSQL_Q_005",
+    "MSQL_Q_006",
     "MSQL_S_001",
     "MSQL_S_002",
     "MSQL_S_003",
@@ -5622,6 +6550,9 @@
   "crates/miyustt/src/lib.rs": [
     "miyustt_lib"
   ],
+  "crates/miyustt/src/securite.rs": [
+    "miyustt_securite"
+  ],
   "crates/miyutext/src/admin_cell.rs": [
     "miyutext_admin_cell"
   ],
@@ -5670,6 +6601,9 @@
   "crates/miyutts/src/lib.rs": [
     "miyutts_lib"
   ],
+  "crates/miyutts/src/securite.rs": [
+    "miyutts_securite"
+  ],
   "crates/miyuvalidate/src/admin_cell.rs": [
     "miyuvalidate_admin_cell"
   ],
@@ -5687,6 +6621,54 @@
   ],
   "crates/miyuvalidate/src/schema.rs": [
     "miyuvalidate_tool_schema_check"
+  ],
+  "crates/miyuvigie/fuzz/examples/generer_graines.rs": [
+    "miyuvigie_fuzz_generer_graines"
+  ],
+  "crates/miyuvigie/fuzz/fuzz_targets/commun.rs": [
+    "miyuvigie_fuzz_commun"
+  ],
+  "crates/miyuvigie/fuzz/fuzz_targets/journal_douane.rs": [
+    "miyuvigie_fuzz_journal_douane"
+  ],
+  "crates/miyuvigie/fuzz/fuzz_targets/proc_net_tcp.rs": [
+    "miyuvigie_fuzz_proc_net_tcp"
+  ],
+  "crates/miyuvigie/fuzz/fuzz_targets/regles.rs": [
+    "miyuvigie_fuzz_regles"
+  ],
+  "crates/miyuvigie/src/dedup.rs": [
+    "miyuvigie_dedup"
+  ],
+  "crates/miyuvigie/src/evenement.rs": [
+    "miyuvigie_evenement"
+  ],
+  "crates/miyuvigie/src/lib.rs": [
+    "miyuvigie_lib"
+  ],
+  "crates/miyuvigie/src/nftables.rs": [
+    "miyuvigie_nftables"
+  ],
+  "crates/miyuvigie/src/regles.rs": [
+    "miyuvigie_regles"
+  ],
+  "crates/miyuvigie/src/signal.rs": [
+    "miyuvigie_signal"
+  ],
+  "crates/miyuvigie/src/sortie.rs": [
+    "miyuvigie_sortie"
+  ],
+  "crates/miyuvigie/src/vigie.rs": [
+    "miyuvigie_vigie"
+  ],
+  "crates/miyuvigie/src/zone.rs": [
+    "miyuvigie_zone"
+  ],
+  "crates/miyuvigie/tests/journaux_douane.rs": [
+    "miyuvigie_test_journaux_douane"
+  ],
+  "crates/miyuvigie/tests/vigie.rs": [
+    "miyuvigie_test_vigie"
   ],
   "crates/miyuvoicecapture/src/admin_cell.rs": [
     "alicia_capture_admin_cell",
@@ -5798,6 +6780,9 @@
   "crates/miyuwebway_participant/src/errors.rs": [
     "miyuwebway_participant_errors"
   ],
+  "crates/miyuwebway_participant/src/identite.rs": [
+    "miyuwebway_participant_identite"
+  ],
   "crates/miyuwebway_participant/src/lib.rs": [
     "miyuwebway_participant_lib"
   ],
@@ -5838,7 +6823,7 @@
     "miyuwebway_tracker_context"
   ],
   "crates/miyuwebway_tracker/src/declaration.rs": [
-    "miyuwebway_tracker_mws_declaration_validate_validate_2",
+    "miyuwebway_tracker_mws_declaration_validate",
     "miyuwebway_tracker_mws_declaration_verify"
   ],
   "crates/miyuwebway_tracker/src/discovery.rs": [
@@ -5887,13 +6872,6 @@
     "miyuwidgets_tool_web_widget_text_render"
   ],
   "crates/mscm_namespaces.rs": [
-    "lifegame",
-    "lifegame.ai",
-    "lifegame.entities",
-    "lifegame.operator",
-    "lifegame.powers",
-    "lifegame.simulation",
-    "lifegame.world",
     "origin",
     "origin.relay",
     "origin.tracker",
@@ -5941,6 +6919,7 @@
     "strongfather_decision_accepted_priority",
     "strongfather_decision_ambiguous_clarifications",
     "strongfather_decision_ambiguous_missing_information",
+    "strongfather_decision_deciding_rule",
     "strongfather_decision_deferred_context_required",
     "strongfather_decision_deferred_reason",
     "strongfather_decision_eval_context_default",
@@ -5949,6 +6928,7 @@
     "strongfather_decision_eval_context_with_field",
     "strongfather_decision_evaluation_context",
     "strongfather_decision_evaluation_context_evaluation_context_2",
+    "strongfather_decision_intent_digest",
     "strongfather_decision_intent_id",
     "strongfather_decision_is_accepted",
     "strongfather_decision_is_ambiguous",
@@ -5961,6 +6941,7 @@
     "strongfather_decision_justification_policy_references",
     "strongfather_decision_justification_reasoning_steps",
     "strongfather_decision_justification_with_reasoning",
+    "strongfather_decision_matches_intent",
     "strongfather_decision_metadata",
     "strongfather_decision_metadata_default",
     "strongfather_decision_metadata_fields",
@@ -5969,6 +6950,7 @@
     "strongfather_decision_metadata_with_field",
     "strongfather_decision_new",
     "strongfather_decision_policies_applied",
+    "strongfather_decision_reason",
     "strongfather_decision_refused_reason",
     "strongfather_decision_refused_violated_policies",
     "strongfather_decision_test_create_accepted",
@@ -5982,11 +6964,25 @@
     "strongfather_decision_type_decision_type_2",
     "strongfather_decision_type_deferred",
     "strongfather_decision_type_refused",
+    "strongfather_decision_verdict",
     "strongfather_decision_with_evaluation_context",
-    "strongfather_decision_with_metadata"
+    "strongfather_decision_with_metadata",
+    "strongfather_verdict"
+  ],
+  "crates/strongfather/src/expr.rs": [
+    "strongfather_expr",
+    "strongfather_expr_compiled",
+    "strongfather_expr_error",
+    "strongfather_expr_eval",
+    "strongfather_expr_parse",
+    "strongfather_expr_test_bounds",
+    "strongfather_expr_test_errors",
+    "strongfather_expr_test_no_substring",
+    "strongfather_expr_test_true_false"
   ],
   "crates/strongfather/src/intent.rs": [
     "strongfather_intent",
+    "strongfather_intent_action_as_str",
     "strongfather_intent_action_creation",
     "strongfather_intent_action_deletion",
     "strongfather_intent_action_evaluation",
@@ -6005,6 +7001,7 @@
     "strongfather_intent_data",
     "strongfather_intent_data_content",
     "strongfather_intent_data_data_2",
+    "strongfather_intent_digest",
     "strongfather_intent_id",
     "strongfather_intent_metadata",
     "strongfather_intent_new",
@@ -6014,10 +7011,12 @@
     "strongfather_intent_state_in_evaluation",
     "strongfather_intent_state_submitted",
     "strongfather_intent_subject",
+    "strongfather_intent_test_action_from_str",
     "strongfather_intent_test_all_action_types",
     "strongfather_intent_test_create_basic",
     "strongfather_intent_test_create_with_constraints",
     "strongfather_intent_test_create_with_priority",
+    "strongfather_intent_test_digest_stable",
     "strongfather_intent_type",
     "strongfather_intent_with_constraints",
     "strongfather_intent_with_metadata",
@@ -6025,20 +7024,36 @@
   ],
   "crates/strongfather/src/lib.rs": [
     "strongfather_module_decision",
+    "strongfather_module_expr",
     "strongfather_module_intent",
+    "strongfather_module_loader",
     "strongfather_module_policy",
     "strongfather_module_policy_engine",
     "strongfather_module_priority",
     "strongfather_module_validator",
     "strongfather_reexport_decision",
+    "strongfather_reexport_expr_loader",
     "strongfather_reexport_intent",
     "strongfather_reexport_policy",
     "strongfather_reexport_policy_engine",
     "strongfather_reexport_priority",
     "strongfather_reexport_validator"
   ],
+  "crates/strongfather/src/loader.rs": [
+    "strongfather_loader",
+    "strongfather_loader_test_fail_closed",
+    "strongfather_loader_test_file",
+    "strongfather_loader_test_valid_json",
+    "strongfather_loader_test_valid_toml",
+    "strongfather_policy_engine_load_file",
+    "strongfather_policy_load_error",
+    "strongfather_policy_set_from_json",
+    "strongfather_policy_set_from_toml",
+    "strongfather_policy_set_load_file"
+  ],
   "crates/strongfather/src/policy.rs": [
     "strongfather_policy",
+    "strongfather_policy_check_coherence",
     "strongfather_policy_composite_policies",
     "strongfather_policy_condition",
     "strongfather_policy_condition_condition_2",
@@ -6083,6 +7098,10 @@
     "strongfather_policy_set_len",
     "strongfather_policy_set_new",
     "strongfather_policy_set_policies",
+    "strongfather_policy_target",
+    "strongfather_policy_target_any",
+    "strongfather_policy_target_field",
+    "strongfather_policy_target_matches",
     "strongfather_policy_test_all_types",
     "strongfather_policy_test_create_basic",
     "strongfather_policy_test_create_with_priority",
@@ -6096,23 +7115,35 @@
     "strongfather_policy_type_validation",
     "strongfather_policy_with_composite",
     "strongfather_policy_with_metadata",
-    "strongfather_policy_with_priority"
+    "strongfather_policy_with_priority",
+    "strongfather_policy_with_target"
   ],
   "crates/strongfather/src/policy_engine.rs": [
     "strongfather_policy_engine",
     "strongfather_policy_engine_apply",
+    "strongfather_policy_engine_decide",
     "strongfather_policy_engine_error",
     "strongfather_policy_engine_error_consistency",
     "strongfather_policy_engine_error_display",
     "strongfather_policy_engine_error_invariant",
     "strongfather_policy_engine_error_reason",
-    "strongfather_policy_engine_evaluate_policy",
     "strongfather_policy_engine_new",
     "strongfather_policy_engine_policies",
-    "strongfather_policy_engine_select_applicable",
-    "strongfather_policy_engine_test_apply_permission",
-    "strongfather_policy_engine_test_create",
-    "strongfather_policy_engine_test_priority_order"
+    "strongfather_policy_engine_test_allow",
+    "strongfather_policy_engine_test_apply",
+    "strongfather_policy_engine_test_composite",
+    "strongfather_policy_engine_test_condition",
+    "strongfather_policy_engine_test_constraint",
+    "strongfather_policy_engine_test_default_deny",
+    "strongfather_policy_engine_test_deny_over_allow",
+    "strongfather_policy_engine_test_digest",
+    "strongfather_policy_engine_test_incoherent",
+    "strongfather_policy_engine_test_invalid_intent",
+    "strongfather_policy_engine_test_malformed",
+    "strongfather_policy_engine_test_no_substring",
+    "strongfather_policy_engine_test_priority",
+    "strongfather_policy_engine_try_new",
+    "strongfather_policy_engine_validate"
   ],
   "crates/strongfather/src/priority.rs": [
     "strongfather_priority_calculator",
@@ -6216,626 +7247,23 @@
     "worrysentinel_threat_level_none",
     "worrysentinel_threat_test_level_ordering"
   ],
-  "mge/crates/mge-audio/src/lib.rs": [
-    "crates_mge_audio_lib"
+  "crates/worrysentinel/src/voies.rs": [
+    "worrysentinel_voies"
   ],
-  "mge/crates/mge-content/src/lib.rs": [
-    "crates_mge_content_lib"
+  "crates/worrysentinel/tests/chaine_vigies.rs": [
+    "worrysentinel_test_chaine_vigies"
   ],
-  "mge/crates/mge-core/src/lib.rs": [
-    "crates_mge_core_lib"
+  "docs/doc_for_website/js/doc.js": [
+    "cog.docsDoc"
   ],
-  "mge/crates/mge-gameplay/src/actions.rs": [
-    "crates_mge_gameplay_actions"
+  "docs/doc_for_website/js/list.js": [
+    "cog.docsList"
   ],
-  "mge/crates/mge-gameplay/src/character.rs": [
-    "crates_mge_gameplay_character"
+  "docs/ux_ui/ui/hyperui/assets/component.js": [
+    "cog.docsComponent"
   ],
-  "mge/crates/mge-gameplay/src/combat.rs": [
-    "crates_mge_gameplay_combat"
-  ],
-  "mge/crates/mge-gameplay/src/effects.rs": [
-    "crates_mge_gameplay_effects"
-  ],
-  "mge/crates/mge-gameplay/src/lib.rs": [
-    "crates_mge_gameplay_lib"
-  ],
-  "mge/crates/mge-gameplay/src/progression.rs": [
-    "crates_mge_gameplay_progression"
-  ],
-  "mge/crates/mge-gameplay/src/skills.rs": [
-    "crates_mge_gameplay_skills"
-  ],
-  "mge/crates/mge-gameplay/src/stats.rs": [
-    "crates_mge_gameplay_stats"
-  ],
-  "mge/crates/mge-input/src/lib.rs": [
-    "crates_mge_input_lib"
-  ],
-  "mge/crates/mge-items/src/affixes.rs": [
-    "crates_mge_items_affixes"
-  ],
-  "mge/crates/mge-items/src/charms.rs": [
-    "crates_mge_items_charms"
-  ],
-  "mge/crates/mge-items/src/crafting.rs": [
-    "crates_mge_items_crafting"
-  ],
-  "mge/crates/mge-items/src/economy.rs": [
-    "crates_mge_items_economy"
-  ],
-  "mge/crates/mge-items/src/item.rs": [
-    "crates_mge_items_item"
-  ],
-  "mge/crates/mge-items/src/lib.rs": [
-    "crates_mge_items_lib"
-  ],
-  "mge/crates/mge-items/src/loot.rs": [
-    "crates_mge_items_loot"
-  ],
-  "mge/crates/mge-items/src/rarity.rs": [
-    "crates_mge_items_rarity"
-  ],
-  "mge/crates/mge-items/src/runewords.rs": [
-    "crates_mge_items_runewords"
-  ],
-  "mge/crates/mge-items/src/simulator.rs": [
-    "crates_mge_items_simulator"
-  ],
-  "mge/crates/mge-items/src/socketables.rs": [
-    "crates_mge_items_socketables"
-  ],
-  "mge/crates/mge-items/src/sockets.rs": [
-    "crates_mge_items_sockets"
-  ],
-  "mge/crates/mge-items/src/uniques.rs": [
-    "crates_mge_items_uniques"
-  ],
-  "mge/crates/mge-items/src/vendors.rs": [
-    "crates_mge_items_vendors"
-  ],
-  "mge/crates/mge-meta/src/hardcore.rs": [
-    "crates_mge_meta_hardcore"
-  ],
-  "mge/crates/mge-meta/src/harness.rs": [
-    "crates_mge_meta_harness"
-  ],
-  "mge/crates/mge-meta/src/ladder.rs": [
-    "crates_mge_meta_ladder"
-  ],
-  "mge/crates/mge-meta/src/lib.rs": [
-    "crates_mge_meta_lib"
-  ],
-  "mge/crates/mge-meta/src/mercenary.rs": [
-    "crates_mge_meta_mercenary"
-  ],
-  "mge/crates/mge-meta/src/party.rs": [
-    "crates_mge_meta_party"
-  ],
-  "mge/crates/mge-meta/src/pvp.rs": [
-    "crates_mge_meta_pvp"
-  ],
-  "mge/crates/mge-meta/src/services.rs": [
-    "crates_mge_meta_services"
-  ],
-  "mge/crates/mge-monsters/src/ai.rs": [
-    "crates_mge_monsters_ai"
-  ],
-  "mge/crates/mge-monsters/src/lib.rs": [
-    "crates_mge_monsters_lib"
-  ],
-  "mge/crates/mge-monsters/src/roster.rs": [
-    "crates_mge_monsters_roster"
-  ],
-  "mge/crates/mge-monsters/src/scripts.rs": [
-    "crates_mge_monsters_scripts"
-  ],
-  "mge/crates/mge-monsters/src/variants.rs": [
-    "crates_mge_monsters_variants"
-  ],
-  "mge/crates/mge-nav/src/lib.rs": [
-    "crates_mge_nav_lib"
-  ],
-  "mge/crates/mge-net/src/lib.rs": [
-    "crates_mge_net_lib"
-  ],
-  "mge/crates/mge-proto/src/lib.rs": [
-    "crates_mge_proto_lib"
-  ],
-  "mge/crates/mge-render/src/animation.rs": [
-    "crates_mge_render_animation"
-  ],
-  "mge/crates/mge-render/src/atlas.rs": [
-    "crates_mge_render_atlas"
-  ],
-  "mge/crates/mge-render/src/batch.rs": [
-    "crates_mge_render_batch"
-  ],
-  "mge/crates/mge-render/src/camera.rs": [
-    "crates_mge_render_camera"
-  ],
-  "mge/crates/mge-render/src/lib.rs": [
-    "crates_mge_render_lib"
-  ],
-  "mge/crates/mge-render/src/lighting.rs": [
-    "crates_mge_render_lighting"
-  ],
-  "mge/crates/mge-render/src/pass.rs": [
-    "crates_mge_render_pass"
-  ],
-  "mge/crates/mge-render/src/pipeline.rs": [
-    "crates_mge_render_pipeline"
-  ],
-  "mge/crates/mge-render/src/quality.rs": [
-    "crates_mge_render_quality"
-  ],
-  "mge/crates/mge-render/src/telemetry.rs": [
-    "crates_mge_render_telemetry"
-  ],
-  "mge/crates/mge-render/src/vfx.rs": [
-    "crates_mge_render_vfx"
-  ],
-  "mge/crates/mge-replication/src/lib.rs": [
-    "crates_mge_replication_lib"
-  ],
-  "mge/crates/mge-save/src/lib.rs": [
-    "crates_mge_save_lib"
-  ],
-  "mge/crates/mge-sim/src/civil_skills.rs": [
-    "crates_mge_sim_civil_skills"
-  ],
-  "mge/crates/mge-sim/src/constants.rs": [
-    "crates_mge_sim_constants"
-  ],
-  "mge/crates/mge-sim/src/entity.rs": [
-    "crates_mge_sim_entity"
-  ],
-  "mge/crates/mge-sim/src/gather_node.rs": [
-    "crates_mge_sim_gather_node"
-  ],
-  "mge/crates/mge-sim/src/inventory.rs": [
-    "crates_mge_sim_inventory"
-  ],
-  "mge/crates/mge-sim/src/lib.rs": [
-    "crates_mge_sim_lib"
-  ],
-  "mge/crates/mge-sim/src/player_state.rs": [
-    "crates_mge_sim_player_state"
-  ],
-  "mge/crates/mge-sim/src/sim_tick.rs": [
-    "crates_mge_sim_sim_tick"
-  ],
-  "mge/crates/mge-sim/src/skill_disk.rs": [
-    "crates_mge_sim_skill_disk"
-  ],
-  "mge/crates/mge-sim/src/spatial.rs": [
-    "crates_mge_sim_spatial"
-  ],
-  "mge/crates/mge-sim/src/world_map.rs": [
-    "crates_mge_sim_world_map"
-  ],
-  "mge/crates/mge-sim/src/zone_state.rs": [
-    "crates_mge_sim_zone_state"
-  ],
-  "mge/crates/mge-ui/src/charsheet.rs": [
-    "crates_mge_ui_charsheet"
-  ],
-  "mge/crates/mge-ui/src/debug.rs": [
-    "crates_mge_ui_debug"
-  ],
-  "mge/crates/mge-ui/src/feedback.rs": [
-    "crates_mge_ui_feedback"
-  ],
-  "mge/crates/mge-ui/src/hud.rs": [
-    "crates_mge_ui_hud"
-  ],
-  "mge/crates/mge-ui/src/input_map.rs": [
-    "crates_mge_ui_input_map"
-  ],
-  "mge/crates/mge-ui/src/inventory.rs": [
-    "crates_mge_ui_inventory"
-  ],
-  "mge/crates/mge-ui/src/lib.rs": [
-    "crates_mge_ui_lib"
-  ],
-  "mge/crates/mge-ui/src/menu.rs": [
-    "crates_mge_ui_menu"
-  ],
-  "mge/crates/mge-ui/src/quest.rs": [
-    "crates_mge_ui_quest"
-  ],
-  "mge/crates/mge-ui/src/shell.rs": [
-    "crates_mge_ui_shell"
-  ],
-  "mge/crates/mge-ui/src/stash.rs": [
-    "crates_mge_ui_stash"
-  ],
-  "mge/crates/mge-ui/src/tooltip.rs": [
-    "crates_mge_ui_tooltip"
-  ],
-  "mge/crates/mge-ui/src/vendor.rs": [
-    "crates_mge_ui_vendor"
-  ],
-  "mge/crates/mge-ui/src/visual_state.rs": [
-    "crates_mge_ui_visual_state"
-  ],
-  "mge/crates/mge-world/src/boss.rs": [
-    "crates_mge_world_boss"
-  ],
-  "mge/crates/mge-world/src/camp.rs": [
-    "crates_mge_world_camp"
-  ],
-  "mge/crates/mge-world/src/chunks.rs": [
-    "crates_mge_world_chunks"
-  ],
-  "mge/crates/mge-world/src/events.rs": [
-    "crates_mge_world_events"
-  ],
-  "mge/crates/mge-world/src/lib.rs": [
-    "crates_mge_world_lib"
-  ],
-  "mge/crates/mge-world/src/progression.rs": [
-    "crates_mge_world_progression"
-  ],
-  "mge/crates/mge-world/src/quests.rs": [
-    "crates_mge_world_quests"
-  ],
-  "mge/crates/mge-world/src/randomize.rs": [
-    "crates_mge_world_randomize"
-  ],
-  "mge/crates/mge-world/src/runner.rs": [
-    "crates_mge_world_runner"
-  ],
-  "mge/crates/mge-world/src/secondary.rs": [
-    "crates_mge_world_secondary"
-  ],
-  "mge/crates/mge-world/src/transition.rs": [
-    "crates_mge_world_transition"
-  ],
-  "mge/crates/mge-world/src/waypoints.rs": [
-    "crates_mge_world_waypoints"
-  ],
-  "mge/crates/mge-world/src/zone.rs": [
-    "crates_mge_world_zone"
-  ],
-  "mge/games/allumina/build.rs": [
-    "games_allumina_build"
-  ],
-  "mge/games/allumina/src/app.rs": [
-    "games_allumina_app"
-  ],
-  "mge/games/allumina/src/components/cc.rs": [
-    "games_allumina_components_cc"
-  ],
-  "mge/games/allumina/src/components/equipment.rs": [
-    "games_allumina_components_equipment"
-  ],
-  "mge/games/allumina/src/components/item.rs": [
-    "games_allumina_components_item"
-  ],
-  "mge/games/allumina/src/components/mercenary.rs": [
-    "games_allumina_components_mercenary"
-  ],
-  "mge/games/allumina/src/components/mob.rs": [
-    "games_allumina_components_mob"
-  ],
-  "mge/games/allumina/src/components/mod.rs": [
-    "games_allumina_components_mod"
-  ],
-  "mge/games/allumina/src/components/npc.rs": [
-    "games_allumina_components_npc"
-  ],
-  "mge/games/allumina/src/components/player.rs": [
-    "games_allumina_components_player"
-  ],
-  "mge/games/allumina/src/components/projectile.rs": [
-    "games_allumina_components_projectile"
-  ],
-  "mge/games/allumina/src/components/quest.rs": [
-    "games_allumina_components_quest"
-  ],
-  "mge/games/allumina/src/components/skill.rs": [
-    "games_allumina_components_skill"
-  ],
-  "mge/games/allumina/src/components/summon.rs": [
-    "games_allumina_components_summon"
-  ],
-  "mge/games/allumina/src/components/world.rs": [
-    "games_allumina_components_world"
-  ],
-  "mge/games/allumina/src/data/affixes.rs": [
-    "games_allumina_data_affixes"
-  ],
-  "mge/games/allumina/src/data/classes.rs": [
-    "games_allumina_data_classes"
-  ],
-  "mge/games/allumina/src/data/items.rs": [
-    "games_allumina_data_items"
-  ],
-  "mge/games/allumina/src/data/mercenary.rs": [
-    "games_allumina_data_mercenary"
-  ],
-  "mge/games/allumina/src/data/mobs.rs": [
-    "games_allumina_data_mobs"
-  ],
-  "mge/games/allumina/src/data/mod.rs": [
-    "games_allumina_data_mod"
-  ],
-  "mge/games/allumina/src/data/skills.rs": [
-    "games_allumina_data_skills"
-  ],
-  "mge/games/allumina/src/data/summon.rs": [
-    "games_allumina_data_summon"
-  ],
-  "mge/games/allumina/src/data/uniques.rs": [
-    "games_allumina_data_uniques"
-  ],
-  "mge/games/allumina/src/ecs.rs": [
-    "games_allumina_ecs"
-  ],
-  "mge/games/allumina/src/lib.rs": [
-    "games_allumina_lib"
-  ],
-  "mge/games/allumina/src/main.rs": [
-    "games_allumina_main"
-  ],
-  "mge/games/allumina/src/network/interpolation.rs": [
-    "games_allumina_network_interpolation"
-  ],
-  "mge/games/allumina/src/network/lobby_client.rs": [
-    "games_allumina_network_lobby_client"
-  ],
-  "mge/games/allumina/src/network/prediction.rs": [
-    "games_allumina_network_prediction"
-  ],
-  "mge/games/allumina/src/network/snapshot_renderer.rs": [
-    "games_allumina_network_snapshot_renderer"
-  ],
-  "mge/games/allumina/src/plugins/camera.rs": [
-    "games_allumina_plugins_camera"
-  ],
-  "mge/games/allumina/src/plugins/cc.rs": [
-    "games_allumina_plugins_cc"
-  ],
-  "mge/games/allumina/src/plugins/combat.rs": [
-    "games_allumina_plugins_combat"
-  ],
-  "mge/games/allumina/src/plugins/content.rs": [
-    "games_allumina_plugins_content"
-  ],
-  "mge/games/allumina/src/plugins/inventory.rs": [
-    "games_allumina_plugins_inventory"
-  ],
-  "mge/games/allumina/src/plugins/isometric.rs": [
-    "games_allumina_plugins_isometric"
-  ],
-  "mge/games/allumina/src/plugins/loot.rs": [
-    "games_allumina_plugins_loot"
-  ],
-  "mge/games/allumina/src/plugins/mercenary.rs": [
-    "games_allumina_plugins_mercenary"
-  ],
-  "mge/games/allumina/src/plugins/mob_ai.rs": [
-    "games_allumina_plugins_mob_ai"
-  ],
-  "mge/games/allumina/src/plugins/mod.rs": [
-    "games_allumina_plugins_mod"
-  ],
-  "mge/games/allumina/src/plugins/network.rs": [
-    "games_allumina_plugins_network"
-  ],
-  "mge/games/allumina/src/plugins/skills.rs": [
-    "games_allumina_plugins_skills"
-  ],
-  "mge/games/allumina/src/plugins/summon.rs": [
-    "games_allumina_plugins_summon"
-  ],
-  "mge/games/allumina/src/plugins/tilemap.rs": [
-    "games_allumina_plugins_tilemap"
-  ],
-  "mge/games/allumina/src/render/animation.rs": [
-    "games_allumina_render_animation"
-  ],
-  "mge/games/allumina/src/render/camera.rs": [
-    "games_allumina_render_camera"
-  ],
-  "mge/games/allumina/src/render/feedback.rs": [
-    "games_allumina_render_feedback"
-  ],
-  "mge/games/allumina/src/render/figures.rs": [
-    "games_allumina_render_figures"
-  ],
-  "mge/games/allumina/src/render/font.rs": [
-    "games_allumina_render_font"
-  ],
-  "mge/games/allumina/src/render/item_icon.rs": [
-    "games_allumina_render_item_icon"
-  ],
-  "mge/games/allumina/src/render/mod.rs": [
-    "games_allumina_render_mod"
-  ],
-  "mge/games/allumina/src/render/particles.rs": [
-    "games_allumina_render_particles"
-  ],
-  "mge/games/allumina/src/render/pixel_sprite.rs": [
-    "games_allumina_render_pixel_sprite"
-  ],
-  "mge/games/allumina/src/render/renderer.rs": [
-    "games_allumina_render_renderer"
-  ],
-  "mge/games/allumina/src/render/renderer/input.rs": [
-    "games_allumina_render_renderer_input"
-  ],
-  "mge/games/allumina/src/render/renderer/online.rs": [
-    "games_allumina_render_renderer_online"
-  ],
-  "mge/games/allumina/src/render/shapes.rs": [
-    "games_allumina_render_shapes"
-  ],
-  "mge/games/allumina/src/render/skill_fx.rs": [
-    "games_allumina_render_skill_fx"
-  ],
-  "mge/games/allumina/src/render/skill_icon.rs": [
-    "games_allumina_render_skill_icon"
-  ],
-  "mge/games/allumina/src/render/sprite.rs": [
-    "games_allumina_render_sprite"
-  ],
-  "mge/games/allumina/src/render/sprites_data.rs": [
-    "games_allumina_render_sprites_data"
-  ],
-  "mge/games/allumina/src/render/tilemap_renderer.rs": [
-    "games_allumina_render_tilemap_renderer"
-  ],
-  "mge/games/allumina/src/render/vertex.rs": [
-    "games_allumina_render_vertex"
-  ],
-  "mge/games/allumina/src/rng.rs": [
-    "games_allumina_rng"
-  ],
-  "mge/games/allumina/src/save.rs": [
-    "games_allumina_save"
-  ],
-  "mge/games/allumina/src/systems/ai.rs": [
-    "games_allumina_systems_ai"
-  ],
-  "mge/games/allumina/src/systems/balance.rs": [
-    "games_allumina_systems_balance"
-  ],
-  "mge/games/allumina/src/systems/boss.rs": [
-    "games_allumina_systems_boss"
-  ],
-  "mge/games/allumina/src/systems/cc.rs": [
-    "games_allumina_systems_cc"
-  ],
-  "mge/games/allumina/src/systems/combat.rs": [
-    "games_allumina_systems_combat"
-  ],
-  "mge/games/allumina/src/systems/craft.rs": [
-    "games_allumina_systems_craft"
-  ],
-  "mge/games/allumina/src/systems/death.rs": [
-    "games_allumina_systems_death"
-  ],
-  "mge/games/allumina/src/systems/forge.rs": [
-    "games_allumina_systems_forge"
-  ],
-  "mge/games/allumina/src/systems/level_up.rs": [
-    "games_allumina_systems_level_up"
-  ],
-  "mge/games/allumina/src/systems/loot.rs": [
-    "games_allumina_systems_loot"
-  ],
-  "mge/games/allumina/src/systems/mercenary.rs": [
-    "games_allumina_systems_mercenary"
-  ],
-  "mge/games/allumina/src/systems/mod.rs": [
-    "games_allumina_systems_mod"
-  ],
-  "mge/games/allumina/src/systems/movement.rs": [
-    "games_allumina_systems_movement"
-  ],
-  "mge/games/allumina/src/systems/projectile.rs": [
-    "games_allumina_systems_projectile"
-  ],
-  "mge/games/allumina/src/systems/quest.rs": [
-    "games_allumina_systems_quest"
-  ],
-  "mge/games/allumina/src/systems/skill.rs": [
-    "games_allumina_systems_skill"
-  ],
-  "mge/games/allumina/src/systems/skill/archer.rs": [
-    "games_allumina_systems_skill_archer"
-  ],
-  "mge/games/allumina/src/systems/skill/clerc.rs": [
-    "games_allumina_systems_skill_clerc"
-  ],
-  "mge/games/allumina/src/systems/skill/fields.rs": [
-    "games_allumina_systems_skill_fields"
-  ],
-  "mge/games/allumina/src/systems/skill/mage.rs": [
-    "games_allumina_systems_skill_mage"
-  ],
-  "mge/games/allumina/src/systems/skill/soldat.rs": [
-    "games_allumina_systems_skill_soldat"
-  ],
-  "mge/games/allumina/src/systems/spatial.rs": [
-    "games_allumina_systems_spatial"
-  ],
-  "mge/games/allumina/src/systems/stats.rs": [
-    "games_allumina_systems_stats"
-  ],
-  "mge/games/allumina/src/systems/summon.rs": [
-    "games_allumina_systems_summon"
-  ],
-  "mge/games/allumina/src/systems/targeting.rs": [
-    "games_allumina_systems_targeting"
-  ],
-  "mge/games/allumina/src/systems/vendor.rs": [
-    "games_allumina_systems_vendor"
-  ],
-  "mge/games/allumina/src/systems/waypoint.rs": [
-    "games_allumina_systems_waypoint"
-  ],
-  "mge/games/allumina/src/ui/chat.rs": [
-    "games_allumina_ui_chat"
-  ],
-  "mge/games/allumina/src/ui/class_select.rs": [
-    "games_allumina_ui_class_select"
-  ],
-  "mge/games/allumina/src/ui/craft.rs": [
-    "games_allumina_ui_craft"
-  ],
-  "mge/games/allumina/src/ui/equipment_ui.rs": [
-    "games_allumina_ui_equipment_ui"
-  ],
-  "mge/games/allumina/src/ui/forge.rs": [
-    "games_allumina_ui_forge"
-  ],
-  "mge/games/allumina/src/ui/hud.rs": [
-    "games_allumina_ui_hud"
-  ],
-  "mge/games/allumina/src/ui/inventory_ui.rs": [
-    "games_allumina_ui_inventory_ui"
-  ],
-  "mge/games/allumina/src/ui/lobby.rs": [
-    "games_allumina_ui_lobby"
-  ],
-  "mge/games/allumina/src/ui/merc_ui.rs": [
-    "games_allumina_ui_merc_ui"
-  ],
-  "mge/games/allumina/src/ui/minimap.rs": [
-    "games_allumina_ui_minimap"
-  ],
-  "mge/games/allumina/src/ui/mob_tooltip.rs": [
-    "games_allumina_ui_mob_tooltip"
-  ],
-  "mge/games/allumina/src/ui/mod.rs": [
-    "games_allumina_ui_mod"
-  ],
-  "mge/games/allumina/src/ui/quest_log.rs": [
-    "games_allumina_ui_quest_log"
-  ],
-  "mge/games/allumina/src/ui/skill_tree_ui.rs": [
-    "games_allumina_ui_skill_tree_ui"
-  ],
-  "mge/games/allumina/src/ui/title_screen.rs": [
-    "games_allumina_ui_title_screen"
-  ],
-  "mge/games/allumina/src/ui/tooltip.rs": [
-    "games_allumina_ui_tooltip"
-  ],
-  "mge/games/allumina/src/ui/vendor.rs": [
-    "games_allumina_ui_vendor"
-  ],
-  "mge/games/allumina/src/ui/waypoint_ui.rs": [
-    "games_allumina_ui_waypoint_ui"
-  ],
-  "mge/games/allumina/web/game.js": [
-    "cog.gameAllumina"
-  ],
-  "mge/tools/mge-asset-baker/src/main.rs": [
-    "tools_mge_asset_baker_main"
+  "scripts/verifier-regle-rusqlite.sh": [
+    "script_verifier_regle_rusqlite"
   ],
   "site_officiel_miyukini_cog/src/App.tsx": [
     "cog.siteApp"

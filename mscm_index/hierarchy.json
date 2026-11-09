@@ -16,16 +16,6 @@
     "central.components.calendar.types",
     "central.components.calendar.week_view"
   ],
-  "central.services": [
-    "central.services.lifegame",
-    "central.services.ui_assets",
-    "central.services.ui_builder"
-  ],
-  "central.services.lifegame": [
-    "central.services.lifegame.canvas",
-    "central.services.lifegame.sidebar",
-    "central.services.lifegame.stats_bar"
-  ],
   "cog": [
     "cog.adminApp",
     "cog.adminTheme",
@@ -85,7 +75,9 @@
     "cog.dataRoadmap",
     "cog.dataServices",
     "cog.dataServicesDetailed",
-    "cog.gameAllumina",
+    "cog.docsComponent",
+    "cog.docsDoc",
+    "cog.docsList",
     "cog.pageAbout",
     "cog.pageArchitecture",
     "cog.pageCoreDetail",
@@ -248,68 +240,26 @@
     "cog.cloudViewProfile.changePassword",
     "cog.cloudViewProfile.createAppPassword",
     "cog.cloudViewProfile.init",
+    "cog.cloudViewProfile.linkMiyuDevice",
+    "cog.cloudViewProfile.linkMiyuIdentity",
     "cog.cloudViewProfile.loadAppPasswords",
+    "cog.cloudViewProfile.loadMiyuDevices",
+    "cog.cloudViewProfile.loadMiyuIdentities",
+    "cog.cloudViewProfile.removeMiyuDevice",
     "cog.cloudViewProfile.revokeAppPassword",
-    "cog.cloudViewProfile.t"
-  ],
-  "lifegame": [
-    "lifegame.ai",
-    "lifegame.entities",
-    "lifegame.operator",
-    "lifegame.powers",
-    "lifegame.simulation",
-    "lifegame.world"
-  ],
-  "lifegame.ai": [
-    "lifegame.ai.decide_action"
-  ],
-  "lifegame.entities": [
-    "lifegame.entities.building",
-    "lifegame.entities.building_struct",
-    "lifegame.entities.building_type",
-    "lifegame.entities.creature",
-    "lifegame.entities.creature_struct",
-    "lifegame.entities.creature_type",
-    "lifegame.entities.manager",
-    "lifegame.entities.race",
-    "lifegame.entities.unit",
-    "lifegame.entities.unit_struct"
-  ],
-  "lifegame.operator": [
-    "lifegame.operator.entities",
-    "lifegame.operator.powers",
-    "lifegame.operator.simulation",
-    "lifegame.operator.world"
-  ],
-  "lifegame.powers": [
-    "lifegame.powers.creation",
-    "lifegame.powers.destruction",
-    "lifegame.powers.manager"
-  ],
-  "lifegame.simulation": [
-    "lifegame.simulation.ai",
-    "lifegame.simulation.tick_world_fn",
-    "lifegame.simulation.world_tick"
-  ],
-  "lifegame.world": [
-    "lifegame.world.biome",
-    "lifegame.world.biome_struct",
-    "lifegame.world.biome_type",
-    "lifegame.world.generation",
-    "lifegame.world.generator",
-    "lifegame.world.terrain",
-    "lifegame.world.terrain_grid",
-    "lifegame.world.terrain_type",
-    "lifegame.world.tile"
+    "cog.cloudViewProfile.t",
+    "cog.cloudViewProfile.unlinkMiyuIdentity"
   ],
   "origin": [
     "origin.relay",
     "origin.tracker"
   ],
   "origin.relay": [
+    "origin.relay.identites",
     "origin.relay.permis_registry"
   ],
   "origin.tracker": [
+    "origin.tracker.authentification",
     "origin.tracker.visit_tracker"
   ],
   "service": [
@@ -339,6 +289,7 @@
     "service.alicia.memory",
     "service.alicia.nlu-bridge",
     "service.alicia.nlu-fallback",
+    "service.alicia.nlu-local",
     "service.alicia.orchestrator",
     "service.alicia.rest-api",
     "service.alicia.service",
@@ -353,6 +304,7 @@
     "service.alicia.api.errors",
     "service.alicia.api.handlers",
     "service.alicia.api.router",
+    "service.alicia.api.security",
     "service.alicia.api.server"
   ],
   "service.alicia.api.handlers": [
@@ -367,19 +319,40 @@
     "service.alicia.cores_gate.lib"
   ],
   "service.alicia.dispatcher": [
+    "service.alicia.dispatcher.chemin_politiques",
     "service.alicia.dispatcher.core_gate",
     "service.alicia.dispatcher.dispatcher",
+    "service.alicia.dispatcher.enrichisseur_intention",
     "service.alicia.dispatcher.errors",
+    "service.alicia.dispatcher.intention_alicia",
     "service.alicia.dispatcher.lib",
-    "service.alicia.dispatcher.service_client"
+    "service.alicia.dispatcher.service_client",
+    "service.alicia.dispatcher.strongfather_core_gate"
+  ],
+  "service.alicia.dispatcher.tests": [
+    "service.alicia.dispatcher.tests.strongfather_gate"
   ],
   "service.alicia.memory": [
+    "service.alicia.memory.copie_heritee",
+    "service.alicia.memory.entrepot",
     "service.alicia.memory.errors",
+    "service.alicia.memory.heritage",
+    "service.alicia.memory.kindmother",
     "service.alicia.memory.learning",
     "service.alicia.memory.lib",
     "service.alicia.memory.prompt",
+    "service.alicia.memory.recherche",
+    "service.alicia.memory.schema",
     "service.alicia.memory.store",
-    "service.alicia.memory.types"
+    "service.alicia.memory.types",
+    "service.alicia.memory.vif"
+  ],
+  "service.alicia.memory.bin": [
+    "service.alicia.memory.bin.import"
+  ],
+  "service.alicia.memory.tests": [
+    "service.alicia.memory.tests.fact_versions",
+    "service.alicia.memory.tests.kindmother"
   ],
   "service.alicia.orchestrator": [
     "service.alicia.orchestrator.admin"
@@ -394,6 +367,9 @@
     "service.alicia.skills.registry",
     "service.alicia.skills.tooling",
     "service.alicia.skills.watcher"
+  ],
+  "service.alicia.tests": [
+    "service.alicia.tests.strongfather_runtime"
   ],
   "service.jaycloud": [
     "service.jaycloud.alicia_client"
