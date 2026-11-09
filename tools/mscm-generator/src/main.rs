@@ -1,3 +1,16 @@
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -135,7 +148,7 @@ fn parse_file(file_path: &Path, blocks: &mut Vec<Block>) -> Result<(), Box<dyn s
         let trimmed = line.trim();
 
         // Détecter le début d'un bloc MSCM (@id)
-        if let Some(caps) = id_re.captures(line) {
+        if let Some(id) = capture_valeur(&id_re, line) {
             // Sauvegarder le bloc précédent s'il existe
             if let Some(mut block) = current_block.take() {
                 // Trouver la dernière ligne de code du bloc précédent
@@ -144,7 +157,7 @@ fn parse_file(file_path: &Path, blocks: &mut Vec<Block>) -> Result<(), Box<dyn s
             }
 
             // Nouveau bloc
-            let id = caps.get(1).unwrap().as_str().trim().to_string();
+            let id = id.to_string();
             in_comment_block = true;
             current_block = Some(Block {
                 id,
@@ -161,16 +174,15 @@ fn parse_file(file_path: &Path, blocks: &mut Vec<Block>) -> Result<(), Box<dyn s
 
         // Parser les autres annotations pour le bloc courant
         if let Some(ref mut block) = current_block {
-            if let Some(caps) = role_re.captures(line) {
-                block.role = Some(caps.get(1).unwrap().as_str().trim().to_string());
-            } else if let Some(caps) = layer_re.captures(line) {
-                block.layer = Some(caps.get(1).unwrap().as_str().trim().to_string());
-            } else if let Some(caps) = do_re.captures(line) {
-                block.do_action = Some(caps.get(1).unwrap().as_str().trim().to_string());
-            } else if let Some(caps) = human_re.captures(line) {
-                block.human = Some(caps.get(1).unwrap().as_str().trim().to_string());
-            } else if let Some(caps) = depends_re.captures(line) {
-                let deps_str = caps.get(1).unwrap().as_str().trim();
+            if let Some(v) = capture_valeur(&role_re, line) {
+                block.role = Some(v.to_string());
+            } else if let Some(v) = capture_valeur(&layer_re, line) {
+                block.layer = Some(v.to_string());
+            } else if let Some(v) = capture_valeur(&do_re, line) {
+                block.do_action = Some(v.to_string());
+            } else if let Some(v) = capture_valeur(&human_re, line) {
+                block.human = Some(v.to_string());
+            } else if let Some(deps_str) = capture_valeur(&depends_re, line) {
                 // Les dépendances peuvent être séparées par des virgules ou des espaces
                 let deps: Vec<String> = deps_str
                     .split(',')
@@ -203,6 +215,17 @@ fn parse_file(file_path: &Path, blocks: &mut Vec<Block>) -> Result<(), Box<dyn s
     }
 
     Ok(())
+}
+
+/// Valeur (rognée) du premier groupe capturant de `re` sur `line`.
+///
+/// Les motifs d'annotation ont tous un groupe 1 obligatoire `(.+)` : dès que le motif
+/// correspond, le groupe est présent. Le `and_then` ne fait que l'exprimer sans `unwrap`
+/// (une absence, impossible ici, serait traitée comme « pas d'annotation »).
+fn capture_valeur<'a>(re: &Regex, line: &'a str) -> Option<&'a str> {
+    re.captures(line)
+        .and_then(|caps| caps.get(1))
+        .map(|m| m.as_str().trim())
 }
 
 fn find_block_end(lines: &[&str], start_idx: usize) -> usize {
@@ -515,4 +538,23 @@ fn count_domains(blocks: &[Block]) -> usize {
         domains.insert(domain);
     }
     domains.len()
+}
+
+#[cfg(test)]
+mod tests_capture {
+    use super::*;
+
+    #[test]
+    fn capture_valeur_extrait_et_rogne() {
+        let re = Regex::new(r"(?:///|//!)\s*@role:?\s*(.+)").unwrap();
+        assert_eq!(capture_valeur(&re, "/// @role: Gardien  "), Some("Gardien"));
+        assert_eq!(capture_valeur(&re, "// pas une annotation"), None);
+    }
+
+    #[test]
+    fn capture_valeur_sans_groupe_vaut_none() {
+        // Motif sans groupe capturant : aucune valeur, pas de panique.
+        let re = Regex::new(r"@id").unwrap();
+        assert_eq!(capture_valeur(&re, "/// @id"), None);
+    }
 }

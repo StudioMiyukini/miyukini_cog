@@ -15,15 +15,5 @@
     "central.components.calendar.month_view",
     "central.components.calendar.types",
     "central.components.calendar.week_view"
-  ],
-  "central.services": [
-    "central.services.lifegame",
-    "central.services.ui_assets",
-    "central.services.ui_builder"
-  ],
-  "central.services.lifegame": [
-    "central.services.lifegame.canvas",
-    "central.services.lifegame.sidebar",
-    "central.services.lifegame.stats_bar"
   ]
 }

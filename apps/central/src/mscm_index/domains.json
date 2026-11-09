@@ -2,8 +2,173 @@
   "central": [
     "central"
   ],
+  "central_app": [
+    "central_app"
+  ],
+  "central_audio": [
+    "central_audio"
+  ],
+  "central_canal_officiel": [
+    "central_canal_officiel"
+  ],
+  "central_canal_officiel_alertes": [
+    "central_canal_officiel_alertes"
+  ],
+  "central_canal_officiel_installateur": [
+    "central_canal_officiel_installateur"
+  ],
+  "central_canal_officiel_modeles": [
+    "central_canal_officiel_modeles"
+  ],
+  "central_canal_officiel_persistance": [
+    "central_canal_officiel_persistance"
+  ],
+  "central_cle_service": [
+    "central_cle_service"
+  ],
+  "central_components_header": [
+    "central_components_header"
+  ],
+  "central_components_mobile_devices": [
+    "central_components_mobile_devices"
+  ],
+  "central_components_service_card": [
+    "central_components_service_card"
+  ],
+  "central_components_service_grid": [
+    "central_components_service_grid"
+  ],
+  "central_components_tab_bar": [
+    "central_components_tab_bar"
+  ],
+  "central_data": [
+    "central_data"
+  ],
+  "central_kindmother_launcher": [
+    "central_kindmother_launcher"
+  ],
+  "central_llm_client": [
+    "central_llm_client"
+  ],
+  "central_maia_memoire": [
+    "central_maia_memoire"
+  ],
+  "central_maia_memoire_client": [
+    "central_maia_memoire_client"
+  ],
+  "central_maia_memoire_modele": [
+    "central_maia_memoire_modele"
+  ],
+  "central_market_client": [
+    "central_market_client"
+  ],
+  "central_miou_bubble": [
+    "central_miou_bubble"
+  ],
+  "central_miou_context": [
+    "central_miou_context"
+  ],
+  "central_miou_engine": [
+    "central_miou_engine"
+  ],
+  "central_miou_mod": [
+    "central_miou_mod"
+  ],
+  "central_miou_state": [
+    "central_miou_state"
+  ],
+  "central_miou_templates": [
+    "central_miou_templates"
+  ],
   "central_remote_module": [
     "central_remote_module"
+  ],
+  "central_screens_connexion": [
+    "central_screens_connexion"
+  ],
+  "central_screens_mod": [
+    "central_screens_mod"
+  ],
+  "central_screens_profile_window": [
+    "central_screens_profile_window"
+  ],
+  "central_screens_rite_entree": [
+    "central_screens_rite_entree"
+  ],
+  "central_service_manager_confiance": [
+    "central_service_manager_confiance"
+  ],
+  "central_service_manager_gouvernance": [
+    "central_service_manager_gouvernance"
+  ],
+  "central_service_manager_installer": [
+    "central_service_manager_installer"
+  ],
+  "central_service_manager_launcher": [
+    "central_service_manager_launcher"
+  ],
+  "central_service_manager_mod": [
+    "central_service_manager_mod"
+  ],
+  "central_service_manager_registry": [
+    "central_service_manager_registry"
+  ],
+  "central_services_alicia_automations": [
+    "central_services_alicia_automations"
+  ],
+  "central_services_alicia_devices": [
+    "central_services_alicia_devices"
+  ],
+  "central_services_alicia_mod": [
+    "central_services_alicia_mod"
+  ],
+  "central_services_alicia_rooms": [
+    "central_services_alicia_rooms"
+  ],
+  "central_services_alicia_settings": [
+    "central_services_alicia_settings"
+  ],
+  "central_services_alicia_state": [
+    "central_services_alicia_state"
+  ],
+  "central_services_external_service_view": [
+    "central_services_external_service_view"
+  ],
+  "central_services_home": [
+    "central_services_home"
+  ],
+  "central_services_market_catalog": [
+    "central_services_market_catalog"
+  ],
+  "central_services_market_mod": [
+    "central_services_market_mod"
+  ],
+  "central_services_market_service_detail": [
+    "central_services_market_service_detail"
+  ],
+  "central_services_market_sidebar": [
+    "central_services_market_sidebar"
+  ],
+  "central_services_miyucloud_settings": [
+    "central_services_miyucloud_settings"
+  ],
+  "central_services_miyucloud_setup_wizard": [
+    "central_services_miyucloud_setup_wizard"
+  ],
+  "central_services_miyukini_whisper_mod": [
+    "central_services_miyukini_whisper_mod"
+  ],
+  "central_services_mws_settings": [
+    "central_services_mws_settings"
+  ],
+  "central_services_mws_view": [
+    "central_services_mws_view"
+  ],
+  "central_state": [
+    "central_state"
+  ],
+  "central_theme": [
+    "central_theme"
   ],
   "components": [
     "central.components",
@@ -63,12 +228,6 @@
     "miyucloud_upload"
   ],
   "services": [
-    "central.services",
-    "central.services.lifegame",
-    "central.services.lifegame.canvas",
-    "central.services.lifegame.sidebar",
-    "central.services.lifegame.stats_bar",
-    "central.services.ui_assets",
-    "central.services.ui_builder"
+    "central.services"
   ]
 }

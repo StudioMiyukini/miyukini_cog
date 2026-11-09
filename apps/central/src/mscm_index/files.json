@@ -1,4 +1,28 @@
 {
+  "app.rs": [
+    "central_app"
+  ],
+  "audio.rs": [
+    "central_audio"
+  ],
+  "canal_officiel/alertes.rs": [
+    "central_canal_officiel_alertes"
+  ],
+  "canal_officiel/installateur.rs": [
+    "central_canal_officiel_installateur"
+  ],
+  "canal_officiel/mod.rs": [
+    "central_canal_officiel"
+  ],
+  "canal_officiel/modeles.rs": [
+    "central_canal_officiel_modeles"
+  ],
+  "canal_officiel/persistance.rs": [
+    "central_canal_officiel_persistance"
+  ],
+  "cle_service.rs": [
+    "central_cle_service"
+  ],
   "components/calendar/agenda_list.rs": [
     "central.components.calendar.agenda_list"
   ],
@@ -23,29 +47,137 @@
   "components/calendar/week_view.rs": [
     "central.components.calendar.week_view"
   ],
+  "components/header.rs": [
+    "central_components_header"
+  ],
+  "components/mobile_devices.rs": [
+    "central_components_mobile_devices"
+  ],
   "components/mod.rs": [
     "central.components"
+  ],
+  "components/service_card.rs": [
+    "central_components_service_card"
+  ],
+  "components/service_grid.rs": [
+    "central_components_service_grid"
   ],
   "components/service_sidebar.rs": [
     "central.components.service_sidebar"
   ],
+  "components/tab_bar.rs": [
+    "central_components_tab_bar"
+  ],
+  "data.rs": [
+    "central_data"
+  ],
+  "kindmother_launcher.rs": [
+    "central_kindmother_launcher"
+  ],
+  "llm_client.rs": [
+    "central_llm_client"
+  ],
   "main.rs": [
     "central"
+  ],
+  "market_client.rs": [
+    "central_market_client"
+  ],
+  "miou/bubble.rs": [
+    "central_miou_bubble"
+  ],
+  "miou/context.rs": [
+    "central_miou_context"
+  ],
+  "miou/engine.rs": [
+    "central_miou_engine"
+  ],
+  "miou/mod.rs": [
+    "central_miou_mod"
+  ],
+  "miou/state.rs": [
+    "central_miou_state"
+  ],
+  "miou/templates.rs": [
+    "central_miou_templates"
   ],
   "remote.rs": [
     "central_remote_module"
   ],
-  "services/lifegame/canvas.rs": [
-    "central.services.lifegame.canvas"
+  "screens/connexion.rs": [
+    "central_screens_connexion"
   ],
-  "services/lifegame/mod.rs": [
-    "central.services.lifegame"
+  "screens/mod.rs": [
+    "central_screens_mod"
   ],
-  "services/lifegame/sidebar.rs": [
-    "central.services.lifegame.sidebar"
+  "screens/profile_window.rs": [
+    "central_screens_profile_window"
   ],
-  "services/lifegame/stats_bar.rs": [
-    "central.services.lifegame.stats_bar"
+  "screens/rite_entree.rs": [
+    "central_screens_rite_entree"
+  ],
+  "service_manager/confiance.rs": [
+    "central_service_manager_confiance"
+  ],
+  "service_manager/gouvernance.rs": [
+    "central_service_manager_gouvernance"
+  ],
+  "service_manager/installer.rs": [
+    "central_service_manager_installer"
+  ],
+  "service_manager/launcher.rs": [
+    "central_service_manager_launcher"
+  ],
+  "service_manager/mod.rs": [
+    "central_service_manager_mod"
+  ],
+  "service_manager/registry.rs": [
+    "central_service_manager_registry"
+  ],
+  "services/alicia/automations.rs": [
+    "central_services_alicia_automations"
+  ],
+  "services/alicia/devices.rs": [
+    "central_services_alicia_devices"
+  ],
+  "services/alicia/mod.rs": [
+    "central_services_alicia_mod"
+  ],
+  "services/alicia/rooms.rs": [
+    "central_services_alicia_rooms"
+  ],
+  "services/alicia/settings.rs": [
+    "central_services_alicia_settings"
+  ],
+  "services/alicia/state.rs": [
+    "central_services_alicia_state"
+  ],
+  "services/external_service_view.rs": [
+    "central_services_external_service_view"
+  ],
+  "services/home.rs": [
+    "central_services_home"
+  ],
+  "services/maia_memoire/client.rs": [
+    "central_maia_memoire_client"
+  ],
+  "services/maia_memoire/mod.rs": [
+    "central_maia_memoire"
+  ],
+  "services/maia_memoire/modele.rs": [
+    "central_maia_memoire_modele"
+  ],
+  "services/market/catalog.rs": [
+    "central_services_market_catalog"
+  ],
+  "services/market/mod.rs": [
+    "central_services_market_mod"
+  ],
+  "services/market/service_detail.rs": [
+    "central_services_market_service_detail"
+  ],
+  "services/market/sidebar.rs": [
+    "central_services_market_sidebar"
   ],
   "services/miyucloud/auth_security.rs": [
     "miyucloud_auth_security_components"
@@ -74,6 +206,9 @@
   "services/miyucloud/settings.rs": [
     "miyucloud_settings"
   ],
+  "services/miyucloud/setup_wizard.rs": [
+    "central_services_miyucloud_setup_wizard"
+  ],
   "services/miyucloud/share_dialog.rs": [
     "miyucloud_share_dialog"
   ],
@@ -92,13 +227,25 @@
   "services/miyucloud/upload.rs": [
     "miyucloud_upload"
   ],
+  "services/miyucloud_settings.rs": [
+    "central_services_miyucloud_settings"
+  ],
+  "services/miyukini_whisper/mod.rs": [
+    "central_services_miyukini_whisper_mod"
+  ],
   "services/mod.rs": [
     "central.services"
   ],
-  "services/ui_assets.rs": [
-    "central.services.ui_assets"
+  "services/mws_settings.rs": [
+    "central_services_mws_settings"
   ],
-  "services/ui_builder.rs": [
-    "central.services.ui_builder"
+  "services/mws_view.rs": [
+    "central_services_mws_view"
+  ],
+  "state.rs": [
+    "central_state"
+  ],
+  "theme.rs": [
+    "central_theme"
   ]
 }

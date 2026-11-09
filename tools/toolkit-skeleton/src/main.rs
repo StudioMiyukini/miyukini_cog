@@ -1,6 +1,19 @@
 //! Génère les squelettes de crates toolkit à partir de (name, toolkit_id).
 //! Usage: cargo run --bin toolkit-skeleton (depuis tools/toolkit-skeleton ou workspace root)
 
+// C-10 : aucun unwrap / expect / panic! / todo! / unimplemented! / unreachable! hors tests.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::todo,
+        clippy::unimplemented,
+        clippy::unreachable
+    )
+)]
+
 fn pascal(s: &str) -> String {
     s.split('_')
         .map(|w| {
@@ -13,7 +26,25 @@ fn pascal(s: &str) -> String {
         .collect()
 }
 
-fn main() {
+fn main() -> std::process::ExitCode {
+    let racine = match std::env::current_dir() {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("toolkit-skeleton : répertoire courant illisible : {e}");
+            return std::process::ExitCode::FAILURE;
+        }
+    };
+    match generer(&racine) {
+        Ok(()) => std::process::ExitCode::SUCCESS,
+        Err(e) => {
+            eprintln!("toolkit-skeleton : génération interrompue : {e}");
+            std::process::ExitCode::FAILURE
+        }
+    }
+}
+
+/// Génère, sous `root/crates`, chaque squelette absent. Toute erreur d'E/S est propagée.
+fn generer(root: &std::path::Path) -> std::io::Result<()> {
     let kits: &[(&str, &str)] = &[
         ("miyauth", "toolkit.identity.miyauth"),
         ("miyuweb", "toolkit.web.miyuweb"),
@@ -59,7 +90,6 @@ fn main() {
         ("miyustory", "toolkit.social.story"),
     ];
 
-    let root = std::env::current_dir().unwrap();
     let base = root.join("crates");
     for (name, toolkit_id) in kits {
         let p = base.join(name);
@@ -67,7 +97,7 @@ fn main() {
             continue;
         }
         let pascal_name = pascal(name);
-        let _ = std::fs::create_dir_all(p.join("src"));
+        std::fs::create_dir_all(p.join("src"))?;
 
         let desc = format!("Kit d'outils {} — squelette Phase 1", pascal_name);
         let origin = format!("miyukini-{}", name);
@@ -104,7 +134,7 @@ pedantic = "warn"
 "#,
             name, desc
         );
-        std::fs::write(p.join("Cargo.toml"), cargo).expect("write Cargo.toml");
+        std::fs::write(p.join("Cargo.toml"), cargo)?;
 
         let lib = format!(
             r#"//! # {} — {}
@@ -128,7 +158,7 @@ pub use tools::execute;
             pascal_name,
             pascal_name
         );
-        std::fs::write(p.join("src/lib.rs"), lib).expect("write lib.rs");
+        std::fs::write(p.join("src/lib.rs"), lib)?;
 
         let admin = format!(
             r#"use serde::{{Deserialize, Serialize}};
@@ -226,7 +256,7 @@ pub fn {}_admin_cell(version: &str, fingerprint: &str) -> {}AdminCell {{
             pascal_name,
             contract
         );
-        std::fs::write(p.join("src/admin_cell.rs"), admin).expect("write admin_cell.rs");
+        std::fs::write(p.join("src/admin_cell.rs"), admin)?;
 
         let context = r#"#[derive(Debug, Clone)]
 pub struct GovernedContext {
@@ -243,7 +273,7 @@ impl GovernedContext {
     }
 }
 "#;
-        std::fs::write(p.join("src/context.rs"), context).expect("write context.rs");
+        std::fs::write(p.join("src/context.rs"), context)?;
 
         let errors = format!(
             r#"#[derive(Debug, Clone)]
@@ -264,7 +294,7 @@ impl std::error::Error for {}Error {{}}
 "#,
             pascal_name, pascal_name, pascal_name, pascal_name, pascal_name
         );
-        std::fs::write(p.join("src/errors.rs"), errors).expect("write errors.rs");
+        std::fs::write(p.join("src/errors.rs"), errors)?;
 
         let tools = format!(
             r#"use crate::context::GovernedContext;
@@ -279,8 +309,42 @@ pub fn execute(ctx: &GovernedContext, _tool_id: &str, _params: &[String]) -> Res
 "#,
             pascal_name, pascal_name, pascal_name, pascal_name
         );
-        std::fs::write(p.join("src/tools.rs"), tools).expect("write tools.rs");
+        std::fs::write(p.join("src/tools.rs"), tools)?;
 
         println!("Created crate {}", name);
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pascal_convertit_les_segments() {
+        assert_eq!(pascal("miyuwebway_participant"), "MiyuwebwayParticipant");
+    }
+
+    #[test]
+    fn generer_propage_l_erreur_si_crates_est_un_fichier() {
+        let dir = std::env::temp_dir().join(format!("toolkit-skeleton-err-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        // `crates` est un fichier : la création de `crates/<kit>/src` doit échouer.
+        std::fs::write(dir.join("crates"), b"").unwrap();
+        assert!(generer(&dir).is_err());
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn generer_ecrit_les_squelettes() {
+        let dir = std::env::temp_dir().join(format!("toolkit-skeleton-ok-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        generer(&dir).unwrap();
+        assert!(dir.join("crates/miyauth/src/tools.rs").is_file());
+        // Idempotent : une crate existante est laissée telle quelle.
+        generer(&dir).unwrap();
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 }
