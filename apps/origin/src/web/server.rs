@@ -6,7 +6,7 @@
 
 //! Serveur Web Origin — Implémentation HTTP.
 
-use super::{api, content::ContentManager, forum_auth, market, pages, revocations};
+use super::{api, content::ContentManager, forum_auth, market, pages, presentation, revocations};
 use crate::config::OriginConfig;
 use crate::garde_reseau::{analyser_adresse, connecter_cible_publique, AdresseAnalysee};
 use crate::relay::rate_limiter::{RateLimitResult, RateLimiter, RateLimiterConfig};
@@ -1389,23 +1389,29 @@ async fn route_request(
             }
         }
 
-        "/pricing" | "/tarifs" => {
-            let body = pages::pricing_page();
-            RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "text/html".to_string(),
-                body,
-            }
-        }
+        "/fonctionnement" => RouteResponse::Normal {
+            status: "200 OK".to_string(),
+            content_type: "text/html".to_string(),
+            body: presentation::fonctionnement_page(),
+        },
 
-        "/studio" => {
-            let body = pages::studio_page();
-            RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "text/html".to_string(),
-                body,
-            }
-        }
+        "/souverainete" => RouteResponse::Normal {
+            status: "200 OK".to_string(),
+            content_type: "text/html".to_string(),
+            body: presentation::souverainete_page(),
+        },
+
+        // Anciennes pages commerciales et liens morts du pied de page : redirigés
+        // vers les pages qui les remplacent, pour ne pas casser les liens existants.
+        "/pricing" | "/tarifs" | "/studio" => RouteResponse::Redirect {
+            location: "/".to_string(),
+        },
+        "/legal/privacy" | "/legal/terms" | "/legal/licenses" => RouteResponse::Redirect {
+            location: "/souverainete".to_string(),
+        },
+        "/community/github" => RouteResponse::Redirect {
+            location: "https://github.com/StudioMiyukini".to_string(),
+        },
 
         // ═══════════════════════════════════════════════════════════════════
         // API JSON
