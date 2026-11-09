@@ -4,63 +4,68 @@
 //! @layer  app
 //! @human  MAIA — routes HTTP de la mémoire (EX-56) : voir, corriger, exporter, oublier, valider /
 //! @human  rejeter les candidats (TAMR pour les branches sensibles), poser une règle ; réservées à
-//! @human  l'utilisateur authentifié, sur SA base `maia-<utilisateur>` ; désactivées par défaut.
+//! @human  l'utilisateur authentifié par visa (I4), sur SA base `maia-<utilisateur>` ; désactivées par défaut.
 
 //! # Routes de la mémoire de l'utilisateur (EX-56)
 //!
-//! | Méthode | Chemin | Effet |
-//! |---|---|---|
-//! | POST | `/v1/memoire/{u}/consulter` | notes courantes + candidats |
-//! | POST | `/v1/memoire/{u}/historique` | versions d'une note (`{"id"}`) |
-//! | POST | `/v1/memoire/{u}/exporter` | export `maia-memoire/v1` |
-//! | POST | `/v1/memoire/{u}/corriger` | nouvelle version (`{"id","texte","importance"?}`) |
-//! | DELETE | `/v1/memoire/{u}/notes` | oubli (`{"chemin","motif"}`), pierre tombale |
-//! | POST | `/v1/memoire/{u}/regles` | pose une Règle (`{"branche","texte","importance"}`) |
-//! | POST | `/v1/memoire/{u}/candidats/{id}/valider` | valide ; branche sensible ⇒ 202 + demande TAMR |
-//! | DELETE | `/v1/memoire/{u}/candidats/{id}` | rejette |
-//! | POST | `/v1/memoire/{u}/approbations/{iv}` | approuve (`{"empreinte"}`) ⇒ décision StrongFather |
-//! | DELETE | `/v1/memoire/{u}/approbations/{iv}` | refuse l'approbation |
+//! | Méthode | Chemin | Portée du visa | Effet |
+//! |---|---|---|---|
+//! | POST | `/v1/memoire/defi` | aucune | défi de possession à usage unique (corps vide) |
+//! | POST | `/v1/memoire/{u}/consulter` | `maia:memoire` | notes courantes (avec `strate` N0–N3 et `domaine`) + candidats |
+//! | POST | `/v1/memoire/{u}/historique` | `maia:memoire` | versions d'une note (`{"id"}`) |
+//! | POST | `/v1/memoire/{u}/exporter` | `maia:memoire` | export `maia-memoire/v1` |
+//! | POST | `/v1/memoire/{u}/corriger` | `maia:memoire:ecrire` | nouvelle version (`{"id","texte","importance"?}`) |
+//! | DELETE | `/v1/memoire/{u}/notes` | `maia:memoire:ecrire` | oubli (`{"chemin","motif"}`), pierre tombale |
+//! | POST | `/v1/memoire/{u}/regles` | `maia:memoire:ecrire` | pose une Règle (`{"branche","texte","importance"}`) |
+//! | POST | `/v1/memoire/{u}/candidats/{id}/valider` | `maia:memoire:ecrire` | valide ; branche sensible ⇒ 202 + demande TAMR |
+//! | DELETE | `/v1/memoire/{u}/candidats/{id}` | `maia:memoire:ecrire` | rejette |
+//! | POST | `/v1/memoire/{u}/approbations/{iv}` | `maia:tamr:approuver` + appareil d'approbation | approuve (`{"empreinte"}`) ⇒ décision StrongFather |
+//! | DELETE | `/v1/memoire/{u}/approbations/{iv}` | `maia:memoire:ecrire` | refuse l'approbation |
 //!
-//! ## Authentification (minimum fail-closed)
+//! ## Authentification (I4)
 //!
-//! Le pont n'a pas encore d'authentification **utilisateur** (seulement des
-//! requêtes signées de services : Central, hub TEAM). Ces routes exigent une
+//! **Visa** (`Authorization: MiyuVisa …`, `X-Miyu-PoP`, `X-Miyu-Delegations`)
+//! vérifié par [`crate::auth_memoire`] : visa d'indice 5 délégué par la racine
+//! épinglée (mode strict), audience `maia`, portée de la route, preuve de
+//! possession liée à la requête (méthode, chemin, corps) sur un défi
+//! persistant, révocations ≤ 15 min, **sujet du passeport = titulaire de
+//! l'instance**. Refus : 401 `visa_refuse` (titre, défi rejoué ou expiré,
+//! délégation absente, révocation, possession), 503 si le service est saturé,
+//! 403 `autre_utilisateur` / `portee_insuffisante` /
+//! `appareil_approbation_requis`, 400 `requete_refusee` (chaîne de requête).
+//!
+//! **Transition** (désactivée par défaut, `MAIA_MEMOIRE_TRANSITION=cles-epinglees`) :
 //! requête signée Ed25519 (`miyauth::http::service`) d'usage
-//! [`USAGE_MEMOIRE`] par une clé **de l'utilisateur** de l'instance, épinglée
-//! dans `MAIA_MEMOIRE_CLES_UTILISATEUR` (liste séparée par des virgules) :
+//! `maia/memoire/<instance>/<utilisateur>` par une clé épinglée dans
+//! `MAIA_MEMOIRE_CLES_UTILISATEUR` ; approbation d'usage
+//! `maia/tamr-approbation/<instance>/<utilisateur>` par une clé de
+//! `MAIA_TAMR_CLES_APPROBATION` (F7). Nonces persistants si
+//! `MAIA_MEMOIRE_ETAT_DIR` est configuré. Hors transition, ces en-têtes sont
+//! ignorés (401 `visa_requis`).
 //!
-//! - clés absentes ou mal formées, ou mémoire non ouverte ⇒ routes
+//! Commun aux deux voies (fail-closed) :
+//!
+//! - mémoire non ouverte, ou ni visa ni transition configurés ⇒ routes
 //!   **désactivées** (503) ;
-//! - signature absente, clé non épinglée (dont les clés de Central et du hub
-//!   TEAM), horodatage hors fenêtre, nonce rejoué, corps altéré ⇒ 401 ;
 //! - `{u}` différent de l'utilisateur de l'instance ⇒ 403 (une seule base,
 //!   `maia-<utilisateur>`) ;
 //! - méthodes POST / DELETE seulement (autre méthode ⇒ 405) ; en-tête `Cookie`
 //!   ⇒ 400 (aucune authentification ambiante) ; aucun en-tête CORS ;
-//! - origine réseau contrôlée comme le reste de l'API.
+//! - origine réseau contrôlée comme le reste de l'API ;
+//! - limiteur de débit par IP avant tout contrôle (L3) ; corps borné à
+//!   [`MAX_CORPS`] ;
+//! - l'identifiant d'instance (128 bits tirés au démarrage, L2) est rendu dans
+//!   l'en-tête [`ENTETE_INSTANCE`] de toute réponse.
 //!
-//! Revue de sécurité du lot 7 :
-//!
-//! - **L2 (rejeu après redémarrage)** : l'usage signé lie l'**identifiant
-//!   d'instance** (128 bits aléatoires tirés au démarrage) et l'utilisateur :
-//!   `maia/memoire/<instance>/<utilisateur>` ; une requête capturée avant un
-//!   redémarrage (registre de nonces vidé) ne se rejoue pas. L'identifiant est
-//!   rendu dans l'en-tête [`ENTETE_INSTANCE`] de toute réponse de ces routes ;
-//! - **F7 (approbation TAMR)** : `POST …/approbations/{iv}` exige une requête
-//!   signée d'usage `maia/tamr-approbation/<instance>/<utilisateur>` par une clé
-//!   épinglée dans `MAIA_TAMR_CLES_APPROBATION` (voir [`crate::tamr`]),
-//!   **distincte** des clés mémoire (clé commune ⇒ approbations refusées ;
-//!   liste vide ⇒ approbations refusées). Le refus d'une approbation (`DELETE`)
-//!   reste ouvert à la clé mémoire ;
-//! - **L3** : limiteur de débit (`security::RateLimiter`, par IP) appliqué
-//!   avant tout contrôle ; la signature porte sur l'empreinte du corps, elle ne
-//!   peut donc être vérifiée qu'après lecture : les en-têtes (clé épinglée,
-//!   fenêtre, nonce) sont contrôlés **avant** la lecture et le corps reste borné
-//!   à [`MAX_CORPS`].
+//! Approbation TAMR (F7) : la clé d'appareil du visa (ou la clé signataire en
+//! transition) doit être épinglée dans `MAIA_TAMR_CLES_APPROBATION`, liste
+//! **distincte** des clés mémoire de transition (clé commune ⇒ approbations
+//! refusées ; liste vide ⇒ approbations refusées).
 //!
 //! Le chemin d'inférence et les outils de MAIA ne détiennent qu'une
 //! `VueMaia` : ces routes sont le seul accès à `AccesUtilisateur`.
 
+use std::collections::HashSet;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
@@ -75,9 +80,13 @@ use maia_memoire::{
     Branche, Entrepot, ErreurMemoire, IdMemoire, Issue, MemoireMaia, Uuid, Validation,
 };
 use miyauth::http::service::{analyser_cles_publiques, maintenant_unix, GardeSignee};
-use miyauth::http::{ENTETE_HORODATAGE, ENTETE_NONCE, ENTETE_SIGNATAIRE, ENTETE_SIGNATURE};
+use miyauth::http::{
+    RegistreNonces, RequeteHttp, ENTETE_DELEGATIONS, ENTETE_HORODATAGE, ENTETE_NONCE, ENTETE_POP,
+    ENTETE_SIGNATAIRE, ENTETE_SIGNATURE, SCHEMA_VISA,
+};
 use serde::Deserialize;
 
+use crate::auth_memoire::{AuthVisa, Droit, RefusVisa};
 use crate::config::SecurityConfig;
 use crate::gouvernance::GouvernanceMaia;
 use crate::security::{RateLimitConfig, RateLimiter};
@@ -86,10 +95,10 @@ use crate::tamr::{
     USAGE_APPROBATION,
 };
 
-/// Usage signé (préfixe) des requêtes de l'utilisateur sur sa mémoire ; usage
+/// Usage signé (préfixe) des requêtes de transition sur la mémoire ; usage
 /// complet : `maia/memoire/<instance>/<utilisateur>` (L2).
 pub const USAGE_MEMOIRE: &str = "maia/memoire";
-/// Clés publiques de l'utilisateur de l'instance (base64 URL ou hex, séparées par des virgules).
+/// Clés publiques de transition de l'utilisateur (base64 URL ou hex, séparées par des virgules).
 pub const ENV_CLES_UTILISATEUR: &str = "MAIA_MEMOIRE_CLES_UTILISATEUR";
 /// Corps maximal d'une requête mémoire (octets).
 pub const MAX_CORPS: usize = 256 * 1024;
@@ -97,6 +106,8 @@ pub const MAX_CORPS: usize = 256 * 1024;
 pub const ENTETE_INSTANCE: &str = "x-maia-instance";
 /// Requêtes au plus par minute et par IP sur ces routes (L3).
 pub const DEBIT_MAX_PAR_MINUTE: u32 = 60;
+/// Chemin du défi de possession.
+pub const CHEMIN_DEFI: &str = "/v1/memoire/defi";
 
 /// Utilisateur authentifié (posé par la garde).
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -105,8 +116,15 @@ pub struct UtilisateurAuthentifie(pub String);
 /// État des routes mémoire.
 pub struct EtatMemoireHttp<E: Entrepot> {
     acces: Option<(String, Arc<MemoireMaia<E>>)>,
+    /// Vérificateur des visas (I4) ; `None` : visas désactivés.
+    visa: Option<AuthVisa>,
+    /// Garde de transition (clés épinglées) ; vide hors transition.
     garde: GardeSignee,
     garde_approbation: GardeSignee,
+    cles_utilisateur: Vec<[u8; 32]>,
+    /// Clés d'approbation TAMR (F7) : clés signataires en transition, clés
+    /// d'appareil des visas d'approbation.
+    cles_approbation: HashSet<[u8; 32]>,
     instance: String,
     limiteur: RateLimiter,
     approbations: RegistreApprobations,
@@ -131,9 +149,10 @@ pub(crate) fn analyser_env(nom: &str) -> Vec<[u8; 32]> {
 }
 
 impl<E: Entrepot> EtatMemoireHttp<E> {
-    /// Routes actives pour `utilisateur`, sa mémoire et ses clés ; sans clé :
-    /// désactivées. `cles_approbation` (F7) : clés d'approbation TAMR,
-    /// distinctes des clés mémoire ; une clé commune ⇒ aucune approbation.
+    /// Routes pour `utilisateur` et sa mémoire. `cles_utilisateur` : clés de
+    /// **transition** (vide : transition désactivée) ; `cles_approbation`
+    /// (F7) : clés d'approbation TAMR, distinctes des clés de transition (une
+    /// clé commune ⇒ aucune approbation). Visas : [`Self::avec_visa`].
     pub fn new(
         acces: Option<(String, Arc<MemoireMaia<E>>)>,
         cles_utilisateur: Vec<[u8; 32]>,
@@ -152,8 +171,11 @@ impl<E: Entrepot> EtatMemoireHttp<E> {
         };
         Self {
             acces,
-            garde: GardeSignee::new(cles_utilisateur),
-            garde_approbation: GardeSignee::new(cles_approbation),
+            visa: None,
+            garde: GardeSignee::new(cles_utilisateur.clone()),
+            garde_approbation: GardeSignee::new(cles_approbation.clone()),
+            cles_utilisateur,
+            cles_approbation: cles_approbation.into_iter().collect(),
             instance: crate::garde_etranger::identifiant_aleatoire(),
             limiteur: RateLimiter::new(RateLimitConfig {
                 max_requests: DEBIT_MAX_PAR_MINUTE,
@@ -165,28 +187,89 @@ impl<E: Entrepot> EtatMemoireHttp<E> {
         }
     }
 
-    /// Clés lues dans [`ENV_CLES_UTILISATEUR`] et [`ENV_CLES_APPROBATION`] ;
-    /// absentes ou mal formées ⇒ routes (ou approbations) désactivées.
+    /// Active l'authentification par visa (I4).
+    pub fn avec_visa(mut self, visa: AuthVisa) -> Self {
+        self.visa = Some(visa);
+        self
+    }
+
+    /// Nonces de transition **persistants** dans `dossier` (rejeu refusé après
+    /// redémarrage). Erreur ⇒ rien n'est modifié.
+    pub fn activer_nonces_persistants(&mut self, dossier: &std::path::Path) -> Result<(), String> {
+        let registre = || {
+            RegistreNonces::persistant(
+                dossier,
+                miyauth::http::CAPACITE_NONCES_DEFAUT,
+                miyauth::http::FENETRE_HORODATAGE_SECS,
+            )
+            .map_err(|e| format!("nonces : {e}"))
+        };
+        let (memoire, approbation) = (registre()?, registre()?);
+        self.garde = GardeSignee::avec_registre(self.cles_utilisateur.clone(), memoire);
+        self.garde_approbation =
+            GardeSignee::avec_registre(self.cles_approbation.iter().copied(), approbation);
+        Ok(())
+    }
+
+    /// Configuration lue dans l'environnement (voir [`crate::auth_memoire`]) :
+    /// visas si la configuration est complète ; clés épinglées seulement en
+    /// transition explicite. Toute erreur ⇒ la voie concernée est désactivée.
     pub fn depuis_env(
         acces: Option<(String, Arc<MemoireMaia<E>>)>,
         gouvernance: Arc<GouvernanceMaia>,
         securite: SecurityConfig,
     ) -> Self {
-        let etat = Self::new(
+        let transition = crate::auth_memoire::transition_demandee();
+        let cles_utilisateur = if transition {
+            tracing::warn!("routes mémoire : TRANSITION active — clés épinglées ({ENV_CLES_UTILISATEUR}) acceptées en plus des visas");
+            analyser_env(ENV_CLES_UTILISATEUR)
+        } else {
+            if std::env::var(ENV_CLES_UTILISATEUR).is_ok_and(|v| !v.trim().is_empty()) {
+                tracing::warn!(
+                    "{ENV_CLES_UTILISATEUR} ignorée : transition non demandée ({}={})",
+                    crate::auth_memoire::ENV_TRANSITION,
+                    crate::auth_memoire::VALEUR_TRANSITION
+                );
+            }
+            Vec::new()
+        };
+        let mut etat = Self::new(
             acces,
-            analyser_env(ENV_CLES_UTILISATEUR),
+            cles_utilisateur,
             analyser_env(ENV_CLES_APPROBATION),
             gouvernance,
             securite,
         );
+        match crate::auth_memoire::ConfigVisa::depuis_env() {
+            Ok(Some(config)) => match AuthVisa::charger(&config) {
+                Ok((visa, revocations)) => {
+                    revocations.lancer_releve();
+                    tracing::info!(
+                        "routes mémoire : visas actifs (COG {}, audience « {} »)",
+                        visa.cog(),
+                        crate::auth_memoire::AUDIENCE
+                    );
+                    etat = etat.avec_visa(visa);
+                    let dossier = crate::auth_memoire::dossier_nonces(&config.etat);
+                    if let Err(e) = etat.activer_nonces_persistants(&dossier) {
+                        tracing::error!("routes mémoire : {e} — transition désactivée");
+                        etat.garde = GardeSignee::default();
+                        etat.garde_approbation = GardeSignee::default();
+                    }
+                }
+                Err(e) => tracing::error!("routes mémoire : visas désactivés : {e}"),
+            },
+            Ok(None) => tracing::info!("routes mémoire : visas non configurés"),
+            Err(e) => tracing::error!("routes mémoire : visas désactivés : {e}"),
+        }
         if etat.est_active() {
-            tracing::info!("routes mémoire actives (requêtes signées « {USAGE_MEMOIRE}/<instance>/<utilisateur> » de l'utilisateur)");
+            tracing::info!("routes mémoire actives");
         } else {
             tracing::info!(
-                "routes mémoire désactivées (mémoire non ouverte ou {ENV_CLES_UTILISATEUR} vide)"
+                "routes mémoire désactivées (mémoire non ouverte, ni visa ni transition)"
             );
         }
-        if !etat.garde_approbation.est_configuree() {
+        if etat.cles_approbation.is_empty() {
             tracing::info!(
                 "approbations TAMR désactivées ({ENV_CLES_APPROBATION} vide ou invalide)"
             );
@@ -194,9 +277,14 @@ impl<E: Entrepot> EtatMemoireHttp<E> {
         etat
     }
 
+    /// Vrai si la transition (clés épinglées) est active.
+    pub fn transition(&self) -> bool {
+        self.garde.est_configuree()
+    }
+
     /// Vrai si les routes sont servies.
     pub fn est_active(&self) -> bool {
-        self.acces.is_some() && self.garde.est_configuree()
+        self.acces.is_some() && (self.visa.is_some() || self.transition())
     }
 
     /// Identifiant d'instance fixé (tests).
@@ -225,6 +313,7 @@ impl<E: Entrepot> EtatMemoireHttp<E> {
 /// Routeur des routes mémoire (à fusionner avec le routeur principal).
 pub fn routeur<E: Entrepot + 'static>(etat: Arc<EtatMemoireHttp<E>>) -> Router {
     Router::new()
+        .route(CHEMIN_DEFI, post(defi::<E>))
         .route("/v1/memoire/{utilisateur}/consulter", post(consulter::<E>))
         .route(
             "/v1/memoire/{utilisateur}/historique",
@@ -261,16 +350,26 @@ fn refus(statut: StatusCode, motif: &str) -> Response {
         .into_response()
 }
 
-/// `POST /v1/memoire/{u}/approbations/{iv}` : approbation TAMR (F7).
-fn est_approbation(methode: &axum::http::Method, chemin: &str) -> bool {
+/// Droit exigé par une route (méthode, chemin) ; par défaut l'écriture.
+pub fn droit_requis(methode: &axum::http::Method, chemin: &str) -> Droit {
     let segments: Vec<&str> = chemin.split('/').collect();
-    methode == axum::http::Method::POST
-        && matches!(segments.as_slice(), ["", "v1", "memoire", u, "approbations", iv] if !u.is_empty() && !iv.is_empty())
+    match segments.as_slice() {
+        ["", "v1", "memoire", u, "consulter" | "historique" | "exporter"]
+            if methode == axum::http::Method::POST && !u.is_empty() =>
+        {
+            Droit::Lire
+        }
+        ["", "v1", "memoire", u, "approbations", iv]
+            if methode == axum::http::Method::POST && !u.is_empty() && !iv.is_empty() =>
+        {
+            Droit::Approuver
+        }
+        _ => Droit::Ecrire,
+    }
 }
 
-/// Garde : débit, routes actives, pas de cookie, origine, requête signée par
-/// une clé de l'utilisateur (ou d'approbation), usage lié à l'instance.
-/// Toute réponse porte [`ENTETE_INSTANCE`].
+/// Garde : débit, routes actives, pas de cookie, origine, puis visa (ou
+/// requête signée en transition). Toute réponse porte [`ENTETE_INSTANCE`].
 async fn garde<E: Entrepot + 'static>(
     State(etat): State<Arc<EtatMemoireHttp<E>>>,
     req: Request,
@@ -281,6 +380,16 @@ async fn garde<E: Entrepot + 'static>(
         reponse.headers_mut().insert(ENTETE_INSTANCE, v);
     }
     reponse
+}
+
+/// Valeur unique d'un en-tête (doublon ou non-ASCII ⇒ absent, fail-closed).
+fn entete_unique(h: &axum::http::HeaderMap, nom: &str) -> Option<String> {
+    let mut valeurs = h.get_all(nom).iter();
+    let v = valeurs.next()?;
+    if valeurs.next().is_some() {
+        return None;
+    }
+    v.to_str().ok().map(str::to_owned)
 }
 
 async fn garder<E: Entrepot + 'static>(
@@ -303,7 +412,7 @@ async fn garder<E: Entrepot + 'static>(
         tracing::warn!(target: "maia::memoire_http", ip = %ip, "débit dépassé sur les routes mémoire");
         return refus(StatusCode::TOO_MANY_REQUESTS, "debit_depasse");
     }
-    let Some((utilisateur, _)) = etat.acces.as_ref().filter(|_| etat.garde.est_configuree()) else {
+    let Some((utilisateur, _)) = etat.acces.as_ref().filter(|_| etat.est_active()) else {
         return refus(StatusCode::SERVICE_UNAVAILABLE, "memoire_http_desactivee");
     };
     if req.headers().contains_key(axum::http::header::COOKIE) {
@@ -314,7 +423,103 @@ async fn garder<E: Entrepot + 'static>(
     {
         return refus(StatusCode::FORBIDDEN, "origin_blocked");
     }
-    let approbation = est_approbation(req.method(), req.uri().path());
+    if req.uri().path() == CHEMIN_DEFI {
+        return next.run(req).await;
+    }
+    let droit = droit_requis(req.method(), req.uri().path());
+    let visa_presente = entete_unique(req.headers(), axum::http::header::AUTHORIZATION.as_str())
+        .is_some_and(|v| v.trim_start().starts_with(&format!("{SCHEMA_VISA} ")));
+    if visa_presente {
+        return garder_visa(etat, utilisateur, droit, req, next).await;
+    }
+    if !etat.transition() {
+        return refus(StatusCode::UNAUTHORIZED, "visa_requis");
+    }
+    garder_transition(etat, utilisateur, droit == Droit::Approuver, req, next).await
+}
+
+/// Voie visa (I4) : voir [`crate::auth_memoire`].
+async fn garder_visa<E: Entrepot + 'static>(
+    etat: &EtatMemoireHttp<E>,
+    utilisateur: &str,
+    droit: Droit,
+    req: Request,
+    next: Next,
+) -> Response {
+    let Some(auth) = etat.visa.as_ref() else {
+        return refus(StatusCode::UNAUTHORIZED, "visa_desactive");
+    };
+    if droit == Droit::Approuver && etat.cles_approbation.is_empty() {
+        return refus(StatusCode::SERVICE_UNAVAILABLE, "approbations_desactivees");
+    }
+    if req.uri().query().is_some() {
+        return refus(StatusCode::BAD_REQUEST, "requete_refusee");
+    }
+    let h = req.headers();
+    let autorisation = entete_unique(h, axum::http::header::AUTHORIZATION.as_str());
+    let pop = entete_unique(h, ENTETE_POP);
+    let delegations = if h.contains_key(ENTETE_DELEGATIONS) {
+        match entete_unique(h, ENTETE_DELEGATIONS) {
+            Some(d) => Some(d),
+            None => return refus(StatusCode::UNAUTHORIZED, "visa_refuse"),
+        }
+    } else {
+        None
+    };
+    let (parts, corps) = req.into_parts();
+    let Ok(corps) = axum::body::to_bytes(corps, MAX_CORPS).await else {
+        return refus(StatusCode::PAYLOAD_TOO_LARGE, "corps_trop_volumineux");
+    };
+    let chemin = parts.uri.path().to_owned();
+    let requete = RequeteHttp {
+        methode: parts.method.as_str(),
+        chemin: &chemin,
+        corps: &corps,
+        autorisation: autorisation.as_deref(),
+        pop: pop.as_deref(),
+        liaison: None,
+    };
+    let acces = match auth.verifier(&requete, delegations.as_deref(), droit, maintenant_unix()) {
+        Ok(a) => a,
+        Err(r) => {
+            tracing::warn!(target: "maia::memoire_http", refus = ?r, ?droit, "visa refusé");
+            return match r {
+                RefusVisa::Http(h) => refus(
+                    StatusCode::from_u16(h.statut()).unwrap_or(StatusCode::UNAUTHORIZED),
+                    "visa_refuse",
+                ),
+                RefusVisa::AutreTitulaire => refus(StatusCode::FORBIDDEN, "autre_utilisateur"),
+                RefusVisa::PorteeInsuffisante => {
+                    refus(StatusCode::FORBIDDEN, "portee_insuffisante")
+                }
+            };
+        }
+    };
+    if droit == Droit::Approuver && !etat.cles_approbation.contains(&acces.cle_appareil) {
+        tracing::warn!(target: "maia::memoire_http", "approbation par un appareil non épinglé refusée");
+        return refus(StatusCode::FORBIDDEN, "appareil_approbation_requis");
+    }
+    let mut parts = parts;
+    parts
+        .extensions
+        .insert(UtilisateurAuthentifie(utilisateur.to_owned()));
+    if droit == Droit::Approuver {
+        parts
+            .extensions
+            .insert(SignatureApprobation::par_visa(&acces.cle_appareil));
+    }
+    next.run(Request::from_parts(parts, Body::from(corps)))
+        .await
+}
+
+/// Voie de transition : requête signée par une clé épinglée (ou d'approbation).
+async fn garder_transition<E: Entrepot + 'static>(
+    etat: &EtatMemoireHttp<E>,
+    utilisateur: &str,
+    approbation: bool,
+    req: Request,
+    next: Next,
+) -> Response {
     let (garde, usage) = if approbation {
         if !etat.garde_approbation.est_configuree() {
             return refus(StatusCode::SERVICE_UNAVAILABLE, "approbations_desactivees");
@@ -322,6 +527,11 @@ async fn garder<E: Entrepot + 'static>(
         (&etat.garde_approbation, etat.usage_approbation(utilisateur))
     } else {
         (&etat.garde, etat.usage_memoire(utilisateur))
+    };
+    let motif = if approbation {
+        "signature_approbation_requise"
+    } else {
+        "signature_utilisateur_requise"
     };
     let maintenant = maintenant_unix();
     let h = req.headers();
@@ -336,14 +546,7 @@ async fn garder<E: Entrepot + 'static>(
         Ok(e) => e,
         Err(r) => {
             tracing::warn!(target: "maia::memoire_http", refus = ?r, approbation, "requête mémoire refusée");
-            return refus(
-                StatusCode::UNAUTHORIZED,
-                if approbation {
-                    "signature_approbation_requise"
-                } else {
-                    "signature_utilisateur_requise"
-                },
-            );
+            return refus(StatusCode::UNAUTHORIZED, motif);
         }
     };
     let (parts, corps) = req.into_parts();
@@ -363,19 +566,12 @@ async fn garder<E: Entrepot + 'static>(
         maintenant,
     ) {
         tracing::warn!(target: "maia::memoire_http", refus = ?r, approbation, "requête mémoire refusée");
-        return refus(
-            StatusCode::UNAUTHORIZED,
-            if approbation {
-                "signature_approbation_requise"
-            } else {
-                "signature_utilisateur_requise"
-            },
-        );
+        return refus(StatusCode::UNAUTHORIZED, motif);
     }
     let mut parts = parts;
     parts
         .extensions
-        .insert(UtilisateurAuthentifie(utilisateur.clone()));
+        .insert(UtilisateurAuthentifie(utilisateur.to_owned()));
     if approbation {
         parts
             .extensions
@@ -383,6 +579,32 @@ async fn garder<E: Entrepot + 'static>(
     }
     next.run(Request::from_parts(parts, Body::from(corps)))
         .await
+}
+
+/// `POST /v1/memoire/defi` : défi de possession à usage unique (visas seulement).
+async fn defi<E: Entrepot + 'static>(
+    State(etat): State<Arc<EtatMemoireHttp<E>>>,
+    corps: axum::body::Bytes,
+) -> Response {
+    if !corps.is_empty() {
+        return refus(StatusCode::BAD_REQUEST, "corps_inattendu");
+    }
+    let Some(auth) = etat.visa.as_ref() else {
+        return refus(StatusCode::SERVICE_UNAVAILABLE, "visa_desactive");
+    };
+    match auth.emettre_defi(maintenant_unix()) {
+        Ok(d) => Json(serde_json::json!({
+            "id": d.id_b64(),
+            "defi": d.defi_b64(),
+            "audience": d.audience,
+            "expire_a": d.expire_a,
+        }))
+        .into_response(),
+        Err(r) => refus(
+            StatusCode::from_u16(r.statut()).unwrap_or(StatusCode::SERVICE_UNAVAILABLE),
+            "defi_refuse",
+        ),
+    }
 }
 
 /// Refus léger (statut, motif), rendu en JSON.
@@ -466,6 +688,20 @@ macro_rules! essayer {
 type Etat<E> = State<Arc<EtatMemoireHttp<E>>>;
 type Auth = Extension<UtilisateurAuthentifie>;
 
+/// Note courante annotée de sa strate (N0–N3) et de son domaine (A5).
+fn note_annotee(n: &maia_memoire::Note) -> serde_json::Value {
+    let mut v = serde_json::to_value(n).unwrap_or(serde_json::Value::Null);
+    if let Some(o) = v.as_object_mut() {
+        o.insert(
+            "strate".into(),
+            serde_json::to_value(maia_memoire::assemblage::strate(n))
+                .unwrap_or(serde_json::Value::Null),
+        );
+        o.insert("domaine".into(), n.id.domaine().into());
+    }
+    v
+}
+
 async fn consulter<E: Entrepot + 'static>(
     State(etat): Etat<E>,
     Extension(auth): Auth,
@@ -475,6 +711,7 @@ async fn consulter<E: Entrepot + 'static>(
     let acces = m.utilisateur();
     match (acces.consulter().await, acces.candidats().await) {
         (Ok(notes), Ok(candidats)) => {
+            let notes: Vec<serde_json::Value> = notes.iter().map(note_annotee).collect();
             Json(serde_json::json!({ "notes": notes, "candidats": candidats })).into_response()
         }
         (Err(e), _) | (_, Err(e)) => erreur(&e),
@@ -1520,5 +1757,583 @@ mod tests {
             n[0].texte, "Dort 8 h",
             "la correction approuvée sur une cible périmée n'est pas écrite"
         );
+    }
+
+    // ── I4 : authentification par passeport et visa ──
+
+    mod visa {
+        use super::*;
+        use crate::auth_memoire::banc::{maintenant, MondeVisa, Titres};
+        use crate::auth_memoire::{AuthVisa, PORTEE_APPROUVER, PORTEE_ECRIRE, PORTEE_LIRE};
+        use miyauth::http::{b64_decoder, MagasinDefis, MagasinDefisFichier, MagasinDefisMemoire};
+
+        const TOUTES: [&str; 3] = [PORTEE_LIRE, PORTEE_ECRIRE, PORTEE_APPROUVER];
+
+        fn appareil_alice() -> CleSignature {
+            CleSignature::depuis_graine(&[0x31; 32])
+        }
+
+        /// Appareil d'approbation d'Alice (clé épinglée dans les clés d'approbation).
+        fn appareil_approbation() -> CleSignature {
+            CleSignature::depuis_graine(&[0x32; 32])
+        }
+
+        fn auth(monde: &MondeVisa, defis: Box<dyn MagasinDefis>) -> AuthVisa {
+            AuthVisa::new(
+                &monde.racine_publique(),
+                monde.titulaire("alice"),
+                defis,
+                monde.revocations(),
+            )
+            .expect("auth")
+        }
+
+        fn etat(
+            m: Arc<MemoireMaia<EntrepotMemoire>>,
+            monde: &MondeVisa,
+            defis: Box<dyn MagasinDefis>,
+            gouvernance: GouvernanceMaia,
+        ) -> EtatMemoireHttp<EntrepotMemoire> {
+            EtatMemoireHttp::new(
+                Some(("alice".into(), m)),
+                Vec::new(),
+                vec![appareil_approbation().cle_publique()],
+                Arc::new(gouvernance),
+                SecurityConfig::default(),
+            )
+            .avec_visa(auth(monde, defis))
+            .avec_instance(INSTANCE)
+        }
+
+        async fn monter_visa(
+            gouvernance: GouvernanceMaia,
+        ) -> (Router, Arc<MemoireMaia<EntrepotMemoire>>, MondeVisa) {
+            let m = Arc::new(
+                MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets))
+                    .await
+                    .expect("m"),
+            );
+            let monde = MondeVisa::new();
+            let app = routeur(Arc::new(etat(
+                Arc::clone(&m),
+                &monde,
+                Box::new(MagasinDefisMemoire::default()),
+                gouvernance,
+            )));
+            (app, m, monde)
+        }
+
+        fn titres(
+            monde: &MondeVisa,
+            nom: &str,
+            appareil: CleSignature,
+            portees: &[&str],
+        ) -> Titres {
+            let passeport = monde.passeport(nom, &appareil, &TOUTES);
+            Titres {
+                visa: monde.visa(&passeport, &appareil, portees),
+                passeport,
+                delegations: Some(monde.entete_delegations()),
+                appareil,
+            }
+        }
+
+        async fn defi(app: &Router) -> ([u8; 16], [u8; 32]) {
+            let (s, v) = appel(app, requete("POST", CHEMIN_DEFI, "", None)).await;
+            assert_eq!(s, StatusCode::OK, "{v}");
+            assert_eq!(v["audience"], "maia");
+            let id = b64_decoder(v["id"].as_str().expect("id")).expect("b64");
+            let d = b64_decoder(v["defi"].as_str().expect("défi")).expect("b64");
+            (id.try_into().expect("16"), d.try_into().expect("32"))
+        }
+
+        fn requete_visa(
+            methode: &str,
+            chemin: &str,
+            corps: &str,
+            t: &Titres,
+            d: &([u8; 16], [u8; 32]),
+        ) -> Request {
+            let mut r = requete(methode, chemin, corps, None);
+            let sans_requete = chemin.split('?').next().unwrap_or(chemin);
+            for (n, v) in t.entetes((&d.0, &d.1), methode, sans_requete, corps.as_bytes()) {
+                r.headers_mut().insert(n, v.parse().expect("en-tête"));
+            }
+            r
+        }
+
+        async fn appel_visa(
+            app: &Router,
+            methode: &str,
+            chemin: &str,
+            corps: &str,
+            t: &Titres,
+        ) -> (StatusCode, serde_json::Value) {
+            let d = defi(app).await;
+            appel(app, requete_visa(methode, chemin, corps, t, &d)).await
+        }
+
+        async fn ecrire_fait(m: &MemoireMaia<EntrepotMemoire>, texte: &str) {
+            m.utilisateur()
+                .ecrire(Ecrit::new(
+                    Branche::parse("travail").expect("b"),
+                    TypeUnite::Fait,
+                    texte,
+                    5,
+                ))
+                .await
+                .expect("écrire");
+        }
+
+        #[tokio::test]
+        async fn visa_valide_donne_acces_lecture_ecriture_oubli() {
+            let (app, m, monde) = monter_visa(sans_tamr()).await;
+            ecrire_fait(&m, "Lot 7").await;
+            let t = titres(
+                &monde,
+                "alice",
+                appareil_alice(),
+                &[PORTEE_LIRE, PORTEE_ECRIRE],
+            );
+            let (s, v) = appel_visa(&app, "POST", "/v1/memoire/alice/consulter", "", &t).await;
+            assert_eq!(s, StatusCode::OK, "{v}");
+            assert_eq!(v["notes"][0]["id"], "travail.f1");
+            assert_eq!(v["notes"][0]["strate"], "N3");
+            assert_eq!(v["notes"][0]["domaine"], "travail");
+            let (s, v) = appel_visa(
+                &app,
+                "POST",
+                "/v1/memoire/alice/corriger",
+                r#"{"id":"travail.f1","texte":"Lot 8"}"#,
+                &t,
+            )
+            .await;
+            assert_eq!(s, StatusCode::OK, "{v}");
+            let (s, v) = appel_visa(
+                &app,
+                "POST",
+                "/v1/memoire/alice/regles",
+                r#"{"branche":"moi","texte":"Tutoie-moi","importance":9}"#,
+                &t,
+            )
+            .await;
+            assert_eq!(s, StatusCode::OK, "{v}");
+            let (s, v) = appel_visa(&app, "POST", "/v1/memoire/alice/exporter", "", &t).await;
+            assert_eq!(
+                (s, v["format"].as_str()),
+                (StatusCode::OK, Some("maia-memoire/v1"))
+            );
+            // Oubli réel : la branche disparaît, une pierre tombale reste.
+            let (s, v) = appel_visa(
+                &app,
+                "DELETE",
+                "/v1/memoire/alice/notes",
+                r#"{"chemin":"travail","motif":"plus utile"}"#,
+                &t,
+            )
+            .await;
+            assert_eq!(s, StatusCode::OK, "{v}");
+            let notes = m.utilisateur().consulter().await.expect("c");
+            assert!(notes.iter().all(|n| n.id.domaine() != "travail"));
+            let (_, v) = appel_visa(&app, "POST", "/v1/memoire/alice/exporter", "", &t).await;
+            assert!(
+                !v.to_string().contains("Lot 8"),
+                "contenu effacé de l'export"
+            );
+            assert_eq!(v["pierres_tombales"][0]["id"], "travail.f1");
+        }
+
+        #[tokio::test]
+        async fn autre_utilisateur_refuse() {
+            let (app, m, monde) = monter_visa(sans_tamr()).await;
+            ecrire_fait(&m, "Secret").await;
+            // Passeport de Bob (même COG), visa valide : 403.
+            let bob = titres(
+                &monde,
+                "bob",
+                CleSignature::depuis_graine(&[0x41; 32]),
+                &[PORTEE_LIRE, PORTEE_ECRIRE],
+            );
+            let (s, v) = appel_visa(&app, "POST", "/v1/memoire/alice/consulter", "", &bob).await;
+            assert_eq!(
+                (s, v["reason"].as_str()),
+                (StatusCode::FORBIDDEN, Some("autre_utilisateur"))
+            );
+            let (s, _) = appel_visa(&app, "POST", "/v1/memoire/bob/consulter", "", &bob).await;
+            assert_eq!(s, StatusCode::FORBIDDEN);
+            // Alice authentifiée, chemin de Bob : 403.
+            let alice = titres(
+                &monde,
+                "alice",
+                appareil_alice(),
+                &[PORTEE_LIRE, PORTEE_ECRIRE],
+            );
+            let (s, v) = appel_visa(
+                &app,
+                "DELETE",
+                "/v1/memoire/bob/notes",
+                r#"{"chemin":"travail","motif":"x"}"#,
+                &alice,
+            )
+            .await;
+            assert_eq!(
+                (s, v["reason"].as_str()),
+                (StatusCode::FORBIDDEN, Some("autre_utilisateur"))
+            );
+            assert_eq!(
+                m.utilisateur().consulter().await.expect("c").len(),
+                1,
+                "rien d'oublié"
+            );
+        }
+
+        #[tokio::test]
+        async fn portee_insuffisante_refusee() {
+            let (app, m, monde) = monter_visa(sans_tamr()).await;
+            ecrire_fait(&m, "Lot 7").await;
+            let lecture = titres(&monde, "alice", appareil_alice(), &[PORTEE_LIRE]);
+            for (methode, chemin, corps) in [
+                (
+                    "POST",
+                    "/v1/memoire/alice/corriger",
+                    r#"{"id":"travail.f1","texte":"x"}"#,
+                ),
+                (
+                    "DELETE",
+                    "/v1/memoire/alice/notes",
+                    r#"{"chemin":"travail","motif":"x"}"#,
+                ),
+                (
+                    "POST",
+                    "/v1/memoire/alice/regles",
+                    r#"{"branche":"moi","texte":"x","importance":9}"#,
+                ),
+            ] {
+                let (s, v) = appel_visa(&app, methode, chemin, corps, &lecture).await;
+                assert_eq!(
+                    (s, v["reason"].as_str()),
+                    (StatusCode::FORBIDDEN, Some("portee_insuffisante")),
+                    "{chemin}"
+                );
+            }
+            let n = m.utilisateur().consulter().await.expect("c");
+            assert_eq!(
+                (n.len(), n[0].texte.as_str()),
+                (1, "Lot 7"),
+                "rien n'a changé"
+            );
+            // L'écriture seule n'ouvre pas la lecture.
+            let ecriture = titres(&monde, "alice", appareil_alice(), &[PORTEE_ECRIRE]);
+            let (s, _) =
+                appel_visa(&app, "POST", "/v1/memoire/alice/exporter", "", &ecriture).await;
+            assert_eq!(s, StatusCode::FORBIDDEN);
+        }
+
+        #[tokio::test]
+        async fn visa_expire_ou_delegation_absente_refuses() {
+            let (app, _, monde) = monter_visa(sans_tamr()).await;
+            let appareil = appareil_alice();
+            let passeport = monde.passeport("alice", &appareil, &TOUTES);
+            let t0 = maintenant();
+            let expire = Titres {
+                visa: monde.visa_fenetre(
+                    &passeport,
+                    &appareil,
+                    &[PORTEE_LIRE],
+                    (t0 - 1200, t0 - 300),
+                    None,
+                ),
+                passeport: passeport.clone(),
+                delegations: Some(monde.entete_delegations()),
+                appareil: appareil_alice(),
+            };
+            let (s, v) = appel_visa(&app, "POST", "/v1/memoire/alice/consulter", "", &expire).await;
+            assert_eq!(
+                (s, v["reason"].as_str()),
+                (StatusCode::UNAUTHORIZED, Some("visa_refuse"))
+            );
+            // Sans délégations : mode strict, refus.
+            let mut t = titres(&monde, "alice", appareil_alice(), &[PORTEE_LIRE]);
+            t.delegations = None;
+            let (s, _) = appel_visa(&app, "POST", "/v1/memoire/alice/consulter", "", &t).await;
+            assert_eq!(s, StatusCode::UNAUTHORIZED);
+            // Délégation `visas` seule (celle de la clé `emission` manque) : refus.
+            t.delegations = Some(miyauth::http::formater_delegations(&[&monde.deleg_visas]));
+            let (s, _) = appel_visa(&app, "POST", "/v1/memoire/alice/consulter", "", &t).await;
+            assert_eq!(s, StatusCode::UNAUTHORIZED);
+            // Visa scellé par la clé `emission` (indice 1) : usage incorrect, refus.
+            let faux = Titres {
+                visa: monde.visa_fenetre(
+                    &passeport,
+                    &appareil,
+                    &[PORTEE_LIRE],
+                    (t0 - 60, t0 + 600),
+                    Some(
+                        monde
+                            .racine
+                            .cle(miyuracine::Usage::Emission, 0)
+                            .expect("emission"),
+                    ),
+                ),
+                passeport,
+                delegations: Some(monde.entete_delegations()),
+                appareil: appareil_alice(),
+            };
+            let (s, _) = appel_visa(&app, "POST", "/v1/memoire/alice/consulter", "", &faux).await;
+            assert_eq!(s, StatusCode::UNAUTHORIZED);
+            // Contrôle : le même visa valide passe.
+            t.delegations = Some(monde.entete_delegations());
+            let (s, _) = appel_visa(&app, "POST", "/v1/memoire/alice/consulter", "", &t).await;
+            assert_eq!(s, StatusCode::OK);
+        }
+
+        #[tokio::test]
+        async fn preuve_liee_a_la_requete_et_requete_refusee() {
+            let (app, _, monde) = monter_visa(sans_tamr()).await;
+            let t = titres(
+                &monde,
+                "alice",
+                appareil_alice(),
+                &[PORTEE_LIRE, PORTEE_ECRIRE],
+            );
+            // Preuve calculée pour un autre chemin : refus.
+            let d = defi(&app).await;
+            let mut r = requete("POST", "/v1/memoire/alice/consulter", "", None);
+            for (n, v) in t.entetes((&d.0, &d.1), "POST", "/v1/memoire/alice/exporter", b"") {
+                r.headers_mut().insert(n, v.parse().expect("en-tête"));
+            }
+            assert_eq!(appel(&app, r).await.0, StatusCode::UNAUTHORIZED);
+            // Corps altéré : refus.
+            let d = defi(&app).await;
+            let mut r = requete_visa(
+                "POST",
+                "/v1/memoire/alice/historique",
+                r#"{"id":"travail.f1"}"#,
+                &t,
+                &d,
+            );
+            *r.body_mut() = Body::from(r#"{"id":"travail.f2"}"#);
+            assert_eq!(appel(&app, r).await.0, StatusCode::UNAUTHORIZED);
+            // Chaîne de requête : refus.
+            let (s, v) = appel_visa(&app, "POST", "/v1/memoire/alice/consulter?x=1", "", &t).await;
+            assert_eq!(
+                (s, v["reason"].as_str()),
+                (StatusCode::BAD_REQUEST, Some("requete_refusee"))
+            );
+            // Défi : corps inattendu.
+            let (s, _) = appel(&app, requete("POST", CHEMIN_DEFI, "x", None)).await;
+            assert_eq!(s, StatusCode::BAD_REQUEST);
+        }
+
+        #[tokio::test]
+        async fn rejeu_refuse_y_compris_apres_redemarrage() {
+            let dossier = std::env::temp_dir().join(format!(
+                "maia-memoire-defis-{}",
+                crate::garde_etranger::identifiant_aleatoire()
+            ));
+            let m = Arc::new(
+                MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets))
+                    .await
+                    .expect("m"),
+            );
+            let monde = MondeVisa::new();
+            let ouvrir = || -> Box<dyn MagasinDefis> {
+                Box::new(MagasinDefisFichier::ouvrir_defaut(&dossier.join("defis")).expect("défis"))
+            };
+            let app = routeur(Arc::new(etat(
+                Arc::clone(&m),
+                &monde,
+                ouvrir(),
+                sans_tamr(),
+            )));
+            let t = titres(&monde, "alice", appareil_alice(), &[PORTEE_LIRE]);
+            let d = defi(&app).await;
+            let r = requete_visa("POST", "/v1/memoire/alice/consulter", "", &t, &d);
+            let entetes = r.headers().clone();
+            assert_eq!(appel(&app, r).await.0, StatusCode::OK);
+            let rejouee = || {
+                let mut r = requete("POST", "/v1/memoire/alice/consulter", "", None);
+                r.headers_mut().extend(entetes.clone());
+                r
+            };
+            assert_eq!(
+                appel(&app, rejouee()).await.0,
+                StatusCode::UNAUTHORIZED,
+                "rejeu"
+            );
+            // Défi émis avant le redémarrage, encore inutilisé.
+            let d2 = defi(&app).await;
+            drop(app);
+            // Redémarrage : nouvel état, même dossier de défis.
+            let app = routeur(Arc::new(etat(
+                Arc::clone(&m),
+                &monde,
+                ouvrir(),
+                sans_tamr(),
+            )));
+            assert_eq!(
+                appel(&app, rejouee()).await.0,
+                StatusCode::UNAUTHORIZED,
+                "rejeu après redémarrage"
+            );
+            let r = requete_visa("POST", "/v1/memoire/alice/consulter", "", &t, &d2);
+            let entetes2 = r.headers().clone();
+            assert_eq!(
+                appel(&app, r).await.0,
+                StatusCode::OK,
+                "défi d'avant le redémarrage, une fois"
+            );
+            let mut r = requete("POST", "/v1/memoire/alice/consulter", "", None);
+            r.headers_mut().extend(entetes2);
+            assert_eq!(appel(&app, r).await.0, StatusCode::UNAUTHORIZED);
+            let _ = std::fs::remove_dir_all(&dossier);
+        }
+
+        #[tokio::test]
+        async fn hors_transition_les_cles_epinglees_sont_refusees() {
+            let (app, _, _) = monter_visa(sans_tamr()).await;
+            // Clé de transition (non épinglée ici) : 401 « visa_requis ».
+            let (s, v) = appel(&app, signee("POST", "/v1/memoire/alice/consulter", "")).await;
+            assert_eq!(
+                (s, v["reason"].as_str()),
+                (StatusCode::UNAUTHORIZED, Some("visa_requis"))
+            );
+            let (s, v) = appel(
+                &app,
+                requete("POST", "/v1/memoire/alice/consulter", "", None),
+            )
+            .await;
+            assert_eq!(
+                (s, v["reason"].as_str()),
+                (StatusCode::UNAUTHORIZED, Some("visa_requis"))
+            );
+            // Sans visa configuré, la route du défi est fermée.
+            let (app, _) = monter(sans_tamr()).await;
+            let (s, _) = appel(&app, requete("POST", CHEMIN_DEFI, "", None)).await;
+            assert_eq!(s, StatusCode::SERVICE_UNAVAILABLE);
+        }
+
+        #[tokio::test]
+        async fn approbation_tamr_par_visa_d_un_appareil_epingle() {
+            let (app, m, monde) = monter_visa(crate::tamr::tests::gouvernance(
+                crate::tamr::tests::POLITIQUE_TAMR,
+            ))
+            .await;
+            let k = candidat_sensible(&m).await;
+            // L'appareil courant porte toutes les portées, mais n'est pas un appareil d'approbation.
+            let courant = titres(&monde, "alice", appareil_alice(), &TOUTES);
+            let (s, v) = appel_visa(
+                &app,
+                "POST",
+                &format!("/v1/memoire/alice/candidats/{k}/valider"),
+                "",
+                &courant,
+            )
+            .await;
+            assert_eq!(s, StatusCode::ACCEPTED, "{v}");
+            let d = v["approbation"].clone();
+            assert_eq!(
+                d["empreinte"].as_str().map(str::len),
+                Some(64),
+                "empreinte exacte affichée"
+            );
+            let iv = d["intervention_id"].as_str().expect("iv").to_string();
+            let chemin = format!("/v1/memoire/alice/approbations/{iv}");
+            let corps = serde_json::json!({ "empreinte": d["empreinte"] }).to_string();
+            let (s, v) = appel_visa(&app, "POST", &chemin, &corps, &courant).await;
+            assert_eq!(
+                (s, v["reason"].as_str()),
+                (StatusCode::FORBIDDEN, Some("appareil_approbation_requis"))
+            );
+            // Appareil d'approbation sans la portée : refus.
+            let sans_portee = titres(
+                &monde,
+                "alice",
+                appareil_approbation(),
+                &[PORTEE_LIRE, PORTEE_ECRIRE],
+            );
+            let (s, v) = appel_visa(&app, "POST", &chemin, &corps, &sans_portee).await;
+            assert_eq!(
+                (s, v["reason"].as_str()),
+                (StatusCode::FORBIDDEN, Some("portee_insuffisante"))
+            );
+            assert!(m.utilisateur().consulter().await.expect("c").is_empty());
+            // Appareil d'approbation avec la portée : StrongFather accorde, la note est écrite.
+            let approbateur = titres(&monde, "alice", appareil_approbation(), &[PORTEE_APPROUVER]);
+            let (s, v) = appel_visa(&app, "POST", &chemin, &corps, &approbateur).await;
+            assert_eq!(s, StatusCode::OK, "{v}");
+            assert_eq!(v["ecrite"], "sante.sommeil.f1");
+        }
+
+        #[tokio::test]
+        async fn approbations_desactivees_sans_cle_d_approbation() {
+            let m = Arc::new(
+                MemoireMaia::ouvrir(EntrepotMemoire::new(), Arc::new(BorneOctets))
+                    .await
+                    .expect("m"),
+            );
+            let monde = MondeVisa::new();
+            let app = routeur(Arc::new(
+                EtatMemoireHttp::new(
+                    Some(("alice".into(), Arc::clone(&m))),
+                    Vec::new(),
+                    Vec::new(),
+                    Arc::new(crate::tamr::tests::gouvernance(
+                        crate::tamr::tests::POLITIQUE_TAMR,
+                    )),
+                    SecurityConfig::default(),
+                )
+                .avec_visa(auth(&monde, Box::new(MagasinDefisMemoire::default()))),
+            ));
+            let t = titres(&monde, "alice", appareil_approbation(), &TOUTES);
+            let (s, v) = appel_visa(
+                &app,
+                "POST",
+                "/v1/memoire/alice/approbations/x",
+                r#"{"empreinte":"00"}"#,
+                &t,
+            )
+            .await;
+            assert_eq!(
+                (s, v["reason"].as_str()),
+                (
+                    StatusCode::SERVICE_UNAVAILABLE,
+                    Some("approbations_desactivees")
+                )
+            );
+        }
+
+        #[test]
+        fn droits_par_route() {
+            use crate::auth_memoire::Droit;
+            use axum::http::Method;
+            for (m, c, d) in [
+                (Method::POST, "/v1/memoire/a/consulter", Droit::Lire),
+                (Method::POST, "/v1/memoire/a/historique", Droit::Lire),
+                (Method::POST, "/v1/memoire/a/exporter", Droit::Lire),
+                (Method::POST, "/v1/memoire/a/corriger", Droit::Ecrire),
+                (Method::DELETE, "/v1/memoire/a/notes", Droit::Ecrire),
+                (Method::POST, "/v1/memoire/a/regles", Droit::Ecrire),
+                (
+                    Method::POST,
+                    "/v1/memoire/a/candidats/k/valider",
+                    Droit::Ecrire,
+                ),
+                (Method::DELETE, "/v1/memoire/a/candidats/k", Droit::Ecrire),
+                (
+                    Method::POST,
+                    "/v1/memoire/a/approbations/i",
+                    Droit::Approuver,
+                ),
+                (
+                    Method::DELETE,
+                    "/v1/memoire/a/approbations/i",
+                    Droit::Ecrire,
+                ),
+                (Method::GET, "/v1/memoire/a/consulter", Droit::Ecrire),
+            ] {
+                assert_eq!(droit_requis(&m, c), d, "{m} {c}");
+            }
+        }
     }
 }

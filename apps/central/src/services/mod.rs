@@ -14,6 +14,7 @@
 pub mod alicia;
 mod external_service_view;
 mod home;
+pub mod maia_memoire;
 mod market;
 pub mod miyucloud;
 pub(crate) mod miyucloud_settings;
@@ -44,6 +45,7 @@ pub fn ActiveServiceView() -> Element {
             None => rsx! { HomeView {} },
             Some("market") => rsx! { MarketView {} },
             Some("alicia") => rsx! { alicia::AliciaView {} },
+            Some("maia-memoire") => rsx! { maia_memoire::MemoireMaiaView {} },
             Some("miyukini-whisper") => rsx! { miyukini_whisper::MiyukiniWhisperView {} },
             Some("miyucloud") => rsx! { miyucloud::MiyuCloudView {} },
             Some(id) => rsx! {

@@ -35,10 +35,13 @@
 //!
 //! ## Approbation signée (revue de sécurité du lot 7, F7)
 //!
-//! L'approbation (étape 2) n'est recevable que si la requête HTTP est signée
-//! avec l'usage [`USAGE_APPROBATION`] par une clé épinglée dans
-//! [`ENV_CLES_APPROBATION`], **distincte** des clés `maia/memoire` (vérifié
-//! par `routes_memoire`) ; liste vide ⇒ approbations refusées. La garde HTTP
+//! L'approbation (étape 2) n'est recevable que si la requête HTTP est
+//! authentifiée par une clé épinglée dans [`ENV_CLES_APPROBATION`] :
+//! **visa** de portée `maia:tamr:approuver` dont la clé d'appareil est l'une
+//! de ces clés (I4, `crate::auth_memoire`), ou, en transition seulement,
+//! requête signée avec l'usage [`USAGE_APPROBATION`] par l'une de ces clés,
+//! **distinctes** des clés `maia/memoire` (vérifié par `routes_memoire`) ;
+//! liste vide ⇒ approbations refusées. La garde HTTP
 //! produit une [`SignatureApprobation`] (identifiant de la clé signataire),
 //! portée par l'intention (`data.cle_approbation`, `data.usage_signe`,
 //! `data.canal = 'utilisateur_signe'`). **Limite restante** : StrongFather ne
@@ -75,7 +78,8 @@
 //!   `data.approbateur_est_proprietaire`, `data.empreinte` (SHA-256 hexadécimal
 //!   de l'action), `data.canal` (`utilisateur_signe`), `data.usage_signe`
 //!   ([`USAGE_APPROBATION`]), `data.cle_approbation` (identifiant de la clé
-//!   signataire), et pour un candidat `data.domaine`, `data.sensible`,
+//!   signataire), `data.authentification` (`cle_epinglee` en transition,
+//!   `visa` pour un visa `maia:tamr:approuver`, I4), et pour un candidat `data.domaine`, `data.sensible`,
 //!   `data.provenance`, `data.type_unite`, `data.version_cible`
 //! - métadonnées : `requested_at`, `resolved_at` (secondes Unix)
 //!
@@ -141,10 +145,22 @@ pub fn instituer_autorites() -> bool {
 /// Preuve, posée par la garde HTTP **après vérification**, qu'une requête
 /// d'approbation a été signée avec [`USAGE_APPROBATION`] par une clé épinglée
 /// d'approbation (F7). Porte l'identifiant de la clé signataire.
+///
+/// Deux voies (I4) : requête signée par une clé épinglée (transition,
+/// `authentification = 'cle_epinglee'`) ou visa de portée
+/// `maia:tamr:approuver` dont la clé d'appareil est épinglée comme clé
+/// d'approbation, possession prouvée sur la requête (`authentification =
+/// 'visa'`). Dans les deux cas `cle` identifie la clé qui a signé.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SignatureApprobation {
     cle: String,
+    authentification: &'static str,
 }
+
+/// Valeur de `data.authentification` : requête signée par clé épinglée.
+pub const AUTHENTIFICATION_CLE: &str = "cle_epinglee";
+/// Valeur de `data.authentification` : visa + preuve de possession.
+pub const AUTHENTIFICATION_VISA: &str = "visa";
 
 impl SignatureApprobation {
     /// Signature vérifiée par la clé publique `cle_publique` (identifiant :
@@ -152,7 +168,22 @@ impl SignatureApprobation {
     pub(crate) fn verifiee(cle_publique: &[u8; 32]) -> Self {
         Self {
             cle: hex::encode(Sha256::digest(cle_publique)),
+            authentification: AUTHENTIFICATION_CLE,
         }
+    }
+
+    /// Possession prouvée de la clé d'appareil `cle_appareil` d'un visa
+    /// d'approbation (même identifiant : SHA-256 hexadécimal de la clé).
+    pub(crate) fn par_visa(cle_appareil: &[u8; 32]) -> Self {
+        Self {
+            cle: hex::encode(Sha256::digest(cle_appareil)),
+            authentification: AUTHENTIFICATION_VISA,
+        }
+    }
+
+    /// Voie d'authentification (`cle_epinglee` ou `visa`).
+    pub fn authentification(&self) -> &'static str {
+        self.authentification
     }
 
     /// Identifiant de la clé signataire.
@@ -714,6 +745,10 @@ pub fn intention_approbation(
     data.insert("canal".into(), CANAL_UTILISATEUR.into());
     data.insert("usage_signe".into(), USAGE_APPROBATION.into());
     data.insert("cle_approbation".into(), signature.cle().into());
+    data.insert(
+        "authentification".into(),
+        signature.authentification().into(),
+    );
     if let ActionTamr::ValiderCandidat {
         candidat,
         cible_actuelle,
@@ -1017,6 +1052,11 @@ origins = ["maia"]
         assert_eq!(i.data.content["canal"], "utilisateur_signe");
         assert_eq!(i.data.content["usage_signe"], USAGE_APPROBATION);
         assert_eq!(i.data.content["cle_approbation"], sig().cle());
+        assert_eq!(i.data.content["authentification"], AUTHENTIFICATION_CLE);
+        let v = SignatureApprobation::par_visa(&[0xA5; 32]);
+        assert_eq!(v.cle(), sig().cle(), "même identifiant de clé");
+        let iv = intention_approbation("iv2", &a, &e, "alice", &v, 7);
+        assert_eq!(iv.data.content["authentification"], AUTHENTIFICATION_VISA);
         assert_eq!(sig().cle().len(), 64);
         assert_ne!(action("b").empreinte().expect("b"), e);
     }
@@ -1027,7 +1067,10 @@ origins = ["maia"]
         let g = gouvernance(POLITIQUE_TAMR);
         let r = RegistreApprobations::new();
         let d = r.demander(action("a")).expect("d");
-        let vide = SignatureApprobation { cle: String::new() };
+        let vide = SignatureApprobation {
+            cle: String::new(),
+            authentification: AUTHENTIFICATION_CLE,
+        };
         assert_eq!(
             r.approuver(&d.intervention_id, "alice", &d.empreinte, &vide, &g)
                 .unwrap_err(),

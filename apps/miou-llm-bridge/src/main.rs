@@ -33,6 +33,7 @@
 )]
 
 mod agents;
+mod auth_memoire;
 mod catalog;
 mod config;
 mod confirmations;
@@ -54,6 +55,7 @@ mod outil_memoire;
 mod persona;
 mod proxy;
 mod recommend;
+mod revocations_memoire;
 mod routes_federee;
 mod routes_memoire;
 mod security;

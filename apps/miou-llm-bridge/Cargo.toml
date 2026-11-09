@@ -64,6 +64,8 @@ hostname = "0.4"
 # Requêtes signées entrantes / sortantes (lot 2 : plus de secret partagé)
 miyauth   = { path = "../../crates/miyauth", features = ["http"] }
 miyusceau = { path = "../../crates/miyusceau" }
+# Révocations des passeports et visas des routes mémoire (I4) : miroir vérifié du registre du COG
+miyuregistre = { path = "../../crates/miyuregistre", features = ["miyauth"] }
 
 # Porte obligatoire StrongFather (K-11) : outils et administration des agents
 bondingbrother = { path = "../../crates/bondingbrother" }
@@ -82,6 +84,8 @@ kindmother-client = { path = "../../crates/kindmother-client" }
 # Serveur KindMother réel pour les tests de la route de publication (étiquettes v2).
 kindmother-service = { path = "../../crates/kindmother-service" }
 ed25519-dalek = "2"
+# Racine d'essai (délégations `emission` et `visas`) des tests des routes mémoire par visa (I4).
+miyuracine = { path = "../../crates/miyuracine" }
 
 [lints]
 workspace = true

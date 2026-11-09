@@ -6077,6 +6077,8 @@ dependencies = [
  "maia-federee",
  "maia-memoire",
  "miyauth",
+ "miyuracine",
+ "miyuregistre",
  "miyusceau",
  "rand 0.8.5",
  "reqwest",

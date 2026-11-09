@@ -167,6 +167,7 @@ const OFFICIAL_CATALOG: &[ServiceMeta] = &[
     ServiceMeta { id: "miou-llm-bridge", name: "Miyukini AI Studio",   description: "Service IA local — inférence GGUF native, agents spécialisés, skills, tool calling", icon: "\u{1F9E0}", service_type: ServiceType::InterneCog, is_favorite: false },
     ServiceMeta { id: "miyukini-whisper", name: "Miyukini Whisper", description: "Dictee locale STT/TTS avec presets hardware FR/EN et fallback opt-in", icon: "\u{1F3A4}", service_type: ServiceType::InterneCog, is_favorite: true },
     ServiceMeta { id: "alicia",          name: "Alicia Home Assistante", description: "Assistant vocal local Alicia — capture audio, détection de mot-clé, domotique 100% hors-ligne", icon: "\u{1F399}", service_type: ServiceType::InterneCog, is_favorite: false },
+    ServiceMeta { id: "maia-memoire",    name: "M\u{00e9}moire de MAIA",      description: "Voir, corriger, exporter et oublier ce que MAIA (IA locale) retient ; valider ses propositions", icon: "\u{1F9E0}", service_type: ServiceType::InterneCog, is_favorite: false },
     ServiceMeta { id: "miyucloud",       name: "MiyuCloud",             description: "Cloud priv\u{00e9} \u{2014} fichiers, sync, partage s\u{00e9}curis\u{00e9}",                                      icon: "\u{2601}",  service_type: ServiceType::InterCog,   is_favorite: true },
 ];
 
