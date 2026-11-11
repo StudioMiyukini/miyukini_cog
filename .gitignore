@@ -118,3 +118,6 @@ review-receipts/
 # Couverture (cargo-llvm-cov)
 *.profraw
 __pycache__/
+
+# Rushs et rendus de la vidéo de présentation (476 Mo) — seuls les fichiers web vont dans apps/origin/assets
+brag-output/

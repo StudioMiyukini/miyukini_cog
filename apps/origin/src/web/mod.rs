@@ -13,6 +13,7 @@ pub mod content;
 pub mod forum_auth;
 pub mod jaybureau;
 pub mod market;
+pub mod media;
 pub mod pages;
 pub mod presentation;
 pub mod revocations;

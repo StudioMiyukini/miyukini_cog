@@ -581,6 +581,16 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
       <p class="home-hero-test-note">
         Version 0.9.0-beta.1 (recette)&nbsp;: &agrave; installer sur une machine d&eacute;di&eacute;e, jamais en production.
       </p>
+      <figure class="home-hero-video">
+        <video poster="/media/brag-poster.jpg?v=1"
+               autoplay muted loop playsinline controls preload="metadata"
+               aria-label="Pr&eacute;sentation de Miyukini COG en 20 secondes">
+          <source src="/media/brag.webm?v=1" type='video/webm; codecs="vp9, opus"'>
+          <source src="/media/brag.mp4?v=1" type='video/mp4; codecs="avc1.640028, mp4a.40.2"'>
+          <a href="/media/brag.mp4?v=1">Voir la vid&eacute;o de pr&eacute;sentation</a>
+        </video>
+        <figcaption>Miyukini COG en 20&nbsp;secondes &mdash; activez le son &#x1f50a;</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -1034,6 +1044,18 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
 }}
 .home-hero-test-note {{
   font-size: 0.9rem; color: rgba(255,183,197,0.85); font-style: italic;
+}}
+.home-hero-video {{
+  margin: 36px auto 0; max-width: 960px;
+}}
+.home-hero-video video {{
+  display: block; width: 100%; aspect-ratio: 16 / 9; height: auto;
+  border-radius: 16px; background: #0e1015;
+  border: 1px solid rgba(255,183,197,0.18);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(139,92,246,0.10);
+}}
+.home-hero-video figcaption {{
+  margin-top: 12px; font-size: 0.85rem; color: rgba(255,255,255,0.55);
 }}
 
 /* === AVANTAGES === */

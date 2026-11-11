@@ -6,7 +6,7 @@
 
 //! Serveur Web Origin — Implémentation HTTP.
 
-use super::{api, content::ContentManager, forum_auth, market, pages, presentation, revocations};
+use super::{api, content::ContentManager, forum_auth, market, media, pages, presentation, revocations};
 use crate::config::OriginConfig;
 use crate::garde_reseau::{analyser_adresse, connecter_cible_publique, AdresseAnalysee};
 use crate::relay::rate_limiter::{RateLimitResult, RateLimiter, RateLimiterConfig};
@@ -759,6 +759,16 @@ async fn handle_connection(
             relay_ref.as_deref(),
         )
         .await;
+        write_response(&mut writer, route_response).await?;
+        return Ok(());
+    }
+
+    // Médias embarqués du site (vidéo d'accueil) : GET/HEAD, Range pris en charge.
+    if (method == "GET" || method == "HEAD") && path.starts_with(media::PREFIXE) {
+        let route_response = match media::reponse(path, &headers, method == "HEAD") {
+            Some(bytes) => RouteResponse::Raw { bytes },
+            None => not_found_page(),
+        };
         write_response(&mut writer, route_response).await?;
         return Ok(());
     }
